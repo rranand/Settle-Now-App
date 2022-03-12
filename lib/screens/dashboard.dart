@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/aboutus.dart';
-import 'package:settlenow/screens/colorpicker.dart';
 import 'package:settlenow/screens/expenses.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:settlenow/screens/profile.dart';
@@ -33,8 +32,9 @@ class RoomEach {
   final double total;
   final double spend;
   final String date;
+  final String roomLink;
 
-  RoomEach({required this.roomName,required this.members,required this.roomKey, required this.active, required this.total, required this.spend, required this.date});
+  RoomEach({required this.roomName,required this.members,required this.roomKey, required this.active, required this.total, required this.spend, required this.date, required this.roomLink});
 
   factory RoomEach.fromJson(Map<String, dynamic> json) {
     return RoomEach(
@@ -45,6 +45,7 @@ class RoomEach {
       total: double.parse(crypto.decrypt(json['total'])),
       spend: double.parse(crypto.decrypt(json['spend'])),
       date: crypto.decrypt(json['date']),
+      roomLink: crypto.decrypt(json['joinLink']),
     );
   }
 }
@@ -88,9 +89,9 @@ class _DashBoardState extends State<DashBoard> {
   int roomStatusIndex = 0;
   bool imageUploading = false;
   bool haveImg = false;
-  String imgLink = "";
   bool open = true;
   String amtSpend = "";
+  late NetworkImage profilePic;
 
   Future _getImageID() async {
     if (this.mounted) {
@@ -115,7 +116,7 @@ class _DashBoardState extends State<DashBoard> {
         if (imgData['havePic']) {
           if (this.mounted) {
             setState(() {
-              imgLink =  crypto.decrypt(imgData["fileId"]);
+              profilePic = NetworkImage('https://drive.google.com/uc?id='+crypto.decrypt(imgData["fileId"]));
               haveImg = true;
             });
           }
@@ -168,7 +169,7 @@ class _DashBoardState extends State<DashBoard> {
         );
         
         if (response.statusCode == 200 ) {
-          _getImageID();
+          await _getImageID();
           _showToast(context, "Image Uploaded Successfully");
         } else {
           _showToast(context, "Failed to Upload Image");
@@ -239,7 +240,6 @@ class _DashBoardState extends State<DashBoard> {
         _name.text = prefs.getString("name")!;
         _token = prefs.getString("token")!;
         
-        _getImageID();
       } else {
         Navigator.pushAndRemoveUntil(
           context, 
@@ -273,7 +273,12 @@ class _DashBoardState extends State<DashBoard> {
             RoomDataC.add(RoomEach.fromJson(list[i]));
           }
         }
-        
+
+        if (this.mounted) {
+          setState(() {});
+        }
+
+        await _getImageID();
       } else if (jsonDecode(response.body)['maintenance'] != null && jsonDecode(response.body)['maintenance']) {
         Navigator.pushAndRemoveUntil(
           context,
@@ -426,7 +431,6 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   buildFilterDialog(BuildContext context) {
-    final colorProvider = Provider.of<ColorProvider>(context, listen:false);
 
     showDialog(
       context: context,
@@ -448,7 +452,7 @@ class _DashBoardState extends State<DashBoard> {
                           children: [
                             Container(
                               decoration: dateIndex?BoxDecoration(
-                                border: Border.symmetric(horizontal: BorderSide(width: 2, color: Colors.blueAccent))
+                                border: Border.symmetric(horizontal: BorderSide(width: 2, color: Theme.of(context).primaryColor))
                               ):null,
                               child: Padding(
                                 padding: const EdgeInsets.all(4.0),
@@ -472,7 +476,7 @@ class _DashBoardState extends State<DashBoard> {
                             ),
                             Container(
                               decoration: dateIndex?null:BoxDecoration(
-                                border: Border.symmetric(horizontal: BorderSide(width: 2, color: Colors.blueAccent))
+                                border: Border.symmetric(horizontal: BorderSide(width: 2, color: Theme.of(context).primaryColor))
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(4.0),
@@ -513,6 +517,8 @@ class _DashBoardState extends State<DashBoard> {
                             itemCount: Year.length,
                             shrinkWrap: true,
                             itemBuilder: (BuildContext context, int index) {
+                              final themeProvider = Provider.of<ThemeProvider>(context);
+
                               return SizedBox(
                                 height: 70,
                                 width: 95,
@@ -530,8 +536,8 @@ class _DashBoardState extends State<DashBoard> {
                                     },
                                     child: Card(
                                       elevation: 1.0,
-                                      shadowColor: colorProvider.getPrimaryColor,
-                                      color: dateIndex?(index==from[0]?Colors.blueAccent:Theme.of(context).cardColor):(index==to[0]?Colors.blueAccent:Theme.of(context).cardColor),
+                                      shadowColor: Theme.of(context).primaryColor,
+                                      color: dateIndex?(index==from[0]?Theme.of(context).primaryColor:Theme.of(context).cardColor):(index==to[0]?Theme.of(context).primaryColor:Theme.of(context).cardColor),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10.0),
                                       ),
@@ -588,8 +594,8 @@ class _DashBoardState extends State<DashBoard> {
                                     },
                                     child: Card(
                                       elevation: 1.0,
-                                      shadowColor: colorProvider.getPrimaryColor,
-                                      color: dateIndex?(index==from[1]?Colors.blueAccent:Theme.of(context).cardColor):(index==to[1]?Colors.blueAccent:Theme.of(context).cardColor),
+                                      shadowColor: Theme.of(context).primaryColor,
+                                      color: dateIndex?(index==from[1]?Theme.of(context).primaryColor:Theme.of(context).cardColor):(index==to[1]?Theme.of(context).primaryColor:Theme.of(context).cardColor),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10.0),
                                       ),
@@ -646,8 +652,8 @@ class _DashBoardState extends State<DashBoard> {
                                     },
                                     child: Card(
                                       elevation: 1.0,
-                                      color: dateIndex?(index==from[2]?Colors.blueAccent:Theme.of(context).cardColor):(index==to[2]?Colors.blueAccent:Theme.of(context).cardColor),
-                                      shadowColor: colorProvider.getPrimaryColor,
+                                      color: dateIndex?(index==from[2]?Theme.of(context).primaryColor:Theme.of(context).cardColor):(index==to[2]?Theme.of(context).primaryColor:Theme.of(context).cardColor),
+                                      shadowColor: Theme.of(context).primaryColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10.0),
                                       ),
@@ -727,7 +733,11 @@ class _DashBoardState extends State<DashBoard> {
                               height: 45,
                               width: 100,
                               child: ElevatedButton(
-                                child: const Text("Close"),
+                                child: Text("Close", 
+                                  style: TextStyle(
+                                    color: Colors.white
+                                  ),
+                                ),
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
@@ -740,7 +750,11 @@ class _DashBoardState extends State<DashBoard> {
                               height: 45,
                               width: 100,
                               child: ElevatedButton(
-                                child: const Text("Apply"),
+                                child: Text("Apply",
+                                  style: TextStyle(
+                                    color: Colors.white
+                                  ),
+                                ),
                                 onPressed: () {
                                   setState(() {
                                     DateChanged = false;
@@ -1006,7 +1020,7 @@ class _DashBoardState extends State<DashBoard> {
                 DateChanged = false;
               });
             }, 
-            icon: Icon(Icons.search, color: themeProvider.darkTheme?Colors.white:Colors.black87,))
+            icon: Icon(Icons.search, color: themeProvider.darkTheme?Colors.white:Colors.black,))
         ],
       ),
       body: RefreshIndicator(
@@ -1066,7 +1080,7 @@ class _DashBoardState extends State<DashBoard> {
                       width: 80,
                       height: 40,
                       decoration: open?BoxDecoration(
-                        border: Border.all(color: Colors.blueAccent, width: 2),
+                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
                         borderRadius: BorderRadius.all(Radius.circular(13))
                       ):null,
                       child: Center(
@@ -1095,7 +1109,7 @@ class _DashBoardState extends State<DashBoard> {
                       height: 40,
                       width: 80,
                       decoration: open?null:BoxDecoration(
-                        border: Border.all(color: Colors.blueAccent, width: 2),
+                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
                         borderRadius: BorderRadius.all(Radius.circular(13))
                       ),
                       child: Center(
@@ -1193,12 +1207,15 @@ class _DashBoardState extends State<DashBoard> {
         child: ListView(
           children: [
             _name.text.length==0? Center(child: CircularProgressIndicator(),) :UserAccountsDrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).drawerTheme.backgroundColor
+              ),
               margin: EdgeInsets.all(0),
               currentAccountPicture: Stack(
                 children: [
                   haveImg?CircleAvatar(
                     radius: 45,
-                    backgroundImage: NetworkImage('https://drive.google.com/uc?id='+imgLink),
+                    backgroundImage: profilePic,
                     child: imageUploading?Center(child: CircularProgressIndicator()):null,
                   )
                   :CircleAvatar(
@@ -1309,10 +1326,6 @@ class _DashBoardState extends State<DashBoard> {
                 ),
             ),
             ListTile(
-              onTap:() => Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (context) => ColorChooser()),
-              ),
               leading: Icon(Icons.border_color, color: Colors.white),
               title: Text(
                 "Theme",
@@ -1341,19 +1354,6 @@ class _DashBoardState extends State<DashBoard> {
               leading: Icon(Icons.book_outlined, color: Colors.white),
               title: Text(
                   "About Us",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white
-                  ),
-                ),
-            ),
-            ListTile(
-              onTap: () async {
-                await Share.share("Download Settle Now\n" + crypto.decrypt(updateData["link"]));
-              },
-              leading: Icon(Icons.share, color: Colors.white),
-              title: Text(
-                  "Share",
                   style: TextStyle(
                     fontSize: 15,
                     color: Colors.white
@@ -1439,7 +1439,7 @@ class _DashBoardState extends State<DashBoard> {
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
                         ListTile(
-                          leading: const Icon(Icons.add, color: Colors.deepPurpleAccent,),
+                          leading: Icon(Icons.add, color: Theme.of(context).primaryColor,),
                           title: const Text("Create Room"),
                           onTap: () {
                             showModalBottomSheet<void>(
@@ -1499,7 +1499,7 @@ class _DashBoardState extends State<DashBoard> {
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.edit, color: Colors.deepPurpleAccent,),
+                          leading: Icon(Icons.edit, color: Theme.of(context).primaryColor,),
                           title: const Text("Join Room"),
                           onTap: () {
                             showModalBottomSheet<void>(
@@ -1592,7 +1592,7 @@ class RoomWidget extends StatelessWidget {
   _MoveToNext(BuildContext context, int index) {
     Navigator.push(
       context, 
-      MaterialPageRoute(builder: (context) => RoomExpense(roomKey: RoomData[index].roomKey, email: email, roomName: RoomData[index].roomName, token: token,)),
+      MaterialPageRoute(builder: (context) => RoomExpense(roomKey: RoomData[index].roomKey, email: email, roomName: RoomData[index].roomName, token: token, roomLink: RoomData[index].roomLink)),
     );
   }
 
@@ -1604,12 +1604,14 @@ class RoomWidget extends StatelessWidget {
       itemCount: RoomData.length, 
       separatorBuilder: (context, index) => SizedBox(height: 5,),
       itemBuilder: (BuildContext context, int index){
-        final colorProvider = Provider.of<ColorProvider>(context);
+        final themeProvider = Provider.of<ThemeProvider>(context);
+
         return InkWell(
           child: SizedBox(
             child: Card(
+              elevation: 2.0,
               clipBehavior: Clip.antiAlias,
-              shadowColor: colorProvider.getPrimaryColor,
+              shadowColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15.0),
               ),
@@ -1636,21 +1638,26 @@ class RoomWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Room: " + (RoomData[index].active?"Live":"Closed"),
-                                style: TextStyle(
-                                  foreground: Paint()..shader = linearGradient_2
-                                ),
-                              ),
-                              Text(
                                 "Members: " + RoomData[index].members.toString(),
                                 style: TextStyle(
-                                  foreground: Paint()..shader = linearGradient_2
+                                  color: Theme.of(context).primaryColor
                                 ),
                               ),
                               Text(
                                 "Created: " + RoomData[index].date,
                                 style: TextStyle(
-                                  foreground: Paint()..shader = linearGradient_2
+                                    color: Theme.of(context).primaryColor
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  await Share.share(RoomData[index].roomKey);
+                                },
+                                child: Text(
+                                  "Room Key: " + RoomData[index].roomKey,
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor
+                                  ),
                                 ),
                               ),
                             ],
@@ -1661,24 +1668,20 @@ class RoomWidget extends StatelessWidget {
                               Text(
                                 "Total Spend: ₹ " + RoomData[index].total.toString(),
                                 style: TextStyle(
-                                  foreground: Paint()..shader = linearGradient_2
+                                    color: Theme.of(context).primaryColor
                                 ),
                               ),
                               Text(
                                 "Your Spend: ₹ " + RoomData[index].spend.toString(),
                                 style: TextStyle(
-                                  foreground: Paint()..shader = linearGradient_2
+                                    color: Theme.of(context).primaryColor
                                 ),
                               ),
-                              InkWell(
-                                onTap: () async {
-                                  await Share.share(RoomData[index].roomKey);
-                                },
-                                child: Text(
-                                  "Room Key: " + RoomData[index].roomKey,
-                                  style: TextStyle(
-                                    foreground: Paint()..shader = linearGradient_2
-                                  ),
+                              
+                              Text(
+                                "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
+                                style: TextStyle(
+                                    color: Theme.of(context).primaryColor
                                 ),
                               ),
                             ],

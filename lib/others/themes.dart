@@ -13,38 +13,11 @@ class ThemeProvider extends ChangeNotifier {
   }
 }
 
-class ColorProvider extends ChangeNotifier {
-  MaterialColor color = Colors.deepPurple;
-  MaterialColor get getPrimaryColor => color;
-
-  void changeColor(Color nColor) {
-    List strengths = <double>[.05];
-    final swatch = <int, Color>{};
-    final int r = nColor.red, g = nColor.green, b = nColor.blue;
-
-    for (int i = 1; i < 10; i++) {
-      strengths.add(0.1 * i);
-    }
-    strengths.forEach((strength) {
-      final double ds = 0.5 - strength;
-      swatch[(strength * 1000).round()] = Color.fromRGBO(
-        r + ((ds < 0 ? r : (255 - r)) * ds).round(),
-        g + ((ds < 0 ? g : (255 - g)) * ds).round(),
-        b + ((ds < 0 ? b : (255 - b)) * ds).round(),
-        1,
-      );
-    });
-    
-    color = MaterialColor(nColor.value, swatch);
-    notifyListeners();
-  }
-}
-
-
 class MyTheme {
-  static ThemeData lightTheme(BuildContext context, MaterialColor primaryColor) { 
+  static ThemeData lightTheme(BuildContext context) { 
     return ThemeData(
-      primarySwatch: primaryColor,
+      primarySwatch: Colors.deepPurple,
+      primaryColor: Colors.deepPurple,
       fontFamily: GoogleFonts.lato().fontFamily,
       appBarTheme: AppBarTheme(
         color: Colors.white,
@@ -54,7 +27,7 @@ class MyTheme {
         titleTextStyle: Theme.of(context).textTheme.headline6,
       ),
       drawerTheme: DrawerThemeData(
-        backgroundColor: primaryColor,
+        backgroundColor: Colors.deepPurple,
       ), 
       textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.black),
       textTheme: TextTheme(
@@ -74,12 +47,25 @@ class MyTheme {
 
   static ThemeData darTheme(BuildContext context) => ThemeData(
     brightness: Brightness.dark,
+    primarySwatch: MaterialColor(0xFF69F0AE, <int, Color>{
+      50: Color(0xFFEDFDF5),
+      100: Color(0xFFD2FBE7),
+      200: Color(0xFFB4F8D7),
+      300: Color(0xFF96F5C6),
+      400: Color(0xFF80F2BA),
+      500: Color(0xFF69F0AE),
+      600: Color(0xFF61EEA7),
+      700: Color(0xFF56EC9D),
+      800: Color(0xFF4CE994),
+      900: Color(0xFF3BE584),
+    }),
+    primaryColor: Colors.greenAccent,
     fontFamily: GoogleFonts.lato().fontFamily,
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: Color.fromARGB(255, 65, 105, 225)
+      backgroundColor: Colors.greenAccent
     ),
     scrollbarTheme: ScrollbarThemeData(
-      thumbColor: MaterialStateProperty.all(Color.fromARGB(255, 65, 105, 225)),
+      thumbColor: MaterialStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
     ),
     textTheme: TextTheme(
         bodyText1: TextStyle(),

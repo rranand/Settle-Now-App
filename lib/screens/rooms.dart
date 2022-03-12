@@ -13,7 +13,8 @@ class RoomExpense extends StatefulWidget {
   final String email;
   final String roomName;
   final String token;
-  const RoomExpense({ Key? key , required this.roomKey, required this.email, required this.roomName, required this.token}) : super(key: key);
+  final String roomLink;
+  const RoomExpense({ Key? key , required this.roomKey, required this.email, required this.roomName, required this.token, required this.roomLink}) : super(key: key);
 
   @override
   _RoomExpenseState createState() => _RoomExpenseState();
@@ -339,7 +340,7 @@ class _RoomExpenseState extends State<RoomExpense> {
               }
               
             }, 
-            icon: Icon(Icons.transfer_within_a_station_rounded, color: themeProvider.darkTheme?Colors.white:Colors.black87,))
+            icon: Icon(Icons.transfer_within_a_station_rounded, color: themeProvider.darkTheme?Colors.white:Colors.black,))
         ],
       ),
       body: defaultPage?RefreshIndicator(
@@ -424,10 +425,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                         shrinkWrap: true,
                         itemCount: list.length,
                         itemBuilder: (BuildContext context, int index) {
-                          final colorProvider = Provider.of<ColorProvider>(context);
                           if (index == 0) {
                             return SizedBox(
-                              height: 180,
+                              height: 185,
                               width: 180,
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
@@ -442,7 +442,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   },
                                   child: Card(
                                     elevation: 5.0,
-                                    shadowColor: colorProvider.getPrimaryColor,
+                                    shadowColor: Theme.of(context).primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
@@ -465,7 +465,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                             );
                           } else {
                             return SizedBox(
-                              height: 180,
+                              height: 185,
                               width: 175,
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
@@ -478,7 +478,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   },
                                   child: Card(
                                     elevation: 5.0,
-                                    shadowColor: colorProvider.getPrimaryColor,
+                                    shadowColor: Colors.deepPurple,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
@@ -697,12 +697,11 @@ class _RoomExpenseState extends State<RoomExpense> {
                           physics: ScrollPhysics(),
                           itemCount: paymentData.length,
                           itemBuilder: (BuildContext context, int index) {
-                            final colorProvider = Provider.of<ColorProvider>(context);
                             return SizedBox(
                               height: 70,
                               child: Card(
                                 elevation: 5.0,
-                                shadowColor: colorProvider.getPrimaryColor,
+                                shadowColor: Theme.of(context).primaryColor,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(15.0),
                                 ),
@@ -769,7 +768,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.money, color: Colors.deepPurpleAccent,),
+                          leading: Icon(Icons.money, color: Theme.of(context).primaryColor,),
                           title: const Text("Pay to Member"),
                           onTap: () {
                             if (membersListName.length <= 1) {
@@ -875,7 +874,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                           }
                         ),
                         ListTile(
-                          leading: const Icon(Icons.add, color: Colors.deepPurpleAccent,),
+                          leading: Icon(Icons.add, color: Theme.of(context).primaryColor,),
                           title: const Text("Add Expense"),
                           onTap: () {
                             showModalBottomSheet<void>(
@@ -981,12 +980,11 @@ class ExpenseData extends StatelessWidget {
         physics: ScrollPhysics(),
         itemCount: TransList.length,
         itemBuilder: (BuildContext context, int index) {
-          final colorProvider = Provider.of<ColorProvider>(context);
           return SizedBox(
             height: 125,
             child: Card(
               elevation: 5.0,
-              shadowColor: colorProvider.getPrimaryColor,
+              shadowColor: Theme.of(context).primaryColor,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15.0),
               ),

@@ -19,10 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   bool canLoad = false;
   final _formKey = GlobalKey<FormState>();
   bool darkTheme = false;
-  int red = 103;
-  int green = 58;
-  int blue = 183;
-  int alpha = 255;
 
   Future _extractEmail() async {
     prefs = await SharedPreferences.getInstance();
@@ -32,36 +28,9 @@ class _LoginPageState extends State<LoginPage> {
     } else {
       prefs.setBool('darkTheme', false);
     }
-    
-    if (prefs.getInt('alpha') != null) {
-      alpha = prefs.getInt('alpha')!;
-    } else {
-      prefs.setInt('alpha', 255);
-    }
-
-    if (prefs.getInt('red') != null) {
-      red = prefs.getInt('red')!;
-    } else {
-      prefs.setInt('red', 103);
-    }
-
-    if (prefs.getInt('green') != null) {
-      green = prefs.getInt('green')!;
-    } else {
-      prefs.setInt('green', 58);
-    }
-
-    if (prefs.getInt('blue') != null) {
-      blue = prefs.getInt('blue')!;
-    } else {
-      prefs.setInt('blue', 183);
-    }
 
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
-
-    final cprovider = Provider.of<ColorProvider>(context, listen: false);
-    cprovider.changeColor(Color.fromARGB(alpha, red, green, blue));
 
     if (prefs.getString("email") != null && prefs.getString("name") != null && prefs.getString("token") != null) {
       Navigator.pushAndRemoveUntil(

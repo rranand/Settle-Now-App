@@ -3,7 +3,7 @@ description: A Finance Management App
 
 publish_to: 'none'
 
-version: 1.0.9
+version: 1.0.10
 
 environment:
   sdk: ">=2.16.0-134.0.dev <3.0.0"
@@ -12,7 +12,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
 
   cupertino_icons: ^1.0.2
   shared_preferences: ^2.0.11
@@ -25,7 +24,6 @@ dependencies:
   font_awesome_flutter: ^9.2.0
   provider: ^6.0.2
   encrypt: ^5.0.1
-  flutter_colorpicker: ^1.0.3
   device_info_plus: ^3.2.1
   share_plus: ^3.0.4
   image_picker: ^0.8.4+5
@@ -37,6 +35,7 @@ dependencies:
   firebase_core: ^1.12.0
   flutter_local_notifications: ^9.4.0
   firebase_messaging: ^11.2.10
+  firebase_dynamic_links: ^4.1.0
 
 dev_dependencies:
   flutter_test:
@@ -44,9 +43,10 @@ dev_dependencies:
 
 flutter_icons:
   android: true
-  ios: true
   image_path: "assets/icon/settle.png"
   flutter_lints: ^1.0.0
+  adaptive_icon_background: "#000000"
+  adaptive_icon_foreground: "assets/icon/settlef.png"
 
 flutter:
   uses-material-design: true

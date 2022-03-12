@@ -176,11 +176,12 @@ class _ExpensesState extends State<Expenses> {
                     shrinkWrap: true,
                     itemCount: TransList.length, 
                     itemBuilder: (BuildContext context, int index) {
-                      final colorProvider = Provider.of<ColorProvider>(context);
+                      final themeProvider = Provider.of<ThemeProvider>(context);
+
                       return SizedBox(
                         child: Card(
                           elevation: 5.0,
-                          shadowColor: colorProvider.getPrimaryColor,
+                          shadowColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
                           ),

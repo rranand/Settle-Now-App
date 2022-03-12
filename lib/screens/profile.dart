@@ -186,7 +186,6 @@ class _ProfileState extends State<Profile> {
                   shrinkWrap: true,
                   itemCount: personalExpense.length,
                   itemBuilder: (BuildContext context, int index) {
-                    final colorProvider = Provider.of<ColorProvider>(context);
                     return SizedBox(
                       height: 150,
                       width: 150,
@@ -203,7 +202,7 @@ class _ProfileState extends State<Profile> {
                           },
                           child: Card(
                             elevation: 5.0,
-                            shadowColor: colorProvider.getPrimaryColor,
+                            shadowColor: Theme.of(context).primaryColor,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15.0),
                             ),

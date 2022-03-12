@@ -10,11 +10,13 @@ import 'package:firebase_core/firebase_core.dart';
 Future<void> backgroundHandler(RemoteMessage message) async {
 }
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   FirebaseMessaging.onBackgroundMessage(backgroundHandler); 
   LocalNotificationService.initialize();
+
   runApp(const MyApp());
 }
 
@@ -31,20 +33,13 @@ class MyApp extends StatelessWidget {
       create: (context) => ThemeProvider(),
       builder: (context, _) {
         final themeProvider = Provider.of<ThemeProvider>(context);
-        
-        return ChangeNotifierProvider(
-          create: (context) => ColorProvider(),
-          builder: (context, _) {
-            final colorProvider = Provider.of<ColorProvider>(context);
-            return  MaterialApp(
+        return MaterialApp(
               themeMode: themeProvider.darkTheme?ThemeMode.dark:ThemeMode.light,
-              theme: MyTheme.lightTheme(context, colorProvider.getPrimaryColor),
+              theme: MyTheme.lightTheme(context),
               darkTheme: MyTheme.darTheme(context),
               title: "Settle Now",
               home: LoginPage(),
             );
-          }
-        );
       }
     );
   }
