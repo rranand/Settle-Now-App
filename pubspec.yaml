@@ -1,0 +1,55 @@
+name: settlenow
+description: A Finance Management App
+
+publish_to: 'none'
+
+version: 1.0.9
+
+environment:
+  sdk: ">=2.16.0-134.0.dev <3.0.0"
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+  cupertino_icons: ^1.0.2
+  shared_preferences: ^2.0.11
+  http: ^0.13.4
+  fluttertoast: ^8.0.8
+  flutter_launcher_icons: ^0.9.2
+  package_info_plus: ^1.3.0
+  url_launcher: ^6.0.18
+  google_fonts: ^2.2.0
+  font_awesome_flutter: ^9.2.0
+  provider: ^6.0.2
+  encrypt: ^5.0.1
+  flutter_colorpicker: ^1.0.3
+  device_info_plus: ^3.2.1
+  share_plus: ^3.0.4
+  image_picker: ^0.8.4+5
+  dio: ^4.0.4
+  googleapis: ^7.0.0
+  google_sign_in: ^5.2.3
+  pie_chart: ^5.1.0
+  firebase_analytics: ^9.1.1
+  firebase_core: ^1.12.0
+  flutter_local_notifications: ^9.4.0
+  firebase_messaging: ^11.2.10
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/settle.png"
+  flutter_lints: ^1.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - "assets/Images/"

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "950526449356",
+    "project_id": "settle-now-340017",
+    "storage_bucket": "settle-now-340017.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:950526449356:android:1fdb7eebae5c7c9e305469",
+        "android_client_info": {
+          "package_name": "com.rohit.settlenow"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABtlYc95qPY8qlPHXrQsEpIqelijQHSt8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
