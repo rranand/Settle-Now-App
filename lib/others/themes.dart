@@ -39,7 +39,7 @@ class MyTheme {
       ),
       scaffoldBackgroundColor: Colors.white,
       scrollbarTheme: ScrollbarThemeData(
-        thumbColor: MaterialStateProperty.all(Colors.grey.shade800),
+        thumbColor: MaterialStateProperty.all(Colors.deepPurpleAccent),
       ),
       
     );

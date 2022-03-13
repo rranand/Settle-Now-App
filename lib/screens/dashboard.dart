@@ -1651,7 +1651,7 @@ class RoomWidget extends StatelessWidget {
                               ),
                               InkWell(
                                 onTap: () async {
-                                  await Share.share(RoomData[index].roomKey);
+                                  await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
                                 },
                                 child: Text(
                                   "Room Key: " + RoomData[index].roomKey,

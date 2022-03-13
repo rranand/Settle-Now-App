@@ -363,7 +363,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                   title: const Text("Room Key"),
                   trailing: Text(widget.roomKey),
                   onTap: () async {
-                    await Share.share(widget.roomKey);
+                    await Share.share("Join "+ widget.roomName + "\nRoom Key: " + widget.roomKey + "\n" + widget.roomLink);
                   },
                 ),
                 ListTile(

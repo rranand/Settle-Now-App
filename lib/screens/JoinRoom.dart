@@ -1,0 +1,109 @@
+import 'dart:convert';
+import 'package:settlenow/screens/dashboard.dart';
+
+import '../contents.dart' as global;
+import 'package:http/http.dart' as http;
+import 'package:settlenow/others/crypto.dart';
+
+import 'package:flutter/material.dart';
+import 'package:settlenow/screens/loginPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+class RoomJoin extends StatefulWidget {
+  final String roomKey;
+
+  const RoomJoin({ Key? key, required this.roomKey }) : super(key: key);
+
+  @override
+  State<RoomJoin> createState() => _RoomJoinState();
+}
+
+class _RoomJoinState extends State<RoomJoin> {
+
+  late SharedPreferences prefs;
+  String message = "Joining Room";
+
+  Future _roomJoin() async {
+    prefs = await SharedPreferences.getInstance();
+
+    try {
+      if (prefs.getString("email") != null && prefs.getString("token") != null) {
+        String email = prefs.getString("email")!;
+        String _token = prefs.getString("token")!;
+
+        final response = await http.put(
+          Uri.parse(global.url+'room'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(email),
+            'roomKey': crypto.encrypt(widget.roomKey.substring(1)),
+          })
+        );
+
+        if (this.mounted) {
+          setState(() {
+            message = crypto.decrypt(jsonDecode(response.body)['Message']);
+          });
+        }
+
+        Future.delayed(const Duration(milliseconds: 500), () {
+          Navigator.pushAndRemoveUntil(
+            context, 
+            MaterialPageRoute(
+              builder: (context) => const DashBoard(),
+            ),
+            (Route<dynamic> route) => false,
+          );
+        });
+        
+      } else {
+        Navigator.pushAndRemoveUntil(
+          context, 
+          MaterialPageRoute(
+            builder: (context) => const LoginPage(),
+          ),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } on Exception catch(_) {
+      Navigator.pushAndRemoveUntil(
+        context, 
+        MaterialPageRoute(
+          builder: (context) => const DashBoard(),
+        ),
+        (Route<dynamic> route) => false,
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _roomJoin();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+      ),
+      body:Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Theme.of(context).primaryColor,),
+            SizedBox(height: 10,),
+            Text(message, style: TextStyle(
+              fontSize: 25,
+            ),),
+          ],
+        )
+      )
+    );
+  }
+}
