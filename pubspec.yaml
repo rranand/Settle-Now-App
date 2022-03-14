@@ -43,9 +43,11 @@ dev_dependencies:
 
 flutter_icons:
   android: true
-  iso: true
-  image_path: "assets/icon/settle_nbg.png"
+  image_path: "assets/icon/settle.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/icon/settlef.png"
   flutter_lints: ^1.0.0
+  
 
 flutter:
   uses-material-design: true

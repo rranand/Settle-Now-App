@@ -1406,7 +1406,7 @@ class _DashBoardState extends State<DashBoard> {
                       launch(
                         "https://settle-now-web.herokuapp.com/privacy-policy",
                         forceWebView: true,
-                        enableJavaScript: true
+                        enableJavaScript: true,
                       );
                     },
                     child: Text(
