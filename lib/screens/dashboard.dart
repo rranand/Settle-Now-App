@@ -241,6 +241,13 @@ class _DashBoardState extends State<DashBoard> {
         _token = prefs.getString("token")!;
         
       } else {
+        
+        await prefs.remove("email");
+        await prefs.remove("name");
+        await prefs.remove("token");
+        await prefs.remove("pushToken");
+        await deleteToken();
+
         Navigator.pushAndRemoveUntil(
           context, 
           MaterialPageRoute(builder: (context) => const LoginPage()),
@@ -1365,6 +1372,7 @@ class _DashBoardState extends State<DashBoard> {
                 await prefs.remove('name');
                 await prefs.remove('email');
                 await prefs.remove('token');
+                await prefs.remove('pushToken');
                 await deleteToken();
                 Navigator.pushAndRemoveUntil(
                   context, 

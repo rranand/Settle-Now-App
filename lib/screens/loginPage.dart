@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
 
-    if (prefs.getString("email") != null && prefs.getString("name") != null && prefs.getString("token") != null) {
+    if (prefs.getString("email") != null && prefs.getString("name") != null && prefs.getString("token") != null && prefs.getString("pushToken") != null) {
       Navigator.pushAndRemoveUntil(
         context, 
         MaterialPageRoute(

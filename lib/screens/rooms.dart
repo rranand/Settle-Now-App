@@ -478,7 +478,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   },
                                   child: Card(
                                     elevation: 5.0,
-                                    shadowColor: Colors.deepPurple,
+                                    shadowColor:  Theme.of(context).primaryColor,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),

@@ -25,9 +25,9 @@ class _ExpensesState extends State<Expenses> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
   String title = "Personal Expense";
-  List<String> category = ["Fashion", "Investment", "Food", "Travelling", "Household", "Health", "Miscellaneous"];
+  List<String> category = ["Fashion", "Investment", "Food", "Travelling", "Household", "Health", "Entertainment", "Miscellaneous"];
   List<String> investmentCat = ["Mutual Fund", "Cryptography", "Fixed Deposit", "Stock"];
-  int categoryIndex = 6;
+  int categoryIndex = 7;
   int investIndex = 0;
   String CurDate = "";
   final _formKey = GlobalKey<FormState>();
