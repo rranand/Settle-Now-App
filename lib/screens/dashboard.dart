@@ -1033,7 +1033,7 @@ class _DashBoardState extends State<DashBoard> {
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _extractEmail,
-        child: RoomDataO.isEmpty?
+        child: (RoomDataO.isEmpty&&RoomDataC.isEmpty)?
           Scrollbar(
             radius: Radius.circular(10.0),
             thickness: 10.5,

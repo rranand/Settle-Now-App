@@ -72,8 +72,14 @@ class _LoginPageState extends State<LoginPage> {
           height: MediaQuery.of(context).size.height,
           alignment: Alignment.center,
           child: canLoad?Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SizedBox(height: MediaQuery.of(context).size.height/4,),
+              Image.asset(
+                'assets/Images/settle.jpg',
+                height: 150,
+                width: 150,
+              ),
               Text("Settle Now", style: TextStyle(
                   fontSize: 60,
                   fontWeight: FontWeight.bold,

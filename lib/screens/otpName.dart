@@ -202,8 +202,15 @@ class _OtpNameState extends State<OtpName> {
             child: (data==null?const Center(
               child: CircularProgressIndicator(),
               ):Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  SizedBox(height: MediaQuery.of(context).size.height/4,),
+                  Image.asset(
+                    'assets/Images/settle.jpg',
+                    height: 150,
+                    width: 150,
+                  ),
+                  SizedBox(height: 50,),
                   (crypto.decrypt(data['Name'])=='Unknown')?
                     AutofillGroup(
                       child: TextFormField(
