@@ -104,8 +104,8 @@ class _LoginPageState extends State<LoginPage> {
                         return null;
                       },
                       decoration: InputDecoration(
-                        hintText: "Enter Email",
-                        labelText: "Email",
+                        hintText: "xyz@gmail.com",
+                        labelText: "Enter Email",
                       ),
                     ),
                   ),

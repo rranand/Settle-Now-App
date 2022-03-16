@@ -222,8 +222,8 @@ class _OtpNameState extends State<OtpName> {
                         autofillHints: [AutofillHints.email],
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.all(8.0),
-                          hintText: "Enter Name",
-                          labelText: "Name",
+                          hintText: "Aditya",
+                          labelText: "Enter Name",
                           errorText: (errorN==true?errorTextN:null),
                           errorStyle: const TextStyle(fontSize: 15),
                         ),
@@ -238,8 +238,8 @@ class _OtpNameState extends State<OtpName> {
                       autocorrect: false,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(8.0),
-                        hintText: "Enter OTP",
-                        labelText: "OTP",
+                        hintText: "000000",
+                        labelText: "Enter OTP",
                         errorText: (error==true?errorText:null),
                         errorStyle: const TextStyle(fontSize: 15),
                       ),
