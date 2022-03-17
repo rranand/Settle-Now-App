@@ -21,7 +21,7 @@ class _ProfileState extends State<Profile> {
   List<dynamic> personalExpense = [];
   bool personalLoaded = false;
   bool roomLoaded = false;
-  List<String> category = ["Fashion", "Investment", "Food", "Travelling", "Household", "Health", "Entertainment", "Miscellaneous"];
+  List<String> category = ["Fashion", "Investment", "Food", "Travelling", "Household", "Health", "Entertainment", "Education", "Miscellaneous"];
   final Shader linearGradient = LinearGradient(
       colors: <Color>[Color.fromARGB(255, 243, 33, 112), Color.fromARGB(255, 255, 235, 7), Color.fromARGB(255,33, 150, 243), Color.fromARGB(255, 255, 0, 235)],
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -1604,6 +1605,16 @@ class RoomWidget extends StatelessWidget {
     );
   }
 
+  _showToast(BuildContext context, String show) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text(show),
+        action: SnackBarAction(label: 'Close', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
@@ -1660,6 +1671,10 @@ class RoomWidget extends StatelessWidget {
                               InkWell(
                                 onTap: () async {
                                   await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
+                                },
+                                onLongPress: () async {
+                                  Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
+                                  _showToast(context, "Join Key Copied");
                                 },
                                 child: Text(
                                   "Room Key: " + RoomData[index].roomKey,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -359,11 +360,17 @@ class _RoomExpenseState extends State<RoomExpense> {
           thickness: 10.5,
           child: ListView(
               children: [
-                ListTile(
-                  title: const Text("Room Key"),
-                  trailing: Text(widget.roomKey),
+                InkWell(
+                  child: ListTile(
+                    title: const Text("Room Key"),
+                    trailing: Text(widget.roomKey),
+                  ),
                   onTap: () async {
                     await Share.share("Join "+ widget.roomName + "\nRoom Key: " + widget.roomKey + "\n" + widget.roomLink);
+                  },
+                  onLongPress: () async {
+                    Clipboard.setData(ClipboardData(text: widget.roomKey));
+                    _showToast(context, "Join Key Copied");
                   },
                 ),
                 ListTile(
@@ -490,14 +497,17 @@ class _RoomExpenseState extends State<RoomExpense> {
                                           SizedBox(
                                             height: 8,
                                           ),
-                                          Text(
-                                            crypto.decrypt(list[index]['Name']),
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.w500,
-                                              foreground: Paint()..shader = linearGradient,
+                                          InkWell(
+                                            child: Text(
+                                              crypto.decrypt(list[index]['Name']),
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.w500,
+                                                foreground: Paint()..shader = linearGradient,
+                                              ),
                                             ),
+                                            onTap: () => _showToast(context, crypto.decrypt(list[index]['Name'])),
                                           ),
                                           SizedBox(
                                             height: 12,
@@ -970,6 +980,16 @@ class ExpenseData extends StatelessWidget {
   final List<dynamic> TransList;
   ExpenseData({ Key? key, required this.TransList }) : super(key: key);
 
+  _showToast(BuildContext context, String show) {
+    final scaffold = ScaffoldMessenger.of(context);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text(show),
+        action: SnackBarAction(label: 'Close', onPressed: scaffold.hideCurrentSnackBar),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -1000,13 +1020,16 @@ class ExpenseData extends StatelessWidget {
                         child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            crypto.decrypt(TransList[index]["Purpose"]), 
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w500
+                          InkWell(
+                            child: Text(
+                              crypto.decrypt(TransList[index]["Purpose"]), 
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w500
+                              ),
                             ),
+                            onTap: () => _showToast(context, crypto.decrypt(TransList[index]["Purpose"])),
                           ),
                           SizedBox(
                             height: 10,
