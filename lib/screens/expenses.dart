@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -75,6 +76,66 @@ class _ExpensesState extends State<Expenses> {
     if (this.mounted) {
       setState(() {});
     }
+  }
+
+  Widget _buildPopupDialog(BuildContext context, String purpose, String type, String date, String amount) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+      child: Container(
+        width: MediaQuery.of(context).size.width*0.95,
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                purpose,
+                style: TextStyle(
+                  fontSize: 30
+                ),
+              ),
+              SizedBox(height: 25,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Type: " + type, style: TextStyle(
+                        fontSize: 20
+                      ),),
+                      SizedBox(height: 10,),
+                      Text("Date: " + date, style: TextStyle(
+                        fontSize: 20
+                      ),),
+                    ],
+                  ),
+                  Text(amount, style: TextStyle(
+                    fontSize: 20
+                  ),)
+                ],
+              ),
+              SizedBox(height: 25,),
+              SizedBox(
+                height: 45,
+                width: MediaQuery.of(context).size.width*0.95 - 25,
+                child: ElevatedButton(
+                  child: Text("Close", 
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   AddExpense(BuildContext context) async {
@@ -177,81 +238,88 @@ class _ExpensesState extends State<Expenses> {
                     itemCount: TransList.length, 
                     itemBuilder: (BuildContext context, int index) {
                       final themeProvider = Provider.of<ThemeProvider>(context);
-
-                      return SizedBox(
-                        child: Card(
-                          elevation: 5.0,
-                          shadowColor: Theme.of(context).primaryColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.90,
-                                  child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 10,
+                      return InkWell(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"])),
+                          );
+                        },
+                        child: SizedBox(
+                          child: Card(
+                            elevation: 5.0,
+                            shadowColor: Theme.of(context).primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width * 0.90,
+                                    child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Text(
+                                        crypto.decrypt(TransList[index]["Purpose"]), 
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.w500
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 15,
+                                      ),
+                                      Opacity(
+                                        opacity: 0.8,
+                                        child: Text(
+                                          crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")),
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 15,
+                                      ),
+                                      Opacity(
+                                        opacity: 0.8,
+                                        child: Text(
+                                          crypto.decrypt(TransList[index]["Date"]),
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                      ),
+                                    ]
                                     ),
-                                    Text(
-                                      crypto.decrypt(TransList[index]["Purpose"]), 
-                                      overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 0,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width * 0.20,
+                                    child: Text(
+                                      "₹ " + crypto.decrypt(TransList[index]["Amount"]),
                                       style: const TextStyle(
-                                        fontSize: 26,
-                                        fontWeight: FontWeight.w500
+                                        fontSize: 20,
                                       ),
-                                    ),
-                                    SizedBox(
-                                      height: 15,
-                                    ),
-                                    Opacity(
-                                      opacity: 0.8,
-                                      child: Text(
-                                        crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")),
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 15,
-                                    ),
-                                    Opacity(
-                                      opacity: 0.8,
-                                      child: Text(
-                                        crypto.decrypt(TransList[index]["Date"]),
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ]
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                flex: 0,
-                                child: SizedBox(
-                                  width: MediaQuery.of(context).size.width * 0.20,
-                                  child: Text(
-                                    "₹ " + crypto.decrypt(TransList[index]["Amount"]),
-                                    style: const TextStyle(
-                                      fontSize: 20,
                                     ),
                                   ),
                                 ),
-                              ),
-                            ]
+                              ]
+                            ),
                           ),
+                                          ),
                         ),
-                                        ),
                       );
                     }
                       ),

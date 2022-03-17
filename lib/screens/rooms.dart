@@ -990,6 +990,68 @@ class ExpenseData extends StatelessWidget {
     );
   }
 
+
+
+  Widget _buildPopupDialog(BuildContext context, String purpose, String name, String date, String amount) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+      child: Container(
+        width: MediaQuery.of(context).size.width*0.95,
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                purpose,
+                style: TextStyle(
+                  fontSize: 30
+                ),
+              ),
+              SizedBox(height: 25,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name, style: TextStyle(
+                        fontSize: 20
+                      ),),
+                      SizedBox(height: 10,),
+                      Text("Date: " + date, style: TextStyle(
+                        fontSize: 20
+                      ),),
+                    ],
+                  ),
+                  Text(amount, style: TextStyle(
+                    fontSize: 20
+                  ),)
+                ],
+              ),
+              SizedBox(height: 25,),
+              SizedBox(
+                height: 45,
+                width: MediaQuery.of(context).size.width*0.95 - 25,
+                child: ElevatedButton(
+                  child: Text("Close", 
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -1000,28 +1062,34 @@ class ExpenseData extends StatelessWidget {
         physics: ScrollPhysics(),
         itemCount: TransList.length,
         itemBuilder: (BuildContext context, int index) {
-          return SizedBox(
-            height: 125,
-            child: Card(
-              elevation: 5.0,
-              shadowColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.90,
-                        child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          InkWell(
-                            child: Text(
+          return InkWell(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["Name"]), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"])),
+              );
+            },
+            child: SizedBox(
+              height: 125,
+              child: Card(
+                elevation: 5.0,
+                shadowColor: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        flex: 1,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.90,
+                          child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
                               crypto.decrypt(TransList[index]["Purpose"]), 
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -1029,52 +1097,51 @@ class ExpenseData extends StatelessWidget {
                                 fontWeight: FontWeight.w500
                               ),
                             ),
-                            onTap: () => _showToast(context, crypto.decrypt(TransList[index]["Purpose"])),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Opacity(
-                            opacity: 0.8,
-                            child: Text(
-                              crypto.decrypt(TransList[index]["Name"]),
-                              style: const TextStyle(
-                                fontSize: 18,
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Opacity(
+                              opacity: 0.8,
+                              child: Text(
+                                crypto.decrypt(TransList[index]["Name"]),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Opacity(
-                            opacity: 0.8,
-                            child: Text(
-                              crypto.decrypt(TransList[index]["Date"]),
-                              style: const TextStyle(
-                                fontSize: 18,
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Opacity(
+                              opacity: 0.8,
+                              child: Text(
+                                crypto.decrypt(TransList[index]["Date"]),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                ),
                               ),
                             ),
-                          ),
-                        ]
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 0,
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.20,
-                        child: Text(
-                          "₹ " + crypto.decrypt(TransList[index]["Amount"]),
-                          style: const TextStyle(
-                            fontSize: 20,
+                          ]
                           ),
                         ),
                       ),
-                    ),
-                  ]
+                      Expanded(
+                        flex: 0,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.20,
+                          child: Text(
+                            "₹ " + crypto.decrypt(TransList[index]["Amount"]),
+                            style: const TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]
+                  ),
                 ),
-              ),
-            )
+              )
+            ),
           );
         }
       ),
