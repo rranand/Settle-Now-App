@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:settlenow/screens/loginPage.dart';
@@ -10,6 +11,8 @@ import 'package:settlenow/screens/maintain.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../contents.dart' as global;
 import 'package:device_info_plus/device_info_plus.dart';
+
+import '../others/themes.dart';
 
 class OtpName extends StatefulWidget {
   final String email;
@@ -22,7 +25,7 @@ class OtpName extends StatefulWidget {
 
 class _OtpNameState extends State<OtpName> {
   bool error = false;
-  final String errorText = "Invalid OTP!!!";
+  String errorText = "Invalid OTP!!!";
   bool errorN = false;
   final String errorTextN = "Invalid Name!!!";
   late var data = null;
@@ -150,7 +153,9 @@ class _OtpNameState extends State<OtpName> {
       } else {
         error = true;
         if (this.mounted) {
-          setState(() {});
+          setState(() {
+            errorText = crypto.decrypt(JsonData['Message']);
+          });
         }
         Navigator.pop(context);
       }
@@ -191,6 +196,7 @@ class _OtpNameState extends State<OtpName> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -206,9 +212,15 @@ class _OtpNameState extends State<OtpName> {
                 children: [
                   SizedBox(height: MediaQuery.of(context).size.height/4,),
                   Image.asset(
-                    'assets/Images/settle.jpg',
+                    'assets/Images/SN.jpg',
                     height: 150,
                     width: 150,
+                  ),
+                  Text("Settle Now", style: TextStyle(
+                      fontSize: 60,
+                      fontWeight: FontWeight.bold,
+                      color: themeProvider.darkTheme?null:Theme.of(context).primaryColor,
+                    ),
                   ),
                   SizedBox(height: 50,),
                   (crypto.decrypt(data['Name'])=='Unknown')?
