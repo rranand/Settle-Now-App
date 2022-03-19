@@ -7,7 +7,7 @@ import 'package:settlenow/screens/otpName.dart';
 import '../others/themes.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({ Key? key }) : super(key: key);
+  const LoginPage({ Key? key}) : super(key: key);
 
   @override
   _LoginPageState createState() => _LoginPageState();

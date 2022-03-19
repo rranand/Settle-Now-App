@@ -80,7 +80,7 @@ class _OtpNameState extends State<OtpName> {
           (Route<dynamic> route) => false,
       );
     } else {
-      _showToast(context, "Some Unknown Error Occurred");
+      _showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']));
       Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
