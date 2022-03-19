@@ -1355,6 +1355,19 @@ class _DashBoardState extends State<DashBoard> {
               ),
             ),
             ListTile(
+              onTap: () async {
+                await Share.share("Download Settle Now\nhttps://bit.ly/3iboMf1");
+              },
+              leading: Icon(Icons.share, color: Colors.white),
+              title: Text(
+                  "Share",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white
+                  ),
+                ),
+            ),
+            ListTile(
               onTap: () => Navigator.push(
                 context, 
                 MaterialPageRoute(builder: (context) => AboutUs()),
