@@ -27,6 +27,7 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: MyApp(),
     );
   }
@@ -57,6 +58,7 @@ class _MyAppState extends State<MyApp> {
       builder: (context, _) {
         final themeProvider = Provider.of<ThemeProvider>(context);
         return MaterialApp(
+           debugShowCheckedModeBanner: false,
           themeMode: themeProvider.darkTheme?ThemeMode.dark:ThemeMode.light,
           theme: MyTheme.lightTheme(context),
           darkTheme: MyTheme.darTheme(context),

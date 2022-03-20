@@ -1418,7 +1418,7 @@ class _DashBoardState extends State<DashBoard> {
                   InkWell(
                     onTap: () async {
                       launch(
-                        "https://settle-now-web.herokuapp.com/privacy-policy",
+                        "https://settlenow.herokuapp.com/privacy-policy",
                         forceWebView: true,
                         enableJavaScript: true,
                       );
