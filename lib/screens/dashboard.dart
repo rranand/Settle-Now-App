@@ -1356,7 +1356,7 @@ class _DashBoardState extends State<DashBoard> {
             ),
             ListTile(
               onTap: () async {
-                await Share.share("Download Settle Now\nhttps://bit.ly/3iboMf1");
+                await Share.share("Download Settle Now\nhttps://settlenow.herokuapp.com");
               },
               leading: Icon(Icons.share, color: Colors.white),
               title: Text(
