@@ -589,7 +589,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       :SizedBox(
                           width: MediaQuery.of(context).size.width,
                           height: heightExpense,
-                          child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token),
+                          child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token, refreshIndicatorKey: _refreshIndicatorKey,),
                         ),
                     ],
                   ),
@@ -977,12 +977,22 @@ class _RoomExpenseState extends State<RoomExpense> {
   }
 }
 
-class ExpenseData extends StatelessWidget {
+class ExpenseData extends StatefulWidget {
   final List<dynamic> TransList;
   final String RoomKey;
   final String Email;
   final String Token;
-  ExpenseData({ Key? key, required this.TransList, required this.RoomKey, required this.Email, required this.Token }) : super(key: key);
+  final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
+  ExpenseData({ Key? key, required this.TransList, required this.RoomKey, required this.Email, required this.Token, required this.refreshIndicatorKey }) : super(key: key);
+
+  @override
+  State<ExpenseData> createState() => _ExpenseDataState();
+}
+
+class _ExpenseDataState extends State<ExpenseData> {
+  final TextEditingController _purpose = TextEditingController(); 
+  final TextEditingController _amount = TextEditingController();
+  final _updateExpense = GlobalKey<FormState>();
 
   _showToast(BuildContext context, String show) {
     final scaffold = ScaffoldMessenger.of(context);
@@ -1012,11 +1022,11 @@ class ExpenseData extends StatelessWidget {
         Uri.parse(global.url + 'transaction'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Auth': Token
+          'Auth': widget.Token
         },
         body: jsonEncode({
-          'email': crypto.encrypt(Email),
-          'roomKey': crypto.encrypt(RoomKey),
+          'email': crypto.encrypt(widget.Email),
+          'roomKey': crypto.encrypt(widget.RoomKey),
           'purpose': crypto.encrypt(purpose),
           'amount': crypto.encrypt(amount),
           'id': crypto.encrypt(id),
@@ -1025,18 +1035,17 @@ class ExpenseData extends StatelessWidget {
 
       var updateMessage = jsonDecode(response.body);
       _showToast(context, crypto.decrypt(updateMessage["Message"]));
+      widget.refreshIndicatorKey.currentState?.show();
     } on Exception catch(_) {
       _showToast(context, "No Internet Connection");
     }
   }
 
-  Widget _buildUpdateDialog(BuildContext context, String purpose, String id, String amount) {
+  Widget _buildUpdateDialog(BuildContext context,String id, String purpose, String amount) {
     return StatefulBuilder(
       builder: (context, setState) {
-        final TextEditingController _purpose = TextEditingController();
-        final TextEditingController _amount = TextEditingController();
         _purpose.text = purpose;
-        _amount.text = amount.substring(2);
+        _amount.text = amount;
 
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
@@ -1045,53 +1054,74 @@ class ExpenseData extends StatelessWidget {
               width: MediaQuery.of(context).size.width,
               child: Padding(
                 padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: _purpose,
-                      keyboardType: TextInputType.text,
-                      maxLength: 150,
-                      maxLines: 1,
-                      style: const TextStyle(fontSize: 18),
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.all(8.0),
-                        hintText: "Enter Purpose",
-                        labelText: "Purpose",
-                        errorStyle: TextStyle(fontSize: 15),
+                child: Form(
+                  key: _updateExpense,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: _amount,
+                        keyboardType: TextInputType.number,
+                        maxLength: 10,
+                        maxLines: 1,
+                        style: const TextStyle(fontSize: 18),
+                        autocorrect: false,
+                        validator: (value) {
+                          RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
+                          if (!validateNumber.hasMatch(_amount.text)) {
+                            return "Enter Valid Amount";
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: "Enter Amount",
+                          labelText: "Amount",
+                          errorStyle: TextStyle(fontSize: 15),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10,),
-                    TextField(
-                      controller: _amount,
-                      keyboardType: TextInputType.number,
-                      maxLength: 10,
-                      maxLines: 1,
-                      style: const TextStyle(fontSize: 18),
-                      decoration: const InputDecoration(
-                        contentPadding: EdgeInsets.all(8.0),
-                        hintText: "Enter Amount",
-                        labelText: "Amount",
-                        errorStyle: TextStyle(fontSize: 15),
+                      SizedBox(height: 10,),
+                      TextFormField(
+                        controller: _purpose,
+                        keyboardType: TextInputType.text,
+                        maxLength: 150,
+                        maxLines: 1,
+                        style: const TextStyle(fontSize: 18),
+                        autocorrect: false,
+                        validator: (value) {
+                          RegExp validateText = RegExp(r'\b[\w]+\b');
+                          if (!validateText.hasMatch(_purpose.text)) {
+                            return "Enter Valid Purpose";
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: "Enter Purpose",
+                          labelText: "Purpose",
+                          errorStyle: TextStyle(fontSize: 15),
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 15,),
-                    SizedBox(
-                      height: 40,
-                      width: MediaQuery.of(context).size.width*0.95,
-                      child: ElevatedButton(
-                        child: const Text("Update", style: TextStyle(color: Colors.white),),
-                        onPressed: () async {
-                          setState(() {});
-                          buildShowDialog(context);
-                          await _updateTransaction(context, _purpose.text, id, _amount.text);
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        }
+                      SizedBox(height: 15,),
+                      SizedBox(
+                        height: 40,
+                        width: MediaQuery.of(context).size.width*0.95,
+                        child: ElevatedButton(
+                          child: const Text("Update", style: TextStyle(color: Colors.white),),
+                          onPressed: () async {
+                            if (_updateExpense.currentState!.validate()) {
+                              buildShowDialog(context);
+                              await _updateTransaction(context, _purpose.text, id, _amount.text);
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            }
+                          }
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 )
               )
             ),
@@ -1101,7 +1131,7 @@ class ExpenseData extends StatelessWidget {
     );
   }
 
-  Widget _buildPopupDialog(BuildContext context, String purpose, String name, String date, String amount, String email, String id) {
+  Widget _buildPopupDialog(BuildContext context, String name, String date, String email, String id, String purpose, String amount) {
     return StatefulBuilder(
       builder: (context, setState) {
         return Dialog(
@@ -1118,16 +1148,16 @@ class ExpenseData extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        purpose,
+                        _purpose.text,
                         style: TextStyle(
                           fontSize: 30
                         ),
                       ),
-                      Email==email?IconButton(
-                        onPressed: () {
+                      widget.Email==email?IconButton(
+                        onPressed: () async {
                           showDialog(
                             context: context,
-                            builder: (BuildContext context) => _buildUpdateDialog(context, purpose, id, amount),
+                            builder: (BuildContext context) => _buildUpdateDialog(context, id, purpose, amount),
                           );
                         },
                         icon: Icon(Icons.edit)
@@ -1150,7 +1180,7 @@ class ExpenseData extends StatelessWidget {
                           ),),
                         ],
                       ),
-                      Text(amount, style: TextStyle(
+                      Text("₹ " + _amount.text, style: TextStyle(
                         fontSize: 20
                       ),)
                     ],
@@ -1187,13 +1217,15 @@ class ExpenseData extends StatelessWidget {
         separatorBuilder: (context, index) => SizedBox(height: 5,),
         shrinkWrap: true,
         physics: ScrollPhysics(),
-        itemCount: TransList.length,
+        itemCount: widget.TransList.length,
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
             onTap: () {
+              _purpose.text = crypto.decrypt(widget.TransList[index]["Purpose"]);
+              _amount.text = crypto.decrypt(widget.TransList[index]["Amount"]);
               showDialog(
                 context: context,
-                builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["Name"]), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"]), crypto.decrypt(TransList[index]["Email"]), crypto.decrypt(TransList[index]["id"])),
+                builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(widget.TransList[index]["Name"]), crypto.decrypt(widget.TransList[index]["Date"]), crypto.decrypt(widget.TransList[index]["Email"]), crypto.decrypt(widget.TransList[index]["id"]), crypto.decrypt(widget.TransList[index]["Purpose"]), crypto.decrypt(widget.TransList[index]["Amount"])),
               );
             },
             child: SizedBox(
@@ -1217,7 +1249,7 @@ class ExpenseData extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              crypto.decrypt(TransList[index]["Purpose"]), 
+                              crypto.decrypt(widget.TransList[index]["Purpose"]), 
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontSize: 26,
@@ -1230,7 +1262,7 @@ class ExpenseData extends StatelessWidget {
                             Opacity(
                               opacity: 0.8,
                               child: Text(
-                                crypto.decrypt(TransList[index]["Name"]),
+                                crypto.decrypt(widget.TransList[index]["Name"]),
                                 style: const TextStyle(
                                   fontSize: 18,
                                 ),
@@ -1242,7 +1274,7 @@ class ExpenseData extends StatelessWidget {
                             Opacity(
                               opacity: 0.8,
                               child: Text(
-                                crypto.decrypt(TransList[index]["Date"]),
+                                crypto.decrypt(widget.TransList[index]["Date"]),
                                 style: const TextStyle(
                                   fontSize: 18,
                                 ),
@@ -1257,7 +1289,7 @@ class ExpenseData extends StatelessWidget {
                         child: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.20,
                           child: Text(
-                            "₹ " + crypto.decrypt(TransList[index]["Amount"]),
+                            "₹ " + crypto.decrypt(widget.TransList[index]["Amount"]),
                             style: const TextStyle(
                               fontSize: 20,
                             ),
