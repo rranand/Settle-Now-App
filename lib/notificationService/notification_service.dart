@@ -14,15 +14,6 @@ class LocalNotificationService {
       initializationSettings,
       onSelectNotification: (String? id) async {
         if (id!.isNotEmpty) {
-
-          // Navigator.of(context).push(
-          //   MaterialPageRoute(
-          //     builder: (context) => DemoScreen(
-          //       id: id,
-          //     ),
-          //   ),
-          // );
-
           
         }
       },

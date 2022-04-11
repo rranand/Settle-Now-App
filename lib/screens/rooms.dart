@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -82,7 +83,7 @@ class _RoomExpenseState extends State<RoomExpense> {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
         }
-
+        
         if (this.mounted) {
           setState(() {});
         }
@@ -588,7 +589,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       :SizedBox(
                           width: MediaQuery.of(context).size.width,
                           height: heightExpense,
-                          child: ExpenseData(TransList: TransList,),
+                          child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token),
                         ),
                     ],
                   ),
@@ -978,7 +979,10 @@ class _RoomExpenseState extends State<RoomExpense> {
 
 class ExpenseData extends StatelessWidget {
   final List<dynamic> TransList;
-  ExpenseData({ Key? key, required this.TransList }) : super(key: key);
+  final String RoomKey;
+  final String Email;
+  final String Token;
+  ExpenseData({ Key? key, required this.TransList, required this.RoomKey, required this.Email, required this.Token }) : super(key: key);
 
   _showToast(BuildContext context, String show) {
     final scaffold = ScaffoldMessenger.of(context);
@@ -990,65 +994,188 @@ class ExpenseData extends StatelessWidget {
     );
   }
 
+  buildShowDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: CircularProgressIndicator(),
+        );
+      }
+    );
+  }
 
+  _updateTransaction(BuildContext context, String purpose, String id, String amount) async {
+    try {
+      final response = await http.patch(
+        Uri.parse(global.url + 'transaction'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': Token
+        },
+        body: jsonEncode({
+          'email': crypto.encrypt(Email),
+          'roomKey': crypto.encrypt(RoomKey),
+          'purpose': crypto.encrypt(purpose),
+          'amount': crypto.encrypt(amount),
+          'id': crypto.encrypt(id),
+        })
+      );
 
-  Widget _buildPopupDialog(BuildContext context, String purpose, String name, String date, String amount) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
-      child: Container(
-        width: MediaQuery.of(context).size.width*0.95,
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                purpose,
-                style: TextStyle(
-                  fontSize: 30
-                ),
-              ),
-              SizedBox(height: 25,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      var updateMessage = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(updateMessage["Message"]));
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+  }
+
+  Widget _buildUpdateDialog(BuildContext context, String purpose, String id, String amount) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        final TextEditingController _purpose = TextEditingController();
+        final TextEditingController _amount = TextEditingController();
+        _purpose.text = purpose;
+        _amount.text = amount.substring(2);
+
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+          child: SingleChildScrollView(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextField(
+                      controller: _purpose,
+                      keyboardType: TextInputType.text,
+                      maxLength: 150,
+                      maxLines: 1,
+                      style: const TextStyle(fontSize: 18),
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.all(8.0),
+                        hintText: "Enter Purpose",
+                        labelText: "Purpose",
+                        errorStyle: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    SizedBox(height: 10,),
+                    TextField(
+                      controller: _amount,
+                      keyboardType: TextInputType.number,
+                      maxLength: 10,
+                      maxLines: 1,
+                      style: const TextStyle(fontSize: 18),
+                      decoration: const InputDecoration(
+                        contentPadding: EdgeInsets.all(8.0),
+                        hintText: "Enter Amount",
+                        labelText: "Amount",
+                        errorStyle: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                    SizedBox(height: 15,),
+                    SizedBox(
+                      height: 40,
+                      width: MediaQuery.of(context).size.width*0.95,
+                      child: ElevatedButton(
+                        child: const Text("Update", style: TextStyle(color: Colors.white),),
+                        onPressed: () async {
+                          setState(() {});
+                          buildShowDialog(context);
+                          await _updateTransaction(context, _purpose.text, id, _amount.text);
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        }
+                      ),
+                    ),
+                  ],
+                )
+              )
+            ),
+          )
+        );
+      }
+    );
+  }
+
+  Widget _buildPopupDialog(BuildContext context, String purpose, String name, String date, String amount, String email, String id) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+          child: Container(
+            width: MediaQuery.of(context).size.width*0.95,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(name, style: TextStyle(
-                        fontSize: 20
-                      ),),
-                      SizedBox(height: 10,),
-                      Text("Date: " + date, style: TextStyle(
-                        fontSize: 20
-                      ),),
+                      Text(
+                        purpose,
+                        style: TextStyle(
+                          fontSize: 30
+                        ),
+                      ),
+                      Email==email?IconButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => _buildUpdateDialog(context, purpose, id, amount),
+                          );
+                        },
+                        icon: Icon(Icons.edit)
+                      ):SizedBox()
                     ],
                   ),
-                  Text(amount, style: TextStyle(
-                    fontSize: 20
-                  ),)
-                ],
-              ),
-              SizedBox(height: 25,),
-              SizedBox(
-                height: 45,
-                width: MediaQuery.of(context).size.width*0.95 - 25,
-                child: ElevatedButton(
-                  child: Text("Close", 
-                    style: TextStyle(
-                      color: Colors.white
+                  SizedBox(height: 25,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(name, style: TextStyle(
+                            fontSize: 20
+                          ),),
+                          SizedBox(height: 10,),
+                          Text("Date: " + date, style: TextStyle(
+                            fontSize: 20
+                          ),),
+                        ],
+                      ),
+                      Text(amount, style: TextStyle(
+                        fontSize: 20
+                      ),)
+                    ],
+                  ),
+                  SizedBox(height: 25,),
+                  SizedBox(
+                    height: 45,
+                    width: MediaQuery.of(context).size.width*0.95 - 25,
+                    child: ElevatedButton(
+                      child: Text("Close", 
+                        style: TextStyle(
+                          color: Colors.white
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      }
     );
   }
 
@@ -1066,7 +1193,7 @@ class ExpenseData extends StatelessWidget {
             onTap: () {
               showDialog(
                 context: context,
-                builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["Name"]), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"])),
+                builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["Name"]), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"]), crypto.decrypt(TransList[index]["Email"]), crypto.decrypt(TransList[index]["id"])),
               );
             },
             child: SizedBox(

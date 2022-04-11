@@ -197,6 +197,8 @@ class _OtpNameState extends State<OtpName> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final height = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -210,14 +212,14 @@ class _OtpNameState extends State<OtpName> {
               ):Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height/4,),
+                  height>=800?SizedBox(height: MediaQuery.of(context).size.height/4,):SizedBox(height: 60,),
                   Image.asset(
                     'assets/Images/SN.jpg',
                     height: 150,
                     width: 150,
                   ),
                   Text("Settle Now", style: TextStyle(
-                      fontSize: 60,
+                      fontSize: height>=800?60:40,
                       fontWeight: FontWeight.bold,
                       color: themeProvider.darkTheme?null:Theme.of(context).primaryColor,
                     ),
@@ -293,7 +295,7 @@ class _OtpNameState extends State<OtpName> {
               )
             ),
           )
-        )
+        ),
       ),
     );
   }
