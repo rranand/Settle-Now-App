@@ -375,15 +375,6 @@ class _DashBoardState extends State<DashBoard> {
     FirebaseMessaging.instance.getInitialMessage().then(
       (message) {
         if (message != null) {
-          // if (message.data['_id'] != null) {
-          //   Navigator.of(context).push(
-          //     MaterialPageRoute(
-          //       builder: (context) => DemoScreen(
-          //         id: message.data['_id'],
-          //       ),
-          //     ),
-          //   );
-          // }
         }
       },
     );
