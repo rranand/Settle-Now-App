@@ -49,7 +49,7 @@ class _RoomJoinState extends State<RoomJoin> {
           });
         }
 
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 1000), () {
           Navigator.pushAndRemoveUntil(
             context, 
             MaterialPageRoute(

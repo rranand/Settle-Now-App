@@ -317,6 +317,60 @@ class _RoomExpenseState extends State<RoomExpense> {
     }
   }
 
+  closeRoomWidget(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+      child: SingleChildScrollView(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Are You Sure?",
+                  style: TextStyle(
+                    fontSize: 25
+                  ),
+                ),
+                SizedBox(height: 20,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    SizedBox(
+                      width: 100,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text("No"),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 100,
+                      child: ElevatedButton(
+                        onPressed: () async{
+                          buildShowDialog(context);
+                          await CloseRoom(context);
+                          Navigator.pop(context);
+                          Navigator.pop(context);
+                        },
+                        child: Text("Yes"),
+                      ),
+                    )
+                  ],
+                )
+              ],
+            ),
+          )
+        )
+      )
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -398,7 +452,10 @@ class _RoomExpenseState extends State<RoomExpense> {
                       child: const Text("Close Room", style: TextStyle(color: Colors.white),),
                       onPressed: () {
                         if (!isClear) {
-                          CloseRoom(context);
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => closeRoomWidget(context),
+                          );
                         } else {
                           _showToast(context, "Room Already Closed By You");
                         }
@@ -1016,7 +1073,7 @@ class _ExpenseDataState extends State<ExpenseData> {
     );
   }
 
-  _updateTransaction(BuildContext context, String purpose, String id, String amount) async {
+  _updateTransaction(BuildContext context, String purpose, String id, String amount, String flag) async {
     try {
       final response = await http.patch(
         Uri.parse(global.url + 'transaction'),
@@ -1030,6 +1087,7 @@ class _ExpenseDataState extends State<ExpenseData> {
           'purpose': crypto.encrypt(purpose),
           'amount': crypto.encrypt(amount),
           'id': crypto.encrypt(id),
+          'flag': crypto.encrypt(flag)
         })
       );
 
@@ -1104,21 +1162,40 @@ class _ExpenseDataState extends State<ExpenseData> {
                         ),
                       ),
                       SizedBox(height: 15,),
-                      SizedBox(
-                        height: 40,
-                        width: MediaQuery.of(context).size.width*0.95,
-                        child: ElevatedButton(
-                          child: const Text("Update", style: TextStyle(color: Colors.white),),
-                          onPressed: () async {
-                            if (_updateExpense.currentState!.validate()) {
-                              buildShowDialog(context);
-                              await _updateTransaction(context, _purpose.text, id, _amount.text);
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            }
-                          }
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            height: 40,
+                            width: MediaQuery.of(context).size.width*0.3,
+                            child: ElevatedButton(
+                              child: const Text("Delete", style: TextStyle(color: Colors.white),),
+                              onPressed: () async {
+                                buildShowDialog(context);
+                                await _updateTransaction(context, _purpose.text, id, _amount.text, "1");
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              }
+                            ),
+                          ),
+                          SizedBox(
+                            height: 40,
+                            width: MediaQuery.of(context).size.width*0.3,
+                            child: ElevatedButton(
+                              child: const Text("Update", style: TextStyle(color: Colors.white),),
+                              onPressed: () async {
+                                if (_updateExpense.currentState!.validate()) {
+                                  buildShowDialog(context);
+                                  await _updateTransaction(context, _purpose.text, id, _amount.text, "0");
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                }
+                              }
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
