@@ -9,6 +9,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/aboutus.dart';
 import 'package:settlenow/screens/expenses.dart';
+import 'package:settlenow/screens/lendCredit.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:settlenow/screens/profile.dart';
 import 'package:settlenow/screens/rooms.dart';
@@ -1108,7 +1109,7 @@ class _DashBoardState extends State<DashBoard> {
                       height: 40,
                       width: 80,
                       decoration: open?null:BoxDecoration(
-                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+                        border: Border.all(color: Colors.red, width: 2),
                         borderRadius: BorderRadius.all(Radius.circular(13))
                       ),
                       child: Center(
@@ -1318,6 +1319,22 @@ class _DashBoardState extends State<DashBoard> {
               leading: Icon(Icons.account_balance_outlined, color: Colors.white,),
               title: Text(
                   "Personal Expenses",
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white
+                  ),
+                ),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => LendCredit(email: _email.text, token: _token,)),
+                );
+              },
+              leading: Icon(Icons.credit_card, color: Colors.white,),
+              title: Text(
+                  "Len-Den",
                   style: TextStyle(
                     fontSize: 15,
                     color: Colors.white

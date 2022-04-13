@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,14 +25,14 @@ class _ExpensesState extends State<Expenses> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
   String title = "Personal Expense";
-  List<String> category = ["Fashion", "Investment", "Food", "Travelling", "Household", "Health", "Entertainment", "Education", "Miscellaneous"];
+  List<String> category = ["Fashion", "Investment", "Food", "Traveling", "Household", "Health", "Entertainment", "Education", "Miscellaneous"];
   List<String> investmentCat = ["Mutual Fund", "Cryptography", "Fixed Deposit", "Stock"];
   int categoryIndex = 7;
   int investIndex = 0;
   String CurDate = "";
   final _formKey = GlobalKey<FormState>();
 
-  Future _initialisation() async {
+  Future _initialization() async {
     var now = DateTime.now();
     CurDate = (now.month-1).toString() + now.year.toString();
     
@@ -214,7 +213,7 @@ class _ExpensesState extends State<Expenses> {
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
-        onRefresh: _initialisation,
+        onRefresh: _initialization,
         child: TransList.isEmpty? SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
