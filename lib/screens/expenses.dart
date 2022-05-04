@@ -228,7 +228,7 @@ class _ExpensesState extends State<Expenses> {
                   ))
           ):Scrollbar(
             radius: Radius.circular(10.0),
-            thickness: 10.5,
+            thickness: 5.5,
             child: Padding(
               padding: EdgeInsets.all(10.0),
               child: ListView.separated(

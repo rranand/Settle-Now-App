@@ -25,6 +25,7 @@ class RoomExpense extends StatefulWidget {
 class _RoomExpenseState extends State<RoomExpense> {
   List<dynamic> list = [];
   List<dynamic> TransList = [];
+  bool locked = false;
   final TextEditingController _amt = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
@@ -82,8 +83,11 @@ class _RoomExpenseState extends State<RoomExpense> {
         for(int i=1; i<list.length; i++) {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
+          if (list[i]["done"]) {
+            locked = true;
+          }
         }
-        
+
         if (this.mounted) {
           setState(() {});
         }
@@ -412,7 +416,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         )
         :Scrollbar(
           radius: Radius.circular(10.0),
-          thickness: 10.5,
+          thickness: 5.5,
           child: ListView(
               children: [
                 InkWell(
@@ -646,7 +650,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       :SizedBox(
                           width: MediaQuery.of(context).size.width,
                           height: heightExpense,
-                          child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token, refreshIndicatorKey: _refreshIndicatorKey,),
+                          child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token, refreshIndicatorKey: _refreshIndicatorKey, locked: locked,),
                         ),
                     ],
                   ),
@@ -656,7 +660,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         ),
       ):Scrollbar(
           radius: Radius.circular(10.0),
-          thickness: 10.5,
+          thickness: 5.5,
           child: Center(
             child: Padding(
               padding: const EdgeInsets.all(10.0),
@@ -1039,8 +1043,9 @@ class ExpenseData extends StatefulWidget {
   final String RoomKey;
   final String Email;
   final String Token;
+  final bool locked;
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
-  ExpenseData({ Key? key, required this.TransList, required this.RoomKey, required this.Email, required this.Token, required this.refreshIndicatorKey }) : super(key: key);
+  ExpenseData({ Key? key, required this.TransList, required this.RoomKey, required this.Email, required this.Token, required this.refreshIndicatorKey, required this.locked }) : super(key: key);
 
   @override
   State<ExpenseData> createState() => _ExpenseDataState();
@@ -1208,7 +1213,7 @@ class _ExpenseDataState extends State<ExpenseData> {
     );
   }
 
-  Widget _buildPopupDialog(BuildContext context, String name, String date, String email, String id, String purpose, String amount) {
+  Widget _buildPopupDialog(BuildContext context, String name, String date, String email, String id, String purpose, String amount, bool locked) {
     return StatefulBuilder(
       builder: (context, setState) {
         return Dialog(
@@ -1230,7 +1235,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                           fontSize: 30
                         ),
                       ),
-                      widget.Email==email?IconButton(
+                      widget.Email==email&&!locked?IconButton(
                         onPressed: () async {
                           showDialog(
                             context: context,
@@ -1302,7 +1307,7 @@ class _ExpenseDataState extends State<ExpenseData> {
               _amount.text = crypto.decrypt(widget.TransList[index]["Amount"]);
               showDialog(
                 context: context,
-                builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(widget.TransList[index]["Name"]), crypto.decrypt(widget.TransList[index]["Date"]), crypto.decrypt(widget.TransList[index]["Email"]), crypto.decrypt(widget.TransList[index]["id"]), crypto.decrypt(widget.TransList[index]["Purpose"]), crypto.decrypt(widget.TransList[index]["Amount"])),
+                builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(widget.TransList[index]["Name"]), crypto.decrypt(widget.TransList[index]["Date"]), crypto.decrypt(widget.TransList[index]["Email"]), crypto.decrypt(widget.TransList[index]["id"]), crypto.decrypt(widget.TransList[index]["Purpose"]), crypto.decrypt(widget.TransList[index]["Amount"]), widget.locked),
               );
             },
             child: SizedBox(

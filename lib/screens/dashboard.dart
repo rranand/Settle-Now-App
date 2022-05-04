@@ -60,6 +60,8 @@ class DashBoard extends StatefulWidget {
 }
 
 class _DashBoardState extends State<DashBoard> {
+  int dash = 0;
+  double yourSpend = 0;
   final TextEditingController _email = TextEditingController();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController();
@@ -275,8 +277,10 @@ class _DashBoardState extends State<DashBoard> {
         List<dynamic> list = jsonDecode(response.body)['data'];
         RoomDataO.clear();
         RoomDataC.clear();
+
         for(int i=0; i<list.length; i++) {
           if (list[i]['active']) {
+            yourSpend += double.parse(crypto.decrypt(list[i]['spend'])) - (double.parse(crypto.decrypt(list[i]['total']))/double.parse(crypto.decrypt(list[i]['members'])));
             RoomDataO.add(RoomEach.fromJson(list[i]));
           } else {
             RoomDataC.add(RoomEach.fromJson(list[i]));
@@ -960,12 +964,10 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget updateWidget(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return _isUpdateAvailable? 
-    Scaffold(
+    
+    return Scaffold(
       appBar: AppBar(
         title: Text(
           "Settle Now (New Update Available)",
@@ -987,10 +989,215 @@ class _DashBoardState extends State<DashBoard> {
           )
         ],
       ),
-      body: UpdateWidget(data: updateData),
-    )
+      body: updatePage(data: updateData),
+    );
+  }
+
+  Widget notificationWidget(BuildContext context) {
+    return SizedBox();
+  }
+
+  Widget homeWidget(BuildContext context) {
+    return RefreshIndicator(
+      key: _refreshIndicatorKey,
+      onRefresh: _extractEmail,
+      child: (RoomDataO.isEmpty&&RoomDataC.isEmpty)?
+        Scrollbar(
+          radius: Radius.circular(10.0),
+          thickness: 5.5,
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height*0.8,
+            width: MediaQuery.of(context).size.width,
+            child: Center(
+              child: Text("No Rooms to Join, Create One!!!",
+              style: TextStyle(
+                fontSize: 25,
+              ),
+              ),
+            ),
+          ),
+        ) 
+        :(searchTrigger? _search.text.length==0&&SearchRoomData.isEmpty?Center(
+          child: Text("Search Rooms...",style: TextStyle(
+              fontSize: 25,
+            ),),
+        ):(SearchRoomData.isEmpty? Center(
+          child: searching? CircularProgressIndicator():Text("No Results Found",style: TextStyle(
+              fontSize: 25,
+          )))
+        :Scrollbar(
+          radius: Radius.circular(10.0),
+          thickness: 5.5,
+          child: ListView(
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal:15.0, vertical: 10.0),
+                child: Text(SearchRoomData.length.toString() + " Results Found"),
+              ),
+              SizedBox (
+                height: heightSearched,
+                child: RoomWidget(RoomData: SearchRoomData, email: _email.text, flag: true, token: _token,)
+              ),
+            ],
+          ),
+        ))
+        :
+        Column(
+          children: [
+            SizedBox(
+              height: 50,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 40,
+                    decoration: open?BoxDecoration(
+                      border: Border.all(color: Theme.of(context).primaryColor, width: 2),
+                      borderRadius: BorderRadius.all(Radius.circular(13))
+                    ):null,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: InkWell(
+                          child: Text(
+                            "Live",
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              open = true;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  Container(
+                    height: 40,
+                    width: 80,
+                    decoration: open?null:BoxDecoration(
+                      border: Border.all(color: Colors.red, width: 2),
+                      borderRadius: BorderRadius.all(Radius.circular(13))
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: InkWell(
+                          child: Text(
+                            "Closed",
+                            style: TextStyle(
+                              fontSize: 18,
+                            ),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              open = false;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            open?Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Total : ₹ " + double.parse(amtSpend).toStringAsFixed(2),
+                    style: TextStyle(
+                      fontSize: 18
+                    ),
+                  ),
+                  Text(
+                    (yourSpend>=0?"Gain : ₹ ":"Loss : ₹ ") + yourSpend.toStringAsFixed(2),
+                    style: TextStyle(
+                      fontSize: 18
+                    ),
+                  ),
+                ],
+              ),
+            ):SizedBox(),
+            GestureDetector(
+              onPanUpdate: (details) {
+                if (details.delta.dx > 0) {
+                  setState(() {
+                    open = true;
+                  });
+                }
+              
+                if (details.delta.dx < 0) {
+                  setState(() {
+                    open = false;
+                  });
+                }
+              },
+              child: SizedBox(
+                height: open?(MediaQuery.of(context).size.height-250):(MediaQuery.of(context).size.height-220),
+                child: open?RoomDataO.isEmpty?Scrollbar(
+                radius: Radius.circular(10.0),
+                thickness: 5.5,
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height*0.8,
+                  width: MediaQuery.of(context).size.width,
+                  child: Center(
+                    child: Text("No Live Room Found!!!",
+                    style: TextStyle(
+                      fontSize: 25,
+                    ),
+                    ),
+                  ),
+                ),
+                ):Scrollbar(
+                  radius: Radius.circular(10.0),
+                  thickness: 5.5,
+                  child: RoomWidget(RoomData: RoomDataO, email: _email.text, flag: false, token: _token)
+                ):(RoomDataC.isEmpty?Scrollbar(
+                  radius: Radius.circular(10.0),
+                  thickness: 5.5,
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height*0.8,
+                    width: MediaQuery.of(context).size.width,
+                    child: Center(
+                      child: Text("No Closed Room Found!!!",
+                      style: TextStyle(
+                        fontSize: 25,
+                      ),
+                      ),
+                    ),
+                  ),
+                ):Scrollbar(
+                  radius: Radius.circular(10.0),
+                  thickness: 5.5,
+                  child: RoomWidget(RoomData: RoomDataC, email: _email.text, flag: false, token: _token,)
+                )),
+              ),
+            )
+            
+          ],
+        ) 
+        )
+      );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return _isUpdateAvailable?updateWidget(context)
     :Scaffold(
-      appBar: AppBar(
+      appBar: dash==0?AppBar(
         title: searchTrigger? TextField(
           keyboardType: TextInputType.text,
           textInputAction: TextInputAction.search,
@@ -1022,187 +1229,32 @@ class _DashBoardState extends State<DashBoard> {
             }, 
             icon: Icon(Icons.search, color: themeProvider.darkTheme?Colors.white:Colors.black,))
         ],
-      ),
-      body: RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: _extractEmail,
-        child: (RoomDataO.isEmpty&&RoomDataC.isEmpty)?
-          Scrollbar(
-            radius: Radius.circular(10.0),
-            thickness: 10.5,
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height*0.8,
-              width: MediaQuery.of(context).size.width,
-              child: Center(
-                child: Text("No Rooms to Join, Create One!!!",
-                style: TextStyle(
-                  fontSize: 25,
-                ),
-                ),
-              ),
-            ),
-          ) 
-          :(searchTrigger? _search.text.length==0&&SearchRoomData.isEmpty?Center(
-            child: Text("Search Rooms...",style: TextStyle(
-                fontSize: 25,
-              ),),
-          ):(SearchRoomData.isEmpty? Center(
-            child: searching? CircularProgressIndicator():Text("No Results Found",style: TextStyle(
-                fontSize: 25,
-            )))
-          :Scrollbar(
-            radius: Radius.circular(10.0),
-            thickness: 10.5,
-            child: ListView(
-              shrinkWrap: true,
-              physics: ScrollPhysics(),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal:15.0, vertical: 10.0),
-                  child: Text(SearchRoomData.length.toString() + " Results Found"),
-                ),
-                SizedBox (
-                  height: heightSearched,
-                  child: RoomWidget(RoomData: SearchRoomData, email: _email.text, flag: true, token: _token,)
-                ),
-              ],
-            ),
-          ))
-          :
-          Column(
-            children: [
-              SizedBox(
-                height: 50,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 40,
-                      decoration: open?BoxDecoration(
-                        border: Border.all(color: Theme.of(context).primaryColor, width: 2),
-                        borderRadius: BorderRadius.all(Radius.circular(13))
-                      ):null,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: InkWell(
-                            child: Text(
-                              "Live",
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                            onTap: () {
-                              setState(() {
-                                open = true;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Container(
-                      height: 40,
-                      width: 80,
-                      decoration: open?null:BoxDecoration(
-                        border: Border.all(color: Colors.red, width: 2),
-                        borderRadius: BorderRadius.all(Radius.circular(13))
-                      ),
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: InkWell(
-                            child: Text(
-                              "Closed",
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ),
-                            onTap: () {
-                              setState(() {
-                                open = false;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              open?Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  "Total Amount: " + double.parse(amtSpend).toStringAsFixed(2),
-                  style: TextStyle(
-                    fontSize: 18
-                  ),
-                ),
-              ):SizedBox(),
-              GestureDetector(
-                onPanUpdate: (details) {
-                  if (details.delta.dx > 0) {
-                    setState(() {
-                      open = true;
-                    });
-                  }
-                
-                  if (details.delta.dx < 0) {
-                    setState(() {
-                      open = false;
-                    });
-                  }
-                },
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height-250,
-                  child: open?RoomDataO.isEmpty?Scrollbar(
-                  radius: Radius.circular(10.0),
-                  thickness: 10.5,
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height*0.8,
-                    width: MediaQuery.of(context).size.width,
-                    child: Center(
-                      child: Text("No Live Room Found!!!",
-                      style: TextStyle(
-                        fontSize: 25,
-                      ),
-                      ),
-                    ),
-                  ),
-                ) :Scrollbar(
-                  radius: Radius.circular(10.0),
-                  thickness: 10.5,
-                  child: RoomWidget(RoomData: RoomDataO, email: _email.text, flag: false, token: _token)
-                ):(RoomDataC.isEmpty?Scrollbar(
-                  radius: Radius.circular(10.0),
-                  thickness: 10.5,
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height*0.8,
-                    width: MediaQuery.of(context).size.width,
-                    child: Center(
-                      child: Text("No Closed Room Found!!!",
-                      style: TextStyle(
-                        fontSize: 25,
-                      ),
-                      ),
-                    ),
-                  ),
-                ):Scrollbar(
-                  radius: Radius.circular(10.0),
-                  thickness: 10.5,
-                  child: RoomWidget(RoomData: RoomDataC, email: _email.text, flag: false, token: _token,)
-                )),
-                ),
-              )
-              
-            ],
-          ) 
-          )
+      ):AppBar(
+        title:Text(
+          "Settle Now",
+          style: TextStyle(
+            fontWeight: FontWeight.bold
+          ),
         ),
+      ),
+      body: dash==0?homeWidget(context):notificationWidget(context),
+        bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: dash,
+        onTap: (index) => setState(() {
+          dash = index;
+        }),
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home, size: 25,),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications, size: 25,),
+            label: "Notification",
+          ),
+        ],
+      ),
       drawer: Drawer(
         child: ListView(
           children: [
@@ -1446,7 +1498,7 @@ class _DashBoardState extends State<DashBoard> {
           ],
         ),
       ),
-      floatingActionButton: searchTrigger?
+      floatingActionButton: dash==0?(searchTrigger?
       FloatingActionButton(
         onPressed: () {
           buildFilterDialog(context);
@@ -1598,7 +1650,7 @@ class _DashBoardState extends State<DashBoard> {
           );
         },
         child: const Icon(Icons.add, color: Colors.white,),
-      ),
+      )):null,
     );
   }
 }
@@ -1645,7 +1697,6 @@ class RoomWidget extends StatelessWidget {
       separatorBuilder: (context, index) => SizedBox(height: 5,),
       itemBuilder: (BuildContext context, int index){
         final themeProvider = Provider.of<ThemeProvider>(context);
-
         return InkWell(
           child: SizedBox(
             child: Card(
@@ -1747,9 +1798,9 @@ class RoomWidget extends StatelessWidget {
   }
 }
 
-class UpdateWidget extends StatelessWidget {
+class updatePage extends StatelessWidget {
   var data = null;
-  UpdateWidget({ Key? key, required this.data }) : super(key: key);
+  updatePage({ Key? key, required this.data }) : super(key: key);
 
   _launchURL(BuildContext context) async {
     launch(crypto.decrypt(data["link"]));

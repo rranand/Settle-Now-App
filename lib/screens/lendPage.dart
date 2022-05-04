@@ -223,7 +223,7 @@ class _LendPageState extends State<LendPage> {
         onRefresh: _initialization,
         child: Scrollbar(
           radius: Radius.circular(10.0),
-          thickness: 10.5,
+          thickness: 5.5,
           child: load?(data.isEmpty?Center(child: Text("No Loan Found", style: TextStyle(fontSize: 25),),):Center(
             child: SizedBox(
               width: MediaQuery.of(context).size.width*0.95,
