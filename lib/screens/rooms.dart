@@ -126,6 +126,12 @@ class _RoomExpenseState extends State<RoomExpense> {
 
   getFriendData() async {
     try {
+      if (this.mounted) {
+        setState(() {
+          loadFriendData = false;
+          friendData.clear();
+        });
+      }
       final response = await http.patch(
         Uri.parse(global.url + 'friend'),
         headers: <String, String>{
@@ -645,6 +651,7 @@ class _RoomExpenseState extends State<RoomExpense> {
       appBar: AppBar(
         title: Text(widget.roomName),
         actions: [
+          locked?SizedBox():
           IconButton(
             onPressed: () async {
               if (loadFriendData) {
@@ -1225,79 +1232,84 @@ class _RoomExpenseState extends State<RoomExpense> {
                           leading: Icon(Icons.add, color: Theme.of(context).primaryColor,),
                           title: const Text("Add Expense"),
                           onTap: () {
-                            showModalBottomSheet<void>(
-                              context: context,
-                              isScrollControlled: true,
-                              builder: (BuildContext context) {
-                                return Padding(
-                                  padding: MediaQuery.of(context).viewInsets,
-                                  child: Form(
-                                    key: _formKey,
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: <Widget>[
-                                        TextFormField(
-                                          controller: _amt,
-                                          keyboardType: TextInputType.number,
-                                          maxLength: 10,
-                                          maxLines: 1,
-                                          style: const TextStyle(fontSize: 18),
-                                          autocorrect: false,
-                                          validator: (value) {
-                                            RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
-                                            if (!validateNumber.hasMatch(_amt.text)) {
-                                              return "Enter Valid Amount";
-                                            }
-                                            return null;
-                                          },
-                                          decoration: const InputDecoration(
-                                            contentPadding: EdgeInsets.all(8.0),
-                                            hintText: "Enter Amount",
-                                            labelText: "Amount",
-                                            errorStyle: TextStyle(fontSize: 15),
+                            if (locked) {
+                              Navigator.pop(context);
+                              _showToast(context, "Someone Already Closed this Room");
+                            } else {
+                              showModalBottomSheet<void>(
+                                context: context,
+                                isScrollControlled: true,
+                                builder: (BuildContext context) {
+                                  return Padding(
+                                    padding: MediaQuery.of(context).viewInsets,
+                                    child: Form(
+                                      key: _formKey,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          TextFormField(
+                                            controller: _amt,
+                                            keyboardType: TextInputType.number,
+                                            maxLength: 10,
+                                            maxLines: 1,
+                                            style: const TextStyle(fontSize: 18),
+                                            autocorrect: false,
+                                            validator: (value) {
+                                              RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
+                                              if (!validateNumber.hasMatch(_amt.text)) {
+                                                return "Enter Valid Amount";
+                                              }
+                                              return null;
+                                            },
+                                            decoration: const InputDecoration(
+                                              contentPadding: EdgeInsets.all(8.0),
+                                              hintText: "Enter Amount",
+                                              labelText: "Amount",
+                                              errorStyle: TextStyle(fontSize: 15),
+                                            ),
                                           ),
-                                        ),
-                                        TextFormField(
-                                          controller: _purpose,
-                                          keyboardType: TextInputType.text,
-                                          maxLength: 150,
-                                          maxLines: 1,
-                                          style: const TextStyle(fontSize: 18),
-                                          autocorrect: false,
-                                          validator: (value) {
-                                            RegExp validateText = RegExp(r'\b[\w]+\b');
-                                            if (!validateText.hasMatch(_purpose.text)) {
-                                              return "Enter Valid Purpose";
-                                            }
-                                            return null;
-                                          },
-                                          decoration: const InputDecoration(
-                                            contentPadding: EdgeInsets.all(8.0),
-                                            hintText: "Enter Purpose",
-                                            labelText: "Purpose",
-                                            errorStyle: TextStyle(fontSize: 15),
+                                          TextFormField(
+                                            controller: _purpose,
+                                            keyboardType: TextInputType.text,
+                                            maxLength: 150,
+                                            maxLines: 1,
+                                            style: const TextStyle(fontSize: 18),
+                                            autocorrect: false,
+                                            validator: (value) {
+                                              RegExp validateText = RegExp(r'\b[\w]+\b');
+                                              if (!validateText.hasMatch(_purpose.text)) {
+                                                return "Enter Valid Purpose";
+                                              }
+                                              return null;
+                                            },
+                                            decoration: const InputDecoration(
+                                              contentPadding: EdgeInsets.all(8.0),
+                                              hintText: "Enter Purpose",
+                                              labelText: "Purpose",
+                                              errorStyle: TextStyle(fontSize: 15),
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 40,
-                                          width: 100,
-                                          child: ElevatedButton(
-                                            child: const Text("Add", style: TextStyle(color: Colors.white),),
-                                            onPressed: () {
-                                              AddExpense(context);
-                                            }
+                                          SizedBox(
+                                            height: 40,
+                                            width: 100,
+                                            child: ElevatedButton(
+                                              child: const Text("Add", style: TextStyle(color: Colors.white),),
+                                              onPressed: () {
+                                                AddExpense(context);
+                                              }
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(
-                                          height: 10,
-                                        )
-                                      ],
+                                          SizedBox(
+                                            height: 10,
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }
-                            );
+                                  );
+                                }
+                              );
+                            }
                           },
                         ),
                       ],

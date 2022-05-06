@@ -73,11 +73,11 @@ class _DashBoardState extends State<DashBoard> {
   final List<RoomEach> SearchRoomData = [];
   late String version = "";
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _refreshRequestKey = new GlobalKey<RefreshIndicatorState>();
   final _CformKey = GlobalKey<FormState>();
   final _JformKey = GlobalKey<FormState>();
   bool searchTrigger = false;
   bool searching  = false;
+  bool loadingRequest = false;
   bool dateIndex = true;
   List<String> Year = [];
   List<String> Month = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -279,7 +279,8 @@ class _DashBoardState extends State<DashBoard> {
         List<dynamic> list = jsonDecode(response.body)['data'];
         RoomDataO.clear();
         RoomDataC.clear();
-
+        yourSpend = 0;
+        
         for(int i=0; i<list.length; i++) {
           if (list[i]['active']) {
             yourSpend += double.parse(crypto.decrypt(list[i]['spend'])) - (double.parse(crypto.decrypt(list[i]['total']))/double.parse(crypto.decrypt(list[i]['members'])));
@@ -292,7 +293,7 @@ class _DashBoardState extends State<DashBoard> {
         if (this.mounted) {
           setState(() {});
         }
-
+        await getRoomRequest();
         await _getImageID();
       } else if (jsonDecode(response.body)['maintenance'] != null && jsonDecode(response.body)['maintenance']) {
         Navigator.pushAndRemoveUntil(
@@ -324,8 +325,15 @@ class _DashBoardState extends State<DashBoard> {
     
   }
 
-  Future<void> getRoomRequest() async {
+  Future getRoomRequest() async {
     try {
+      if (this.mounted) {
+        setState(() {
+          loadingRequest = false;
+          RoomRequest.clear();
+        });
+      }
+
       final response = await http.delete(
         Uri.parse(global.url+'friend'),
         headers: <String, String>{
@@ -333,10 +341,10 @@ class _DashBoardState extends State<DashBoard> {
           'Auth': _token
         },
         body: jsonEncode({
-          'email': crypto.encrypt(_email.text),
+          'email': crypto.encrypt("rrohitanand3336@gmail.com"),
         })
       );
-
+      loadingRequest = true;
       var data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
@@ -407,7 +415,6 @@ class _DashBoardState extends State<DashBoard> {
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
-    WidgetsBinding.instance!.addPostFrameCallback((_) => _refreshRequestKey.currentState?.show());
     LocalNotificationService.initialize();
     
     FirebaseMessaging.instance.getInitialMessage().then(
@@ -1015,7 +1022,6 @@ class _DashBoardState extends State<DashBoard> {
 
       var data = jsonDecode(response.body);
       _showToast(context, crypto.decrypt(data["Message"]));
-      _refreshRequestKey.currentState?.show();
     } on Exception catch(_) {
       _showToast(context, "No Internet Connection");
     }
@@ -1052,96 +1058,92 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Widget RequestWidget(BuildContext context) {
-    return RefreshIndicator(
-      key: _refreshRequestKey,
-      onRefresh: getRoomRequest,
-      child: Scrollbar(
-        radius: Radius.circular(10.0),
-        thickness: 5.5,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: RoomRequest.isEmpty?Center(
-            child: Text(
-              "No Request Found",
-              style: TextStyle(
-                fontSize: 25,
-              ),
+    return Scrollbar(
+      radius: Radius.circular(10.0),
+      thickness: 5.5,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: RoomRequest.isEmpty?Center(
+          child: Text(
+            "No Request Found",
+            style: TextStyle(
+              fontSize: 25,
             ),
-          ) 
-          :ListView.separated(
-            padding: EdgeInsets.all(8.0),
-            itemCount: RoomRequest.length, 
-            separatorBuilder: (context, index) => SizedBox(height: 5,),
-            itemBuilder: (BuildContext context, int index) {
-              return SizedBox(
-                  child: Card(
-                    elevation: 1.0,
-                    clipBehavior: Clip.antiAlias,
-                    shadowColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column (
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Text(
-                              crypto.decrypt(RoomRequest[index]["name"]), 
-                              style: TextStyle(
-                                fontSize: 24,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Text(
-                              "Members: " + crypto.decrypt(RoomRequest[index]["members"]), 
-                              style: TextStyle(
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Text(
-                              "Invited By: " + crypto.decrypt(RoomRequest[index]["by"]), 
-                              style: TextStyle(
-                                fontSize: 20,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 8,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              IconButton(onPressed: () async {
-                                buildShowDialog(context);
-                                await JoinRequest("0", crypto.decrypt(RoomRequest[index]["key"]));
-                                Navigator.pop(context);
-                              }, icon: Icon(Icons.cancel_sharp, size: 30, color: Colors.red,)),
-                              IconButton(onPressed: () async {
-                                buildShowDialog(context);
-                                await JoinRequest("1", crypto.decrypt(RoomRequest[index]["key"]));
-                                Navigator.pop(context);
-                              }, icon: Icon(Icons.check, size: 30, color: Colors.greenAccent)),
-                            ],
-                          )
-                        ]
-                      )
-                    )
-                  ),
-              );
-            }
           ),
+        ) 
+        :ListView.separated(
+          padding: EdgeInsets.all(8.0),
+          itemCount: RoomRequest.length, 
+          separatorBuilder: (context, index) => SizedBox(height: 5,),
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+                child: Card(
+                  elevation: 1.0,
+                  clipBehavior: Clip.antiAlias,
+                  shadowColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column (
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text(
+                            crypto.decrypt(RoomRequest[index]["name"]), 
+                            style: TextStyle(
+                              fontSize: 24,
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(
+                            "Members: " + crypto.decrypt(RoomRequest[index]["members"]), 
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Text(
+                            "Invited By: " + crypto.decrypt(RoomRequest[index]["by"]), 
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            IconButton(onPressed: () async {
+                              buildShowDialog(context);
+                              await JoinRequest("0", crypto.decrypt(RoomRequest[index]["key"]));
+                              Navigator.pop(context);
+                            }, icon: Icon(Icons.cancel_sharp, size: 30, color: Colors.red,)),
+                            IconButton(onPressed: () async {
+                              buildShowDialog(context);
+                              await JoinRequest("1", crypto.decrypt(RoomRequest[index]["key"]));
+                              Navigator.pop(context);
+                            }, icon: Icon(Icons.check, size: 30, color: Colors.greenAccent)),
+                          ],
+                        )
+                      ]
+                    )
+                  )
+                ),
+            );
+          }
         ),
       ),
     );
@@ -1391,7 +1393,7 @@ class _DashBoardState extends State<DashBoard> {
           ),
         ),
       ),
-      body: dash==0?homeWidget(context):RequestWidget(context),
+      body: dash==0?homeWidget(context):(loadingRequest?RequestWidget(context):Center(child: CircularProgressIndicator(),)),
         bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: dash,
@@ -1404,7 +1406,33 @@ class _DashBoardState extends State<DashBoard> {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_add_outlined, size: 25,),
+            icon: Stack(
+              children: [
+                Icon(Icons.person_add_outlined, size: 25,),
+                RoomRequest.isNotEmpty?Positioned(
+                  right: 0,
+                  child: new Container(
+                    padding: EdgeInsets.all(1),
+                    decoration: new BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 12,
+                      minHeight: 12,
+                    ),
+                    child: new Text(
+                      RoomRequest.length.toString(),
+                      style: new TextStyle(
+                        color: Colors.white,
+                        fontSize: 8,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ):SizedBox()
+              ]
+            ),
             label: "Room Request",
           ),
         ],
@@ -1812,7 +1840,11 @@ class _DashBoardState extends State<DashBoard> {
           );
         },
         child: const Icon(Icons.add, color: Colors.white,),
-      )):null,
+      )):FloatingActionButton(
+        onPressed: () async {
+          await getRoomRequest();
+        }, 
+        child: Icon(Icons.refresh_outlined),),
     );
   }
 }
