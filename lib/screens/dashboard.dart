@@ -73,6 +73,7 @@ class _DashBoardState extends State<DashBoard> {
   final List<RoomEach> SearchRoomData = [];
   late String version = "";
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshRequestKey = new GlobalKey<RefreshIndicatorState>();
   final _CformKey = GlobalKey<FormState>();
   final _JformKey = GlobalKey<FormState>();
   bool searchTrigger = false;
@@ -95,7 +96,8 @@ class _DashBoardState extends State<DashBoard> {
   bool haveImg = false;
   bool open = true;
   String amtSpend = "";
-  late NetworkImage profilePic;
+  String _profilePicID = "";
+  List<dynamic> RoomRequest = [];
 
   Future _getImageID() async {
     if (this.mounted) {
@@ -120,7 +122,7 @@ class _DashBoardState extends State<DashBoard> {
         if (imgData['havePic']) {
           if (this.mounted) {
             setState(() {
-              profilePic = NetworkImage('https://drive.google.com/uc?id='+crypto.decrypt(imgData["fileId"]));
+              _profilePicID = crypto.decrypt(imgData["fileId"]);
               haveImg = true;
             });
           }
@@ -322,6 +324,36 @@ class _DashBoardState extends State<DashBoard> {
     
   }
 
+  Future<void> getRoomRequest() async {
+    try {
+      final response = await http.delete(
+        Uri.parse(global.url+'friend'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': _token
+        },
+        body: jsonEncode({
+          'email': crypto.encrypt(_email.text),
+        })
+      );
+
+      var data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        RoomRequest = data["data"];
+      } else {
+        _showToast(context, crypto.decrypt(data["Message"]));
+      }
+      
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection!!!");
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   SendingData(bool flag, BuildContext context) async {
     var response;
     buildShowDialog(context);
@@ -375,6 +407,7 @@ class _DashBoardState extends State<DashBoard> {
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    WidgetsBinding.instance!.addPostFrameCallback((_) => _refreshRequestKey.currentState?.show());
     LocalNotificationService.initialize();
     
     FirebaseMessaging.instance.getInitialMessage().then(
@@ -964,6 +997,31 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
+  JoinRequest(String flag, String roomKey) async {
+    buildShowDialog(context);
+    try {
+      final response = await http.put(
+        Uri.parse(global.url + 'friend'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': _token
+        },
+        body: jsonEncode({
+          'roomKey': crypto.encrypt(roomKey),
+          'email': crypto.encrypt(_email.text),
+          'confirm': crypto.encrypt(flag)
+        })
+      );  
+
+      var data = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(data["Message"]));
+      _refreshRequestKey.currentState?.show();
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+    Navigator.pop(context);
+  }
+
   Widget updateWidget(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     
@@ -993,8 +1051,100 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  Widget notificationWidget(BuildContext context) {
-    return SizedBox();
+  Widget RequestWidget(BuildContext context) {
+    return RefreshIndicator(
+      key: _refreshRequestKey,
+      onRefresh: getRoomRequest,
+      child: Scrollbar(
+        radius: Radius.circular(10.0),
+        thickness: 5.5,
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: RoomRequest.isEmpty?Center(
+            child: Text(
+              "No Request Found",
+              style: TextStyle(
+                fontSize: 25,
+              ),
+            ),
+          ) 
+          :ListView.separated(
+            padding: EdgeInsets.all(8.0),
+            itemCount: RoomRequest.length, 
+            separatorBuilder: (context, index) => SizedBox(height: 5,),
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                  child: Card(
+                    elevation: 1.0,
+                    clipBehavior: Clip.antiAlias,
+                    shadowColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Column (
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text(
+                              crypto.decrypt(RoomRequest[index]["name"]), 
+                              style: TextStyle(
+                                fontSize: 24,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Text(
+                              "Members: " + crypto.decrypt(RoomRequest[index]["members"]), 
+                              style: TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Text(
+                              "Invited By: " + crypto.decrypt(RoomRequest[index]["by"]), 
+                              style: TextStyle(
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 8,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              IconButton(onPressed: () async {
+                                buildShowDialog(context);
+                                await JoinRequest("0", crypto.decrypt(RoomRequest[index]["key"]));
+                                Navigator.pop(context);
+                              }, icon: Icon(Icons.cancel_sharp, size: 30, color: Colors.red,)),
+                              IconButton(onPressed: () async {
+                                buildShowDialog(context);
+                                await JoinRequest("1", crypto.decrypt(RoomRequest[index]["key"]));
+                                Navigator.pop(context);
+                              }, icon: Icon(Icons.check, size: 30, color: Colors.greenAccent)),
+                            ],
+                          )
+                        ]
+                      )
+                    )
+                  ),
+              );
+            }
+          ),
+        ),
+      ),
+    );
   }
 
   Widget homeWidget(BuildContext context) {
@@ -1191,6 +1341,10 @@ class _DashBoardState extends State<DashBoard> {
       );
   }
 
+  Future<NetworkImage> getProfilePhoto(String id) async {
+    return await NetworkImage('https://drive.google.com/uc?id='+id);
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -1237,7 +1391,7 @@ class _DashBoardState extends State<DashBoard> {
           ),
         ),
       ),
-      body: dash==0?homeWidget(context):notificationWidget(context),
+      body: dash==0?homeWidget(context):RequestWidget(context),
         bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: dash,
@@ -1250,8 +1404,8 @@ class _DashBoardState extends State<DashBoard> {
             label: "Home",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications, size: 25,),
-            label: "Notification",
+            icon: Icon(Icons.person_add_outlined, size: 25,),
+            label: "Room Request",
           ),
         ],
       ),
@@ -1265,15 +1419,23 @@ class _DashBoardState extends State<DashBoard> {
               margin: EdgeInsets.all(0),
               currentAccountPicture: Stack(
                 children: [
-                  haveImg?CircleAvatar(
-                    radius: 45,
-                    backgroundImage: profilePic,
-                    child: imageUploading?Center(child: CircularProgressIndicator()):null,
-                  )
-                  :CircleAvatar(
-                    radius: 45,
-                    backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                    child: imageUploading?Center(child: CircularProgressIndicator()):null,
+                  FutureBuilder<NetworkImage>(
+                    builder: (ctx, snapshot) {
+                      if (snapshot.hasData) {
+                        return CircleAvatar(
+                          radius: 45,
+                          backgroundImage: snapshot.data,
+                          child: null,
+                        );
+                      } else {
+                        return CircleAvatar(
+                          radius: 45,
+                          backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                    },
+                    future: getProfilePhoto(_profilePicID),
                   ),
                   Positioned(
                     left: 40,

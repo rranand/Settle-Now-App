@@ -10,6 +10,24 @@ import '../contents.dart' as global;
 import '../others/themes.dart';
 import 'package:share_plus/share_plus.dart';
 
+class FriendEach {
+  String name;
+  String email;
+  String status;
+  String pic;
+
+  FriendEach({required this.name,required this.email,required this.status, required this.pic});
+
+  factory FriendEach.fromJson(Map<String, dynamic> json) {
+    return FriendEach(
+      name: crypto.decrypt(json['name']),
+      email: crypto.decrypt(json['email']),
+      status: crypto.decrypt(json['status']),
+      pic: crypto.decrypt(json['pic']),
+    );
+  }
+}
+
 class RoomExpense extends StatefulWidget {
   final String roomKey;
   final String email;
@@ -25,12 +43,15 @@ class RoomExpense extends StatefulWidget {
 class _RoomExpenseState extends State<RoomExpense> {
   List<dynamic> list = [];
   List<dynamic> TransList = [];
+  List<FriendEach> friendData = [];
   bool locked = false;
   final TextEditingController _amt = TextEditingController();
+  final TextEditingController _searchFriend = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
   bool isClear = false;
   bool loaded = false;
+  bool loadFriendData = false;
   double heightExpense = 0;
   final _formKey = GlobalKey<FormState>();
   final Shader linearGradient = LinearGradient(
@@ -57,6 +78,7 @@ class _RoomExpenseState extends State<RoomExpense> {
   String paymentTotal = "";
   bool isLoadedDef = false;
   List<dynamic> paymentData = [];
+  List<FriendEach> friendDataSearched = [];
 
   Future _initialisation() async {
     try {
@@ -99,6 +121,57 @@ class _RoomExpenseState extends State<RoomExpense> {
     }
 
     _extractExpenseData("all");
+    getFriendData();
+  }
+
+  getFriendData() async {
+    try {
+      final response = await http.patch(
+        Uri.parse(global.url + 'friend'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': widget.token
+        },
+        body: jsonEncode({
+          'roomKey': crypto.encrypt(widget.roomKey),
+          'email': crypto.encrypt(widget.email),
+        })
+      );  
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        loadFriendData = true;
+        List<dynamic> tempData = data['data'];
+        for(int i=0; i<tempData.length; i++) {
+          friendData.add(FriendEach.fromJson(tempData[i]));
+        }
+      } else {
+        _showToast(context, crypto.decrypt(data["Message"]));
+      }
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  SearchFriend() {
+    if (this.mounted) {
+      setState(() {
+        friendDataSearched.clear();
+      });
+    }
+
+    for(int i=0; i<friendData.length; i++) {
+      if (friendData[i].name.toString().toLowerCase().contains(_searchFriend.text.toLowerCase())) {
+        friendDataSearched.add(friendData[i]);
+      }
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
   }
 
   Future _extractExpenseData(String email) async {
@@ -381,6 +454,189 @@ class _RoomExpenseState extends State<RoomExpense> {
     WidgetsBinding.instance!.addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
   }
 
+  Widget addFriendWidget(BuildContext context) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+          child: SingleChildScrollView(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Add Member",
+                      style: TextStyle(
+                        fontSize: 25
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    TextField(
+                      controller: _searchFriend,
+                      keyboardType: TextInputType.text,
+                      maxLines: 1,
+                      style: const TextStyle(fontSize: 18),
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.all(8.0),
+                        labelText: "Enter Name",
+                        errorStyle: const TextStyle(fontSize: 15),
+                      ),
+                      onChanged: (String s) {
+                        SearchFriend();
+                      },
+                    ),
+                    SizedBox(height: 13,),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height*0.6,
+                      child: _searchFriend.text.isEmpty?friendListWidget(context, friendData):(friendDataSearched.isEmpty
+                      ?Center(child: Text("No User Found", style: TextStyle(fontSize: 20),),) 
+                      :friendListWidget(context, friendDataSearched))
+                    )
+                  ],
+                )
+              )
+            )
+          )
+        );
+      }
+    );
+  }
+
+  Future<NetworkImage> getProfilePhoto(String id) async {
+    return await NetworkImage('https://drive.google.com/uc?id='+id);
+  }
+
+  sendJoinRequest(String email) async {
+    buildShowDialog(context);
+    try {
+      final response = await http.post(
+        Uri.parse(global.url + 'friend'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': widget.token
+        },
+        body: jsonEncode({
+          'roomKey': crypto.encrypt(widget.roomKey),
+          'email': crypto.encrypt(widget.email),
+          'fEmail': crypto.encrypt(email)
+        })
+      );  
+
+      var data = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(data["Message"]));
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+    Navigator.pop(context);
+  }
+
+  cancelJoinRequest(String email) async {
+    buildShowDialog(context);
+    try {
+      final response = await http.put(
+        Uri.parse(global.url + 'friend'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': widget.token
+        },
+        body: jsonEncode({
+          'roomKey': crypto.encrypt(widget.roomKey),
+          'email': crypto.encrypt(email),
+          'confirm': crypto.encrypt("0")
+        })
+      );  
+
+      var data = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(data["Message"]));
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+    Navigator.pop(context);
+  }
+
+  Widget friendListWidget(BuildContext context, List<FriendEach> data) {
+    return ListView.separated(
+      separatorBuilder: (context, index) => SizedBox(height: 5,),
+      shrinkWrap: true,
+      physics: ScrollPhysics(),
+      itemCount: data.length,
+      itemBuilder: (BuildContext context, int index) {
+        return SizedBox(
+          height: 80,
+          child: Center(
+            child: Card(
+              elevation: 1.0,
+              shadowColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    data[index].pic.isEmpty?
+                    CircleAvatar(
+                      radius: 18,
+                      backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
+                      child: null,
+                    )
+                    :FutureBuilder<NetworkImage>(
+                      builder: (ctx, snapshot) {
+                        if (snapshot.hasData) {
+                          return CircleAvatar(
+                            radius: 18,
+                            backgroundImage: snapshot.data,
+                            child: null,
+                          );
+                        } else {
+                          return CircleAvatar(
+                            radius: 18,
+                            backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                      },
+                      future: getProfilePhoto(data[index].pic),
+                    ),
+                    Text(
+                      data[index].name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        if (data[index].status=="NJ") {
+                          await sendJoinRequest(data[index].email);
+                          data[index].status = "S";
+                        } else {
+                          await cancelJoinRequest(data[index].email);
+                          data[index].status = "NJ";
+                        }
+
+                        if (this.mounted) {
+                          setState(() {});
+                        }
+                      }, 
+                      icon: Icon(data[index].status=="NJ"?Icons.person_add_alt:Icons.cancel_outlined)
+                    )
+                  ]
+                ),
+              ),
+            ),
+          )
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -390,6 +646,19 @@ class _RoomExpenseState extends State<RoomExpense> {
         title: Text(widget.roomName),
         actions: [
           IconButton(
+            onPressed: () async {
+              if (loadFriendData) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => addFriendWidget(context),
+                );
+              } else {
+                _showToast(context, "Loading Data");
+              }
+            }, 
+            icon: Icon(Icons.person_add, color: themeProvider.darkTheme?Colors.white:Colors.black,)
+          ),
+          IconButton(
             onPressed: () {
               if (membersListName.length <= 1) {
                 _showToast(context, "More Than One Member Required");
@@ -398,9 +667,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                   defaultPage = !defaultPage;
                 });
               }
-              
             }, 
-            icon: Icon(Icons.transfer_within_a_station_rounded, color: themeProvider.darkTheme?Colors.white:Colors.black,))
+            icon: Icon(Icons.transfer_within_a_station_rounded, color: themeProvider.darkTheme?Colors.white:Colors.black,)
+          )
         ],
       ),
       body: defaultPage?RefreshIndicator(
@@ -421,7 +690,14 @@ class _RoomExpenseState extends State<RoomExpense> {
               children: [
                 InkWell(
                   child: ListTile(
-                    title: const Text("Room Key"),
+                    title: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text("Room Key"),
+                        SizedBox(width: 10,),
+                        Icon(Icons.share, size: 18,)
+                      ],
+                    ),
                     trailing: Text(widget.roomKey),
                   ),
                   onTap: () async {
