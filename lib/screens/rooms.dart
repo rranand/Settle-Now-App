@@ -567,77 +567,81 @@ class _RoomExpenseState extends State<RoomExpense> {
   }
 
   Widget friendListWidget(BuildContext context, List<FriendEach> data) {
-    return ListView.separated(
-      separatorBuilder: (context, index) => SizedBox(height: 5,),
-      shrinkWrap: true,
-      physics: ScrollPhysics(),
-      itemCount: data.length,
-      itemBuilder: (BuildContext context, int index) {
-        return SizedBox(
-          height: 80,
-          child: Center(
-            child: Card(
-              elevation: 1.0,
-              shadowColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    data[index].pic.isEmpty?
-                    CircleAvatar(
-                      radius: 18,
-                      backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                      child: null,
-                    )
-                    :FutureBuilder<NetworkImage>(
-                      builder: (ctx, snapshot) {
-                        if (snapshot.hasData) {
-                          return CircleAvatar(
-                            radius: 18,
-                            backgroundImage: snapshot.data,
-                            child: null,
-                          );
-                        } else {
-                          return CircleAvatar(
-                            radius: 18,
-                            backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                            child: Center(child: CircularProgressIndicator()),
-                          );
-                        }
-                      },
-                      future: getProfilePhoto(data[index].pic),
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return ListView.separated(
+          separatorBuilder: (context, index) => SizedBox(height: 5,),
+          shrinkWrap: true,
+          physics: ScrollPhysics(),
+          itemCount: data.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+              height: 80,
+              child: Center(
+                child: Card(
+                  elevation: 1.0,
+                  shadowColor: Theme.of(context).primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        data[index].pic.isEmpty?
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
+                          child: null,
+                        )
+                        :FutureBuilder<NetworkImage>(
+                          builder: (ctx, snapshot) {
+                            if (snapshot.hasData) {
+                              return CircleAvatar(
+                                radius: 18,
+                                backgroundImage: snapshot.data,
+                                child: null,
+                              );
+                            } else {
+                              return CircleAvatar(
+                                radius: 18,
+                                backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
+                                child: Center(child: CircularProgressIndicator()),
+                              );
+                            }
+                          },
+                          future: getProfilePhoto(data[index].pic),
+                        ),
+                        Text(
+                          data[index].name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () async {
+                            if (data[index].status=="NJ") {
+                              await sendJoinRequest(data[index].email);
+                              data[index].status = "S";
+                            } else {
+                              await cancelJoinRequest(data[index].email);
+                              data[index].status = "NJ";
+                            }
+      
+                            if (this.mounted) {
+                              setState(() {});
+                            }
+                          }, 
+                          icon: Icon(data[index].status=="NJ"?Icons.person_add_alt:Icons.cancel_outlined)
+                        )
+                      ]
                     ),
-                    Text(
-                      data[index].name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () async {
-                        if (data[index].status=="NJ") {
-                          await sendJoinRequest(data[index].email);
-                          data[index].status = "S";
-                        } else {
-                          await cancelJoinRequest(data[index].email);
-                          data[index].status = "NJ";
-                        }
-
-                        if (this.mounted) {
-                          setState(() {});
-                        }
-                      }, 
-                      icon: Icon(data[index].status=="NJ"?Icons.person_add_alt:Icons.cancel_outlined)
-                    )
-                  ]
+                  ),
                 ),
-              ),
-            ),
-          )
+              )
+            );
+          }
         );
       }
     );

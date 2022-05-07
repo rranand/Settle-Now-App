@@ -325,7 +325,7 @@ class _DashBoardState extends State<DashBoard> {
     
   }
 
-  Future getRoomRequest() async {
+  getRoomRequest() async {
     try {
       if (this.mounted) {
         setState(() {
@@ -333,7 +333,6 @@ class _DashBoardState extends State<DashBoard> {
           RoomRequest.clear();
         });
       }
-
       final response = await http.delete(
         Uri.parse(global.url+'friend'),
         headers: <String, String>{
@@ -341,7 +340,7 @@ class _DashBoardState extends State<DashBoard> {
           'Auth': _token
         },
         body: jsonEncode({
-          'email': crypto.encrypt("rrohitanand3336@gmail.com"),
+          'email': crypto.encrypt(_email.text),
         })
       );
       loadingRequest = true;
