@@ -429,7 +429,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text("No"),
+                        child: Text("No", style: TextStyle(color: Colors.white),),
                       ),
                     ),
                     SizedBox(
@@ -441,7 +441,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
-                        child: Text("Yes"),
+                        child: Text("Yes", style: TextStyle(color: Colors.white),),
                       ),
                     )
                   ],
@@ -564,6 +564,27 @@ class _RoomExpenseState extends State<RoomExpense> {
       _showToast(context, "No Internet Connection");
     }
     Navigator.pop(context);
+  }
+
+  closeRoomRequest() async {
+    try {
+      final response = await http.put(
+        Uri.parse(global.url + 'transaction'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': widget.token
+        },
+        body: jsonEncode({
+          'roomKey': crypto.encrypt(widget.roomKey),
+          'email': crypto.encrypt(widget.email)
+        })
+      );  
+
+      var data = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(data["Message"]));
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
   }
 
   Widget friendListWidget(BuildContext context, List<FriendEach> data) {
@@ -1120,12 +1141,22 @@ class _RoomExpenseState extends State<RoomExpense> {
               return Padding(
                 padding: MediaQuery.of(context).viewInsets,
                 child: SizedBox(
-                  height: 120,
+                  height: 170,
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        ListTile(
+                          leading: Icon(Icons.close, color: Theme.of(context).primaryColor,),
+                          title: const Text("Close Room Request"),
+                          onTap: () async {
+                            buildShowDialog(context);
+                            await closeRoomRequest();
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                        ),
                         ListTile(
                           leading: Icon(Icons.money, color: Theme.of(context).primaryColor,),
                           title: const Text("Pay to Member"),
@@ -1505,6 +1536,30 @@ class _ExpenseDataState extends State<ExpenseData> {
     );
   }
 
+  addToPersonalExpense(String objId) async {
+    buildShowDialog(context);
+    try {
+      final response = await http.post(
+        Uri.parse(global.url + 'transaction/personalExpense'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': widget.Token
+        },
+        body: jsonEncode({
+          'roomKey': crypto.encrypt(widget.RoomKey),
+          'email': crypto.encrypt(widget.Email),
+          'id': crypto.encrypt(objId)
+        })
+      );  
+
+      var data = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(data["Message"]));
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+    Navigator.pop(context);
+  }
+
   Widget _buildPopupDialog(BuildContext context, String name, String date, String email, String id, String purpose, String amount, bool locked) {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -1527,15 +1582,29 @@ class _ExpenseDataState extends State<ExpenseData> {
                           fontSize: 30
                         ),
                       ),
-                      widget.Email==email&&!locked?IconButton(
-                        onPressed: () async {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => _buildUpdateDialog(context, id, purpose, amount),
-                          );
-                        },
-                        icon: Icon(Icons.edit)
-                      ):SizedBox()
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              buildShowDialog(context);
+                              await addToPersonalExpense(id);
+                              Navigator.pop(context);
+                              Navigator.pop(context);
+                            },
+                            icon: Icon(Icons.add)
+                          ),
+                          widget.Email==email&&!locked?IconButton(
+                            onPressed: () async {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) => _buildUpdateDialog(context, id, purpose, amount),
+                              );
+                            },
+                            icon: Icon(Icons.edit)
+                          ):SizedBox()
+                        ],
+                      )
                     ],
                   ),
                   SizedBox(height: 25,),

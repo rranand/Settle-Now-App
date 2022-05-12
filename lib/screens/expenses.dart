@@ -77,7 +77,171 @@ class _ExpensesState extends State<Expenses> {
     }
   }
 
-  Widget _buildPopupDialog(BuildContext context, String purpose, String type, String date, String amount) {
+  removeRoomTransaction(String id) async {
+    try {
+      final response = await http.delete(
+        Uri.parse(global.url + 'transaction/personalExpense'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': widget.token
+        },
+        body: jsonEncode({
+          'email': crypto.encrypt(widget.email),
+          'id': crypto.encrypt(id)
+        })
+      );
+      
+      var TransData = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(TransData["Message"]));
+      await _initialization();
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  updatePersonalTransaction(String purpose, String amount, String flag, String id) async {
+    try {
+      final response = await http.put(
+          Uri.parse(global.url + 'ptransaction'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'purpose': crypto.encrypt(purpose),
+            'amount': crypto.encrypt(amount),
+            'flag': crypto.encrypt(flag),
+            'id': crypto.encrypt(id)
+          })
+        );
+      
+      var TransData = jsonDecode(response.body);
+      _showToast(context, crypto.decrypt(TransData["Message"]));
+      await _initialization();
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Widget _buildUpdateDialog(BuildContext context,String id, String purpose, String amount) {
+    TextEditingController _updatePurpose = TextEditingController();
+    TextEditingController _updateAmount = TextEditingController();
+    
+    return StatefulBuilder(
+      builder: (context, setState) {
+        _updateAmount.text = amount.substring(2);
+        _updatePurpose.text = purpose;
+
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+          child: SingleChildScrollView(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: Form(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      TextFormField(
+                        controller: _updateAmount,
+                        keyboardType: TextInputType.number,
+                        maxLength: 10,
+                        maxLines: 1,
+                        style: const TextStyle(fontSize: 18),
+                        autocorrect: false,
+                        validator: (value) {
+                          RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
+                          if (!validateNumber.hasMatch(_updateAmount.text)) {
+                            return "Enter Valid Amount";
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: "Enter Amount",
+                          labelText: "Amount",
+                          errorStyle: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                      SizedBox(height: 10,),
+                      TextFormField(
+                        controller: _updatePurpose,
+                        keyboardType: TextInputType.text,
+                        maxLength: 150,
+                        maxLines: 1,
+                        style: const TextStyle(fontSize: 18),
+                        autocorrect: false,
+                        validator: (value) {
+                          RegExp validateText = RegExp(r'\b[\w]+\b');
+                          if (!validateText.hasMatch(_updatePurpose.text)) {
+                            return "Enter Valid Purpose";
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: "Enter Purpose",
+                          labelText: "Purpose",
+                          errorStyle: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                      SizedBox(height: 15,),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            height: 40,
+                            width: MediaQuery.of(context).size.width*0.3,
+                            child: ElevatedButton(
+                              child: const Text("Delete", style: TextStyle(color: Colors.white),),
+                              onPressed: () async {
+                                buildShowDialog(context);
+                                await updatePersonalTransaction(_updatePurpose.text, _updateAmount.text, "1", id);
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              }
+                            ),
+                          ),
+                          SizedBox(
+                            height: 40,
+                            width: MediaQuery.of(context).size.width*0.3,
+                            child: ElevatedButton(
+                              child: const Text("Update", style: TextStyle(color: Colors.white),),
+                              onPressed: () async {
+                                if (true) {
+                                  buildShowDialog(context);
+                                  await updatePersonalTransaction(_updatePurpose.text, _updateAmount.text, "0", id);
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                }
+                              }
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                )
+              )
+            ),
+          )
+        );
+      }
+    );
+  }
+
+  Widget _buildPopupDialog(BuildContext context, String purpose, String type, String date, String amount, bool room, String id) {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
       child: Container(
@@ -88,11 +252,31 @@ class _ExpensesState extends State<Expenses> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                purpose,
-                style: TextStyle(
-                  fontSize: 30
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    purpose,
+                    style: TextStyle(
+                      fontSize: 30
+                    ),
+                  ),
+                  room?IconButton(onPressed: () async {
+                    buildShowDialog(context);
+                    await removeRoomTransaction(id);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  }, 
+                    icon: Icon(Icons.delete)):
+                  IconButton(onPressed: () async {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => _buildUpdateDialog(context, id, purpose, amount),
+                    );
+                  }, 
+                    icon: Icon(Icons.edit)
+                  )
+                ],
               ),
               SizedBox(height: 25,),
               Row(
@@ -101,7 +285,10 @@ class _ExpensesState extends State<Expenses> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Type: " + type, style: TextStyle(
+                      room?Text(type + " (Room)", style: TextStyle(
+                        fontSize: 20
+                      ),)
+                      :Text("Type: " + type, style: TextStyle(
                         fontSize: 20
                       ),),
                       SizedBox(height: 10,),
@@ -237,89 +424,175 @@ class _ExpensesState extends State<Expenses> {
                     itemCount: TransList.length, 
                     itemBuilder: (BuildContext context, int index) {
                       final themeProvider = Provider.of<ThemeProvider>(context);
-                      return InkWell(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"])),
-                          );
-                        },
-                        child: SizedBox(
-                          child: Card(
-                            elevation: 5.0,
-                            shadowColor: Theme.of(context).primaryColor,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  flex: 1,
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width * 0.90,
-                                    child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        height: 10,
+                      if (TransList[index]["room"]) {
+                        return InkWell(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["RoomName"]), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"]), TransList[index]["room"], crypto.decrypt(TransList[index]["id"])),
+                            );
+                          },
+                          child: SizedBox(
+                            child: Card(
+                              elevation: 5.0,
+                              shadowColor: Theme.of(context).primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width * 0.90,
+                                      child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          crypto.decrypt(TransList[index]["Purpose"]), 
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.w500
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            crypto.decrypt(TransList[index]["RoomName"]) + " (Room)",
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            crypto.decrypt(TransList[index]["Date"]),
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      ]
                                       ),
-                                      Text(
-                                        crypto.decrypt(TransList[index]["Purpose"]), 
-                                        overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 0,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width * 0.20,
+                                      child: Text(
+                                        "₹ " + crypto.decrypt(TransList[index]["Amount"]),
                                         style: const TextStyle(
-                                          fontSize: 26,
-                                          fontWeight: FontWeight.w500
+                                          fontSize: 20,
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")),
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 15,
-                                      ),
-                                      Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          crypto.decrypt(TransList[index]["Date"]),
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ),
-                                    ]
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  flex: 0,
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width * 0.20,
-                                    child: Text(
-                                      "₹ " + crypto.decrypt(TransList[index]["Amount"]),
-                                      style: const TextStyle(
-                                        fontSize: 20,
                                       ),
                                     ),
                                   ),
-                                ),
-                              ]
+                                ]
+                              ),
                             ),
+                                            ),
                           ),
+                        );
+                      } else {
+                        return InkWell(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"]), TransList[index]["room"], crypto.decrypt(TransList[index]["id"])),
+                            );
+                          },
+                          child: SizedBox(
+                            child: Card(
+                              elevation: 5.0,
+                              shadowColor: Theme.of(context).primaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    flex: 1,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width * 0.90,
+                                      child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        Text(
+                                          crypto.decrypt(TransList[index]["Purpose"]), 
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 26,
+                                            fontWeight: FontWeight.w500
                                           ),
-                        ),
-                      );
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")),
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 15,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            crypto.decrypt(TransList[index]["Date"]),
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      ]
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 0,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width * 0.20,
+                                      child: Text(
+                                        "₹ " + crypto.decrypt(TransList[index]["Amount"]),
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ]
+                              ),
+                            ),
+                                            ),
+                          ),
+                        );
+                      }
                     }
                       ),
             ),

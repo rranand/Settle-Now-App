@@ -135,7 +135,7 @@ class _DashBoardState extends State<DashBoard> {
 
   Future? imageUpload(ImageSource imageSource) async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: imageSource, imageQuality: 50,);
+    final XFile? image = await _picker.pickImage(source: imageSource, imageQuality: 40,);
     Dio dio = new Dio();
 
     if (image != null) {
@@ -1003,7 +1003,7 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  JoinRequest(String flag, String roomKey) async {
+  Future<void> JoinRequest(String flag, String roomKey) async {
     buildShowDialog(context);
     try {
       final response = await http.put(
@@ -1021,6 +1021,7 @@ class _DashBoardState extends State<DashBoard> {
 
       var data = jsonDecode(response.body);
       _showToast(context, crypto.decrypt(data["Message"]));
+      await getRoomRequest();
     } on Exception catch(_) {
       _showToast(context, "No Internet Connection");
     }
@@ -1843,7 +1844,7 @@ class _DashBoardState extends State<DashBoard> {
         onPressed: () async {
           await getRoomRequest();
         }, 
-        child: Icon(Icons.refresh_outlined),),
+        child: Icon(Icons.refresh_outlined, color: Colors.white,),),
     );
   }
 }
