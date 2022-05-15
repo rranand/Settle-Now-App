@@ -46,6 +46,7 @@ class _RoomExpenseState extends State<RoomExpense> {
   List<dynamic> list = [];
   List<dynamic> TransList = [];
   List<FriendEach> friendData = [];
+  List<dynamic> allTransactionData = [];
   bool locked = false;
   final TextEditingController _amt = TextEditingController();
   final TextEditingController _searchFriend = TextEditingController();
@@ -55,6 +56,8 @@ class _RoomExpenseState extends State<RoomExpense> {
   bool loaded = false;
   bool loadFriendData = false;
   double heightExpense = 0;
+  String paymentTotalALL = "";
+  bool paidTransactionData = false;
   final _formKey = GlobalKey<FormState>();
   final Shader linearGradient = LinearGradient(
       colors: <Color>[Color.fromARGB(255, 243, 236, 120), Color.fromARGB(255, 175, 66, 97), Color.fromARGB(255,241, 143, 67), Color.fromARGB(255, 139, 152, 98)],
@@ -81,6 +84,39 @@ class _RoomExpenseState extends State<RoomExpense> {
   bool isLoadedDef = false;
   List<dynamic> paymentData = [];
   List<FriendEach> friendDataSearched = [];
+  bool showAllTransactionData = true;
+
+  _getPaymentData() async {
+    try {
+      final response = await http.delete(
+        Uri.parse(global.url + 'transaction/all'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': widget.token
+        },
+        body: jsonEncode({
+          'roomKey': crypto.encrypt(widget.roomKey),
+          'email': crypto.encrypt(widget.email),
+        })
+      );  
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        allTransactionData.clear();
+        allTransactionData = data['data'];
+        paymentTotalALL = crypto.decrypt(data['total']);
+        paidTransactionData = true;
+      } else {
+        _showToast(context, crypto.decrypt(data["Message"]));
+      }
+    } on Exception catch(_) {
+      _showToast(context, "No Internet Connection");
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
 
   Future _initialisation() async {
     try {
@@ -124,6 +160,7 @@ class _RoomExpenseState extends State<RoomExpense> {
 
     _extractExpenseData("all");
     getFriendData();
+    _getPaymentData();
   }
 
   getFriendData() async {
@@ -334,6 +371,7 @@ class _RoomExpenseState extends State<RoomExpense> {
           paymentData = jsonDecode(response.body)["data"];
           paymentTotal = crypto.decrypt(jsonDecode(response.body)["total"]);
           payment = false;
+          showAllTransactionData = false;
           if (this.mounted) {
             setState(() {});
           }
@@ -1054,7 +1092,107 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ],
                     ),
                   ),
-                  isLoadedDef?
+                  showAllTransactionData?(
+                    paidTransactionData?(
+                      allTransactionData.isEmpty?
+                      Center(
+                        child: Text("No Results Found!!!", style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600
+                        ),),
+                      ):Column (
+                        children: [
+                          Text(
+                            "Total Amount Paid: ₹ " + paymentTotalALL,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: ListView.separated(
+                              separatorBuilder: (context, index) => SizedBox(height: 5,),
+                              shrinkWrap: true,
+                              physics: ScrollPhysics(),
+                              itemCount: allTransactionData.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Card(
+                                  elevation: 5.0,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              crypto.decrypt(allTransactionData[index]["sender"]),
+                                              style: const TextStyle(
+                                                fontSize: 23,
+                                              ),
+                                            ),
+                                            Text(
+                                              "---->",
+                                              style: const TextStyle(
+                                                fontSize: 23,
+                                              ),
+                                            ),
+                                            Text(
+                                              crypto.decrypt(allTransactionData[index]["receiver"]),
+                                              style: const TextStyle(
+                                                fontSize: 23,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 10,),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.90,
+                                                child: Opacity(
+                                                  opacity: 0.8,
+                                                  child: Text(
+                                                    crypto.decrypt(allTransactionData[index]["Date"]),
+                                                    style: const TextStyle(
+                                                      fontSize: 18,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 0,
+                                              child: SizedBox(
+                                                width: MediaQuery.of(context).size.width * 0.20,
+                                                child: Text(
+                                                  "₹ " + crypto.decrypt(allTransactionData[index]["Amount"]),
+                                                  style: const TextStyle(
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ]
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }
+                            ),
+                          ),
+                        ],
+                      )
+                    ):Center(
+                      child: Text("Loading..."),
+                    )
+                  ):(isLoadedDef?
                   paymentData.isEmpty?
                   (payment? 
                     Center(
@@ -1128,7 +1266,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                         ),
                       ),
                     ]
-                  ):SizedBox()
+                  ):SizedBox())
                 ],
               ),
             ),
