@@ -31,6 +31,7 @@ class _ExpensesState extends State<Expenses> {
   int investIndex = 0;
   String CurDate = "";
   final _formKey = GlobalKey<FormState>();
+  final _updateExpense = GlobalKey<FormState>();
 
   Future _initialization() async {
     var now = DateTime.now();
@@ -147,6 +148,7 @@ class _ExpensesState extends State<Expenses> {
               child: Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Form(
+                  key: _updateExpense,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,7 +220,7 @@ class _ExpensesState extends State<Expenses> {
                             child: ElevatedButton(
                               child: const Text("Update", style: TextStyle(color: Colors.white),),
                               onPressed: () async {
-                                if (true) {
+                                if (_updateExpense.currentState!.validate()) {
                                   buildShowDialog(context);
                                   await updatePersonalTransaction(_updatePurpose.text, _updateAmount.text, "0", id);
                                   Navigator.pop(context);

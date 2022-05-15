@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/aboutus.dart';
 import 'package:settlenow/screens/expenses.dart';
@@ -62,6 +63,7 @@ class DashBoard extends StatefulWidget {
 class _DashBoardState extends State<DashBoard> {
   int dash = 0;
   double yourSpend = 0;
+  bool isGoogle = false;
   final TextEditingController _email = TextEditingController();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController();
@@ -241,6 +243,11 @@ class _DashBoardState extends State<DashBoard> {
 
     if (_email.text == "") {
       prefs = await SharedPreferences.getInstance();
+
+      if (prefs.getBool("isGoogle") != null) {
+        isGoogle = prefs.getBool("isGoogle")!;
+      }
+
       if (prefs.getString("email") != null && prefs.getString("name") != null && prefs.getString("token") != null && prefs.getString("pushToken") != null) {
         _email.text = prefs.getString("email")!;
         _name.text = prefs.getString("name")!;
@@ -253,6 +260,10 @@ class _DashBoardState extends State<DashBoard> {
         await prefs.remove("token");
         await prefs.remove("pushToken");
         await deleteToken();
+
+        if (isGoogle) {
+          await GoogleSignIN.logout();
+        }
 
         Navigator.pushAndRemoveUntil(
           context, 
@@ -307,6 +318,10 @@ class _DashBoardState extends State<DashBoard> {
         await prefs.remove("token");
         await prefs.remove("pushToken");
         await deleteToken();
+
+        if (isGoogle) {
+          await GoogleSignIN.logout();
+        }
 
         Navigator.pushAndRemoveUntil(
           context, 
@@ -1344,7 +1359,7 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<NetworkImage> getProfilePhoto(String id) async {
-    return await NetworkImage('https://drive.google.com/uc?id='+id);
+    return await isGoogle?NetworkImage(id):NetworkImage('https://drive.google.com/uc?id='+id);
   }
 
   @override
@@ -1465,7 +1480,7 @@ class _DashBoardState extends State<DashBoard> {
                     },
                     future: getProfilePhoto(_profilePicID),
                   ),
-                  Positioned(
+                  isGoogle?SizedBox():Positioned(
                     left: 40,
                     top: 43,
                     child: Container(
@@ -1638,6 +1653,11 @@ class _DashBoardState extends State<DashBoard> {
                 await prefs.remove('token');
                 await prefs.remove('pushToken');
                 await deleteToken();
+
+                if (isGoogle) {
+                  await GoogleSignIN.logout();
+                }
+
                 Navigator.pushAndRemoveUntil(
                   context, 
                   MaterialPageRoute(builder: (context) => LoginPage()),

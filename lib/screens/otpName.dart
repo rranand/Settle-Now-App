@@ -124,6 +124,7 @@ class _OtpNameState extends State<OtpName> {
         prefs.setString("email", widget.email);
         prefs.setString("token", token);
         prefs.setString("pushToken", deviceToken);
+        prefs.setBool("isGoogle", false);
 
         await http.patch(
           Uri.parse(global.url + 'verify'),

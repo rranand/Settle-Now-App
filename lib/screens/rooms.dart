@@ -1,8 +1,8 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -15,8 +15,9 @@ class FriendEach {
   String email;
   String status;
   String pic;
+  bool isGoogle;
 
-  FriendEach({required this.name,required this.email,required this.status, required this.pic});
+  FriendEach({required this.name,required this.email,required this.status, required this.pic, required this.isGoogle});
 
   factory FriendEach.fromJson(Map<String, dynamic> json) {
     return FriendEach(
@@ -24,6 +25,7 @@ class FriendEach {
       email: crypto.decrypt(json['email']),
       status: crypto.decrypt(json['status']),
       pic: crypto.decrypt(json['pic']),
+      isGoogle: json['isGoogle'],
     );
   }
 }
@@ -514,8 +516,8 @@ class _RoomExpenseState extends State<RoomExpense> {
     );
   }
 
-  Future<NetworkImage> getProfilePhoto(String id) async {
-    return await NetworkImage('https://drive.google.com/uc?id='+id);
+  Future<NetworkImage> getProfilePhoto(String id, bool isGoogle) async {
+    return await NetworkImage(isGoogle?id:('https://drive.google.com/uc?id='+id));
   }
 
   sendJoinRequest(String email) async {
@@ -632,7 +634,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                               );
                             }
                           },
-                          future: getProfilePhoto(data[index].pic),
+                          future: getProfilePhoto(data[index].pic, data[index].isGoogle),
                         ),
                         Text(
                           data[index].name,
@@ -1582,29 +1584,15 @@ class _ExpenseDataState extends State<ExpenseData> {
                           fontSize: 30
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            onPressed: () async {
-                              buildShowDialog(context);
-                              await addToPersonalExpense(id);
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            },
-                            icon: Icon(Icons.add)
-                          ),
-                          widget.Email==email&&!locked?IconButton(
-                            onPressed: () async {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) => _buildUpdateDialog(context, id, purpose, amount),
-                              );
-                            },
-                            icon: Icon(Icons.edit)
-                          ):SizedBox()
-                        ],
-                      )
+                      widget.Email==email&&!locked?IconButton(
+                        onPressed: () async {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) => _buildUpdateDialog(context, id, purpose, amount),
+                          );
+                        },
+                        icon: Icon(Icons.edit)
+                      ):SizedBox()
                     ],
                   ),
                   SizedBox(height: 25,),
@@ -1629,6 +1617,24 @@ class _ExpenseDataState extends State<ExpenseData> {
                     ],
                   ),
                   SizedBox(height: 25,),
+                  SizedBox(
+                    height: 45,
+                    width: MediaQuery.of(context).size.width*0.95 - 25,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        buildShowDialog(context);
+                        await addToPersonalExpense(id);
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      child: Text("Add To Personal Expense", 
+                        style: TextStyle(
+                          color: Colors.white
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8,),
                   SizedBox(
                     height: 45,
                     width: MediaQuery.of(context).size.width*0.95 - 25,
