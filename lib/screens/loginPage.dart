@@ -175,13 +175,10 @@ class _LoginPageState extends State<LoginPage> {
                 height: 40,
               ),
               SizedBox(
-                width: 220,
-                height: 45,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.white
-                  ),
-                  onPressed: () async {
+                width: 250,
+                height: 60,
+                child: InkWell(
+                  onTap: () async {
                     final user = await GoogleSignIN.login();
 
                     buildShowDialog(context);
@@ -229,17 +226,31 @@ class _LoginPageState extends State<LoginPage> {
                       (Route<dynamic> route) => false,
                     );
                   }, 
-                  icon: FaIcon(
-                    FontAwesomeIcons.google,
-                    color: Colors.red,
-                  ), 
-                  label: Text(
-                    "Sign In With Google",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black
+                  child: Card(
+                    elevation: 2.5,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: SizedBox(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Image.asset(
+                              'assets/icon/google.jpg',
+                              width: 35,
+                              height: 35,
+                            ),
+                            Text(
+                              "Sign In With Google",
+                              style: TextStyle(
+                                fontSize: 22,
+                                color: Colors.black
+                              ),
+                            )
+                          ]
+                        ),
+                      ),
                     ),
-                  )
+                  ),
                 ),
               ),
             ],

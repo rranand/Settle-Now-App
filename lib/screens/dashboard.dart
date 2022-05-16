@@ -137,7 +137,7 @@ class _DashBoardState extends State<DashBoard> {
 
   Future? imageUpload(ImageSource imageSource) async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: imageSource, imageQuality: 40,);
+    final XFile? image = await _picker.pickImage(source: imageSource, imageQuality: 25,);
     Dio dio = new Dio();
 
     if (image != null) {
