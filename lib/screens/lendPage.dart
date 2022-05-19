@@ -178,7 +178,7 @@ class _LendPageState extends State<LendPage> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text("No"),
+                        child: Text("No", style: TextStyle(color: Colors.white),),
                       ),
                     ),
                     SizedBox(
@@ -191,7 +191,7 @@ class _LendPageState extends State<LendPage> {
                           Navigator.pop(context);
                           Navigator.pop(context);
                         },
-                        child: Text("Yes"),
+                        child: Text("Yes", style: TextStyle(color: Colors.white),),
                       ),
                     )
                   ],

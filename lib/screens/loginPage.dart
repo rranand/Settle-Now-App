@@ -4,7 +4,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -175,7 +174,7 @@ class _LoginPageState extends State<LoginPage> {
                 height: 40,
               ),
               SizedBox(
-                width: 250,
+                width: 260,
                 height: 60,
                 child: InkWell(
                   onTap: () async {
@@ -227,6 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                     );
                   }, 
                   child: Card(
+                    color: Theme.of(context).primaryColor,
                     elevation: 2.5,
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
@@ -234,16 +234,15 @@ class _LoginPageState extends State<LoginPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Image.asset(
-                              'assets/icon/google.jpg',
-                              width: 35,
-                              height: 35,
+                            FaIcon(
+                              FontAwesomeIcons.google,
+                              color: Colors.white
                             ),
                             Text(
                               "Sign In With Google",
                               style: TextStyle(
                                 fontSize: 22,
-                                color: Colors.black
+                                color: Colors.white
                               ),
                             )
                           ]
