@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -100,6 +101,8 @@ class _DashBoardState extends State<DashBoard> {
   String amtSpend = "";
   String _profilePicID = "";
   List<dynamic> RoomRequest = [];
+  GoogleSignIn _googleSignIn = GoogleSignIn();
+  GoogleSignInAccount? _currentUser;
 
   Future _getImageID() async {
     if (this.mounted) {
@@ -108,25 +111,32 @@ class _DashBoardState extends State<DashBoard> {
       });
     }
     try {
-      final response = await http.put(
-        Uri.parse(global.url+'login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Auth': _token
-        },
-        body: jsonEncode({
-          'email': crypto.encrypt(_email.text),
-        })
-      );
+      if (isGoogle) {
+        setState(() {
+          _profilePicID = (_currentUser!.photoUrl).toString();
+          haveImg = true;
+        });
+      } else {
+        final response = await http.put(
+          Uri.parse(global.url+'login'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(_email.text),
+          })
+        );
 
-      if (response.statusCode == 200) {
-        var imgData = jsonDecode(response.body);
-        if (imgData['havePic']) {
-          if (this.mounted) {
-            setState(() {
-              _profilePicID = crypto.decrypt(imgData["fileId"]);
-              haveImg = true;
-            });
+        if (response.statusCode == 200) {
+          var imgData = jsonDecode(response.body);
+          if (imgData['havePic']) {
+            if (this.mounted) {
+              setState(() {
+                _profilePicID = crypto.decrypt(imgData["fileId"]);
+                haveImg = true;
+              });
+            }
           }
         }
       }
@@ -246,6 +256,15 @@ class _DashBoardState extends State<DashBoard> {
 
       if (prefs.getBool("isGoogle") != null) {
         isGoogle = prefs.getBool("isGoogle")!;
+      }
+
+      if (isGoogle) {
+        _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+          setState(() {
+            _currentUser = account;
+          });
+        });
+        _googleSignIn.signInSilently();
       }
 
       if (prefs.getString("email") != null && prefs.getString("name") != null && prefs.getString("token") != null && prefs.getString("pushToken") != null) {

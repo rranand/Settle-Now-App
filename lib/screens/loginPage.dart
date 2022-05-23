@@ -173,80 +173,79 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(
                 height: 40,
               ),
-              SizedBox(
-                width: 260,
-                height: 60,
-                child: InkWell(
-                  onTap: () async {
-                    final user = await GoogleSignIN.login();
+              InkWell(
+                onTap: () async {
+                  final user = await GoogleSignIN.login();
 
-                    buildShowDialog(context);
-                    String token = crypto.encrypt((user?.email).toString()+"#"+androidInfo.androidId!+"#"+DateTime.now().toString());
-                    await getDeviceTokenToSendNotification();
+                  buildShowDialog(context);
+                  String token = crypto.encrypt((user?.email).toString()+"#"+androidInfo.androidId!+"#"+DateTime.now().toString());
+                  await getDeviceTokenToSendNotification();
 
-                    final ipAdd = await http.get(
-                      Uri.parse('http://ip-api.com/json'),
-                    );
+                  final ipAdd = await http.get(
+                    Uri.parse('http://ip-api.com/json'),
+                  );
 
-                    final JD = jsonDecode(ipAdd.body);
-                    prefs.setBool("isGoogle", true);
-                    prefs.setString("email", (user?.email).toString());
-                    prefs.setString("name", (user?.displayName).toString());
-                    prefs.setString("token", token);
-                    prefs.setString("pushToken", deviceToken);
+                  final JD = jsonDecode(ipAdd.body);
+                  prefs.setBool("isGoogle", true);
+                  prefs.setString("email", (user?.email).toString());
+                  prefs.setString("name", (user?.displayName).toString());
+                  prefs.setString("token", token);
+                  prefs.setString("pushToken", deviceToken);
 
-                    await http.post(
-                      Uri.parse(global.url + 'login/google'),
-                      headers: <String, String>{
-                        'Content-Type': 'application/json; charset=UTF-8',
-                      },
-                      body: jsonEncode({
-                        'email': crypto.encrypt((user?.email).toString()),
-                        'name': crypto.encrypt((user?.displayName).toString()),
-                        'profilePic': crypto.encrypt((user?.photoUrl).toString()),
-                        'country': crypto.encrypt(JD['country']),
-                        'ip': crypto.encrypt(JD['query']),
-                        'state': crypto.encrypt(JD['regionName']),
-                        'city': crypto.encrypt(JD['city']),
-                        'isp': crypto.encrypt(JD['isp']),
-                        'device': crypto.encrypt(androidInfo.device!),
-                        'deviceID': crypto.encrypt(androidInfo.androidId!),
-                        'deviceToken': crypto.encrypt(deviceToken),
-                        "token": crypto.encrypt(token)
-                      })
-                    );
+                  await http.post(
+                    Uri.parse(global.url + 'login/google'),
+                    headers: <String, String>{
+                      'Content-Type': 'application/json; charset=UTF-8',
+                    },
+                    body: jsonEncode({
+                      'email': crypto.encrypt((user?.email).toString()),
+                      'name': crypto.encrypt((user?.displayName).toString()),
+                      'profilePic': crypto.encrypt((user?.photoUrl).toString()),
+                      'country': crypto.encrypt(JD['country']),
+                      'ip': crypto.encrypt(JD['query']),
+                      'state': crypto.encrypt(JD['regionName']),
+                      'city': crypto.encrypt(JD['city']),
+                      'isp': crypto.encrypt(JD['isp']),
+                      'device': crypto.encrypt(androidInfo.device!),
+                      'deviceID': crypto.encrypt(androidInfo.androidId!),
+                      'deviceToken': crypto.encrypt(deviceToken),
+                      "token": crypto.encrypt(token)
+                    })
+                  );
 
-                    Navigator.pop(context);
-                    Navigator.pushAndRemoveUntil(
-                      context, 
-                      MaterialPageRoute(
-                        builder: (context) => const DashBoard(),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
-                  }, 
+                  Navigator.pop(context);
+                  Navigator.pushAndRemoveUntil(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (context) => const DashBoard(),
+                    ),
+                    (Route<dynamic> route) => false,
+                  );
+                }, 
+                child: SizedBox(
+                  width: 240,
                   child: Card(
                     color: Theme.of(context).primaryColor,
                     elevation: 2.5,
                     child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: SizedBox(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            FaIcon(
-                              FontAwesomeIcons.google,
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          FaIcon(
+                            FontAwesomeIcons.google,
+                            color: Colors.white
+                          ),
+                          SizedBox(width: 9,),
+                          Text(
+                            "Sign In With Google",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
                               color: Colors.white
                             ),
-                            Text(
-                              "Sign In With Google",
-                              style: TextStyle(
-                                fontSize: 22,
-                                color: Colors.white
-                              ),
-                            )
-                          ]
-                        ),
+                          )
+                        ]
                       ),
                     ),
                   ),
