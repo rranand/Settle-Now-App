@@ -1056,10 +1056,11 @@ class _DashBoardState extends State<DashBoard> {
       var data = jsonDecode(response.body);
       _showToast(context, crypto.decrypt(data["Message"]));
       await getRoomRequest();
+      Navigator.pop(context);
     } on Exception catch(_) {
+      Navigator.pop(context);
       _showToast(context, "No Internet Connection");
     }
-    Navigator.pop(context);
   }
 
   Widget updateWidget(BuildContext context) {
@@ -1161,14 +1162,10 @@ class _DashBoardState extends State<DashBoard> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             IconButton(onPressed: () async {
-                              buildShowDialog(context);
                               await JoinRequest("0", crypto.decrypt(RoomRequest[index]["key"]));
-                              Navigator.pop(context);
                             }, icon: Icon(Icons.cancel_sharp, size: 30, color: Colors.red,)),
                             IconButton(onPressed: () async {
-                              buildShowDialog(context);
                               await JoinRequest("1", crypto.decrypt(RoomRequest[index]["key"]));
-                              Navigator.pop(context);
                             }, icon: Icon(Icons.check, size: 30, color: Colors.greenAccent)),
                           ],
                         )
