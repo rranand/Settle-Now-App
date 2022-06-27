@@ -1904,7 +1904,7 @@ class RoomWidget extends StatelessWidget {
   _MoveToNext(BuildContext context, int index) {
     Navigator.push(
       context, 
-      MaterialPageRoute(builder: (context) => RoomExpense(roomKey: RoomData[index].roomKey, email: email, roomName: RoomData[index].roomName, token: token, roomLink: RoomData[index].roomLink)),
+      MaterialPageRoute(builder: (context) => RoomExpense(roomKey: RoomData[index].roomKey, email: email, roomName: RoomData[index].roomName, token: token, roomLink: RoomData[index].roomLink, isRoomActive: RoomData[index].active)),
     );
   }
 

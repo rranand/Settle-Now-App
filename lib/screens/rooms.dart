@@ -36,7 +36,8 @@ class RoomExpense extends StatefulWidget {
   final String roomName;
   final String token;
   final String roomLink;
-  const RoomExpense({ Key? key , required this.roomKey, required this.email, required this.roomName, required this.token, required this.roomLink}) : super(key: key);
+  final bool isRoomActive;
+  const RoomExpense({ Key? key , required this.roomKey, required this.email, required this.roomName, required this.token, required this.roomLink, required this.isRoomActive}) : super(key: key);
 
   @override
   _RoomExpenseState createState() => _RoomExpenseState();
@@ -139,7 +140,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         isClear = list[0]["done"];
         membersListName.clear();
         membersListEmail.clear();
-        
+
         for(int i=1; i<list.length; i++) {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
@@ -803,14 +804,10 @@ class _RoomExpenseState extends State<RoomExpense> {
                     child: ElevatedButton(
                       child: const Text("Close Room", style: TextStyle(color: Colors.white),),
                       onPressed: () {
-                        if (!isClear) {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => closeRoomWidget(context),
-                          );
-                        } else {
-                          _showToast(context, "Room Already Closed By You");
-                        }
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) => closeRoomWidget(context),
+                        );
                       },
                     ),
                   ),
@@ -1272,7 +1269,7 @@ class _RoomExpenseState extends State<RoomExpense> {
             ),
           )
       ),
-      floatingActionButton: !isClear?FloatingActionButton(
+      floatingActionButton: widget.isRoomActive?FloatingActionButton(
         onPressed: () {
           showModalBottomSheet<void>(
             context: context,
@@ -1281,7 +1278,7 @@ class _RoomExpenseState extends State<RoomExpense> {
               return Padding(
                 padding: MediaQuery.of(context).viewInsets,
                 child: SizedBox(
-                  height: 170,
+                  height: isClear?60:(locked?120:170),
                   child: Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -1297,7 +1294,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                             Navigator.pop(context);
                           },
                         ),
-                        ListTile(
+                        !isClear?ListTile(
                           leading: Icon(Icons.money, color: Theme.of(context).primaryColor,),
                           title: const Text("Pay to Member"),
                           onTap: () {
@@ -1402,15 +1399,11 @@ class _RoomExpenseState extends State<RoomExpense> {
                               );
                             }
                           }
-                        ),
-                        ListTile(
+                        ):SizedBox(),
+                        !(isClear || locked)?ListTile(
                           leading: Icon(Icons.add, color: Theme.of(context).primaryColor,),
                           title: const Text("Add Expense"),
                           onTap: () {
-                            if (locked) {
-                              Navigator.pop(context);
-                              _showToast(context, "Someone Already Closed this Room");
-                            } else {
                               showModalBottomSheet<void>(
                                 context: context,
                                 isScrollControlled: true,
@@ -1485,8 +1478,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                 }
                               );
                             }
-                          },
-                        ),
+                        ):SizedBox(),
                       ],
                     ),
                   ),
