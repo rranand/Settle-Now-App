@@ -73,7 +73,7 @@ class _RoomExpenseState extends State<RoomExpense> {
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
   
   String expenseTitle = "All Expense";
-
+  String expenseDetailByMember = "all";
   List<String> membersListName = [];
   List<String> membersListEmail = [];
   int membersListIndex = 0;
@@ -159,7 +159,7 @@ class _RoomExpenseState extends State<RoomExpense> {
       _showToast(context, "No Internet Connection");
     }
 
-    _extractExpenseData("all");
+    _extractExpenseData(expenseDetailByMember);
     getFriendData();
     _getPaymentData();
   }
@@ -850,6 +850,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                     if (this.mounted) {
                                       setState(() {
                                         expenseTitle = "All Expense";
+                                        expenseDetailByMember = "all";
                                       });
                                     }
                                     _extractExpenseData("all");
@@ -886,6 +887,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                 child: InkWell(
                                   onTap: () {
                                     if (this.mounted) {
+                                      expenseDetailByMember = crypto.decrypt(list[index]['email']);
                                       expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
                                     }
                                     _extractExpenseData(crypto.decrypt(list[index]['email']));
@@ -1697,7 +1699,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       builder: (context, setState) {
         return Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width*0.95,
             child: Padding(
               padding: const EdgeInsets.all(15.0),
@@ -1709,7 +1711,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        _purpose.text,
+                        "Expense Detail",
                         style: TextStyle(
                           fontSize: 30
                         ),
@@ -1725,7 +1727,14 @@ class _ExpenseDataState extends State<ExpenseData> {
                       ):SizedBox()
                     ],
                   ),
-                  SizedBox(height: 25,),
+                  SizedBox(height: 10,),
+                  Text(
+                    _purpose.text,
+                    style: TextStyle(
+                      fontSize: 25
+                    ),
+                  ),
+                  SizedBox(height: 10,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

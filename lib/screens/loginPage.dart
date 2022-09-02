@@ -106,6 +106,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -117,7 +119,7 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               SizedBox(height: MediaQuery.of(context).size.height/5,),
               Image.asset(
-                'assets/Images/SN.jpg',
+                themeProvider.darkTheme?'assets/Images/SN_dark.jpg':'assets/Images/SN.jpg',
                 height: 150,
                 width: 150,
               ),

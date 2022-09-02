@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:googleapis/calendar/v3.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -103,6 +102,7 @@ class _ProfileState extends State<Profile> {
       
       if (response.statusCode == 200) {
         var tempData =  jsonDecode(response.body)['data'];
+        
         for(int i=0; i<category.length; i++) {
           dataMap[category[i]] = double.parse(double.parse(crypto.decrypt(tempData[category[i]])).toStringAsFixed(2));
         }

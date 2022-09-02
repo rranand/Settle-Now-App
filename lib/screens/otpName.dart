@@ -215,7 +215,7 @@ class _OtpNameState extends State<OtpName> {
                 children: [
                   height>=800?SizedBox(height: MediaQuery.of(context).size.height/4,):SizedBox(height: 60,),
                   Image.asset(
-                    'assets/Images/SN.jpg',
+                    themeProvider.darkTheme?'assets/Images/SN_dark.jpg':'assets/Images/SN.jpg',
                     height: 150,
                     width: 150,
                   ),

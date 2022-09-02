@@ -130,10 +130,18 @@ class _DashBoardState extends State<DashBoard> {
 
         if (response.statusCode == 200) {
           var imgData = jsonDecode(response.body);
+
           if (imgData['havePic']) {
             if (this.mounted) {
               setState(() {
                 _profilePicID = crypto.decrypt(imgData["fileId"]);
+                haveImg = true;
+              });
+            }
+          } else {
+            if (this.mounted) {
+              setState(() {
+                _profilePicID = "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8";
                 haveImg = true;
               });
             }
