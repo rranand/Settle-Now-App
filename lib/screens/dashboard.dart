@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:settlenow/ads.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/aboutus.dart';
@@ -481,6 +483,7 @@ class _DashBoardState extends State<DashBoard> {
     );
 
     _updateCheck();
+    myBanner.load();
   }
 
   buildShowDialog(BuildContext context) {
@@ -1229,7 +1232,7 @@ class _DashBoardState extends State<DashBoard> {
               ),
               SizedBox (
                 height: heightSearched,
-                child: RoomWidget(RoomData: SearchRoomData, email: _email.text, flag: true, token: _token,)
+                child: RoomWidget(RoomData: SearchRoomData, email: _email.text, flag: true, token: _token, banner: myBanner)
               ),
             ],
           ),
@@ -1353,7 +1356,7 @@ class _DashBoardState extends State<DashBoard> {
                 ):Scrollbar(
                   radius: Radius.circular(10.0),
                   thickness: 5.5,
-                  child: RoomWidget(RoomData: RoomDataO, email: _email.text, flag: false, token: _token)
+                  child: RoomWidget(RoomData: RoomDataO, email: _email.text, flag: false, token: _token, banner: myBanner)
                 ):(RoomDataC.isEmpty?Scrollbar(
                   radius: Radius.circular(10.0),
                   thickness: 5.5,
@@ -1371,11 +1374,10 @@ class _DashBoardState extends State<DashBoard> {
                 ):Scrollbar(
                   radius: Radius.circular(10.0),
                   thickness: 5.5,
-                  child: RoomWidget(RoomData: RoomDataC, email: _email.text, flag: false, token: _token,)
+                  child: RoomWidget(RoomData: RoomDataC, email: _email.text, flag: false, token: _token, banner: myBanner)
                 )),
               ),
-            )
-            
+            ),
           ],
         ) 
         )
@@ -1711,10 +1713,10 @@ class _DashBoardState extends State<DashBoard> {
                     ),
                   InkWell(
                     onTap: () async {
-                      launch(
-                        "https://settlenow.herokuapp.com/privacy-policy",
-                        forceWebView: true,
-                        enableJavaScript: true,
+                      launchUrl(
+                        Uri.parse("https://settlenow.herokuapp.com/privacy-policy"),
+                        mode: LaunchMode.inAppWebView,
+                        webViewConfiguration: const WebViewConfiguration(enableJavaScript: true),
                       );
                     },
                     child: Text(
@@ -1898,6 +1900,7 @@ class RoomWidget extends StatelessWidget {
   final String email;
   final bool flag;
   final String token;
+  final BannerAd banner;
 
   final Shader linearGradient = LinearGradient(
       colors: <Color>[Color.fromARGB(255, 243, 33, 112), Color.fromARGB(255, 255, 235, 7), Color.fromARGB(255,33, 150, 243), Color.fromARGB(255, 255, 0, 235)],
@@ -1907,7 +1910,7 @@ class RoomWidget extends StatelessWidget {
       colors: <Color>[Color.fromARGB(255, 0, 219, 222), Color.fromARGB(255, 252, 0, 255)],
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
-  RoomWidget({ Key? key, required this.RoomData, required this.email, required this.flag, required this.token }) : super(key: key);
+  RoomWidget({ Key? key, required this.RoomData, required this.email, required this.flag, required this.token, required this.banner }) : super(key: key);
 
   _MoveToNext(BuildContext context, int index) {
     Navigator.push(
@@ -1935,102 +1938,212 @@ class RoomWidget extends StatelessWidget {
       separatorBuilder: (context, index) => SizedBox(height: 5,),
       itemBuilder: (BuildContext context, int index){
         final themeProvider = Provider.of<ThemeProvider>(context);
-        return InkWell(
-          child: SizedBox(
-            child: Card(
-              elevation: 2.0,
-              clipBehavior: Clip.antiAlias,
-              shadowColor: Theme.of(context).primaryColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column (
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
+
+        if (index==0) {
+          return Column(
+            children: [
+              InkWell(
+                child: SizedBox(
+                  child: Card(
+                    elevation: 2.0,
+                    clipBehavior: Clip.antiAlias,
+                    shadowColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Text(
-                        RoomData[index].roomName, 
-                        style: TextStyle(
-                          fontSize: 24,
-                        ),
+                      child: Column (
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text(
+                              RoomData[index].roomName, 
+                              style: TextStyle(
+                                fontSize: 24,
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Members: " + RoomData[index].members.toString(),
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor
+                                      ),
+                                    ),
+                                    Text(
+                                      "Created: " + RoomData[index].date,
+                                      style: TextStyle(
+                                          color: Theme.of(context).primaryColor
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () async {
+                                        await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
+                                      },
+                                      onLongPress: () async {
+                                        Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
+                                        _showToast(context, "Join Key Copied");
+                                      },
+                                      child: Text(
+                                        "Room Key: " + RoomData[index].roomKey,
+                                        style: TextStyle(
+                                          color: Theme.of(context).primaryColor
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Total Spend: ₹ " + RoomData[index].total.toString(),
+                                      style: TextStyle(
+                                          color: Theme.of(context).primaryColor
+                                      ),
+                                    ),
+                                    Text(
+                                      "Your Spend: ₹ " + RoomData[index].spend.toString(),
+                                      style: TextStyle(
+                                          color: Theme.of(context).primaryColor
+                                      ),
+                                    ),
+                                    
+                                    Text(
+                                      "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
+                                      style: TextStyle(
+                                          color: Theme.of(context).primaryColor
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          )
+                        ]
+                        )
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Members: " + RoomData[index].members.toString(),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor
-                                ),
-                              ),
-                              Text(
-                                "Created: " + RoomData[index].date,
-                                style: TextStyle(
-                                    color: Theme.of(context).primaryColor
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () async {
-                                  await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
-                                },
-                                onLongPress: () async {
-                                  Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
-                                  _showToast(context, "Join Key Copied");
-                                },
-                                child: Text(
-                                  "Room Key: " + RoomData[index].roomKey,
+                  ),
+                onTap: () {
+                  _MoveToNext(context, index);
+                },
+              ),
+              Container(
+                alignment: Alignment.center,
+                child: AdWidget(ad: myBanner),
+                width: myBanner.size.width.toDouble(),
+                height: myBanner.size.height.toDouble(),
+              )
+            ],
+          );
+        } else {
+          return InkWell(
+            child: SizedBox(
+              child: Card(
+                elevation: 2.0,
+                clipBehavior: Clip.antiAlias,
+                shadowColor: Theme.of(context).primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column (
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text(
+                          RoomData[index].roomName, 
+                          style: TextStyle(
+                            fontSize: 24,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Members: " + RoomData[index].members.toString(),
                                   style: TextStyle(
                                     color: Theme.of(context).primaryColor
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Total Spend: ₹ " + RoomData[index].total.toString(),
-                                style: TextStyle(
-                                    color: Theme.of(context).primaryColor
+                                Text(
+                                  "Created: " + RoomData[index].date,
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                "Your Spend: ₹ " + RoomData[index].spend.toString(),
-                                style: TextStyle(
-                                    color: Theme.of(context).primaryColor
+                                InkWell(
+                                  onTap: () async {
+                                    await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
+                                  },
+                                  onLongPress: () async {
+                                    Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
+                                    _showToast(context, "Join Key Copied");
+                                  },
+                                  child: Text(
+                                    "Room Key: " + RoomData[index].roomKey,
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              
-                              Text(
-                                "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
-                                style: TextStyle(
-                                    color: Theme.of(context).primaryColor
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Total Spend: ₹ " + RoomData[index].total.toString(),
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor
+                                  ),
                                 ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
+                                Text(
+                                  "Your Spend: ₹ " + RoomData[index].spend.toString(),
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor
+                                  ),
+                                ),
+                                
+                                Text(
+                                  "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
+                                  style: TextStyle(
+                                      color: Theme.of(context).primaryColor
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    ]
                     )
-                  ]
-                  )
+                  ),
                 ),
               ),
-            ),
-          onTap: () {
-            _MoveToNext(context, index);
-          },
-        );
+            onTap: () {
+              _MoveToNext(context, index);
+            },
+          );
+        }
       },
     );
   }
@@ -2041,7 +2154,10 @@ class updatePage extends StatelessWidget {
   updatePage({ Key? key, required this.data }) : super(key: key);
 
   _launchURL(BuildContext context) async {
-    launch(crypto.decrypt(data["link"]));
+    launchUrl(
+      Uri.parse(crypto.decrypt(data["link"])),
+      mode: LaunchMode.externalApplication,
+    );
   }
 
   @override

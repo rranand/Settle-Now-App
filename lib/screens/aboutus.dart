@@ -35,7 +35,10 @@ class AboutUs extends StatelessWidget {
               children: [
                 IconButton(
                   onPressed: () {
-                    launch("mailto:rrohitanand3336@gmail.com");
+                    launchUrl(
+                      Uri.parse("mailto:rrohitanand3336@gmail.com"),
+                      mode: LaunchMode.externalApplication,
+                    );
                   }, 
                   icon: FaIcon(FontAwesomeIcons.envelope, size: 35,),
                 ),
@@ -44,7 +47,10 @@ class AboutUs extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    launch("http://github.com/rranand");
+                    launchUrl(
+                      Uri.parse("http://github.com/rranand"),
+                      mode: LaunchMode.externalApplication,
+                    );
                   }, 
                   icon: FaIcon(FontAwesomeIcons.github, size: 35,)
                 ),
@@ -53,7 +59,10 @@ class AboutUs extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: () {
-                    launch("https://www.linkedin.com/in/rohit-anand-86a869184/");
+                    launchUrl(
+                      Uri.parse("https://www.linkedin.com/in/rohit-anand-86a869184/"),
+                      mode: LaunchMode.externalApplication,
+                    );
                   }, 
                   icon: FaIcon(FontAwesomeIcons.linkedin, size: 35,)
                 )

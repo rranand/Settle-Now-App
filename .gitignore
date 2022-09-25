@@ -12,6 +12,12 @@ key.properties
 crypto.dart
 contents.dart
 firebase_options.dart
+.firebase/
+.github/
+public/
+firebase.json
+.firebaserc
+
 # IntelliJ related
 *.iml
 *.ipr
@@ -35,7 +41,6 @@ firebase_options.dart
 /build/
 
 # Web related
-lib/generated_plugin_registrant.dart
 
 # Symbolication related
 app.*.symbols
