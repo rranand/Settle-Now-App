@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "950526449356",
+    "firebase_url": "https://settle-now-340017-default-rtdb.firebaseio.com",
     "project_id": "settle-now-340017",
     "storage_bucket": "settle-now-340017.appspot.com"
   },
@@ -13,6 +14,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "950526449356-6nc4jbu8qj66jhou7t70hmg5vh09dcor.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.settlenow",
+            "certificate_hash": "579a649e26d2c3265e3af6c8ed1a0e58eff0c521"
+          }
+        },
+        {
+          "client_id": "950526449356-8hkncftlusffsc8n1j9jtbpgmljb8st7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.settlenow",
+            "certificate_hash": "f5045d01e3a952ad3aebc57ca8102421eba11c05"
+          }
+        },
         {
           "client_id": "950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com",
           "client_type": 3

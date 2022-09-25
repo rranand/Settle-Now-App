@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -37,25 +40,57 @@ class _OtpNameState extends State<OtpName> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _otp = TextEditingController();
   late SharedPreferences prefs;
-  late AndroidDeviceInfo androidInfo;
+  Map<String, dynamic> _deviceData = <String, dynamic>{};
+  final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+
+  Future<void> initPlatformState() async {
+    var deviceData = <String, dynamic>{};
+
+    try {
+      if (kIsWeb) {
+        WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
+        deviceData = <String, dynamic>{
+          'id': describeEnum(data.browserName),
+          'device': describeEnum(data.browserName) + " ("+data.platform!+")"
+        };
+      } else {
+        if (Platform.isAndroid) {
+          AndroidDeviceInfo build = await  deviceInfoPlugin.androidInfo;
+          deviceData = <String, dynamic>{
+            'id': build.androidId,
+            'device': build.device
+          };
+        }
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'id': 'Not Found',
+        'device': 'Not Found'
+      };
+    }
+
+    if (this.mounted) {
+      setState(() {
+        _deviceData = deviceData;
+      });
+    }
+  }
 
   Future _initialisation() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    androidInfo = await deviceInfo.androidInfo;
     prefs = await SharedPreferences.getInstance();
+    await initPlatformState();
+    getDeviceTokenToSendNotification();
 
     final response = await http.post(
       Uri.parse(global.url + 'login'),
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json; charset=UTF-8'
       },
       body: jsonEncode({
         'email': crypto.encrypt(widget.email),
       })
     );
-    
-    getDeviceTokenToSendNotification();
-    token = crypto.encrypt(widget.email+"#"+androidInfo.androidId!+"#"+DateTime.now().toString());
+    token = crypto.encrypt(widget.email+"#"+_deviceData['id']+"#"+DateTime.now().toString());
 
     if (response.statusCode == 200) {
       if (this.mounted) {
@@ -138,8 +173,8 @@ class _OtpNameState extends State<OtpName> {
             'state': crypto.encrypt(JD['regionName']),
             'city': crypto.encrypt(JD['city']),
             'isp': crypto.encrypt(JD['isp']),
-            'device': crypto.encrypt(androidInfo.device!),
-            'deviceID': crypto.encrypt(androidInfo.androidId!),
+            'device': crypto.encrypt(_deviceData['id']),
+            'deviceID': crypto.encrypt(_deviceData['device']),
             'deviceToken': crypto.encrypt(deviceToken)
           })
         );

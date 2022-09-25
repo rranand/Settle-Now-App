@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -28,14 +31,47 @@ class _LoginPageState extends State<LoginPage> {
   bool canLoad = false;
   String deviceToken = "";
   final _formKey = GlobalKey<FormState>();
+  final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   bool darkTheme = false;
-  late AndroidDeviceInfo androidInfo;
+  Map<String, dynamic> _deviceData = <String, dynamic>{};
+
+  Future<void> initPlatformState() async {
+    var deviceData = <String, dynamic>{};
+
+    try {
+      if (kIsWeb) {
+        WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
+        deviceData = <String, dynamic>{
+          'id': describeEnum(data.browserName),
+          'device': describeEnum(data.browserName) + " ("+data.platform!+")"
+        };
+      } else {
+        if (Platform.isAndroid) {
+          AndroidDeviceInfo build = await  deviceInfoPlugin.androidInfo;
+          deviceData = <String, dynamic>{
+            'id': build.androidId,
+            'device': build.device
+          };
+        }
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'id': 'Not Found',
+        'device': 'Not Found'
+      };
+    }
+
+    if (this.mounted) {
+      setState(() {
+        _deviceData = deviceData;
+      });
+    }
+  }
 
   Future _extractEmail() async {
     prefs = await SharedPreferences.getInstance();
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    androidInfo = await deviceInfo.androidInfo;
-
+    await initPlatformState();
+    
     if (prefs.getBool('darkTheme') != null) {
       darkTheme = prefs.getBool('darkTheme')!;
     } else {
@@ -62,6 +98,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _MoveToNext(BuildContext context) async {
+    print(crypto.encrypt(_emailId.text));
     if (_formKey.currentState!.validate()) {
       Navigator.push(
         context,
@@ -180,9 +217,9 @@ class _LoginPageState extends State<LoginPage> {
                   final user = await GoogleSignIN.login();
 
                   buildShowDialog(context);
-                  String token = crypto.encrypt((user?.email).toString()+"#"+androidInfo.androidId!+"#"+DateTime.now().toString());
+                  String token = crypto.encrypt((user?.email).toString()+"#"+_deviceData['id']+"#"+DateTime.now().toString());
                   await getDeviceTokenToSendNotification();
-
+                  
                   final ipAdd = await http.get(
                     Uri.parse('http://ip-api.com/json'),
                   );
@@ -208,8 +245,8 @@ class _LoginPageState extends State<LoginPage> {
                       'state': crypto.encrypt(JD['regionName']),
                       'city': crypto.encrypt(JD['city']),
                       'isp': crypto.encrypt(JD['isp']),
-                      'device': crypto.encrypt(androidInfo.device!),
-                      'deviceID': crypto.encrypt(androidInfo.androidId!),
+                      'device': crypto.encrypt(_deviceData['device']),
+                      'deviceID': crypto.encrypt(_deviceData['id']),
                       'deviceToken': crypto.encrypt(deviceToken),
                       "token": crypto.encrypt(token)
                     })

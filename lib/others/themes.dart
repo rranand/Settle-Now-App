@@ -18,7 +18,7 @@ class MyTheme {
     return ThemeData(
       primarySwatch: Colors.deepPurple,
       primaryColor: Colors.deepPurple,
-      fontFamily: GoogleFonts.lato().fontFamily,
+      fontFamily: GoogleFonts.lato().fontFamily ,
       appBarTheme: AppBarTheme(
         color: Colors.white,
         elevation: 0.0,

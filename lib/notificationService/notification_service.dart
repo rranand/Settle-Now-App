@@ -12,11 +12,6 @@ class LocalNotificationService {
 
     _notificationsPlugin.initialize(
       initializationSettings,
-      onSelectNotification: (String? id) async {
-        if (id!.isNotEmpty) {
-          
-        }
-      },
     );
   }
   
