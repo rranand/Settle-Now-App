@@ -845,7 +845,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        height: 190,
+                        height: 210,
                         child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         shrinkWrap: true,
@@ -853,8 +853,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                         itemBuilder: (BuildContext context, int index) {
                           if (index == 0) {
                             return SizedBox(
-                              height: 190,
-                              width: 180,
+                              height: 210,
+                              width: 200,
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: InkWell(
@@ -892,8 +892,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                             );
                           } else {
                             return SizedBox(
-                              height: 190,
-                              width: 175,
+                              height: 210,
+                              width: 200,
                               child: Padding(
                                 padding: EdgeInsets.all(8.0),
                                 child: InkWell(
@@ -1838,7 +1838,7 @@ class _ExpenseDataState extends State<ExpenseData> {
               );
             },
             child: SizedBox(
-              height: 125,
+              height: 134,
               child: Card(
                 elevation: 5.0,
                 shadowColor: Theme.of(context).primaryColor,

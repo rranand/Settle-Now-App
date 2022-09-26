@@ -262,7 +262,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 }, 
                 child: SizedBox(
-                  width: 240,
+                  width: 245,
                   child: Card(
                     color: Theme.of(context).primaryColor,
                     elevation: 2.5,
