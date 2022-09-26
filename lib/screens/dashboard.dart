@@ -483,7 +483,6 @@ class _DashBoardState extends State<DashBoard> {
     );
 
     _updateCheck();
-    myBanner.load();
   }
 
   buildShowDialog(BuildContext context) {
@@ -1232,7 +1231,7 @@ class _DashBoardState extends State<DashBoard> {
               ),
               SizedBox (
                 height: heightSearched,
-                child: RoomWidget(RoomData: SearchRoomData, email: _email.text, flag: true, token: _token, banner: myBanner)
+                child: RoomWidget(RoomData: SearchRoomData, email: _email.text, flag: true, token: _token)
               ),
             ],
           ),
@@ -1356,7 +1355,7 @@ class _DashBoardState extends State<DashBoard> {
                 ):Scrollbar(
                   radius: Radius.circular(10.0),
                   thickness: 5.5,
-                  child: RoomWidget(RoomData: RoomDataO, email: _email.text, flag: false, token: _token, banner: myBanner)
+                  child: RoomWidget(RoomData: RoomDataO, email: _email.text, flag: false, token: _token)
                 ):(RoomDataC.isEmpty?Scrollbar(
                   radius: Radius.circular(10.0),
                   thickness: 5.5,
@@ -1374,7 +1373,7 @@ class _DashBoardState extends State<DashBoard> {
                 ):Scrollbar(
                   radius: Radius.circular(10.0),
                   thickness: 5.5,
-                  child: RoomWidget(RoomData: RoomDataC, email: _email.text, flag: false, token: _token, banner: myBanner)
+                  child: RoomWidget(RoomData: RoomDataC, email: _email.text, flag: false, token: _token)
                 )),
               ),
             ),
@@ -1900,7 +1899,6 @@ class RoomWidget extends StatelessWidget {
   final String email;
   final bool flag;
   final String token;
-  final BannerAd banner;
 
   final Shader linearGradient = LinearGradient(
       colors: <Color>[Color.fromARGB(255, 243, 33, 112), Color.fromARGB(255, 255, 235, 7), Color.fromARGB(255,33, 150, 243), Color.fromARGB(255, 255, 0, 235)],
@@ -1910,7 +1908,7 @@ class RoomWidget extends StatelessWidget {
       colors: <Color>[Color.fromARGB(255, 0, 219, 222), Color.fromARGB(255, 252, 0, 255)],
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
 
-  RoomWidget({ Key? key, required this.RoomData, required this.email, required this.flag, required this.token, required this.banner }) : super(key: key);
+  RoomWidget({ Key? key, required this.RoomData, required this.email, required this.flag, required this.token}) : super(key: key);
 
   _MoveToNext(BuildContext context, int index) {
     Navigator.push(
@@ -1939,9 +1937,18 @@ class RoomWidget extends StatelessWidget {
       itemBuilder: (BuildContext context, int index){
         final themeProvider = Provider.of<ThemeProvider>(context);
 
-        if (index==0) {
+        if (index>0 && index < 9) {
+        BannerAd newBanner = createBanner(adsID[index-1]);
+        newBanner.load();
+
           return Column(
             children: [
+              Container(
+                alignment: Alignment.center,
+                child: AdWidget(ad: newBanner),
+                width: newBanner.size.width.toDouble(),
+                height: newBanner.size.height.toDouble(),
+              ),
               InkWell(
                 child: SizedBox(
                   child: Card(
@@ -2037,12 +2044,6 @@ class RoomWidget extends StatelessWidget {
                 onTap: () {
                   _MoveToNext(context, index);
                 },
-              ),
-              Container(
-                alignment: Alignment.center,
-                child: AdWidget(ad: myBanner),
-                width: myBanner.size.width.toDouble(),
-                height: myBanner.size.height.toDouble(),
               )
             ],
           );

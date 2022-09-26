@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:settlenow/ads.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
 import '../others/themes.dart';
@@ -711,6 +713,11 @@ class _RoomExpenseState extends State<RoomExpense> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    BannerAd newBanner = createBanner(adsID[9]);
+    newBanner.load();
+
+    BannerAd newBanner_1 = createBanner(adsID[10]);
+    newBanner_1.load();
 
     return Scaffold(
       appBar: AppBar(
@@ -811,6 +818,12 @@ class _RoomExpenseState extends State<RoomExpense> {
                     ),
                   ),
                 ):SizedBox(),
+                Container(
+                  alignment: Alignment.center,
+                  child: AdWidget(ad: newBanner),
+                  width: newBanner.size.width.toDouble(),
+                  height: newBanner.size.height.toDouble(),
+                ),
                 const Divider(),
                 const SizedBox(
                   height: 5,
@@ -971,6 +984,15 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ),
                       SizedBox(
                         height: 15,
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        child: AdWidget(ad: newBanner_1),
+                        width: newBanner_1.size.width.toDouble(),
+                        height: newBanner_1.size.height.toDouble(),
+                      ),
+                      SizedBox(
+                        height: 5,
                       ),
                       Text(
                         expenseTitle,
