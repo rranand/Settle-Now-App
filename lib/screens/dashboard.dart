@@ -9,6 +9,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/ads.dart';
+import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/aboutus.dart';
@@ -28,33 +29,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'maintain.dart';
 import 'package:http_parser/http_parser.dart';
-
-
-class RoomEach {
-  final String roomName;
-  final int members;
-  final String roomKey;
-  final bool active;
-  final double total;
-  final double spend;
-  final String date;
-  final String roomLink;
-
-  RoomEach({required this.roomName,required this.members,required this.roomKey, required this.active, required this.total, required this.spend, required this.date, required this.roomLink});
-
-  factory RoomEach.fromJson(Map<String, dynamic> json) {
-    return RoomEach(
-      roomName: crypto.decrypt(json['roomName']),
-      members: int.parse(crypto.decrypt(json['members'])),
-      roomKey: crypto.decrypt(json['roomKey']),
-      active: json['active'],
-      total: double.parse(crypto.decrypt(json['total'])),
-      spend: double.parse(crypto.decrypt(json['spend'])),
-      date: crypto.decrypt(json['date']),
-      roomLink: crypto.decrypt(json['joinLink']),
-    );
-  }
-}
 
 class DashBoard extends StatefulWidget {
   const DashBoard({ Key? key }) : super(key: key);
@@ -338,7 +312,7 @@ class _DashBoardState extends State<DashBoard> {
       } else if (jsonDecode(response.body)['maintenance'] != null && jsonDecode(response.body)['maintenance']) {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => Maintainence()),
+          MaterialPageRoute(builder: (context) => Maintenance()),
             (Route<dynamic> route) => false,
         );
       } else {
@@ -514,6 +488,7 @@ class _DashBoardState extends State<DashBoard> {
 
     } on Exception catch(_) {
     }
+
     Navigator.pop(context);
   }
 
@@ -1927,6 +1902,107 @@ class RoomWidget extends StatelessWidget {
     );
   }
 
+  Widget roomSectors(BuildContext context, int index) {
+    return InkWell(
+      child: SizedBox(
+        child: Card(
+          elevation: 2.0,
+          clipBehavior: Clip.antiAlias,
+          shadowColor: Theme.of(context).primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column (
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    RoomData[index].roomName, 
+                    textScaleFactor: 1.0,
+                    style: TextStyle(
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Members: " + RoomData[index].members.toString(),
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor
+                            ),
+                          ),
+                          Text(
+                            "Created: " + RoomData[index].date,
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () async {
+                              await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
+                            },
+                            onLongPress: () async {
+                              Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
+                              _showToast(context, "Join Key Copied");
+                            },
+                            child: Text(
+                              "Room Key: " + RoomData[index].roomKey,
+                              textScaleFactor: 1.0,
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Total Spend: ₹ " + RoomData[index].total.toString(),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor
+                            ),
+                          ),
+                          Text(
+                            "Your Spend: ₹ " + RoomData[index].spend.toString(),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor
+                            ),
+                          ),
+                          
+                          Text(
+                            "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
+                            style: TextStyle(
+                                color: Theme.of(context).primaryColor
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                )
+              ]
+              )
+            ),
+          ),
+        ),
+      onTap: () {
+        _MoveToNext(context, index);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
@@ -1949,201 +2025,12 @@ class RoomWidget extends StatelessWidget {
                 width: newBanner.size.width.toDouble(),
                 height: newBanner.size.height.toDouble(),
               ),
-              InkWell(
-                child: SizedBox(
-                  child: Card(
-                    elevation: 2.0,
-                    clipBehavior: Clip.antiAlias,
-                    shadowColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column (
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Text(
-                              RoomData[index].roomName, 
-                              style: TextStyle(
-                                fontSize: 24,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Members: " + RoomData[index].members.toString(),
-                                      style: TextStyle(
-                                        color: Theme.of(context).primaryColor
-                                      ),
-                                    ),
-                                    Text(
-                                      "Created: " + RoomData[index].date,
-                                      style: TextStyle(
-                                          color: Theme.of(context).primaryColor
-                                      ),
-                                    ),
-                                    InkWell(
-                                      onTap: () async {
-                                        await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
-                                      },
-                                      onLongPress: () async {
-                                        Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
-                                        _showToast(context, "Join Key Copied");
-                                      },
-                                      child: Text(
-                                        "Room Key: " + RoomData[index].roomKey,
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Total Spend: ₹ " + RoomData[index].total.toString(),
-                                      style: TextStyle(
-                                          color: Theme.of(context).primaryColor
-                                      ),
-                                    ),
-                                    Text(
-                                      "Your Spend: ₹ " + RoomData[index].spend.toString(),
-                                      style: TextStyle(
-                                          color: Theme.of(context).primaryColor
-                                      ),
-                                    ),
-                                    
-                                    Text(
-                                      "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
-                                      style: TextStyle(
-                                          color: Theme.of(context).primaryColor
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          )
-                        ]
-                        )
-                      ),
-                    ),
-                  ),
-                onTap: () {
-                  _MoveToNext(context, index);
-                },
-              )
-            ],
-          );
+              SizedBox(height: 5,),
+              roomSectors(context, index)
+            ]
+          ); 
         } else {
-          return InkWell(
-            child: SizedBox(
-              child: Card(
-                elevation: 2.0,
-                clipBehavior: Clip.antiAlias,
-                shadowColor: Theme.of(context).primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column (
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Text(
-                          RoomData[index].roomName, 
-                          style: TextStyle(
-                            fontSize: 24,
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Members: " + RoomData[index].members.toString(),
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor
-                                  ),
-                                ),
-                                Text(
-                                  "Created: " + RoomData[index].date,
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () async {
-                                    await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
-                                  },
-                                  onLongPress: () async {
-                                    Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
-                                    _showToast(context, "Join Key Copied");
-                                  },
-                                  child: Text(
-                                    "Room Key: " + RoomData[index].roomKey,
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Total Spend: ₹ " + RoomData[index].total.toString(),
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor
-                                  ),
-                                ),
-                                Text(
-                                  "Your Spend: ₹ " + RoomData[index].spend.toString(),
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor
-                                  ),
-                                ),
-                                
-                                Text(
-                                  "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
-                                  style: TextStyle(
-                                      color: Theme.of(context).primaryColor
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      )
-                    ]
-                    )
-                  ),
-                ),
-              ),
-            onTap: () {
-              _MoveToNext(context, index);
-            },
-          );
+          return roomSectors(context, index);
         }
       },
     );

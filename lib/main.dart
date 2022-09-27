@@ -63,12 +63,17 @@ class _MyAppState extends State<MyApp> {
       builder: (context, _) {
         final themeProvider = Provider.of<ThemeProvider>(context);
         return MaterialApp(
-           debugShowCheckedModeBanner: false,
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), 
+              child: child! ,
+            );
+          },
           themeMode: themeProvider.darkTheme?ThemeMode.dark:ThemeMode.light,
           theme: MyTheme.lightTheme(context),
           darkTheme: MyTheme.darTheme(context),
           title: "Settle Now",
-          home: LoginPage(),
+          home: SafeArea(child: LoginPage(),),
           onGenerateRoute: RouteServices.generateRoute,
         );
       }

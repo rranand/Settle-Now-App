@@ -111,7 +111,7 @@ class _OtpNameState extends State<OtpName> {
     } else if (jsonDecode(response.body)['maintenance'] != null && jsonDecode(response.body)['maintenance']) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => Maintainence()),
+        MaterialPageRoute(builder: (context) => Maintenance()),
           (Route<dynamic> route) => false,
       );
     } else {
@@ -247,8 +247,8 @@ class _OtpNameState extends State<OtpName> {
               child: CircularProgressIndicator(),
               ):Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  height>=800?SizedBox(height: MediaQuery.of(context).size.height/4,):SizedBox(height: 60,),
                   Image.asset(
                     themeProvider.darkTheme?'assets/Images/SN_dark.jpg':'assets/Images/SN.jpg',
                     height: 150,

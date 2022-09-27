@@ -3,33 +3,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/ads.dart';
+import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
 import '../others/themes.dart';
 import 'package:share_plus/share_plus.dart';
-
-class FriendEach {
-  String name;
-  String email;
-  String status;
-  String pic;
-  bool isGoogle;
-
-  FriendEach({required this.name,required this.email,required this.status, required this.pic, required this.isGoogle});
-
-  factory FriendEach.fromJson(Map<String, dynamic> json) {
-    return FriendEach(
-      name: crypto.decrypt(json['name']),
-      email: crypto.decrypt(json['email']),
-      status: crypto.decrypt(json['status']),
-      pic: crypto.decrypt(json['pic']),
-      isGoogle: json['isGoogle'],
-    );
-  }
-}
 
 class RoomExpense extends StatefulWidget {
   final String roomKey;
@@ -87,6 +69,7 @@ class _RoomExpenseState extends State<RoomExpense> {
   List<dynamic> paymentData = [];
   List<FriendEach> friendDataSearched = [];
   bool showAllTransactionData = true;
+  ScrollController _scrollController = ScrollController();
 
   _getPaymentData() async {
     try {
@@ -710,6 +693,137 @@ class _RoomExpenseState extends State<RoomExpense> {
     );
   }
 
+  Widget memberCard(BuildContext context, int index) {
+    return SizedBox(
+      height: 190,
+      width: 180,
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            if (this.mounted) {
+              expenseDetailByMember = crypto.decrypt(list[index]['email']);
+              expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
+            }
+            _extractExpenseData(crypto.decrypt(list[index]['email']));
+          },
+          child: Card(
+            elevation: 5.0,
+            shadowColor:  Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 8,
+                  ),
+                  InkWell(
+                    child: Text(
+                      crypto.decrypt(list[index]['Name']),
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w500,
+                        foreground: Paint()..shader = linearGradient,
+                      ),
+                    ),
+                    onTap: () => _showToast(context, crypto.decrypt(list[index]['Name'])),
+                  ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  Text(
+                    "Total: ₹ " + crypto.decrypt(list[index]['Expense']),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      foreground: Paint()..shader = linearGradient_2,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))>0?
+                  Text(
+                    "Gain: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.green,
+                    ),
+                  ):double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))<0?Text(
+                    "Loss: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.red,
+                    ),
+                  ):SizedBox(),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Center(
+                    child: Text(
+                      (list[index]['own']?"👑 ":"") + (list[index]['done']?"🔒":""),
+                      style: TextStyle(
+                        fontSize: 20
+                      ),
+                    )
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget memberAll(BuildContext context) {
+    return SizedBox(
+      height: 190,
+      width: 180,
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            if (this.mounted) {
+              setState(() {
+                expenseTitle = "All Expense";
+                expenseDetailByMember = "all";
+              });
+            }
+            _extractExpenseData("all");
+          },
+          child: Card(
+            elevation: 5.0,
+            shadowColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Text(
+                  "ALL",
+                  style: TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    foreground: Paint()..shader = linearGradient_3,
+                  ),
+                ),
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -762,12 +876,12 @@ class _RoomExpenseState extends State<RoomExpense> {
             child: Text("Loading..."),
           ),
         )
-        :Scrollbar(
-          radius: Radius.circular(10.0),
-          thickness: 5.5,
-          child: ListView(
-              children: [
-                InkWell(
+        :NestedScrollView(
+          controller: _scrollController,
+          headerSliverBuilder: (context, value) {
+            return [
+              SliverToBoxAdapter(
+                child: InkWell(
                   child: ListTile(
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -787,23 +901,33 @@ class _RoomExpenseState extends State<RoomExpense> {
                     _showToast(context, "Join Key Copied");
                   },
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Total Expense"),
                   trailing: Text(crypto.decrypt(list[0]["TotalExpense"])),
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Average Expense"),
                   trailing: Text(crypto.decrypt(list[0]["AverageExpense"])),
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Members"),
                   trailing: Text(crypto.decrypt(list[0]["cnt"])),
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Created On"),
                   trailing: Text(crypto.decrypt(list[0]["date"])),
                 ),
-                !isClear?Padding(
+              ),
+              SliverToBoxAdapter(
+                child: !isClear?Padding(
                   padding: EdgeInsets.all(15.0),
                   child: SizedBox(
                     height: 45,
@@ -818,17 +942,23 @@ class _RoomExpenseState extends State<RoomExpense> {
                     ),
                   ),
                 ):SizedBox(),
-                Container(
+              ),
+              SliverToBoxAdapter(
+                child: Container(
                   alignment: Alignment.center,
                   child: AdWidget(ad: newBanner),
                   width: newBanner.size.width.toDouble(),
                   height: newBanner.size.height.toDouble(),
                 ),
-                const Divider(),
-                const SizedBox(
+              ),
+              SliverToBoxAdapter(child: const Divider()),
+              SliverToBoxAdapter(
+                child: const SizedBox(
                   height: 5,
                 ),
-                Padding(
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
                   padding: EdgeInsets.all(15.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -845,139 +975,16 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        height: 210,
+                        height: 190,
                         child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         shrinkWrap: true,
                         itemCount: list.length,
                         itemBuilder: (BuildContext context, int index) {
                           if (index == 0) {
-                            return SizedBox(
-                              height: 210,
-                              width: 200,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (this.mounted) {
-                                      setState(() {
-                                        expenseTitle = "All Expense";
-                                        expenseDetailByMember = "all";
-                                      });
-                                    }
-                                    _extractExpenseData("all");
-                                  },
-                                  child: Card(
-                                    elevation: 5.0,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Center(
-                                        child: Text(
-                                          "ALL",
-                                          style: TextStyle(
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.bold,
-                                            foreground: Paint()..shader = linearGradient_3,
-                                          ),
-                                        ),
-                                      )
-                                    )
-                                  )
-                                )
-                              )
-                            );
+                            return memberAll(context);
                           } else {
-                            return SizedBox(
-                              height: 210,
-                              width: 200,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (this.mounted) {
-                                      expenseDetailByMember = crypto.decrypt(list[index]['email']);
-                                      expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
-                                    }
-                                    _extractExpenseData(crypto.decrypt(list[index]['email']));
-                                  },
-                                  child: Card(
-                                    elevation: 5.0,
-                                    shadowColor:  Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(
-                                            height: 8,
-                                          ),
-                                          InkWell(
-                                            child: Text(
-                                              crypto.decrypt(list[index]['Name']),
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.w500,
-                                                foreground: Paint()..shader = linearGradient,
-                                              ),
-                                            ),
-                                            onTap: () => _showToast(context, crypto.decrypt(list[index]['Name'])),
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          Text(
-                                            "Total: ₹ " + crypto.decrypt(list[index]['Expense']),
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              foreground: Paint()..shader = linearGradient_2,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))>0?
-                                          Text(
-                                            "Gain: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.green,
-                                            ),
-                                          ):double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))<0?Text(
-                                            "Loss: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.red,
-                                            ),
-                                          ):SizedBox(),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              (list[index]['own']?"👑 ":"") + (list[index]['done']?"🔒":""),
-                                              style: TextStyle(
-                                                fontSize: 20
-                                              ),
-                                            )
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
+                            return memberCard(context, index);
                           }
                         },
                       ),
@@ -1001,30 +1008,28 @@ class _RoomExpenseState extends State<RoomExpense> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TransList.isEmpty? (
-                        Center(
-                          child: loaded? Text(
-                            "No Expense Found",
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          )
-                          :CircularProgressIndicator()
-                        )
-                      )
-                      :SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: heightExpense,
-                          child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token, refreshIndicatorKey: _refreshIndicatorKey, locked: locked,),
-                        ),
                     ],
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ];
+          },
+          body: TransList.isEmpty? (
+            Center(
+              child: loaded? Text(
+                "No Expense Found",
+                style: TextStyle(
+                  fontSize: 20,
+                ),
+              )
+              :CircularProgressIndicator()
+            )
+          )
+          :SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: heightExpense,
+            child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token, refreshIndicatorKey: _refreshIndicatorKey, locked: locked,),
+          ),
         ),
       ):Scrollbar(
           radius: Radius.circular(10.0),
@@ -1121,12 +1126,13 @@ class _RoomExpenseState extends State<RoomExpense> {
                           fontWeight: FontWeight.w600
                         ),),
                       ):Column (
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             "Total Amount Paid: ₹ " + paymentTotalALL,
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(12.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: ListView.separated(
                               separatorBuilder: (context, index) => SizedBox(height: 5,),
                               shrinkWrap: true,
@@ -1140,32 +1146,22 @@ class _RoomExpenseState extends State<RoomExpense> {
                                     borderRadius: BorderRadius.circular(15.0),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              crypto.decrypt(allTransactionData[index]["sender"]),
+                                        SizedBox(
+                                          width: MediaQuery.of(context).size.width,
+                                          child: Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              crypto.decrypt(allTransactionData[index]["sender"]) + " -> " + crypto.decrypt(allTransactionData[index]["receiver"]),
+                                              overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 fontSize: 23,
                                               ),
                                             ),
-                                            Text(
-                                              "---->",
-                                              style: const TextStyle(
-                                                fontSize: 23,
-                                              ),
-                                            ),
-                                            Text(
-                                              crypto.decrypt(allTransactionData[index]["receiver"]),
-                                              style: const TextStyle(
-                                                fontSize: 23,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                         SizedBox(height: 10,),
                                         Row(
