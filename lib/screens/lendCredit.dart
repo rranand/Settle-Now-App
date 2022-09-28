@@ -134,15 +134,15 @@ class _LendCreditState extends State<LendCredit> {
             child: SizedBox(
               width: MediaQuery.of(context).size.width*0.95,
               child: ListView.separated(
-                separatorBuilder: (context, index) => SizedBox(height: 10,), 
+                separatorBuilder: (context, index) => SizedBox(height: 7,), 
                 itemCount: data.length,
                 itemBuilder: (BuildContext context, int index) {
                   return InkWell(
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => LendPage(email: widget.email, token: widget.token, name: crypto.decrypt(data[index]["name"]),))),
                     child: SizedBox(
-                      height: 90,
+                      height: 80,
                       child: Card(
-                        elevation: 1.0,
+                        elevation: 2.1,
                         shadowColor: Theme.of(context).primaryColor,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.0),
@@ -156,14 +156,14 @@ class _LendCreditState extends State<LendCredit> {
                               crypto.decrypt(data[index]["name"]), 
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 26,
+                                fontSize: 20,
                                 fontWeight: FontWeight.w500
                               ),
                             ),
                             Text(
                               "₹ " + crypto.decrypt(data[index]["total"]),
                               style: const TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                               ),
                             ),
                           ]
@@ -200,7 +200,7 @@ class _LendCreditState extends State<LendCredit> {
                           Text(
                             "Create New Room",
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 20,
                             ),
                           ),
                           SizedBox(height: 10,),
@@ -209,7 +209,7 @@ class _LendCreditState extends State<LendCredit> {
                             keyboardType: TextInputType.text,
                             maxLength: 150,
                             maxLines: 1,
-                            style: const TextStyle(fontSize: 18),
+                            style: const TextStyle(fontSize: 15),
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(8.0),
                               hintText: "Enter Room Name",

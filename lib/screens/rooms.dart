@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -436,12 +437,12 @@ class _RoomExpenseState extends State<RoomExpense> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   "Are You Sure?",
                   style: TextStyle(
-                    fontSize: 25
+                    fontSize: 22
                   ),
                 ),
                 SizedBox(height: 20,),
@@ -449,7 +450,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     SizedBox(
-                      width: 100,
+                      width: 80,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -458,7 +459,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ),
                     ),
                     SizedBox(
-                      width: 100,
+                      width: 80,
                       child: ElevatedButton(
                         onPressed: () async{
                           buildShowDialog(context);
@@ -503,7 +504,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                     Text(
                       "Add Member",
                       style: TextStyle(
-                        fontSize: 25
+                        fontSize: 22
                       ),
                     ),
                     SizedBox(height: 20,),
@@ -511,7 +512,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       controller: _searchFriend,
                       keyboardType: TextInputType.text,
                       maxLines: 1,
-                      style: const TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 15),
                       autocorrect: false,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(8.0),
@@ -526,7 +527,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                     SizedBox(
                       height: MediaQuery.of(context).size.height*0.6,
                       child: _searchFriend.text.isEmpty?friendListWidget(context, friendData):(friendDataSearched.isEmpty
-                      ?Center(child: Text("No User Found", style: TextStyle(fontSize: 20),),) 
+                      ?Center(child: Text("No User Found", style: TextStyle(fontSize: 18),),) 
                       :friendListWidget(context, friendDataSearched))
                     )
                   ],
@@ -537,10 +538,6 @@ class _RoomExpenseState extends State<RoomExpense> {
         );
       }
     );
-  }
-
-  Future<NetworkImage> getProfilePhoto(String id, bool isGoogle) async {
-    return await NetworkImage(isGoogle?id:('https://drive.google.com/uc?id='+id));
   }
 
   sendJoinRequest(String email) async {
@@ -635,34 +632,25 @@ class _RoomExpenseState extends State<RoomExpense> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        data[index].pic.isEmpty?
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                          child: null,
-                        )
-                        :FutureBuilder<NetworkImage>(
-                          builder: (ctx, snapshot) {
-                            if (snapshot.hasData) {
-                              return CircleAvatar(
-                                radius: 18,
-                                backgroundImage: snapshot.data,
-                                child: null,
-                              );
-                            } else {
-                              return CircleAvatar(
-                                radius: 18,
-                                backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                                child: Center(child: CircularProgressIndicator()),
-                              );
-                            }
-                          },
-                          future: getProfilePhoto(data[index].pic, data[index].isGoogle),
+                        CachedNetworkImage(
+                          imageUrl: data[index].isGoogle?data[index].pic:('https://drive.google.com/uc?id='+(data[index].pic.length==0?"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":data[index].pic)),
+                          progressIndicatorBuilder: (context, url, downloadProgress) => 
+                            CircularProgressIndicator(value: downloadProgress.progress),
+                          errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 45.0,
+                            height: 45.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider, fit: BoxFit.cover),
+                            ),
+                          ),
                         ),
                         Text(
                           data[index].name,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 17,
                           ),
                         ),
                         IconButton(
@@ -695,8 +683,6 @@ class _RoomExpenseState extends State<RoomExpense> {
 
   Widget memberCard(BuildContext context, int index) {
     return SizedBox(
-      height: 190,
-      width: 180,
       child: Padding(
         padding: EdgeInsets.all(8.0),
         child: InkWell(
@@ -715,64 +701,90 @@ class _RoomExpenseState extends State<RoomExpense> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 8,
-                  ),
-                  InkWell(
-                    child: Text(
-                      crypto.decrypt(list[index]['Name']),
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w500,
-                        foreground: Paint()..shader = linearGradient,
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Stack(
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: crypto.decrypt(list[index]['pic']).length==0?"https://drive.google.com/uc?id=11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":crypto.decrypt(list[index]['pic']),
+                          progressIndicatorBuilder: (context, url, downloadProgress) => 
+                            CircularProgressIndicator(value: downloadProgress.progress),
+                          errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 65.0,
+                            height: 65.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider, fit: BoxFit.cover),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 39,
+                          right: -5,
+                          child: Text(
+                            (list[index]['own']?"👑 ":"") + (list[index]['done']?"🔒":""),
+                            style: TextStyle(
+                              fontSize: 20
+                            ),
+                          ),
+                        )
+                      ]
                     ),
-                    onTap: () => _showToast(context, crypto.decrypt(list[index]['Name'])),
                   ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  Text(
-                    "Total: ₹ " + crypto.decrypt(list[index]['Expense']),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      foreground: Paint()..shader = linearGradient_2,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          child: Text(
+                            crypto.decrypt(list[index]['Name']),
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w500,
+                              foreground: Paint()..shader = linearGradient,
+                            ),
+                          ),
+                          onTap: () => _showToast(context, crypto.decrypt(list[index]['Name'])),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Text(
+                          "Total: ₹ " + crypto.decrypt(list[index]['Expense']),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            foreground: Paint()..shader = linearGradient_2,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))>0?
+                        Text(
+                          "Gain: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.green,
+                          ),
+                        ):double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))<0?Text(
+                          "Loss: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.red,
+                          ),
+                        ):SizedBox(),
+                      ],
                     ),
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))>0?
-                  Text(
-                    "Gain: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.green,
-                    ),
-                  ):double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))<0?Text(
-                    "Loss: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.red,
-                    ),
-                  ):SizedBox(),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Center(
-                    child: Text(
-                      (list[index]['own']?"👑 ":"") + (list[index]['done']?"🔒":""),
-                      style: TextStyle(
-                        fontSize: 20
-                      ),
-                    )
                   )
                 ],
               ),
@@ -785,8 +797,7 @@ class _RoomExpenseState extends State<RoomExpense> {
 
   Widget memberAll(BuildContext context) {
     return SizedBox(
-      height: 190,
-      width: 180,
+      width: 140,
       child: Padding(
         padding: EdgeInsets.all(8.0),
         child: InkWell(
@@ -811,7 +822,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                 child: Text(
                   "ALL",
                   style: TextStyle(
-                    fontSize: 26,
+                    fontSize: 24,
                     fontWeight: FontWeight.bold,
                     foreground: Paint()..shader = linearGradient_3,
                   ),
@@ -966,7 +977,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       Text(
                         "Member",
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -975,7 +986,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        height: 190,
+                        height: 140,
                         child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         shrinkWrap: true,
@@ -1004,7 +1015,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       Text(
                         expenseTitle,
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1019,7 +1030,7 @@ class _RoomExpenseState extends State<RoomExpense> {
               child: loaded? Text(
                 "No Expense Found",
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                 ),
               )
               :CircularProgressIndicator()
@@ -1051,7 +1062,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                               "From"
                             ),
                             DropdownButton<String>(
-                              alignment: AlignmentDirectional.topStart,
                               borderRadius: BorderRadius.circular(10.0),
                               itemHeight: 60,
                               elevation: 1,
@@ -1083,7 +1093,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                               "To"
                             ),
                             DropdownButton<String>(
-                              alignment: AlignmentDirectional.topStart,
                               borderRadius: BorderRadius.circular(10.0),
                               itemHeight: 60,
                               elevation: 1,
@@ -1158,7 +1167,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                               crypto.decrypt(allTransactionData[index]["sender"]) + " -> " + crypto.decrypt(allTransactionData[index]["receiver"]),
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
-                                                fontSize: 23,
+                                                fontSize: 21,
                                               ),
                                             ),
                                           ),
@@ -1168,7 +1177,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Expanded(
-                                              flex: 1,
                                               child: SizedBox(
                                                 width: MediaQuery.of(context).size.width * 0.90,
                                                 child: Opacity(
@@ -1176,7 +1184,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                   child: Text(
                                                     crypto.decrypt(allTransactionData[index]["Date"]),
                                                     style: const TextStyle(
-                                                      fontSize: 18,
+                                                      fontSize: 16,
                                                     ),
                                                   ),
                                                 ),
@@ -1189,7 +1197,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                 child: Text(
                                                   "₹ " + crypto.decrypt(allTransactionData[index]["Amount"]),
                                                   style: const TextStyle(
-                                                    fontSize: 20,
+                                                    fontSize: 16,
                                                   ),
                                                 ),
                                               ),
@@ -1235,6 +1243,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               height: 70,
+                              width: MediaQuery.of(context).size.width,
                               child: Card(
                                 elevation: 5.0,
                                 shadowColor: Theme.of(context).primaryColor,
@@ -1242,35 +1251,23 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   borderRadius: BorderRadius.circular(15.0),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(12.0),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context).size.width * 0.90,
-                                          child: Opacity(
-                                            opacity: 0.8,
-                                            child: Text(
-                                              crypto.decrypt(paymentData[index]["Date"]),
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
+                                      Opacity(
+                                        opacity: 0.8,
+                                        child: Text(
+                                          crypto.decrypt(paymentData[index]["Date"]),
+                                          style: const TextStyle(
+                                            fontSize: 18,
                                           ),
                                         ),
                                       ),
-                                      Expanded(
-                                        flex: 0,
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context).size.width * 0.20,
-                                          child: Text(
-                                            "₹ " + crypto.decrypt(paymentData[index]["Amount"]),
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                            ),
-                                          ),
+                                      Text(
+                                        "₹ " + crypto.decrypt(paymentData[index]["Amount"]),
+                                        style: const TextStyle(
+                                          fontSize: 18,
                                         ),
                                       ),
                                     ]
@@ -1347,7 +1344,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                       ),
                                                     ),
                                                     DropdownButton<String>(
-                                                      alignment: AlignmentDirectional.topEnd,
                                                       borderRadius: BorderRadius.circular(10.0),
                                                       itemHeight: 60,
                                                       elevation: 1,
@@ -1730,7 +1726,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                       Text(
                         "Expense Detail",
                         style: TextStyle(
-                          fontSize: 30
+                          fontSize: 23
                         ),
                       ),
                       widget.Email==email&&!locked?IconButton(
@@ -1748,7 +1744,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                   Text(
                     _purpose.text,
                     style: TextStyle(
-                      fontSize: 25
+                      fontSize: 22
                     ),
                   ),
                   SizedBox(height: 10,),
@@ -1857,7 +1853,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               crypto.decrypt(widget.TransList[index]["Purpose"]), 
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 26,
+                                fontSize: 24,
                                 fontWeight: FontWeight.w500
                               ),
                             ),
@@ -1869,7 +1865,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               child: Text(
                                 crypto.decrypt(widget.TransList[index]["Name"]),
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                 ),
                               ),
                             ),
@@ -1881,7 +1877,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               child: Text(
                                 crypto.decrypt(widget.TransList[index]["Date"]),
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                 ),
                               ),
                             ),
@@ -1896,7 +1892,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                           child: Text(
                             "₹ " + crypto.decrypt(widget.TransList[index]["Amount"]),
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 19,
                             ),
                           ),
                         ),

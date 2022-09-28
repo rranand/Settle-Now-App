@@ -141,7 +141,7 @@ class _ProfileState extends State<Profile> {
             SizedBox(
               height: 10,
             ),
-            dataMap.isEmpty?Center(child: CircularProgressIndicator(),):Padding(
+            dataMap.isEmpty?Center(child: CircularProgressIndicator(strokeWidth: 3.3,),):Padding(
               padding: const EdgeInsets.all(12.0),
               child: PieChart(
                 dataMap: dataMap,
@@ -161,7 +161,7 @@ class _ProfileState extends State<Profile> {
             Text(
               "Personal Expense",
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -176,9 +176,9 @@ class _ProfileState extends State<Profile> {
                     child:personalLoaded?Text(
                       "No Personal Expense",
                       style: TextStyle(
-                        fontSize: 24
+                        fontSize: 20
                       ),
-                  ):CircularProgressIndicator(),
+                  ):CircularProgressIndicator(strokeWidth: 3.3),
                 ):ListView.builder(
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true,
@@ -212,7 +212,7 @@ class _ProfileState extends State<Profile> {
                                 Text(
                                   crypto.decrypt(personalExpense[index]['Month']) + ",",
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w500,
                                     foreground: Paint()..shader = linearGradient_1,
                                   ),
@@ -220,7 +220,7 @@ class _ProfileState extends State<Profile> {
                                 Text(
                                   crypto.decrypt(personalExpense[index]['Year']),
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w500,
                                     foreground: Paint()..shader = linearGradient_1,
                                   ),
@@ -231,7 +231,7 @@ class _ProfileState extends State<Profile> {
                                 Text(
                                   "₹ " + crypto.decrypt(personalExpense[index]['Total']),
                                   style: TextStyle(
-                                    fontSize: 24,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.w500,
                                     foreground: Paint()..shader = linearGradient_2,
                                   ),

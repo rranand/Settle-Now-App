@@ -24,7 +24,7 @@ class Maintenance extends StatelessWidget {
                   "Sorry, we are down for maintenance but will be back in no time!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 26,
+                    fontSize: 25,
                     foreground: Paint()..shader = linearGradient,
                   ),
                 ),

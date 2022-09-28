@@ -50,8 +50,8 @@ class _LoginPageState extends State<LoginPage> {
         if (Platform.isAndroid) {
           AndroidDeviceInfo build = await  deviceInfoPlugin.androidInfo;
           deviceData = <String, dynamic>{
-            'id': build.androidId,
-            'device': build.device
+            'id': build.id,
+            'device': build.product
           };
         }
       }

@@ -1,12 +1,15 @@
 
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:in_app_update/in_app_update.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/ads.dart';
 import 'package:settlenow/models/RoomEach.dart';
@@ -38,6 +41,7 @@ class DashBoard extends StatefulWidget {
 }
 
 class _DashBoardState extends State<DashBoard> {
+  AppUpdateInfo? _updateInfo;
   int dash = 0;
   double yourSpend = 0;
   bool isGoogle = false;
@@ -68,7 +72,6 @@ class _DashBoardState extends State<DashBoard> {
   bool DateChanged = false;
   double heightSearched = 0;
   var updateData = null;
-  bool _isUpdateAvailable = false;
   List<String> roomStatus = ['All', 'Active', 'Closed'];
   int roomStatusIndex = 0;
   bool imageUploading = false;
@@ -79,6 +82,27 @@ class _DashBoardState extends State<DashBoard> {
   List<dynamic> RoomRequest = [];
   GoogleSignIn _googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _currentUser;
+  bool _flexibleUpdateAvailable = false;
+
+  Future<void> checkForUpdate() async {
+    await InAppUpdate.checkForUpdate().then((info) {
+      setState(() {
+        _updateInfo = info;
+      });
+    }).catchError((e) {
+    });
+    
+    if (_updateInfo?.updateAvailability == UpdateAvailability.updateAvailable) {
+      await InAppUpdate.startFlexibleUpdate().then((_) {
+        setState(() {
+          _flexibleUpdateAvailable = true;
+        });
+      }).catchError((e) {
+      });
+
+      await InAppUpdate.completeFlexibleUpdate();
+    }
+  }
 
   Future _getImageID() async {
     if (this.mounted) {
@@ -129,7 +153,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future? imageUpload(ImageSource imageSource) async {
+  Future imageUpload(ImageSource imageSource) async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: imageSource, imageQuality: 25,);
     Dio dio = new Dio();
@@ -188,48 +212,14 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future _updateCheck() async {
-    
-    try {
-      final response = await http.patch(
-        Uri.parse(global.url + 'login'),
-      );
-
-      if (response.statusCode == 200 && version.length != 0) {
-        updateData = jsonDecode(response.body);
-
-        List<String> gVersion =  version.split('.');
-        List<int> versionPartG = [int.parse(gVersion[0]), int.parse(gVersion[1]), int.parse(gVersion[2])];
-        List<String> rVersion =  crypto.decrypt(updateData["Version"]).split('.');
-        List<int> versionPartR = [int.parse(rVersion[0]), int.parse(rVersion[1]), int.parse(rVersion[2])];
-        
-        if (versionPartR[0] > versionPartG[0]) {
-          _isUpdateAvailable = true;
-        } else if (versionPartR[0] == versionPartG[0]) {
-          if (versionPartR[1] > versionPartG[1]) {
-            _isUpdateAvailable = true;
-          } else if (versionPartR[1] == versionPartG[1] && versionPartR[2] > versionPartG[2]) {
-            _isUpdateAvailable = true;
-          }
-        }
-      }
-      
-    } on Exception catch(_) {
-    }
-    
-    if (this.mounted) {
-      setState(() {});
-    }
-  }
-
   Future _extractEmail() async {
+
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    version = await packageInfo.version.toString();
 
     var date = DateTime.now();
     from = [0, date.month-1, date.day-1];
     to = [0, date.month-1, date.day-1];
-
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-    version = await packageInfo.version.toString();
 
     for(int i=date.year; i>=2018; i--) {
       Year.add(i.toString());
@@ -428,6 +418,10 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  _updateCheck() async {
+    await checkForUpdate();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -522,7 +516,7 @@ class _DashBoardState extends State<DashBoard> {
                                   child: Text(
                                     "From",
                                     style: TextStyle(
-                                      fontSize: 28,
+                                      fontSize: 24,
                                     ),
                                   ),
                                   onTap: () {
@@ -546,7 +540,7 @@ class _DashBoardState extends State<DashBoard> {
                                   child: Text(
                                     "To",
                                     style: TextStyle(
-                                      fontSize: 28,
+                                      fontSize: 24,
                                     ),
                                   ),
                                   onTap: () {
@@ -565,7 +559,7 @@ class _DashBoardState extends State<DashBoard> {
                         Text(
                           "Year",
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 22,
                           ),
                         ),
                         SizedBox(
@@ -628,7 +622,7 @@ class _DashBoardState extends State<DashBoard> {
                         Text(
                           "Month",
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 22,
                           ),
                         ),
                         SizedBox(
@@ -686,7 +680,7 @@ class _DashBoardState extends State<DashBoard> {
                         Text(
                           "Day",
                           style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 22,
                           ),
                         ),
                         SizedBox(
@@ -744,13 +738,12 @@ class _DashBoardState extends State<DashBoard> {
                           children: [
                             Text("Room Status",
                               style: TextStyle(
-                                  fontSize: 24,
+                                  fontSize: 22,
                                 ),
                             ),
                             Container(
                               width: 75,
                               child: DropdownButton<String>(
-                                alignment: AlignmentDirectional.topStart,
                                 borderRadius: BorderRadius.circular(10.0),
                                 itemHeight: 70,
                                 elevation: 1,
@@ -1088,7 +1081,7 @@ class _DashBoardState extends State<DashBoard> {
           child: Text(
             "No Request Found",
             style: TextStyle(
-              fontSize: 25,
+              fontSize: 22,
             ),
           ),
         ) 
@@ -1105,57 +1098,67 @@ class _DashBoardState extends State<DashBoard> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column (
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Text(
-                            crypto.decrypt(RoomRequest[index]["name"]), 
-                            style: TextStyle(
-                              fontSize: 24,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CachedNetworkImage(
+                        imageUrl: crypto.decrypt(RoomRequest[index]["pic"]).length==0?"https://drive.google.com/uc?id=11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":crypto.decrypt(RoomRequest[index]["pic"]),
+                        progressIndicatorBuilder: (context, url, downloadProgress) => 
+                            CircularProgressIndicator(value: downloadProgress.progress),
+                        errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                        imageBuilder: (context, imageProvider) => Container(
+                          width: 65.0,
+                          height: 65.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: imageProvider, fit: BoxFit.cover),
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Text(
-                            "Members: " + crypto.decrypt(RoomRequest[index]["members"]), 
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Text(
-                            "Invited By: " + crypto.decrypt(RoomRequest[index]["by"]), 
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 8,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Column (
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            IconButton(onPressed: () async {
-                              await JoinRequest("0", crypto.decrypt(RoomRequest[index]["key"]));
-                            }, icon: Icon(Icons.cancel_sharp, size: 30, color: Colors.red,)),
-                            IconButton(onPressed: () async {
-                              await JoinRequest("1", crypto.decrypt(RoomRequest[index]["key"]));
-                            }, icon: Icon(Icons.check, size: 30, color: Colors.greenAccent)),
-                          ],
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width - 140,
+                              child: Expanded(
+                                child: Text(
+                                  crypto.decrypt(RoomRequest[index]["by"]) + " invited to join " + crypto.decrypt(RoomRequest[index]["name"]),
+                                  style: TextStyle(
+                                    overflow: TextOverflow.clip,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 8,
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width - 140,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  IconButton(onPressed: () async {
+                                    await JoinRequest("0", crypto.decrypt(RoomRequest[index]["key"]));
+                                  }, icon: Icon(Icons.cancel_sharp, size: 30, color: Colors.red,)),
+                                  IconButton(onPressed: () async {
+                                    await JoinRequest("1", crypto.decrypt(RoomRequest[index]["key"]));
+                                    await _refreshIndicatorKey.currentState?.show();
+                                  }, icon: Icon(Icons.check, size: 30, color: Colors.greenAccent)),
+                                ],
+                              ),
+                            )
+                          ]
                         )
-                      ]
-                    )
+                      ),
+                    ],
                   )
                 ),
             );
@@ -1179,7 +1182,7 @@ class _DashBoardState extends State<DashBoard> {
             child: Center(
               child: Text("No Rooms to Join, Create One!!!",
               style: TextStyle(
-                fontSize: 25,
+                fontSize: 22,
               ),
               ),
             ),
@@ -1187,11 +1190,11 @@ class _DashBoardState extends State<DashBoard> {
         ) 
         :(searchTrigger? _search.text.length==0&&SearchRoomData.isEmpty?Center(
           child: Text("Search Rooms...",style: TextStyle(
-              fontSize: 25,
+              fontSize: 22,
             ),),
         ):(SearchRoomData.isEmpty? Center(
           child: searching? CircularProgressIndicator():Text("No Results Found",style: TextStyle(
-              fontSize: 25,
+              fontSize: 22,
           )))
         :Scrollbar(
           radius: Radius.circular(10.0),
@@ -1233,7 +1236,7 @@ class _DashBoardState extends State<DashBoard> {
                           child: Text(
                             "Live",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                             ),
                           ),
                           onTap: () {
@@ -1262,7 +1265,7 @@ class _DashBoardState extends State<DashBoard> {
                           child: Text(
                             "Closed",
                             style: TextStyle(
-                              fontSize: 18,
+                              fontSize: 16,
                             ),
                           ),
                           onTap: () {
@@ -1358,16 +1361,11 @@ class _DashBoardState extends State<DashBoard> {
       );
   }
 
-  Future<NetworkImage> getProfilePhoto(String id) async {
-    return await isGoogle?NetworkImage(id):NetworkImage('https://drive.google.com/uc?id='+id);
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    return _isUpdateAvailable?updateWidget(context)
-    :Scaffold(
+    return Scaffold(
       appBar: dash==0?AppBar(
         title: searchTrigger? TextField(
           keyboardType: TextInputType.text,
@@ -1462,23 +1460,20 @@ class _DashBoardState extends State<DashBoard> {
               margin: EdgeInsets.all(0),
               currentAccountPicture: Stack(
                 children: [
-                  FutureBuilder<NetworkImage>(
-                    builder: (ctx, snapshot) {
-                      if (snapshot.hasData) {
-                        return CircleAvatar(
-                          radius: 45,
-                          backgroundImage: snapshot.data,
-                          child: null,
-                        );
-                      } else {
-                        return CircleAvatar(
-                          radius: 45,
-                          backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                    },
-                    future: getProfilePhoto(_profilePicID),
+                  CachedNetworkImage(
+                    imageUrl: isGoogle?_profilePicID:('https://drive.google.com/uc?id='+(_profilePicID.length==0?"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":_profilePicID)),
+                    progressIndicatorBuilder: (context, url, downloadProgress) => 
+                            CircularProgressIndicator(value: downloadProgress.progress),
+                    errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                    imageBuilder: (context, imageProvider) => Container(
+                      width: 120.0,
+                      height: 120.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: imageProvider, fit: BoxFit.cover),
+                      ),
+                    ),
                   ),
                   isGoogle?SizedBox():Positioned(
                     left: 40,
@@ -1537,14 +1532,14 @@ class _DashBoardState extends State<DashBoard> {
               accountName: Text(
                 _name.text,
                 style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     color: Colors.white
                 )
               ), 
               accountEmail: Text(
                 _email.text,
                 style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     color: Colors.white
                 )
               ),
@@ -1554,11 +1549,11 @@ class _DashBoardState extends State<DashBoard> {
                 context, 
                 MaterialPageRoute(builder: (context) => Profile(email: _email.text, token: _token,)),
               ),
-              leading: Icon(Icons.person, color: Colors.white),
+              leading: Icon(Icons.person, color: Colors.white, size: 22,),
               title: Text(
                   "Profile",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     color: Colors.white
                   ),
                 ),
@@ -1573,11 +1568,11 @@ class _DashBoardState extends State<DashBoard> {
                   MaterialPageRoute(builder: (context) => Expenses(email: _email.text, date: date, token: _token,)),
                 );
               },
-              leading: Icon(Icons.account_balance_outlined, color: Colors.white,),
+              leading: Icon(Icons.account_balance_outlined, color: Colors.white, size: 22,),
               title: Text(
                   "Personal Expenses",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     color: Colors.white
                   ),
                 ),
@@ -1589,21 +1584,21 @@ class _DashBoardState extends State<DashBoard> {
                   MaterialPageRoute(builder: (context) => LendCredit(email: _email.text, token: _token,)),
                 );
               },
-              leading: Icon(Icons.credit_card, color: Colors.white,),
+              leading: Icon(Icons.credit_card, color: Colors.white, size: 22,),
               title: Text(
                   "Len-Den",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     color: Colors.white
                   ),
                 ),
             ),
             ListTile(
-              leading: Icon(Icons.border_color, color: Colors.white),
+              leading: Icon(Icons.border_color, color: Colors.white, size: 22,),
               title: Text(
                 "Theme",
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   color: Colors.white
                 ),
               ),
@@ -1616,6 +1611,7 @@ class _DashBoardState extends State<DashBoard> {
                 icon: Icon(
                   Icons.brightness_2,
                   color: themeProvider.darkTheme?Colors.black87:Colors.white,
+                  size: 22,
                 )
               ),
             ),
@@ -1623,11 +1619,11 @@ class _DashBoardState extends State<DashBoard> {
               onTap: () async {
                 await Share.share("Download Settle Now\nhttps://settlenow.herokuapp.com");
               },
-              leading: Icon(Icons.share, color: Colors.white),
+              leading: Icon(Icons.share, color: Colors.white, size: 22,),
               title: Text(
                   "Share",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     color: Colors.white
                   ),
                 ),
@@ -1637,11 +1633,11 @@ class _DashBoardState extends State<DashBoard> {
                 context, 
                 MaterialPageRoute(builder: (context) => AboutUs()),
               ),
-              leading: Icon(Icons.book_outlined, color: Colors.white),
+              leading: Icon(Icons.book_outlined, color: Colors.white, size: 22,),
               title: Text(
                   "About Us",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     color: Colors.white
                   ),
                 ),
@@ -1664,11 +1660,11 @@ class _DashBoardState extends State<DashBoard> {
                   (Route<dynamic> route) => false,
                 );
               },
-              leading: Icon(Icons.logout, color: Colors.white),
+              leading: Icon(Icons.logout, color: Colors.white, size: 22,),
               title: Text(
                   "Log Out",
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 14,
                     color: Colors.white
                   ),
                 ),
@@ -1903,103 +1899,125 @@ class RoomWidget extends StatelessWidget {
   }
 
   Widget roomSectors(BuildContext context, int index) {
-    return InkWell(
-      child: SizedBox(
-        child: Card(
-          elevation: 2.0,
-          clipBehavior: Clip.antiAlias,
-          shadowColor: Theme.of(context).primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column (
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    RoomData[index].roomName, 
-                    textScaleFactor: 1.0,
-                    style: TextStyle(
-                      fontSize: 24,
+    return Slidable(
+      endActionPane: ActionPane(
+        motion: const BehindMotion(), 
+        children: [
+          SlidableAction(
+            onPressed: (context) async {
+              await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
+            },
+            backgroundColor: Colors.blue,
+            label: 'Share',
+            icon: Icons.share,
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+          )
+        ]
+      ),
+      child: InkWell(
+        child: SizedBox(
+          child: Card(
+            elevation: 2.0,
+            clipBehavior: Clip.antiAlias,
+            shadowColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column (
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      RoomData[index].roomName, 
+                      textScaleFactor: 1.0,
+                      style: TextStyle(
+                        fontSize: 22,
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Members: " + RoomData[index].members.toString(),
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor
-                            ),
-                          ),
-                          Text(
-                            "Created: " + RoomData[index].date,
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
-                            },
-                            onLongPress: () async {
-                              Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
-                              _showToast(context, "Join Key Copied");
-                            },
-                            child: Text(
-                              "Room Key: " + RoomData[index].roomKey,
-                              textScaleFactor: 1.0,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Members: " + RoomData[index].members.toString(),
                               style: TextStyle(
-                                color: Theme.of(context).primaryColor
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 13,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Total Spend: ₹ " + RoomData[index].total.toString(),
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor
+                            Text(
+                              "Created: " + RoomData[index].date,
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                              ),
                             ),
-                          ),
-                          Text(
-                            "Your Spend: ₹ " + RoomData[index].spend.toString(),
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor
+                            InkWell(
+                              onTap: () async {
+                                await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
+                              },
+                              onLongPress: () async {
+                                Clipboard.setData(ClipboardData(text: RoomData[index].roomKey));
+                                _showToast(context, "Join Key Copied");
+                              },
+                              child: Text(
+                                "Room Key: " + RoomData[index].roomKey,
+                                textScaleFactor: 1.0,
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                                ),
+                              ),
                             ),
-                          ),
-                          
-                          Text(
-                            "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
-                            style: TextStyle(
-                                color: Theme.of(context).primaryColor
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Total Spend: ₹ " + RoomData[index].total.toString(),
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                              ),
                             ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
+                            Text(
+                              "Your Spend: ₹ " + RoomData[index].spend.toString(),
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                              ),
+                            ),
+                            
+                            Text(
+                              "Average Spend: ₹ " + double.parse((RoomData[index].total/RoomData[index].members).toString()).toStringAsFixed(1),
+                              style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  )
+                ]
                 )
-              ]
-              )
+              ),
             ),
           ),
-        ),
-      onTap: () {
-        _MoveToNext(context, index);
-      },
+        onTap: () {
+          _MoveToNext(context, index);
+        },
+      ),
     );
   }
 

@@ -73,6 +73,13 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
+    lintOptions {
+        disable 'InvalidPackage'
+        disable "Instantiatable"
+        checkReleaseBuilds false
+        abortOnError false
+    }
 }
 
 flutter {
@@ -85,6 +92,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.google.android.gms:play-services-ads:21.2.0'
+    implementation 'com.google.android.play:core:1.10.3'
 }
 
 android.buildTypes.release.ndk.debugSymbolLevel = 'FULL'

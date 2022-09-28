@@ -180,7 +180,7 @@ class _ExpensesState extends State<Expenses> {
                         keyboardType: TextInputType.text,
                         maxLength: 150,
                         maxLines: 1,
-                        style: const TextStyle(fontSize: 18),
+                        style: const TextStyle(fontSize: 15),
                         autocorrect: false,
                         validator: (value) {
                           RegExp validateText = RegExp(r'\b[\w]+\b');
@@ -193,7 +193,7 @@ class _ExpensesState extends State<Expenses> {
                           contentPadding: EdgeInsets.all(8.0),
                           hintText: "Enter Purpose",
                           labelText: "Purpose",
-                          errorStyle: TextStyle(fontSize: 15),
+                          errorStyle: TextStyle(fontSize: 13),
                         ),
                       ),
                       SizedBox(height: 15,),
@@ -260,7 +260,7 @@ class _ExpensesState extends State<Expenses> {
                   Text(
                     purpose,
                     style: TextStyle(
-                      fontSize: 30
+                      fontSize: 26
                     ),
                   ),
                   room?IconButton(onPressed: () async {
@@ -281,27 +281,25 @@ class _ExpensesState extends State<Expenses> {
                 ],
               ),
               SizedBox(height: 25,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      room?Text(type + " (Room)", style: TextStyle(
-                        fontSize: 20
-                      ),)
-                      :Text("Type: " + type, style: TextStyle(
-                        fontSize: 20
-                      ),),
-                      SizedBox(height: 10,),
-                      Text("Date: " + date, style: TextStyle(
-                        fontSize: 20
-                      ),),
-                    ],
-                  ),
-                  Text(amount, style: TextStyle(
-                    fontSize: 20
+                  room?Text(type + " (Room)", style: TextStyle(
+                    fontSize: 18
                   ),)
+                  :Text("Type: " + type, style: TextStyle(
+                    fontSize: 18
+                  ),),
+                  SizedBox(height: 10,),
+                  Text(
+                    "Amount: " + amount, 
+                    style: TextStyle(
+                    fontSize: 18
+                  ),),
+                  SizedBox(height: 10,),
+                  Text("Date: " + date, style: TextStyle(
+                    fontSize: 18
+                  ),),
                 ],
               ),
               SizedBox(height: 25,),
@@ -411,7 +409,7 @@ class _ExpensesState extends State<Expenses> {
                   child: loaded?
                   Text("No Expense Found",
                     style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 23,
                     ))
                   :Text("Loading..."),
                   ))
@@ -442,7 +440,7 @@ class _ExpensesState extends State<Expenses> {
                                 borderRadius: BorderRadius.circular(15.0),
                               ),
                             child: Padding(
-                              padding: const EdgeInsets.all(12.0),
+                              padding: const EdgeInsets.all(10.0),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -460,7 +458,7 @@ class _ExpensesState extends State<Expenses> {
                                           crypto.decrypt(TransList[index]["Purpose"]), 
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            fontSize: 26,
+                                            fontSize: 23,
                                             fontWeight: FontWeight.w500
                                           ),
                                         ),
@@ -472,7 +470,7 @@ class _ExpensesState extends State<Expenses> {
                                           child: Text(
                                             crypto.decrypt(TransList[index]["RoomName"]) + " (Room)",
                                             style: const TextStyle(
-                                              fontSize: 20,
+                                              fontSize: 17,
                                             ),
                                           ),
                                         ),
@@ -484,7 +482,7 @@ class _ExpensesState extends State<Expenses> {
                                           child: Text(
                                             crypto.decrypt(TransList[index]["Date"]),
                                             style: const TextStyle(
-                                              fontSize: 18,
+                                              fontSize: 17,
                                             ),
                                           ),
                                         ),
@@ -499,7 +497,7 @@ class _ExpensesState extends State<Expenses> {
                                       child: Text(
                                         "₹ " + crypto.decrypt(TransList[index]["Amount"]),
                                         style: const TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 18,
                                         ),
                                       ),
                                     ),
@@ -526,7 +524,7 @@ class _ExpensesState extends State<Expenses> {
                                 borderRadius: BorderRadius.circular(15.0),
                               ),
                             child: Padding(
-                              padding: const EdgeInsets.all(12.0),
+                              padding: const EdgeInsets.all(10.0),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -544,7 +542,7 @@ class _ExpensesState extends State<Expenses> {
                                           crypto.decrypt(TransList[index]["Purpose"]), 
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            fontSize: 26,
+                                            fontSize: 23,
                                             fontWeight: FontWeight.w500
                                           ),
                                         ),
@@ -556,7 +554,7 @@ class _ExpensesState extends State<Expenses> {
                                           child: Text(
                                             crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")),
                                             style: const TextStyle(
-                                              fontSize: 20,
+                                              fontSize: 17,
                                             ),
                                           ),
                                         ),
@@ -568,7 +566,7 @@ class _ExpensesState extends State<Expenses> {
                                           child: Text(
                                             crypto.decrypt(TransList[index]["Date"]),
                                             style: const TextStyle(
-                                              fontSize: 18,
+                                              fontSize: 17,
                                             ),
                                           ),
                                         ),
@@ -583,7 +581,7 @@ class _ExpensesState extends State<Expenses> {
                                       child: Text(
                                         "₹ " + crypto.decrypt(TransList[index]["Amount"]),
                                         style: const TextStyle(
-                                          fontSize: 20,
+                                          fontSize: 18,
                                         ),
                                       ),
                                     ),
@@ -622,7 +620,7 @@ class _ExpensesState extends State<Expenses> {
                             keyboardType: TextInputType.number,
                             maxLength: 10,
                             maxLines: 1,
-                            style: const TextStyle(fontSize: 18),
+                            style: const TextStyle(fontSize: 15),
                             autocorrect: false,
                             validator: (value) {
                               RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
@@ -643,7 +641,7 @@ class _ExpensesState extends State<Expenses> {
                             keyboardType: TextInputType.text,
                             maxLength: 150,
                             maxLines: 1,
-                            style: const TextStyle(fontSize: 18),
+                            style: const TextStyle(fontSize: 15),
                             autocorrect: false,
                             validator: (value) {
                               RegExp validateText = RegExp(r'\b[\w]+\b');
@@ -667,25 +665,29 @@ class _ExpensesState extends State<Expenses> {
                                 Text(
                                   "Category",
                                   style: TextStyle(
-                                    fontSize: 18
+                                    fontSize: 16
                                   ),
                                 ),
                                 DropdownButton<String>(
-                                  alignment: AlignmentDirectional.topStart,
                                   borderRadius: BorderRadius.circular(10.0),
                                   itemHeight: 70,
                                   elevation: 1,
                                   hint: Text(
                                     category[categoryIndex],
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 17,
                                     ),
                                   ),
                                   items: category.map((String value) {
                                     return DropdownMenuItem<String>(
                                       alignment: AlignmentDirectional.center,
                                       value: category.indexOf(value).toString(),
-                                      child: Text(value),
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                        ),
+                                      ),
                                     );
                                   }).toList(),
                                   onChanged: (index) {
@@ -706,7 +708,7 @@ class _ExpensesState extends State<Expenses> {
                                 Text(
                                   "Investment Type",
                                   style: TextStyle(
-                                    fontSize: 18
+                                    fontSize: 16
                                   ),
                                 ),
                                 DropdownButton<String>(
@@ -717,7 +719,7 @@ class _ExpensesState extends State<Expenses> {
                                   hint: Text(
                                     investmentCat[investIndex],
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 16,
                                     ),
                                   ),
                                   items: investmentCat.map((String value) {
