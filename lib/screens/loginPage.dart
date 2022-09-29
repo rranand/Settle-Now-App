@@ -67,8 +67,6 @@ class _LoginPageState extends State<LoginPage> {
         _deviceData = deviceData;
       });
     }
-
-    print(_deviceData);
   }
 
   Future _extractEmail() async {
@@ -101,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   _MoveToNext(BuildContext context) async {
-    print(crypto.encrypt(_emailId.text));
     if (_formKey.currentState!.validate()) {
       Navigator.push(
         context,
