@@ -173,8 +173,8 @@ class _OtpNameState extends State<OtpName> {
             'state': crypto.encrypt(JD['regionName']),
             'city': crypto.encrypt(JD['city']),
             'isp': crypto.encrypt(JD['isp']),
-            'device': crypto.encrypt(_deviceData['id']),
-            'deviceID': crypto.encrypt(_deviceData['device']),
+            'device': crypto.encrypt(_deviceData['device']),
+            'deviceID': crypto.encrypt(_deviceData['id']),
             'deviceToken': crypto.encrypt(deviceToken)
           })
         );
