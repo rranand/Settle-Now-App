@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -842,10 +843,13 @@ class _RoomExpenseState extends State<RoomExpense> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     BannerAd newBanner = createBanner(adsID[9]);
-    newBanner.load();
-
     BannerAd newBanner_1 = createBanner(adsID[10]);
-    newBanner_1.load();
+
+    if (Platform.isAndroid) {
+      newBanner.load();
+      newBanner_1.load();
+    }
+      
 
     return Scaffold(
       appBar: AppBar(
@@ -958,12 +962,12 @@ class _RoomExpenseState extends State<RoomExpense> {
                 ):SizedBox(),
               ),
               SliverToBoxAdapter(
-                child: Container(
+                child: Platform.isAndroid?Container(
                   alignment: Alignment.center,
                   child: AdWidget(ad: newBanner),
                   width: newBanner.size.width.toDouble(),
                   height: newBanner.size.height.toDouble(),
-                ),
+                ):SizedBox(),
               ),
               SliverToBoxAdapter(child: const Divider()),
               SliverToBoxAdapter(
@@ -1006,12 +1010,12 @@ class _RoomExpenseState extends State<RoomExpense> {
                       SizedBox(
                         height: 15,
                       ),
-                      Container(
+                      Platform.isAndroid?Container(
                         alignment: Alignment.center,
                         child: AdWidget(ad: newBanner_1),
                         width: newBanner_1.size.width.toDouble(),
                         height: newBanner_1.size.height.toDouble(),
-                      ),
+                      ):SizedBox(height: 0,),
                       SizedBox(
                         height: 5,
                       ),

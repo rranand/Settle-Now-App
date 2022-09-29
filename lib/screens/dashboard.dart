@@ -1,5 +1,6 @@
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -2014,9 +2015,9 @@ class RoomWidget extends StatelessWidget {
       itemBuilder: (BuildContext context, int index){
         final themeProvider = Provider.of<ThemeProvider>(context);
 
-        if (index>0 && index < 9) {
-        BannerAd newBanner = createBanner(adsID[index-1]);
-        newBanner.load();
+        if (Platform.isAndroid && index>0 && index < 9) {
+          BannerAd newBanner = createBanner(adsID[index-1]);
+          newBanner.load();
 
           return Column(
             children: [
