@@ -160,12 +160,12 @@ class _LendPageState extends State<LendPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   "Are You Sure?",
                   style: TextStyle(
-                    fontSize: 25
+                    fontSize: 22
                   ),
                 ),
                 SizedBox(height: 20,),
@@ -173,7 +173,7 @@ class _LendPageState extends State<LendPage> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     SizedBox(
-                      width: 100,
+                      width: 80,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -182,7 +182,7 @@ class _LendPageState extends State<LendPage> {
                       ),
                     ),
                     SizedBox(
-                      width: 100,
+                      width: 80,
                       child: ElevatedButton(
                         onPressed: () async{
                           buildShowDialog(context);
@@ -232,7 +232,7 @@ class _LendPageState extends State<LendPage> {
                 itemCount: data.length,
                 itemBuilder: (BuildContext context, int index) {
                   return SizedBox(
-                    height: 90,
+                    height: 85,
                     child: Card(
                       elevation: 1.0,
                       shadowColor: Theme.of(context).primaryColor,
@@ -240,22 +240,30 @@ class _LendPageState extends State<LendPage> {
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                     child: Padding(
-                      padding: const EdgeInsets.all(12.0),
+                      padding: const EdgeInsets.all(10.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            crypto.decrypt(data[index]["purpose"]), 
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 26,
-                              fontWeight: FontWeight.w500
+                          Expanded(
+                            flex: 1,
+                            child: InkWell(
+                              child: Text(
+                                crypto.decrypt(data[index]["purpose"]), 
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500
+                                ),
+                              ),
+                              onTap: () {
+                                _showToast(context, crypto.decrypt(data[index]["purpose"]));
+                              },
                             ),
                           ),
                           Text(
                             "₹ " + crypto.decrypt(data[index]["amount"]),
                             style: TextStyle(
-                              fontSize: 20,
+                              fontSize: 18,
                               color: (crypto.decrypt(data[index]["amount"])[0]=="-"?Colors.red:Colors.green)
                             ),
                           ),
@@ -291,7 +299,7 @@ class _LendPageState extends State<LendPage> {
                           Text(
                             "Add Credit/Debit",
                             style: TextStyle(
-                              fontSize: 24,
+                              fontSize: 20,
                             ),
                           ),
                           SizedBox(height: 10,),
@@ -304,7 +312,7 @@ class _LendPageState extends State<LendPage> {
                                   keyboardType: TextInputType.text,
                                   maxLength: 150,
                                   maxLines: 1,
-                                  style: const TextStyle(fontSize: 18),
+                                  style: const TextStyle(fontSize: 15),
                                   validator: (value) {
                                     RegExp validateText = RegExp(r'\b[\w]+\b');
                                     if (!validateText.hasMatch(_purpose.text)) {
@@ -325,7 +333,7 @@ class _LendPageState extends State<LendPage> {
                                   keyboardType: TextInputType.number,
                                   maxLength: 20,
                                   maxLines: 1,
-                                  style: const TextStyle(fontSize: 18),
+                                  style: const TextStyle(fontSize: 15),
                                   validator: (value) {
                                     RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
                                     if (!validateNumber.hasMatch(_amount.text)) {

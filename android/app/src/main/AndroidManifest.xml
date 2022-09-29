@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rohit.settlenow">
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
    <application
         android:label="Settle Now"
         android:name="${applicationName}"
@@ -26,6 +26,7 @@
                 android:name="com.google.firebase.messaging.default_notification_channel_id"
                 android:value="settlenow"
             />
+            
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -34,6 +35,11 @@
             <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
 
         </activity>
+        
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-2748051594366591~5715829404"
+        />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

@@ -8,6 +8,7 @@ import 'others/route_service.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 Future<void> backgroundHandler(RemoteMessage message) async {
 }
@@ -20,6 +21,7 @@ Future<void> main() async {
   );
   FirebaseMessaging.onBackgroundMessage(backgroundHandler); 
   LocalNotificationService.initialize();
+  MobileAds.instance.initialize();
 
   runApp(MyApp());
 }
@@ -61,12 +63,17 @@ class _MyAppState extends State<MyApp> {
       builder: (context, _) {
         final themeProvider = Provider.of<ThemeProvider>(context);
         return MaterialApp(
-           debugShowCheckedModeBanner: false,
+          builder: (context, child) {
+            return MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), 
+              child: child! ,
+            );
+          },
           themeMode: themeProvider.darkTheme?ThemeMode.dark:ThemeMode.light,
           theme: MyTheme.lightTheme(context),
           darkTheme: MyTheme.darTheme(context),
           title: "Settle Now",
-          home: LoginPage(),
+          home: SafeArea(child: LoginPage(),),
           onGenerateRoute: RouteServices.generateRoute,
         );
       }

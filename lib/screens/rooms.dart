@@ -1,33 +1,18 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:settlenow/ads.dart';
+import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
 import '../others/themes.dart';
 import 'package:share_plus/share_plus.dart';
-
-class FriendEach {
-  String name;
-  String email;
-  String status;
-  String pic;
-  bool isGoogle;
-
-  FriendEach({required this.name,required this.email,required this.status, required this.pic, required this.isGoogle});
-
-  factory FriendEach.fromJson(Map<String, dynamic> json) {
-    return FriendEach(
-      name: crypto.decrypt(json['name']),
-      email: crypto.decrypt(json['email']),
-      status: crypto.decrypt(json['status']),
-      pic: crypto.decrypt(json['pic']),
-      isGoogle: json['isGoogle'],
-    );
-  }
-}
 
 class RoomExpense extends StatefulWidget {
   final String roomKey;
@@ -85,6 +70,7 @@ class _RoomExpenseState extends State<RoomExpense> {
   List<dynamic> paymentData = [];
   List<FriendEach> friendDataSearched = [];
   bool showAllTransactionData = true;
+  ScrollController _scrollController = ScrollController();
 
   _getPaymentData() async {
     try {
@@ -451,12 +437,12 @@ class _RoomExpenseState extends State<RoomExpense> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   "Are You Sure?",
                   style: TextStyle(
-                    fontSize: 25
+                    fontSize: 22
                   ),
                 ),
                 SizedBox(height: 20,),
@@ -464,7 +450,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     SizedBox(
-                      width: 100,
+                      width: 80,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -473,7 +459,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ),
                     ),
                     SizedBox(
-                      width: 100,
+                      width: 80,
                       child: ElevatedButton(
                         onPressed: () async{
                           buildShowDialog(context);
@@ -518,7 +504,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                     Text(
                       "Add Member",
                       style: TextStyle(
-                        fontSize: 25
+                        fontSize: 22
                       ),
                     ),
                     SizedBox(height: 20,),
@@ -526,7 +512,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       controller: _searchFriend,
                       keyboardType: TextInputType.text,
                       maxLines: 1,
-                      style: const TextStyle(fontSize: 18),
+                      style: const TextStyle(fontSize: 15),
                       autocorrect: false,
                       decoration: InputDecoration(
                         contentPadding: const EdgeInsets.all(8.0),
@@ -541,7 +527,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                     SizedBox(
                       height: MediaQuery.of(context).size.height*0.6,
                       child: _searchFriend.text.isEmpty?friendListWidget(context, friendData):(friendDataSearched.isEmpty
-                      ?Center(child: Text("No User Found", style: TextStyle(fontSize: 20),),) 
+                      ?Center(child: Text("No User Found", style: TextStyle(fontSize: 18),),) 
                       :friendListWidget(context, friendDataSearched))
                     )
                   ],
@@ -552,10 +538,6 @@ class _RoomExpenseState extends State<RoomExpense> {
         );
       }
     );
-  }
-
-  Future<NetworkImage> getProfilePhoto(String id, bool isGoogle) async {
-    return await NetworkImage(isGoogle?id:('https://drive.google.com/uc?id='+id));
   }
 
   sendJoinRequest(String email) async {
@@ -650,34 +632,25 @@ class _RoomExpenseState extends State<RoomExpense> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        data[index].pic.isEmpty?
-                        CircleAvatar(
-                          radius: 18,
-                          backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                          child: null,
-                        )
-                        :FutureBuilder<NetworkImage>(
-                          builder: (ctx, snapshot) {
-                            if (snapshot.hasData) {
-                              return CircleAvatar(
-                                radius: 18,
-                                backgroundImage: snapshot.data,
-                                child: null,
-                              );
-                            } else {
-                              return CircleAvatar(
-                                radius: 18,
-                                backgroundImage: AssetImage('assets/Images/unknown.jpeg'),
-                                child: Center(child: CircularProgressIndicator()),
-                              );
-                            }
-                          },
-                          future: getProfilePhoto(data[index].pic, data[index].isGoogle),
+                        CachedNetworkImage(
+                          imageUrl: data[index].isGoogle?data[index].pic:('https://drive.google.com/uc?id='+(data[index].pic.length==0?"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":data[index].pic)),
+                          progressIndicatorBuilder: (context, url, downloadProgress) => 
+                            CircularProgressIndicator(value: downloadProgress.progress),
+                          errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 45.0,
+                            height: 45.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider, fit: BoxFit.cover),
+                            ),
+                          ),
                         ),
                         Text(
                           data[index].name,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 17,
                           ),
                         ),
                         IconButton(
@@ -708,9 +681,168 @@ class _RoomExpenseState extends State<RoomExpense> {
     );
   }
 
+  Widget memberCard(BuildContext context, int index) {
+    return SizedBox(
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            if (this.mounted) {
+              expenseDetailByMember = crypto.decrypt(list[index]['email']);
+              expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
+            }
+            _extractExpenseData(crypto.decrypt(list[index]['email']));
+          },
+          child: Card(
+            elevation: 5.0,
+            shadowColor:  Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Stack(
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: crypto.decrypt(list[index]['pic']).length==0?"https://drive.google.com/uc?id=11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":crypto.decrypt(list[index]['pic']),
+                          progressIndicatorBuilder: (context, url, downloadProgress) => 
+                            CircularProgressIndicator(value: downloadProgress.progress),
+                          errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 65.0,
+                            height: 65.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                image: imageProvider, fit: BoxFit.cover),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 39,
+                          right: -5,
+                          child: Text(
+                            (list[index]['own']?"👑 ":"") + (list[index]['done']?"🔒":""),
+                            style: TextStyle(
+                              fontSize: 20
+                            ),
+                          ),
+                        )
+                      ]
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        InkWell(
+                          child: Text(
+                            crypto.decrypt(list[index]['Name']),
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w500,
+                              foreground: Paint()..shader = linearGradient,
+                            ),
+                          ),
+                          onTap: () => _showToast(context, crypto.decrypt(list[index]['Name'])),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        Text(
+                          "Total: ₹ " + crypto.decrypt(list[index]['Expense']),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            foreground: Paint()..shader = linearGradient_2,
+                          ),
+                        ),
+                        SizedBox(
+                          height: 8,
+                        ),
+                        double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))>0?
+                        Text(
+                          "Gain: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.green,
+                          ),
+                        ):double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))<0?Text(
+                          "Loss: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.red,
+                          ),
+                        ):SizedBox(),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget memberAll(BuildContext context) {
+    return SizedBox(
+      width: 140,
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: InkWell(
+          onTap: () {
+            if (this.mounted) {
+              setState(() {
+                expenseTitle = "All Expense";
+                expenseDetailByMember = "all";
+              });
+            }
+            _extractExpenseData("all");
+          },
+          child: Card(
+            elevation: 5.0,
+            shadowColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: Text(
+                  "ALL",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    foreground: Paint()..shader = linearGradient_3,
+                  ),
+                ),
+              )
+            )
+          )
+        )
+      )
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    BannerAd newBanner = createBanner(adsID[9]);
+    newBanner.load();
+
+    BannerAd newBanner_1 = createBanner(adsID[10]);
+    newBanner_1.load();
 
     return Scaffold(
       appBar: AppBar(
@@ -755,12 +887,12 @@ class _RoomExpenseState extends State<RoomExpense> {
             child: Text("Loading..."),
           ),
         )
-        :Scrollbar(
-          radius: Radius.circular(10.0),
-          thickness: 5.5,
-          child: ListView(
-              children: [
-                InkWell(
+        :NestedScrollView(
+          controller: _scrollController,
+          headerSliverBuilder: (context, value) {
+            return [
+              SliverToBoxAdapter(
+                child: InkWell(
                   child: ListTile(
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -780,23 +912,33 @@ class _RoomExpenseState extends State<RoomExpense> {
                     _showToast(context, "Join Key Copied");
                   },
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Total Expense"),
                   trailing: Text(crypto.decrypt(list[0]["TotalExpense"])),
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Average Expense"),
                   trailing: Text(crypto.decrypt(list[0]["AverageExpense"])),
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Members"),
                   trailing: Text(crypto.decrypt(list[0]["cnt"])),
                 ),
-                ListTile(
+              ),
+              SliverToBoxAdapter(
+                child: ListTile(
                   title: const Text("Created On"),
                   trailing: Text(crypto.decrypt(list[0]["date"])),
                 ),
-                !isClear?Padding(
+              ),
+              SliverToBoxAdapter(
+                child: !isClear?Padding(
                   padding: EdgeInsets.all(15.0),
                   child: SizedBox(
                     height: 45,
@@ -811,11 +953,23 @@ class _RoomExpenseState extends State<RoomExpense> {
                     ),
                   ),
                 ):SizedBox(),
-                const Divider(),
-                const SizedBox(
+              ),
+              SliverToBoxAdapter(
+                child: Container(
+                  alignment: Alignment.center,
+                  child: AdWidget(ad: newBanner),
+                  width: newBanner.size.width.toDouble(),
+                  height: newBanner.size.height.toDouble(),
+                ),
+              ),
+              SliverToBoxAdapter(child: const Divider()),
+              SliverToBoxAdapter(
+                child: const SizedBox(
                   height: 5,
                 ),
-                Padding(
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
                   padding: EdgeInsets.all(15.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -823,7 +977,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       Text(
                         "Member",
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -832,139 +986,16 @@ class _RoomExpenseState extends State<RoomExpense> {
                       ),
                       SizedBox(
                         width: MediaQuery.of(context).size.width,
-                        height: 190,
+                        height: 140,
                         child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         shrinkWrap: true,
                         itemCount: list.length,
                         itemBuilder: (BuildContext context, int index) {
                           if (index == 0) {
-                            return SizedBox(
-                              height: 190,
-                              width: 180,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (this.mounted) {
-                                      setState(() {
-                                        expenseTitle = "All Expense";
-                                        expenseDetailByMember = "all";
-                                      });
-                                    }
-                                    _extractExpenseData("all");
-                                  },
-                                  child: Card(
-                                    elevation: 5.0,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Center(
-                                        child: Text(
-                                          "ALL",
-                                          style: TextStyle(
-                                            fontSize: 26,
-                                            fontWeight: FontWeight.bold,
-                                            foreground: Paint()..shader = linearGradient_3,
-                                          ),
-                                        ),
-                                      )
-                                    )
-                                  )
-                                )
-                              )
-                            );
+                            return memberAll(context);
                           } else {
-                            return SizedBox(
-                              height: 190,
-                              width: 175,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (this.mounted) {
-                                      expenseDetailByMember = crypto.decrypt(list[index]['email']);
-                                      expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
-                                    }
-                                    _extractExpenseData(crypto.decrypt(list[index]['email']));
-                                  },
-                                  child: Card(
-                                    elevation: 5.0,
-                                    shadowColor:  Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          SizedBox(
-                                            height: 8,
-                                          ),
-                                          InkWell(
-                                            child: Text(
-                                              crypto.decrypt(list[index]['Name']),
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.w500,
-                                                foreground: Paint()..shader = linearGradient,
-                                              ),
-                                            ),
-                                            onTap: () => _showToast(context, crypto.decrypt(list[index]['Name'])),
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          Text(
-                                            "Total: ₹ " + crypto.decrypt(list[index]['Expense']),
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              foreground: Paint()..shader = linearGradient_2,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 12,
-                                          ),
-                                          double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))>0?
-                                          Text(
-                                            "Gain: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.green,
-                                            ),
-                                          ):double.parse(double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2))<0?Text(
-                                            "Loss: ₹ " + double.parse(crypto.decrypt(list[index]["current"])).toStringAsFixed(2),
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.red,
-                                            ),
-                                          ):SizedBox(),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              (list[index]['own']?"👑 ":"") + (list[index]['done']?"🔒":""),
-                                              style: TextStyle(
-                                                fontSize: 20
-                                              ),
-                                            )
-                                          )
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
+                            return memberCard(context, index);
                           }
                         },
                       ),
@@ -972,37 +1003,44 @@ class _RoomExpenseState extends State<RoomExpense> {
                       SizedBox(
                         height: 15,
                       ),
+                      Container(
+                        alignment: Alignment.center,
+                        child: AdWidget(ad: newBanner_1),
+                        width: newBanner_1.size.width.toDouble(),
+                        height: newBanner_1.size.height.toDouble(),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
                       Text(
                         expenseTitle,
                         style: TextStyle(
-                          fontSize: 26,
+                          fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      TransList.isEmpty? (
-                        Center(
-                          child: loaded? Text(
-                            "No Expense Found",
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          )
-                          :CircularProgressIndicator()
-                        )
-                      )
-                      :SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: heightExpense,
-                          child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token, refreshIndicatorKey: _refreshIndicatorKey, locked: locked,),
-                        ),
                     ],
                   ),
-                )
-              ],
-            ),
+                ),
+              )
+            ];
+          },
+          body: TransList.isEmpty? (
+            Center(
+              child: loaded? Text(
+                "No Expense Found",
+                style: TextStyle(
+                  fontSize: 18,
+                ),
+              )
+              :CircularProgressIndicator()
+            )
+          )
+          :SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: heightExpense,
+            child: ExpenseData(TransList: TransList,RoomKey: widget.roomKey, Email: widget.email, Token: widget.token, refreshIndicatorKey: _refreshIndicatorKey, locked: locked,),
+          ),
         ),
       ):Scrollbar(
           radius: Radius.circular(10.0),
@@ -1024,7 +1062,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                               "From"
                             ),
                             DropdownButton<String>(
-                              alignment: AlignmentDirectional.topStart,
                               borderRadius: BorderRadius.circular(10.0),
                               itemHeight: 60,
                               elevation: 1,
@@ -1056,7 +1093,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                               "To"
                             ),
                             DropdownButton<String>(
-                              alignment: AlignmentDirectional.topStart,
                               borderRadius: BorderRadius.circular(10.0),
                               itemHeight: 60,
                               elevation: 1,
@@ -1099,12 +1135,13 @@ class _RoomExpenseState extends State<RoomExpense> {
                           fontWeight: FontWeight.w600
                         ),),
                       ):Column (
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             "Total Amount Paid: ₹ " + paymentTotalALL,
                           ),
                           Padding(
-                            padding: const EdgeInsets.all(12.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: ListView.separated(
                               separatorBuilder: (context, index) => SizedBox(height: 5,),
                               shrinkWrap: true,
@@ -1118,39 +1155,28 @@ class _RoomExpenseState extends State<RoomExpense> {
                                     borderRadius: BorderRadius.circular(15.0),
                                   ),
                                   child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              crypto.decrypt(allTransactionData[index]["sender"]),
+                                        SizedBox(
+                                          width: MediaQuery.of(context).size.width,
+                                          child: Expanded(
+                                            flex: 1,
+                                            child: Text(
+                                              crypto.decrypt(allTransactionData[index]["sender"]) + " -> " + crypto.decrypt(allTransactionData[index]["receiver"]),
+                                              overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(
-                                                fontSize: 23,
+                                                fontSize: 21,
                                               ),
                                             ),
-                                            Text(
-                                              "---->",
-                                              style: const TextStyle(
-                                                fontSize: 23,
-                                              ),
-                                            ),
-                                            Text(
-                                              crypto.decrypt(allTransactionData[index]["receiver"]),
-                                              style: const TextStyle(
-                                                fontSize: 23,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                         SizedBox(height: 10,),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Expanded(
-                                              flex: 1,
                                               child: SizedBox(
                                                 width: MediaQuery.of(context).size.width * 0.90,
                                                 child: Opacity(
@@ -1158,7 +1184,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                   child: Text(
                                                     crypto.decrypt(allTransactionData[index]["Date"]),
                                                     style: const TextStyle(
-                                                      fontSize: 18,
+                                                      fontSize: 16,
                                                     ),
                                                   ),
                                                 ),
@@ -1171,7 +1197,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                 child: Text(
                                                   "₹ " + crypto.decrypt(allTransactionData[index]["Amount"]),
                                                   style: const TextStyle(
-                                                    fontSize: 20,
+                                                    fontSize: 16,
                                                   ),
                                                 ),
                                               ),
@@ -1217,6 +1243,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               height: 70,
+                              width: MediaQuery.of(context).size.width,
                               child: Card(
                                 elevation: 5.0,
                                 shadowColor: Theme.of(context).primaryColor,
@@ -1224,35 +1251,23 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   borderRadius: BorderRadius.circular(15.0),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(10.0),
+                                  padding: const EdgeInsets.all(12.0),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Expanded(
-                                        flex: 1,
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context).size.width * 0.90,
-                                          child: Opacity(
-                                            opacity: 0.8,
-                                            child: Text(
-                                              crypto.decrypt(paymentData[index]["Date"]),
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
+                                      Opacity(
+                                        opacity: 0.8,
+                                        child: Text(
+                                          crypto.decrypt(paymentData[index]["Date"]),
+                                          style: const TextStyle(
+                                            fontSize: 18,
                                           ),
                                         ),
                                       ),
-                                      Expanded(
-                                        flex: 0,
-                                        child: SizedBox(
-                                          width: MediaQuery.of(context).size.width * 0.20,
-                                          child: Text(
-                                            "₹ " + crypto.decrypt(paymentData[index]["Amount"]),
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                            ),
-                                          ),
+                                      Text(
+                                        "₹ " + crypto.decrypt(paymentData[index]["Amount"]),
+                                        style: const TextStyle(
+                                          fontSize: 18,
                                         ),
                                       ),
                                     ]
@@ -1329,7 +1344,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                       ),
                                                     ),
                                                     DropdownButton<String>(
-                                                      alignment: AlignmentDirectional.topEnd,
                                                       borderRadius: BorderRadius.circular(10.0),
                                                       itemHeight: 60,
                                                       elevation: 1,
@@ -1712,7 +1726,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                       Text(
                         "Expense Detail",
                         style: TextStyle(
-                          fontSize: 30
+                          fontSize: 23
                         ),
                       ),
                       widget.Email==email&&!locked?IconButton(
@@ -1730,7 +1744,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                   Text(
                     _purpose.text,
                     style: TextStyle(
-                      fontSize: 25
+                      fontSize: 22
                     ),
                   ),
                   SizedBox(height: 10,),
@@ -1816,7 +1830,7 @@ class _ExpenseDataState extends State<ExpenseData> {
               );
             },
             child: SizedBox(
-              height: 125,
+              height: 134,
               child: Card(
                 elevation: 5.0,
                 shadowColor: Theme.of(context).primaryColor,
@@ -1839,7 +1853,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               crypto.decrypt(widget.TransList[index]["Purpose"]), 
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
-                                fontSize: 26,
+                                fontSize: 24,
                                 fontWeight: FontWeight.w500
                               ),
                             ),
@@ -1851,7 +1865,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               child: Text(
                                 crypto.decrypt(widget.TransList[index]["Name"]),
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                 ),
                               ),
                             ),
@@ -1863,7 +1877,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               child: Text(
                                 crypto.decrypt(widget.TransList[index]["Date"]),
                                 style: const TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                 ),
                               ),
                             ),
@@ -1878,7 +1892,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                           child: Text(
                             "₹ " + crypto.decrypt(widget.TransList[index]["Amount"]),
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 19,
                             ),
                           ),
                         ),

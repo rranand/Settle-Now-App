@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Maintainence extends StatelessWidget {
-  Maintainence({ Key? key }) : super(key: key);
+class Maintenance extends StatelessWidget {
+  Maintenance({ Key? key }) : super(key: key);
   final Shader linearGradient = LinearGradient(
       colors: <Color>[Color.fromARGB(255, 243, 33, 112), Color.fromARGB(255, 255, 235, 7), Color.fromARGB(255,33, 150, 243), Color.fromARGB(255, 255, 0, 235)],
     ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
@@ -24,7 +24,7 @@ class Maintainence extends StatelessWidget {
                   "Sorry, we are down for maintenance but will be back in no time!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 26,
+                    fontSize: 25,
                     foreground: Paint()..shader = linearGradient,
                   ),
                 ),

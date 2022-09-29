@@ -99,7 +99,7 @@ class _RoomJoinState extends State<RoomJoin> {
             CircularProgressIndicator(color: Theme.of(context).primaryColor,),
             SizedBox(height: 10,),
             Text(message, style: TextStyle(
-              fontSize: 25,
+              fontSize: 22,
             ),),
           ],
         )

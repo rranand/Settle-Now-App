@@ -34,6 +34,7 @@ class _LoginPageState extends State<LoginPage> {
   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   bool darkTheme = false;
   Map<String, dynamic> _deviceData = <String, dynamic>{};
+  double textScale = 1.0;
 
   Future<void> initPlatformState() async {
     var deviceData = <String, dynamic>{};
@@ -49,8 +50,8 @@ class _LoginPageState extends State<LoginPage> {
         if (Platform.isAndroid) {
           AndroidDeviceInfo build = await  deviceInfoPlugin.androidInfo;
           deviceData = <String, dynamic>{
-            'id': build.androidId,
-            'device': build.device
+            'id': build.id,
+            'device': build.product
           };
         }
       }
@@ -144,6 +145,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    textScale = MediaQuery.of(context).textScaleFactor;
     
     return Scaffold(
       body: SingleChildScrollView(
@@ -153,8 +155,8 @@ class _LoginPageState extends State<LoginPage> {
           alignment: Alignment.center,
           child: canLoad?Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: MediaQuery.of(context).size.height/5,),
               Image.asset(
                 themeProvider.darkTheme?'assets/Images/SN_dark.jpg':'assets/Images/SN.jpg',
                 height: 150,
@@ -210,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               SizedBox(
-                height: 40,
+                height: 15,
               ),
               InkWell(
                 onTap: () async {
@@ -262,7 +264,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 }, 
                 child: SizedBox(
-                  width: 240,
+                  width: 245,
                   child: Card(
                     color: Theme.of(context).primaryColor,
                     elevation: 2.5,
