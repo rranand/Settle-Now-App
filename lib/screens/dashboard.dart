@@ -5,7 +5,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -1104,7 +1103,7 @@ class _DashBoardState extends State<DashBoard> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: CachedNetworkImage(
-                        imageUrl: crypto.decrypt(RoomRequest[index]["pic"]).length==0?"https://drive.google.com/uc?id=11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":crypto.decrypt(RoomRequest[index]["pic"]),
+                        imageUrl: crypto.decrypt(RoomRequest[index]["pic"]).length==0?global.driveUrl+"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":crypto.decrypt(RoomRequest[index]["pic"]),
                         progressIndicatorBuilder: (context, url, downloadProgress) => 
                             CircularProgressIndicator(value: downloadProgress.progress),
                         errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
@@ -1461,7 +1460,7 @@ class _DashBoardState extends State<DashBoard> {
               currentAccountPicture: Stack(
                 children: [
                   CachedNetworkImage(
-                    imageUrl: isGoogle?_profilePicID:('https://drive.google.com/uc?id='+(_profilePicID.length==0?"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":_profilePicID)),
+                    imageUrl: isGoogle?_profilePicID:(global.driveUrl+(_profilePicID.length==0?"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":_profilePicID)),
                     progressIndicatorBuilder: (context, url, downloadProgress) => 
                             CircularProgressIndicator(value: downloadProgress.progress),
                     errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
@@ -1899,22 +1898,7 @@ class RoomWidget extends StatelessWidget {
   }
 
   Widget roomSectors(BuildContext context, int index) {
-    return Slidable(
-      endActionPane: ActionPane(
-        motion: const BehindMotion(), 
-        children: [
-          SlidableAction(
-            onPressed: (context) async {
-              await Share.share("Join "+ RoomData[index].roomName + "\nRoom Key: " + RoomData[index].roomKey + "\n" + RoomData[index].roomLink);
-            },
-            backgroundColor: Colors.blue,
-            label: 'Share',
-            icon: Icons.share,
-            borderRadius: BorderRadius.all(Radius.circular(15)),
-          )
-        ]
-      ),
-      child: InkWell(
+    return InkWell(
         child: SizedBox(
           child: Card(
             elevation: 2.0,
@@ -2017,8 +2001,7 @@ class RoomWidget extends StatelessWidget {
         onTap: () {
           _MoveToNext(context, index);
         },
-      ),
-    );
+      );
   }
 
   @override

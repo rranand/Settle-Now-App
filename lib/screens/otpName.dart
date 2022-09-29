@@ -298,14 +298,14 @@ class _OtpNameState extends State<OtpName> {
                       height: 20,
                     ),
                     SizedBox(
-                      width: 150,
+                      width: 140,
                       height: 45,
                       child: ElevatedButton(
                         child: Text(
                           "Login",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                            fontSize: 15,
                             color: Colors.white
                           ),
                         ),

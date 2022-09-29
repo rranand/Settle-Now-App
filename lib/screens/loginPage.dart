@@ -67,6 +67,8 @@ class _LoginPageState extends State<LoginPage> {
         _deviceData = deviceData;
       });
     }
+
+    print(_deviceData);
   }
 
   Future _extractEmail() async {
@@ -194,17 +196,17 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 15,
               ),
               SizedBox(
-                width: 150,
+                width: 140,
                 height: 45,
                 child: ElevatedButton(
                   child: Text(
                     "Send OTP",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 18,
+                      fontSize: 15,
                       color: Colors.white
                     ),
                   ),
@@ -212,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               SizedBox(
-                height: 15,
+                height: 10,
               ),
               InkWell(
                 onTap: () async {
@@ -264,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
                   );
                 }, 
                 child: SizedBox(
-                  width: 245,
+                  width: 240,
                   child: Card(
                     color: Theme.of(context).primaryColor,
                     elevation: 2.5,
@@ -282,7 +284,7 @@ class _LoginPageState extends State<LoginPage> {
                             "Sign In With Google",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 18,
+                              fontSize: 15,
                               color: Colors.white
                             ),
                           )

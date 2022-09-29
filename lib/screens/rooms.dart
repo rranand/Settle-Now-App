@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
@@ -145,7 +146,9 @@ class _RoomExpenseState extends State<RoomExpense> {
     }
 
     _extractExpenseData(expenseDetailByMember);
-    getFriendData();
+    if (widget.isRoomActive) {
+      getFriendData();
+    }
     _getPaymentData();
   }
 
@@ -633,7 +636,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         CachedNetworkImage(
-                          imageUrl: data[index].isGoogle?data[index].pic:('https://drive.google.com/uc?id='+(data[index].pic.length==0?"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":data[index].pic)),
+                          imageUrl: data[index].isGoogle?data[index].pic:(global.driveUrl+(data[index].pic.length==0?"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":data[index].pic)),
                           progressIndicatorBuilder: (context, url, downloadProgress) => 
                             CircularProgressIndicator(value: downloadProgress.progress),
                           errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
@@ -709,7 +712,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                     child: Stack(
                       children: [
                         CachedNetworkImage(
-                          imageUrl: crypto.decrypt(list[index]['pic']).length==0?"https://drive.google.com/uc?id=11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":crypto.decrypt(list[index]['pic']),
+                          imageUrl: crypto.decrypt(list[index]['pic']).length==0?global.driveUrl+"11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8":crypto.decrypt(list[index]['pic']),
                           progressIndicatorBuilder: (context, url, downloadProgress) => 
                             CircularProgressIndicator(value: downloadProgress.progress),
                           errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
@@ -892,25 +895,25 @@ class _RoomExpenseState extends State<RoomExpense> {
           headerSliverBuilder: (context, value) {
             return [
               SliverToBoxAdapter(
-                child: InkWell(
+                child: Slidable(
+                  endActionPane: ActionPane(
+                    motion: const BehindMotion(), 
+                    children: [
+                      SlidableAction(
+                        onPressed: (context) async {
+                          await Share.share("Join "+ widget.roomName + "\nRoom Key: " + widget.roomKey + "\n" + widget.roomLink);
+                        },
+                        backgroundColor: Colors.blue,
+                        label: 'Share',
+                        icon: Icons.share,
+                        borderRadius: BorderRadius.all(Radius.circular(15)),
+                      )
+                    ]
+                  ),
                   child: ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text("Room Key"),
-                        SizedBox(width: 10,),
-                        Icon(Icons.share, size: 18,)
-                      ],
-                    ),
+                    title: Text("Room Key"),
                     trailing: Text(widget.roomKey),
                   ),
-                  onTap: () async {
-                    await Share.share("Join "+ widget.roomName + "\nRoom Key: " + widget.roomKey + "\n" + widget.roomLink);
-                  },
-                  onLongPress: () async {
-                    Clipboard.setData(ClipboardData(text: widget.roomKey));
-                    _showToast(context, "Join Key Copied");
-                  },
                 ),
               ),
               SliverToBoxAdapter(
