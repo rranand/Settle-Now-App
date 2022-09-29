@@ -46,10 +46,18 @@
             {
               "client_id": "950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "950526449356-r2a1gb09mcqruuve59kpjnibckrtjjth.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rohit.settlenow"
+              }
             }
           ]
         }
-      }
+      },
+      "admob_app_id": "ca-app-pub-2748051594366591~5715829404"
     }
   ],
   "configuration_version": "1"
