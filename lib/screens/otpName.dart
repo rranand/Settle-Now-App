@@ -47,21 +47,11 @@ class _OtpNameState extends State<OtpName> {
     var deviceData = <String, dynamic>{};
 
     try {
-      if (kIsWeb) {
-        WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
-        deviceData = <String, dynamic>{
-          'id': describeEnum(data.browserName),
-          'device': describeEnum(data.browserName) + " ("+data.platform!+")"
-        };
-      } else {
-        if (Platform.isAndroid) {
-          AndroidDeviceInfo build = await  deviceInfoPlugin.androidInfo;
-          deviceData = <String, dynamic>{
-            'id': build.id,
-            'device': build.product
-          };
-        }
-      }
+      AndroidDeviceInfo build = await  deviceInfoPlugin.androidInfo;
+      deviceData = <String, dynamic>{
+        'id': build.id,
+        'device': build.product
+      };
     } on PlatformException {
       deviceData = <String, dynamic>{
         'id': 'Not Found',

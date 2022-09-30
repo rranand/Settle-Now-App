@@ -845,11 +845,8 @@ class _RoomExpenseState extends State<RoomExpense> {
     BannerAd newBanner = createBanner(adsID[9]);
     BannerAd newBanner_1 = createBanner(adsID[10]);
 
-    if (Platform.isAndroid) {
-      newBanner.load();
-      newBanner_1.load();
-    }
-      
+    newBanner.load();
+    newBanner_1.load();
 
     return Scaffold(
       appBar: AppBar(
@@ -962,12 +959,12 @@ class _RoomExpenseState extends State<RoomExpense> {
                 ):SizedBox(),
               ),
               SliverToBoxAdapter(
-                child: Platform.isAndroid?Container(
+                child: Container(
                   alignment: Alignment.center,
                   child: AdWidget(ad: newBanner),
                   width: newBanner.size.width.toDouble(),
                   height: newBanner.size.height.toDouble(),
-                ):SizedBox(),
+                ),
               ),
               SliverToBoxAdapter(child: const Divider()),
               SliverToBoxAdapter(
@@ -1010,12 +1007,12 @@ class _RoomExpenseState extends State<RoomExpense> {
                       SizedBox(
                         height: 15,
                       ),
-                      Platform.isAndroid?Container(
+                      Container(
                         alignment: Alignment.center,
                         child: AdWidget(ad: newBanner_1),
                         width: newBanner_1.size.width.toDouble(),
                         height: newBanner_1.size.height.toDouble(),
-                      ):SizedBox(height: 0,),
+                      ),
                       SizedBox(
                         height: 5,
                       ),

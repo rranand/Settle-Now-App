@@ -2016,7 +2016,7 @@ class RoomWidget extends StatelessWidget {
       itemBuilder: (BuildContext context, int index){
         final themeProvider = Provider.of<ThemeProvider>(context);
 
-        if (Platform.isAndroid && index>0 && index < 9) {
+        if (index>0 && index < 9) {
           BannerAd newBanner = createBanner(adsID[index-1]);
           newBanner.load();
 
