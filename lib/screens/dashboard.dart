@@ -1124,9 +1124,10 @@ class _DashBoardState extends State<DashBoard> {
                         child: Column (
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
+                            Expanded(
+                              flex: 0,
+                              child: SizedBox(
                               width: MediaQuery.of(context).size.width - 140,
-                              child: Expanded(
                                 child: Text(
                                   crypto.decrypt(RoomRequest[index]["by"]) + " invited to join " + crypto.decrypt(RoomRequest[index]["name"]),
                                   style: TextStyle(
