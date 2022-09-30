@@ -1,12 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/ads.dart';
