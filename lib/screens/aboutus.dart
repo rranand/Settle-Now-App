@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:settlenow/functions/gradient.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutUs extends StatelessWidget {
   AboutUs({ Key? key }) : super(key: key);
 
-  final Shader linearGradient = LinearGradient(
-      colors: <Color>[Color.fromARGB(255, 243, 33, 112), Color.fromARGB(255, 255, 235, 7), Color.fromARGB(255,33, 150, 243), Color.fromARGB(255, 255, 0, 235)],
-    ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+  
 
   @override
   Widget build(BuildContext context) {

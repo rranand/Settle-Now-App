@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
 import '../others/themes.dart';
@@ -11,7 +12,9 @@ class Expenses extends StatefulWidget {
   final String email;
   final String date;
   final String token;
-  const Expenses({ Key? key, required this.email, required this.date, required this.token}) : super(key: key);
+  const Expenses(
+      {Key? key, required this.email, required this.date, required this.token})
+      : super(key: key);
 
   @override
   _ExpensesState createState() => _ExpensesState();
@@ -19,14 +22,43 @@ class Expenses extends StatefulWidget {
 
 class _ExpensesState extends State<Expenses> {
   List<dynamic> TransList = [];
-  List<String> Months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  List<String> Months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December'
+  ];
   final TextEditingController _amt = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = new GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
   String title = "Personal Expense";
-  List<String> category = ["Fashion", "Investment", "Food", "Traveling", "Household", "Health", "Entertainment", "Education", "Miscellaneous"];
-  List<String> investmentCat = ["Mutual Fund", "Cryptography", "Fixed Deposit", "Stock"];
+  List<String> category = [
+    "Fashion",
+    "Investment",
+    "Food",
+    "Traveling",
+    "Household",
+    "Health",
+    "Entertainment",
+    "Education",
+    "Miscellaneous"
+  ];
+  List<String> investmentCat = [
+    "Mutual Fund",
+    "Cryptography",
+    "Fixed Deposit",
+    "Stock"
+  ];
   int categoryIndex = 7;
   int investIndex = 0;
   String CurDate = "";
@@ -35,43 +67,41 @@ class _ExpensesState extends State<Expenses> {
 
   Future _initialization() async {
     var now = DateTime.now();
-    CurDate = (now.month-1).toString() + now.year.toString();
-    
+    CurDate = (now.month - 1).toString() + now.year.toString();
+
     String yr = "";
     String mn = "";
 
-    for(int i=widget.date.length-1; i>=0; i--) {
+    for (int i = widget.date.length - 1; i >= 0; i--) {
       if (yr.length != 4) {
         yr = widget.date[i] + yr;
       } else {
         mn = widget.date[i] + mn;
       }
     }
-    
+
     title = Months[int.parse(mn)] + ", " + yr;
 
     try {
-      final response = await http.post(
-        Uri.parse(global.url + 'ptransaction'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Auth': widget.token
-        },
-        body: jsonEncode({
-          'email': crypto.encrypt(widget.email),
-          'date': crypto.encrypt(widget.date),
-        })
-      );
-      
+      final response = await http.post(Uri.parse(global.url + 'ptransaction'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'date': crypto.encrypt(widget.date),
+          }));
+
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
         loaded = true;
-        TransList =  jsonDecode(response.body)['data'];
+        TransList = jsonDecode(response.body)['data'];
       } else {
-        _showToast(context, crypto.decrypt(TransData["Message"]));
+        showToast(context, crypto.decrypt(TransData["Message"]));
       }
-    } on Exception catch(_) {
-      _showToast(context, "No Internet Connection");
+    } on Exception catch (_) {
+      showToast(context, "No Internet Connection");
     }
     if (this.mounted) {
       setState(() {});
@@ -81,32 +111,31 @@ class _ExpensesState extends State<Expenses> {
   removeRoomTransaction(String id) async {
     try {
       final response = await http.delete(
-        Uri.parse(global.url + 'transaction/personalExpense'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Auth': widget.token
-        },
-        body: jsonEncode({
-          'email': crypto.encrypt(widget.email),
-          'id': crypto.encrypt(id)
-        })
-      );
-      
+          Uri.parse(global.url + 'transaction/personalExpense'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'id': crypto.encrypt(id)
+          }));
+
       var TransData = jsonDecode(response.body);
-      _showToast(context, crypto.decrypt(TransData["Message"]));
+      showToast(context, crypto.decrypt(TransData["Message"]));
       await _initialization();
-    } on Exception catch(_) {
-      _showToast(context, "No Internet Connection");
+    } on Exception catch (_) {
+      showToast(context, "No Internet Connection");
     }
     if (this.mounted) {
       setState(() {});
     }
   }
 
-  updatePersonalTransaction(String purpose, String amount, String flag, String id) async {
+  updatePersonalTransaction(
+      String purpose, String amount, String flag, String id) async {
     try {
-      final response = await http.put(
-          Uri.parse(global.url + 'ptransaction'),
+      final response = await http.put(Uri.parse(global.url + 'ptransaction'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'Auth': widget.token
@@ -117,137 +146,153 @@ class _ExpensesState extends State<Expenses> {
             'amount': crypto.encrypt(amount),
             'flag': crypto.encrypt(flag),
             'id': crypto.encrypt(id)
-          })
-        );
-      
+          }));
+
       var TransData = jsonDecode(response.body);
-      _showToast(context, crypto.decrypt(TransData["Message"]));
+      showToast(context, crypto.decrypt(TransData["Message"]));
       await _initialization();
-    } on Exception catch(_) {
-      _showToast(context, "No Internet Connection");
+    } on Exception catch (_) {
+      showToast(context, "No Internet Connection");
     }
     if (this.mounted) {
       setState(() {});
     }
   }
 
-  Widget _buildUpdateDialog(BuildContext context,String id, String purpose, String amount) {
+  Widget _buildUpdateDialog(
+      BuildContext context, String id, String purpose, String amount) {
     TextEditingController _updatePurpose = TextEditingController();
     TextEditingController _updateAmount = TextEditingController();
-    
-    return StatefulBuilder(
-      builder: (context, setState) {
-        _updateAmount.text = amount.substring(2);
-        _updatePurpose.text = purpose;
 
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+    return StatefulBuilder(builder: (context, setState) {
+      _updateAmount.text = amount.substring(2);
+      _updatePurpose.text = purpose;
+
+      return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SingleChildScrollView(
             child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Form(
-                  key: _updateExpense,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextFormField(
-                        controller: _updateAmount,
-                        keyboardType: TextInputType.number,
-                        maxLength: 10,
-                        maxLines: 1,
-                        style: const TextStyle(fontSize: 18),
-                        autocorrect: false,
-                        validator: (value) {
-                          RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
-                          if (!validateNumber.hasMatch(_updateAmount.text)) {
-                            return "Enter Valid Amount";
-                          }
-                          return null;
-                        },
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.all(8.0),
-                          hintText: "Enter Amount",
-                          labelText: "Amount",
-                          errorStyle: TextStyle(fontSize: 15),
-                        ),
-                      ),
-                      SizedBox(height: 10,),
-                      TextFormField(
-                        controller: _updatePurpose,
-                        keyboardType: TextInputType.text,
-                        maxLength: 150,
-                        maxLines: 1,
-                        style: const TextStyle(fontSize: 15),
-                        autocorrect: false,
-                        validator: (value) {
-                          RegExp validateText = RegExp(r'\b[\w]+\b');
-                          if (!validateText.hasMatch(_updatePurpose.text)) {
-                            return "Enter Valid Purpose";
-                          }
-                          return null;
-                        },
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.all(8.0),
-                          hintText: "Enter Purpose",
-                          labelText: "Purpose",
-                          errorStyle: TextStyle(fontSize: 13),
-                        ),
-                      ),
-                      SizedBox(height: 15,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Form(
+                      key: _updateExpense,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          SizedBox(
-                            height: 40,
-                            width: MediaQuery.of(context).size.width*0.3,
-                            child: ElevatedButton(
-                              child: const Text("Delete", style: TextStyle(color: Colors.white),),
-                              onPressed: () async {
-                                buildShowDialog(context);
-                                await updatePersonalTransaction(_updatePurpose.text, _updateAmount.text, "1", id);
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                                Navigator.pop(context);
+                          TextFormField(
+                            controller: _updateAmount,
+                            keyboardType: TextInputType.number,
+                            maxLength: 10,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 18),
+                            autocorrect: false,
+                            validator: (value) {
+                              RegExp validateNumber =
+                                  RegExp(r'\b[1-9]{1}[\d]*\b');
+                              if (!validateNumber
+                                  .hasMatch(_updateAmount.text)) {
+                                return "Enter Valid Amount";
                               }
+                              return null;
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: "Enter Amount",
+                              labelText: "Amount",
+                              errorStyle: TextStyle(fontSize: 15),
                             ),
                           ),
                           SizedBox(
-                            height: 40,
-                            width: MediaQuery.of(context).size.width*0.3,
-                            child: ElevatedButton(
-                              child: const Text("Update", style: TextStyle(color: Colors.white),),
-                              onPressed: () async {
-                                if (_updateExpense.currentState!.validate()) {
-                                  buildShowDialog(context);
-                                  await updatePersonalTransaction(_updatePurpose.text, _updateAmount.text, "0", id);
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
-                                }
+                            height: 10,
+                          ),
+                          TextFormField(
+                            controller: _updatePurpose,
+                            keyboardType: TextInputType.text,
+                            maxLength: 150,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 15),
+                            autocorrect: false,
+                            validator: (value) {
+                              RegExp validateText = RegExp(r'\b[\w]+\b');
+                              if (!validateText.hasMatch(_updatePurpose.text)) {
+                                return "Enter Valid Purpose";
                               }
+                              return null;
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: "Enter Purpose",
+                              labelText: "Purpose",
+                              errorStyle: TextStyle(fontSize: 13),
                             ),
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                height: 40,
+                                width: MediaQuery.of(context).size.width * 0.3,
+                                child: ElevatedButton(
+                                    child: const Text(
+                                      "Delete",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    onPressed: () async {
+                                      buildShowDialog(context);
+                                      await updatePersonalTransaction(
+                                          _updatePurpose.text,
+                                          _updateAmount.text,
+                                          "1",
+                                          id);
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                      Navigator.pop(context);
+                                    }),
+                              ),
+                              SizedBox(
+                                height: 40,
+                                width: MediaQuery.of(context).size.width * 0.3,
+                                child: ElevatedButton(
+                                    child: const Text(
+                                      "Update",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    onPressed: () async {
+                                      if (_updateExpense.currentState!
+                                          .validate()) {
+                                        buildShowDialog(context);
+                                        await updatePersonalTransaction(
+                                            _updatePurpose.text,
+                                            _updateAmount.text,
+                                            "0",
+                                            id);
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                      }
+                                    }),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                )
-              )
-            ),
-          )
-        );
-      }
-    );
+                    ))),
+          ));
+    });
   }
 
-  Widget _buildPopupDialog(BuildContext context, String purpose, String type, String date, String amount, bool room, String id) {
+  Widget _buildPopupDialog(BuildContext context, String purpose, String type,
+      String date, String amount, bool room, String id) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)), 
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
-        width: MediaQuery.of(context).size.width*0.95,
+        width: MediaQuery.of(context).size.width * 0.95,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Column(
@@ -259,58 +304,70 @@ class _ExpensesState extends State<Expenses> {
                 children: [
                   Text(
                     purpose,
-                    style: TextStyle(
-                      fontSize: 26
-                    ),
+                    style: TextStyle(fontSize: 26),
                   ),
-                  room?IconButton(onPressed: () async {
-                    buildShowDialog(context);
-                    await removeRoomTransaction(id);
-                    Navigator.pop(context);
-                    Navigator.pop(context);
-                  }, 
-                    icon: Icon(Icons.delete)):
-                  IconButton(onPressed: () async {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => _buildUpdateDialog(context, id, purpose, amount),
-                    );
-                  }, 
-                    icon: Icon(Icons.edit)
-                  )
+                  room
+                      ? IconButton(
+                          onPressed: () async {
+                            buildShowDialog(context);
+                            await removeRoomTransaction(id);
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(Icons.delete))
+                      : IconButton(
+                          onPressed: () async {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  _buildUpdateDialog(
+                                      context, id, purpose, amount),
+                            );
+                          },
+                          icon: Icon(Icons.edit))
                 ],
               ),
-              SizedBox(height: 25,),
+              SizedBox(
+                height: 25,
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  room?Text(type + " (Room)", style: TextStyle(
-                    fontSize: 18
-                  ),)
-                  :Text("Type: " + type, style: TextStyle(
-                    fontSize: 18
-                  ),),
-                  SizedBox(height: 10,),
+                  room
+                      ? Text(
+                          type + " (Room)",
+                          style: TextStyle(fontSize: 18),
+                        )
+                      : Text(
+                          "Type: " + type,
+                          style: TextStyle(fontSize: 18),
+                        ),
+                  SizedBox(
+                    height: 10,
+                  ),
                   Text(
-                    "Amount: " + amount, 
-                    style: TextStyle(
-                    fontSize: 18
-                  ),),
-                  SizedBox(height: 10,),
-                  Text("Date: " + date, style: TextStyle(
-                    fontSize: 18
-                  ),),
+                    "Amount: " + amount,
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Date: " + date,
+                    style: TextStyle(fontSize: 18),
+                  ),
                 ],
               ),
-              SizedBox(height: 25,),
+              SizedBox(
+                height: 25,
+              ),
               SizedBox(
                 height: 45,
-                width: MediaQuery.of(context).size.width*0.95 - 25,
+                width: MediaQuery.of(context).size.width * 0.95 - 25,
                 child: ElevatedButton(
-                  child: Text("Close", 
-                    style: TextStyle(
-                      color: Colors.white
-                    ),
+                  child: Text(
+                    "Close",
+                    style: TextStyle(color: Colors.white),
                   ),
                   onPressed: () {
                     Navigator.pop(context);
@@ -329,21 +386,19 @@ class _ExpensesState extends State<Expenses> {
     buildShowDialog(context);
 
     try {
-      final response = await http.patch(
-        Uri.parse(global.url + 'ptransaction'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Auth': widget.token
-        },
-        body: jsonEncode({
-          'email': crypto.encrypt(widget.email),
-          'purpose': crypto.encrypt(_purpose.text),
-          'amt':crypto.encrypt(_amt.text),
-          'type':crypto.encrypt(categoryIndex.toString()),
-          'investType':crypto.encrypt(investIndex.toString()),
-        })
-      );
-      
+      final response = await http.patch(Uri.parse(global.url + 'ptransaction'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'purpose': crypto.encrypt(_purpose.text),
+            'amt': crypto.encrypt(_amt.text),
+            'type': crypto.encrypt(categoryIndex.toString()),
+            'investType': crypto.encrypt(investIndex.toString()),
+          }));
+
       _amt.text = "";
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
@@ -351,13 +406,13 @@ class _ExpensesState extends State<Expenses> {
       Navigator.pop(context);
 
       _refreshIndicatorKey.currentState?.show();
-      
+
       if (response.statusCode == 422) {
-        _showToast(context, crypto.decrypt(Tdata["Message"]));
+        showToast(context, crypto.decrypt(Tdata["Message"]));
       }
-    } on Exception catch(_) {
+    } on Exception catch (_) {
       Navigator.pop(context);
-      _showToast(context, "No Internet Connection");
+      showToast(context, "No Internet Connection");
     }
     if (this.mounted) {
       setState(() {});
@@ -367,29 +422,8 @@ class _ExpensesState extends State<Expenses> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
-  }
-
-  _showToast(BuildContext context, String show) {
-    final scaffold = ScaffoldMessenger.of(context);
-    scaffold.showSnackBar(
-      SnackBar(
-        content: Text(show),
-        action: SnackBarAction(label: 'Close', onPressed: scaffold.hideCurrentSnackBar),
-      ),
-    );
-  }
-
-  buildShowDialog(BuildContext context) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      }
-    );
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
   }
 
   @override
@@ -399,370 +433,466 @@ class _ExpensesState extends State<Expenses> {
         title: Text(title),
       ),
       body: RefreshIndicator(
-        key: _refreshIndicatorKey,
-        onRefresh: _initialization,
-        child: TransList.isEmpty? SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-              child:  
-                (Center(
-                  child: loaded?
-                  Text("No Expense Found",
-                    style: TextStyle(
-                      fontSize: 23,
-                    ))
-                  :Text("Loading..."),
-                  ))
-          ):Scrollbar(
-            radius: Radius.circular(10.0),
-            thickness: 5.5,
-            child: Padding(
-              padding: EdgeInsets.all(10.0),
-              child: ListView.separated(
-                    separatorBuilder: (context, index) => SizedBox(height: 0,),
-                    shrinkWrap: true,
-                    itemCount: TransList.length, 
-                    itemBuilder: (BuildContext context, int index) {
-                      final themeProvider = Provider.of<ThemeProvider>(context);
-                      if (TransList[index]["room"]) {
-                        return InkWell(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["RoomName"]), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"]), TransList[index]["room"], crypto.decrypt(TransList[index]["id"])),
+          key: _refreshIndicatorKey,
+          onRefresh: _initialization,
+          child: TransList.isEmpty
+              ? SizedBox(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  child: (Center(
+                    child: loaded
+                        ? Text("No Expense Found",
+                            style: TextStyle(
+                              fontSize: 23,
+                            ))
+                        : Text("Loading..."),
+                  )))
+              : Scrollbar(
+                  radius: Radius.circular(10.0),
+                  thickness: 5.5,
+                  child: Padding(
+                    padding: EdgeInsets.all(10.0),
+                    child: ListView.separated(
+                        separatorBuilder: (context, index) => SizedBox(
+                              height: 0,
+                            ),
+                        shrinkWrap: true,
+                        itemCount: TransList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final themeProvider =
+                              Provider.of<ThemeProvider>(context);
+                          if (TransList[index]["room"]) {
+                            return InkWell(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      _buildPopupDialog(
+                                          context,
+                                          crypto.decrypt(
+                                              TransList[index]["Purpose"]),
+                                          crypto.decrypt(
+                                              TransList[index]["RoomName"]),
+                                          crypto.decrypt(
+                                              TransList[index]["Date"]),
+                                          "₹ " +
+                                              crypto.decrypt(
+                                                  TransList[index]["Amount"]),
+                                          TransList[index]["room"],
+                                          crypto
+                                              .decrypt(TransList[index]["id"])),
+                                );
+                              },
+                              child: SizedBox(
+                                child: Card(
+                                  elevation: 5.0,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.90,
+                                              child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Text(
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["Purpose"]),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                          fontSize: 23,
+                                                          fontWeight:
+                                                              FontWeight.w500),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 15,
+                                                    ),
+                                                    Opacity(
+                                                      opacity: 0.8,
+                                                      child: Text(
+                                                        crypto.decrypt(TransList[
+                                                                    index]
+                                                                ["RoomName"]) +
+                                                            " (Room)",
+                                                        style: const TextStyle(
+                                                          fontSize: 17,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 15,
+                                                    ),
+                                                    Opacity(
+                                                      opacity: 0.8,
+                                                      child: Text(
+                                                        crypto.decrypt(
+                                                            TransList[index]
+                                                                ["Date"]),
+                                                        style: const TextStyle(
+                                                          fontSize: 17,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ]),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 0,
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.20,
+                                              child: Text(
+                                                "₹ " +
+                                                    crypto.decrypt(
+                                                        TransList[index]
+                                                            ["Amount"]),
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ]),
+                                  ),
+                                ),
+                              ),
                             );
-                          },
-                          child: SizedBox(
-                            child: Card(
-                              elevation: 5.0,
-                              shadowColor: Theme.of(context).primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    flex: 1,
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width * 0.90,
-                                      child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text(
-                                          crypto.decrypt(TransList[index]["Purpose"]), 
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 23,
-                                            fontWeight: FontWeight.w500
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Opacity(
-                                          opacity: 0.8,
-                                          child: Text(
-                                            crypto.decrypt(TransList[index]["RoomName"]) + " (Room)",
-                                            style: const TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Opacity(
-                                          opacity: 0.8,
-                                          child: Text(
-                                            crypto.decrypt(TransList[index]["Date"]),
-                                            style: const TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                      ]
-                                      ),
-                                    ),
+                          } else {
+                            return InkWell(
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      _buildPopupDialog(
+                                          context,
+                                          crypto.decrypt(
+                                              TransList[index]["Purpose"]),
+                                          crypto.decrypt(TransList[index]["type"]) +
+                                              (crypto.decrypt(TransList[index]
+                                                          ["invType"]) ==
+                                                      "None"
+                                                  ? ""
+                                                  : (" (" +
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["invType"]) +
+                                                      ")")),
+                                          crypto.decrypt(
+                                              TransList[index]["Date"]),
+                                          "₹ " +
+                                              crypto.decrypt(
+                                                  TransList[index]["Amount"]),
+                                          TransList[index]["room"],
+                                          crypto.decrypt(TransList[index]["id"])),
+                                );
+                              },
+                              child: SizedBox(
+                                child: Card(
+                                  elevation: 5.0,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0),
                                   ),
-                                  Expanded(
-                                    flex: 0,
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width * 0.20,
-                                      child: Text(
-                                        "₹ " + crypto.decrypt(TransList[index]["Amount"]),
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ]
-                              ),
-                            ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            flex: 1,
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.90,
+                                              child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Text(
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["Purpose"]),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                          fontSize: 23,
+                                                          fontWeight:
+                                                              FontWeight.w500),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 15,
+                                                    ),
+                                                    Opacity(
+                                                      opacity: 0.8,
+                                                      child: Text(
+                                                        crypto.decrypt(
+                                                                TransList[index]
+                                                                    ["type"]) +
+                                                            (crypto.decrypt(TransList[
+                                                                            index]
+                                                                        [
+                                                                        "invType"]) ==
+                                                                    "None"
+                                                                ? ""
+                                                                : (" (" +
+                                                                    crypto.decrypt(
+                                                                        TransList[index]
+                                                                            [
+                                                                            "invType"]) +
+                                                                    ")")),
+                                                        style: const TextStyle(
+                                                          fontSize: 17,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 15,
+                                                    ),
+                                                    Opacity(
+                                                      opacity: 0.8,
+                                                      child: Text(
+                                                        crypto.decrypt(
+                                                            TransList[index]
+                                                                ["Date"]),
+                                                        style: const TextStyle(
+                                                          fontSize: 17,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ]),
                                             ),
-                          ),
-                        );
-                      } else {
-                        return InkWell(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) => _buildPopupDialog(context, crypto.decrypt(TransList[index]["Purpose"]), crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")), crypto.decrypt(TransList[index]["Date"]), "₹ " + crypto.decrypt(TransList[index]["Amount"]), TransList[index]["room"], crypto.decrypt(TransList[index]["id"])),
+                                          ),
+                                          Expanded(
+                                            flex: 0,
+                                            child: SizedBox(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  0.20,
+                                              child: Text(
+                                                "₹ " +
+                                                    crypto.decrypt(
+                                                        TransList[index]
+                                                            ["Amount"]),
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ]),
+                                  ),
+                                ),
+                              ),
                             );
-                          },
-                          child: SizedBox(
-                            child: Card(
-                              elevation: 5.0,
-                              shadowColor: Theme.of(context).primaryColor,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0),
+                          }
+                        }),
+                  ),
+                )),
+      floatingActionButton: CurDate == widget.date
+          ? FloatingActionButton(
+              child: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (BuildContext context) {
+                    return StatefulBuilder(builder: (context, setState) {
+                      return Padding(
+                        padding: MediaQuery.of(context).viewInsets,
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              TextFormField(
+                                controller: _amt,
+                                keyboardType: TextInputType.number,
+                                maxLength: 10,
+                                maxLines: 1,
+                                style: const TextStyle(fontSize: 15),
+                                autocorrect: false,
+                                validator: (value) {
+                                  RegExp validateNumber =
+                                      RegExp(r'\b[1-9]{1}[\d]*\b');
+                                  if (!validateNumber.hasMatch(_amt.text)) {
+                                    return "Enter Valid Amount";
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.all(8.0),
+                                  hintText: "Enter Amount",
+                                  labelText: "Amount",
+                                  errorStyle: TextStyle(fontSize: 15),
+                                ),
                               ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Expanded(
-                                    flex: 1,
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width * 0.90,
-                                      child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        Text(
-                                          crypto.decrypt(TransList[index]["Purpose"]), 
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontSize: 23,
-                                            fontWeight: FontWeight.w500
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Opacity(
-                                          opacity: 0.8,
-                                          child: Text(
-                                            crypto.decrypt(TransList[index]["type"]) + (crypto.decrypt(TransList[index]["invType"])=="None"?"":(" ("+crypto.decrypt(TransList[index]["invType"])+")")),
-                                            style: const TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(
-                                          height: 15,
-                                        ),
-                                        Opacity(
-                                          opacity: 0.8,
-                                          child: Text(
-                                            crypto.decrypt(TransList[index]["Date"]),
-                                            style: const TextStyle(
-                                              fontSize: 17,
-                                            ),
-                                          ),
-                                        ),
-                                      ]
-                                      ),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 0,
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width * 0.20,
-                                      child: Text(
-                                        "₹ " + crypto.decrypt(TransList[index]["Amount"]),
-                                        style: const TextStyle(
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ]
+                              TextFormField(
+                                controller: _purpose,
+                                keyboardType: TextInputType.text,
+                                maxLength: 150,
+                                maxLines: 1,
+                                style: const TextStyle(fontSize: 15),
+                                autocorrect: false,
+                                validator: (value) {
+                                  RegExp validateText = RegExp(r'\b[\w]+\b');
+                                  if (!validateText.hasMatch(_purpose.text)) {
+                                    return "Enter Valid Purpose";
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  contentPadding: EdgeInsets.all(8.0),
+                                  hintText: "Enter Purpose",
+                                  labelText: "Purpose",
+                                  errorStyle: TextStyle(fontSize: 15),
+                                ),
                               ),
-                            ),
-                                            ),
-                          ),
-                        );
-                      }
-                    }
-                      ),
-            ),
-          )
-      ),
-      floatingActionButton: CurDate==widget.date?FloatingActionButton(
-        child: Icon(Icons.add, color: Colors.white,),
-        onPressed: () {
-          showModalBottomSheet<void>(
-            context: context,
-            isScrollControlled: true,
-            builder: (BuildContext context) {
-              return StatefulBuilder(
-                builder: (context, setState) {
-                  return Padding(
-                    padding: MediaQuery.of(context).viewInsets,
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          TextFormField(
-                            controller: _amt,
-                            keyboardType: TextInputType.number,
-                            maxLength: 10,
-                            maxLines: 1,
-                            style: const TextStyle(fontSize: 15),
-                            autocorrect: false,
-                            validator: (value) {
-                              RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
-                              if (!validateNumber.hasMatch(_amt.text)) {
-                                return "Enter Valid Amount";
-                              }
-                              return null;
-                            },
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Enter Amount",
-                              labelText: "Amount",
-                              errorStyle: TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          TextFormField(
-                            controller: _purpose,
-                            keyboardType: TextInputType.text,
-                            maxLength: 150,
-                            maxLines: 1,
-                            style: const TextStyle(fontSize: 15),
-                            autocorrect: false,
-                            validator: (value) {
-                              RegExp validateText = RegExp(r'\b[\w]+\b');
-                              if (!validateText.hasMatch(_purpose.text)) {
-                                return "Enter Valid Purpose";
-                              }
-                              return null;
-                            },
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Enter Purpose",
-                              labelText: "Purpose",
-                              errorStyle: TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Category",
-                                  style: TextStyle(
-                                    fontSize: 16
-                                  ),
-                                ),
-                                DropdownButton<String>(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  itemHeight: 70,
-                                  elevation: 1,
-                                  hint: Text(
-                                    category[categoryIndex],
-                                    style: TextStyle(
-                                      fontSize: 17,
-                                    ),
-                                  ),
-                                  items: category.map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      alignment: AlignmentDirectional.center,
-                                      value: category.indexOf(value).toString(),
-                                      child: Text(
-                                        value,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                        ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Category",
+                                        style: TextStyle(fontSize: 16),
                                       ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (index) {
-                                    setState(() {
-                                      categoryIndex = int.parse(index!);
-                                    });
-                                  },
-                                ),
-                              ]
-                            ),
-                          ),
-                          categoryIndex==1?
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Investment Type",
-                                  style: TextStyle(
-                                    fontSize: 16
-                                  ),
-                                ),
-                                DropdownButton<String>(
-                                  alignment: AlignmentDirectional.topStart,
-                                  borderRadius: BorderRadius.circular(10.0),
-                                  itemHeight: 70,
-                                  elevation: 1,
-                                  hint: Text(
-                                    investmentCat[investIndex],
-                                    style: TextStyle(
-                                      fontSize: 16,
+                                      DropdownButton<String>(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        itemHeight: 70,
+                                        elevation: 1,
+                                        hint: Text(
+                                          category[categoryIndex],
+                                          style: TextStyle(
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                        items: category.map((String value) {
+                                          return DropdownMenuItem<String>(
+                                            alignment:
+                                                AlignmentDirectional.center,
+                                            value: category
+                                                .indexOf(value)
+                                                .toString(),
+                                            child: Text(
+                                              value,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                        onChanged: (index) {
+                                          setState(() {
+                                            categoryIndex = int.parse(index!);
+                                          });
+                                        },
+                                      ),
+                                    ]),
+                              ),
+                              categoryIndex == 1
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              "Investment Type",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            DropdownButton<String>(
+                                              alignment:
+                                                  AlignmentDirectional.topStart,
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                              itemHeight: 70,
+                                              elevation: 1,
+                                              hint: Text(
+                                                investmentCat[investIndex],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              items: investmentCat
+                                                  .map((String value) {
+                                                return DropdownMenuItem<String>(
+                                                  alignment:
+                                                      AlignmentDirectional
+                                                          .center,
+                                                  value: investmentCat
+                                                      .indexOf(value)
+                                                      .toString(),
+                                                  child: Text(value),
+                                                );
+                                              }).toList(),
+                                              onChanged: (index) {
+                                                setState(() {
+                                                  investIndex =
+                                                      int.parse(index!);
+                                                });
+                                              },
+                                            ),
+                                          ]),
+                                    )
+                                  : SizedBox(),
+                              SizedBox(
+                                height: 40,
+                                width: 100,
+                                child: ElevatedButton(
+                                    child: const Text(
+                                      "Add",
+                                      style: TextStyle(color: Colors.white),
                                     ),
-                                  ),
-                                  items: investmentCat.map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      alignment: AlignmentDirectional.center,
-                                      value: investmentCat.indexOf(value).toString(),
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  onChanged: (index) {
-                                    setState(() {
-                                      investIndex = int.parse(index!);
-                                    });
-                                  },
-                                ),
-                              ]
-                            ),
-                          ):SizedBox(),
-                          SizedBox(
-                            height: 40,
-                            width: 100,
-                            child: ElevatedButton(
-                              child: const Text("Add", style: TextStyle(color: Colors.white),),
-                              onPressed: () {
-                                if (_formKey.currentState!.validate()) {
-                                  AddExpense(context);
-                                }
-                              }
-                            ),
+                                    onPressed: () {
+                                      if (_formKey.currentState!.validate()) {
+                                        AddExpense(context);
+                                      }
+                                    }),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              )
+                            ],
                           ),
-                          SizedBox(
-                            height: 10,
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                }
-              );
-            },
-          );
-        },
-      ): null,
+                        ),
+                      );
+                    });
+                  },
+                );
+              },
+            )
+          : null,
     );
   }
 }
