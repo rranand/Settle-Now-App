@@ -9,7 +9,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:in_app_update/in_app_update.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/ads.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
@@ -34,7 +33,8 @@ import 'maintain.dart';
 import 'package:http_parser/http_parser.dart';
 
 class DashBoard extends StatefulWidget {
-  const DashBoard({Key? key}) : super(key: key);
+  final String version;
+  const DashBoard({Key? key, required this.version}) : super(key: key);
 
   @override
   _DashBoardState createState() => _DashBoardState();
@@ -54,7 +54,6 @@ class _DashBoardState extends State<DashBoard> {
   final List<RoomEach> RoomDataO = [];
   final List<RoomEach> RoomDataC = [];
   final List<RoomEach> SearchRoomData = [];
-  late String version = "";
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   final _CformKey = GlobalKey<FormState>();
@@ -252,8 +251,6 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future _extractEmail() async {
-    version = await getAppVersion();
-
     var date = DateTime.now();
     from = [0, date.month - 1, date.day - 1];
     to = [0, date.month - 1, date.day - 1];
@@ -1657,7 +1654,7 @@ class _DashBoardState extends State<DashBoard> {
                     )
                   : SizedBox()
             ]),
-            label: "Room Request",
+            label: "Request",
           ),
         ],
       ),
@@ -1911,7 +1908,7 @@ class _DashBoardState extends State<DashBoard> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Version " + version,
+                    "Version " + widget.version,
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 12, color: Colors.white),
                   ),

@@ -1,8 +1,10 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/models/FriendEach.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
@@ -21,11 +23,52 @@ class LendPage extends StatefulWidget {
 class _LendPageState extends State<LendPage> {
   List<dynamic> data = [];
   bool load = false;
+  List<FriendEach> friendData = [];
+  bool loadFriendData = false;
+  final TextEditingController _searchFriend = TextEditingController();
+  List<FriendEach> friendDataSearched = [];
+
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
+
+  Future<void> getFriendData() async {
+    try {
+      if (this.mounted) {
+        setState(() {
+          loadFriendData = false;
+          friendData.clear();
+        });
+      }
+      final response = await http.patch(Uri.parse(global.url + 'friend'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'roomKey': crypto.encrypt("d9JHege"),
+            'email': crypto.encrypt(widget.email),
+          }));
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        loadFriendData = true;
+        List<dynamic> tempData = data['data'];
+        for (int i = 0; i < tempData.length; i++) {
+          friendData.add(FriendEach.fromJson(tempData[i]));
+        }
+      } else {
+        showToast(context, crypto.decrypt(data["Message"]));
+      }
+    } on Exception catch (_) {
+      showToast(context, "No Internet Connection");
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
 
   Future<void> addLoan(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
@@ -98,6 +141,7 @@ class _LendPageState extends State<LendPage> {
   @override
   void initState() {
     super.initState();
+    getFriendData();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
   }
@@ -186,12 +230,180 @@ class _LendPageState extends State<LendPage> {
                 ))));
   }
 
+  Widget addFriendWidget(BuildContext context) {
+    return StatefulBuilder(builder: (context, setState) {
+      return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          child: SingleChildScrollView(
+              child: Container(
+                  width: MediaQuery.of(context).size.width,
+                  child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Add Member",
+                            style: TextStyle(fontSize: 22),
+                          ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          TextField(
+                            controller: _searchFriend,
+                            keyboardType: TextInputType.text,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 15),
+                            autocorrect: false,
+                            decoration: InputDecoration(
+                              contentPadding: const EdgeInsets.all(8.0),
+                              labelText: "Enter Name",
+                              errorStyle: const TextStyle(fontSize: 15),
+                            ),
+                            onChanged: (String s) {
+                              SearchFriend();
+                            },
+                          ),
+                          SizedBox(
+                            height: 13,
+                          ),
+                          SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.6,
+                              child: _searchFriend.text.isEmpty
+                                  ? friendListWidget(context, friendData)
+                                  : (friendDataSearched.isEmpty
+                                      ? Center(
+                                          child: Text(
+                                            "No User Found",
+                                            style: TextStyle(fontSize: 18),
+                                          ),
+                                        )
+                                      : friendListWidget(
+                                          context, friendDataSearched)))
+                        ],
+                      )))));
+    });
+  }
+
+  Widget friendListWidget(BuildContext context, List<FriendEach> data) {
+    return StatefulBuilder(builder: (context, setState) {
+      return ListView.separated(
+          separatorBuilder: (context, index) => SizedBox(
+                height: 5,
+              ),
+          shrinkWrap: true,
+          physics: ScrollPhysics(),
+          itemCount: data.length,
+          itemBuilder: (BuildContext context, int index) {
+            return SizedBox(
+                height: 80,
+                child: Center(
+                  child: Card(
+                    elevation: 1.0,
+                    shadowColor: Theme.of(context).primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            CachedNetworkImage(
+                              imageUrl: data[index].isGoogle
+                                  ? data[index].pic
+                                  : (global.driveUrl +
+                                      (data[index].pic.length == 0
+                                          ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                          : data[index].pic)),
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) =>
+                                      CircularProgressIndicator(
+                                          value: downloadProgress.progress),
+                              errorWidget: (context, url, error) => Image(
+                                  image:
+                                      AssetImage('assets/Images/unknown.jpeg')),
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
+                                width: 45.0,
+                                height: 45.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: imageProvider, fit: BoxFit.cover),
+                                ),
+                              ),
+                            ),
+                            Text(
+                              data[index].name,
+                              style: const TextStyle(
+                                fontSize: 17,
+                              ),
+                            ),
+                            IconButton(
+                                onPressed: () async {
+                                  if (data[index].status == "NJ") {
+                                    //await sendLenDenJoinRequest(data[index].email);
+                                    data[index].status = "S";
+                                  } else {
+                                    //await cancelLenDenJoinRequest(data[index].email);
+                                    data[index].status = "NJ";
+                                  }
+
+                                  if (this.mounted) {
+                                    setState(() {});
+                                  }
+                                },
+                                icon: Icon(data[index].status == "NJ"
+                                    ? Icons.person_add_alt
+                                    : Icons.cancel_outlined))
+                          ]),
+                    ),
+                  ),
+                ));
+          });
+    });
+  }
+
+  SearchFriend() {
+    if (this.mounted) {
+      setState(() {
+        friendDataSearched.clear();
+      });
+    }
+
+    for (int i = 0; i < friendData.length; i++) {
+      if (friendData[i]
+          .name
+          .toString()
+          .toLowerCase()
+          .contains(_searchFriend.text.toLowerCase())) {
+        friendDataSearched.add(friendData[i]);
+      }
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.name),
         actions: [
+          IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) => addFriendWidget(context),
+                );
+              },
+              icon: Icon(Icons.person_add_outlined)),
           IconButton(
               onPressed: () {
                 showDialog(

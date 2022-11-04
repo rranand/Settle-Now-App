@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:googleapis/appengine/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -15,8 +16,9 @@ import '../others/themes.dart';
 
 class OtpName extends StatefulWidget {
   final String email;
+  final String version;
 
-  const OtpName({Key? key, required this.email}) : super(key: key);
+  const OtpName({Key? key, required this.email, required this.version}) : super(key: key);
 
   @override
   _OtpNameState createState() => _OtpNameState();
@@ -33,14 +35,12 @@ class _OtpNameState extends State<OtpName> {
   var JD = null;
   String token = "";
   String deviceToken = "";
-  String version = "";
   final TextEditingController _name = TextEditingController();
   final TextEditingController _otp = TextEditingController();
   late SharedPreferences prefs;
   Map<String, dynamic> _deviceData = <String, dynamic>{};
 
   Future _initialisation() async {
-    version = await getAppVersion();
     prefs = await SharedPreferences.getInstance();
     _deviceData = await initPlatformState();
     getDeviceTokenToSendNotification();
@@ -146,7 +146,7 @@ class _OtpNameState extends State<OtpName> {
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => const DashBoard()),
+          MaterialPageRoute(builder: (context) => DashBoard(version: widget.version,)),
           (Route<dynamic> route) => false,
         );
       } else {
@@ -290,6 +290,6 @@ class _OtpNameState extends State<OtpName> {
                       )),
               )),
         ),
-        bottomNavigationBar: privacyAndVersionBottomAppBar(version));
+        bottomNavigationBar: privacyAndVersionBottomAppBar(widget.version));
   }
 }

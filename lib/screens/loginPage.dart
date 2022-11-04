@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => const DashBoard(),
+          builder: (context) => DashBoard(version: version,),
         ),
         (Route<dynamic> route) => false,
       );
@@ -154,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                               fontSize: 15,
                               color: Colors.white),
                         ),
-                        onPressed: () => MoveToNext(context, OtpName(email: _emailId.text), _formKey),
+                        onPressed: () => MoveToNext(context, OtpName(email: _emailId.text, version: version), _formKey),
                       ),
                     ),
                     SizedBox(
@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const DashBoard(),
+                            builder: (context) => DashBoard(version: version,),
                           ),
                           (Route<dynamic> route) => false,
                         );

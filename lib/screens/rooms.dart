@@ -72,6 +72,7 @@ class _RoomExpenseState extends State<RoomExpense> {
   List<FriendEach> friendDataSearched = [];
   bool showAllTransactionData = true;
   ScrollController _scrollController = ScrollController();
+  List<String> addExpenseTo = [];
 
   _getPaymentData() async {
     try {
@@ -797,6 +798,87 @@ class _RoomExpenseState extends State<RoomExpense> {
     );
   }
 
+  bool findElement(List<String> arr, String ele) {
+    for (int i = 0; i < arr.length; i++) {
+      if (arr[i] == ele) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Widget memberExpenseCard(BuildContext context, int index) {
+    return Padding(
+      padding: EdgeInsets.all(8.0),
+      child: Card(
+        elevation: 1.4,
+        shadowColor: Theme.of(context).primaryColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              CachedNetworkImage(
+                imageUrl: crypto.decrypt(list[index]['pic']).length == 0
+                    ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                    : crypto.decrypt(list[index]['pic']),
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    CircularProgressIndicator(value: downloadProgress.progress),
+                errorWidget: (context, url, error) =>
+                    Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                imageBuilder: (context, imageProvider) => Container(
+                  width: 50.0,
+                  height: 50.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: imageProvider, fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+              Text(
+                crypto.decrypt(list[index]['Name']),
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget memberExpenseAll(BuildContext context) {
+    return SizedBox(
+      width: 85,
+      child: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Card(
+              elevation: 1.4,
+              shadowColor: Theme.of(context).primaryColor,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15.0),
+              ),
+              child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Text(
+                      "ALL",
+                      style: TextStyle(
+                        fontSize: 14,
+                      ),
+                    ),
+                  )))),
+    );
+  }
+
   Widget memberAll(BuildContext context) {
     return SizedBox(
         width: 140,
@@ -1082,127 +1164,266 @@ class _RoomExpenseState extends State<RoomExpense> {
             : Scrollbar(
                 radius: Radius.circular(10.0),
                 thickness: 5.5,
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: ListView(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("From"),
-                                  DropdownButton<String>(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    itemHeight: 60,
-                                    elevation: 1,
-                                    hint: Text(
-                                      membersListName[membersListIndexS],
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    items: membersListName.map((String value) {
-                                      return DropdownMenuItem<String>(
-                                        alignment: AlignmentDirectional.center,
-                                        value: membersListName
-                                            .indexOf(value)
-                                            .toString(),
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
-                                    onChanged: (index) {
-                                      setState(() {
-                                        membersListIndexS = int.parse(index!);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("To"),
-                                  DropdownButton<String>(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    itemHeight: 60,
-                                    elevation: 1,
-                                    hint: Text(
-                                      membersListName[membersListIndexR],
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    items: membersListName.map((String value) {
-                                      return DropdownMenuItem<String>(
-                                        alignment: AlignmentDirectional.center,
-                                        value: membersListName
-                                            .indexOf(value)
-                                            .toString(),
-                                        child: Text(value),
-                                      );
-                                    }).toList(),
-                                    onChanged: (index) {
-                                      setState(() {
-                                        membersListIndexR = int.parse(index!);
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                              ElevatedButton(
-                                child: const Text(
-                                  "Search",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                                onPressed: () {
-                                  retrievePaymentData();
-                                },
-                              ),
-                            ],
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "From",
+                            style: TextStyle(fontSize: 18),
                           ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width - 65,
+                            height: 70,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: list.length - 1,
+                              itemBuilder: (BuildContext context, int index) {
+                                return InkWell(
+                                  child: memberExpenseCard(context, index + 1),
+                                  onTap: () {
+                                    if (this.mounted) {
+                                      setState(() {
+                                        membersListIndexS = index;
+                                      });
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "To",
+                            style: TextStyle(fontSize: 18),
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          SizedBox(
+                              width: MediaQuery.of(context).size.width - 45,
+                              height: 70,
+                              child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: list.length - 1,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return InkWell(
+                                      child:
+                                          memberExpenseCard(context, index + 1),
+                                      onTap: () {
+                                        if (this.mounted) {
+                                          setState(() {
+                                            membersListIndexR = index;
+                                          });
+                                        }
+                                      },
+                                    );
+                                  })),
+                        ],
+                      ),
+                      ElevatedButton(
+                        child: const Text(
+                          "Search",
+                          style: TextStyle(color: Colors.white),
                         ),
-                        showAllTransactionData
-                            ? (paidTransactionData
-                                ? (allTransactionData.isEmpty
-                                    ? Center(
-                                        child: Text(
-                                          "No Results Found!!!",
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.w600),
+                        onPressed: () {
+                          retrievePaymentData();
+                        },
+                      ),
+                      showAllTransactionData
+                          ? (paidTransactionData
+                              ? (allTransactionData.isEmpty
+                                  ? Center(
+                                      child: Text(
+                                        "No Results Found!!!",
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    )
+                                  : Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Total Amount Paid: ₹ " +
+                                              paymentTotalALL,
                                         ),
-                                      )
-                                    : Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            "Total Amount Paid: ₹ " +
-                                                paymentTotalALL,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: ListView.separated(
-                                                separatorBuilder:
-                                                    (context, index) =>
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: ListView.separated(
+                                              separatorBuilder:
+                                                  (context, index) => SizedBox(
+                                                        height: 5,
+                                                      ),
+                                              shrinkWrap: true,
+                                              physics: ScrollPhysics(),
+                                              itemCount:
+                                                  allTransactionData.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return Card(
+                                                  elevation: 5.0,
+                                                  shadowColor: Theme.of(context)
+                                                      .primaryColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
                                                         SizedBox(
-                                                          height: 5,
+                                                          width: MediaQuery.of(
+                                                                  context)
+                                                              .size
+                                                              .width,
+                                                          child: Expanded(
+                                                            flex: 1,
+                                                            child: Text(
+                                                              crypto.decrypt(allTransactionData[
+                                                                          index]
+                                                                      [
+                                                                      "sender"]) +
+                                                                  " -> " +
+                                                                  crypto.decrypt(
+                                                                      allTransactionData[
+                                                                              index]
+                                                                          [
+                                                                          "receiver"]),
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 21,
+                                                              ),
+                                                            ),
+                                                          ),
                                                         ),
-                                                shrinkWrap: true,
-                                                physics: ScrollPhysics(),
-                                                itemCount:
-                                                    allTransactionData.length,
-                                                itemBuilder:
-                                                    (BuildContext context,
-                                                        int index) {
-                                                  return Card(
+                                                        SizedBox(
+                                                          height: 10,
+                                                        ),
+                                                        Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Expanded(
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.90,
+                                                                  child:
+                                                                      Opacity(
+                                                                    opacity:
+                                                                        0.8,
+                                                                    child: Text(
+                                                                      crypto.decrypt(
+                                                                          allTransactionData[index]
+                                                                              [
+                                                                              "Date"]),
+                                                                      style:
+                                                                          const TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Expanded(
+                                                                flex: 0,
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.20,
+                                                                  child: Text(
+                                                                    "₹ " +
+                                                                        crypto.decrypt(allTransactionData[index]
+                                                                            [
+                                                                            "Amount"]),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          16,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ]),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                );
+                                              }),
+                                        ),
+                                      ],
+                                    ))
+                              : Center(
+                                  child: Text("Loading..."),
+                                ))
+                          : (isLoadedDef
+                              ? paymentData.isEmpty
+                                  ? (payment
+                                      ? Center(
+                                          child: Text("Loading..."),
+                                        )
+                                      : Center(
+                                          child: Text(
+                                            "No Results Found!!!",
+                                            style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                        ))
+                                  : Column(children: [
+                                      Text(
+                                        "Total Amount Paid: ₹ " + paymentTotal,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: ListView.separated(
+                                            separatorBuilder:
+                                                (context, index) => SizedBox(
+                                                      height: 5,
+                                                    ),
+                                            shrinkWrap: true,
+                                            physics: ScrollPhysics(),
+                                            itemCount: paymentData.length,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              return SizedBox(
+                                                  height: 70,
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  child: Card(
                                                     elevation: 5.0,
                                                     shadowColor:
                                                         Theme.of(context)
@@ -1216,532 +1437,425 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                     child: Padding(
                                                       padding:
                                                           const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          SizedBox(
-                                                            width:
-                                                                MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width,
-                                                            child: Expanded(
-                                                              flex: 1,
+                                                              12.0),
+                                                      child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Opacity(
+                                                              opacity: 0.8,
                                                               child: Text(
-                                                                crypto.decrypt(allTransactionData[
+                                                                crypto.decrypt(
+                                                                    paymentData[
                                                                             index]
                                                                         [
-                                                                        "sender"]) +
-                                                                    " -> " +
-                                                                    crypto.decrypt(
-                                                                        allTransactionData[index]
-                                                                            [
-                                                                            "receiver"]),
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style:
-                                                                    const TextStyle(
-                                                                  fontSize: 21,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                          SizedBox(
-                                                            height: 10,
-                                                          ),
-                                                          Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                Expanded(
-                                                                  child:
-                                                                      SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.90,
-                                                                    child:
-                                                                        Opacity(
-                                                                      opacity:
-                                                                          0.8,
-                                                                      child:
-                                                                          Text(
-                                                                        crypto.decrypt(allTransactionData[index]
-                                                                            [
-                                                                            "Date"]),
-                                                                        style:
-                                                                            const TextStyle(
-                                                                          fontSize:
-                                                                              16,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Expanded(
-                                                                  flex: 0,
-                                                                  child:
-                                                                      SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.20,
-                                                                    child: Text(
-                                                                      "₹ " +
-                                                                          crypto.decrypt(allTransactionData[index]
-                                                                              [
-                                                                              "Amount"]),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            16,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ]),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  );
-                                                }),
-                                          ),
-                                        ],
-                                      ))
-                                : Center(
-                                    child: Text("Loading..."),
-                                  ))
-                            : (isLoadedDef
-                                ? paymentData.isEmpty
-                                    ? (payment
-                                        ? Center(
-                                            child: Text("Loading..."),
-                                          )
-                                        : Center(
-                                            child: Text(
-                                              "No Results Found!!!",
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w600),
-                                            ),
-                                          ))
-                                    : Column(children: [
-                                        Text(
-                                          "Total Amount Paid: ₹ " +
-                                              paymentTotal,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: ListView.separated(
-                                              separatorBuilder:
-                                                  (context, index) => SizedBox(
-                                                        height: 5,
-                                                      ),
-                                              shrinkWrap: true,
-                                              physics: ScrollPhysics(),
-                                              itemCount: paymentData.length,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                return SizedBox(
-                                                    height: 70,
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                            .size
-                                                            .width,
-                                                    child: Card(
-                                                      elevation: 5.0,
-                                                      shadowColor:
-                                                          Theme.of(context)
-                                                              .primaryColor,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(15.0),
-                                                      ),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(12.0),
-                                                        child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              Opacity(
-                                                                opacity: 0.8,
-                                                                child: Text(
-                                                                  crypto.decrypt(
-                                                                      paymentData[
-                                                                              index]
-                                                                          [
-                                                                          "Date"]),
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Text(
-                                                                "₹ " +
-                                                                    crypto.decrypt(
-                                                                        paymentData[index]
-                                                                            [
-                                                                            "Amount"]),
+                                                                        "Date"]),
                                                                 style:
                                                                     const TextStyle(
                                                                   fontSize: 18,
                                                                 ),
                                                               ),
-                                                            ]),
-                                                      ),
-                                                    ));
-                                              }),
-                                        ),
-                                      ])
-                                : SizedBox())
-                      ],
-                    ),
+                                                            ),
+                                                            Text(
+                                                              "₹ " +
+                                                                  crypto.decrypt(
+                                                                      paymentData[
+                                                                              index]
+                                                                          [
+                                                                          "Amount"]),
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 18,
+                                                              ),
+                                                            ),
+                                                          ]),
+                                                    ),
+                                                  ));
+                                            }),
+                                      ),
+                                    ])
+                              : SizedBox())
+                    ],
                   ),
                 )),
         floatingActionButton: widget.isRoomActive
             ? FloatingActionButton(
                 onPressed: () {
-                  showModalBottomSheet<void>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
-                      return Padding(
-                        padding: MediaQuery.of(context).viewInsets,
-                        child: SizedBox(
-                          height: isClear ? 60 : (locked ? 120 : 170),
-                          child: Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  leading: Icon(
-                                    Icons.close,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  title: const Text("Close Room Request"),
-                                  onTap: () async {
-                                    buildShowDialog(context);
-                                    await closeRoomRequest();
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                                !isClear
-                                    ? ListTile(
-                                        leading: Icon(
-                                          Icons.money,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                        title: const Text("Pay to Member"),
-                                        onTap: () {
-                                          if (membersListName.length <= 1) {
-                                            showToast(context,
-                                                "More Than One Member Required");
-                                          } else {
-                                            showModalBottomSheet<void>(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return StatefulBuilder(
-                                                      builder:
-                                                          (context, setState) {
-                                                    return Padding(
-                                                      padding:
-                                                          MediaQuery.of(context)
-                                                              .viewInsets,
-                                                      child: Form(
-                                                        key: _formKey,
-                                                        child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: <Widget>[
-                                                            Center(
-                                                              child: Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .spaceBetween,
-                                                                children: [
-                                                                  Padding(
-                                                                    padding: EdgeInsets
-                                                                        .only(
-                                                                            left:
-                                                                                12.0),
-                                                                    child: Text(
-                                                                      "Select Member",
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            18,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  DropdownButton<
-                                                                      String>(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10.0),
-                                                                    itemHeight:
-                                                                        60,
-                                                                    elevation:
-                                                                        1,
-                                                                    hint: Text(
-                                                                      membersListName[
-                                                                          membersListIndex],
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            18,
-                                                                      ),
-                                                                    ),
-                                                                    items: membersListName
-                                                                        .map((String
-                                                                            value) {
-                                                                      return DropdownMenuItem<
-                                                                          String>(
-                                                                        alignment:
-                                                                            AlignmentDirectional.center,
-                                                                        value: membersListName
-                                                                            .indexOf(value)
-                                                                            .toString(),
-                                                                        child: Text(
-                                                                            value),
-                                                                      );
-                                                                    }).toList(),
-                                                                    onChanged:
-                                                                        (index) {
-                                                                      setState(
-                                                                          () {
-                                                                        membersListIndex =
-                                                                            int.parse(index!);
-                                                                      });
-                                                                    },
-                                                                  ),
-                                                                ],
-                                                              ),
-                                                            ),
-                                                            TextFormField(
-                                                              controller: _amt,
-                                                              keyboardType:
-                                                                  TextInputType
-                                                                      .number,
-                                                              maxLength: 10,
-                                                              maxLines: 1,
-                                                              style:
-                                                                  const TextStyle(
-                                                                      fontSize:
-                                                                          18),
-                                                              autocorrect:
-                                                                  false,
-                                                              validator:
-                                                                  (value) {
-                                                                RegExp
-                                                                    validateNumber =
-                                                                    RegExp(
-                                                                        r'\b[1-9]{1}[\d]*\b');
-                                                                if (!validateNumber
-                                                                    .hasMatch(_amt
-                                                                        .text)) {
-                                                                  return "Enter Valid Amount";
-                                                                }
-                                                                return null;
-                                                              },
-                                                              decoration:
-                                                                  const InputDecoration(
-                                                                contentPadding:
-                                                                    EdgeInsets
-                                                                        .all(
-                                                                            8.0),
-                                                                hintText:
-                                                                    "Enter Amount",
-                                                                labelText:
-                                                                    "Amount",
-                                                                errorStyle:
-                                                                    TextStyle(
-                                                                        fontSize:
-                                                                            15),
-                                                              ),
-                                                            ),
-                                                            SizedBox(
-                                                              height: 40,
-                                                              width: 100,
-                                                              child:
-                                                                  ElevatedButton(
-                                                                      child:
-                                                                          const Text(
-                                                                        "Add",
-                                                                        style: TextStyle(
-                                                                            color:
-                                                                                Colors.white),
-                                                                      ),
-                                                                      onPressed:
-                                                                          () {
-                                                                        PayToMember(
-                                                                            context);
-                                                                      }),
-                                                            ),
-                                                            SizedBox(
-                                                              height: 10,
-                                                            )
-                                                          ],
-                                                        ),
-                                                      ),
-                                                    );
-                                                  });
-                                                });
-                                          }
-                                        })
-                                    : SizedBox(),
-                                !(isClear || locked)
-                                    ? ListTile(
-                                        leading: Icon(
-                                          Icons.add,
-                                          color: Theme.of(context).primaryColor,
-                                        ),
-                                        title: const Text("Add Expense"),
-                                        onTap: () {
-                                          showModalBottomSheet<void>(
-                                              context: context,
-                                              isScrollControlled: true,
-                                              builder: (BuildContext context) {
-                                                return Padding(
-                                                  padding:
-                                                      MediaQuery.of(context)
-                                                          .viewInsets,
-                                                  child: Form(
-                                                    key: _formKey,
-                                                    child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: <Widget>[
-                                                        TextFormField(
-                                                          controller: _amt,
-                                                          keyboardType:
-                                                              TextInputType
-                                                                  .number,
-                                                          maxLength: 10,
-                                                          maxLines: 1,
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: 18),
-                                                          autocorrect: false,
-                                                          validator: (value) {
-                                                            RegExp
-                                                                validateNumber =
-                                                                RegExp(
-                                                                    r'\b[1-9]{1}[\d]*\b');
-                                                            if (!validateNumber
-                                                                .hasMatch(_amt
-                                                                    .text)) {
-                                                              return "Enter Valid Amount";
-                                                            }
-                                                            return null;
-                                                          },
-                                                          decoration:
-                                                              const InputDecoration(
-                                                            contentPadding:
-                                                                EdgeInsets.all(
-                                                                    8.0),
-                                                            hintText:
-                                                                "Enter Amount",
-                                                            labelText: "Amount",
-                                                            errorStyle:
-                                                                TextStyle(
-                                                                    fontSize:
-                                                                        15),
-                                                          ),
-                                                        ),
-                                                        TextFormField(
-                                                          controller: _purpose,
-                                                          keyboardType:
-                                                              TextInputType
-                                                                  .text,
-                                                          maxLength: 150,
-                                                          maxLines: 1,
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: 18),
-                                                          autocorrect: false,
-                                                          validator: (value) {
-                                                            RegExp
-                                                                validateText =
-                                                                RegExp(
-                                                                    r'\b[\w]+\b');
-                                                            if (!validateText
-                                                                .hasMatch(
-                                                                    _purpose
-                                                                        .text)) {
-                                                              return "Enter Valid Purpose";
-                                                            }
-                                                            return null;
-                                                          },
-                                                          decoration:
-                                                              const InputDecoration(
-                                                            contentPadding:
-                                                                EdgeInsets.all(
-                                                                    8.0),
-                                                            hintText:
-                                                                "Enter Purpose",
-                                                            labelText:
-                                                                "Purpose",
-                                                            errorStyle:
-                                                                TextStyle(
-                                                                    fontSize:
-                                                                        15),
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 40,
-                                                          width: 100,
-                                                          child: ElevatedButton(
-                                                              child: const Text(
-                                                                "Add",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                        .white),
-                                                              ),
-                                                              onPressed: () {
-                                                                AddExpense(
-                                                                    context);
-                                                              }),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 10,
-                                                        )
-                                                      ],
-                                                    ),
+                  showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (BuildContext context) {
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            return Dialog(
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12.0)),
+                                child: Padding(
+                                  padding: MediaQuery.of(context).viewInsets,
+                                  child: SizedBox(
+                                    height: isClear ? 60 : (locked ? 120 : 170),
+                                    child: Center(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ListTile(
+                                            leading: Icon(
+                                              Icons.close,
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                            ),
+                                            title: const Text(
+                                                "Close Room Request"),
+                                            onTap: () async {
+                                              buildShowDialog(context);
+                                              await closeRoomRequest();
+                                              Navigator.pop(context);
+                                              Navigator.pop(context);
+                                            },
+                                          ),
+                                          !isClear
+                                              ? ListTile(
+                                                  leading: Icon(
+                                                    Icons.money,
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
                                                   ),
-                                                );
-                                              });
-                                        })
-                                    : SizedBox(),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  );
+                                                  title: const Text(
+                                                      "Pay to Member"),
+                                                  onTap: () {
+                                                    if (membersListName
+                                                            .length <=
+                                                        1) {
+                                                      showToast(context,
+                                                          "More Than One Member Required");
+                                                    } else {
+                                                      showDialog(
+                                                          context: context,
+                                                          barrierDismissible:
+                                                              false,
+                                                          builder: (BuildContext
+                                                              context) {
+                                                            return StatefulBuilder(
+                                                                builder: (context,
+                                                                    setState) {
+                                                              return Dialog(
+                                                                  shape: RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              12.0)),
+                                                                  child:
+                                                                      Container(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.9,
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                              .all(
+                                                                          18.0),
+                                                                      child: Column(
+                                                                          mainAxisSize:
+                                                                              MainAxisSize.min,
+                                                                          children: [
+                                                                            Text(
+                                                                              "Pay to Member",
+                                                                              style: TextStyle(fontSize: 22),
+                                                                            ),
+                                                                            SizedBox(
+                                                                              height: 5,
+                                                                            ),
+                                                                            Form(
+                                                                              key: _formKey,
+                                                                              child: Column(
+                                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                children: <Widget>[
+                                                                                  SizedBox(
+                                                                                    width: MediaQuery.of(context).size.width * 0.8,
+                                                                                    height: 80,
+                                                                                    child: ListView.builder(
+                                                                                      scrollDirection: Axis.horizontal,
+                                                                                      itemCount: list.length - 1,
+                                                                                      itemBuilder: (BuildContext context, int index) {
+                                                                                        return InkWell(
+                                                                                          child: memberExpenseCard(context, index + 1),
+                                                                                          onTap: () {
+                                                                                            if (this.mounted) {
+                                                                                              setState(
+                                                                                                () {
+                                                                                                  membersListIndex = index;
+                                                                                                },
+                                                                                              );
+                                                                                            }
+                                                                                          },
+                                                                                        );
+                                                                                      },
+                                                                                    ),
+                                                                                  ),
+                                                                                  TextFormField(
+                                                                                    controller: _amt,
+                                                                                    keyboardType: TextInputType.number,
+                                                                                    maxLength: 10,
+                                                                                    maxLines: 1,
+                                                                                    style: const TextStyle(fontSize: 18),
+                                                                                    autocorrect: false,
+                                                                                    validator: (value) {
+                                                                                      RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
+                                                                                      if (!validateNumber.hasMatch(_amt.text)) {
+                                                                                        return "Enter Valid Amount";
+                                                                                      }
+                                                                                      return null;
+                                                                                    },
+                                                                                    decoration: const InputDecoration(
+                                                                                      contentPadding: EdgeInsets.all(8.0),
+                                                                                      hintText: "Enter Amount",
+                                                                                      labelText: "Amount",
+                                                                                      errorStyle: TextStyle(fontSize: 15),
+                                                                                    ),
+                                                                                  ),
+                                                                                  Padding(
+                                                                                    padding: const EdgeInsets.all(8.0),
+                                                                                    child: Row(
+                                                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                      children: [
+                                                                                        SizedBox(
+                                                                                          height: 40,
+                                                                                          width: 100,
+                                                                                          child: ElevatedButton(
+                                                                                              child: const Text(
+                                                                                                "Close",
+                                                                                                style: TextStyle(color: Colors.white),
+                                                                                              ),
+                                                                                              onPressed: () {
+                                                                                                Navigator.pop(context);
+                                                                                              }),
+                                                                                        ),
+                                                                                        SizedBox(
+                                                                                          height: 40,
+                                                                                          width: 100,
+                                                                                          child: ElevatedButton(
+                                                                                              child: const Text(
+                                                                                                "Add",
+                                                                                                style: TextStyle(color: Colors.white),
+                                                                                              ),
+                                                                                              onPressed: () {
+                                                                                                PayToMember(context);
+                                                                                              }),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: 10,
+                                                                                  )
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          ]),
+                                                                    ),
+                                                                  ));
+                                                            });
+                                                          });
+                                                    }
+                                                  })
+                                              : SizedBox(),
+                                          !(isClear || locked)
+                                              ? ListTile(
+                                                  leading: Icon(
+                                                    Icons.add,
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                  ),
+                                                  title:
+                                                      const Text("Add Expense"),
+                                                  onTap: () {
+                                                    showDialog(
+                                                        context: context,
+                                                        barrierDismissible:
+                                                            false,
+                                                        builder: (BuildContext
+                                                            context) {
+                                                          return StatefulBuilder(
+                                                              builder: (context,
+                                                                  setState) {
+                                                            return Dialog(
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              12.0)),
+                                                              child: Container(
+                                                                width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.9,
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                              .all(
+                                                                          18.0),
+                                                                  child: Column(
+                                                                      mainAxisSize:
+                                                                          MainAxisSize
+                                                                              .min,
+                                                                      children: [
+                                                                        Text(
+                                                                          "Add Expense",
+                                                                          style:
+                                                                              TextStyle(fontSize: 22),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              5,
+                                                                        ),
+                                                                        Form(
+                                                                          key:
+                                                                              _formKey,
+                                                                          child:
+                                                                              Column(
+                                                                            mainAxisAlignment:
+                                                                                MainAxisAlignment.center,
+                                                                            mainAxisSize:
+                                                                                MainAxisSize.min,
+                                                                            children: <Widget>[
+                                                                              TextFormField(
+                                                                                controller: _amt,
+                                                                                keyboardType: TextInputType.number,
+                                                                                maxLength: 10,
+                                                                                maxLines: 1,
+                                                                                style: const TextStyle(fontSize: 18),
+                                                                                autocorrect: false,
+                                                                                validator: (value) {
+                                                                                  RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
+                                                                                  if (!validateNumber.hasMatch(_amt.text)) {
+                                                                                    return "Enter Valid Amount";
+                                                                                  }
+                                                                                  return null;
+                                                                                },
+                                                                                decoration: const InputDecoration(
+                                                                                  contentPadding: EdgeInsets.all(8.0),
+                                                                                  hintText: "Enter Amount",
+                                                                                  labelText: "Amount",
+                                                                                  errorStyle: TextStyle(fontSize: 15),
+                                                                                ),
+                                                                              ),
+                                                                              TextFormField(
+                                                                                controller: _purpose,
+                                                                                keyboardType: TextInputType.text,
+                                                                                maxLength: 150,
+                                                                                maxLines: 1,
+                                                                                style: const TextStyle(fontSize: 18),
+                                                                                autocorrect: false,
+                                                                                validator: (value) {
+                                                                                  RegExp validateText = RegExp(r'\b[\w]+\b');
+                                                                                  if (!validateText.hasMatch(_purpose.text)) {
+                                                                                    return "Enter Valid Purpose";
+                                                                                  }
+                                                                                  return null;
+                                                                                },
+                                                                                decoration: const InputDecoration(
+                                                                                  contentPadding: EdgeInsets.all(8.0),
+                                                                                  hintText: "Enter Purpose",
+                                                                                  labelText: "Purpose",
+                                                                                  errorStyle: TextStyle(fontSize: 15),
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 80,
+                                                                                child: ListView.builder(
+                                                                                  scrollDirection: Axis.horizontal,
+                                                                                  itemCount: list.length,
+                                                                                  itemBuilder: (BuildContext context, int index) {
+                                                                                    if (index == 0) {
+                                                                                      return InkWell(
+                                                                                        child: memberExpenseAll(context),
+                                                                                        onTap: () {
+                                                                                          addExpenseTo.clear();
+                                                                                          if (this.mounted) {
+                                                                                            setState(() {});
+                                                                                          }
+                                                                                        },
+                                                                                      );
+                                                                                    } else if (membersListEmail[index - 1] == widget.email) {
+                                                                                      return SizedBox();
+                                                                                    } else {
+                                                                                      return InkWell(
+                                                                                        child: memberExpenseCard(context, index),
+                                                                                        onTap: () {
+                                                                                          if (findElement(addExpenseTo, membersListEmail[index - 1])) {
+                                                                                            addExpenseTo.remove(membersListEmail[index - 1]);
+                                                                                          } else {
+                                                                                            addExpenseTo.add(membersListEmail[index - 1]);
+                                                                                          }
+
+                                                                                          if (this.mounted) {
+                                                                                            setState(() {});
+                                                                                          }
+                                                                                        },
+                                                                                      );
+                                                                                    }
+                                                                                  },
+                                                                                ),
+                                                                              ),
+                                                                              Padding(
+                                                                                padding: const EdgeInsets.all(8.0),
+                                                                                child: Row(
+                                                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                  children: [
+                                                                                    SizedBox(
+                                                                                      height: 40,
+                                                                                      width: 100,
+                                                                                      child: ElevatedButton(
+                                                                                          child: const Text(
+                                                                                            "Close",
+                                                                                            style: TextStyle(color: Colors.white),
+                                                                                          ),
+                                                                                          onPressed: () {
+                                                                                            Navigator.pop(context);
+                                                                                          }),
+                                                                                    ),
+                                                                                    SizedBox(
+                                                                                      height: 40,
+                                                                                      width: 100,
+                                                                                      child: ElevatedButton(
+                                                                                          child: const Text(
+                                                                                            "Add",
+                                                                                            style: TextStyle(color: Colors.white),
+                                                                                          ),
+                                                                                          onPressed: () {
+                                                                                            AddExpense(context);
+                                                                                          }),
+                                                                                    ),
+                                                                                  ],
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 10,
+                                                                              )
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ]),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          });
+                                                        });
+                                                  })
+                                              : SizedBox(),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ));
+                          },
+                        );
+                      });
                 },
                 child: const Icon(
                   Icons.edit,
@@ -1777,7 +1891,6 @@ class _ExpenseDataState extends State<ExpenseData> {
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
   final _updateExpense = GlobalKey<FormState>();
-
 
   _updateTransaction(BuildContext context, String purpose, String id,
       String amount, String flag) async {

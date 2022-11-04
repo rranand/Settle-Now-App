@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/screens/dashboard.dart';
 
 import '../contents.dart' as global;
@@ -12,36 +13,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RoomJoin extends StatefulWidget {
   final String roomKey;
 
-  const RoomJoin({ Key? key, required this.roomKey }) : super(key: key);
+  const RoomJoin({Key? key, required this.roomKey}) : super(key: key);
 
   @override
   State<RoomJoin> createState() => _RoomJoinState();
 }
 
 class _RoomJoinState extends State<RoomJoin> {
-
+  String version = '';
   late SharedPreferences prefs;
   String message = "Joining Room";
 
   Future _roomJoin() async {
+    version = await getAppVersion();
     prefs = await SharedPreferences.getInstance();
 
     try {
-      if (prefs.getString("email") != null && prefs.getString("token") != null) {
+      if (prefs.getString("email") != null &&
+          prefs.getString("token") != null) {
         String email = prefs.getString("email")!;
         String _token = prefs.getString("token")!;
 
-        final response = await http.put(
-          Uri.parse(global.url+'room'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(email),
-            'roomKey': crypto.encrypt(widget.roomKey.substring(1)),
-          })
-        );
+        final response = await http.put(Uri.parse(global.url + 'room'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Auth': _token
+            },
+            body: jsonEncode({
+              'email': crypto.encrypt(email),
+              'roomKey': crypto.encrypt(widget.roomKey.substring(1)),
+            }));
 
         if (this.mounted) {
           setState(() {
@@ -51,28 +52,31 @@ class _RoomJoinState extends State<RoomJoin> {
 
         Future.delayed(const Duration(milliseconds: 1000), () {
           Navigator.pushAndRemoveUntil(
-            context, 
+            context,
             MaterialPageRoute(
-              builder: (context) => const DashBoard(),
+              builder: (context) => DashBoard(
+                version: version,
+              ),
             ),
             (Route<dynamic> route) => false,
           );
         });
-        
       } else {
         Navigator.pushAndRemoveUntil(
-          context, 
+          context,
           MaterialPageRoute(
             builder: (context) => const LoginPage(),
           ),
           (Route<dynamic> route) => false,
         );
       }
-    } on Exception catch(_) {
+    } on Exception catch (_) {
       Navigator.pushAndRemoveUntil(
-        context, 
+        context,
         MaterialPageRoute(
-          builder: (context) => const DashBoard(),
+          builder: (context) => DashBoard(
+            version: version,
+          ),
         ),
         (Route<dynamic> route) => false,
       );
@@ -88,22 +92,27 @@ class _RoomJoinState extends State<RoomJoin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-      ),
-      body:Center(
-        child: Column(
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+        ),
+        body: Center(
+            child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Theme.of(context).primaryColor,),
-            SizedBox(height: 10,),
-            Text(message, style: TextStyle(
-              fontSize: 22,
-            ),),
+            CircularProgressIndicator(
+              color: Theme.of(context).primaryColor,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Text(
+              message,
+              style: TextStyle(
+                fontSize: 22,
+              ),
+            ),
           ],
-        )
-      )
-    );
+        )));
   }
 }
