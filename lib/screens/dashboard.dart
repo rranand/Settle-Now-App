@@ -1,15 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:in_app_update/in_app_update.dart';
-import 'package:settlenow/ads.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -2321,27 +2318,7 @@ class RoomWidget extends StatelessWidget {
         height: 5,
       ),
       itemBuilder: (BuildContext context, int index) {
-        final themeProvider = Provider.of<ThemeProvider>(context);
-
-        if (Platform.isAndroid && index > 0 && index < 9) {
-          BannerAd newBanner = createBanner(adsID[index - 1]);
-          newBanner.load();
-
-          return Column(children: [
-            Container(
-              alignment: Alignment.center,
-              child: AdWidget(ad: newBanner),
-              width: newBanner.size.width.toDouble(),
-              height: newBanner.size.height.toDouble(),
-            ),
-            SizedBox(
-              height: 5,
-            ),
-            roomSectors(context, index)
-          ]);
-        } else {
-          return roomSectors(context, index);
-        }
+        return roomSectors(context, index);
       },
     );
   }

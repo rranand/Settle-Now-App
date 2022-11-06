@@ -10,16 +10,12 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-Future<void> backgroundHandler(RemoteMessage message) async {
-}
-
+Future<void> backgroundHandler(RemoteMessage message) async {}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform
-  );
-  FirebaseMessaging.onBackgroundMessage(backgroundHandler); 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(backgroundHandler);
   LocalNotificationService.initialize();
   MobileAds.instance.initialize();
 
@@ -27,7 +23,7 @@ Future<void> main() async {
 }
 
 class MainScreen extends StatelessWidget {
-  const MainScreen({ Key? key }) : super(key: key);
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -43,14 +39,13 @@ class MyApp extends StatefulWidget {
 
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   static FirebaseAnalyticsObserver observer =
-    FirebaseAnalyticsObserver(analytics: analytics);
+      FirebaseAnalyticsObserver(analytics: analytics);
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   void initState() {
     super.initState();
@@ -59,24 +54,26 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
-      builder: (context, _) {
-        final themeProvider = Provider.of<ThemeProvider>(context);
-        return MaterialApp(
-          builder: (context, child) {
-            return MediaQuery(
-              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), 
-              child: child! ,
-            );
-          },
-          themeMode: themeProvider.darkTheme?ThemeMode.dark:ThemeMode.light,
-          theme: MyTheme.lightTheme(context),
-          darkTheme: MyTheme.darTheme(context),
-          title: "Settle Now",
-          home: SafeArea(child: LoginPage(),),
-          onGenerateRoute: RouteServices.generateRoute,
-        );
-      }
-    );
+        create: (context) => ThemeProvider(),
+        builder: (context, _) {
+          final themeProvider = Provider.of<ThemeProvider>(context);
+          return MaterialApp(
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: child!,
+              );
+            },
+            themeMode:
+                themeProvider.darkTheme ? ThemeMode.dark : ThemeMode.light,
+            theme: MyTheme.lightTheme(context),
+            darkTheme: MyTheme.darTheme(context),
+            title: "Settle Now",
+            home: SafeArea(
+              child: LoginPage(),
+            ),
+            onGenerateRoute: RouteServices.generateRoute,
+          );
+        });
   }
 }

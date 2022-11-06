@@ -1,14 +1,10 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:googleapis/displayvideo/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:settlenow/ads.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/models/FriendEach.dart';
@@ -124,7 +120,6 @@ class _RoomExpenseState extends State<RoomExpense> {
         isClear = list[0]["done"];
         membersListName.clear();
         membersListEmail.clear();
-
         for (int i = 1; i < list.length; i++) {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
@@ -263,6 +258,7 @@ class _RoomExpenseState extends State<RoomExpense> {
               'roomKey': crypto.encrypt(widget.roomKey),
               'purpose': crypto.encrypt(_purpose.text),
               'amt': crypto.encrypt(_amt.text),
+              "members": crypto.encrypt(addExpenseTo.toString())
             }));
 
         _amt.text = "";
@@ -609,12 +605,10 @@ class _RoomExpenseState extends State<RoomExpense> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             CachedNetworkImage(
-                              imageUrl: data[index].isGoogle
-                                  ? data[index].pic
-                                  : (global.driveUrl +
-                                      (data[index].pic.length == 0
-                                          ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                          : data[index].pic)),
+                              imageUrl: data[index].pic.length == 0
+                                  ? global.driveUrl +
+                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                  : data[index].pic,
                               progressIndicatorBuilder:
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(
@@ -917,13 +911,6 @@ class _RoomExpenseState extends State<RoomExpense> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    BannerAd newBanner = createBanner(adsID[9]);
-    BannerAd newBanner_1 = createBanner(adsID[10]);
-
-    if (Platform.isAndroid) {
-      newBanner.load();
-      newBanner_1.load();
-    }
 
     return Scaffold(
         appBar: AppBar(
@@ -934,11 +921,15 @@ class _RoomExpenseState extends State<RoomExpense> {
                 : IconButton(
                     onPressed: () async {
                       if (loadFriendData) {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) =>
-                              addFriendWidget(context),
-                        );
+                        if (friendData.isEmpty) {
+                          showToast(context, "No Friend Found");
+                        } else {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) =>
+                                addFriendWidget(context),
+                          );
+                        }
                       } else {
                         showToast(context, "Loading Data");
                       }
@@ -1057,22 +1048,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                     )
                                   : SizedBox(),
                             ),
-                            SliverToBoxAdapter(
-                              child: Platform.isAndroid
-                                  ? Container(
-                                      alignment: Alignment.center,
-                                      child: AdWidget(ad: newBanner),
-                                      width: newBanner.size.width.toDouble(),
-                                      height: newBanner.size.height.toDouble(),
-                                    )
-                                  : SizedBox(),
-                            ),
                             SliverToBoxAdapter(child: const Divider()),
-                            SliverToBoxAdapter(
-                              child: const SizedBox(
-                                height: 5,
-                              ),
-                            ),
                             SliverToBoxAdapter(
                               child: Padding(
                                 padding: EdgeInsets.all(15.0),
@@ -1108,21 +1084,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                                     ),
                                     SizedBox(
                                       height: 15,
-                                    ),
-                                    Platform.isAndroid
-                                        ? Container(
-                                            alignment: Alignment.center,
-                                            child: AdWidget(ad: newBanner_1),
-                                            width: newBanner_1.size.width
-                                                .toDouble(),
-                                            height: newBanner_1.size.height
-                                                .toDouble(),
-                                          )
-                                        : SizedBox(
-                                            height: 0,
-                                          ),
-                                    SizedBox(
-                                      height: 5,
                                     ),
                                     Text(
                                       expenseTitle,
@@ -1773,7 +1734,28 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                   itemBuilder: (BuildContext context, int index) {
                                                                                     if (index == 0) {
                                                                                       return InkWell(
-                                                                                        child: memberExpenseAll(context),
+                                                                                        child: SizedBox(
+                                                                                          width: 85,
+                                                                                          child: Padding(
+                                                                                              padding: EdgeInsets.all(8.0),
+                                                                                              child: Card(
+                                                                                                  elevation: 1.4,
+                                                                                                  shadowColor: Theme.of(context).primaryColor,
+                                                                                                  shape: RoundedRectangleBorder(
+                                                                                                    side: BorderSide(color: addExpenseTo.isEmpty ? Theme.of(context).primaryColor : Theme.of(context).backgroundColor),
+                                                                                                    borderRadius: BorderRadius.circular(15.0),
+                                                                                                  ),
+                                                                                                  child: Padding(
+                                                                                                      padding: const EdgeInsets.all(8.0),
+                                                                                                      child: Center(
+                                                                                                        child: Text(
+                                                                                                          "ALL",
+                                                                                                          style: TextStyle(
+                                                                                                            fontSize: 14,
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                      )))),
+                                                                                        ),
                                                                                         onTap: () {
                                                                                           addExpenseTo.clear();
                                                                                           if (this.mounted) {
@@ -1785,12 +1767,55 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                       return SizedBox();
                                                                                     } else {
                                                                                       return InkWell(
-                                                                                        child: memberExpenseCard(context, index),
+                                                                                        child: Padding(
+                                                                                          padding: EdgeInsets.all(8.0),
+                                                                                          child: Card(
+                                                                                            elevation: 1.4,
+                                                                                            shadowColor: Theme.of(context).primaryColor,
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              side: BorderSide(color: findElement(addExpenseTo, membersListEmail[index - 1]) ? Theme.of(context).primaryColor : Theme.of(context).backgroundColor),
+                                                                                              borderRadius: BorderRadius.circular(15.0),
+                                                                                            ),
+                                                                                            child: Padding(
+                                                                                              padding: const EdgeInsets.all(5.0),
+                                                                                              child: Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                children: [
+                                                                                                  CachedNetworkImage(
+                                                                                                    imageUrl: crypto.decrypt(list[index]['pic']).length == 0 ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8" : crypto.decrypt(list[index]['pic']),
+                                                                                                    progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                                                                                                    errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                                                                                                    imageBuilder: (context, imageProvider) => Container(
+                                                                                                      width: 50.0,
+                                                                                                      height: 50.0,
+                                                                                                      decoration: BoxDecoration(
+                                                                                                        shape: BoxShape.circle,
+                                                                                                        image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                                                                                                      ),
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  Text(
+                                                                                                    crypto.decrypt(list[index]['Name']),
+                                                                                                    overflow: TextOverflow.ellipsis,
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 18,
+                                                                                                      fontWeight: FontWeight.w500,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
                                                                                         onTap: () {
                                                                                           if (findElement(addExpenseTo, membersListEmail[index - 1])) {
                                                                                             addExpenseTo.remove(membersListEmail[index - 1]);
                                                                                           } else {
                                                                                             addExpenseTo.add(membersListEmail[index - 1]);
+
+                                                                                            if (addExpenseTo.length == membersListEmail.length - 1) {
+                                                                                              addExpenseTo.clear();
+                                                                                            }
                                                                                           }
 
                                                                                           if (this.mounted) {
@@ -2062,8 +2087,16 @@ class _ExpenseDataState extends State<ExpenseData> {
     Navigator.pop(context);
   }
 
-  Widget _buildPopupDialog(BuildContext context, String name, String date,
-      String email, String id, String purpose, String amount, bool locked) {
+  Widget _buildPopupDialog(
+      BuildContext context,
+      String name,
+      String date,
+      String email,
+      String id,
+      String purpose,
+      String amount,
+      bool locked,
+      List<dynamic> partialExpense) {
     return StatefulBuilder(builder: (context, setState) {
       return Dialog(
         shape:
@@ -2113,15 +2146,19 @@ class _ExpenseDataState extends State<ExpenseData> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        partialExpense.isEmpty
+                            ? Text(
+                                name,
+                                style: TextStyle(fontSize: 20),
+                              )
+                            : SizedBox(),
+                        partialExpense.isEmpty
+                            ? SizedBox(
+                                height: 10,
+                              )
+                            : SizedBox(),
                         Text(
-                          name,
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Date: " + date,
+                          date,
                           style: TextStyle(fontSize: 20),
                         ),
                       ],
@@ -2132,6 +2169,88 @@ class _ExpenseDataState extends State<ExpenseData> {
                     )
                   ],
                 ),
+                partialExpense.isEmpty
+                    ? SizedBox()
+                    : SizedBox(
+                        height: 10,
+                      ),
+                partialExpense.isEmpty
+                    ? SizedBox()
+                    : SizedBox(
+                        height: 10,
+                      ),
+                partialExpense.isEmpty
+                    ? SizedBox()
+                    : SizedBox(
+                        width: MediaQuery.of(context).size.width - 65,
+                        height: 70,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: partialExpense.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Card(
+                                elevation: 1.4,
+                                shadowColor: Theme.of(context).primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(5.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      CachedNetworkImage(
+                                        imageUrl: crypto
+                                                    .decrypt(
+                                                        partialExpense[index]
+                                                            ['pic'])
+                                                    .length ==
+                                                0
+                                            ? global.driveUrl +
+                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                            : crypto.decrypt(
+                                                partialExpense[index]['pic']),
+                                        progressIndicatorBuilder: (context, url,
+                                                downloadProgress) =>
+                                            CircularProgressIndicator(
+                                                value:
+                                                    downloadProgress.progress),
+                                        errorWidget: (context, url, error) =>
+                                            Image(
+                                                image: AssetImage(
+                                                    'assets/Images/unknown.jpeg')),
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                Container(
+                                          width: 50.0,
+                                          height: 50.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                                image: imageProvider,
+                                                fit: BoxFit.cover),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        crypto.decrypt(
+                                            partialExpense[index]['Name']),
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
                 SizedBox(
                   height: 25,
                 ),
@@ -2187,6 +2306,8 @@ class _ExpenseDataState extends State<ExpenseData> {
           physics: ScrollPhysics(),
           itemCount: widget.TransList.length,
           itemBuilder: (BuildContext context, int index) {
+            List<dynamic> partialExpense = widget.TransList[index]["members"];
+
             return InkWell(
               onTap: () {
                 _purpose.text =
@@ -2203,11 +2324,12 @@ class _ExpenseDataState extends State<ExpenseData> {
                       crypto.decrypt(widget.TransList[index]["id"]),
                       crypto.decrypt(widget.TransList[index]["Purpose"]),
                       crypto.decrypt(widget.TransList[index]["Amount"]),
-                      widget.locked),
+                      widget.locked,
+                      partialExpense),
                 );
               },
               child: SizedBox(
-                  height: 134,
+                  height: 147,
                   child: Card(
                     elevation: 5.0,
                     shadowColor: Theme.of(context).primaryColor,
@@ -2243,6 +2365,21 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         child: Text(
                                           crypto.decrypt(
                                               widget.TransList[index]["Name"]),
+                                          style: const TextStyle(
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      Opacity(
+                                        opacity: 0.8,
+                                        child: Text(
+                                          "Expense Type : " +
+                                              (partialExpense.isEmpty
+                                                  ? "All"
+                                                  : "Partial"),
                                           style: const TextStyle(
                                             fontSize: 17,
                                           ),

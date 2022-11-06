@@ -246,8 +246,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: CircularProgressIndicator(),
                 ),
         ),
-      ),
-      bottomNavigationBar: privacyAndVersionBottomAppBar(version)
+      )
     );
   }
 }

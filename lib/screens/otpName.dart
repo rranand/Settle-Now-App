@@ -18,7 +18,8 @@ class OtpName extends StatefulWidget {
   final String email;
   final String version;
 
-  const OtpName({Key? key, required this.email, required this.version}) : super(key: key);
+  const OtpName({Key? key, required this.email, required this.version})
+      : super(key: key);
 
   @override
   _OtpNameState createState() => _OtpNameState();
@@ -146,7 +147,10 @@ class _OtpNameState extends State<OtpName> {
 
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => DashBoard(version: widget.version,)),
+          MaterialPageRoute(
+              builder: (context) => DashBoard(
+                    version: widget.version,
+                  )),
           (Route<dynamic> route) => false,
         );
       } else {
@@ -177,119 +181,116 @@ class _OtpNameState extends State<OtpName> {
 
     return Scaffold(
         body: SingleChildScrollView(
-          child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              alignment: Alignment.center,
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: (data == null
-                    ? const Center(
-                        child: CircularProgressIndicator(),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            themeProvider.darkTheme
-                                ? 'assets/Images/SN_dark.jpg'
-                                : 'assets/Images/SN.jpg',
-                            height: 150,
-                            width: 150,
-                          ),
-                          Text(
-                            "Settle Now",
-                            style: TextStyle(
-                              fontSize: height >= 800 ? 60 : 40,
-                              fontWeight: FontWeight.bold,
-                              color: themeProvider.darkTheme
-                                  ? null
-                                  : Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 50,
-                          ),
-                          (crypto.decrypt(data['Name']) == 'Unknown')
-                              ? AutofillGroup(
-                                  child: TextFormField(
-                                    controller: _name,
-                                    keyboardType: TextInputType.text,
-                                    maxLength: 70,
-                                    maxLines: 1,
-                                    style: const TextStyle(fontSize: 18),
-                                    autofillHints: [AutofillHints.email],
-                                    decoration: InputDecoration(
-                                      contentPadding: const EdgeInsets.all(8.0),
-                                      hintText: "Aditya",
-                                      labelText: "Enter Name",
-                                      errorText:
-                                          (errorN == true ? errorTextN : null),
-                                      errorStyle: const TextStyle(fontSize: 15),
-                                    ),
-                                  ),
-                                )
-                              : const SizedBox(
-                                  width: 0,
-                                  height: 0,
+      child: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          alignment: Alignment.center,
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            child: (data == null
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        themeProvider.darkTheme
+                            ? 'assets/Images/SN_dark.jpg'
+                            : 'assets/Images/SN.jpg',
+                        height: 150,
+                        width: 150,
+                      ),
+                      Text(
+                        "Settle Now",
+                        style: TextStyle(
+                          fontSize: height >= 800 ? 60 : 40,
+                          fontWeight: FontWeight.bold,
+                          color: themeProvider.darkTheme
+                              ? null
+                              : Theme.of(context).primaryColor,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 50,
+                      ),
+                      (crypto.decrypt(data['Name']) == 'Unknown')
+                          ? AutofillGroup(
+                              child: TextFormField(
+                                controller: _name,
+                                keyboardType: TextInputType.text,
+                                maxLength: 70,
+                                maxLines: 1,
+                                style: const TextStyle(fontSize: 18),
+                                autofillHints: [AutofillHints.email],
+                                decoration: InputDecoration(
+                                  contentPadding: const EdgeInsets.all(8.0),
+                                  hintText: "Aditya",
+                                  labelText: "Enter Name",
+                                  errorText:
+                                      (errorN == true ? errorTextN : null),
+                                  errorStyle: const TextStyle(fontSize: 15),
                                 ),
-                          TextField(
-                            controller: _otp,
-                            keyboardType: TextInputType.number,
-                            maxLength: 6,
-                            maxLines: 1,
-                            style: const TextStyle(fontSize: 18),
-                            autocorrect: false,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.all(8.0),
-                              hintText: "000000",
-                              labelText: "Enter OTP",
-                              errorText: (error == true ? errorText : null),
-                              errorStyle: const TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          SizedBox(
-                            width: 140,
-                            height: 45,
-                            child: ElevatedButton(
-                              child: Text(
-                                "Login",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                    color: Colors.white),
                               ),
-                              onPressed: () {
-                                RegExp validateName = RegExp(r'[A-Za-z]{3,}');
-                                RegExp validateOTP = RegExp(r'^[\d]{6}');
-                                errorN =
-                                    ((crypto.decrypt(data['Name']) != 'Unknown')
-                                        ? false
-                                        : !validateName.hasMatch(_name.text));
-                                error = !validateOTP.hasMatch(_otp.text);
-                                if (!(error || errorN)) {
-                                  if (crypto.decrypt(data['Name']) ==
-                                      'Unknown') {
-                                    verifyStatus(
-                                        _name.text, _otp.text, context);
-                                  } else {
-                                    verifyStatus("##", _otp.text, context);
-                                  }
-                                }
-                                if (this.mounted) {
-                                  setState(() {});
-                                }
-                              },
+                            )
+                          : const SizedBox(
+                              width: 0,
+                              height: 0,
                             ),
+                      TextField(
+                        controller: _otp,
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        maxLines: 1,
+                        style: const TextStyle(fontSize: 18),
+                        autocorrect: false,
+                        decoration: InputDecoration(
+                          contentPadding: const EdgeInsets.all(8.0),
+                          hintText: "000000",
+                          labelText: "Enter OTP",
+                          errorText: (error == true ? errorText : null),
+                          errorStyle: const TextStyle(fontSize: 15),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      SizedBox(
+                        width: 140,
+                        height: 45,
+                        child: ElevatedButton(
+                          child: Text(
+                            "Login",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Colors.white),
                           ),
-                        ],
-                      )),
-              )),
-        ),
-        bottomNavigationBar: privacyAndVersionBottomAppBar(widget.version));
+                          onPressed: () {
+                            RegExp validateName = RegExp(r'[A-Za-z]{3,}');
+                            RegExp validateOTP = RegExp(r'^[\d]{6}');
+                            errorN =
+                                ((crypto.decrypt(data['Name']) != 'Unknown')
+                                    ? false
+                                    : !validateName.hasMatch(_name.text));
+                            error = !validateOTP.hasMatch(_otp.text);
+                            if (!(error || errorN)) {
+                              if (crypto.decrypt(data['Name']) == 'Unknown') {
+                                verifyStatus(_name.text, _otp.text, context);
+                              } else {
+                                verifyStatus("##", _otp.text, context);
+                              }
+                            }
+                            if (this.mounted) {
+                              setState(() {});
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  )),
+          )),
+    ));
   }
 }

@@ -14,11 +14,11 @@ final List<String> adsID = [
   'ca-app-pub-2748051594366591/3750073246'
 ];
 
-BannerAd createBanner(String addID) {
+/*BannerAd createBanner(String addID) {
   return BannerAd(
     adUnitId: addID,
     size: AdSize.banner,
     request: AdRequest(),
     listener: BannerAdListener(),
   );
-}
+}*/
