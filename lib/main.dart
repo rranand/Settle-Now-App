@@ -8,7 +8,6 @@ import 'others/route_service.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 Future<void> backgroundHandler(RemoteMessage message) async {}
 
@@ -17,7 +16,6 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(backgroundHandler);
   LocalNotificationService.initialize();
-  MobileAds.instance.initialize();
 
   runApp(MyApp());
 }

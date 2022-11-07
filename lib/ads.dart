@@ -1,5 +1,3 @@
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-
 final List<String> adsID = [
   'ca-app-pub-2748051594366591/8411372986',
   'ca-app-pub-2748051594366591/1314400026',
