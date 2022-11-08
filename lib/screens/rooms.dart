@@ -1150,7 +1150,79 @@ class _RoomExpenseState extends State<RoomExpense> {
                               itemCount: list.length - 1,
                               itemBuilder: (BuildContext context, int index) {
                                 return InkWell(
-                                  child: memberExpenseCard(context, index + 1),
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Card(
+                                      elevation: 1.4,
+                                      shadowColor:
+                                          Theme.of(context).primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: membersListEmail[index] ==
+                                                    membersListEmail[
+                                                        membersListIndexS]
+                                                ? Theme.of(context).primaryColor
+                                                : Theme.of(context)
+                                                    .backgroundColor),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            CachedNetworkImage(
+                                              imageUrl: crypto
+                                                          .decrypt(
+                                                              list[index + 1]
+                                                                  ['pic'])
+                                                          .length ==
+                                                      0
+                                                  ? global.driveUrl +
+                                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  : crypto.decrypt(
+                                                      list[index + 1]['pic']),
+                                              progressIndicatorBuilder:
+                                                  (context, url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                              errorWidget: (context, url,
+                                                      error) =>
+                                                  Image(
+                                                      image: AssetImage(
+                                                          'assets/Images/unknown.jpeg')),
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                width: 50.0,
+                                                height: 50.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              crypto.decrypt(
+                                                  list[index + 1]['Name']),
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                   onTap: () {
                                     if (this.mounted) {
                                       setState(() {
@@ -1182,8 +1254,83 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   itemBuilder:
                                       (BuildContext context, int index) {
                                     return InkWell(
-                                      child:
-                                          memberExpenseCard(context, index + 1),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Card(
+                                          elevation: 1.4,
+                                          shadowColor:
+                                              Theme.of(context).primaryColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: membersListEmail[
+                                                            index] ==
+                                                        membersListEmail[
+                                                            membersListIndexR]
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Theme.of(context)
+                                                        .backgroundColor),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(5.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                CachedNetworkImage(
+                                                  imageUrl: crypto
+                                                              .decrypt(list[
+                                                                      index + 1]
+                                                                  ['pic'])
+                                                              .length ==
+                                                          0
+                                                      ? global.driveUrl +
+                                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                      : crypto.decrypt(
+                                                          list[index + 1]
+                                                              ['pic']),
+                                                  progressIndicatorBuilder: (context,
+                                                          url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                                  errorWidget: (context, url,
+                                                          error) =>
+                                                      Image(
+                                                          image: AssetImage(
+                                                              'assets/Images/unknown.jpeg')),
+                                                  imageBuilder: (context,
+                                                          imageProvider) =>
+                                                      Container(
+                                                    width: 50.0,
+                                                    height: 50.0,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                          image: imageProvider,
+                                                          fit: BoxFit.cover),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  crypto.decrypt(
+                                                      list[index + 1]['Name']),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                       onTap: () {
                                         if (this.mounted) {
                                           setState(() {
@@ -1260,26 +1407,24 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                   context)
                                                               .size
                                                               .width,
-                                                          child: Expanded(
-                                                            flex: 1,
-                                                            child: Text(
-                                                              crypto.decrypt(allTransactionData[
-                                                                          index]
-                                                                      [
-                                                                      "sender"]) +
-                                                                  " -> " +
-                                                                  crypto.decrypt(
-                                                                      allTransactionData[
-                                                                              index]
-                                                                          [
-                                                                          "receiver"]),
+                                                          child: Text(
+                                                            crypto.decrypt(
+                                                                    allTransactionData[
+                                                                            index]
+                                                                        [
+                                                                        "sender"]) +
+                                                                " -> " +
+                                                                crypto.decrypt(
+                                                                    allTransactionData[
+                                                                            index]
+                                                                        [
+                                                                        "receiver"]),
+                                                            style:
+                                                                const TextStyle(
                                                               overflow:
                                                                   TextOverflow
-                                                                      .ellipsis,
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 21,
-                                                              ),
+                                                                      .clip,
+                                                              fontSize: 21,
                                                             ),
                                                           ),
                                                         ),
@@ -2329,7 +2474,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                 );
               },
               child: SizedBox(
-                  height: 147,
+                  height: 150,
                   child: Card(
                     elevation: 5.0,
                     shadowColor: Theme.of(context).primaryColor,

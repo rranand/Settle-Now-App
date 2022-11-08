@@ -1247,17 +1247,15 @@ class _DashBoardState extends State<DashBoard> {
                                         width:
                                             MediaQuery.of(context).size.width -
                                                 140,
-                                        child: Expanded(
-                                          child: Text(
-                                            crypto.decrypt(
-                                                    RoomRequest[index]["by"]) +
-                                                " invited to join " +
-                                                crypto.decrypt(
-                                                    RoomRequest[index]["name"]),
-                                            style: TextStyle(
-                                              overflow: TextOverflow.clip,
-                                              fontSize: 20,
-                                            ),
+                                        child: Text(
+                                          crypto.decrypt(
+                                                  RoomRequest[index]["by"]) +
+                                              " invited to join " +
+                                              crypto.decrypt(
+                                                  RoomRequest[index]["name"]),
+                                          style: TextStyle(
+                                            overflow: TextOverflow.clip,
+                                            fontSize: 20,
                                           ),
                                         ),
                                       ),
