@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": "web",
+    "public": "build/web",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -11,6 +11,10 @@
       {
         "source": "/room/**",
         "dynamicLinks": true
+      },
+      {
+        "source": "/privacy-policy",
+        "destination": "/privacy-policy.html"
       }
     ]
   }
