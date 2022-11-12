@@ -41,7 +41,7 @@ class _RoomJoinState extends State<RoomJoin> {
             },
             body: jsonEncode({
               'email': crypto.encrypt(email),
-              'roomKey': crypto.encrypt(widget.roomKey.substring(1)),
+              'roomKey': crypto.encrypt(widget.roomKey),
             }));
 
         if (this.mounted) {
