@@ -613,9 +613,17 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(
                                           value: downloadProgress.progress),
-                              errorWidget: (context, url, error) => Image(
-                                  image:
-                                      AssetImage('assets/Images/unknown.jpeg')),
+                              errorWidget: (context, url, error) => Container(
+                                width: 120.0,
+                                height: 120.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/Images/unknown.jpeg'),
+                                      fit: BoxFit.cover),
+                                ),
+                              ),
                               imageBuilder: (context, imageProvider) =>
                                   Container(
                                 width: 45.0,
@@ -672,11 +680,16 @@ class _RoomExpenseState extends State<RoomExpense> {
             _extractExpenseData(crypto.decrypt(list[index]['email']));
           },
           child: Card(
-            elevation: 5.0,
+            elevation: 1.0,
             shadowColor: Theme.of(context).primaryColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
+            shape: list[index]['done']
+                ? RoundedRectangleBorder(
+                    side: BorderSide(color: Colors.red),
+                    borderRadius: BorderRadius.circular(15.0),
+                  )
+                : RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                  ),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
@@ -684,38 +697,40 @@ class _RoomExpenseState extends State<RoomExpense> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Stack(children: [
-                      CachedNetworkImage(
-                        imageUrl: crypto.decrypt(list[index]['pic']).length == 0
-                            ? global.driveUrl +
-                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                            : crypto.decrypt(list[index]['pic']),
-                        progressIndicatorBuilder:
-                            (context, url, downloadProgress) =>
-                                CircularProgressIndicator(
-                                    value: downloadProgress.progress),
-                        errorWidget: (context, url, error) => Image(
-                            image: AssetImage('assets/Images/unknown.jpeg')),
-                        imageBuilder: (context, imageProvider) => Container(
-                          width: 65.0,
-                          height: 65.0,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                                image: imageProvider, fit: BoxFit.cover),
-                          ),
+                    child: CachedNetworkImage(
+                      imageUrl: crypto.decrypt(list[index]['pic']).length == 0
+                          ? global.driveUrl +
+                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                          : crypto.decrypt(list[index]['pic']),
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) =>
+                              CircularProgressIndicator(
+                                  value: downloadProgress.progress),
+                      errorWidget: (context, url, error) => Container(
+                        width: 120.0,
+                        height: 120.0,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: AssetImage('assets/Images/unknown.jpeg'),
+                              fit: BoxFit.cover),
                         ),
                       ),
-                      Positioned(
-                        top: 39,
-                        right: -5,
-                        child: Text(
-                          (list[index]['own'] ? "👑 " : "") +
-                              (list[index]['done'] ? "🔒" : ""),
-                          style: TextStyle(fontSize: 20),
+                      imageBuilder: (context, imageProvider) => Container(
+                        width: 65.0,
+                        height: 65.0,
+                        decoration: BoxDecoration(
+                          border: list[index]['own']
+                              ? Border.all(
+                                  color: Theme.of(context).primaryColor,
+                                  width: 3.4)
+                              : null,
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: imageProvider, fit: BoxFit.cover),
                         ),
-                      )
-                    ]),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -822,8 +837,16 @@ class _RoomExpenseState extends State<RoomExpense> {
                     : crypto.decrypt(list[index]['pic']),
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
-                errorWidget: (context, url, error) =>
-                    Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                errorWidget: (context, url, error) => Container(
+                  width: 120.0,
+                  height: 120.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: AssetImage('assets/Images/unknown.jpeg'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
                 imageBuilder: (context, imageProvider) => Container(
                   width: 50.0,
                   height: 50.0,
@@ -889,7 +912,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                   _extractExpenseData("all");
                 },
                 child: Card(
-                    elevation: 5.0,
+                    elevation: 1.0,
                     shadowColor: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),
@@ -1191,11 +1214,19 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                           value:
                                                               downloadProgress
                                                                   .progress),
-                                              errorWidget: (context, url,
-                                                      error) =>
-                                                  Image(
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Container(
+                                                width: 120.0,
+                                                height: 120.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
                                                       image: AssetImage(
-                                                          'assets/Images/unknown.jpeg')),
+                                                          'assets/Images/unknown.jpeg'),
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
                                               imageBuilder:
                                                   (context, imageProvider) =>
                                                       Container(
@@ -1298,11 +1329,19 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                           value:
                                                               downloadProgress
                                                                   .progress),
-                                                  errorWidget: (context, url,
-                                                          error) =>
-                                                      Image(
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          Container(
+                                                    width: 120.0,
+                                                    height: 120.0,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
                                                           image: AssetImage(
-                                                              'assets/Images/unknown.jpeg')),
+                                                              'assets/Images/unknown.jpeg'),
+                                                          fit: BoxFit.cover),
+                                                    ),
+                                                  ),
                                                   imageBuilder: (context,
                                                           imageProvider) =>
                                                       Container(
@@ -1385,7 +1424,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                   (BuildContext context,
                                                       int index) {
                                                 return Card(
-                                                  elevation: 5.0,
+                                                  elevation: 1.0,
                                                   shadowColor: Theme.of(context)
                                                       .primaryColor,
                                                   shape: RoundedRectangleBorder(
@@ -1530,7 +1569,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                       .size
                                                       .width,
                                                   child: Card(
-                                                    elevation: 5.0,
+                                                    elevation: 1.0,
                                                     shadowColor:
                                                         Theme.of(context)
                                                             .primaryColor,
@@ -1929,7 +1968,14 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                                   CachedNetworkImage(
                                                                                                     imageUrl: crypto.decrypt(list[index]['pic']).length == 0 ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8" : crypto.decrypt(list[index]['pic']),
                                                                                                     progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
-                                                                                                    errorWidget: (context, url, error) => Image(image: AssetImage('assets/Images/unknown.jpeg')),
+                                                                                                    errorWidget: (context, url, error) => Container(
+                                                                                                      width: 120.0,
+                                                                                                      height: 120.0,
+                                                                                                      decoration: BoxDecoration(
+                                                                                                        shape: BoxShape.circle,
+                                                                                                        image: DecorationImage(image: AssetImage('assets/Images/unknown.jpeg'), fit: BoxFit.cover),
+                                                                                                      ),
+                                                                                                    ),
                                                                                                     imageBuilder: (context, imageProvider) => Container(
                                                                                                       width: 50.0,
                                                                                                       height: 50.0,
@@ -2363,9 +2409,17 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                 value:
                                                     downloadProgress.progress),
                                         errorWidget: (context, url, error) =>
-                                            Image(
+                                            Container(
+                                          width: 120.0,
+                                          height: 120.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
                                                 image: AssetImage(
-                                                    'assets/Images/unknown.jpeg')),
+                                                    'assets/Images/unknown.jpeg'),
+                                                fit: BoxFit.cover),
+                                          ),
+                                        ),
                                         imageBuilder:
                                             (context, imageProvider) =>
                                                 Container(
@@ -2476,7 +2530,7 @@ class _ExpenseDataState extends State<ExpenseData> {
               child: SizedBox(
                   height: 150,
                   child: Card(
-                    elevation: 5.0,
+                    elevation: 1.0,
                     shadowColor: Theme.of(context).primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15.0),

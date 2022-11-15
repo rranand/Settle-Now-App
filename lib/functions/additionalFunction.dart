@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:settlenow/others/crypto.dart';
 
 Future<Map<String, dynamic>> initPlatformState() async {
   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -108,4 +110,27 @@ Widget textWidget(String text, Shader gradient) {
       foreground: Paint()..shader = gradient,
     ),
   );
+}
+
+Future<Map<String, String>> getDataFromNotification(String? payload) async {
+  String text = payload!;
+  List<String> cols = text.substring(1, text.length - 1).split(', ');
+  final Map<String, String> data = {};
+  for (int i = 0; i < cols.length; i++) {
+    List<String> obj = cols[i].split(': ');
+    data[obj[0]] = crypto.decrypt(obj[1]);
+  }
+
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  if (prefs.getString("email") != null &&
+      prefs.getString("name") != null &&
+      prefs.getString("token") != null &&
+      prefs.getString("pushToken") != null) {
+    data["email"] = prefs.getString("email")!;
+    data["token"] = prefs.getString("token")!;
+    return data;
+  } else {
+    return {};
+  }
 }

@@ -1,20 +1,38 @@
-
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/others/route_service.dart';
+import 'package:settlenow/screens/rooms.dart';
 
 class LocalNotificationService {
-  static final FlutterLocalNotificationsPlugin _notificationsPlugin = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin notificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   static void initialize() {
-    const InitializationSettings initializationSettings = InitializationSettings(
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
       android: AndroidInitializationSettings("@mipmap/ic_launcher"),
     );
 
-    _notificationsPlugin.initialize(
-      initializationSettings,
-    );
+    notificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (String? payload) async {
+      Map<String, String> data = await getDataFromNotification(payload);
+
+      if (data.isNotEmpty) {
+        NavKey.navKey.currentState!.push(MaterialPageRoute(
+            builder: (_) => RoomExpense(
+                roomKey: data["roomKey"]!,
+                email: data["email"]!,
+                roomName: data["roomName"]!,
+                token: data["token"]!,
+                roomLink: data["roomLink"]!,
+                isRoomActive:
+                    ((data["isRoomActive"]!) == 'true' ? true : false))));
+      }
+    });
   }
-  
+
   static void createanddisplaynotification(RemoteMessage message) async {
     try {
       final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -27,14 +45,13 @@ class LocalNotificationService {
         ),
       );
 
-      await _notificationsPlugin.show(
+      await notificationsPlugin.show(
         id,
         message.notification!.title,
         message.notification!.body,
         notificationDetails,
-        payload: message.data['_id'],
+        payload: message.data.toString(),
       );
-    } on Exception catch (_) {
-    }
+    } on Exception catch (_) {}
   }
 }

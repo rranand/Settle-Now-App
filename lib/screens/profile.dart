@@ -200,7 +200,7 @@ class _ProfileState extends State<Profile> {
                                       .decrypt(personalExpense[index]['Date']));
                                 },
                                 child: Card(
-                                  elevation: 5.0,
+                                  elevation: 1.0,
                                   shadowColor: Theme.of(context).primaryColor,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15.0),
@@ -213,11 +213,13 @@ class _ProfileState extends State<Profile> {
                                       textWidget(
                                         crypto.decrypt(personalExpense[index]
                                                 ['Month']) +
-                                            ",",linearGradient_1,
+                                            ",",
+                                        linearGradient_1,
                                       ),
                                       textWidget(
                                         crypto.decrypt(
-                                            personalExpense[index]['Year']),linearGradient_1,
+                                            personalExpense[index]['Year']),
+                                        linearGradient_1,
                                       ),
                                       SizedBox(
                                         height: 20,

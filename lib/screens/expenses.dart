@@ -485,7 +485,7 @@ class _ExpensesState extends State<Expenses> {
                               },
                               child: SizedBox(
                                 child: Card(
-                                  elevation: 5.0,
+                                  elevation: 1.0,
                                   shadowColor: Theme.of(context).primaryColor,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15.0),
@@ -607,7 +607,7 @@ class _ExpensesState extends State<Expenses> {
                               },
                               child: SizedBox(
                                 child: Card(
-                                  elevation: 5.0,
+                                  elevation: 1.0,
                                   shadowColor: Theme.of(context).primaryColor,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15.0),

@@ -224,9 +224,17 @@ class _LendPageState extends State<LendPage> {
                                   (context, url, downloadProgress) =>
                                       CircularProgressIndicator(
                                           value: downloadProgress.progress),
-                              errorWidget: (context, url, error) => Image(
-                                  image:
-                                      AssetImage('assets/Images/unknown.jpeg')),
+                              errorWidget: (context, url, error) => Container(
+                                width: 120.0,
+                                height: 120.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/Images/unknown.jpeg'),
+                                      fit: BoxFit.cover),
+                                ),
+                              ),
                               imageBuilder: (context, imageProvider) =>
                                   Container(
                                 width: 45.0,

@@ -8,3 +8,7 @@ class RouteServices {
     });
   }
 }
+
+class NavKey {
+  static final navKey = new GlobalKey<NavigatorState>();
+}

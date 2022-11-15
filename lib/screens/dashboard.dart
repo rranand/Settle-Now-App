@@ -11,6 +11,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/route_service.dart';
 import 'package:settlenow/screens/aboutus.dart';
 import 'package:settlenow/screens/expenses.dart';
 import 'package:settlenow/screens/lendCredit.dart';
@@ -455,8 +456,22 @@ class _DashBoardState extends State<DashBoard> {
     LocalNotificationService.initialize();
 
     FirebaseMessaging.instance.getInitialMessage().then(
-      (message) {
-        if (message != null) {}
+      (message) async {
+        if (message != null) {
+          Map<String, String> notificationData =
+              await getDataFromNotification(message.data.toString());
+
+          NavKey.navKey.currentState!.push(MaterialPageRoute(
+              builder: (_) => RoomExpense(
+                  roomKey: notificationData["roomKey"]!,
+                  email: notificationData["email"]!,
+                  roomName: notificationData["roomName"]!,
+                  token: notificationData["token"]!,
+                  roomLink: notificationData["roomLink"]!,
+                  isRoomActive: ((notificationData["isRoomActive"]!) == 'true'
+                      ? true
+                      : false))));
+        }
       },
     );
 
@@ -469,11 +484,27 @@ class _DashBoardState extends State<DashBoard> {
     );
 
     FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) {
-        if (message.notification != null) {}
+      (message) async {
+        if (message.notification != null) {
+          Map<String, String> notificationData =
+              await getDataFromNotification(message.data.toString());
+
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => RoomExpense(
+                      roomKey: notificationData["roomKey"]!,
+                      email: notificationData["email"]!,
+                      roomName: notificationData["roomName"]!,
+                      token: notificationData["token"]!,
+                      roomLink: notificationData["roomLink"]!,
+                      isRoomActive:
+                          ((notificationData["isRoomActive"]!) == 'true'
+                              ? true
+                              : false))));
+        }
       },
     );
-
     _updateCheck();
   }
 
@@ -481,7 +512,7 @@ class _DashBoardState extends State<DashBoard> {
     buildShowDialog(context);
 
     try {
-      final response = await http.delete(Uri.parse(global.url + 'verify'),
+      await http.delete(Uri.parse(global.url + 'verify'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'Auth': _token
@@ -590,9 +621,6 @@ class _DashBoardState extends State<DashBoard> {
                                 itemCount: Year.length,
                                 shrinkWrap: true,
                                 itemBuilder: (BuildContext context, int index) {
-                                  final themeProvider =
-                                      Provider.of<ThemeProvider>(context);
-
                                   return SizedBox(
                                     height: 70,
                                     width: 95,
@@ -1221,9 +1249,17 @@ class _DashBoardState extends State<DashBoard> {
                                     (context, url, downloadProgress) =>
                                         CircularProgressIndicator(
                                             value: downloadProgress.progress),
-                                errorWidget: (context, url, error) => Image(
-                                    image: AssetImage(
-                                        'assets/Images/unknown.jpeg')),
+                                errorWidget: (context, url, error) => Container(
+                                  width: 120.0,
+                                  height: 120.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
                                 imageBuilder: (context, imageProvider) =>
                                     Container(
                                   width: 65.0,
@@ -1677,8 +1713,17 @@ class _DashBoardState extends State<DashBoard> {
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
                                       value: downloadProgress.progress),
-                          errorWidget: (context, url, error) => Image(
-                              image: AssetImage('assets/Images/unknown.jpeg')),
+                          errorWidget: (context, url, error) => Container(
+                            width: 120.0,
+                            height: 120.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  image:
+                                      AssetImage('assets/Images/unknown.jpeg'),
+                                  fit: BoxFit.cover),
+                            ),
+                          ),
                           imageBuilder: (context, imageProvider) => Container(
                             width: 120.0,
                             height: 120.0,
@@ -2323,7 +2368,7 @@ class RoomWidget extends StatelessWidget {
 }
 
 class updatePage extends StatelessWidget {
-  var data = null;
+  final data;
   updatePage({Key? key, required this.data}) : super(key: key);
 
   _launchURL(BuildContext context) async {
