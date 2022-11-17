@@ -1250,8 +1250,8 @@ class _DashBoardState extends State<DashBoard> {
                                         CircularProgressIndicator(
                                             value: downloadProgress.progress),
                                 errorWidget: (context, url, error) => Container(
-                                  width: 120.0,
-                                  height: 120.0,
+                                  width: 65.0,
+                                  height: 65.0,
                                   decoration: BoxDecoration(
                                     shape: BoxShape.circle,
                                     image: DecorationImage(
@@ -1887,8 +1887,7 @@ class _DashBoardState extends State<DashBoard> {
             ),
             ListTile(
               onTap: () async {
-                await Share.share(
-                    "Download Settle Now\nhttps://settlenow.herokuapp.com");
+                await Share.share("Download Settle Now\nhttps://settlenow.in");
               },
               leading: Icon(
                 Icons.share,

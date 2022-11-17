@@ -614,8 +614,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                                       CircularProgressIndicator(
                                           value: downloadProgress.progress),
                               errorWidget: (context, url, error) => Container(
-                                width: 120.0,
-                                height: 120.0,
+                                width: 45.0,
+                                height: 45.0,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   image: DecorationImage(
@@ -707,8 +707,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                               CircularProgressIndicator(
                                   value: downloadProgress.progress),
                       errorWidget: (context, url, error) => Container(
-                        width: 120.0,
-                        height: 120.0,
+                        width: 65.0,
+                        height: 65.0,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           image: DecorationImage(
@@ -838,8 +838,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
                 errorWidget: (context, url, error) => Container(
-                  width: 120.0,
-                  height: 120.0,
+                  width: 50.0,
+                  height: 50.0,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
@@ -1217,8 +1217,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                                               errorWidget:
                                                   (context, url, error) =>
                                                       Container(
-                                                width: 120.0,
-                                                height: 120.0,
+                                                width: 50.0,
+                                                height: 50.0,
                                                 decoration: BoxDecoration(
                                                   shape: BoxShape.circle,
                                                   image: DecorationImage(
@@ -1332,8 +1332,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                   errorWidget:
                                                       (context, url, error) =>
                                                           Container(
-                                                    width: 120.0,
-                                                    height: 120.0,
+                                                    width: 50.0,
+                                                    height: 50.0,
                                                     decoration: BoxDecoration(
                                                       shape: BoxShape.circle,
                                                       image: DecorationImage(
@@ -1969,8 +1969,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                                     imageUrl: crypto.decrypt(list[index]['pic']).length == 0 ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8" : crypto.decrypt(list[index]['pic']),
                                                                                                     progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
                                                                                                     errorWidget: (context, url, error) => Container(
-                                                                                                      width: 120.0,
-                                                                                                      height: 120.0,
+                                                                                                      width: 50.0,
+                                                                                                      height: 50.0,
                                                                                                       decoration: BoxDecoration(
                                                                                                         shape: BoxShape.circle,
                                                                                                         image: DecorationImage(image: AssetImage('assets/Images/unknown.jpeg'), fit: BoxFit.cover),
@@ -2410,8 +2410,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                     downloadProgress.progress),
                                         errorWidget: (context, url, error) =>
                                             Container(
-                                          width: 120.0,
-                                          height: 120.0,
+                                          width: 50.0,
+                                          height: 50.0,
                                           decoration: BoxDecoration(
                                             shape: BoxShape.circle,
                                             image: DecorationImage(
