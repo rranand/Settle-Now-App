@@ -47,7 +47,7 @@ class _ContactUsState extends State<ContactUs> {
         showToast(context, crypto.decrypt(Tdata["Message"]));
       } on Exception catch (_) {
         Navigator.pop(context);
-        showToast(context, "No Internet Connection");
+        await onException(context);
       }
 
       if (this.mounted) {
@@ -81,7 +81,7 @@ class _ContactUsState extends State<ContactUs> {
                     height: 20,
                   ),
                   Text(
-                    "You can request new features or report bug.",
+                    "You can suggest new features or report bug.",
                     textAlign: TextAlign.left,
                     style: TextStyle(fontSize: 16),
                   ),

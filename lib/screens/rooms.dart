@@ -93,7 +93,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         showToast(context, crypto.decrypt(data["Message"]));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     if (this.mounted) {
@@ -135,7 +135,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         showToast(context, crypto.decrypt(data["Message"]));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     _extractExpenseData(expenseDetailByMember);
@@ -174,7 +174,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         showToast(context, crypto.decrypt(data["Message"]));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     if (this.mounted) {
       setState(() {});
@@ -232,7 +232,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         showToast(context, crypto.decrypt(TransData["Message"]));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     heightExpense = 30 + TransList.length * 125 + (TransList.length - 1) * 5;
@@ -275,7 +275,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         }
       } on Exception catch (_) {
         Navigator.pop(context);
-        showToast(context, "No Internet Connection");
+        await onException(context);
       }
       if (this.mounted) {
         setState(() {});
@@ -312,7 +312,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         showToast(context, crypto.decrypt(Tdata["Message"]));
       } on Exception catch (_) {
         Navigator.pop(context);
-        showToast(context, "No Internet Connection");
+        await onException(context);
       }
       if (this.mounted) {
         setState(() {});
@@ -359,7 +359,7 @@ class _RoomExpenseState extends State<RoomExpense> {
       }
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     if (this.mounted) {
       setState(() {});
@@ -386,7 +386,7 @@ class _RoomExpenseState extends State<RoomExpense> {
       _refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     if (this.mounted) {
@@ -543,7 +543,7 @@ class _RoomExpenseState extends State<RoomExpense> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]));
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     Navigator.pop(context);
   }
@@ -565,7 +565,7 @@ class _RoomExpenseState extends State<RoomExpense> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]));
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     Navigator.pop(context);
   }
@@ -585,7 +585,7 @@ class _RoomExpenseState extends State<RoomExpense> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]));
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
   }
 
@@ -992,12 +992,17 @@ class _RoomExpenseState extends State<RoomExpense> {
                 key: _refreshIndicatorKey,
                 onRefresh: _initialisation,
                 child: list.isEmpty
-                    ? SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        child: Center(
-                          child: Text("Loading..."),
-                        ),
+                    ? ListView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height,
+                            width: MediaQuery.of(context).size.width,
+                            child: Center(
+                              child: Text("Loading..."),
+                            ),
+                          )
+                        ],
                       )
                     : NestedScrollView(
                         controller: _scrollController,
@@ -2144,7 +2149,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       showToast(context, crypto.decrypt(updateMessage["Message"]));
       widget.refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
   }
 
@@ -2290,7 +2295,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]));
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     Navigator.pop(context);
   }

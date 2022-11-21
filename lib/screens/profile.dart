@@ -62,7 +62,7 @@ class _ProfileState extends State<Profile> {
 
       updatePieChart("all");
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     if (this.mounted) {
@@ -100,7 +100,7 @@ class _ProfileState extends State<Profile> {
             context, crypto.decrypt(jsonDecode(response.body)["Message"]));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     if (this.mounted) {

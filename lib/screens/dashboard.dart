@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:intl/intl.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -192,7 +193,7 @@ class _DashBoardState extends State<DashBoard> {
         }
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection!!!");
+      await onException(context);
     }
   }
 
@@ -339,6 +340,18 @@ class _DashBoardState extends State<DashBoard> {
           }
         }
 
+        RoomDataO.sort((b, a) {
+          DateTime tempDate_1 = new DateFormat("MMM dd yyyy").parse(a.date);
+          DateTime tempDate_2 = new DateFormat("MMM dd yyyy").parse(b.date);
+          return tempDate_1.compareTo(tempDate_2);
+        });
+
+        RoomDataC.sort((b, a) {
+          DateTime tempDate_1 = new DateFormat("MMM dd yyyy").parse(a.date);
+          DateTime tempDate_2 = new DateFormat("MMM dd yyyy").parse(b.date);
+          return tempDate_1.compareTo(tempDate_2);
+        });
+
         if (this.mounted) {
           setState(() {});
         }
@@ -369,7 +382,7 @@ class _DashBoardState extends State<DashBoard> {
         );
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection!!!");
+      await onException(context);
     }
 
     if (await _inAppReview.isAvailable() && appOpened == 5) {
@@ -408,7 +421,7 @@ class _DashBoardState extends State<DashBoard> {
         showToast(context, crypto.decrypt(data["Message"]));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection!!!");
+      await onException(context);
     }
 
     if (this.mounted) {
@@ -457,7 +470,7 @@ class _DashBoardState extends State<DashBoard> {
       }
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection!!!");
+      await onException(context);
     }
   }
 
@@ -1181,6 +1194,12 @@ class _DashBoardState extends State<DashBoard> {
       }
     }
 
+    SearchRoomData.sort((b, a) {
+      DateTime tempDate_1 = new DateFormat("MMM dd yyyy").parse(a.date);
+      DateTime tempDate_2 = new DateFormat("MMM dd yyyy").parse(b.date);
+      return tempDate_1.compareTo(tempDate_2);
+    });
+
     if (this.mounted) {
       setState(() {
         heightSearched =
@@ -1210,7 +1229,7 @@ class _DashBoardState extends State<DashBoard> {
       Navigator.pop(context);
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
   }
 
@@ -1391,21 +1410,22 @@ class _DashBoardState extends State<DashBoard> {
         key: _refreshIndicatorKey,
         onRefresh: _extractEmail,
         child: (RoomDataO.isEmpty && RoomDataC.isEmpty)
-            ? Scrollbar(
-                radius: Radius.circular(10.0),
-                thickness: 5.5,
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.8,
-                  width: MediaQuery.of(context).size.width,
-                  child: Center(
-                    child: Text(
-                      "No Rooms to Join, Create One!!!",
-                      style: TextStyle(
-                        fontSize: 22,
+            ? ListView(
+                physics: AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.8,
+                    width: MediaQuery.of(context).size.width,
+                    child: Center(
+                      child: Text(
+                        "No Rooms to Join, Create One!!!",
+                        style: TextStyle(
+                          fontSize: 22,
+                        ),
                       ),
                     ),
-                  ),
-                ),
+                  )
+                ],
               )
             : (searchTrigger
                 ? _search.text.length == 0 && SearchRoomData.isEmpty
@@ -1425,12 +1445,8 @@ class _DashBoardState extends State<DashBoard> {
                                     style: TextStyle(
                                       fontSize: 22,
                                     )))
-                        : Scrollbar(
-                            radius: Radius.circular(10.0),
-                            thickness: 5.5,
-                            child: ListView(
-                              shrinkWrap: true,
-                              physics: ScrollPhysics(),
+                        : SingleChildScrollView(
+                            child: Column(
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -1439,12 +1455,14 @@ class _DashBoardState extends State<DashBoard> {
                                       " Results Found"),
                                 ),
                                 SizedBox(
-                                    height: heightSearched,
-                                    child: RoomWidget(
-                                        RoomData: SearchRoomData,
-                                        email: _email.text,
-                                        flag: true,
-                                        token: _token)),
+                                  height:
+                                      MediaQuery.of(context).size.height - 180,
+                                  child: RoomWidget(
+                                      RoomData: SearchRoomData,
+                                      email: _email.text,
+                                      flag: true,
+                                      token: _token),
+                                ),
                               ],
                             ),
                           ))

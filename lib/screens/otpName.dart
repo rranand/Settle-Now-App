@@ -165,7 +165,7 @@ class _OtpNameState extends State<OtpName> {
       }
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
   }
 

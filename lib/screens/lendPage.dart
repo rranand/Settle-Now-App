@@ -56,7 +56,7 @@ class _LendPageState extends State<LendPage> {
         }
       } on Exception catch (_) {
         Navigator.pop(context);
-        showToast(context, "No Internet Connection");
+        await onException(context);
       }
     }
   }
@@ -88,7 +88,7 @@ class _LendPageState extends State<LendPage> {
       }
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     load = true;
@@ -122,7 +122,7 @@ class _LendPageState extends State<LendPage> {
       showToast(context, crypto.decrypt(CloseData["Message"]));
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     if (this.mounted) {
@@ -296,85 +296,95 @@ class _LendPageState extends State<LendPage> {
       body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: _initialization,
-          child: Scrollbar(
-            radius: Radius.circular(10.0),
-            thickness: 5.5,
-            child: load
-                ? (data.isEmpty
-                    ? Center(
-                        child: Text(
-                          "No Loan Found",
-                          style: TextStyle(fontSize: 25),
-                        ),
-                      )
-                    : Center(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.95,
-                          child: ListView.separated(
-                            separatorBuilder: (context, index) => SizedBox(
-                              height: 10,
+          child: ListView(physics: AlwaysScrollableScrollPhysics(), children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: load
+                  ? (data.isEmpty
+                      ? SizedBox(
+                          height: MediaQuery.of(context).size.height,
+                          child: Center(
+                            child: Text(
+                              "No Loan Found",
+                              style: TextStyle(fontSize: 25),
                             ),
-                            itemCount: data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return SizedBox(
-                                height: 85,
-                                child: Card(
-                                  elevation: 1.0,
-                                  shadowColor: Theme.of(context).primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            flex: 1,
-                                            child: InkWell(
-                                              child: Text(
-                                                crypto.decrypt(
-                                                    data[index]["purpose"]),
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                    fontSize: 20,
-                                                    fontWeight:
-                                                        FontWeight.w500),
-                                              ),
-                                              onTap: () {
-                                                showToast(
-                                                    context,
-                                                    crypto.decrypt(data[index]
-                                                        ["purpose"]));
-                                              },
-                                            ),
-                                          ),
-                                          Text(
-                                            "₹ " +
-                                                crypto.decrypt(
-                                                    data[index]["amount"]),
-                                            style: TextStyle(
-                                                fontSize: 18,
-                                                color: (crypto.decrypt(data[
-                                                                index]
-                                                            ["amount"])[0] ==
-                                                        "-"
-                                                    ? Colors.red
-                                                    : Colors.green)),
-                                          ),
-                                        ]),
-                                  ),
-                                ),
-                              );
-                            },
                           ),
-                        ),
-                      ))
-                : Center(
-                    child: Text("Loading..."),
-                  ),
-          )),
+                        )
+                      : SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.95,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: ListView.separated(
+                              separatorBuilder: (context, index) => SizedBox(
+                                height: 10,
+                              ),
+                              itemCount: data.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  height: 85,
+                                  child: Card(
+                                    elevation: 1.0,
+                                    shadowColor: Theme.of(context).primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: InkWell(
+                                                child: Text(
+                                                  crypto.decrypt(
+                                                      data[index]["purpose"]),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: const TextStyle(
+                                                      fontSize: 20,
+                                                      fontWeight:
+                                                          FontWeight.w500),
+                                                ),
+                                                onTap: () {
+                                                  showToast(
+                                                      context,
+                                                      crypto.decrypt(data[index]
+                                                          ["purpose"]));
+                                                },
+                                              ),
+                                            ),
+                                            Text(
+                                              "₹ " +
+                                                  crypto.decrypt(
+                                                      data[index]["amount"]),
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: (crypto.decrypt(data[
+                                                                  index]
+                                                              ["amount"])[0] ==
+                                                          "-"
+                                                      ? Colors.red
+                                                      : Colors.green)),
+                                            ),
+                                          ]),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ))
+                  : SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: Center(
+                        child: Text("Loading..."),
+                      ),
+                    ),
+            ),
+          ])),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet<void>(

@@ -47,7 +47,7 @@ class _LendCreditState extends State<LendCredit> {
             context, crypto.decrypt(jsonDecode(response.body)['Message']));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     if (this.mounted) {
@@ -79,7 +79,7 @@ class _LendCreditState extends State<LendCredit> {
       }
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
 
     load = true;
@@ -100,83 +100,94 @@ class _LendCreditState extends State<LendCredit> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Len Den"),
+        title: Text("Len-Den"),
       ),
       body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: _initialization,
-          child: Scrollbar(
-            radius: Radius.circular(10.0),
-            thickness: 5.5,
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
             child: load
                 ? (data.isEmpty
-                    ? Center(
-                        child: Text(
-                          "No Room Found",
-                          style: TextStyle(fontSize: 25),
-                        ),
-                      )
-                    : Center(
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.95,
-                          child: ListView.separated(
-                            separatorBuilder: (context, index) => SizedBox(
-                              height: 7,
+                    ? ListView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height,
+                            child: Center(
+                              child: Text(
+                                "No Room Found",
+                                style: TextStyle(fontSize: 25),
+                              ),
                             ),
-                            itemCount: data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return InkWell(
-                                onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => LendPage(
-                                              email: widget.email,
-                                              token: widget.token,
-                                              name: crypto
-                                                  .decrypt(data[index]["name"]),
-                                            ))),
-                                child: SizedBox(
-                                  height: 80,
-                                  child: Card(
-                                    elevation: 2.1,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              crypto
-                                                  .decrypt(data[index]["name"]),
-                                              overflow: TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w500),
+                          )
+                        ],
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListView.separated(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          separatorBuilder: (context, index) => SizedBox(
+                            height: 7,
+                          ),
+                          itemCount: data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return InkWell(
+                              onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => LendPage(
+                                            email: widget.email,
+                                            token: widget.token,
+                                            name: crypto
+                                                .decrypt(data[index]["name"]),
+                                          ))),
+                              child: SizedBox(
+                                height: 80,
+                                child: Card(
+                                  elevation: 2.1,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            crypto.decrypt(data[index]["name"]),
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                          Text(
+                                            "₹ " +
+                                                crypto.decrypt(
+                                                    data[index]["total"]),
+                                            style: const TextStyle(
+                                              fontSize: 18,
                                             ),
-                                            Text(
-                                              "₹ " +
-                                                  crypto.decrypt(
-                                                      data[index]["total"]),
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                          ]),
-                                    ),
+                                          ),
+                                        ]),
                                   ),
                                 ),
-                              );
-                            },
-                          ),
+                              ),
+                            );
+                          },
                         ),
                       ))
-                : Center(
-                    child: Text("Loading..."),
-                  ),
+                : ListView(physics: AlwaysScrollableScrollPhysics(), children: [
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: Center(
+                        child: Text("Loading..."),
+                      ),
+                    )
+                  ]),
           )),
       floatingActionButton: FloatingActionButton(
         child: Icon(

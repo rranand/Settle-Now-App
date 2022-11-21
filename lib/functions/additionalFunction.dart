@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -132,5 +133,15 @@ Future<Map<String, String>> getDataFromNotification(String? payload) async {
     return data;
   } else {
     return {};
+  }
+}
+
+onException(BuildContext context) async {
+  bool result = await InternetConnectionChecker().hasConnection;
+
+  if (result) {
+    showToast(context, "Server Error Try Again");
+  } else {
+    showToast(context, "No Internet Connection");
   }
 }

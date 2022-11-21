@@ -101,7 +101,7 @@ class _ExpensesState extends State<Expenses> {
         showToast(context, crypto.decrypt(TransData["Message"]));
       }
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     if (this.mounted) {
       setState(() {});
@@ -125,7 +125,7 @@ class _ExpensesState extends State<Expenses> {
       showToast(context, crypto.decrypt(TransData["Message"]));
       await _initialization();
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     if (this.mounted) {
       setState(() {});
@@ -152,7 +152,7 @@ class _ExpensesState extends State<Expenses> {
       showToast(context, crypto.decrypt(TransData["Message"]));
       await _initialization();
     } on Exception catch (_) {
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     if (this.mounted) {
       setState(() {});
@@ -414,7 +414,7 @@ class _ExpensesState extends State<Expenses> {
       }
     } on Exception catch (_) {
       Navigator.pop(context);
-      showToast(context, "No Internet Connection");
+      await onException(context);
     }
     if (this.mounted) {
       setState(() {});
@@ -438,280 +438,281 @@ class _ExpensesState extends State<Expenses> {
           key: _refreshIndicatorKey,
           onRefresh: _initialization,
           child: TransList.isEmpty
-              ? SizedBox(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  child: (Center(
-                    child: loaded
-                        ? Text("No Expense Found",
-                            style: TextStyle(
-                              fontSize: 23,
-                            ))
-                        : Text("Loading..."),
-                  )))
-              : Scrollbar(
-                  radius: Radius.circular(10.0),
-                  thickness: 5.5,
-                  child: Padding(
-                    padding: EdgeInsets.all(10.0),
-                    child: ListView.separated(
-                        separatorBuilder: (context, index) => SizedBox(
-                              height: 0,
+              ? ListView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  children: [
+                    SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: (Center(
+                          child: loaded
+                              ? Text("No Expense Found",
+                                  style: TextStyle(
+                                    fontSize: 23,
+                                  ))
+                              : Text("Loading..."),
+                        )))
+                  ],
+                )
+              : Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: ListView.separated(
+                      separatorBuilder: (context, index) => SizedBox(
+                            height: 0,
+                          ),
+                      shrinkWrap: true,
+                      itemCount: TransList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (TransList[index]["room"]) {
+                          return InkWell(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    _buildPopupDialog(
+                                        context,
+                                        crypto.decrypt(
+                                            TransList[index]["Purpose"]),
+                                        crypto.decrypt(
+                                            TransList[index]["RoomName"]),
+                                        crypto
+                                            .decrypt(TransList[index]["Date"]),
+                                        "₹ " +
+                                            crypto.decrypt(
+                                                TransList[index]["Amount"]),
+                                        TransList[index]["room"],
+                                        crypto.decrypt(TransList[index]["id"])),
+                              );
+                            },
+                            child: SizedBox(
+                              child: Card(
+                                elevation: 1.0,
+                                shadowColor: Theme.of(context).primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.90,
+                                            child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Text(
+                                                    crypto.decrypt(
+                                                        TransList[index]
+                                                            ["Purpose"]),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                        fontSize: 23,
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 15,
+                                                  ),
+                                                  Opacity(
+                                                    opacity: 0.8,
+                                                    child: Text(
+                                                      crypto.decrypt(TransList[
+                                                                  index]
+                                                              ["RoomName"]) +
+                                                          " (Room)",
+                                                      style: const TextStyle(
+                                                        fontSize: 17,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 15,
+                                                  ),
+                                                  Opacity(
+                                                    opacity: 0.8,
+                                                    child: Text(
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["Date"]),
+                                                      style: const TextStyle(
+                                                        fontSize: 17,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ]),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 0,
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.20,
+                                            child: Text(
+                                              "₹ " +
+                                                  crypto.decrypt(
+                                                      TransList[index]
+                                                          ["Amount"]),
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ]),
+                                ),
+                              ),
                             ),
-                        shrinkWrap: true,
-                        itemCount: TransList.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          if (TransList[index]["room"]) {
-                            return InkWell(
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      _buildPopupDialog(
-                                          context,
-                                          crypto.decrypt(
-                                              TransList[index]["Purpose"]),
-                                          crypto.decrypt(
-                                              TransList[index]["RoomName"]),
-                                          crypto.decrypt(
-                                              TransList[index]["Date"]),
-                                          "₹ " +
-                                              crypto.decrypt(
-                                                  TransList[index]["Amount"]),
-                                          TransList[index]["room"],
-                                          crypto
-                                              .decrypt(TransList[index]["id"])),
-                                );
-                              },
-                              child: SizedBox(
-                                child: Card(
-                                  elevation: 1.0,
-                                  shadowColor: Theme.of(context).primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            flex: 1,
-                                            child: SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.90,
-                                              child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    Text(
-                                                      crypto.decrypt(
-                                                          TransList[index]
-                                                              ["Purpose"]),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                          fontSize: 23,
-                                                          fontWeight:
-                                                              FontWeight.w500),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 15,
-                                                    ),
-                                                    Opacity(
-                                                      opacity: 0.8,
-                                                      child: Text(
-                                                        crypto.decrypt(TransList[
-                                                                    index]
-                                                                ["RoomName"]) +
-                                                            " (Room)",
-                                                        style: const TextStyle(
-                                                          fontSize: 17,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 15,
-                                                    ),
-                                                    Opacity(
-                                                      opacity: 0.8,
-                                                      child: Text(
-                                                        crypto.decrypt(
-                                                            TransList[index]
-                                                                ["Date"]),
-                                                        style: const TextStyle(
-                                                          fontSize: 17,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ]),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 0,
-                                            child: SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.20,
-                                              child: Text(
-                                                "₹ " +
+                          );
+                        } else {
+                          return InkWell(
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) =>
+                                    _buildPopupDialog(
+                                        context,
+                                        crypto.decrypt(
+                                            TransList[index]["Purpose"]),
+                                        crypto.decrypt(TransList[index]["type"]) +
+                                            (crypto.decrypt(TransList[index]
+                                                        ["invType"]) ==
+                                                    "None"
+                                                ? ""
+                                                : (" (" +
                                                     crypto.decrypt(
                                                         TransList[index]
-                                                            ["Amount"]),
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                ),
+                                                            ["invType"]) +
+                                                    ")")),
+                                        crypto
+                                            .decrypt(TransList[index]["Date"]),
+                                        "₹ " +
+                                            crypto.decrypt(
+                                                TransList[index]["Amount"]),
+                                        TransList[index]["room"],
+                                        crypto.decrypt(TransList[index]["id"])),
+                              );
+                            },
+                            child: SizedBox(
+                              child: Card(
+                                elevation: 1.0,
+                                shadowColor: Theme.of(context).primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.90,
+                                            child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  Text(
+                                                    crypto.decrypt(
+                                                        TransList[index]
+                                                            ["Purpose"]),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                        fontSize: 23,
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 15,
+                                                  ),
+                                                  Opacity(
+                                                    opacity: 0.8,
+                                                    child: Text(
+                                                      crypto.decrypt(
+                                                              TransList[index]
+                                                                  ["type"]) +
+                                                          (crypto.decrypt(TransList[
+                                                                          index]
+                                                                      [
+                                                                      "invType"]) ==
+                                                                  "None"
+                                                              ? ""
+                                                              : (" (" +
+                                                                  crypto.decrypt(
+                                                                      TransList[
+                                                                              index]
+                                                                          [
+                                                                          "invType"]) +
+                                                                  ")")),
+                                                      style: const TextStyle(
+                                                        fontSize: 17,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 15,
+                                                  ),
+                                                  Opacity(
+                                                    opacity: 0.8,
+                                                    child: Text(
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["Date"]),
+                                                      style: const TextStyle(
+                                                        fontSize: 17,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ]),
+                                          ),
+                                        ),
+                                        Expanded(
+                                          flex: 0,
+                                          child: SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.20,
+                                            child: Text(
+                                              "₹ " +
+                                                  crypto.decrypt(
+                                                      TransList[index]
+                                                          ["Amount"]),
+                                              style: const TextStyle(
+                                                fontSize: 18,
                                               ),
                                             ),
                                           ),
-                                        ]),
-                                  ),
+                                        ),
+                                      ]),
                                 ),
                               ),
-                            );
-                          } else {
-                            return InkWell(
-                              onTap: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      _buildPopupDialog(
-                                          context,
-                                          crypto.decrypt(
-                                              TransList[index]["Purpose"]),
-                                          crypto.decrypt(TransList[index]["type"]) +
-                                              (crypto.decrypt(TransList[index]
-                                                          ["invType"]) ==
-                                                      "None"
-                                                  ? ""
-                                                  : (" (" +
-                                                      crypto.decrypt(
-                                                          TransList[index]
-                                                              ["invType"]) +
-                                                      ")")),
-                                          crypto.decrypt(
-                                              TransList[index]["Date"]),
-                                          "₹ " +
-                                              crypto.decrypt(
-                                                  TransList[index]["Amount"]),
-                                          TransList[index]["room"],
-                                          crypto.decrypt(TransList[index]["id"])),
-                                );
-                              },
-                              child: SizedBox(
-                                child: Card(
-                                  elevation: 1.0,
-                                  shadowColor: Theme.of(context).primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Expanded(
-                                            flex: 1,
-                                            child: SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.90,
-                                              child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    Text(
-                                                      crypto.decrypt(
-                                                          TransList[index]
-                                                              ["Purpose"]),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: const TextStyle(
-                                                          fontSize: 23,
-                                                          fontWeight:
-                                                              FontWeight.w500),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 15,
-                                                    ),
-                                                    Opacity(
-                                                      opacity: 0.8,
-                                                      child: Text(
-                                                        crypto.decrypt(
-                                                                TransList[index]
-                                                                    ["type"]) +
-                                                            (crypto.decrypt(TransList[
-                                                                            index]
-                                                                        [
-                                                                        "invType"]) ==
-                                                                    "None"
-                                                                ? ""
-                                                                : (" (" +
-                                                                    crypto.decrypt(
-                                                                        TransList[index]
-                                                                            [
-                                                                            "invType"]) +
-                                                                    ")")),
-                                                        style: const TextStyle(
-                                                          fontSize: 17,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 15,
-                                                    ),
-                                                    Opacity(
-                                                      opacity: 0.8,
-                                                      child: Text(
-                                                        crypto.decrypt(
-                                                            TransList[index]
-                                                                ["Date"]),
-                                                        style: const TextStyle(
-                                                          fontSize: 17,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ]),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 0,
-                                            child: SizedBox(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  0.20,
-                                              child: Text(
-                                                "₹ " +
-                                                    crypto.decrypt(
-                                                        TransList[index]
-                                                            ["Amount"]),
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ]),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                        }),
-                  ),
+                            ),
+                          );
+                        }
+                      }),
                 )),
       floatingActionButton: CurDate == widget.date
           ? FloatingActionButton(
