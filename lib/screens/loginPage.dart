@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:settlenow/screens/otpName.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
 
 import '../others/themes.dart';
@@ -54,7 +56,9 @@ class _LoginPageState extends State<LoginPage> {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (context) => DashBoard(version: version,),
+          builder: (context) => DashBoard(
+            version: version,
+          ),
         ),
         (Route<dynamic> route) => false,
       );
@@ -71,8 +75,6 @@ class _LoginPageState extends State<LoginPage> {
     final token = await _fcm.getToken();
     deviceToken = token.toString();
   }
-
-  
 
   @override
   void initState() {
@@ -154,7 +156,10 @@ class _LoginPageState extends State<LoginPage> {
                               fontSize: 15,
                               color: Colors.white),
                         ),
-                        onPressed: () => MoveToNext(context, OtpName(email: _emailId.text, version: version), _formKey),
+                        onPressed: () => MoveToNext(
+                            context,
+                            OtpName(email: _emailId.text, version: version),
+                            _formKey),
                       ),
                     ),
                     SizedBox(
@@ -208,7 +213,9 @@ class _LoginPageState extends State<LoginPage> {
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => DashBoard(version: version,),
+                            builder: (context) => DashBoard(
+                              version: version,
+                            ),
                           ),
                           (Route<dynamic> route) => false,
                         );
@@ -246,7 +253,40 @@ class _LoginPageState extends State<LoginPage> {
                   child: CircularProgressIndicator(),
                 ),
         ),
-      )
+      ),
+      bottomNavigationBar: BottomAppBar(
+        elevation: 0,
+        color: Colors.transparent,
+        child: ListView(shrinkWrap: true, children: [
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(
+                text: 'By Signing In, You Agree To The ',
+                style: TextStyle(
+                    fontSize: 16,
+                    color: themeProvider.isDarkTheme
+                        ? Colors.white
+                        : Colors.black),
+                children: [
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () async {
+                        launchUrl(
+                          Uri.parse("https://settlenow.in/privacy-policy"),
+                          mode: LaunchMode.inAppWebView,
+                          webViewConfiguration: const WebViewConfiguration(
+                              enableJavaScript: true),
+                        );
+                      },
+                  ),
+                ]),
+          ),
+          SizedBox(
+            height: 25,
+          )
+        ]),
+      ),
     );
   }
 }
