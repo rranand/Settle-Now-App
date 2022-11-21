@@ -42,6 +42,7 @@ class DashBoard extends StatefulWidget {
 
 class _DashBoardState extends State<DashBoard> {
   AppUpdateInfo? _updateInfo;
+  final InAppReview _inAppReview = InAppReview.instance;
   int dash = 0;
   double yourSpend = 0;
   bool isGoogle = false;
@@ -370,8 +371,6 @@ class _DashBoardState extends State<DashBoard> {
     } on Exception catch (_) {
       showToast(context, "No Internet Connection!!!");
     }
-
-    final InAppReview _inAppReview = InAppReview.instance;
 
     if (await _inAppReview.isAvailable() && appOpened == 5) {
       Future.delayed(const Duration(seconds: 2), () async {
@@ -1966,12 +1965,28 @@ class _DashBoardState extends State<DashBoard> {
                         )),
               ),
               leading: Icon(
-                Icons.contact_mail_outlined,
+                Icons.rate_review_outlined,
                 color: Colors.white,
                 size: 22,
               ),
               title: Text(
                 "Contact Us",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+            ),
+            ListTile(
+              onTap: () async {
+                if (await _inAppReview.isAvailable()) {
+                  await _inAppReview.requestReview();
+                }
+              },
+              leading: Icon(
+                Icons.star_border_outlined,
+                color: Colors.white,
+                size: 22,
+              ),
+              title: Text(
+                "Rate Us",
                 style: TextStyle(fontSize: 14, color: Colors.white),
               ),
             ),
