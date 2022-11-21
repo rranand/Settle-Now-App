@@ -494,6 +494,14 @@ class _RoomExpenseState extends State<RoomExpense> {
                               errorStyle: const TextStyle(fontSize: 15),
                             ),
                             onChanged: (String s) {
+                              if (this.mounted) {
+                                setState(() {
+                                  _searchFriend.text = s;
+                                  _searchFriend.selection =
+                                      TextSelection.collapsed(
+                                          offset: _searchFriend.text.length);
+                                });
+                              }
                               SearchFriend();
                             },
                           ),

@@ -374,8 +374,8 @@ class _DashBoardState extends State<DashBoard> {
     final InAppReview _inAppReview = InAppReview.instance;
 
     if (await _inAppReview.isAvailable() && appOpened == 5) {
-      Future.delayed(const Duration(seconds: 2), () {
-        _inAppReview.requestReview();
+      Future.delayed(const Duration(seconds: 2), () async {
+        await _inAppReview.requestReview();
       });
     }
 
@@ -858,43 +858,65 @@ class _DashBoardState extends State<DashBoard> {
                         SizedBox(
                           height: 20,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Room Status",
-                              style: TextStyle(
-                                fontSize: 22,
-                              ),
-                            ),
-                            Container(
-                              width: 75,
-                              child: DropdownButton<String>(
-                                borderRadius: BorderRadius.circular(10.0),
-                                itemHeight: 70,
-                                elevation: 1,
-                                hint: Text(
-                                  roomStatus[roomStatusIndex],
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                items: roomStatus.map((String value) {
-                                  return DropdownMenuItem<String>(
-                                    alignment: AlignmentDirectional.center,
-                                    value: roomStatus.indexOf(value).toString(),
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                                onChanged: (index) {
-                                  setState(() {
-                                    roomStatusIndex = int.parse(index!);
-                                  });
-                                },
-                              ),
-                            ),
-                          ],
+                        Text(
+                          "Room Status",
+                          style: TextStyle(
+                            fontSize: 22,
+                          ),
                         ),
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9 - 50,
+                            height: 70,
+                            child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: roomStatus.length,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    height: 70,
+                                    width: 100,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            roomStatusIndex = index;
+                                          });
+                                        },
+                                        child: Card(
+                                          elevation: 1.0,
+                                          color: (index == roomStatusIndex
+                                              ? Theme.of(context).primaryColor
+                                              : Theme.of(context).cardColor),
+                                          shadowColor:
+                                              Theme.of(context).primaryColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Center(
+                                            child: InkWell(
+                                              child: Text(
+                                                roomStatus[index],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color:
+                                                      (index == roomStatusIndex
+                                                          ? Colors.white
+                                                          : Theme.of(context)
+                                                              .textTheme
+                                                              .bodySmall!
+                                                              .color),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                })),
                         SizedBox(
                           height: 10,
                         ),
@@ -1037,6 +1059,7 @@ class _DashBoardState extends State<DashBoard> {
     if (this.mounted) {
       setState(() {
         searching = true;
+        SearchRoomData.clear();
       });
     }
 
@@ -1162,7 +1185,7 @@ class _DashBoardState extends State<DashBoard> {
     if (this.mounted) {
       setState(() {
         heightSearched =
-            30 + SearchRoomData.length * 130 + (SearchRoomData.length - 1) * 5;
+            SearchRoomData.length * 115 + SearchRoomData.length * 5;
         searching = false;
       });
     }

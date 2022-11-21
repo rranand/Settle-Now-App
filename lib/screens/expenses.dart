@@ -46,7 +46,7 @@ class _ExpensesState extends State<Expenses> {
     "Fashion",
     "Investment",
     "Food",
-    "Traveling",
+    "Travelling",
     "Household",
     "Health",
     "Entertainment",
@@ -59,7 +59,7 @@ class _ExpensesState extends State<Expenses> {
     "Fixed Deposit",
     "Stock"
   ];
-  int categoryIndex = 7;
+  int categoryIndex = 0;
   int investIndex = 0;
   String CurDate = "";
   final _formKey = GlobalKey<FormState>();
@@ -461,8 +461,6 @@ class _ExpensesState extends State<Expenses> {
                         shrinkWrap: true,
                         itemCount: TransList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          final themeProvider =
-                              Provider.of<ThemeProvider>(context);
                           if (TransList[index]["room"]) {
                             return InkWell(
                               onTap: () {
@@ -780,96 +778,142 @@ class _ExpensesState extends State<Expenses> {
                                   errorStyle: TextStyle(fontSize: 15),
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Category",
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                      DropdownButton<String>(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                        itemHeight: 70,
-                                        elevation: 1,
-                                        hint: Text(
-                                          category[categoryIndex],
-                                          style: TextStyle(
-                                            fontSize: 17,
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.96,
+                                height: 70,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: category.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return SizedBox(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: InkWell(
+                                          child: Card(
+                                            elevation: 1.0,
+                                            color: (index == categoryIndex
+                                                ? Theme.of(context).primaryColor
+                                                : Theme.of(context).cardColor),
+                                            shadowColor:
+                                                Theme.of(context).primaryColor,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: Center(
+                                                child: InkWell(
+                                                  child: Text(
+                                                    category[index],
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: (index ==
+                                                              categoryIndex
+                                                          ? Colors.white
+                                                          : Theme.of(context)
+                                                              .textTheme
+                                                              .bodySmall!
+                                                              .color),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
                                           ),
+                                          onTap: () {
+                                            if (this.mounted) {
+                                              setState(
+                                                () {
+                                                  categoryIndex = index;
+                                                },
+                                              );
+                                            }
+                                          },
                                         ),
-                                        items: category.map((String value) {
-                                          return DropdownMenuItem<String>(
-                                            alignment:
-                                                AlignmentDirectional.center,
-                                            value: category
-                                                .indexOf(value)
-                                                .toString(),
-                                            child: Text(
-                                              value,
-                                              style: TextStyle(
-                                                fontSize: 15,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              categoryIndex == 1
+                                  ? SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.96,
+                                      height: 70,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        itemCount: investmentCat.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return SizedBox(
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: InkWell(
+                                                child: Card(
+                                                  elevation: 1.0,
+                                                  color: (index == investIndex
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : Theme.of(context)
+                                                          .cardColor),
+                                                  shadowColor: Theme.of(context)
+                                                      .primaryColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.0),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            12.0),
+                                                    child: Center(
+                                                      child: InkWell(
+                                                        child: Text(
+                                                          investmentCat[index],
+                                                          style: TextStyle(
+                                                            fontSize: 16,
+                                                            color: (index ==
+                                                                    investIndex
+                                                                ? Colors.white
+                                                                : Theme.of(
+                                                                        context)
+                                                                    .textTheme
+                                                                    .bodySmall!
+                                                                    .color),
+                                                            fontWeight:
+                                                                FontWeight.w500,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                onTap: () {
+                                                  if (this.mounted) {
+                                                    setState(
+                                                      () {
+                                                        investIndex = index;
+                                                      },
+                                                    );
+                                                  }
+                                                },
                                               ),
                                             ),
                                           );
-                                        }).toList(),
-                                        onChanged: (index) {
-                                          setState(() {
-                                            categoryIndex = int.parse(index!);
-                                          });
                                         },
                                       ),
-                                    ]),
-                              ),
-                              categoryIndex == 1
-                                  ? Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              "Investment Type",
-                                              style: TextStyle(fontSize: 16),
-                                            ),
-                                            DropdownButton<String>(
-                                              alignment:
-                                                  AlignmentDirectional.topStart,
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                              itemHeight: 70,
-                                              elevation: 1,
-                                              hint: Text(
-                                                investmentCat[investIndex],
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                ),
-                                              ),
-                                              items: investmentCat
-                                                  .map((String value) {
-                                                return DropdownMenuItem<String>(
-                                                  alignment:
-                                                      AlignmentDirectional
-                                                          .center,
-                                                  value: investmentCat
-                                                      .indexOf(value)
-                                                      .toString(),
-                                                  child: Text(value),
-                                                );
-                                              }).toList(),
-                                              onChanged: (index) {
-                                                setState(() {
-                                                  investIndex =
-                                                      int.parse(index!);
-                                                });
-                                              },
-                                            ),
-                                          ]),
                                     )
                                   : SizedBox(),
+                              SizedBox(
+                                height: 15,
+                              ),
                               SizedBox(
                                 height: 40,
                                 width: 100,
