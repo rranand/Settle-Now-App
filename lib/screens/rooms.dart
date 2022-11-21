@@ -490,6 +490,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                             decoration: InputDecoration(
                               contentPadding: const EdgeInsets.all(8.0),
                               labelText: "Enter Name",
+                              counterText: "",
                               errorStyle: const TextStyle(fontSize: 15),
                             ),
                             onChanged: (String s) {
@@ -1757,10 +1758,14 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                     },
                                                                                     decoration: const InputDecoration(
                                                                                       contentPadding: EdgeInsets.all(8.0),
+                                                                                      counterText: "",
                                                                                       hintText: "Enter Amount",
                                                                                       labelText: "Amount",
                                                                                       errorStyle: TextStyle(fontSize: 15),
                                                                                     ),
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: 10,
                                                                                   ),
                                                                                   Padding(
                                                                                     padding: const EdgeInsets.all(8.0),
@@ -1885,6 +1890,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                 decoration: const InputDecoration(
                                                                                   contentPadding: EdgeInsets.all(8.0),
                                                                                   hintText: "Enter Amount",
+                                                                                  counterText: "",
                                                                                   labelText: "Amount",
                                                                                   errorStyle: TextStyle(fontSize: 15),
                                                                                 ),
@@ -1907,6 +1913,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                   contentPadding: EdgeInsets.all(8.0),
                                                                                   hintText: "Enter Purpose",
                                                                                   labelText: "Purpose",
+                                                                                  counterText: "",
                                                                                   errorStyle: TextStyle(fontSize: 15),
                                                                                 ),
                                                                               ),
@@ -2171,6 +2178,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                             decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(8.0),
                               hintText: "Enter Amount",
+                              counterText: "",
                               labelText: "Amount",
                               errorStyle: TextStyle(fontSize: 15),
                             ),
@@ -2196,6 +2204,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               contentPadding: EdgeInsets.all(8.0),
                               hintText: "Enter Purpose",
                               labelText: "Purpose",
+                              counterText: "",
                               errorStyle: TextStyle(fontSize: 15),
                             ),
                           ),

@@ -137,6 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                             decoration: InputDecoration(
                               hintText: "xyz@gmail.com",
                               labelText: "Enter Email",
+                              counterText: "",
                             ),
                           ),
                         ),
@@ -254,39 +255,43 @@ class _LoginPageState extends State<LoginPage> {
                 ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 0,
-        color: Colors.transparent,
-        child: ListView(shrinkWrap: true, children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-                text: 'By Signing In, You Agree To The ',
-                style: TextStyle(
-                    fontSize: 16,
-                    color: themeProvider.isDarkTheme
-                        ? Colors.white
-                        : Colors.black),
-                children: [
-                  TextSpan(
-                    text: 'Privacy Policy',
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () async {
-                        launchUrl(
-                          Uri.parse("https://settlenow.in/privacy-policy"),
-                          mode: LaunchMode.inAppWebView,
-                          webViewConfiguration: const WebViewConfiguration(
-                              enableJavaScript: true),
-                        );
-                      },
-                  ),
-                ]),
-          ),
-          SizedBox(
-            height: 25,
-          )
-        ]),
-      ),
+      bottomNavigationBar: canLoad
+          ? BottomAppBar(
+              elevation: 0,
+              color: Colors.transparent,
+              child: ListView(shrinkWrap: true, children: [
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                      text: 'By Signing In, You Agree To The ',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black),
+                      children: [
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              launchUrl(
+                                Uri.parse(
+                                    "https://settlenow.in/privacy-policy"),
+                                mode: LaunchMode.inAppWebView,
+                                webViewConfiguration:
+                                    const WebViewConfiguration(
+                                        enableJavaScript: true),
+                              );
+                            },
+                        ),
+                      ]),
+                ),
+                SizedBox(
+                  height: 25,
+                )
+              ]),
+            )
+          : null,
     );
   }
 }

@@ -226,6 +226,7 @@ class _OtpNameState extends State<OtpName> {
                                   style: const TextStyle(fontSize: 18),
                                   autofillHints: [AutofillHints.email],
                                   decoration: InputDecoration(
+                                    counterText: "",
                                     contentPadding: const EdgeInsets.all(8.0),
                                     hintText: "Aditya",
                                     labelText: "Enter Name",
@@ -250,6 +251,7 @@ class _OtpNameState extends State<OtpName> {
                             contentPadding: const EdgeInsets.all(8.0),
                             hintText: "000000",
                             labelText: "Enter OTP",
+                            counterText: "",
                             errorText: (error == true ? errorText : null),
                             errorStyle: const TextStyle(fontSize: 15),
                           ),

@@ -4,9 +4,7 @@ import 'package:settlenow/functions/gradient.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutUs extends StatelessWidget {
-  AboutUs({ Key? key }) : super(key: key);
-
-  
+  AboutUs({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,33 +36,41 @@ class AboutUs extends StatelessWidget {
                       Uri.parse("mailto:rrohitanand3336@gmail.com"),
                       mode: LaunchMode.externalApplication,
                     );
-                  }, 
-                  icon: FaIcon(FontAwesomeIcons.envelope, size: 35,),
+                  },
+                  icon: FaIcon(
+                    FontAwesomeIcons.envelope,
+                    size: 35,
+                  ),
                 ),
                 SizedBox(
                   width: 10,
                 ),
                 IconButton(
-                  onPressed: () {
-                    launchUrl(
-                      Uri.parse("http://github.com/rranand"),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  }, 
-                  icon: FaIcon(FontAwesomeIcons.github, size: 35,)
-                ),
+                    onPressed: () {
+                      launchUrl(
+                        Uri.parse("http://github.com/rranand"),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    icon: FaIcon(
+                      FontAwesomeIcons.github,
+                      size: 35,
+                    )),
                 SizedBox(
                   width: 10,
                 ),
                 IconButton(
-                  onPressed: () {
-                    launchUrl(
-                      Uri.parse("https://www.linkedin.com/in/rohit-anand-86a869184/"),
-                      mode: LaunchMode.externalApplication,
-                    );
-                  }, 
-                  icon: FaIcon(FontAwesomeIcons.linkedin, size: 35,)
-                )
+                    onPressed: () {
+                      launchUrl(
+                        Uri.parse(
+                            "https://www.linkedin.com/in/rohit-anand-86a869184/"),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    icon: FaIcon(
+                      FontAwesomeIcons.linkedin,
+                      size: 35,
+                    ))
               ],
             )
           ],

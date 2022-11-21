@@ -21,6 +21,7 @@ class LendCredit extends StatefulWidget {
 class _LendCreditState extends State<LendCredit> {
   List<dynamic> data = [];
   bool load = false;
+  bool validateText = false;
   final TextEditingController _name = TextEditingController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
@@ -211,16 +212,19 @@ class _LendCreditState extends State<LendCredit> {
                             keyboardType: TextInputType.text,
                             maxLength: 150,
                             maxLines: 1,
-                            style: const TextStyle(fontSize: 15),
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Enter Room Name",
-                              labelText: "Name",
-                              errorStyle: TextStyle(fontSize: 15),
-                            ),
+                            style: const TextStyle(fontSize: 18),
+                            decoration: InputDecoration(
+                                counterText: "",
+                                contentPadding: EdgeInsets.all(8.0),
+                                hintText: "Enter Room Name",
+                                labelText: "Name",
+                                errorStyle: TextStyle(fontSize: 15),
+                                errorText: validateText
+                                    ? "Enter Valid Room Name"
+                                    : null),
                           ),
                           SizedBox(
-                            height: 10,
+                            height: 15,
                           ),
                           SizedBox(
                             height: 40,
@@ -228,12 +232,21 @@ class _LendCreditState extends State<LendCredit> {
                             child: ElevatedButton(
                               child: Text(
                                 "Create",
-                                style: TextStyle(fontSize: 18),
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
                               ),
                               onPressed: () async {
-                                buildShowDialog(context);
-                                await createRoom(context);
-                                Navigator.pop(context);
+                                if (_name.text.isNotEmpty) {
+                                  validateText = false;
+                                  buildShowDialog(context);
+                                  await createRoom(context);
+                                  Navigator.pop(context);
+                                } else {
+                                  validateText = true;
+                                }
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
                               },
                             ),
                           ),

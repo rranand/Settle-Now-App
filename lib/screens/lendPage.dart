@@ -409,7 +409,7 @@ class _LendPageState extends State<LendPage> {
                                   keyboardType: TextInputType.text,
                                   maxLength: 150,
                                   maxLines: 1,
-                                  style: const TextStyle(fontSize: 15),
+                                  style: const TextStyle(fontSize: 18),
                                   validator: (value) {
                                     RegExp validateText = RegExp(r'\b[\w]+\b');
                                     if (!validateText.hasMatch(_purpose.text)) {
@@ -418,6 +418,7 @@ class _LendPageState extends State<LendPage> {
                                     return null;
                                   },
                                   decoration: const InputDecoration(
+                                    counterText: "",
                                     contentPadding: EdgeInsets.all(8.0),
                                     hintText: "Enter Purpose",
                                     labelText: "Purpose",
@@ -432,7 +433,7 @@ class _LendPageState extends State<LendPage> {
                                   keyboardType: TextInputType.number,
                                   maxLength: 20,
                                   maxLines: 1,
-                                  style: const TextStyle(fontSize: 15),
+                                  style: const TextStyle(fontSize: 18),
                                   validator: (value) {
                                     RegExp validateNumber =
                                         RegExp(r'\b[1-9]{1}[\d]*\b');
@@ -443,6 +444,7 @@ class _LendPageState extends State<LendPage> {
                                     return null;
                                   },
                                   decoration: const InputDecoration(
+                                    counterText: "",
                                     contentPadding: EdgeInsets.all(8.0),
                                     hintText: "Enter Amount",
                                     labelText: "Amount",
@@ -453,7 +455,7 @@ class _LendPageState extends State<LendPage> {
                             ),
                           ),
                           SizedBox(
-                            height: 10,
+                            height: 15,
                           ),
                           SizedBox(
                             height: 45,
@@ -461,7 +463,8 @@ class _LendPageState extends State<LendPage> {
                             child: ElevatedButton(
                               child: Text(
                                 "Add",
-                                style: TextStyle(fontSize: 18),
+                                style: TextStyle(
+                                    fontSize: 18, color: Colors.white),
                               ),
                               onPressed: () async {
                                 buildShowDialog(context);

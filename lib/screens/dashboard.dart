@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
@@ -13,6 +14,7 @@ import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/route_service.dart';
 import 'package:settlenow/screens/aboutus.dart';
+import 'package:settlenow/screens/contactUs.dart';
 import 'package:settlenow/screens/expenses.dart';
 import 'package:settlenow/screens/lendCredit.dart';
 import 'package:settlenow/screens/loginPage.dart';
@@ -47,6 +49,7 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController();
   String _token = "";
+  int appOpened = 0;
   late SharedPreferences prefs;
   final TextEditingController _NRoom = TextEditingController();
   final List<RoomEach> RoomDataO = [];
@@ -260,6 +263,13 @@ class _DashBoardState extends State<DashBoard> {
     if (_email.text == "") {
       prefs = await SharedPreferences.getInstance();
 
+      if (prefs.getInt("appOpened") != null) {
+        appOpened = prefs.getInt("appOpened")!;
+        prefs.setInt("appOpened", 1 + appOpened);
+      } else {
+        prefs.setInt("appOpened", 1);
+      }
+
       if (prefs.getBool("isGoogle") != null) {
         isGoogle = prefs.getBool("isGoogle")!;
       }
@@ -359,6 +369,14 @@ class _DashBoardState extends State<DashBoard> {
       }
     } on Exception catch (_) {
       showToast(context, "No Internet Connection!!!");
+    }
+
+    final InAppReview _inAppReview = InAppReview.instance;
+
+    if (await _inAppReview.isAvailable() && appOpened == 5) {
+      Future.delayed(const Duration(seconds: 2), () {
+        _inAppReview.requestReview();
+      });
     }
 
     if (this.mounted) {
@@ -1598,6 +1616,7 @@ class _DashBoardState extends State<DashBoard> {
                       textInputAction: TextInputAction.search,
                       maxLines: 1,
                       decoration: const InputDecoration(
+                        counterText: "",
                         contentPadding: EdgeInsets.all(8.0),
                         hintText: "Search ...",
                       ),
@@ -1915,6 +1934,25 @@ class _DashBoardState extends State<DashBoard> {
               ),
             ),
             ListTile(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ContactUs(
+                          email: _email.text,
+                          token: _token,
+                        )),
+              ),
+              leading: Icon(
+                Icons.contact_mail_outlined,
+                color: Colors.white,
+                size: 22,
+              ),
+              title: Text(
+                "Contact Us",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+            ),
+            ListTile(
               onTap: () async {
                 await prefs.remove('name');
                 await prefs.remove('email');
@@ -2042,6 +2080,7 @@ class _DashBoardState extends State<DashBoard> {
                                                     },
                                                     decoration:
                                                         const InputDecoration(
+                                                      counterText: "",
                                                       contentPadding:
                                                           EdgeInsets.all(8.0),
                                                       hintText:
@@ -2050,6 +2089,9 @@ class _DashBoardState extends State<DashBoard> {
                                                           fontSize: 15),
                                                     ),
                                                   ),
+                                                ),
+                                                SizedBox(
+                                                  height: 15,
                                                 ),
                                                 SizedBox(
                                                   height: 40,
@@ -2124,6 +2166,7 @@ class _DashBoardState extends State<DashBoard> {
                                                     },
                                                     decoration:
                                                         const InputDecoration(
+                                                      counterText: "",
                                                       contentPadding:
                                                           EdgeInsets.all(8.0),
                                                       hintText:
@@ -2133,6 +2176,9 @@ class _DashBoardState extends State<DashBoard> {
                                                           fontSize: 15),
                                                     ),
                                                   ),
+                                                ),
+                                                SizedBox(
+                                                  height: 15,
                                                 ),
                                                 SizedBox(
                                                   height: 40,

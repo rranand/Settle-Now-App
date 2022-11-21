@@ -199,6 +199,7 @@ class _ExpensesState extends State<Expenses> {
                               return null;
                             },
                             decoration: const InputDecoration(
+                              counterText: "",
                               contentPadding: EdgeInsets.all(8.0),
                               hintText: "Enter Amount",
                               labelText: "Amount",
@@ -213,7 +214,7 @@ class _ExpensesState extends State<Expenses> {
                             keyboardType: TextInputType.text,
                             maxLength: 150,
                             maxLines: 1,
-                            style: const TextStyle(fontSize: 15),
+                            style: const TextStyle(fontSize: 18),
                             autocorrect: false,
                             validator: (value) {
                               RegExp validateText = RegExp(r'\b[\w]+\b');
@@ -223,10 +224,11 @@ class _ExpensesState extends State<Expenses> {
                               return null;
                             },
                             decoration: const InputDecoration(
+                              counterText: "",
                               contentPadding: EdgeInsets.all(8.0),
                               hintText: "Enter Purpose",
                               labelText: "Purpose",
-                              errorStyle: TextStyle(fontSize: 13),
+                              errorStyle: TextStyle(fontSize: 15),
                             ),
                           ),
                           SizedBox(
@@ -738,7 +740,7 @@ class _ExpensesState extends State<Expenses> {
                                 keyboardType: TextInputType.number,
                                 maxLength: 10,
                                 maxLines: 1,
-                                style: const TextStyle(fontSize: 15),
+                                style: const TextStyle(fontSize: 18),
                                 autocorrect: false,
                                 validator: (value) {
                                   RegExp validateNumber =
@@ -749,6 +751,7 @@ class _ExpensesState extends State<Expenses> {
                                   return null;
                                 },
                                 decoration: const InputDecoration(
+                                  counterText: "",
                                   contentPadding: EdgeInsets.all(8.0),
                                   hintText: "Enter Amount",
                                   labelText: "Amount",
@@ -760,7 +763,7 @@ class _ExpensesState extends State<Expenses> {
                                 keyboardType: TextInputType.text,
                                 maxLength: 150,
                                 maxLines: 1,
-                                style: const TextStyle(fontSize: 15),
+                                style: const TextStyle(fontSize: 18),
                                 autocorrect: false,
                                 validator: (value) {
                                   RegExp validateText = RegExp(r'\b[\w]+\b');
@@ -770,6 +773,7 @@ class _ExpensesState extends State<Expenses> {
                                   return null;
                                 },
                                 decoration: const InputDecoration(
+                                  counterText: "",
                                   contentPadding: EdgeInsets.all(8.0),
                                   hintText: "Enter Purpose",
                                   labelText: "Purpose",
