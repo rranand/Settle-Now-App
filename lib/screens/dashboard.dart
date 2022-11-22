@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -43,7 +42,6 @@ class DashBoard extends StatefulWidget {
 
 class _DashBoardState extends State<DashBoard> {
   AppUpdateInfo? _updateInfo;
-  final InAppReview _inAppReview = InAppReview.instance;
   int dash = 0;
   double yourSpend = 0;
   bool isGoogle = false;
@@ -357,10 +355,6 @@ class _DashBoardState extends State<DashBoard> {
         }
         await getRoomRequest();
         await _getImageID();
-
-        if (appOpened == 5) {
-          await rateUs();
-        }
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
         Navigator.pushAndRemoveUntil(
@@ -393,8 +387,6 @@ class _DashBoardState extends State<DashBoard> {
       setState(() {});
     }
   }
-
-  Future<void> rateUs() => _inAppReview.requestReview();
 
   getRoomRequest() async {
     try {
@@ -1989,18 +1981,6 @@ class _DashBoardState extends State<DashBoard> {
               ),
               title: Text(
                 "Contact Us",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              onTap: rateUs,
-              leading: Icon(
-                Icons.star_border_outlined,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Rate Us",
                 style: TextStyle(fontSize: 14, color: Colors.white),
               ),
             ),
