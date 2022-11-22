@@ -357,6 +357,10 @@ class _DashBoardState extends State<DashBoard> {
         }
         await getRoomRequest();
         await _getImageID();
+
+        if (appOpened == 5) {
+          await rateUs();
+        }
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
         Navigator.pushAndRemoveUntil(
@@ -385,16 +389,12 @@ class _DashBoardState extends State<DashBoard> {
       await onException(context);
     }
 
-    if (await _inAppReview.isAvailable() && appOpened == 5) {
-      Future.delayed(const Duration(seconds: 2), () async {
-        await _inAppReview.requestReview();
-      });
-    }
-
     if (this.mounted) {
       setState(() {});
     }
   }
+
+  Future<void> rateUs() => _inAppReview.requestReview();
 
   getRoomRequest() async {
     try {
@@ -1993,11 +1993,7 @@ class _DashBoardState extends State<DashBoard> {
               ),
             ),
             ListTile(
-              onTap: () async {
-                if (await _inAppReview.isAvailable()) {
-                  await _inAppReview.requestReview();
-                }
-              },
+              onTap: rateUs,
               leading: Icon(
                 Icons.star_border_outlined,
                 color: Colors.white,
