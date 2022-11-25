@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -42,6 +43,7 @@ class DashBoard extends StatefulWidget {
 
 class _DashBoardState extends State<DashBoard> {
   AppUpdateInfo? _updateInfo;
+  final InAppReview inAppReview = InAppReview.instance;
   int dash = 0;
   double yourSpend = 0;
   bool isGoogle = false;
@@ -124,6 +126,8 @@ class _DashBoardState extends State<DashBoard> {
   bool haveImg = false;
   bool open = true;
   String amtSpend = "";
+  double amtSpendOpen = 0;
+  double amtSpendClose = 0;
   String _profilePicID = "";
   List<dynamic> RoomRequest = [];
   GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -194,6 +198,9 @@ class _DashBoardState extends State<DashBoard> {
       await onException(context);
     }
   }
+
+  Future<void> rateUs() =>
+      inAppReview.openStoreListing(appStoreId: 'com.rohit.settlenow');
 
   Future imageUpload(ImageSource imageSource) async {
     final ImagePicker _picker = ImagePicker();
@@ -326,15 +333,18 @@ class _DashBoardState extends State<DashBoard> {
         RoomDataO.clear();
         RoomDataC.clear();
         yourSpend = 0;
+        amtSpendClose = 0;
+        amtSpendOpen = 0;
 
         for (int i = 0; i < list.length; i++) {
           if (list[i]['active']) {
-            yourSpend += double.parse(crypto.decrypt(list[i]['spend'])) -
-                (double.parse(crypto.decrypt(list[i]['total'])) /
-                    double.parse(crypto.decrypt(list[i]['members'])));
             RoomDataO.add(RoomEach.fromJson(list[i]));
+            yourSpend += RoomDataO.last.spend -
+                (RoomDataO.last.total / RoomDataO.last.members);
+            amtSpendOpen += (RoomDataO.last.total / RoomDataO.last.members);
           } else {
             RoomDataC.add(RoomEach.fromJson(list[i]));
+            amtSpendClose += RoomDataC.last.total / RoomDataC.last.members;
           }
         }
 
@@ -548,6 +558,7 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   buildFilterDialog(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -666,13 +677,17 @@ class _DashBoardState extends State<DashBoard> {
                                               ? (index == from[0]
                                                   ? Theme.of(context)
                                                       .primaryColor
-                                                  : Theme.of(context).cardColor)
+                                                  : Theme.of(context)
+                                                      .dialogBackgroundColor)
                                               : (index == to[0]
                                                   ? Theme.of(context)
                                                       .primaryColor
                                                   : Theme.of(context)
-                                                      .cardColor),
+                                                      .dialogBackgroundColor),
                                           shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .primaryColor),
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),
@@ -744,11 +759,16 @@ class _DashBoardState extends State<DashBoard> {
                                         color: dateIndex
                                             ? (index == from[1]
                                                 ? Theme.of(context).primaryColor
-                                                : Theme.of(context).cardColor)
+                                                : Theme.of(context)
+                                                    .dialogBackgroundColor)
                                             : (index == to[1]
                                                 ? Theme.of(context).primaryColor
-                                                : Theme.of(context).cardColor),
+                                                : Theme.of(context)
+                                                    .dialogBackgroundColor),
                                         shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                         ),
@@ -819,13 +839,18 @@ class _DashBoardState extends State<DashBoard> {
                                         color: dateIndex
                                             ? (index == from[2]
                                                 ? Theme.of(context).primaryColor
-                                                : Theme.of(context).cardColor)
+                                                : Theme.of(context)
+                                                    .dialogBackgroundColor)
                                             : (index == to[2]
                                                 ? Theme.of(context).primaryColor
-                                                : Theme.of(context).cardColor),
+                                                : Theme.of(context)
+                                                    .dialogBackgroundColor),
                                         shadowColor:
                                             Theme.of(context).primaryColor,
                                         shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
                                           borderRadius:
                                               BorderRadius.circular(10.0),
                                         ),
@@ -891,10 +916,14 @@ class _DashBoardState extends State<DashBoard> {
                                           elevation: 1.0,
                                           color: (index == roomStatusIndex
                                               ? Theme.of(context).primaryColor
-                                              : Theme.of(context).cardColor),
+                                              : Theme.of(context)
+                                                  .dialogBackgroundColor),
                                           shadowColor:
                                               Theme.of(context).primaryColor,
                                           shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .primaryColor),
                                             borderRadius:
                                                 BorderRadius.circular(10.0),
                                           ),
@@ -944,14 +973,25 @@ class _DashBoardState extends State<DashBoard> {
                             SizedBox(
                               height: 45,
                               width: 100,
-                              child: ElevatedButton(
+                              child: OutlinedButton(
                                 child: Text(
                                   "Close",
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16),
                                 ),
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
                               ),
                             ),
                             SizedBox(
@@ -960,10 +1000,21 @@ class _DashBoardState extends State<DashBoard> {
                             SizedBox(
                               height: 45,
                               width: 100,
-                              child: ElevatedButton(
+                              child: OutlinedButton(
                                 child: Text(
                                   "Apply",
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
                                 ),
                                 onPressed: () {
                                   setState(() {
@@ -1280,7 +1331,11 @@ class _DashBoardState extends State<DashBoard> {
                         elevation: 1.0,
                         clipBehavior: Clip.antiAlias,
                         shadowColor: Theme.of(context).primaryColor,
+                        color: Theme.of(context).scaffoldBackgroundColor,
                         shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                              color:
+                                  Theme.of(context).primaryColor.withAlpha(95)),
                           borderRadius: BorderRadius.circular(15.0),
                         ),
                         child: Row(
@@ -1854,6 +1909,8 @@ class _DashBoardState extends State<DashBoard> {
                     builder: (context) => Profile(
                           email: _email.text,
                           token: _token,
+                          closeRoomSpend: amtSpendClose,
+                          openRoomSpend: amtSpendOpen,
                         )),
               ),
               leading: Icon(
@@ -1981,6 +2038,18 @@ class _DashBoardState extends State<DashBoard> {
               ),
               title: Text(
                 "Contact Us",
+                style: TextStyle(fontSize: 14, color: Colors.white),
+              ),
+            ),
+            ListTile(
+              onTap: rateUs,
+              leading: Icon(
+                Icons.star_border_outlined,
+                color: Colors.white,
+                size: 22,
+              ),
+              title: Text(
+                "Rate Us",
                 style: TextStyle(fontSize: 14, color: Colors.white),
               ),
             ),
@@ -2126,13 +2195,30 @@ class _DashBoardState extends State<DashBoard> {
                                                   height: 15,
                                                 ),
                                                 SizedBox(
-                                                  height: 40,
+                                                  height: 43,
                                                   width: 100,
-                                                  child: ElevatedButton(
-                                                    child: const Text(
+                                                  child: OutlinedButton(
+                                                    child: Text(
                                                       "Create",
                                                       style: TextStyle(
-                                                          color: Colors.white),
+                                                          fontSize: 16,
+                                                          color: themeProvider
+                                                                  .isDarkTheme
+                                                              ? Colors.white
+                                                              : Colors.black),
+                                                    ),
+                                                    style: OutlinedButton
+                                                        .styleFrom(
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10.0),
+                                                      ),
+                                                      side: BorderSide(
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .primaryColor),
                                                     ),
                                                     onPressed: () {
                                                       if (_CformKey
@@ -2213,14 +2299,31 @@ class _DashBoardState extends State<DashBoard> {
                                                   height: 15,
                                                 ),
                                                 SizedBox(
-                                                  height: 40,
+                                                  height: 43,
                                                   width: 100,
-                                                  child: ElevatedButton(
-                                                      child: const Text(
+                                                  child: OutlinedButton(
+                                                      child: Text(
                                                         "Join",
                                                         style: TextStyle(
-                                                            color:
-                                                                Colors.white),
+                                                            fontSize: 16,
+                                                            color: themeProvider
+                                                                    .isDarkTheme
+                                                                ? Colors.white
+                                                                : Colors.black),
+                                                      ),
+                                                      style: OutlinedButton
+                                                          .styleFrom(
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                        ),
+                                                        side: BorderSide(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor),
                                                       ),
                                                       onPressed: () {
                                                         if (_JformKey
@@ -2315,10 +2418,13 @@ class RoomWidget extends StatelessWidget {
     return InkWell(
       child: SizedBox(
         child: Card(
-          elevation: 2.0,
+          elevation: 1.0,
           clipBehavior: Clip.antiAlias,
           shadowColor: Theme.of(context).primaryColor,
+          color: Theme.of(context).scaffoldBackgroundColor,
           shape: RoundedRectangleBorder(
+            side:
+                BorderSide(color: Theme.of(context).primaryColor.withAlpha(95)),
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: Padding(
@@ -2457,6 +2563,7 @@ class updatePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return SizedBox(
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -2491,8 +2598,21 @@ class updatePage extends StatelessWidget {
                   alignment: Alignment.bottomRight,
                   child: SizedBox(
                     height: 40,
-                    child: ElevatedButton(
-                      child: const Text('Download'),
+                    child: OutlinedButton(
+                      child: Text(
+                        'Download',
+                        style: TextStyle(
+                            fontSize: 16,
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13.0),
+                        ),
+                        side: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
                       onPressed: () {
                         _launchURL(context);
                       },

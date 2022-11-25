@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
+import '../others/themes.dart';
 
 class ContactUs extends StatefulWidget {
   final String token;
@@ -63,6 +65,7 @@ class _ContactUsState extends State<ContactUs> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Contact Us"),
@@ -173,12 +176,23 @@ class _ContactUsState extends State<ContactUs> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: SizedBox(
-                              height: 40,
+                              height: 46,
                               width: 100,
-                              child: ElevatedButton(
-                                  child: const Text(
+                              child: OutlinedButton(
+                                  child: Text(
                                     "Send",
-                                    style: TextStyle(color: Colors.white),
+                                    style: TextStyle(
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black,
+                                        fontSize: 16),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(13.0),
+                                    ),
+                                    side: BorderSide(
+                                        color: Theme.of(context).primaryColor),
                                   ),
                                   onPressed: () {
                                     sendContactData(context);

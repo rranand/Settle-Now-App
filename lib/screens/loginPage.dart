@@ -154,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                           "Send OTP",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontSize: 17,
                               color: Colors.white),
                         ),
                         onPressed: () => MoveToNext(

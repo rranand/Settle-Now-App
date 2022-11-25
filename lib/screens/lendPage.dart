@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/FriendEach.dart';
+import 'package:settlenow/others/themes.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
@@ -131,6 +133,7 @@ class _LendPageState extends State<LendPage> {
   }
 
   closeRoomWidget(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Dialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -156,19 +159,32 @@ class _LendPageState extends State<LendPage> {
                         children: [
                           SizedBox(
                             width: 80,
-                            child: ElevatedButton(
+                            height: 37,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
                               onPressed: () {
                                 Navigator.pop(context);
                               },
                               child: Text(
                                 "No",
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 16),
                               ),
                             ),
                           ),
                           SizedBox(
                             width: 80,
-                            child: ElevatedButton(
+                            height: 37,
+                            child: OutlinedButton(
                               onPressed: () async {
                                 buildShowDialog(context);
                                 await CloseRoom(context);
@@ -176,9 +192,20 @@ class _LendPageState extends State<LendPage> {
                                 Navigator.pop(context);
                                 Navigator.pop(context);
                               },
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
                               child: Text(
                                 "Yes",
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 16),
                               ),
                             ),
                           )
@@ -205,7 +232,10 @@ class _LendPageState extends State<LendPage> {
                   child: Card(
                     elevation: 1.0,
                     shadowColor: Theme.of(context).primaryColor,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color: Theme.of(context).cardColor.withAlpha(95)),
                       borderRadius: BorderRadius.circular(15.0),
                     ),
                     child: Padding(
@@ -279,6 +309,7 @@ class _LendPageState extends State<LendPage> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.name),
@@ -325,8 +356,14 @@ class _LendPageState extends State<LendPage> {
                                   height: 85,
                                   child: Card(
                                     elevation: 1.0,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
                                     shadowColor: Theme.of(context).primaryColor,
                                     shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          color: Theme.of(context)
+                                              .cardColor
+                                              .withAlpha(95)),
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
                                     child: Padding(
@@ -470,17 +507,27 @@ class _LendPageState extends State<LendPage> {
                           SizedBox(
                             height: 45,
                             width: MediaQuery.of(context).size.width * 0.95,
-                            child: ElevatedButton(
+                            child: OutlinedButton(
                               child: Text(
                                 "Add",
                                 style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
+                                    fontSize: 18,
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                               onPressed: () async {
                                 buildShowDialog(context);
                                 await addLoan(context);
                                 Navigator.pop(context);
                               },
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(13.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
                             ),
                           ),
                           SizedBox(

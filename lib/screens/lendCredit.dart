@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/gradient.dart';
+import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/screens/lendPage.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
@@ -98,6 +101,7 @@ class _LendCreditState extends State<LendCredit> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Len-Den"),
@@ -126,54 +130,68 @@ class _LendCreditState extends State<LendCredit> {
                       )
                     : Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: ListView.separated(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          separatorBuilder: (context, index) => SizedBox(
-                            height: 7,
+                        child: GridView.builder(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.5,
                           ),
+                          physics: AlwaysScrollableScrollPhysics(),
                           itemCount: data.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return InkWell(
-                              onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => LendPage(
-                                            email: widget.email,
-                                            token: widget.token,
-                                            name: crypto
-                                                .decrypt(data[index]["name"]),
-                                          ))),
-                              child: SizedBox(
-                                height: 80,
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: InkWell(
+                                onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LendPage(
+                                              email: widget.email,
+                                              token: widget.token,
+                                              name: crypto
+                                                  .decrypt(data[index]["name"]),
+                                            ))),
                                 child: Card(
-                                  elevation: 2.1,
+                                  elevation: 2.0,
                                   shadowColor: Theme.of(context).primaryColor,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
                                   shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Theme.of(context).cardColor),
                                     borderRadius: BorderRadius.circular(15.0),
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            crypto.decrypt(data[index]["name"]),
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                                fontSize: 20,
-                                                fontWeight: FontWeight.w500),
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          crypto.decrypt(data[index]["name"]),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500,
+                                            foreground: Paint()
+                                              ..shader = linearGradient_1,
                                           ),
-                                          Text(
-                                            "₹ " +
-                                                crypto.decrypt(
-                                                    data[index]["total"]),
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                            ),
+                                        ),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                        Text(
+                                          "₹ " +
+                                              crypto.decrypt(
+                                                  data[index]["total"]),
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            foreground: Paint()
+                                              ..shader = linearGradient_2,
                                           ),
-                                        ]),
-                                  ),
+                                        ),
+                                      ]),
                                 ),
                               ),
                             );
@@ -240,11 +258,21 @@ class _LendCreditState extends State<LendCredit> {
                           SizedBox(
                             height: 40,
                             width: MediaQuery.of(context).size.width * 0.95,
-                            child: ElevatedButton(
+                            child: OutlinedButton(
                               child: Text(
                                 "Create",
                                 style: TextStyle(
-                                    fontSize: 18, color: Colors.white),
+                                    fontSize: 18,
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
                               ),
                               onPressed: () async {
                                 if (_name.text.isNotEmpty) {

@@ -395,6 +395,7 @@ class _RoomExpenseState extends State<RoomExpense> {
   }
 
   closeRoomWidget(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Dialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -420,19 +421,36 @@ class _RoomExpenseState extends State<RoomExpense> {
                         children: [
                           SizedBox(
                             width: 80,
-                            child: ElevatedButton(
+                            child: OutlinedButton(
                               onPressed: () {
                                 Navigator.pop(context);
                               },
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
                               child: Text(
                                 "No",
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                             ),
                           ),
                           SizedBox(
                             width: 80,
-                            child: ElevatedButton(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
                               onPressed: () async {
                                 buildShowDialog(context);
                                 await CloseRoom(context);
@@ -441,7 +459,10 @@ class _RoomExpenseState extends State<RoomExpense> {
                               },
                               child: Text(
                                 "Yes",
-                                style: TextStyle(color: Colors.white),
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black),
                               ),
                             ),
                           )
@@ -474,53 +495,106 @@ class _RoomExpenseState extends State<RoomExpense> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Add Member",
-                            style: TextStyle(fontSize: 22),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Add Member",
+                                style: TextStyle(fontSize: 22),
+                              ),
+                              IconButton(
+                                  onPressed: () async {
+                                    if (this.mounted) {
+                                      setState(() {
+                                        loadFriendData = false;
+                                      });
+                                      await getFriendData();
+                                      setState(() {
+                                        loadFriendData = true;
+                                      });
+                                    }
+                                  },
+                                  icon: Icon(
+                                    Icons.refresh_outlined,
+                                    size: 26,
+                                  ))
+                            ],
                           ),
                           SizedBox(
                             height: 20,
                           ),
-                          TextField(
-                            controller: _searchFriend,
-                            keyboardType: TextInputType.text,
-                            maxLines: 1,
-                            style: const TextStyle(fontSize: 15),
-                            autocorrect: false,
-                            decoration: InputDecoration(
-                              contentPadding: const EdgeInsets.all(8.0),
-                              labelText: "Enter Name",
-                              counterText: "",
-                              errorStyle: const TextStyle(fontSize: 15),
-                            ),
-                            onChanged: (String s) {
-                              if (this.mounted) {
-                                setState(() {
-                                  _searchFriend.text = s;
-                                  _searchFriend.selection =
-                                      TextSelection.collapsed(
-                                          offset: _searchFriend.text.length);
-                                });
-                              }
-                              SearchFriend();
-                            },
-                          ),
-                          SizedBox(
-                            height: 13,
-                          ),
-                          SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.6,
-                              child: _searchFriend.text.isEmpty
-                                  ? friendListWidget(context, friendData)
-                                  : (friendDataSearched.isEmpty
-                                      ? Center(
-                                          child: Text(
-                                            "No User Found",
-                                            style: TextStyle(fontSize: 18),
+                          loadFriendData
+                              ? friendData.isEmpty
+                                  ? SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.height *
+                                              0.6,
+                                      child: Center(
+                                        child: Text(
+                                          "No User Found",
+                                          style: TextStyle(fontSize: 20),
+                                        ),
+                                      ),
+                                    )
+                                  : Column(
+                                      children: [
+                                        TextField(
+                                          controller: _searchFriend,
+                                          keyboardType: TextInputType.text,
+                                          maxLines: 1,
+                                          style: const TextStyle(fontSize: 15),
+                                          autocorrect: false,
+                                          decoration: InputDecoration(
+                                            contentPadding:
+                                                const EdgeInsets.all(8.0),
+                                            labelText: "Enter Name",
+                                            counterText: "",
+                                            errorStyle:
+                                                const TextStyle(fontSize: 15),
                                           ),
-                                        )
-                                      : friendListWidget(
-                                          context, friendDataSearched)))
+                                          onChanged: (String s) {
+                                            if (this.mounted) {
+                                              setState(() {
+                                                _searchFriend.text = s;
+                                                _searchFriend.selection =
+                                                    TextSelection.collapsed(
+                                                        offset: _searchFriend
+                                                            .text.length);
+                                              });
+                                            }
+                                            SearchFriend();
+                                          },
+                                        ),
+                                        SizedBox(
+                                          height: 13,
+                                        ),
+                                        SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.6,
+                                            child: _searchFriend.text.isEmpty
+                                                ? friendListWidget(
+                                                    context, friendData)
+                                                : (friendDataSearched.isEmpty
+                                                    ? Center(
+                                                        child: Text(
+                                                          "No User Found",
+                                                          style: TextStyle(
+                                                              fontSize: 18),
+                                                        ),
+                                                      )
+                                                    : friendListWidget(context,
+                                                        friendDataSearched))),
+                                      ],
+                                    )
+                              : SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.6,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
                         ],
                       )))));
     });
@@ -691,12 +765,15 @@ class _RoomExpenseState extends State<RoomExpense> {
           child: Card(
             elevation: 1.0,
             shadowColor: Theme.of(context).primaryColor,
+            color: Theme.of(context).scaffoldBackgroundColor,
             shape: list[index]['done']
                 ? RoundedRectangleBorder(
                     side: BorderSide(color: Colors.red),
                     borderRadius: BorderRadius.circular(15.0),
                   )
                 : RoundedRectangleBorder(
+                    side: BorderSide(
+                        color: Theme.of(context).primaryColor.withAlpha(90)),
                     borderRadius: BorderRadius.circular(15.0),
                   ),
             child: Padding(
@@ -832,7 +909,9 @@ class _RoomExpenseState extends State<RoomExpense> {
       child: Card(
         elevation: 1.4,
         shadowColor: Theme.of(context).primaryColor,
+        color: Theme.of(context).scaffoldBackgroundColor,
         shape: RoundedRectangleBorder(
+          side: BorderSide(color: Theme.of(context).primaryColor),
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Padding(
@@ -889,7 +968,9 @@ class _RoomExpenseState extends State<RoomExpense> {
           child: Card(
               elevation: 1.4,
               shadowColor: Theme.of(context).primaryColor,
+              color: Theme.of(context).scaffoldBackgroundColor,
               shape: RoundedRectangleBorder(
+                side: BorderSide(color: Theme.of(context).primaryColor),
                 borderRadius: BorderRadius.circular(15.0),
               ),
               child: Padding(
@@ -923,7 +1004,10 @@ class _RoomExpenseState extends State<RoomExpense> {
                 child: Card(
                     elevation: 1.0,
                     shadowColor: Theme.of(context).primaryColor,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color: Theme.of(context).primaryColor.withAlpha(90)),
                       borderRadius: BorderRadius.circular(15.0),
                     ),
                     child: Padding(
@@ -1067,11 +1151,23 @@ class _RoomExpenseState extends State<RoomExpense> {
                                       padding: EdgeInsets.all(15.0),
                                       child: SizedBox(
                                         height: 45,
-                                        child: ElevatedButton(
-                                          child: const Text(
+                                        child: OutlinedButton(
+                                          child: Text(
                                             "Close Room",
-                                            style:
-                                                TextStyle(color: Colors.white),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: themeProvider.isDarkTheme
+                                                    ? Colors.white
+                                                    : Colors.black),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(13.0),
+                                            ),
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .primaryColor),
                                           ),
                                           onPressed: () {
                                             showDialog(
@@ -1181,90 +1277,84 @@ class _RoomExpenseState extends State<RoomExpense> {
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width - 65,
-                            height: 70,
+                            height: 65,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: list.length - 1,
                               itemBuilder: (BuildContext context, int index) {
                                 return InkWell(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Card(
-                                      elevation: 1.4,
-                                      shadowColor:
-                                          Theme.of(context).primaryColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: membersListEmail[index] ==
-                                                    membersListEmail[
-                                                        membersListIndexS]
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .backgroundColor),
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            CachedNetworkImage(
-                                              imageUrl: crypto
-                                                          .decrypt(
-                                                              list[index + 1]
-                                                                  ['pic'])
-                                                          .length ==
-                                                      0
-                                                  ? global.driveUrl +
-                                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                  : crypto.decrypt(
-                                                      list[index + 1]['pic']),
-                                              progressIndicatorBuilder:
-                                                  (context, url,
-                                                          downloadProgress) =>
-                                                      CircularProgressIndicator(
-                                                          value:
-                                                              downloadProgress
-                                                                  .progress),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      Container(
-                                                width: 50.0,
-                                                height: 50.0,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  image: DecorationImage(
-                                                      image: AssetImage(
-                                                          'assets/Images/unknown.jpeg'),
-                                                      fit: BoxFit.cover),
-                                                ),
-                                              ),
-                                              imageBuilder:
-                                                  (context, imageProvider) =>
-                                                      Container(
-                                                width: 50.0,
-                                                height: 50.0,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  image: DecorationImage(
-                                                      image: imageProvider,
-                                                      fit: BoxFit.cover),
-                                                ),
+                                  child: Card(
+                                    elevation: 1.4,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    shadowColor: Theme.of(context).primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          color: membersListEmail[index] ==
+                                                  membersListEmail[
+                                                      membersListIndexS]
+                                              ? Theme.of(context).primaryColor
+                                              : Theme.of(context)
+                                                  .backgroundColor),
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          CachedNetworkImage(
+                                            imageUrl: crypto
+                                                        .decrypt(list[index + 1]
+                                                            ['pic'])
+                                                        .length ==
+                                                    0
+                                                ? global.driveUrl +
+                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                : crypto.decrypt(
+                                                    list[index + 1]['pic']),
+                                            progressIndicatorBuilder: (context,
+                                                    url, downloadProgress) =>
+                                                CircularProgressIndicator(
+                                                    value: downloadProgress
+                                                        .progress),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    Container(
+                                              width: 50.0,
+                                              height: 50.0,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                    image: AssetImage(
+                                                        'assets/Images/unknown.jpeg'),
+                                                    fit: BoxFit.cover),
                                               ),
                                             ),
-                                            Text(
-                                              crypto.decrypt(
-                                                  list[index + 1]['Name']),
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
+                                            imageBuilder:
+                                                (context, imageProvider) =>
+                                                    Container(
+                                              width: 50.0,
+                                              height: 50.0,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                    image: imageProvider,
+                                                    fit: BoxFit.cover),
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                          Text(
+                                            crypto.decrypt(
+                                                list[index + 1]['Name']),
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -1292,95 +1382,91 @@ class _RoomExpenseState extends State<RoomExpense> {
                           ),
                           SizedBox(
                               width: MediaQuery.of(context).size.width - 45,
-                              height: 70,
+                              height: 65,
                               child: ListView.builder(
                                   scrollDirection: Axis.horizontal,
                                   itemCount: list.length - 1,
                                   itemBuilder:
                                       (BuildContext context, int index) {
                                     return InkWell(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Card(
-                                          elevation: 1.4,
-                                          shadowColor:
-                                              Theme.of(context).primaryColor,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                                color: membersListEmail[
-                                                            index] ==
-                                                        membersListEmail[
-                                                            membersListIndexR]
-                                                    ? Theme.of(context)
-                                                        .primaryColor
-                                                    : Theme.of(context)
-                                                        .backgroundColor),
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(5.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                CachedNetworkImage(
-                                                  imageUrl: crypto
-                                                              .decrypt(list[
-                                                                      index + 1]
-                                                                  ['pic'])
-                                                              .length ==
-                                                          0
-                                                      ? global.driveUrl +
-                                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                      : crypto.decrypt(
-                                                          list[index + 1]
-                                                              ['pic']),
-                                                  progressIndicatorBuilder: (context,
-                                                          url,
-                                                          downloadProgress) =>
-                                                      CircularProgressIndicator(
-                                                          value:
-                                                              downloadProgress
-                                                                  .progress),
-                                                  errorWidget:
-                                                      (context, url, error) =>
-                                                          Container(
-                                                    width: 50.0,
-                                                    height: 50.0,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: AssetImage(
-                                                              'assets/Images/unknown.jpeg'),
-                                                          fit: BoxFit.cover),
-                                                    ),
-                                                  ),
-                                                  imageBuilder: (context,
-                                                          imageProvider) =>
-                                                      Container(
-                                                    width: 50.0,
-                                                    height: 50.0,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: imageProvider,
-                                                          fit: BoxFit.cover),
-                                                    ),
+                                      child: Card(
+                                        elevation: 1.4,
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        shadowColor:
+                                            Theme.of(context).primaryColor,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: membersListEmail[index] ==
+                                                      membersListEmail[
+                                                          membersListIndexR]
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : Theme.of(context)
+                                                      .backgroundColor),
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              CachedNetworkImage(
+                                                imageUrl: crypto
+                                                            .decrypt(
+                                                                list[index + 1]
+                                                                    ['pic'])
+                                                            .length ==
+                                                        0
+                                                    ? global.driveUrl +
+                                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                    : crypto.decrypt(
+                                                        list[index + 1]['pic']),
+                                                progressIndicatorBuilder:
+                                                    (context, url,
+                                                            downloadProgress) =>
+                                                        CircularProgressIndicator(
+                                                            value:
+                                                                downloadProgress
+                                                                    .progress),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Container(
+                                                  width: 50.0,
+                                                  height: 50.0,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                        image: AssetImage(
+                                                            'assets/Images/unknown.jpeg'),
+                                                        fit: BoxFit.cover),
                                                   ),
                                                 ),
-                                                Text(
-                                                  crypto.decrypt(
-                                                      list[index + 1]['Name']),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w500,
+                                                imageBuilder:
+                                                    (context, imageProvider) =>
+                                                        Container(
+                                                  width: 50.0,
+                                                  height: 50.0,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                        image: imageProvider,
+                                                        fit: BoxFit.cover),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                              Text(
+                                                crypto.decrypt(
+                                                    list[index + 1]['Name']),
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
@@ -1395,14 +1481,35 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   })),
                         ],
                       ),
-                      ElevatedButton(
-                        child: const Text(
-                          "Search",
-                          style: TextStyle(color: Colors.white),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      SizedBox(
+                        height: 45,
+                        width: 100,
+                        child: OutlinedButton(
+                          child: Text(
+                            "Search",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black),
+                          ),
+                          onPressed: () {
+                            retrievePaymentData();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            side: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
                         ),
-                        onPressed: () {
-                          retrievePaymentData();
-                        },
+                      ),
+                      SizedBox(
+                        height: 15,
                       ),
                       showAllTransactionData
                           ? (paidTransactionData
@@ -1421,7 +1528,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                                       children: [
                                         Text(
                                           "Total Amount Paid: ₹ " +
-                                              paymentTotalALL,
+                                              double.parse(paymentTotalALL)
+                                                  .toStringAsFixed(2),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
@@ -1441,7 +1549,13 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                   elevation: 1.0,
                                                   shadowColor: Theme.of(context)
                                                       .primaryColor,
+                                                  color: Theme.of(context)
+                                                      .scaffoldBackgroundColor,
                                                   shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(80)),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             15.0),
@@ -1563,7 +1677,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                                         ))
                                   : Column(children: [
                                       Text(
-                                        "Total Amount Paid: ₹ " + paymentTotal,
+                                        "Total Amount Paid: ₹ " +
+                                            double.parse(paymentTotal)
+                                                .toStringAsFixed(2),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.all(12.0),
@@ -1584,11 +1700,18 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                       .width,
                                                   child: Card(
                                                     elevation: 1.0,
+                                                    color: Theme.of(context)
+                                                        .scaffoldBackgroundColor,
                                                     shadowColor:
                                                         Theme.of(context)
                                                             .primaryColor,
                                                     shape:
                                                         RoundedRectangleBorder(
+                                                      side: BorderSide(
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .primaryColor
+                                                              .withAlpha(80)),
                                                       borderRadius:
                                                           BorderRadius.circular(
                                                               15.0),
@@ -1788,10 +1911,16 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                         SizedBox(
                                                                                           height: 40,
                                                                                           width: 100,
-                                                                                          child: ElevatedButton(
-                                                                                              child: const Text(
+                                                                                          child: OutlinedButton(
+                                                                                              style: OutlinedButton.styleFrom(
+                                                                                                shape: RoundedRectangleBorder(
+                                                                                                  borderRadius: BorderRadius.circular(10.0),
+                                                                                                ),
+                                                                                                side: BorderSide(color: Theme.of(context).primaryColor),
+                                                                                              ),
+                                                                                              child: Text(
                                                                                                 "Close",
-                                                                                                style: TextStyle(color: Colors.white),
+                                                                                                style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                                                                                               ),
                                                                                               onPressed: () {
                                                                                                 Navigator.pop(context);
@@ -1800,10 +1929,16 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                         SizedBox(
                                                                                           height: 40,
                                                                                           width: 100,
-                                                                                          child: ElevatedButton(
-                                                                                              child: const Text(
+                                                                                          child: OutlinedButton(
+                                                                                              style: OutlinedButton.styleFrom(
+                                                                                                shape: RoundedRectangleBorder(
+                                                                                                  borderRadius: BorderRadius.circular(10.0),
+                                                                                                ),
+                                                                                                side: BorderSide(color: Theme.of(context).primaryColor),
+                                                                                              ),
+                                                                                              child: Text(
                                                                                                 "Add",
-                                                                                                style: TextStyle(color: Colors.white),
+                                                                                                style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                                                                                               ),
                                                                                               onPressed: () {
                                                                                                 PayToMember(context);
@@ -1945,6 +2080,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                               child: Card(
                                                                                                   elevation: 1.4,
                                                                                                   shadowColor: Theme.of(context).primaryColor,
+                                                                                                  color: Theme.of(context).dialogBackgroundColor,
                                                                                                   shape: RoundedRectangleBorder(
                                                                                                     side: BorderSide(color: addExpenseTo.isEmpty ? Theme.of(context).primaryColor : Theme.of(context).backgroundColor),
                                                                                                     borderRadius: BorderRadius.circular(15.0),
@@ -1976,6 +2112,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                           child: Card(
                                                                                             elevation: 1.4,
                                                                                             shadowColor: Theme.of(context).primaryColor,
+                                                                                            color: Theme.of(context).dialogBackgroundColor,
                                                                                             shape: RoundedRectangleBorder(
                                                                                               side: BorderSide(color: findElement(addExpenseTo, membersListEmail[index - 1]) ? Theme.of(context).primaryColor : Theme.of(context).backgroundColor),
                                                                                               borderRadius: BorderRadius.circular(15.0),
@@ -2044,24 +2181,36 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                   children: [
                                                                                     SizedBox(
-                                                                                      height: 40,
+                                                                                      height: 43,
                                                                                       width: 100,
-                                                                                      child: ElevatedButton(
-                                                                                          child: const Text(
+                                                                                      child: OutlinedButton(
+                                                                                          style: OutlinedButton.styleFrom(
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              borderRadius: BorderRadius.circular(10.0),
+                                                                                            ),
+                                                                                            side: BorderSide(color: Theme.of(context).primaryColor),
+                                                                                          ),
+                                                                                          child: Text(
                                                                                             "Close",
-                                                                                            style: TextStyle(color: Colors.white),
+                                                                                            style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                                                                                           ),
                                                                                           onPressed: () {
                                                                                             Navigator.pop(context);
                                                                                           }),
                                                                                     ),
                                                                                     SizedBox(
-                                                                                      height: 40,
+                                                                                      height: 43,
                                                                                       width: 100,
-                                                                                      child: ElevatedButton(
-                                                                                          child: const Text(
+                                                                                      child: OutlinedButton(
+                                                                                          child: Text(
                                                                                             "Add",
-                                                                                            style: TextStyle(color: Colors.white),
+                                                                                            style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
+                                                                                          ),
+                                                                                          style: OutlinedButton.styleFrom(
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              borderRadius: BorderRadius.circular(10.0),
+                                                                                            ),
+                                                                                            side: BorderSide(color: Theme.of(context).primaryColor),
                                                                                           ),
                                                                                           onPressed: () {
                                                                                             AddExpense(context);
@@ -2129,7 +2278,7 @@ class _ExpenseDataState extends State<ExpenseData> {
   final _updateExpense = GlobalKey<FormState>();
 
   _updateTransaction(BuildContext context, String purpose, String id,
-      String amount, String flag) async {
+      String amount, String flag, String split) async {
     try {
       final response = await http.patch(Uri.parse(global.url + 'transaction'),
           headers: <String, String>{
@@ -2142,7 +2291,8 @@ class _ExpenseDataState extends State<ExpenseData> {
             'purpose': crypto.encrypt(purpose),
             'amount': crypto.encrypt(amount),
             'id': crypto.encrypt(id),
-            'flag': crypto.encrypt(flag)
+            'flag': crypto.encrypt(flag),
+            'split': crypto.encrypt(split)
           }));
 
       var updateMessage = jsonDecode(response.body);
@@ -2153,12 +2303,13 @@ class _ExpenseDataState extends State<ExpenseData> {
     }
   }
 
-  Widget _buildUpdateDialog(
-      BuildContext context, String id, String purpose, String amount) {
+  Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
+      String amount, String split) {
     return StatefulBuilder(builder: (context, setState) {
       _purpose.text = purpose;
       _amount.text = amount;
 
+      final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -2228,29 +2379,60 @@ class _ExpenseDataState extends State<ExpenseData> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               SizedBox(
-                                height: 40,
+                                height: 43,
                                 width: MediaQuery.of(context).size.width * 0.3,
-                                child: ElevatedButton(
-                                    child: const Text(
+                                child: OutlinedButton(
+                                    child: Text(
                                       "Delete",
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
                                     ),
                                     onPressed: () async {
                                       buildShowDialog(context);
-                                      await _updateTransaction(context,
-                                          _purpose.text, id, _amount.text, "1");
+                                      await _updateTransaction(
+                                          context,
+                                          _purpose.text,
+                                          id,
+                                          _amount.text,
+                                          "1",
+                                          split);
                                       Navigator.pop(context);
                                       Navigator.pop(context);
                                       Navigator.pop(context);
                                     }),
                               ),
                               SizedBox(
-                                height: 40,
+                                height: 43,
                                 width: MediaQuery.of(context).size.width * 0.3,
-                                child: ElevatedButton(
-                                    child: const Text(
+                                child: OutlinedButton(
+                                    child: Text(
                                       "Update",
-                                      style: TextStyle(color: Colors.white),
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
                                     ),
                                     onPressed: () async {
                                       if (_updateExpense.currentState!
@@ -2261,7 +2443,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                             _purpose.text,
                                             id,
                                             _amount.text,
-                                            "0");
+                                            "0",
+                                            split);
                                         Navigator.pop(context);
                                         Navigator.pop(context);
                                         Navigator.pop(context);
@@ -2311,6 +2494,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       bool locked,
       List<dynamic> partialExpense) {
     return StatefulBuilder(builder: (context, setState) {
+      final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -2336,7 +2520,11 @@ class _ExpenseDataState extends State<ExpenseData> {
                                 context: context,
                                 builder: (BuildContext context) =>
                                     _buildUpdateDialog(
-                                        context, id, purpose, amount),
+                                        context,
+                                        id,
+                                        purpose,
+                                        amount,
+                                        partialExpense.isEmpty ? "0" : "1"),
                               );
                             },
                             icon: Icon(Icons.edit))
@@ -2385,87 +2573,81 @@ class _ExpenseDataState extends State<ExpenseData> {
                 partialExpense.isEmpty
                     ? SizedBox()
                     : SizedBox(
-                        height: 10,
-                      ),
-                partialExpense.isEmpty
-                    ? SizedBox()
-                    : SizedBox(
-                        height: 10,
+                        height: 20,
                       ),
                 partialExpense.isEmpty
                     ? SizedBox()
                     : SizedBox(
                         width: MediaQuery.of(context).size.width - 65,
-                        height: 70,
+                        height: 65,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: partialExpense.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Card(
-                                elevation: 1.4,
-                                shadowColor: Theme.of(context).primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15.0),
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(5.0),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      CachedNetworkImage(
-                                        imageUrl: crypto
-                                                    .decrypt(
-                                                        partialExpense[index]
-                                                            ['pic'])
-                                                    .length ==
-                                                0
-                                            ? global.driveUrl +
-                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                            : crypto.decrypt(
-                                                partialExpense[index]['pic']),
-                                        progressIndicatorBuilder: (context, url,
-                                                downloadProgress) =>
-                                            CircularProgressIndicator(
-                                                value:
-                                                    downloadProgress.progress),
-                                        errorWidget: (context, url, error) =>
-                                            Container(
-                                          width: 50.0,
-                                          height: 50.0,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                                image: AssetImage(
-                                                    'assets/Images/unknown.jpeg'),
-                                                fit: BoxFit.cover),
-                                          ),
-                                        ),
-                                        imageBuilder:
-                                            (context, imageProvider) =>
-                                                Container(
-                                          width: 50.0,
-                                          height: 50.0,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                                image: imageProvider,
-                                                fit: BoxFit.cover),
-                                          ),
+                            return Card(
+                              elevation: 1.4,
+                              shadowColor: Theme.of(context).primaryColor,
+                              color: Theme.of(context).dialogBackgroundColor,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withAlpha(80)),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    CachedNetworkImage(
+                                      imageUrl: crypto
+                                                  .decrypt(partialExpense[index]
+                                                      ['pic'])
+                                                  .length ==
+                                              0
+                                          ? global.driveUrl +
+                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                          : crypto.decrypt(
+                                              partialExpense[index]['pic']),
+                                      progressIndicatorBuilder: (context, url,
+                                              downloadProgress) =>
+                                          CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                        width: 50.0,
+                                        height: 50.0,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                              image: AssetImage(
+                                                  'assets/Images/unknown.jpeg'),
+                                              fit: BoxFit.cover),
                                         ),
                                       ),
-                                      Text(
-                                        crypto.decrypt(
-                                            partialExpense[index]['Name']),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
+                                      imageBuilder: (context, imageProvider) =>
+                                          Container(
+                                        width: 50.0,
+                                        height: 50.0,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    Text(
+                                      crypto.decrypt(
+                                          partialExpense[index]['Name']),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             );
@@ -2478,29 +2660,49 @@ class _ExpenseDataState extends State<ExpenseData> {
                 SizedBox(
                   height: 45,
                   width: MediaQuery.of(context).size.width * 0.95 - 25,
-                  child: ElevatedButton(
+                  child: OutlinedButton(
                     onPressed: () async {
                       buildShowDialog(context);
                       await addToPersonalExpense(id);
                       Navigator.pop(context);
                       Navigator.pop(context);
                     },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      side: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
                     child: Text(
                       "Add To Personal Expense",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black),
                     ),
                   ),
                 ),
                 SizedBox(
-                  height: 8,
+                  height: 12,
                 ),
                 SizedBox(
                   height: 45,
                   width: MediaQuery.of(context).size.width * 0.95 - 25,
-                  child: ElevatedButton(
+                  child: OutlinedButton(
                     child: Text(
                       "Close",
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      side: BorderSide(color: Theme.of(context).primaryColor),
                     ),
                     onPressed: () {
                       Navigator.pop(context);
@@ -2554,7 +2756,10 @@ class _ExpenseDataState extends State<ExpenseData> {
                   child: Card(
                     elevation: 1.0,
                     shadowColor: Theme.of(context).primaryColor,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                          color: Theme.of(context).primaryColor.withAlpha(80)),
                       borderRadius: BorderRadius.circular(15.0),
                     ),
                     child: Padding(
