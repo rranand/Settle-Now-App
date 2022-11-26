@@ -1284,18 +1284,15 @@ class _RoomExpenseState extends State<RoomExpense> {
                               itemBuilder: (BuildContext context, int index) {
                                 return InkWell(
                                   child: Card(
-                                    elevation: 1.4,
                                     color: Theme.of(context)
                                         .scaffoldBackgroundColor,
-                                    shadowColor: Theme.of(context).primaryColor,
                                     shape: RoundedRectangleBorder(
                                       side: BorderSide(
                                           color: membersListEmail[index] ==
                                                   membersListEmail[
                                                       membersListIndexS]
                                               ? Theme.of(context).primaryColor
-                                              : Theme.of(context)
-                                                  .backgroundColor),
+                                              : Theme.of(context).cardColor),
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
                                     child: Padding(
@@ -1393,8 +1390,6 @@ class _RoomExpenseState extends State<RoomExpense> {
                                         elevation: 1.4,
                                         color: Theme.of(context)
                                             .scaffoldBackgroundColor,
-                                        shadowColor:
-                                            Theme.of(context).primaryColor,
                                         shape: RoundedRectangleBorder(
                                           side: BorderSide(
                                               color: membersListEmail[index] ==
@@ -1403,7 +1398,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                   ? Theme.of(context)
                                                       .primaryColor
                                                   : Theme.of(context)
-                                                      .backgroundColor),
+                                                      .cardColor),
                                           borderRadius:
                                               BorderRadius.circular(15.0),
                                         ),
@@ -2078,11 +2073,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                           child: Padding(
                                                                                               padding: EdgeInsets.all(8.0),
                                                                                               child: Card(
-                                                                                                  elevation: 1.4,
-                                                                                                  shadowColor: Theme.of(context).primaryColor,
                                                                                                   color: Theme.of(context).dialogBackgroundColor,
                                                                                                   shape: RoundedRectangleBorder(
-                                                                                                    side: BorderSide(color: addExpenseTo.isEmpty ? Theme.of(context).primaryColor : Theme.of(context).backgroundColor),
+                                                                                                    side: BorderSide(color: addExpenseTo.isEmpty ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
                                                                                                     borderRadius: BorderRadius.circular(15.0),
                                                                                                   ),
                                                                                                   child: Padding(
@@ -2110,11 +2103,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                         child: Padding(
                                                                                           padding: EdgeInsets.all(8.0),
                                                                                           child: Card(
-                                                                                            elevation: 1.4,
-                                                                                            shadowColor: Theme.of(context).primaryColor,
                                                                                             color: Theme.of(context).dialogBackgroundColor,
                                                                                             shape: RoundedRectangleBorder(
-                                                                                              side: BorderSide(color: findElement(addExpenseTo, membersListEmail[index - 1]) ? Theme.of(context).primaryColor : Theme.of(context).backgroundColor),
+                                                                                              side: BorderSide(color: findElement(addExpenseTo, membersListEmail[index - 1]) ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
                                                                                               borderRadius: BorderRadius.circular(15.0),
                                                                                             ),
                                                                                             child: Padding(
@@ -2460,7 +2451,7 @@ class _ExpenseDataState extends State<ExpenseData> {
     });
   }
 
-  addToPersonalExpense(String objId) async {
+  addToPersonalExpense(String objId, String split) async {
     buildShowDialog(context);
     try {
       final response = await http.post(
@@ -2472,7 +2463,8 @@ class _ExpenseDataState extends State<ExpenseData> {
           body: jsonEncode({
             'roomKey': crypto.encrypt(widget.RoomKey),
             'email': crypto.encrypt(widget.Email),
-            'id': crypto.encrypt(objId)
+            'id': crypto.encrypt(objId),
+            'split': crypto.encrypt(split)
           }));
 
       var data = jsonDecode(response.body);
@@ -2585,14 +2577,10 @@ class _ExpenseDataState extends State<ExpenseData> {
                           itemCount: partialExpense.length,
                           itemBuilder: (BuildContext context, int index) {
                             return Card(
-                              elevation: 1.4,
-                              shadowColor: Theme.of(context).primaryColor,
                               color: Theme.of(context).dialogBackgroundColor,
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withAlpha(80)),
+                                    color: Theme.of(context).cardColor),
                                 borderRadius: BorderRadius.circular(15.0),
                               ),
                               child: Padding(
@@ -2663,7 +2651,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                   child: OutlinedButton(
                     onPressed: () async {
                       buildShowDialog(context);
-                      await addToPersonalExpense(id);
+                      await addToPersonalExpense(
+                          id, partialExpense.isEmpty ? "0" : "1");
                       Navigator.pop(context);
                       Navigator.pop(context);
                     },
