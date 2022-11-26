@@ -1255,258 +1255,254 @@ class _RoomExpenseState extends State<RoomExpense> {
                               ),
                       ),
               )
-            : Scrollbar(
-                radius: Radius.circular(10.0),
-                thickness: 5.5,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "From",
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width - 65,
-                            height: 65,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: list.length - 1,
-                              itemBuilder: (BuildContext context, int index) {
-                                return InkWell(
-                                  child: Card(
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: membersListEmail[index] ==
-                                                  membersListEmail[
-                                                      membersListIndexS]
-                                              ? Theme.of(context).primaryColor
-                                              : Theme.of(context).cardColor),
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          CachedNetworkImage(
-                                            imageUrl: crypto
-                                                        .decrypt(list[index + 1]
-                                                            ['pic'])
-                                                        .length ==
-                                                    0
-                                                ? global.driveUrl +
-                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                : crypto.decrypt(
-                                                    list[index + 1]['pic']),
-                                            progressIndicatorBuilder: (context,
-                                                    url, downloadProgress) =>
-                                                CircularProgressIndicator(
-                                                    value: downloadProgress
-                                                        .progress),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    Container(
-                                              width: 50.0,
-                                              height: 50.0,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                    image: AssetImage(
-                                                        'assets/Images/unknown.jpeg'),
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    Container(
-                                              width: 50.0,
-                                              height: 50.0,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover),
-                                              ),
+            : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "From",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width - 65,
+                          height: 65,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: list.length - 1,
+                            itemBuilder: (BuildContext context, int index) {
+                              return InkWell(
+                                child: Card(
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: membersListEmail[index] ==
+                                                membersListEmail[
+                                                    membersListIndexS]
+                                            ? Theme.of(context).primaryColor
+                                            : Theme.of(context).cardColor),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        CachedNetworkImage(
+                                          imageUrl: crypto
+                                                      .decrypt(list[index + 1]
+                                                          ['pic'])
+                                                      .length ==
+                                                  0
+                                              ? global.driveUrl +
+                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                              : crypto.decrypt(
+                                                  list[index + 1]['pic']),
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(
+                                                  value: downloadProgress
+                                                      .progress),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            width: 50.0,
+                                            height: 50.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: AssetImage(
+                                                      'assets/Images/unknown.jpeg'),
+                                                  fit: BoxFit.cover),
                                             ),
                                           ),
-                                          Text(
-                                            crypto.decrypt(
-                                                list[index + 1]['Name']),
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500,
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            width: 50.0,
+                                            height: 50.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: imageProvider,
+                                                  fit: BoxFit.cover),
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                        Text(
+                                          crypto
+                                              .decrypt(list[index + 1]['Name']),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  onTap: () {
-                                    if (this.mounted) {
-                                      setState(() {
-                                        membersListIndexS = index;
-                                      });
-                                    }
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "To",
-                            style: TextStyle(fontSize: 18),
-                          ),
-                          SizedBox(
-                            width: 5,
-                          ),
-                          SizedBox(
-                              width: MediaQuery.of(context).size.width - 45,
-                              height: 65,
-                              child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: list.length - 1,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return InkWell(
-                                      child: Card(
-                                        elevation: 1.4,
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: membersListEmail[index] ==
-                                                      membersListEmail[
-                                                          membersListIndexR]
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Theme.of(context)
-                                                      .cardColor),
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              CachedNetworkImage(
-                                                imageUrl: crypto
-                                                            .decrypt(
-                                                                list[index + 1]
-                                                                    ['pic'])
-                                                            .length ==
-                                                        0
-                                                    ? global.driveUrl +
-                                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                    : crypto.decrypt(
-                                                        list[index + 1]['pic']),
-                                                progressIndicatorBuilder:
-                                                    (context, url,
-                                                            downloadProgress) =>
-                                                        CircularProgressIndicator(
-                                                            value:
-                                                                downloadProgress
-                                                                    .progress),
-                                                errorWidget:
-                                                    (context, url, error) =>
-                                                        Container(
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                        image: AssetImage(
-                                                            'assets/Images/unknown.jpeg'),
-                                                        fit: BoxFit.cover),
-                                                  ),
-                                                ),
-                                                imageBuilder:
-                                                    (context, imageProvider) =>
-                                                        Container(
-                                                  width: 50.0,
-                                                  height: 50.0,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                        image: imageProvider,
-                                                        fit: BoxFit.cover),
-                                                  ),
-                                                ),
-                                              ),
-                                              Text(
-                                                crypto.decrypt(
-                                                    list[index + 1]['Name']),
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      onTap: () {
-                                        if (this.mounted) {
-                                          setState(() {
-                                            membersListIndexR = index;
-                                          });
-                                        }
-                                      },
-                                    );
-                                  })),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      SizedBox(
-                        height: 45,
-                        width: 100,
-                        child: OutlinedButton(
-                          child: Text(
-                            "Search",
-                            style: TextStyle(
-                                fontSize: 16,
-                                color: themeProvider.isDarkTheme
-                                    ? Colors.white
-                                    : Colors.black),
-                          ),
-                          onPressed: () {
-                            retrievePaymentData();
-                          },
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            side: BorderSide(
-                                color: Theme.of(context).primaryColor),
+                                ),
+                                onTap: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      membersListIndexS = index;
+                                    });
+                                  }
+                                },
+                              );
+                            },
                           ),
                         ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "To",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        SizedBox(
+                            width: MediaQuery.of(context).size.width - 45,
+                            height: 65,
+                            child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: list.length - 1,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return InkWell(
+                                    child: Card(
+                                      elevation: 1.4,
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: membersListEmail[index] ==
+                                                    membersListEmail[
+                                                        membersListIndexR]
+                                                ? Theme.of(context).primaryColor
+                                                : Theme.of(context).cardColor),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            CachedNetworkImage(
+                                              imageUrl: crypto
+                                                          .decrypt(
+                                                              list[index + 1]
+                                                                  ['pic'])
+                                                          .length ==
+                                                      0
+                                                  ? global.driveUrl +
+                                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  : crypto.decrypt(
+                                                      list[index + 1]['pic']),
+                                              progressIndicatorBuilder:
+                                                  (context, url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Container(
+                                                width: 50.0,
+                                                height: 50.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: AssetImage(
+                                                          'assets/Images/unknown.jpeg'),
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                width: 50.0,
+                                                height: 50.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              crypto.decrypt(
+                                                  list[index + 1]['Name']),
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      if (this.mounted) {
+                                        setState(() {
+                                          membersListIndexR = index;
+                                        });
+                                      }
+                                    },
+                                  );
+                                })),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    SizedBox(
+                      height: 45,
+                      width: 100,
+                      child: OutlinedButton(
+                        child: Text(
+                          "Search",
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: themeProvider.isDarkTheme
+                                  ? Colors.white
+                                  : Colors.black),
+                        ),
+                        onPressed: () {
+                          retrievePaymentData();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          side:
+                              BorderSide(color: Theme.of(context).primaryColor),
+                        ),
                       ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      showAllTransactionData
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    Scrollbar(
+                      radius: Radius.circular(10.0),
+                      thickness: 5.5,
+                      child: showAllTransactionData
                           ? (paidTransactionData
                               ? (allTransactionData.isEmpty
                                   ? Center(
@@ -1528,92 +1524,123 @@ class _RoomExpenseState extends State<RoomExpense> {
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: ListView.separated(
-                                              separatorBuilder:
-                                                  (context, index) => SizedBox(
-                                                        height: 5,
-                                                      ),
-                                              shrinkWrap: true,
-                                              physics: ScrollPhysics(),
-                                              itemCount:
-                                                  allTransactionData.length,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                return Card(
-                                                  elevation: 1.0,
-                                                  shadowColor: Theme.of(context)
-                                                      .primaryColor,
-                                                  color: Theme.of(context)
-                                                      .scaffoldBackgroundColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: Theme.of(context)
-                                                            .primaryColor
-                                                            .withAlpha(80)),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15.0),
-                                                  ),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
+                                          child: SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height -
+                                                350,
+                                            child: ListView.separated(
+                                                separatorBuilder:
+                                                    (context, index) =>
                                                         SizedBox(
-                                                          width: MediaQuery.of(
+                                                          height: 5,
+                                                        ),
+                                                shrinkWrap: true,
+                                                physics: ScrollPhysics(),
+                                                itemCount:
+                                                    allTransactionData.length,
+                                                itemBuilder:
+                                                    (BuildContext context,
+                                                        int index) {
+                                                  return Card(
+                                                    elevation: 1.0,
+                                                    shadowColor:
+                                                        Theme.of(context)
+                                                            .primaryColor,
+                                                    color: Theme.of(context)
+                                                        .scaffoldBackgroundColor,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      side: BorderSide(
+                                                          color: Theme.of(
                                                                   context)
-                                                              .size
-                                                              .width,
-                                                          child: Text(
-                                                            crypto.decrypt(
-                                                                    allTransactionData[
-                                                                            index]
-                                                                        [
-                                                                        "sender"]) +
-                                                                " -> " +
-                                                                crypto.decrypt(
-                                                                    allTransactionData[
-                                                                            index]
-                                                                        [
-                                                                        "receiver"]),
-                                                            style:
-                                                                const TextStyle(
-                                                              overflow:
-                                                                  TextOverflow
-                                                                      .clip,
-                                                              fontSize: 21,
+                                                              .primaryColor
+                                                              .withAlpha(80)),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15.0),
+                                                    ),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          SizedBox(
+                                                            width:
+                                                                MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width,
+                                                            child: Text(
+                                                              crypto.decrypt(allTransactionData[
+                                                                          index]
+                                                                      [
+                                                                      "sender"]) +
+                                                                  " -> " +
+                                                                  crypto.decrypt(
+                                                                      allTransactionData[
+                                                                              index]
+                                                                          [
+                                                                          "receiver"]),
+                                                              style:
+                                                                  const TextStyle(
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .clip,
+                                                                fontSize: 21,
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .spaceBetween,
-                                                            children: [
-                                                              Expanded(
-                                                                child: SizedBox(
-                                                                  width: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      0.90,
+                                                          SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                          Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Expanded(
                                                                   child:
-                                                                      Opacity(
-                                                                    opacity:
-                                                                        0.8,
+                                                                      SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.90,
+                                                                    child:
+                                                                        Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        crypto.decrypt(allTransactionData[index]
+                                                                            [
+                                                                            "Date"]),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              16,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  flex: 0,
+                                                                  child:
+                                                                      SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.20,
                                                                     child: Text(
-                                                                      crypto.decrypt(
-                                                                          allTransactionData[index]
+                                                                      "₹ " +
+                                                                          crypto.decrypt(allTransactionData[index]
                                                                               [
-                                                                              "Date"]),
+                                                                              "Amount"]),
                                                                       style:
                                                                           const TextStyle(
                                                                         fontSize:
@@ -1622,34 +1649,13 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                     ),
                                                                   ),
                                                                 ),
-                                                              ),
-                                                              Expanded(
-                                                                flex: 0,
-                                                                child: SizedBox(
-                                                                  width: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      0.20,
-                                                                  child: Text(
-                                                                    "₹ " +
-                                                                        crypto.decrypt(allTransactionData[index]
-                                                                            [
-                                                                            "Amount"]),
-                                                                    style:
-                                                                        const TextStyle(
-                                                                      fontSize:
-                                                                          16,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ]),
-                                                      ],
+                                                              ]),
+                                                        ],
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                              }),
+                                                  );
+                                                }),
+                                          ),
                                         ),
                                       ],
                                     ))
@@ -1752,10 +1758,11 @@ class _RoomExpenseState extends State<RoomExpense> {
                                             }),
                                       ),
                                     ])
-                              : SizedBox())
-                    ],
-                  ),
-                )),
+                              : SizedBox()),
+                    )
+                  ],
+                ),
+              ),
         floatingActionButton: widget.isRoomActive
             ? FloatingActionButton(
                 onPressed: () {
@@ -2475,6 +2482,16 @@ class _ExpenseDataState extends State<ExpenseData> {
     Navigator.pop(context);
   }
 
+  bool userInPartialExpense(List<dynamic> partialExpense, String email) {
+    for (int i = 0; i < partialExpense.length; i++) {
+      if (crypto.decrypt(partialExpense[i]['Email']) == email) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   Widget _buildPopupDialog(
       BuildContext context,
       String name,
@@ -2645,36 +2662,43 @@ class _ExpenseDataState extends State<ExpenseData> {
                 SizedBox(
                   height: 25,
                 ),
-                SizedBox(
-                  height: 45,
-                  width: MediaQuery.of(context).size.width * 0.95 - 25,
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      buildShowDialog(context);
-                      await addToPersonalExpense(
-                          id, partialExpense.isEmpty ? "0" : "1");
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      side: BorderSide(color: Theme.of(context).primaryColor),
-                    ),
-                    child: Text(
-                      "Add To Personal Expense",
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 12,
-                ),
+                partialExpense.isEmpty ||
+                        userInPartialExpense(partialExpense, widget.Email)
+                    ? SizedBox(
+                        height: 45,
+                        width: MediaQuery.of(context).size.width * 0.95 - 25,
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            buildShowDialog(context);
+                            await addToPersonalExpense(
+                                id, partialExpense.isEmpty ? "0" : "1");
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            side: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                          child: Text(
+                            "Add To Personal Expense",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black),
+                          ),
+                        ),
+                      )
+                    : SizedBox(),
+                partialExpense.isEmpty ||
+                        userInPartialExpense(partialExpense, widget.Email)
+                    ? SizedBox(
+                        height: 12,
+                      )
+                    : SizedBox(),
                 SizedBox(
                   height: 45,
                   width: MediaQuery.of(context).size.width * 0.95 - 25,
