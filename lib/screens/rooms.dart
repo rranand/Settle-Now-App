@@ -34,7 +34,8 @@ class RoomExpense extends StatefulWidget {
   _RoomExpenseState createState() => _RoomExpenseState();
 }
 
-class _RoomExpenseState extends State<RoomExpense> {
+class _RoomExpenseState extends State<RoomExpense>
+    with SingleTickerProviderStateMixin {
   List<dynamic> list = [];
   List<dynamic> TransList = [];
   List<FriendEach> friendData = [];
@@ -90,7 +91,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         paymentTotalALL = crypto.decrypt(data['total']);
         paidTransactionData = true;
       } else {
-        showToast(context, crypto.decrypt(data["Message"]));
+        showToast(context, crypto.decrypt(data["Message"]), flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -132,7 +133,7 @@ class _RoomExpenseState extends State<RoomExpense> {
           setState(() {});
         }
       } else {
-        showToast(context, crypto.decrypt(data["Message"]));
+        showToast(context, crypto.decrypt(data["Message"]), flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -171,7 +172,7 @@ class _RoomExpenseState extends State<RoomExpense> {
           friendData.add(FriendEach.fromJson(tempData[i]));
         }
       } else {
-        showToast(context, crypto.decrypt(data["Message"]));
+        showToast(context, crypto.decrypt(data["Message"]), flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -229,7 +230,7 @@ class _RoomExpenseState extends State<RoomExpense> {
           TransList = jsonDecode(response.body)['data'];
         }
       } else {
-        showToast(context, crypto.decrypt(TransData["Message"]));
+        showToast(context, crypto.decrypt(TransData["Message"]), flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -271,7 +272,7 @@ class _RoomExpenseState extends State<RoomExpense> {
         _refreshIndicatorKey.currentState?.show();
 
         if (response.statusCode == 422) {
-          showToast(context, crypto.decrypt(Tdata["Message"]));
+          showToast(context, crypto.decrypt(Tdata["Message"]), flag: false);
         }
       } on Exception catch (_) {
         Navigator.pop(context);
@@ -323,7 +324,7 @@ class _RoomExpenseState extends State<RoomExpense> {
   retrievePaymentData() async {
     try {
       if (membersListIndexS == membersListIndexR) {
-        showToast(context, "Same User");
+        showToast(context, "Same User", flag: false);
       } else {
         paymentData.clear();
         if (this.mounted) {
@@ -354,7 +355,8 @@ class _RoomExpenseState extends State<RoomExpense> {
           }
         } else {
           showToast(
-              context, crypto.decrypt(jsonDecode(response.body)["Message"]));
+              context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+              flag: false);
         }
       }
     } on Exception catch (_) {
@@ -478,6 +480,7 @@ class _RoomExpenseState extends State<RoomExpense> {
     super.initState();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    _initialisation();
   }
 
   Widget addFriendWidget(BuildContext context) {
@@ -840,7 +843,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                           height: 8,
                         ),
                         Text(
-                          "Total: ₹ " + crypto.decrypt(list[index]['Expense']),
+                          "Total: ₹ " +
+                              commaSeperator(
+                                  crypto.decrypt(list[index]['Expense'])),
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w500,
@@ -856,9 +861,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                                 0
                             ? Text(
                                 "Gain: ₹ " +
-                                    double.parse(crypto
+                                    commaSeperator(double.parse(crypto
                                             .decrypt(list[index]["current"]))
-                                        .toStringAsFixed(2),
+                                        .toStringAsFixed(2)),
                                 style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w500,
@@ -871,9 +876,10 @@ class _RoomExpenseState extends State<RoomExpense> {
                                     0
                                 ? Text(
                                     "Loss: ₹ " +
-                                        double.parse(crypto.decrypt(
-                                                list[index]["current"]))
-                                            .toStringAsFixed(2),
+                                        commaSeperator(double.parse(
+                                                crypto.decrypt(
+                                                    list[index]["current"]))
+                                            .toStringAsFixed(2)),
                                     style: TextStyle(
                                       fontSize: 17,
                                       fontWeight: FontWeight.w500,
@@ -907,11 +913,12 @@ class _RoomExpenseState extends State<RoomExpense> {
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: Card(
-        elevation: 1.4,
-        shadowColor: Theme.of(context).primaryColor,
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color: Theme.of(context).dialogBackgroundColor,
         shape: RoundedRectangleBorder(
-          side: BorderSide(color: Theme.of(context).primaryColor),
+          side: BorderSide(
+              color: (membersListIndex + 1) == index
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).cardColor),
           borderRadius: BorderRadius.circular(15.0),
         ),
         child: Padding(
@@ -1038,7 +1045,7 @@ class _RoomExpenseState extends State<RoomExpense> {
                     onPressed: () async {
                       if (loadFriendData) {
                         if (friendData.isEmpty) {
-                          showToast(context, "No Friend Found");
+                          showToast(context, "No Friend Found", flag: false);
                         } else {
                           showDialog(
                             context: context,
@@ -1058,7 +1065,8 @@ class _RoomExpenseState extends State<RoomExpense> {
             IconButton(
                 onPressed: () {
                   if (membersListName.length <= 1) {
-                    showToast(context, "More Than One Member Required");
+                    showToast(context, "More Than One Member Required",
+                        flag: false);
                   } else {
                     setState(() {
                       defaultPage = !defaultPage;
@@ -1072,189 +1080,188 @@ class _RoomExpenseState extends State<RoomExpense> {
           ],
         ),
         body: defaultPage
-            ? RefreshIndicator(
-                key: _refreshIndicatorKey,
-                onRefresh: _initialisation,
-                child: list.isEmpty
-                    ? ListView(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height,
-                            width: MediaQuery.of(context).size.width,
-                            child: Center(
-                              child: Text("Loading..."),
-                            ),
-                          )
-                        ],
+            ? list.isEmpty
+                ? ListView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: Text("Loading..."),
+                        ),
                       )
-                    : NestedScrollView(
-                        controller: _scrollController,
-                        headerSliverBuilder: (context, value) {
-                          return [
-                            SliverToBoxAdapter(
-                              child: Slidable(
-                                endActionPane: ActionPane(
-                                    motion: const BehindMotion(),
-                                    children: [
-                                      SlidableAction(
-                                        onPressed: (context) async {
-                                          await Share.share("Join " +
-                                              widget.roomName +
-                                              "\nRoom Key: " +
-                                              widget.roomKey +
-                                              "\n" +
-                                              widget.roomLink);
-                                        },
-                                        backgroundColor: Colors.blue,
-                                        label: 'Share',
-                                        icon: Icons.share,
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(15)),
-                                      )
-                                    ]),
-                                child: ListTile(
-                                  title: Text("Room Key"),
-                                  trailing: Text(widget.roomKey),
-                                ),
-                              ),
+                    ],
+                  )
+                : NestedScrollView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    controller: _scrollController,
+                    headerSliverBuilder: (context, value) {
+                      return [
+                        SliverToBoxAdapter(
+                          child: Slidable(
+                            endActionPane: ActionPane(
+                                motion: const BehindMotion(),
+                                children: [
+                                  SlidableAction(
+                                    onPressed: (context) async {
+                                      await Share.share("Join " +
+                                          widget.roomName +
+                                          "\nRoom Key: " +
+                                          widget.roomKey +
+                                          "\n" +
+                                          widget.roomLink);
+                                    },
+                                    backgroundColor: Colors.blue,
+                                    label: 'Share',
+                                    icon: Icons.share,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(15)),
+                                  )
+                                ]),
+                            child: ListTile(
+                              title: Text("Room Key"),
+                              trailing: Text(widget.roomKey),
                             ),
-                            SliverToBoxAdapter(
-                              child: ListTile(
-                                title: const Text("Total Expense"),
-                                trailing: Text(
-                                    crypto.decrypt(list[0]["TotalExpense"])),
-                              ),
-                            ),
-                            SliverToBoxAdapter(
-                              child: ListTile(
-                                title: const Text("Average Expense"),
-                                trailing: Text(
-                                    crypto.decrypt(list[0]["AverageExpense"])),
-                              ),
-                            ),
-                            SliverToBoxAdapter(
-                              child: ListTile(
-                                title: const Text("Members"),
-                                trailing: Text(crypto.decrypt(list[0]["cnt"])),
-                              ),
-                            ),
-                            SliverToBoxAdapter(
-                              child: ListTile(
-                                title: const Text("Created On"),
-                                trailing: Text(crypto.decrypt(list[0]["date"])),
-                              ),
-                            ),
-                            SliverToBoxAdapter(
-                              child: !isClear
-                                  ? Padding(
-                                      padding: EdgeInsets.all(15.0),
-                                      child: SizedBox(
-                                        height: 45,
-                                        child: OutlinedButton(
-                                          child: Text(
-                                            "Close Room",
-                                            style: TextStyle(
-                                                fontSize: 16,
-                                                color: themeProvider.isDarkTheme
-                                                    ? Colors.white
-                                                    : Colors.black),
-                                          ),
-                                          style: OutlinedButton.styleFrom(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(13.0),
-                                            ),
-                                            side: BorderSide(
-                                                color: Theme.of(context)
-                                                    .primaryColor),
-                                          ),
-                                          onPressed: () {
-                                            showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) =>
-                                                  closeRoomWidget(context),
-                                            );
-                                          },
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: ListTile(
+                            title: const Text("Total Expense"),
+                            trailing: Text("₹ " +
+                                commaSeperator(
+                                    crypto.decrypt(list[0]["TotalExpense"]))),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: ListTile(
+                            title: const Text("Average Expense"),
+                            trailing: Text("₹ " +
+                                commaSeperator(
+                                    crypto.decrypt(list[0]["AverageExpense"]))),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: ListTile(
+                            title: const Text("Members"),
+                            trailing: Text(crypto.decrypt(list[0]["cnt"])),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: ListTile(
+                            title: const Text("Created On"),
+                            trailing: Text(crypto.decrypt(list[0]["date"])),
+                          ),
+                        ),
+                        SliverToBoxAdapter(
+                          child: !isClear
+                              ? Padding(
+                                  padding: EdgeInsets.all(15.0),
+                                  child: SizedBox(
+                                    height: 45,
+                                    child: OutlinedButton(
+                                      child: Text(
+                                        "Close Room",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(13.0),
                                         ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              closeRoomWidget(context),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                )
+                              : SizedBox(),
+                        ),
+                        SliverToBoxAdapter(child: const Divider()),
+                        SliverToBoxAdapter(
+                          child: Padding(
+                            padding: EdgeInsets.all(15.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Member",
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 140,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    itemCount: list.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      if (index == 0) {
+                                        return memberAll(context);
+                                      } else {
+                                        return memberCard(context, index);
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                Text(
+                                  expenseTitle,
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      ];
+                    },
+                    body: RefreshIndicator(
+                      key: _refreshIndicatorKey,
+                      onRefresh: _initialisation,
+                      child: TransList.isEmpty
+                          ? Center(
+                              child: loaded
+                                  ? Text(
+                                      "No Expense Found",
+                                      style: TextStyle(
+                                        fontSize: 18,
                                       ),
                                     )
-                                  : SizedBox(),
+                                  : CircularProgressIndicator())
+                          : ExpenseData(
+                              TransList: TransList,
+                              RoomKey: widget.roomKey,
+                              Email: widget.email,
+                              Token: widget.token,
+                              refreshIndicatorKey: _refreshIndicatorKey,
+                              locked: locked,
                             ),
-                            SliverToBoxAdapter(child: const Divider()),
-                            SliverToBoxAdapter(
-                              child: Padding(
-                                padding: EdgeInsets.all(15.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Member",
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    SizedBox(
-                                      width: MediaQuery.of(context).size.width,
-                                      height: 140,
-                                      child: ListView.builder(
-                                        scrollDirection: Axis.horizontal,
-                                        shrinkWrap: true,
-                                        itemCount: list.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          if (index == 0) {
-                                            return memberAll(context);
-                                          } else {
-                                            return memberCard(context, index);
-                                          }
-                                        },
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 15,
-                                    ),
-                                    Text(
-                                      expenseTitle,
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            )
-                          ];
-                        },
-                        body: TransList.isEmpty
-                            ? (Center(
-                                child: loaded
-                                    ? Text(
-                                        "No Expense Found",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                        ),
-                                      )
-                                    : CircularProgressIndicator()))
-                            : SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                height: heightExpense,
-                                child: ExpenseData(
-                                  TransList: TransList,
-                                  RoomKey: widget.roomKey,
-                                  Email: widget.email,
-                                  Token: widget.token,
-                                  refreshIndicatorKey: _refreshIndicatorKey,
-                                  locked: locked,
-                                ),
-                              ),
-                      ),
-              )
+                    ),
+                  )
             : Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -1519,8 +1526,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                                       children: [
                                         Text(
                                           "Total Amount Paid: ₹ " +
-                                              double.parse(paymentTotalALL)
-                                                  .toStringAsFixed(2),
+                                              commaSeperator(
+                                                  double.parse(paymentTotalALL)
+                                                      .toStringAsFixed(2)),
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
@@ -1638,9 +1646,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                         0.20,
                                                                     child: Text(
                                                                       "₹ " +
-                                                                          crypto.decrypt(allTransactionData[index]
+                                                                          commaSeperator(crypto.decrypt(allTransactionData[index]
                                                                               [
-                                                                              "Amount"]),
+                                                                              "Amount"])),
                                                                       style:
                                                                           const TextStyle(
                                                                         fontSize:
@@ -1679,8 +1687,9 @@ class _RoomExpenseState extends State<RoomExpense> {
                                   : Column(children: [
                                       Text(
                                         "Total Amount Paid: ₹ " +
-                                            double.parse(paymentTotal)
-                                                .toStringAsFixed(2),
+                                            commaSeperator(
+                                                double.parse(paymentTotal)
+                                                    .toStringAsFixed(2)),
                                       ),
                                       Padding(
                                         padding: const EdgeInsets.all(12.0),
@@ -1742,11 +1751,11 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                             ),
                                                             Text(
                                                               "₹ " +
-                                                                  crypto.decrypt(
-                                                                      paymentData[
-                                                                              index]
-                                                                          [
-                                                                          "Amount"]),
+                                                                  commaSeperator(
+                                                                      crypto.decrypt(
+                                                                          paymentData[index]
+                                                                              [
+                                                                              "Amount"])),
                                                               style:
                                                                   const TextStyle(
                                                                 fontSize: 18,
@@ -1814,7 +1823,8 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                             .length <=
                                                         1) {
                                                       showToast(context,
-                                                          "More Than One Member Required");
+                                                          "More Than One Member Required",
+                                                          flag: false);
                                                     } else {
                                                       showDialog(
                                                           context: context,
@@ -1865,18 +1875,22 @@ class _RoomExpenseState extends State<RoomExpense> {
                                                                                       scrollDirection: Axis.horizontal,
                                                                                       itemCount: list.length - 1,
                                                                                       itemBuilder: (BuildContext context, int index) {
-                                                                                        return InkWell(
-                                                                                          child: memberExpenseCard(context, index + 1),
-                                                                                          onTap: () {
-                                                                                            if (this.mounted) {
-                                                                                              setState(
-                                                                                                () {
-                                                                                                  membersListIndex = index;
-                                                                                                },
-                                                                                              );
-                                                                                            }
-                                                                                          },
-                                                                                        );
+                                                                                        if (membersListEmail[index] == widget.email) {
+                                                                                          return SizedBox();
+                                                                                        } else {
+                                                                                          return InkWell(
+                                                                                            child: memberExpenseCard(context, index + 1),
+                                                                                            onTap: () {
+                                                                                              if (this.mounted) {
+                                                                                                setState(
+                                                                                                  () {
+                                                                                                    membersListIndex = index;
+                                                                                                  },
+                                                                                                );
+                                                                                              }
+                                                                                            },
+                                                                                          );
+                                                                                        }
                                                                                       },
                                                                                     ),
                                                                                   ),

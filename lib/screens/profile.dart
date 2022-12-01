@@ -128,30 +128,33 @@ class _ProfileState extends State<Profile> {
         Year = yearwiseSpend.keys.toList();
         List<Entry> yearWiseExpenseEntry = [];
         yearwiseSpend.forEach((key, value) {
-          yearWiseExpenseEntry
-              .add(Entry(key + ": ₹ " + value.toStringAsFixed(2)));
+          yearWiseExpenseEntry.add(
+              Entry(key + ": ₹ " + commaSeperator(value.toStringAsFixed(2))));
         });
 
         ExpenseData = Entry(
             'Total Expense: ₹ ' +
-                (widget.closeRoomSpend +
+                commaSeperator((widget.closeRoomSpend +
                         widget.openRoomSpend +
                         totalPersonalExpense)
-                    .toStringAsFixed(2),
+                    .toStringAsFixed(2)),
             <Entry>[
               Entry(
                   'Room: ₹ ' +
-                      (widget.closeRoomSpend + widget.openRoomSpend)
-                          .toStringAsFixed(2),
+                      commaSeperator(
+                          (widget.closeRoomSpend + widget.openRoomSpend)
+                              .toStringAsFixed(2)),
                   <Entry>[
                     Entry('Open Room: ₹ ' +
-                        widget.openRoomSpend.toStringAsFixed(2)),
+                        commaSeperator(
+                            widget.openRoomSpend.toStringAsFixed(2))),
                     Entry('Close Room: ₹ ' +
-                        widget.closeRoomSpend.toStringAsFixed(2))
+                        commaSeperator(
+                            widget.closeRoomSpend.toStringAsFixed(2)))
                   ]),
               Entry(
                   'Personal Expense : ₹ ' +
-                      (totalPersonalExpense).toStringAsFixed(2),
+                      commaSeperator((totalPersonalExpense).toStringAsFixed(2)),
                   yearWiseExpenseEntry)
             ]);
         if (this.mounted) {
@@ -159,7 +162,8 @@ class _ProfileState extends State<Profile> {
         }
       } else {
         showToast(
-            context, crypto.decrypt(jsonDecode(response_1.body)["Message"]));
+            context, crypto.decrypt(jsonDecode(response_1.body)["Message"]),
+            flag: false);
       }
 
       updatePieChart("all");
@@ -198,8 +202,8 @@ class _ProfileState extends State<Profile> {
                   .toStringAsFixed(2));
         }
       } else {
-        showToast(
-            context, crypto.decrypt(jsonDecode(response.body)["Message"]));
+        showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+            flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -584,9 +588,11 @@ class _ProfileState extends State<Profile> {
                                                 ),
                                                 textWidget(
                                                     "₹ " +
-                                                        filterResult[index]
-                                                            .Total
-                                                            .toStringAsFixed(2),
+                                                        commaSeperator(
+                                                            filterResult[index]
+                                                                .Total
+                                                                .toStringAsFixed(
+                                                                    2)),
                                                     linearGradient_2)
                                               ],
                                             ),
@@ -659,9 +665,11 @@ class _ProfileState extends State<Profile> {
                                             ),
                                             textWidget(
                                                 "₹ " +
-                                                    personalExpense[index]
-                                                        .Total
-                                                        .toStringAsFixed(2),
+                                                    commaSeperator(
+                                                        personalExpense[index]
+                                                            .Total
+                                                            .toStringAsFixed(
+                                                                2)),
                                                 linearGradient_2)
                                           ],
                                         ),

@@ -4,7 +4,9 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -91,14 +93,38 @@ buildShowDialog(BuildContext context) {
       });
 }
 
-showToast(BuildContext context, String show) {
-  final scaffold = ScaffoldMessenger.of(context);
-  scaffold.showSnackBar(
-    SnackBar(
-      content: Text(show),
-      action: SnackBarAction(
-          label: 'Close', onPressed: scaffold.hideCurrentSnackBar),
+showToast(BuildContext context, String show, {bool flag = true}) {
+  FToast fToast = FToast();
+  fToast.init(context);
+
+  Widget toast = Container(
+    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(25.0),
+      color: Colors.grey.shade700,
     ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          flag ? Icons.check : Icons.close,
+          color: Colors.white,
+        ),
+        SizedBox(
+          width: 12.0,
+        ),
+        Text(
+          show,
+          style: TextStyle(color: Colors.white),
+        ),
+      ],
+    ),
+  );
+
+  fToast.showToast(
+    child: toast,
+    gravity: ToastGravity.BOTTOM,
+    toastDuration: Duration(seconds: 2),
   );
 }
 
@@ -140,8 +166,13 @@ onException(BuildContext context) async {
   bool result = await InternetConnectionChecker().hasConnection;
 
   if (result) {
-    showToast(context, "Server Error Try Again");
+    showToast(context, "Server Error Try Again", flag: false);
   } else {
-    showToast(context, "No Internet Connection");
+    showToast(context, "No Internet Connection", flag: false);
   }
+}
+
+commaSeperator(String amount) {
+  final numberFormatter = new NumberFormat('##,##,###.##');
+  return numberFormatter.format(double.parse(amount));
 }

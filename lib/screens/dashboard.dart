@@ -59,11 +59,12 @@ class _DashBoardState extends State<DashBoard> {
   final List<RoomEach> SearchRoomData = [];
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _requestIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
   final _CformKey = GlobalKey<FormState>();
   final _JformKey = GlobalKey<FormState>();
   bool searchTrigger = false;
   bool searching = false;
-  bool loadingRequest = false;
   bool dateIndex = true;
   List<String> Year = [];
   List<String> Month = [
@@ -213,7 +214,7 @@ class _DashBoardState extends State<DashBoard> {
     if (image != null) {
       double sz = (await image.length()) / (1024 * 1024);
       if (sz > 10) {
-        showToast(context, "Image Size is too large");
+        showToast(context, "Image Size is too large", flag: false);
         return;
       }
 
@@ -244,10 +245,10 @@ class _DashBoardState extends State<DashBoard> {
           await _getImageID();
           showToast(context, "Image Uploaded Successfully");
         } else {
-          showToast(context, "Failed to Upload Image");
+          showToast(context, "Failed to Upload Image", flag: false);
         }
       } on Exception catch (_) {
-        showToast(context, "Failed to Upload Image");
+        showToast(context, "Failed to Upload Image", flag: false);
       }
 
       if (this.mounted) {
@@ -363,7 +364,7 @@ class _DashBoardState extends State<DashBoard> {
         if (this.mounted) {
           setState(() {});
         }
-        await getRoomRequest();
+
         await _getImageID();
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
@@ -398,11 +399,10 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  getRoomRequest() async {
+  Future<void> getRoomRequest() async {
     try {
       if (this.mounted) {
         setState(() {
-          loadingRequest = false;
           RoomRequest.clear();
         });
       }
@@ -414,13 +414,12 @@ class _DashBoardState extends State<DashBoard> {
           body: jsonEncode({
             'email': crypto.encrypt(_email.text),
           }));
-      loadingRequest = true;
       var data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
         RoomRequest = data["data"];
       } else {
-        showToast(context, crypto.decrypt(data["Message"]));
+        showToast(context, crypto.decrypt(data["Message"]), flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -468,7 +467,7 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode == 200) {
         _refreshIndicatorKey.currentState?.show();
       } else {
-        showToast(context, crypto.decrypt(JsonData["Message"]));
+        showToast(context, crypto.decrypt(JsonData["Message"]), flag: false);
       }
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -485,6 +484,8 @@ class _DashBoardState extends State<DashBoard> {
     super.initState();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _requestIndicatorKey.currentState?.show());
     LocalNotificationService.initialize();
 
     FirebaseMessaging.instance.getInitialMessage().then(
@@ -1268,7 +1269,10 @@ class _DashBoardState extends State<DashBoard> {
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]));
-      await getRoomRequest();
+      await _requestIndicatorKey.currentState?.show();
+      if (flag == "1") {
+        await _extractEmail();
+      }
       Navigator.pop(context);
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -1304,151 +1308,149 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Widget RequestWidget(BuildContext context) {
-    return Scrollbar(
-      radius: Radius.circular(10.0),
-      thickness: 5.5,
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: RoomRequest.isEmpty
-            ? Center(
-                child: Text(
-                  "No Request Found",
-                  style: TextStyle(
-                    fontSize: 22,
-                  ),
-                ),
-              )
-            : ListView.separated(
-                padding: EdgeInsets.all(8.0),
-                itemCount: RoomRequest.length,
-                separatorBuilder: (context, index) => SizedBox(
-                      height: 5,
-                    ),
-                itemBuilder: (BuildContext context, int index) {
-                  return SizedBox(
-                    child: Card(
-                        elevation: 1.0,
-                        clipBehavior: Clip.antiAlias,
-                        shadowColor: Theme.of(context).primaryColor,
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                              color:
-                                  Theme.of(context).primaryColor.withAlpha(95)),
-                          borderRadius: BorderRadius.circular(15.0),
+    return RefreshIndicator(
+      key: _requestIndicatorKey,
+      onRefresh: getRoomRequest,
+      child: RoomRequest.isEmpty
+          ? ListView(
+              physics: AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.85,
+                    width: MediaQuery.of(context).size.width,
+                    child: Center(
+                      child: Text(
+                        "No Request Found",
+                        style: TextStyle(
+                          fontSize: 22,
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: CachedNetworkImage(
-                                imageUrl: crypto
-                                            .decrypt(RoomRequest[index]["pic"])
-                                            .length ==
-                                        0
-                                    ? global.driveUrl +
-                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                    : crypto.decrypt(RoomRequest[index]["pic"]),
-                                progressIndicatorBuilder:
-                                    (context, url, downloadProgress) =>
-                                        CircularProgressIndicator(
-                                            value: downloadProgress.progress),
-                                errorWidget: (context, url, error) => Container(
-                                  width: 65.0,
-                                  height: 65.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/Images/unknown.jpeg'),
-                                        fit: BoxFit.cover),
-                                  ),
+                      ),
+                    ))
+              ],
+            )
+          : ListView.separated(
+              physics: AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(8.0),
+              itemCount: RoomRequest.length,
+              separatorBuilder: (context, index) => SizedBox(
+                    height: 5,
+                  ),
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  child: Card(
+                      elevation: 1.0,
+                      clipBehavior: Clip.antiAlias,
+                      shadowColor: Theme.of(context).primaryColor,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color:
+                                Theme.of(context).primaryColor.withAlpha(95)),
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: CachedNetworkImage(
+                              imageUrl: crypto
+                                          .decrypt(RoomRequest[index]["pic"])
+                                          .length ==
+                                      0
+                                  ? global.driveUrl +
+                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                  : crypto.decrypt(RoomRequest[index]["pic"]),
+                              progressIndicatorBuilder:
+                                  (context, url, downloadProgress) =>
+                                      CircularProgressIndicator(
+                                          value: downloadProgress.progress),
+                              errorWidget: (context, url, error) => Container(
+                                width: 65.0,
+                                height: 65.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/Images/unknown.jpeg'),
+                                      fit: BoxFit.cover),
                                 ),
-                                imageBuilder: (context, imageProvider) =>
-                                    Container(
-                                  width: 65.0,
-                                  height: 65.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover),
-                                  ),
+                              ),
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
+                                width: 65.0,
+                                height: 65.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: imageProvider, fit: BoxFit.cover),
                                 ),
                               ),
                             ),
-                            Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width -
-                                                140,
-                                        child: Text(
-                                          crypto.decrypt(
-                                                  RoomRequest[index]["by"]) +
-                                              " invited to join " +
-                                              crypto.decrypt(
-                                                  RoomRequest[index]["name"]),
-                                          style: TextStyle(
-                                            overflow: TextOverflow.clip,
-                                            fontSize: 20,
-                                          ),
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width -
+                                          140,
+                                      child: Text(
+                                        crypto.decrypt(
+                                                RoomRequest[index]["by"]) +
+                                            " invited to join " +
+                                            crypto.decrypt(
+                                                RoomRequest[index]["name"]),
+                                        style: TextStyle(
+                                          overflow: TextOverflow.clip,
+                                          fontSize: 20,
                                         ),
                                       ),
-                                      SizedBox(
-                                        height: 8,
-                                      ),
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width -
-                                                140,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            IconButton(
-                                                onPressed: () async {
-                                                  await JoinRequest(
-                                                      "0",
-                                                      crypto.decrypt(
-                                                          RoomRequest[index]
-                                                              ["key"]));
-                                                },
-                                                icon: Icon(
-                                                  Icons.cancel_sharp,
+                                    ),
+                                    SizedBox(
+                                      height: 8,
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width -
+                                          140,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          IconButton(
+                                              onPressed: () async {
+                                                await JoinRequest(
+                                                    "0",
+                                                    crypto.decrypt(
+                                                        RoomRequest[index]
+                                                            ["key"]));
+                                              },
+                                              icon: Icon(
+                                                Icons.cancel_sharp,
+                                                size: 30,
+                                                color: Colors.red,
+                                              )),
+                                          IconButton(
+                                              onPressed: () async {
+                                                await JoinRequest(
+                                                    "1",
+                                                    crypto.decrypt(
+                                                        RoomRequest[index]
+                                                            ["key"]));
+                                              },
+                                              icon: Icon(Icons.check,
                                                   size: 30,
-                                                  color: Colors.red,
-                                                )),
-                                            IconButton(
-                                                onPressed: () async {
-                                                  await JoinRequest(
-                                                      "1",
-                                                      crypto.decrypt(
-                                                          RoomRequest[index]
-                                                              ["key"]));
-                                                  await _refreshIndicatorKey
-                                                      .currentState
-                                                      ?.show();
-                                                },
-                                                icon: Icon(Icons.check,
-                                                    size: 30,
-                                                    color: Colors.greenAccent)),
-                                          ],
-                                        ),
-                                      )
-                                    ])),
-                          ],
-                        )),
-                  );
-                }),
-      ),
+                                                  color: Colors.greenAccent)),
+                                        ],
+                                      ),
+                                    )
+                                  ])),
+                        ],
+                      )),
+                );
+              }),
     );
   }
 
@@ -1593,16 +1595,15 @@ class _DashBoardState extends State<DashBoard> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    "Total : ₹ " +
-                                        double.parse(amtSpend)
-                                            .toStringAsFixed(2),
+                                    "Total : ₹ " + commaSeperator(amtSpend),
                                     style: TextStyle(fontSize: 18),
                                   ),
                                   Text(
                                     (yourSpend >= 0
                                             ? "Gain : ₹ "
                                             : "Loss : ₹ ") +
-                                        yourSpend.toStringAsFixed(2),
+                                        commaSeperator(
+                                            yourSpend.toStringAsFixed(2)),
                                     style: TextStyle(fontSize: 18),
                                   ),
                                 ],
@@ -1695,615 +1696,511 @@ class _DashBoardState extends State<DashBoard> {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      appBar: dash == 0
-          ? AppBar(
-              title: searchTrigger
-                  ? TextField(
-                      keyboardType: TextInputType.text,
-                      textInputAction: TextInputAction.search,
-                      maxLines: 1,
-                      decoration: const InputDecoration(
-                        counterText: "",
-                        contentPadding: EdgeInsets.all(8.0),
-                        hintText: "Search ...",
+        appBar: dash == 0
+            ? AppBar(
+                title: searchTrigger
+                    ? TextField(
+                        keyboardType: TextInputType.text,
+                        textInputAction: TextInputAction.search,
+                        maxLines: 1,
+                        decoration: const InputDecoration(
+                          counterText: "",
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: "Search ...",
+                        ),
+                        onChanged: (String s) {
+                          setState(() {
+                            _search.text = s;
+                          });
+                          SearchData();
+                        },
+                      )
+                    : Text(
+                        "Settle Now",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      onChanged: (String s) {
+                actions: [
+                  IconButton(
+                      onPressed: () {
                         setState(() {
-                          _search.text = s;
+                          searchTrigger = !searchTrigger;
+                          DateChanged = false;
                         });
-                        SearchData();
                       },
-                    )
-                  : Text(
-                      "Settle Now",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-              actions: [
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        searchTrigger = !searchTrigger;
-                        DateChanged = false;
-                      });
-                    },
-                    icon: Icon(
-                      Icons.search,
-                      color:
-                          themeProvider.darkTheme ? Colors.white : Colors.black,
-                    ))
-              ],
-            )
-          : AppBar(
-              title: Text(
-                "Settle Now",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                      icon: Icon(
+                        Icons.search,
+                        color: themeProvider.darkTheme
+                            ? Colors.white
+                            : Colors.black,
+                      ))
+                ],
+              )
+            : AppBar(
+                title: Text(
+                  "Settle Now",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-            ),
-      body: dash == 0
-          ? homeWidget(context)
-          : (loadingRequest
-              ? RequestWidget(context)
-              : Center(
-                  child: CircularProgressIndicator(),
-                )),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: dash,
-        onTap: (index) => setState(() {
-          dash = index;
-        }),
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.home,
-              size: 25,
-            ),
-            label: "Home",
-          ),
-          BottomNavigationBarItem(
-            icon: Stack(children: [
-              Icon(
-                Icons.person_add_outlined,
+        body: dash == 0 ? homeWidget(context) : RequestWidget(context),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: dash,
+          onTap: (index) => setState(() {
+            dash = index;
+          }),
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.home,
                 size: 25,
               ),
-              RoomRequest.isNotEmpty
-                  ? Positioned(
-                      right: 0,
-                      child: new Container(
-                        padding: EdgeInsets.all(1),
-                        decoration: new BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        constraints: BoxConstraints(
-                          minWidth: 12,
-                          minHeight: 12,
-                        ),
-                        child: new Text(
-                          RoomRequest.length.toString(),
-                          style: new TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              icon: Stack(children: [
+                Icon(
+                  Icons.person_add_outlined,
+                  size: 25,
+                ),
+                RoomRequest.isNotEmpty
+                    ? Positioned(
+                        right: 0,
+                        child: new Container(
+                          padding: EdgeInsets.all(1),
+                          decoration: new BoxDecoration(
+                            color: Colors.red,
+                            borderRadius: BorderRadius.circular(6),
                           ),
-                          textAlign: TextAlign.center,
+                          constraints: BoxConstraints(
+                            minWidth: 12,
+                            minHeight: 12,
+                          ),
+                          child: new Text(
+                            RoomRequest.length.toString(),
+                            style: new TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                      ),
+                      )
+                    : SizedBox()
+              ]),
+              label: "Request",
+            ),
+          ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              _name.text.length == 0
+                  ? Center(
+                      child: CircularProgressIndicator(),
                     )
-                  : SizedBox()
-            ]),
-            label: "Request",
+                  : UserAccountsDrawerHeader(
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).drawerTheme.backgroundColor),
+                      margin: EdgeInsets.all(0),
+                      currentAccountPicture: Stack(
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: isGoogle
+                                ? _profilePicID
+                                : (global.driveUrl +
+                                    (_profilePicID.length == 0
+                                        ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                        : _profilePicID)),
+                            progressIndicatorBuilder:
+                                (context, url, downloadProgress) =>
+                                    CircularProgressIndicator(
+                                        value: downloadProgress.progress),
+                            errorWidget: (context, url, error) => Container(
+                              width: 120.0,
+                              height: 120.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/Images/unknown.jpeg'),
+                                    fit: BoxFit.cover),
+                              ),
+                            ),
+                            imageBuilder: (context, imageProvider) => Container(
+                              width: 120.0,
+                              height: 120.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                    image: imageProvider, fit: BoxFit.cover),
+                              ),
+                            ),
+                          ),
+                          isGoogle
+                              ? SizedBox()
+                              : Positioned(
+                                  left: 40,
+                                  top: 43,
+                                  child: Container(
+                                    width: 35,
+                                    height: 35,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Center(
+                                      child: IconButton(
+                                        onPressed: () {
+                                          showModalBottomSheet<void>(
+                                            context: context,
+                                            isScrollControlled: true,
+                                            builder: (BuildContext context) {
+                                              return SizedBox(
+                                                height: 120,
+                                                child: Column(
+                                                  children: [
+                                                    ListTile(
+                                                      leading:
+                                                          Icon(Icons.camera),
+                                                      title: Text('Camera'),
+                                                      onTap: () {
+                                                        imageUpload(
+                                                            ImageSource.camera);
+                                                        Navigator.pop(context);
+                                                      },
+                                                    ),
+                                                    ListTile(
+                                                      leading:
+                                                          Icon(Icons.image),
+                                                      title: Text('Gallery'),
+                                                      onTap: () {
+                                                        imageUpload(ImageSource
+                                                            .gallery);
+                                                        Navigator.pop(context);
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        },
+                                        icon: const Icon(
+                                          Icons.camera_alt,
+                                          size: 20,
+                                          color: Colors.blueGrey,
+                                        ),
+                                      ),
+                                    ),
+                                  ))
+                        ],
+                      ),
+                      accountName: Text(_name.text,
+                          style: TextStyle(fontSize: 16, color: Colors.white)),
+                      accountEmail: Text(_email.text,
+                          style: TextStyle(fontSize: 15, color: Colors.white)),
+                    ),
+              ListTile(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => Profile(
+                            email: _email.text,
+                            token: _token,
+                            closeRoomSpend: amtSpendClose,
+                            openRoomSpend: amtSpendOpen,
+                          )),
+                ),
+                leading: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Profile",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                onTap: () {
+                  var now = DateTime.now();
+                  String date =
+                      (now.month - 1).toString() + now.year.toString();
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Expenses(
+                              email: _email.text,
+                              date: date,
+                              token: _token,
+                            )),
+                  );
+                },
+                leading: Icon(
+                  Icons.account_balance_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Personal Expenses",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LendCredit(
+                              email: _email.text,
+                              token: _token,
+                            )),
+                  );
+                },
+                leading: Icon(
+                  Icons.credit_card,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Len-Den",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.border_color,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Theme",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+                trailing: IconButton(
+                    onPressed: () {
+                      final provider =
+                          Provider.of<ThemeProvider>(context, listen: false);
+                      provider.toggleTheme(!themeProvider.darkTheme);
+                      prefs.setBool('darkTheme', themeProvider.darkTheme);
+                    },
+                    icon: Icon(
+                      Icons.brightness_2,
+                      color: themeProvider.darkTheme
+                          ? Colors.black87
+                          : Colors.white,
+                      size: 22,
+                    )),
+              ),
+              ListTile(
+                onTap: () async {
+                  await Share.share(
+                      "Download Settle Now\nhttps://settlenow.in");
+                },
+                leading: Icon(
+                  Icons.share,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Share",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutUs()),
+                ),
+                leading: Icon(
+                  Icons.book_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "About Us",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ContactUs(
+                            email: _email.text,
+                            token: _token,
+                          )),
+                ),
+                leading: Icon(
+                  Icons.rate_review_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Contact Us",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                onTap: rateUs,
+                leading: Icon(
+                  Icons.star_border_outlined,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Rate Us",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                onTap: () async {
+                  await prefs.remove('name');
+                  await prefs.remove('email');
+                  await prefs.remove('token');
+                  await prefs.remove('pushToken');
+                  await deleteToken();
+
+                  if (isGoogle) {
+                    await GoogleSignIN.logout();
+                  }
+
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => LoginPage()),
+                    (Route<dynamic> route) => false,
+                  );
+                },
+                leading: Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Log Out",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+              ),
+              ListTile(
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Version " + widget.version,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12, color: Colors.white),
+                    ),
+                    InkWell(
+                      onTap: () async {
+                        launchUrl(
+                          Uri.parse("https://settlenow.in/privacy-policy"),
+                          mode: LaunchMode.inAppWebView,
+                          webViewConfiguration: const WebViewConfiguration(
+                              enableJavaScript: true),
+                        );
+                      },
+                      child: Text(
+                        "Privacy Policy",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            _name.text.length == 0
-                ? Center(
-                    child: CircularProgressIndicator(),
+        ),
+        floatingActionButton: dash == 0
+            ? (searchTrigger
+                ? FloatingActionButton(
+                    onPressed: () {
+                      buildFilterDialog(context);
+                    },
+                    child: Icon(
+                      Icons.filter_alt_outlined,
+                      color: Colors.white,
+                    ),
                   )
-                : UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).drawerTheme.backgroundColor),
-                    margin: EdgeInsets.all(0),
-                    currentAccountPicture: Stack(
-                      children: [
-                        CachedNetworkImage(
-                          imageUrl: isGoogle
-                              ? _profilePicID
-                              : (global.driveUrl +
-                                  (_profilePicID.length == 0
-                                      ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                      : _profilePicID)),
-                          progressIndicatorBuilder:
-                              (context, url, downloadProgress) =>
-                                  CircularProgressIndicator(
-                                      value: downloadProgress.progress),
-                          errorWidget: (context, url, error) => Container(
-                            width: 120.0,
-                            height: 120.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                  image:
-                                      AssetImage('assets/Images/unknown.jpeg'),
-                                  fit: BoxFit.cover),
-                            ),
-                          ),
-                          imageBuilder: (context, imageProvider) => Container(
-                            width: 120.0,
-                            height: 120.0,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                  image: imageProvider, fit: BoxFit.cover),
-                            ),
-                          ),
-                        ),
-                        isGoogle
-                            ? SizedBox()
-                            : Positioned(
-                                left: 40,
-                                top: 43,
-                                child: Container(
-                                  width: 35,
-                                  height: 35,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Center(
-                                    child: IconButton(
-                                      onPressed: () {
+                : FloatingActionButton(
+                    onPressed: () {
+                      showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (BuildContext context) {
+                          return Padding(
+                            padding: MediaQuery.of(context).viewInsets,
+                            child: SizedBox(
+                              height: 120,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    ListTile(
+                                      leading: Icon(
+                                        Icons.add,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      title: const Text("Create Room"),
+                                      onTap: () {
                                         showModalBottomSheet<void>(
                                           context: context,
                                           isScrollControlled: true,
                                           builder: (BuildContext context) {
-                                            return SizedBox(
-                                              height: 120,
+                                            return Padding(
+                                              padding: MediaQuery.of(context)
+                                                  .viewInsets,
                                               child: Column(
-                                                children: [
-                                                  ListTile(
-                                                    leading: Icon(Icons.camera),
-                                                    title: Text('Camera'),
-                                                    onTap: () {
-                                                      imageUpload(
-                                                          ImageSource.camera);
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ),
-                                                  ListTile(
-                                                    leading: Icon(Icons.image),
-                                                    title: Text('Gallery'),
-                                                    onTap: () {
-                                                      imageUpload(
-                                                          ImageSource.gallery);
-                                                      Navigator.pop(context);
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            );
-                                          },
-                                        );
-                                      },
-                                      icon: const Icon(
-                                        Icons.camera_alt,
-                                        size: 20,
-                                        color: Colors.blueGrey,
-                                      ),
-                                    ),
-                                  ),
-                                ))
-                      ],
-                    ),
-                    accountName: Text(_name.text,
-                        style: TextStyle(fontSize: 16, color: Colors.white)),
-                    accountEmail: Text(_email.text,
-                        style: TextStyle(fontSize: 15, color: Colors.white)),
-                  ),
-            ListTile(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => Profile(
-                          email: _email.text,
-                          token: _token,
-                          closeRoomSpend: amtSpendClose,
-                          openRoomSpend: amtSpendOpen,
-                        )),
-              ),
-              leading: Icon(
-                Icons.person,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Profile",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              onTap: () {
-                var now = DateTime.now();
-                String date = (now.month - 1).toString() + now.year.toString();
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Expenses(
-                            email: _email.text,
-                            date: date,
-                            token: _token,
-                          )),
-                );
-              },
-              leading: Icon(
-                Icons.account_balance_outlined,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Personal Expenses",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => LendCredit(
-                            email: _email.text,
-                            token: _token,
-                          )),
-                );
-              },
-              leading: Icon(
-                Icons.credit_card,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Len-Den",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.border_color,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Theme",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-              trailing: IconButton(
-                  onPressed: () {
-                    final provider =
-                        Provider.of<ThemeProvider>(context, listen: false);
-                    provider.toggleTheme(!themeProvider.darkTheme);
-                    prefs.setBool('darkTheme', themeProvider.darkTheme);
-                  },
-                  icon: Icon(
-                    Icons.brightness_2,
-                    color:
-                        themeProvider.darkTheme ? Colors.black87 : Colors.white,
-                    size: 22,
-                  )),
-            ),
-            ListTile(
-              onTap: () async {
-                await Share.share("Download Settle Now\nhttps://settlenow.in");
-              },
-              leading: Icon(
-                Icons.share,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Share",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AboutUs()),
-              ),
-              leading: Icon(
-                Icons.book_outlined,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "About Us",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => ContactUs(
-                          email: _email.text,
-                          token: _token,
-                        )),
-              ),
-              leading: Icon(
-                Icons.rate_review_outlined,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Contact Us",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              onTap: rateUs,
-              leading: Icon(
-                Icons.star_border_outlined,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Rate Us",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              onTap: () async {
-                await prefs.remove('name');
-                await prefs.remove('email');
-                await prefs.remove('token');
-                await prefs.remove('pushToken');
-                await deleteToken();
-
-                if (isGoogle) {
-                  await GoogleSignIN.logout();
-                }
-
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginPage()),
-                  (Route<dynamic> route) => false,
-                );
-              },
-              leading: Icon(
-                Icons.logout,
-                color: Colors.white,
-                size: 22,
-              ),
-              title: Text(
-                "Log Out",
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-            ),
-            ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Version " + widget.version,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 12, color: Colors.white),
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      launchUrl(
-                        Uri.parse("https://settlenow.in/privacy-policy"),
-                        mode: LaunchMode.inAppWebView,
-                        webViewConfiguration:
-                            const WebViewConfiguration(enableJavaScript: true),
-                      );
-                    },
-                    child: Text(
-                      "Privacy Policy",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 12, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: dash == 0
-          ? (searchTrigger
-              ? FloatingActionButton(
-                  onPressed: () {
-                    buildFilterDialog(context);
-                  },
-                  child: Icon(
-                    Icons.filter_alt_outlined,
-                    color: Colors.white,
-                  ),
-                )
-              : FloatingActionButton(
-                  onPressed: () {
-                    showModalBottomSheet<void>(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (BuildContext context) {
-                        return Padding(
-                          padding: MediaQuery.of(context).viewInsets,
-                          child: SizedBox(
-                            height: 120,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.add,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    title: const Text("Create Room"),
-                                    onTap: () {
-                                      showModalBottomSheet<void>(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        builder: (BuildContext context) {
-                                          return Padding(
-                                            padding: MediaQuery.of(context)
-                                                .viewInsets,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                Form(
-                                                  key: _CformKey,
-                                                  child: TextFormField(
-                                                    controller: _NRoom,
-                                                    keyboardType:
-                                                        TextInputType.text,
-                                                    maxLength: 70,
-                                                    maxLines: 1,
-                                                    style: const TextStyle(
-                                                        fontSize: 18),
-                                                    cursorColor: Colors.black,
-                                                    autocorrect: false,
-                                                    validator: (value) {
-                                                      RegExp validateText =
-                                                          RegExp(
-                                                              r'\b[\w]{4,}\b');
-                                                      if (!validateText
-                                                          .hasMatch(
-                                                              _NRoom.text)) {
-                                                        return "Enter Valid Room Name";
-                                                      }
-                                                      return null;
-                                                    },
-                                                    decoration:
-                                                        const InputDecoration(
-                                                      counterText: "",
-                                                      contentPadding:
-                                                          EdgeInsets.all(8.0),
-                                                      hintText:
-                                                          "Enter Room Name",
-                                                      errorStyle: TextStyle(
-                                                          fontSize: 15),
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: 15,
-                                                ),
-                                                SizedBox(
-                                                  height: 43,
-                                                  width: 100,
-                                                  child: OutlinedButton(
-                                                    child: Text(
-                                                      "Create",
-                                                      style: TextStyle(
-                                                          fontSize: 16,
-                                                          color: themeProvider
-                                                                  .isDarkTheme
-                                                              ? Colors.white
-                                                              : Colors.black),
-                                                    ),
-                                                    style: OutlinedButton
-                                                        .styleFrom(
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(10.0),
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  Form(
+                                                    key: _CformKey,
+                                                    child: TextFormField(
+                                                      controller: _NRoom,
+                                                      keyboardType:
+                                                          TextInputType.text,
+                                                      maxLength: 70,
+                                                      maxLines: 1,
+                                                      style: const TextStyle(
+                                                          fontSize: 18),
+                                                      cursorColor: Colors.black,
+                                                      autocorrect: false,
+                                                      validator: (value) {
+                                                        RegExp validateText =
+                                                            RegExp(
+                                                                r'\b[\w]{4,}\b');
+                                                        if (!validateText
+                                                            .hasMatch(
+                                                                _NRoom.text)) {
+                                                          return "Enter Valid Room Name";
+                                                        }
+                                                        return null;
+                                                      },
+                                                      decoration:
+                                                          const InputDecoration(
+                                                        counterText: "",
+                                                        contentPadding:
+                                                            EdgeInsets.all(8.0),
+                                                        hintText:
+                                                            "Enter Room Name",
+                                                        errorStyle: TextStyle(
+                                                            fontSize: 15),
                                                       ),
-                                                      side: BorderSide(
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .primaryColor),
-                                                    ),
-                                                    onPressed: () {
-                                                      if (_CformKey
-                                                          .currentState!
-                                                          .validate()) {
-                                                        SendingData(
-                                                            true, context);
-                                                      }
-                                                    },
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                )
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.edit,
-                                      color: Theme.of(context).primaryColor,
-                                    ),
-                                    title: const Text("Join Room"),
-                                    onTap: () {
-                                      showModalBottomSheet<void>(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        builder: (BuildContext context) {
-                                          return Padding(
-                                            padding: MediaQuery.of(context)
-                                                .viewInsets,
-                                            child: Column(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                Form(
-                                                  key: _JformKey,
-                                                  child: TextFormField(
-                                                    controller: _NRoom,
-                                                    keyboardType:
-                                                        TextInputType.text,
-                                                    maxLength: 7,
-                                                    maxLines: 1,
-                                                    style: const TextStyle(
-                                                        fontSize: 18),
-                                                    cursorColor: Colors.black,
-                                                    autocorrect: false,
-                                                    validator: (value) {
-                                                      RegExp validateText =
-                                                          RegExp(
-                                                              r'\b[\w]{7}\b');
-                                                      if (!validateText
-                                                          .hasMatch(
-                                                              _NRoom.text)) {
-                                                        return "Enter Valid Room Key";
-                                                      }
-                                                      return null;
-                                                    },
-                                                    decoration:
-                                                        const InputDecoration(
-                                                      counterText: "",
-                                                      contentPadding:
-                                                          EdgeInsets.all(8.0),
-                                                      hintText:
-                                                          "Enter Room Key",
-                                                      labelText: "Room Key",
-                                                      errorStyle: TextStyle(
-                                                          fontSize: 15),
                                                     ),
                                                   ),
-                                                ),
-                                                SizedBox(
-                                                  height: 15,
-                                                ),
-                                                SizedBox(
-                                                  height: 43,
-                                                  width: 100,
-                                                  child: OutlinedButton(
+                                                  SizedBox(
+                                                    height: 15,
+                                                  ),
+                                                  SizedBox(
+                                                    height: 43,
+                                                    width: 100,
+                                                    child: OutlinedButton(
                                                       child: Text(
-                                                        "Join",
+                                                        "Create",
                                                         style: TextStyle(
                                                             fontSize: 16,
                                                             color: themeProvider
@@ -2326,47 +2223,144 @@ class _DashBoardState extends State<DashBoard> {
                                                                 .primaryColor),
                                                       ),
                                                       onPressed: () {
-                                                        if (_JformKey
+                                                        if (_CformKey
                                                             .currentState!
                                                             .validate()) {
                                                           SendingData(
-                                                              false, context);
+                                                              true, context);
                                                         }
-                                                      }),
-                                                ),
-                                                SizedBox(
-                                                  height: 10,
-                                                )
-                                              ],
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
+                                                      },
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  )
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: Icon(
+                                        Icons.edit,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      title: const Text("Join Room"),
+                                      onTap: () {
+                                        showModalBottomSheet<void>(
+                                          context: context,
+                                          isScrollControlled: true,
+                                          builder: (BuildContext context) {
+                                            return Padding(
+                                              padding: MediaQuery.of(context)
+                                                  .viewInsets,
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: <Widget>[
+                                                  Form(
+                                                    key: _JformKey,
+                                                    child: TextFormField(
+                                                      controller: _NRoom,
+                                                      keyboardType:
+                                                          TextInputType.text,
+                                                      maxLength: 7,
+                                                      maxLines: 1,
+                                                      style: const TextStyle(
+                                                          fontSize: 18),
+                                                      cursorColor: Colors.black,
+                                                      autocorrect: false,
+                                                      validator: (value) {
+                                                        RegExp validateText =
+                                                            RegExp(
+                                                                r'\b[\w]{7}\b');
+                                                        if (!validateText
+                                                            .hasMatch(
+                                                                _NRoom.text)) {
+                                                          return "Enter Valid Room Key";
+                                                        }
+                                                        return null;
+                                                      },
+                                                      decoration:
+                                                          const InputDecoration(
+                                                        counterText: "",
+                                                        contentPadding:
+                                                            EdgeInsets.all(8.0),
+                                                        hintText:
+                                                            "Enter Room Key",
+                                                        labelText: "Room Key",
+                                                        errorStyle: TextStyle(
+                                                            fontSize: 15),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 15,
+                                                  ),
+                                                  SizedBox(
+                                                    height: 43,
+                                                    width: 100,
+                                                    child: OutlinedButton(
+                                                        child: Text(
+                                                          "Join",
+                                                          style: TextStyle(
+                                                              fontSize: 16,
+                                                              color: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? Colors.white
+                                                                  : Colors
+                                                                      .black),
+                                                        ),
+                                                        style: OutlinedButton
+                                                            .styleFrom(
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.0),
+                                                          ),
+                                                          side: BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColor),
+                                                        ),
+                                                        onPressed: () {
+                                                          if (_JformKey
+                                                              .currentState!
+                                                              .validate()) {
+                                                            SendingData(
+                                                                false, context);
+                                                          }
+                                                        }),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  )
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                  ),
-                ))
-          : FloatingActionButton(
-              onPressed: () async {
-                await getRoomRequest();
-              },
-              child: Icon(
-                Icons.refresh_outlined,
-                color: Colors.white,
-              ),
-            ),
-    );
+                          );
+                        },
+                      );
+                    },
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                  ))
+            : null);
   }
 }
 
@@ -2495,7 +2489,8 @@ class RoomWidget extends StatelessWidget {
                             children: [
                               Text(
                                 "Total Spend: ₹ " +
-                                    RoomData[index].total.toString(),
+                                    commaSeperator(
+                                        RoomData[index].total.toString()),
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 13,
@@ -2503,7 +2498,8 @@ class RoomWidget extends StatelessWidget {
                               ),
                               Text(
                                 "Your Spend: ₹ " +
-                                    RoomData[index].spend.toString(),
+                                    commaSeperator(
+                                        RoomData[index].spend.toString()),
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 13,
@@ -2511,10 +2507,11 @@ class RoomWidget extends StatelessWidget {
                               ),
                               Text(
                                 "Average Spend: ₹ " +
-                                    double.parse((RoomData[index].total /
-                                                RoomData[index].members)
-                                            .toString())
-                                        .toStringAsFixed(1),
+                                    commaSeperator(double.parse(
+                                            (RoomData[index].total /
+                                                    RoomData[index].members)
+                                                .toString())
+                                        .toStringAsFixed(2)),
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 13,

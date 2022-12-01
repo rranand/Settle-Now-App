@@ -84,7 +84,8 @@ class _OtpNameState extends State<OtpName> {
         (Route<dynamic> route) => false,
       );
     } else {
-      showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']));
+      showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
+          flag: false);
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),

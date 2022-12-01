@@ -54,7 +54,7 @@ class _LendPageState extends State<LendPage> {
           _refreshIndicatorKey.currentState?.show();
         } else {
           showToast(
-              context, crypto.decrypt(jsonDecode(response.body)["Message"]));
+              context, crypto.decrypt(jsonDecode(response.body)["Message"]), flag: false);
         }
       } on Exception catch (_) {
         Navigator.pop(context);
@@ -86,7 +86,7 @@ class _LendPageState extends State<LendPage> {
         data = jsonDecode(response.body)['data'];
       } else {
         showToast(
-            context, crypto.decrypt(jsonDecode(response.body)["Message"]));
+            context, crypto.decrypt(jsonDecode(response.body)["Message"]), flag: false);
       }
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -395,8 +395,8 @@ class _LendPageState extends State<LendPage> {
                                             ),
                                             Text(
                                               "₹ " +
-                                                  crypto.decrypt(
-                                                      data[index]["amount"]),
+                                                  commaSeperator(crypto.decrypt(
+                                                      data[index]["amount"])),
                                               style: TextStyle(
                                                   fontSize: 18,
                                                   color: (crypto.decrypt(data[

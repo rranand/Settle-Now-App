@@ -46,8 +46,8 @@ class _LendCreditState extends State<LendCredit> {
         _refreshIndicatorKey.currentState?.show();
         _name.text = "";
       } else {
-        showToast(
-            context, crypto.decrypt(jsonDecode(response.body)['Message']));
+        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
+            flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -77,8 +77,8 @@ class _LendCreditState extends State<LendCredit> {
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
       } else {
-        showToast(
-            context, crypto.decrypt(jsonDecode(response.body)["Message"]));
+        showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+            flag: false);
       }
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -182,8 +182,8 @@ class _LendCreditState extends State<LendCredit> {
                                         ),
                                         Text(
                                           "₹ " +
-                                              crypto.decrypt(
-                                                  data[index]["total"]),
+                                              commaSeperator(crypto.decrypt(
+                                                  data[index]["total"])),
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.w500,

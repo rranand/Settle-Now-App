@@ -64,6 +64,7 @@ class _ExpensesState extends State<Expenses> {
     "Stock"
   ];
   Set<int> filtercategoryIndex = Set();
+  bool isRoomFilter = false;
   int categoryIndex = 0;
   int investIndex = 0;
   String CurDate = "";
@@ -103,7 +104,7 @@ class _ExpensesState extends State<Expenses> {
         loaded = true;
         TransList = jsonDecode(response.body)['data'];
       } else {
-        showToast(context, crypto.decrypt(TransData["Message"]));
+        showToast(context, crypto.decrypt(TransData["Message"]), flag: false);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -451,7 +452,7 @@ class _ExpensesState extends State<Expenses> {
       _refreshIndicatorKey.currentState?.show();
 
       if (response.statusCode == 422) {
-        showToast(context, crypto.decrypt(Tdata["Message"]));
+        showToast(context, crypto.decrypt(Tdata["Message"]), flag: false);
       }
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -470,9 +471,15 @@ class _ExpensesState extends State<Expenses> {
     }
 
     TransList.forEach((element) {
-      if (filtercategoryIndex
-          .contains(category.indexOf(crypto.decrypt(element['type'])))) {
-        filterResult.add(element);
+      if (element['room']) {
+        if (isRoomFilter) {
+          filterResult.add(element);
+        }
+      } else {
+        if (filtercategoryIndex
+            .contains(category.indexOf(crypto.decrypt(element['type'])))) {
+          filterResult.add(element);
+        }
       }
     });
 
@@ -530,27 +537,41 @@ class _ExpensesState extends State<Expenses> {
                   height: 10,
                 ),
                 SizedBox(
-                  height: 510,
+                  height: 570,
                   child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: category.length,
+                      itemCount: category.length + 1,
                       itemBuilder: ((context, index) {
-                        return CheckboxListTile(
-                          title: Text(category[index]),
-                          value: filtercategoryIndex.contains(index),
-                          onChanged: (_) {
-                            if (filtercategoryIndex.contains(index)) {
-                              filtercategoryIndex.remove(index);
-                            } else {
-                              filtercategoryIndex.add(index);
-                            }
+                        if (category.length == index) {
+                          return CheckboxListTile(
+                            title: Text("Room"),
+                            value: isRoomFilter,
+                            onChanged: (_) {
+                              isRoomFilter = !isRoomFilter;
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                          );
+                        } else {
+                          return CheckboxListTile(
+                            title: Text(category[index]),
+                            value: filtercategoryIndex.contains(index),
+                            onChanged: (_) {
+                              if (filtercategoryIndex.contains(index)) {
+                                filtercategoryIndex.remove(index);
+                              } else {
+                                filtercategoryIndex.add(index);
+                              }
 
-                            if (this.mounted) {
-                              setState(() {});
-                            }
-                          },
-                          controlAffinity: ListTileControlAffinity.leading,
-                        );
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                          );
+                        }
                       })),
                 ),
                 SizedBox(
@@ -607,6 +628,7 @@ class _ExpensesState extends State<Expenses> {
                     onPressed: () {
                       filtercategoryIndex.clear();
                       showFilterResult = false;
+                      isRoomFilter = false;
                       if (this.mounted) {
                         setState(() {});
                       }
@@ -676,13 +698,13 @@ class _ExpensesState extends State<Expenses> {
                                                       filterResult[index]
                                                           ["Date"]),
                                                   "₹ " +
-                                                      crypto.decrypt(
-                                                          filterResult[index]
-                                                              ["Amount"]),
+                                                      commaSeperator(
+                                                          crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["Amount"])),
                                                   filterResult[index]["room"],
                                                   crypto.decrypt(
-                                                      filterResult[index]
-                                                          ["id"])),
+                                                      filterResult[index]["id"])),
                                         );
                                       },
                                       child: SizedBox(
@@ -785,10 +807,10 @@ class _ExpensesState extends State<Expenses> {
                                                               0.20,
                                                       child: Text(
                                                         "₹ " +
-                                                            crypto.decrypt(
-                                                                filterResult[
-                                                                        index]
-                                                                    ["Amount"]),
+                                                            commaSeperator(crypto
+                                                                .decrypt(filterResult[
+                                                                        index][
+                                                                    "Amount"])),
                                                         style: const TextStyle(
                                                           fontSize: 18,
                                                         ),
@@ -821,7 +843,7 @@ class _ExpensesState extends State<Expenses> {
                                                           ")")),
                                               crypto.decrypt(
                                                   filterResult[index]["Date"]),
-                                              "₹ " + crypto.decrypt(filterResult[index]["Amount"]),
+                                              "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
                                               filterResult[index]["room"],
                                               crypto.decrypt(filterResult[index]["id"])),
                                         );
@@ -931,10 +953,10 @@ class _ExpensesState extends State<Expenses> {
                                                               0.20,
                                                       child: Text(
                                                         "₹ " +
-                                                            crypto.decrypt(
-                                                                filterResult[
-                                                                        index]
-                                                                    ["Amount"]),
+                                                            commaSeperator(crypto
+                                                                .decrypt(filterResult[
+                                                                        index][
+                                                                    "Amount"])),
                                                         style: const TextStyle(
                                                           fontSize: 18,
                                                         ),
@@ -970,9 +992,9 @@ class _ExpensesState extends State<Expenses> {
                                               crypto.decrypt(
                                                   TransList[index]["Date"]),
                                               "₹ " +
-                                                  crypto.decrypt(
+                                                  commaSeperator(crypto.decrypt(
                                                       TransList[index]
-                                                          ["Amount"]),
+                                                          ["Amount"])),
                                               TransList[index]["room"],
                                               crypto.decrypt(
                                                   TransList[index]["id"])),
@@ -1069,9 +1091,10 @@ class _ExpensesState extends State<Expenses> {
                                                       0.20,
                                                   child: Text(
                                                     "₹ " +
-                                                        crypto.decrypt(
-                                                            TransList[index]
-                                                                ["Amount"]),
+                                                        commaSeperator(crypto
+                                                            .decrypt(TransList[
+                                                                    index]
+                                                                ["Amount"])),
                                                     style: const TextStyle(
                                                       fontSize: 18,
                                                     ),
@@ -1093,19 +1116,19 @@ class _ExpensesState extends State<Expenses> {
                                           crypto.decrypt(
                                               TransList[index]["Purpose"]),
                                           crypto.decrypt(TransList[index]["type"]) +
-                                              (crypto.decrypt(TransList[index]
-                                                          ["invType"]) ==
+                                              (crypto.decrypt(TransList[index]["invType"]) ==
                                                       "None"
                                                   ? ""
                                                   : (" (" +
-                                                      crypto.decrypt(TransList[index]
-                                                          ["invType"]) +
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["invType"]) +
                                                       ")")),
                                           crypto.decrypt(
                                               TransList[index]["Date"]),
                                           "₹ " +
-                                              crypto.decrypt(
-                                                  TransList[index]["Amount"]),
+                                              commaSeperator(crypto.decrypt(
+                                                  TransList[index]["Amount"])),
                                           TransList[index]["room"],
                                           crypto.decrypt(TransList[index]["id"])),
                                     );
@@ -1212,9 +1235,10 @@ class _ExpensesState extends State<Expenses> {
                                                       0.20,
                                                   child: Text(
                                                     "₹ " +
-                                                        crypto.decrypt(
-                                                            TransList[index]
-                                                                ["Amount"]),
+                                                        commaSeperator(crypto
+                                                            .decrypt(TransList[
+                                                                    index]
+                                                                ["Amount"])),
                                                     style: const TextStyle(
                                                       fontSize: 18,
                                                     ),
