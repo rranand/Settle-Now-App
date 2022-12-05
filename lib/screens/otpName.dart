@@ -85,7 +85,7 @@ class _OtpNameState extends State<OtpName> {
       );
     } else {
       showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
-          flag: false);
+          Icons.close);
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),

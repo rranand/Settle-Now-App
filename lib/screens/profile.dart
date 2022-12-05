@@ -163,7 +163,7 @@ class _ProfileState extends State<Profile> {
       } else {
         showToast(
             context, crypto.decrypt(jsonDecode(response_1.body)["Message"]),
-            flag: false);
+            Icons.close);
       }
 
       updatePieChart("all");
@@ -203,7 +203,7 @@ class _ProfileState extends State<Profile> {
         }
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
-            flag: false);
+            Icons.close);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -220,34 +220,38 @@ class _ProfileState extends State<Profile> {
       setState(() {});
     }
 
-    if (monthIndex.isNotEmpty) {
-      personalExpense.forEach((element) {
-        if (monthIndex.contains(Month.indexOf(element.Month))) {
-          filterResult.add(element);
-        }
-      });
-    }
-
-    if (yearIndex.isNotEmpty) {
-      if (filterResult.isEmpty) {
+    if (monthIndex.isEmpty && yearIndex.isEmpty) {
+      showfilterResult = false;
+    } else {
+      if (monthIndex.isNotEmpty) {
         personalExpense.forEach((element) {
-          if (yearIndex.contains(Year.indexOf(element.Year))) {
+          if (monthIndex.contains(Month.indexOf(element.Month))) {
             filterResult.add(element);
           }
         });
-      } else {
-        filterResult.removeWhere(
-            (element) => !yearIndex.contains(Year.indexOf(element.Year)));
       }
-    }
 
-    filterResult.sort((b, a) {
-      DateTime tempDate_1 = new DateFormat("MMM-yyyy")
-          .parse(a.Month.substring(0, 3) + "-" + a.Year);
-      DateTime tempDate_2 = new DateFormat("MMM-yyyy")
-          .parse(b.Month.substring(0, 3) + "-" + b.Year);
-      return tempDate_1.compareTo(tempDate_2);
-    });
+      if (yearIndex.isNotEmpty) {
+        if (filterResult.isEmpty) {
+          personalExpense.forEach((element) {
+            if (yearIndex.contains(Year.indexOf(element.Year))) {
+              filterResult.add(element);
+            }
+          });
+        } else {
+          filterResult.removeWhere(
+              (element) => !yearIndex.contains(Year.indexOf(element.Year)));
+        }
+      }
+
+      filterResult.sort((b, a) {
+        DateTime tempDate_1 = new DateFormat("MMM-yyyy")
+            .parse(a.Month.substring(0, 3) + "-" + a.Year);
+        DateTime tempDate_2 = new DateFormat("MMM-yyyy")
+            .parse(b.Month.substring(0, 3) + "-" + b.Year);
+        return tempDate_1.compareTo(tempDate_2);
+      });
+    }
 
     if (this.mounted) {
       setState(() {});
@@ -461,8 +465,8 @@ class _ProfileState extends State<Profile> {
                               ),
                             ),
                             onPressed: () {
-                              getFilterResult();
                               showfilterResult = true;
+                              getFilterResult();
                               if (this.mounted) {
                                 setState(() {});
                               }

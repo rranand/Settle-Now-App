@@ -67,6 +67,8 @@ class _DashBoardState extends State<DashBoard> {
   bool searching = false;
   bool dateIndex = true;
   List<String> Year = [];
+  bool isImageLoaded = false;
+  bool isRoomRequestLoaded = false;
   List<String> Month = [
     'January',
     'February',
@@ -214,7 +216,7 @@ class _DashBoardState extends State<DashBoard> {
     if (image != null) {
       double sz = (await image.length()) / (1024 * 1024);
       if (sz > 10) {
-        showToast(context, "Image Size is too large", flag: false);
+        showToast(context, "Image Size is too large", Icons.close);
         return;
       }
 
@@ -243,12 +245,12 @@ class _DashBoardState extends State<DashBoard> {
 
         if (response.statusCode == 200) {
           await _getImageID();
-          showToast(context, "Image Uploaded Successfully");
+          showToast(context, "Image Uploaded Successfully", Icons.check);
         } else {
-          showToast(context, "Failed to Upload Image", flag: false);
+          showToast(context, "Failed to Upload Image", Icons.close);
         }
       } on Exception catch (_) {
-        showToast(context, "Failed to Upload Image", flag: false);
+        showToast(context, "Failed to Upload Image", Icons.close);
       }
 
       if (this.mounted) {
@@ -365,7 +367,15 @@ class _DashBoardState extends State<DashBoard> {
           setState(() {});
         }
 
-        await _getImageID();
+        if (!isRoomRequestLoaded) {
+          await getRoomRequest();
+          isRoomRequestLoaded = true;
+        }
+
+        if (!isImageLoaded) {
+          await _getImageID();
+          isImageLoaded = true;
+        }
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
         Navigator.pushAndRemoveUntil(
@@ -419,7 +429,7 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode == 200) {
         RoomRequest = data["data"];
       } else {
-        showToast(context, crypto.decrypt(data["Message"]), flag: false);
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -467,7 +477,7 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode == 200) {
         _refreshIndicatorKey.currentState?.show();
       } else {
-        showToast(context, crypto.decrypt(JsonData["Message"]), flag: false);
+        showToast(context, crypto.decrypt(JsonData["Message"]), Icons.close);
       }
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -484,8 +494,6 @@ class _DashBoardState extends State<DashBoard> {
     super.initState();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _requestIndicatorKey.currentState?.show());
     LocalNotificationService.initialize();
 
     FirebaseMessaging.instance.getInitialMessage().then(
@@ -559,7 +567,7 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   buildFilterDialog(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -1268,7 +1276,7 @@ class _DashBoardState extends State<DashBoard> {
           }));
 
       var data = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(data["Message"]));
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
       await _requestIndicatorKey.currentState?.show();
       if (flag == "1") {
         await _extractEmail();
@@ -2471,7 +2479,7 @@ class RoomWidget extends StatelessWidget {
                                 onLongPress: () async {
                                   Clipboard.setData(ClipboardData(
                                       text: RoomData[index].roomKey));
-                                  showToast(context, "Join Key Copied");
+                                  showToast(context, "Join Key Copied", Icons.check);
                                 },
                                 child: Text(
                                   "Room Key: " + RoomData[index].roomKey,

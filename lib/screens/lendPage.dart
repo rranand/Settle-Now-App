@@ -54,7 +54,8 @@ class _LendPageState extends State<LendPage> {
           _refreshIndicatorKey.currentState?.show();
         } else {
           showToast(
-              context, crypto.decrypt(jsonDecode(response.body)["Message"]), flag: false);
+              context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+              Icons.close);
         }
       } on Exception catch (_) {
         Navigator.pop(context);
@@ -85,8 +86,8 @@ class _LendPageState extends State<LendPage> {
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
       } else {
-        showToast(
-            context, crypto.decrypt(jsonDecode(response.body)["Message"]), flag: false);
+        showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+            Icons.close);
       }
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -121,7 +122,7 @@ class _LendPageState extends State<LendPage> {
           }));
 
       CloseData = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(CloseData["Message"]));
+      showToast(context, crypto.decrypt(CloseData["Message"]),Icons.check);
     } on Exception catch (_) {
       Navigator.pop(context);
       await onException(context);
@@ -389,7 +390,8 @@ class _LendPageState extends State<LendPage> {
                                                   showToast(
                                                       context,
                                                       crypto.decrypt(data[index]
-                                                          ["purpose"]));
+                                                          ["purpose"]),
+                                                      Icons.check);
                                                 },
                                               ),
                                             ),

@@ -93,7 +93,7 @@ buildShowDialog(BuildContext context) {
       });
 }
 
-showToast(BuildContext context, String show, {bool flag = true}) {
+showToast(BuildContext context, String show, IconData icon) {
   FToast fToast = FToast();
   fToast.init(context);
 
@@ -107,7 +107,7 @@ showToast(BuildContext context, String show, {bool flag = true}) {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
-          flag ? Icons.check : Icons.close,
+          icon,
           color: Colors.white,
         ),
         SizedBox(
@@ -166,9 +166,9 @@ onException(BuildContext context) async {
   bool result = await InternetConnectionChecker().hasConnection;
 
   if (result) {
-    showToast(context, "Server Error Try Again", flag: false);
+    showToast(context, "Server Error Try Again", Icons.close);
   } else {
-    showToast(context, "No Internet Connection", flag: false);
+    showToast(context, "No Internet Connection", Icons.check);
   }
 }
 

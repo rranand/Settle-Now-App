@@ -47,7 +47,7 @@ class _LendCreditState extends State<LendCredit> {
         _name.text = "";
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
-            flag: false);
+            Icons.close);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -78,7 +78,7 @@ class _LendCreditState extends State<LendCredit> {
         data = jsonDecode(response.body)['data'];
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
-            flag: false);
+            Icons.close);
       }
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -133,7 +133,9 @@ class _LendCreditState extends State<LendCredit> {
                         child: GridView.builder(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
+                            crossAxisCount:
+                                (MediaQuery.of(context).size.width / 250)
+                                    .round(),
                             childAspectRatio: 1.5,
                           ),
                           physics: AlwaysScrollableScrollPhysics(),

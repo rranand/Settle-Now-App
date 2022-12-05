@@ -91,7 +91,7 @@ class _RoomExpenseState extends State<RoomExpense>
         paymentTotalALL = crypto.decrypt(data['total']);
         paidTransactionData = true;
       } else {
-        showToast(context, crypto.decrypt(data["Message"]), flag: false);
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -133,7 +133,7 @@ class _RoomExpenseState extends State<RoomExpense>
           setState(() {});
         }
       } else {
-        showToast(context, crypto.decrypt(data["Message"]), flag: false);
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -172,7 +172,7 @@ class _RoomExpenseState extends State<RoomExpense>
           friendData.add(FriendEach.fromJson(tempData[i]));
         }
       } else {
-        showToast(context, crypto.decrypt(data["Message"]), flag: false);
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -230,7 +230,7 @@ class _RoomExpenseState extends State<RoomExpense>
           TransList = jsonDecode(response.body)['data'];
         }
       } else {
-        showToast(context, crypto.decrypt(TransData["Message"]), flag: false);
+        showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
       }
     } on Exception catch (_) {
       await onException(context);
@@ -272,7 +272,7 @@ class _RoomExpenseState extends State<RoomExpense>
         _refreshIndicatorKey.currentState?.show();
 
         if (response.statusCode == 422) {
-          showToast(context, crypto.decrypt(Tdata["Message"]), flag: false);
+          showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
       } on Exception catch (_) {
         Navigator.pop(context);
@@ -310,7 +310,7 @@ class _RoomExpenseState extends State<RoomExpense>
 
         _refreshIndicatorKey.currentState?.show();
 
-        showToast(context, crypto.decrypt(Tdata["Message"]));
+        showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
       } on Exception catch (_) {
         Navigator.pop(context);
         await onException(context);
@@ -324,7 +324,7 @@ class _RoomExpenseState extends State<RoomExpense>
   retrievePaymentData() async {
     try {
       if (membersListIndexS == membersListIndexR) {
-        showToast(context, "Same User", flag: false);
+        showToast(context, "Same User", Icons.close);
       } else {
         paymentData.clear();
         if (this.mounted) {
@@ -355,8 +355,9 @@ class _RoomExpenseState extends State<RoomExpense>
           }
         } else {
           showToast(
-              context, crypto.decrypt(jsonDecode(response.body)["Message"]),
-              flag: false);
+              context,
+              crypto.decrypt(jsonDecode(response.body)["Message"]),
+              Icons.close);
         }
       }
     } on Exception catch (_) {
@@ -383,7 +384,7 @@ class _RoomExpenseState extends State<RoomExpense>
           }));
       isClear = true;
       CloseData = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(CloseData["Message"]));
+      showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
       Navigator.pop(context);
       _refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
@@ -618,7 +619,7 @@ class _RoomExpenseState extends State<RoomExpense>
           }));
 
       var data = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(data["Message"]));
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
       await onException(context);
     }
@@ -640,7 +641,7 @@ class _RoomExpenseState extends State<RoomExpense>
           }));
 
       var data = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(data["Message"]));
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
       await onException(context);
     }
@@ -660,7 +661,7 @@ class _RoomExpenseState extends State<RoomExpense>
           }));
 
       var data = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(data["Message"]));
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
       await onException(context);
     }
@@ -836,8 +837,8 @@ class _RoomExpenseState extends State<RoomExpense>
                               foreground: Paint()..shader = linearGradient_1,
                             ),
                           ),
-                          onTap: () => showToast(
-                              context, crypto.decrypt(list[index]['Name'])),
+                          onTap: () => showToast(context,
+                              crypto.decrypt(list[index]['Name']), Icons.check),
                         ),
                         SizedBox(
                           height: 8,
@@ -1045,7 +1046,7 @@ class _RoomExpenseState extends State<RoomExpense>
                     onPressed: () async {
                       if (loadFriendData) {
                         if (friendData.isEmpty) {
-                          showToast(context, "No Friend Found", flag: false);
+                          showToast(context, "No Friend Found", Icons.close);
                         } else {
                           showDialog(
                             context: context,
@@ -1054,7 +1055,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           );
                         }
                       } else {
-                        showToast(context, "Loading Data");
+                        showToast(context, "Loading Data", Icons.more_horiz);
                       }
                     },
                     icon: Icon(
@@ -1065,8 +1066,8 @@ class _RoomExpenseState extends State<RoomExpense>
             IconButton(
                 onPressed: () {
                   if (membersListName.length <= 1) {
-                    showToast(context, "More Than One Member Required",
-                        flag: false);
+                    showToast(
+                        context, "More Than One Member Required", Icons.close);
                   } else {
                     setState(() {
                       defaultPage = !defaultPage;
@@ -1822,9 +1823,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                     if (membersListName
                                                             .length <=
                                                         1) {
-                                                      showToast(context,
+                                                      showToast(
+                                                          context,
                                                           "More Than One Member Required",
-                                                          flag: false);
+                                                          Icons.close);
                                                     } else {
                                                       showDialog(
                                                           context: context,
@@ -2308,7 +2310,7 @@ class _ExpenseDataState extends State<ExpenseData> {
           }));
 
       var updateMessage = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(updateMessage["Message"]));
+      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
       widget.refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
       await onException(context);
@@ -2387,83 +2389,40 @@ class _ExpenseDataState extends State<ExpenseData> {
                           SizedBox(
                             height: 15,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              SizedBox(
-                                height: 43,
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                child: OutlinedButton(
-                                    child: Text(
-                                      "Delete",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: themeProvider.isDarkTheme
-                                              ? Colors.white
-                                              : Colors.black),
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                      ),
-                                      side: BorderSide(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                    ),
-                                    onPressed: () async {
-                                      buildShowDialog(context);
-                                      await _updateTransaction(
-                                          context,
-                                          _purpose.text,
-                                          id,
-                                          _amount.text,
-                                          "1",
-                                          split);
-                                      Navigator.pop(context);
-                                      Navigator.pop(context);
-                                      Navigator.pop(context);
-                                    }),
-                              ),
-                              SizedBox(
-                                height: 43,
-                                width: MediaQuery.of(context).size.width * 0.3,
-                                child: OutlinedButton(
-                                    child: Text(
-                                      "Update",
-                                      style: TextStyle(
-                                          fontSize: 16,
-                                          color: themeProvider.isDarkTheme
-                                              ? Colors.white
-                                              : Colors.black),
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                      ),
-                                      side: BorderSide(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                    ),
-                                    onPressed: () async {
-                                      if (_updateExpense.currentState!
-                                          .validate()) {
-                                        buildShowDialog(context);
-                                        await _updateTransaction(
-                                            context,
-                                            _purpose.text,
-                                            id,
-                                            _amount.text,
-                                            "0",
-                                            split);
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
-                                      }
-                                    }),
-                              ),
-                            ],
+                          SizedBox(
+                            height: 43,
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            child: OutlinedButton(
+                                child: Text(
+                                  "Update",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                                onPressed: () async {
+                                  if (_updateExpense.currentState!.validate()) {
+                                    buildShowDialog(context);
+                                    await _updateTransaction(
+                                        context,
+                                        _purpose.text,
+                                        id,
+                                        _amount.text,
+                                        "0",
+                                        split);
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  }
+                                }),
                           ),
                         ],
                       ),
@@ -2489,7 +2448,7 @@ class _ExpenseDataState extends State<ExpenseData> {
           }));
 
       var data = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(data["Message"]));
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
       await onException(context);
     }
@@ -2537,20 +2496,40 @@ class _ExpenseDataState extends State<ExpenseData> {
                       style: TextStyle(fontSize: 23),
                     ),
                     widget.Email == email && !locked
-                        ? IconButton(
-                            onPressed: () async {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    _buildUpdateDialog(
+                        ? Row(
+                            children: [
+                              IconButton(
+                                  onPressed: () async {
+                                    buildShowDialog(context);
+                                    await _updateTransaction(
                                         context,
+                                        _purpose.text,
                                         id,
-                                        purpose,
-                                        amount,
-                                        partialExpense.isEmpty ? "0" : "1"),
-                              );
-                            },
-                            icon: Icon(Icons.edit))
+                                        _amount.text,
+                                        "1",
+                                        partialExpense.isEmpty ? "0" : "1");
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  },
+                                  icon: Icon(Icons.delete)),
+                              IconButton(
+                                  onPressed: () async {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          _buildUpdateDialog(
+                                              context,
+                                              id,
+                                              purpose,
+                                              amount,
+                                              partialExpense.isEmpty
+                                                  ? "0"
+                                                  : "1"),
+                                    );
+                                  },
+                                  icon: Icon(Icons.edit)),
+                            ],
+                          )
                         : SizedBox()
                   ],
                 ),
