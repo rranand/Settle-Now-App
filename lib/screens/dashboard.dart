@@ -33,6 +33,31 @@ import 'package:dio/dio.dart';
 import 'maintain.dart';
 import 'package:http_parser/http_parser.dart';
 
+class ShareMessage {
+  final String title;
+  final String subject;
+  final String photo;
+  final String web;
+  final String playstore;
+
+  ShareMessage(
+      {required this.title,
+      required this.subject,
+      required this.photo,
+      required this.web,
+      required this.playstore});
+
+  factory ShareMessage.fromJson(Map<String, dynamic> json) {
+    return ShareMessage(
+      title: crypto.decrypt(json['title']),
+      subject: crypto.decrypt(json['subject']),
+      photo: crypto.decrypt(json['photo']),
+      web: crypto.decrypt(json['web']),
+      playstore: crypto.decrypt(json['playstore']),
+    );
+  }
+}
+
 class DashBoard extends StatefulWidget {
   final String version;
   const DashBoard({Key? key, required this.version}) : super(key: key);
@@ -69,6 +94,10 @@ class _DashBoardState extends State<DashBoard> {
   List<String> Year = [];
   bool isImageLoaded = false;
   bool isRoomRequestLoaded = false;
+  bool gotInitialData = false;
+  List<dynamic> expenseCategory = [];
+  List<dynamic> investmentCategory = [];
+  late ShareMessage shareMessage;
   List<String> Month = [
     'January',
     'February',
@@ -161,12 +190,11 @@ class _DashBoardState extends State<DashBoard> {
         haveImg = false;
       });
     }
+
     try {
       if (isGoogle) {
-        setState(() {
-          _profilePicID = (_currentUser!.photoUrl).toString();
-          haveImg = true;
-        });
+        _profilePicID = (await _currentUser!.photoUrl).toString();
+        haveImg = true;
       } else {
         final response = await http.put(Uri.parse(global.url + 'login'),
             headers: <String, String>{
@@ -181,24 +209,51 @@ class _DashBoardState extends State<DashBoard> {
           var imgData = jsonDecode(response.body);
 
           if (imgData['havePic']) {
-            if (this.mounted) {
-              setState(() {
-                _profilePicID = crypto.decrypt(imgData["fileId"]);
-                haveImg = true;
-              });
-            }
+            _profilePicID = crypto.decrypt(imgData["fileId"]);
+            haveImg = true;
           } else {
-            if (this.mounted) {
-              setState(() {
-                _profilePicID = "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8";
-                haveImg = true;
-              });
-            }
+            _profilePicID = "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8";
+            haveImg = true;
           }
         }
       }
     } on Exception catch (_) {
       await onException(context);
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> getInitialData() async {
+    try {
+      final response = await http.patch(Uri.parse(global.url + 'profile'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(_email.text),
+          }));
+
+      if (response.statusCode == 200) {
+        gotInitialData = true;
+        var data = jsonDecode(response.body);
+        expenseCategory = data['expenseCategory'];
+        for (int i = 0; i < expenseCategory.length; i++) {
+          expenseCategory[i] = crypto.decrypt(expenseCategory[i]);
+        }
+        investmentCategory = data['investmentCategory'];
+        for (int i = 0; i < investmentCategory.length; i++) {
+          investmentCategory[i] = crypto.decrypt(investmentCategory[i]);
+        }
+        shareMessage = ShareMessage.fromJson(data['shareMessage']);
+      }
+    } on Exception catch (_) {}
+
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -366,6 +421,10 @@ class _DashBoardState extends State<DashBoard> {
         if (this.mounted) {
           setState(() {});
         }
+
+        do {
+          await getInitialData();
+        } while (!gotInitialData);
 
         if (!isRoomRequestLoaded) {
           await getRoomRequest();
@@ -546,6 +605,7 @@ class _DashBoardState extends State<DashBoard> {
         }
       },
     );
+
     _updateCheck();
   }
 
@@ -1917,6 +1977,8 @@ class _DashBoardState extends State<DashBoard> {
                             token: _token,
                             closeRoomSpend: amtSpendClose,
                             openRoomSpend: amtSpendOpen,
+                            expenseCategory: expenseCategory,
+                            investmentCategory: investmentCategory,
                           )),
                 ),
                 leading: Icon(
@@ -1942,6 +2004,8 @@ class _DashBoardState extends State<DashBoard> {
                               email: _email.text,
                               date: date,
                               token: _token,
+                              expenseCategory: expenseCategory,
+                              investmentCategory: investmentCategory,
                             )),
                   );
                 },
@@ -2003,8 +2067,11 @@ class _DashBoardState extends State<DashBoard> {
               ),
               ListTile(
                 onTap: () async {
-                  await Share.share(
-                      "Download Settle Now\nhttps://settlenow.in");
+                  await Share.share(shareMessage.title +
+                      "\n\n" +
+                      shareMessage.subject +
+                      "\n\n" +
+                      shareMessage.playstore);
                 },
                 leading: Icon(
                   Icons.share,
@@ -2479,7 +2546,8 @@ class RoomWidget extends StatelessWidget {
                                 onLongPress: () async {
                                   Clipboard.setData(ClipboardData(
                                       text: RoomData[index].roomKey));
-                                  showToast(context, "Join Key Copied", Icons.check);
+                                  showToast(
+                                      context, "Join Key Copied", Icons.check);
                                 },
                                 child: Text(
                                   "Room Key: " + RoomData[index].roomKey,

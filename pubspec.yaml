@@ -3,7 +3,7 @@ description: A Finance Management App
 
 publish_to: 'none'
 
-version: 1.2.3+52
+version: 1.2.4+53
 
 environment:
   sdk: ">=2.16.0-134.0.dev <3.0.0"
@@ -43,6 +43,7 @@ dependencies:
   intl: ^0.17.0
   internet_connection_checker: ^1.0.0+1
   in_app_review: ^2.0.4
+  flutter_sms_inbox: ^1.0.2
 
 dev_dependencies:
   flutter_test:

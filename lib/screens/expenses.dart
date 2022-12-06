@@ -12,8 +12,16 @@ class Expenses extends StatefulWidget {
   final String email;
   final String date;
   final String token;
+  final List<dynamic> expenseCategory;
+  final List<dynamic> investmentCategory;
+
   const Expenses(
-      {Key? key, required this.email, required this.date, required this.token})
+      {Key? key,
+      required this.email,
+      required this.date,
+      required this.token,
+      required this.expenseCategory,
+      required this.investmentCategory})
       : super(key: key);
 
   @override
@@ -46,23 +54,8 @@ class _ExpensesState extends State<Expenses> {
       new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
   String title = "Personal Expense";
-  List<String> category = [
-    "Fashion",
-    "Investment",
-    "Food",
-    "Travelling",
-    "Household",
-    "Health",
-    "Entertainment",
-    "Education",
-    "Miscellaneous"
-  ];
-  List<String> investmentCat = [
-    "Mutual Fund",
-    "Cryptography",
-    "Fixed Deposit",
-    "Stock"
-  ];
+  List<dynamic> category = [];
+  List<dynamic> investmentCat = [];
   Set<int> filtercategoryIndex = Set();
   bool isRoomFilter = false;
   int categoryIndex = 0;
@@ -72,6 +65,9 @@ class _ExpensesState extends State<Expenses> {
   final _updateExpense = GlobalKey<FormState>();
 
   Future _initialization() async {
+    category = widget.expenseCategory;
+    investmentCat = widget.investmentCategory;
+    
     var now = DateTime.now();
     CurDate = (now.month - 1).toString() + now.year.toString();
 
@@ -128,7 +124,7 @@ class _ExpensesState extends State<Expenses> {
           }));
 
       var TransData = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(TransData["Message"]),Icons.check);
+      showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
       await _initialization();
     } on Exception catch (_) {
       await onException(context);
@@ -155,7 +151,7 @@ class _ExpensesState extends State<Expenses> {
           }));
 
       var TransData = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(TransData["Message"]),Icons.check);
+      showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
       await _initialization();
     } on Exception catch (_) {
       await onException(context);

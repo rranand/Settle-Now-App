@@ -25,13 +25,17 @@ class Profile extends StatefulWidget {
   final String token;
   final double closeRoomSpend;
   final double openRoomSpend;
+  final List<dynamic> expenseCategory;
+  final List<dynamic> investmentCategory;
 
   const Profile(
       {Key? key,
       required this.email,
       required this.token,
       required this.closeRoomSpend,
-      required this.openRoomSpend})
+      required this.openRoomSpend,
+      required this.expenseCategory,
+      required this.investmentCategory})
       : super(key: key);
 
   @override
@@ -47,19 +51,7 @@ class _ProfileState extends State<Profile> {
   bool showfilterResult = false;
   Set<int> monthIndex = Set();
   Set<int> yearIndex = Set();
-
-  List<String> category = [
-    "Fashion",
-    "Investment",
-    "Food",
-    "Travelling",
-    "Household",
-    "Health",
-    "Entertainment",
-    "Education",
-    "Miscellaneous"
-  ];
-
+  List<dynamic> category = [];
   List<String> Month = [
     'January',
     'February',
@@ -100,6 +92,7 @@ class _ProfileState extends State<Profile> {
   }
 
   Future _initialisation() async {
+    category = widget.expenseCategory;
     try {
       final response_1 = await http.post(Uri.parse(global.url + 'profile'),
           headers: <String, String>{
@@ -162,7 +155,8 @@ class _ProfileState extends State<Profile> {
         }
       } else {
         showToast(
-            context, crypto.decrypt(jsonDecode(response_1.body)["Message"]),
+            context,
+            crypto.decrypt(jsonDecode(response_1.body)["Message"]),
             Icons.close);
       }
 
@@ -554,6 +548,10 @@ class _ProfileState extends State<Profile> {
                                                       date: filterResult[index]
                                                           .Date,
                                                       token: widget.token,
+                                                      expenseCategory: widget
+                                                          .expenseCategory,
+                                                      investmentCategory: widget
+                                                          .investmentCategory,
                                                     )),
                                           ),
                                           onLongPress: () async {
@@ -631,6 +629,10 @@ class _ProfileState extends State<Profile> {
                                                   date: personalExpense[index]
                                                       .Date,
                                                   token: widget.token,
+                                                  expenseCategory:
+                                                      widget.expenseCategory,
+                                                  investmentCategory:
+                                                      widget.investmentCategory,
                                                 )),
                                       ),
                                       onLongPress: () async {
