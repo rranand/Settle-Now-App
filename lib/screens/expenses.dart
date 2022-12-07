@@ -276,8 +276,15 @@ class _ExpensesState extends State<Expenses> {
     });
   }
 
-  Widget _buildPopupDialog(BuildContext context, String purpose, String type,
-      String date, String amount, bool room, String id) {
+  Widget _buildPopupDialog(
+      BuildContext context,
+      String purpose,
+      String type,
+      String date,
+      String amount,
+      bool room,
+      String id,
+      String roomExpenseType) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
@@ -361,6 +368,13 @@ class _ExpensesState extends State<Expenses> {
                     "Date: " + date,
                     style: TextStyle(fontSize: 18),
                   ),
+                  roomExpenseType.isEmpty?SizedBox():(SizedBox(
+                    height: 10,
+                  )),
+                  roomExpenseType.isEmpty?SizedBox():(Text(
+                    "Category: " + roomExpenseType,
+                    style: TextStyle(fontSize: 18),
+                  )),
                 ],
               ),
               SizedBox(
@@ -686,7 +700,8 @@ class _ExpensesState extends State<Expenses> {
                                                               ["Amount"])),
                                                   filterResult[index]["room"],
                                                   crypto.decrypt(
-                                                      filterResult[index]["id"])),
+                                                      filterResult[index]["id"]),
+                                                  crypto.decrypt(filterResult[index]["Type"])),
                                             );
                                           },
                                           child: SizedBox(
@@ -745,7 +760,24 @@ class _ExpensesState extends State<Expenses> {
                                                                               .w500),
                                                                 ),
                                                                 SizedBox(
-                                                                  height: 15,
+                                                                  height: 10,
+                                                                ),
+                                                                Opacity(
+                                                                  opacity: 0.8,
+                                                                  child: Text(
+                                                                    crypto.decrypt(
+                                                                        filterResult[index]
+                                                                            [
+                                                                            "Type"]),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          17,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 10,
                                                                 ),
                                                                 Opacity(
                                                                   opacity: 0.8,
@@ -762,7 +794,7 @@ class _ExpensesState extends State<Expenses> {
                                                                   ),
                                                                 ),
                                                                 SizedBox(
-                                                                  height: 15,
+                                                                  height: 10,
                                                                 ),
                                                                 Opacity(
                                                                   opacity: 0.8,
@@ -832,7 +864,7 @@ class _ExpensesState extends State<Expenses> {
                                                       filterResult[index]["Date"]),
                                                   "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
                                                   filterResult[index]["room"],
-                                                  crypto.decrypt(filterResult[index]["id"])),
+                                                  crypto.decrypt(filterResult[index]["id"]), ""),
                                             );
                                           },
                                           child: SizedBox(
@@ -995,7 +1027,9 @@ class _ExpensesState extends State<Expenses> {
                                                                   ["Amount"])),
                                                   TransList[index]["room"],
                                                   crypto.decrypt(
-                                                      TransList[index]["id"])),
+                                                      TransList[index]["id"]),
+                                                  crypto.decrypt(
+                                                      TransList[index]["Type"])),
                                         );
                                       },
                                       child: SizedBox(
@@ -1052,7 +1086,24 @@ class _ExpensesState extends State<Expenses> {
                                                                           .w500),
                                                             ),
                                                             SizedBox(
-                                                              height: 15,
+                                                              height: 10,
+                                                            ),
+                                                            Opacity(
+                                                              opacity: 0.8,
+                                                              child: Text(
+                                                                crypto.decrypt(
+                                                                    TransList[
+                                                                            index]
+                                                                        [
+                                                                        "Type"]),
+                                                                style:
+                                                                    const TextStyle(
+                                                                  fontSize: 17,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 10,
                                                             ),
                                                             Opacity(
                                                               opacity: 0.8,
@@ -1069,7 +1120,7 @@ class _ExpensesState extends State<Expenses> {
                                                               ),
                                                             ),
                                                             SizedBox(
-                                                              height: 15,
+                                                              height: 10,
                                                             ),
                                                             Opacity(
                                                               opacity: 0.8,
@@ -1136,7 +1187,7 @@ class _ExpensesState extends State<Expenses> {
                                                   commaSeperator(crypto.decrypt(
                                                       TransList[index]["Amount"])),
                                               TransList[index]["room"],
-                                              crypto.decrypt(TransList[index]["id"])),
+                                              crypto.decrypt(TransList[index]["id"]), ""),
                                         );
                                       },
                                       child: SizedBox(
@@ -1342,17 +1393,14 @@ class _ExpensesState extends State<Expenses> {
                                         padding: EdgeInsets.all(8.0),
                                         child: InkWell(
                                           child: Card(
-                                            elevation: 1.0,
-                                            color: (index == categoryIndex
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .scaffoldBackgroundColor),
-                                            shadowColor:
-                                                Theme.of(context).primaryColor,
+                                            color: Theme.of(context)
+                                                    .scaffoldBackgroundColor,
                                             shape: RoundedRectangleBorder(
                                               side: BorderSide(
-                                                  color: Theme.of(context)
-                                                      .primaryColor),
+                                                  color: (index == categoryIndex
+                                                ? Theme.of(context).primaryColor
+                                                : Theme.of(context)
+                                                    .scaffoldBackgroundColor)),
                                               borderRadius:
                                                   BorderRadius.circular(10.0),
                                             ),
@@ -1411,18 +1459,15 @@ class _ExpensesState extends State<Expenses> {
                                                   const EdgeInsets.all(8.0),
                                               child: InkWell(
                                                 child: Card(
-                                                  elevation: 1.0,
-                                                  color: (index == investIndex
+                                                  color: Theme.of(context)
+                                                          .scaffoldBackgroundColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        color: (index == investIndex
                                                       ? Theme.of(context)
                                                           .primaryColor
                                                       : Theme.of(context)
-                                                          .scaffoldBackgroundColor),
-                                                  shadowColor: Theme.of(context)
-                                                      .primaryColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: Theme.of(context)
-                                                            .primaryColor),
+                                                          .scaffoldBackgroundColor)),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             10.0),

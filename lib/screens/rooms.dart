@@ -120,7 +120,14 @@ class _RoomExpenseState extends State<RoomExpense>
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         list.clear();
+        roomExpenseCategory.clear();
         list = data['data'];
+        roomExpenseCategory = data['roomExpenseCategory'];
+
+        for (int i = 0; i < roomExpenseCategory.length; i++) {
+          roomExpenseCategory[i] = crypto.decrypt(roomExpenseCategory[i]);
+        }
+
         isClear = list[0]["done"];
         membersListName.clear();
         membersListEmail.clear();
@@ -262,7 +269,8 @@ class _RoomExpenseState extends State<RoomExpense>
               'roomKey': crypto.encrypt(widget.roomKey),
               'purpose': crypto.encrypt(_purpose.text),
               'amt': crypto.encrypt(_amt.text),
-              'type': crypto.encrypt(roomExpenseCategoryIndex.toString()),
+              'type':
+                  crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
               "members": crypto.encrypt(addExpenseTo.toString())
             }));
 
@@ -2094,6 +2102,54 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                 ),
                                                                               ),
                                                                               SizedBox(
+                                                                                width: MediaQuery.of(context).size.width * 0.9,
+                                                                                height: 70,
+                                                                                child: ListView.builder(
+                                                                                  scrollDirection: Axis.horizontal,
+                                                                                  itemCount: roomExpenseCategory.length,
+                                                                                  itemBuilder: (BuildContext context, int index) {
+                                                                                    return SizedBox(
+                                                                                      child: Padding(
+                                                                                        padding: EdgeInsets.all(8.0),
+                                                                                        child: InkWell(
+                                                                                          child: Card(
+                                                                                            color: Theme.of(context).dialogBackgroundColor,
+                                                                                            shape: RoundedRectangleBorder(
+                                                                                              side: BorderSide(color: roomExpenseCategoryIndex == index ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                                                                                              borderRadius: BorderRadius.circular(10.0),
+                                                                                            ),
+                                                                                            child: Padding(
+                                                                                              padding: const EdgeInsets.all(12.0),
+                                                                                              child: Center(
+                                                                                                child: InkWell(
+                                                                                                  child: Text(
+                                                                                                    roomExpenseCategory[index],
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 16,
+                                                                                                      color: Colors.white,
+                                                                                                      fontWeight: FontWeight.w500,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                          onTap: () {
+                                                                                            if (this.mounted) {
+                                                                                              setState(
+                                                                                                () {
+                                                                                                  roomExpenseCategoryIndex = index;
+                                                                                                },
+                                                                                              );
+                                                                                            }
+                                                                                          },
+                                                                                        ),
+                                                                                      ),
+                                                                                    );
+                                                                                  },
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(
                                                                                 height: 80,
                                                                                 child: ListView.builder(
                                                                                   scrollDirection: Axis.horizontal,
@@ -2484,7 +2540,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       String purpose,
       String amount,
       bool locked,
-      List<dynamic> partialExpense) {
+      List<dynamic> partialExpense,
+      String type) {
     return StatefulBuilder(builder: (context, setState) {
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -2572,6 +2629,13 @@ class _ExpenseDataState extends State<ExpenseData> {
                             : SizedBox(),
                         Text(
                           date,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          type,
                           style: TextStyle(fontSize: 20),
                         ),
                       ],
@@ -2764,11 +2828,12 @@ class _ExpenseDataState extends State<ExpenseData> {
                       crypto.decrypt(widget.TransList[index]["Purpose"]),
                       crypto.decrypt(widget.TransList[index]["Amount"]),
                       widget.locked,
-                      partialExpense),
+                      partialExpense,
+                      crypto.decrypt(widget.TransList[index]["Type"])),
                 );
               },
               child: SizedBox(
-                  height: 150,
+                  height: 165,
                   child: Card(
                     elevation: 1.0,
                     shadowColor: Theme.of(context).primaryColor,
@@ -2800,7 +2865,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                             fontWeight: FontWeight.w500),
                                       ),
                                       SizedBox(
-                                        height: 10,
+                                        height: 6,
                                       ),
                                       Opacity(
                                         opacity: 0.8,
@@ -2813,12 +2878,12 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         ),
                                       ),
                                       SizedBox(
-                                        height: 10,
+                                        height: 6,
                                       ),
                                       Opacity(
                                         opacity: 0.8,
                                         child: Text(
-                                          "Expense Type : " +
+                                          "Split In: " +
                                               (partialExpense.isEmpty
                                                   ? "All"
                                                   : "Partial"),
@@ -2828,7 +2893,21 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         ),
                                       ),
                                       SizedBox(
-                                        height: 10,
+                                        height: 6,
+                                      ),
+                                      Opacity(
+                                        opacity: 0.8,
+                                        child: Text(
+                                          "Category: " +
+                                              crypto.decrypt(widget
+                                                  .TransList[index]["Type"]),
+                                          style: const TextStyle(
+                                            fontSize: 17,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 6,
                                       ),
                                       Opacity(
                                         opacity: 0.8,

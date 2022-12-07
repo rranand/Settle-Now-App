@@ -10,7 +10,15 @@ class RoomEach {
   final String date;
   final String roomLink;
 
-  RoomEach({required this.roomName,required this.members,required this.roomKey, required this.active, required this.total, required this.spend, required this.date, required this.roomLink});
+  RoomEach(
+      {required this.roomName,
+      required this.members,
+      required this.roomKey,
+      required this.active,
+      required this.total,
+      required this.spend,
+      required this.date,
+      required this.roomLink});
 
   factory RoomEach.fromJson(Map<String, dynamic> json) {
     return RoomEach(

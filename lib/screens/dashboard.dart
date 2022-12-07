@@ -146,6 +146,7 @@ class _DashBoardState extends State<DashBoard> {
     '30',
     '31'
   ];
+  bool initalDataLoaded = false;
   List<int> from = [];
   List<int> to = [];
   bool error = false;
@@ -165,6 +166,7 @@ class _DashBoardState extends State<DashBoard> {
   List<dynamic> RoomRequest = [];
   GoogleSignIn _googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _currentUser;
+  bool isBankMessageLoadedOnce = false;
   bool _flexibleUpdateAvailable = false;
 
   Future<void> checkForUpdate() async {
@@ -317,7 +319,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future _extractEmail() async {
+  Future<void> initalDataLoad() async {
     var date = DateTime.now();
     from = [0, date.month - 1, date.day - 1];
     to = [0, date.month - 1, date.day - 1];
@@ -328,6 +330,10 @@ class _DashBoardState extends State<DashBoard> {
 
     if (_email.text == "") {
       prefs = await SharedPreferences.getInstance();
+
+      if (prefs.getBool("isBankMessageLoadedOnce") != null) {
+        isBankMessageLoadedOnce = prefs.getBool("isBankMessageLoadedOnce")!;
+      }
 
       if (prefs.getInt("appOpened") != null) {
         appOpened = prefs.getInt("appOpened")!;
@@ -374,6 +380,17 @@ class _DashBoardState extends State<DashBoard> {
           (Route<dynamic> route) => false,
         );
       }
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Future _extractEmail() async {
+    if (!initalDataLoaded) {
+      await initalDataLoad();
+      initalDataLoaded = true;
     }
 
     try {
@@ -2064,6 +2081,10 @@ class _DashBoardState extends State<DashBoard> {
                         builder: (context) => BankTransactions(
                               email: _email.text,
                               token: _token,
+                              isBankMessageLoadedOnce: isBankMessageLoadedOnce,
+                              expenseCategory: expenseCategory,
+                              investmentCategory: investmentCategory,
+                              RoomData: RoomDataO,
                             )),
                   );
                 },
