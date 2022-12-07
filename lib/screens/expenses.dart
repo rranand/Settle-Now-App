@@ -67,7 +67,7 @@ class _ExpensesState extends State<Expenses> {
   Future _initialization() async {
     category = widget.expenseCategory;
     investmentCat = widget.investmentCategory;
-    
+
     var now = DateTime.now();
     CurDate = (now.month - 1).toString() + now.year.toString();
 
@@ -511,43 +511,47 @@ class _ExpensesState extends State<Expenses> {
                 SizedBox(
                   height: 10,
                 ),
-                SizedBox(
-                  height: 570,
-                  child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: category.length + 1,
-                      itemBuilder: ((context, index) {
-                        if (category.length == index) {
-                          return CheckboxListTile(
-                            title: Text("Room"),
-                            value: isRoomFilter,
-                            onChanged: (_) {
-                              isRoomFilter = !isRoomFilter;
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                          );
-                        } else {
-                          return CheckboxListTile(
-                            title: Text(category[index]),
-                            value: filtercategoryIndex.contains(index),
-                            onChanged: (_) {
-                              if (filtercategoryIndex.contains(index)) {
-                                filtercategoryIndex.remove(index);
-                              } else {
-                                filtercategoryIndex.add(index);
-                              }
+                Scrollbar(
+                  radius: Radius.circular(10.0),
+                  thickness: 5.5,
+                  child: SizedBox(
+                    height: 570,
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        itemCount: category.length + 1,
+                        itemBuilder: ((context, index) {
+                          if (category.length == index) {
+                            return CheckboxListTile(
+                              title: Text("Room"),
+                              value: isRoomFilter,
+                              onChanged: (_) {
+                                isRoomFilter = !isRoomFilter;
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          } else {
+                            return CheckboxListTile(
+                              title: Text(category[index]),
+                              value: filtercategoryIndex.contains(index),
+                              onChanged: (_) {
+                                if (filtercategoryIndex.contains(index)) {
+                                  filtercategoryIndex.remove(index);
+                                } else {
+                                  filtercategoryIndex.add(index);
+                                }
 
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                          );
-                        }
-                      })),
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          }
+                        })),
+                  ),
                 ),
                 SizedBox(
                   height: 45,
@@ -648,20 +652,24 @@ class _ExpensesState extends State<Expenses> {
                                       )),
                                 ),
                               )
-                            : ListView.separated(
-                                separatorBuilder: (context, index) => SizedBox(
-                                      height: 5,
-                                    ),
-                                shrinkWrap: true,
-                                itemCount: filterResult.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (filterResult[index]["room"]) {
-                                    return InkWell(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              _buildPopupDialog(
+                            : Scrollbar(
+                                radius: Radius.circular(10.0),
+                                thickness: 5.5,
+                                child: ListView.separated(
+                                    separatorBuilder: (context, index) =>
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                    shrinkWrap: true,
+                                    itemCount: filterResult.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      if (filterResult[index]["room"]) {
+                                        return InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) => _buildPopupDialog(
                                                   context,
                                                   crypto.decrypt(
                                                       filterResult[index]
@@ -673,13 +681,321 @@ class _ExpensesState extends State<Expenses> {
                                                       filterResult[index]
                                                           ["Date"]),
                                                   "₹ " +
-                                                      commaSeperator(
-                                                          crypto.decrypt(
-                                                              filterResult[index]
-                                                                  ["Amount"])),
+                                                      commaSeperator(crypto.decrypt(
+                                                          filterResult[index]
+                                                              ["Amount"])),
                                                   filterResult[index]["room"],
                                                   crypto.decrypt(
                                                       filterResult[index]["id"])),
+                                            );
+                                          },
+                                          child: SizedBox(
+                                            child: Card(
+                                              elevation: 2.0,
+                                              shadowColor: Theme.of(context)
+                                                  .primaryColor,
+                                              color: Theme.of(context)
+                                                  .scaffoldBackgroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .primaryColor
+                                                        .withAlpha(95)),
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10.0),
+                                                child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 1,
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.90,
+                                                          child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                ),
+                                                                Text(
+                                                                  crypto.decrypt(
+                                                                      filterResult[
+                                                                              index]
+                                                                          [
+                                                                          "Purpose"]),
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: const TextStyle(
+                                                                      fontSize:
+                                                                          23,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 15,
+                                                                ),
+                                                                Opacity(
+                                                                  opacity: 0.8,
+                                                                  child: Text(
+                                                                    crypto.decrypt(filterResult[index]
+                                                                            [
+                                                                            "RoomName"]) +
+                                                                        " (Room)",
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          17,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 15,
+                                                                ),
+                                                                Opacity(
+                                                                  opacity: 0.8,
+                                                                  child: Text(
+                                                                    crypto.decrypt(
+                                                                        filterResult[index]
+                                                                            [
+                                                                            "Date"]),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          17,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ]),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        flex: 0,
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.20,
+                                                          child: Text(
+                                                            "₹ " +
+                                                                commaSeperator(crypto.decrypt(
+                                                                    filterResult[
+                                                                            index]
+                                                                        [
+                                                                        "Amount"])),
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 18,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ]),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        return InkWell(
+                                          onTap: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) => _buildPopupDialog(
+                                                  context,
+                                                  crypto.decrypt(
+                                                      filterResult[index]
+                                                          ["Purpose"]),
+                                                  crypto.decrypt(
+                                                          filterResult[index]
+                                                              ["type"]) +
+                                                      (crypto.decrypt(filterResult[index]["invType"]) ==
+                                                              "None"
+                                                          ? ""
+                                                          : (" (" +
+                                                              crypto.decrypt(filterResult[index]
+                                                                  ["invType"]) +
+                                                              ")")),
+                                                  crypto.decrypt(
+                                                      filterResult[index]["Date"]),
+                                                  "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
+                                                  filterResult[index]["room"],
+                                                  crypto.decrypt(filterResult[index]["id"])),
+                                            );
+                                          },
+                                          child: SizedBox(
+                                            child: Card(
+                                              elevation: 2.0,
+                                              shadowColor: Theme.of(context)
+                                                  .primaryColor,
+                                              color: Theme.of(context)
+                                                  .scaffoldBackgroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .primaryColor
+                                                        .withAlpha(95)),
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10.0),
+                                                child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 1,
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.90,
+                                                          child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                SizedBox(
+                                                                  height: 10,
+                                                                ),
+                                                                Text(
+                                                                  crypto.decrypt(
+                                                                      filterResult[
+                                                                              index]
+                                                                          [
+                                                                          "Purpose"]),
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
+                                                                  style: const TextStyle(
+                                                                      fontSize:
+                                                                          23,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w500),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 15,
+                                                                ),
+                                                                Opacity(
+                                                                  opacity: 0.8,
+                                                                  child: Text(
+                                                                    crypto.decrypt(filterResult[index]
+                                                                            [
+                                                                            "type"]) +
+                                                                        (crypto.decrypt(filterResult[index]["invType"]) ==
+                                                                                "None"
+                                                                            ? ""
+                                                                            : (" (" +
+                                                                                crypto.decrypt(filterResult[index]["invType"]) +
+                                                                                ")")),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          17,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 15,
+                                                                ),
+                                                                Opacity(
+                                                                  opacity: 0.8,
+                                                                  child: Text(
+                                                                    crypto.decrypt(
+                                                                        filterResult[index]
+                                                                            [
+                                                                            "Date"]),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          17,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ]),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        flex: 0,
+                                                        child: SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.20,
+                                                          child: Text(
+                                                            "₹ " +
+                                                                commaSeperator(crypto.decrypt(
+                                                                    filterResult[
+                                                                            index]
+                                                                        [
+                                                                        "Amount"])),
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 18,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ]),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }),
+                              ))
+                        : Scrollbar(
+                            radius: Radius.circular(10.0),
+                            thickness: 5.5,
+                            child: ListView.separated(
+                                separatorBuilder: (context, index) => SizedBox(
+                                      height: 5,
+                                    ),
+                                shrinkWrap: true,
+                                itemCount: TransList.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (TransList[index]["room"]) {
+                                    return InkWell(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              _buildPopupDialog(
+                                                  context,
+                                                  crypto.decrypt(
+                                                      TransList[index]
+                                                          ["Purpose"]),
+                                                  crypto.decrypt(
+                                                      TransList[index]
+                                                          ["RoomName"]),
+                                                  crypto.decrypt(
+                                                      TransList[index]["Date"]),
+                                                  "₹ " +
+                                                      commaSeperator(
+                                                          crypto.decrypt(
+                                                              TransList[index]
+                                                                  ["Amount"])),
+                                                  TransList[index]["room"],
+                                                  crypto.decrypt(
+                                                      TransList[index]["id"])),
                                         );
                                       },
                                       child: SizedBox(
@@ -722,7 +1038,7 @@ class _ExpensesState extends State<Expenses> {
                                                             ),
                                                             Text(
                                                               crypto.decrypt(
-                                                                  filterResult[
+                                                                  TransList[
                                                                           index]
                                                                       [
                                                                       "Purpose"]),
@@ -741,7 +1057,7 @@ class _ExpensesState extends State<Expenses> {
                                                             Opacity(
                                                               opacity: 0.8,
                                                               child: Text(
-                                                                crypto.decrypt(filterResult[
+                                                                crypto.decrypt(TransList[
                                                                             index]
                                                                         [
                                                                         "RoomName"]) +
@@ -759,7 +1075,7 @@ class _ExpensesState extends State<Expenses> {
                                                               opacity: 0.8,
                                                               child: Text(
                                                                 crypto.decrypt(
-                                                                    filterResult[
+                                                                    TransList[
                                                                             index]
                                                                         [
                                                                         "Date"]),
@@ -783,7 +1099,7 @@ class _ExpensesState extends State<Expenses> {
                                                       child: Text(
                                                         "₹ " +
                                                             commaSeperator(crypto
-                                                                .decrypt(filterResult[
+                                                                .decrypt(TransList[
                                                                         index][
                                                                     "Amount"])),
                                                         style: const TextStyle(
@@ -804,23 +1120,23 @@ class _ExpensesState extends State<Expenses> {
                                           context: context,
                                           builder: (BuildContext context) => _buildPopupDialog(
                                               context,
-                                              crypto.decrypt(filterResult[index]
-                                                  ["Purpose"]),
-                                              crypto.decrypt(filterResult[index]["type"]) +
-                                                  (crypto.decrypt(filterResult[index]
-                                                              ["invType"]) ==
-                                                          "None"
+                                              crypto.decrypt(
+                                                  TransList[index]["Purpose"]),
+                                              crypto.decrypt(TransList[index]["type"]) +
+                                                  (crypto.decrypt(TransList[index]["invType"]) == "None"
                                                       ? ""
                                                       : (" (" +
                                                           crypto.decrypt(
-                                                              filterResult[index]
+                                                              TransList[index]
                                                                   ["invType"]) +
                                                           ")")),
                                               crypto.decrypt(
-                                                  filterResult[index]["Date"]),
-                                              "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
-                                              filterResult[index]["room"],
-                                              crypto.decrypt(filterResult[index]["id"])),
+                                                  TransList[index]["Date"]),
+                                              "₹ " +
+                                                  commaSeperator(crypto.decrypt(
+                                                      TransList[index]["Amount"])),
+                                              TransList[index]["room"],
+                                              crypto.decrypt(TransList[index]["id"])),
                                         );
                                       },
                                       child: SizedBox(
@@ -863,7 +1179,7 @@ class _ExpensesState extends State<Expenses> {
                                                             ),
                                                             Text(
                                                               crypto.decrypt(
-                                                                  filterResult[
+                                                                  TransList[
                                                                           index]
                                                                       [
                                                                       "Purpose"]),
@@ -882,15 +1198,15 @@ class _ExpensesState extends State<Expenses> {
                                                             Opacity(
                                                               opacity: 0.8,
                                                               child: Text(
-                                                                crypto.decrypt(filterResult[
+                                                                crypto.decrypt(TransList[
                                                                             index]
                                                                         [
                                                                         "type"]) +
-                                                                    (crypto.decrypt(filterResult[index]["invType"]) ==
+                                                                    (crypto.decrypt(TransList[index]["invType"]) ==
                                                                             "None"
                                                                         ? ""
                                                                         : (" (" +
-                                                                            crypto.decrypt(filterResult[index]["invType"]) +
+                                                                            crypto.decrypt(TransList[index]["invType"]) +
                                                                             ")")),
                                                                 style:
                                                                     const TextStyle(
@@ -905,7 +1221,7 @@ class _ExpensesState extends State<Expenses> {
                                                               opacity: 0.8,
                                                               child: Text(
                                                                 crypto.decrypt(
-                                                                    filterResult[
+                                                                    TransList[
                                                                             index]
                                                                         [
                                                                         "Date"]),
@@ -929,7 +1245,7 @@ class _ExpensesState extends State<Expenses> {
                                                       child: Text(
                                                         "₹ " +
                                                             commaSeperator(crypto
-                                                                .decrypt(filterResult[
+                                                                .decrypt(TransList[
                                                                         index][
                                                                     "Amount"])),
                                                         style: const TextStyle(
@@ -944,289 +1260,8 @@ class _ExpensesState extends State<Expenses> {
                                       ),
                                     );
                                   }
-                                }))
-                        : ListView.separated(
-                            separatorBuilder: (context, index) => SizedBox(
-                                  height: 5,
-                                ),
-                            shrinkWrap: true,
-                            itemCount: TransList.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              if (TransList[index]["room"]) {
-                                return InkWell(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) =>
-                                          _buildPopupDialog(
-                                              context,
-                                              crypto.decrypt(
-                                                  TransList[index]["Purpose"]),
-                                              crypto.decrypt(
-                                                  TransList[index]["RoomName"]),
-                                              crypto.decrypt(
-                                                  TransList[index]["Date"]),
-                                              "₹ " +
-                                                  commaSeperator(crypto.decrypt(
-                                                      TransList[index]
-                                                          ["Amount"])),
-                                              TransList[index]["room"],
-                                              crypto.decrypt(
-                                                  TransList[index]["id"])),
-                                    );
-                                  },
-                                  child: SizedBox(
-                                    child: Card(
-                                      elevation: 2.0,
-                                      shadowColor:
-                                          Theme.of(context).primaryColor,
-                                      color: Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: Theme.of(context)
-                                                .primaryColor
-                                                .withAlpha(95)),
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                flex: 1,
-                                                child: SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.90,
-                                                  child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Text(
-                                                          crypto.decrypt(
-                                                              TransList[index]
-                                                                  ["Purpose"]),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: const TextStyle(
-                                                              fontSize: 23,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 15,
-                                                        ),
-                                                        Opacity(
-                                                          opacity: 0.8,
-                                                          child: Text(
-                                                            crypto.decrypt(TransList[
-                                                                        index][
-                                                                    "RoomName"]) +
-                                                                " (Room)",
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 17,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 15,
-                                                        ),
-                                                        Opacity(
-                                                          opacity: 0.8,
-                                                          child: Text(
-                                                            crypto.decrypt(
-                                                                TransList[index]
-                                                                    ["Date"]),
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 17,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ]),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 0,
-                                                child: SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.20,
-                                                  child: Text(
-                                                    "₹ " +
-                                                        commaSeperator(crypto
-                                                            .decrypt(TransList[
-                                                                    index]
-                                                                ["Amount"])),
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ]),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                return InkWell(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) => _buildPopupDialog(
-                                          context,
-                                          crypto.decrypt(
-                                              TransList[index]["Purpose"]),
-                                          crypto.decrypt(TransList[index]["type"]) +
-                                              (crypto.decrypt(TransList[index]["invType"]) ==
-                                                      "None"
-                                                  ? ""
-                                                  : (" (" +
-                                                      crypto.decrypt(
-                                                          TransList[index]
-                                                              ["invType"]) +
-                                                      ")")),
-                                          crypto.decrypt(
-                                              TransList[index]["Date"]),
-                                          "₹ " +
-                                              commaSeperator(crypto.decrypt(
-                                                  TransList[index]["Amount"])),
-                                          TransList[index]["room"],
-                                          crypto.decrypt(TransList[index]["id"])),
-                                    );
-                                  },
-                                  child: SizedBox(
-                                    child: Card(
-                                      elevation: 2.0,
-                                      shadowColor:
-                                          Theme.of(context).primaryColor,
-                                      color: Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: Theme.of(context)
-                                                .primaryColor
-                                                .withAlpha(95)),
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                flex: 1,
-                                                child: SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.90,
-                                                  child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        SizedBox(
-                                                          height: 10,
-                                                        ),
-                                                        Text(
-                                                          crypto.decrypt(
-                                                              TransList[index]
-                                                                  ["Purpose"]),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                          style: const TextStyle(
-                                                              fontSize: 23,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 15,
-                                                        ),
-                                                        Opacity(
-                                                          opacity: 0.8,
-                                                          child: Text(
-                                                            crypto.decrypt(
-                                                                    TransList[
-                                                                            index]
-                                                                        [
-                                                                        "type"]) +
-                                                                (crypto.decrypt(TransList[index]
-                                                                            [
-                                                                            "invType"]) ==
-                                                                        "None"
-                                                                    ? ""
-                                                                    : (" (" +
-                                                                        crypto.decrypt(TransList[index]
-                                                                            [
-                                                                            "invType"]) +
-                                                                        ")")),
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 17,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 15,
-                                                        ),
-                                                        Opacity(
-                                                          opacity: 0.8,
-                                                          child: Text(
-                                                            crypto.decrypt(
-                                                                TransList[index]
-                                                                    ["Date"]),
-                                                            style:
-                                                                const TextStyle(
-                                                              fontSize: 17,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ]),
-                                                ),
-                                              ),
-                                              Expanded(
-                                                flex: 0,
-                                                child: SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width *
-                                                      0.20,
-                                                  child: Text(
-                                                    "₹ " +
-                                                        commaSeperator(crypto
-                                                            .decrypt(TransList[
-                                                                    index]
-                                                                ["Amount"])),
-                                                    style: const TextStyle(
-                                                      fontSize: 18,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ]),
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }
-                            }),
+                                }),
+                          ),
                   )),
       ),
       floatingActionButton: CurDate == widget.date

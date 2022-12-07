@@ -54,7 +54,8 @@ class _LendPageState extends State<LendPage> {
           _refreshIndicatorKey.currentState?.show();
         } else {
           showToast(
-              context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+              context,
+              crypto.decrypt(jsonDecode(response.body)["Message"]),
               Icons.close);
         }
       } on Exception catch (_) {
@@ -122,7 +123,7 @@ class _LendPageState extends State<LendPage> {
           }));
 
       CloseData = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(CloseData["Message"]),Icons.check);
+      showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
     } on Exception catch (_) {
       Navigator.pop(context);
       await onException(context);
@@ -219,92 +220,97 @@ class _LendPageState extends State<LendPage> {
 
   Widget friendListWidget(BuildContext context, List<FriendEach> data) {
     return StatefulBuilder(builder: (context, setState) {
-      return ListView.separated(
-          separatorBuilder: (context, index) => SizedBox(
-                height: 5,
-              ),
-          shrinkWrap: true,
-          physics: ScrollPhysics(),
-          itemCount: data.length,
-          itemBuilder: (BuildContext context, int index) {
-            return SizedBox(
-                height: 80,
-                child: Center(
-                  child: Card(
-                    elevation: 1.0,
-                    shadowColor: Theme.of(context).primaryColor,
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          color: Theme.of(context).cardColor.withAlpha(95)),
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: data[index].isGoogle
-                                  ? data[index].pic
-                                  : (global.driveUrl +
-                                      (data[index].pic.length == 0
-                                          ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                          : data[index].pic)),
-                              progressIndicatorBuilder:
-                                  (context, url, downloadProgress) =>
-                                      CircularProgressIndicator(
-                                          value: downloadProgress.progress),
-                              errorWidget: (context, url, error) => Container(
-                                width: 120.0,
-                                height: 120.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/Images/unknown.jpeg'),
-                                      fit: BoxFit.cover),
+      return Scrollbar(
+        radius: Radius.circular(10.0),
+        thickness: 5.5,
+        child: ListView.separated(
+            separatorBuilder: (context, index) => SizedBox(
+                  height: 5,
+                ),
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            itemCount: data.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                  height: 80,
+                  child: Center(
+                    child: Card(
+                      elevation: 1.0,
+                      shadowColor: Theme.of(context).primaryColor,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color: Theme.of(context).cardColor.withAlpha(95)),
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: data[index].isGoogle
+                                    ? data[index].pic
+                                    : (global.driveUrl +
+                                        (data[index].pic.length == 0
+                                            ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                            : data[index].pic)),
+                                progressIndicatorBuilder:
+                                    (context, url, downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                errorWidget: (context, url, error) => Container(
+                                  width: 120.0,
+                                  height: 120.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                                imageBuilder: (context, imageProvider) =>
+                                    Container(
+                                  width: 45.0,
+                                  height: 45.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover),
+                                  ),
                                 ),
                               ),
-                              imageBuilder: (context, imageProvider) =>
-                                  Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: imageProvider, fit: BoxFit.cover),
+                              Text(
+                                data[index].name,
+                                style: const TextStyle(
+                                  fontSize: 17,
                                 ),
                               ),
-                            ),
-                            Text(
-                              data[index].name,
-                              style: const TextStyle(
-                                fontSize: 17,
-                              ),
-                            ),
-                            IconButton(
-                                onPressed: () async {
-                                  if (data[index].status == "NJ") {
-                                    //await sendLenDenJoinRequest(data[index].email);
-                                    data[index].status = "S";
-                                  } else {
-                                    //await cancelLenDenJoinRequest(data[index].email);
-                                    data[index].status = "NJ";
-                                  }
+                              IconButton(
+                                  onPressed: () async {
+                                    if (data[index].status == "NJ") {
+                                      //await sendLenDenJoinRequest(data[index].email);
+                                      data[index].status = "S";
+                                    } else {
+                                      //await cancelLenDenJoinRequest(data[index].email);
+                                      data[index].status = "NJ";
+                                    }
 
-                                  if (this.mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                                icon: Icon(data[index].status == "NJ"
-                                    ? Icons.person_add_alt
-                                    : Icons.cancel_outlined))
-                          ]),
+                                    if (this.mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                  icon: Icon(data[index].status == "NJ"
+                                      ? Icons.person_add_alt
+                                      : Icons.cancel_outlined))
+                            ]),
+                      ),
                     ),
-                  ),
-                ));
-          });
+                  ));
+            }),
+      );
     });
   }
 
@@ -347,72 +353,80 @@ class _LendPageState extends State<LendPage> {
                           width: MediaQuery.of(context).size.width * 0.95,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: ListView.separated(
-                              separatorBuilder: (context, index) => SizedBox(
-                                height: 10,
-                              ),
-                              itemCount: data.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: 85,
-                                  child: Card(
-                                    elevation: 1.0,
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: Theme.of(context)
-                                              .cardColor
-                                              .withAlpha(95)),
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Expanded(
-                                              flex: 1,
-                                              child: InkWell(
-                                                child: Text(
-                                                  crypto.decrypt(
-                                                      data[index]["purpose"]),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: const TextStyle(
-                                                      fontSize: 20,
-                                                      fontWeight:
-                                                          FontWeight.w500),
+                            child: Scrollbar(
+                              radius: Radius.circular(10.0),
+                              thickness: 5.5,
+                              child: ListView.separated(
+                                separatorBuilder: (context, index) => SizedBox(
+                                  height: 10,
+                                ),
+                                itemCount: data.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    height: 85,
+                                    child: Card(
+                                      elevation: 1.0,
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      shadowColor:
+                                          Theme.of(context).primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: Theme.of(context)
+                                                .cardColor
+                                                .withAlpha(95)),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Expanded(
+                                                flex: 1,
+                                                child: InkWell(
+                                                  child: Text(
+                                                    crypto.decrypt(
+                                                        data[index]["purpose"]),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: const TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                  onTap: () {
+                                                    showToast(
+                                                        context,
+                                                        crypto.decrypt(
+                                                            data[index]
+                                                                ["purpose"]),
+                                                        Icons.check);
+                                                  },
                                                 ),
-                                                onTap: () {
-                                                  showToast(
-                                                      context,
-                                                      crypto.decrypt(data[index]
-                                                          ["purpose"]),
-                                                      Icons.check);
-                                                },
                                               ),
-                                            ),
-                                            Text(
-                                              "₹ " +
-                                                  commaSeperator(crypto.decrypt(
-                                                      data[index]["amount"])),
-                                              style: TextStyle(
-                                                  fontSize: 18,
-                                                  color: (crypto.decrypt(data[
-                                                                  index]
-                                                              ["amount"])[0] ==
-                                                          "-"
-                                                      ? Colors.red
-                                                      : Colors.green)),
-                                            ),
-                                          ]),
+                                              Text(
+                                                "₹ " +
+                                                    commaSeperator(crypto
+                                                        .decrypt(data[index]
+                                                            ["amount"])),
+                                                style: TextStyle(
+                                                    fontSize: 18,
+                                                    color: (crypto.decrypt(data[
+                                                                    index][
+                                                                "amount"])[0] ==
+                                                            "-"
+                                                        ? Colors.red
+                                                        : Colors.green)),
+                                              ),
+                                            ]),
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ))

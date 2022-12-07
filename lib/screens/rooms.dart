@@ -20,6 +20,7 @@ class RoomExpense extends StatefulWidget {
   final String token;
   final String roomLink;
   final bool isRoomActive;
+
   const RoomExpense(
       {Key? key,
       required this.roomKey,
@@ -70,6 +71,8 @@ class _RoomExpenseState extends State<RoomExpense>
   bool showAllTransactionData = true;
   ScrollController _scrollController = ScrollController();
   List<String> addExpenseTo = [];
+  List<dynamic> roomExpenseCategory = [];
+  int roomExpenseCategoryIndex = 0;
 
   _getPaymentData() async {
     try {
@@ -259,6 +262,7 @@ class _RoomExpenseState extends State<RoomExpense>
               'roomKey': crypto.encrypt(widget.roomKey),
               'purpose': crypto.encrypt(_purpose.text),
               'amt': crypto.encrypt(_amt.text),
+              'type': crypto.encrypt(roomExpenseCategoryIndex.toString()),
               "members": crypto.encrypt(addExpenseTo.toString())
             }));
 
@@ -669,87 +673,93 @@ class _RoomExpenseState extends State<RoomExpense>
 
   Widget friendListWidget(BuildContext context, List<FriendEach> data) {
     return StatefulBuilder(builder: (context, setState) {
-      return ListView.separated(
-          separatorBuilder: (context, index) => SizedBox(
-                height: 5,
-              ),
-          shrinkWrap: true,
-          physics: ScrollPhysics(),
-          itemCount: data.length,
-          itemBuilder: (BuildContext context, int index) {
-            return SizedBox(
-                height: 80,
-                child: Center(
-                  child: Card(
-                    elevation: 1.0,
-                    shadowColor: Theme.of(context).primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: data[index].pic.length == 0
-                                  ? global.driveUrl +
-                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                  : data[index].pic,
-                              progressIndicatorBuilder:
-                                  (context, url, downloadProgress) =>
-                                      CircularProgressIndicator(
-                                          value: downloadProgress.progress),
-                              errorWidget: (context, url, error) => Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/Images/unknown.jpeg'),
-                                      fit: BoxFit.cover),
+      return Scrollbar(
+        radius: Radius.circular(10.0),
+        thickness: 5.5,
+        child: ListView.separated(
+            separatorBuilder: (context, index) => SizedBox(
+                  height: 5,
+                ),
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            itemCount: data.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                  height: 80,
+                  child: Center(
+                    child: Card(
+                      elevation: 1.0,
+                      shadowColor: Theme.of(context).primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: data[index].pic.length == 0
+                                    ? global.driveUrl +
+                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                    : data[index].pic,
+                                progressIndicatorBuilder:
+                                    (context, url, downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                errorWidget: (context, url, error) => Container(
+                                  width: 45.0,
+                                  height: 45.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                                imageBuilder: (context, imageProvider) =>
+                                    Container(
+                                  width: 45.0,
+                                  height: 45.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover),
+                                  ),
                                 ),
                               ),
-                              imageBuilder: (context, imageProvider) =>
-                                  Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: imageProvider, fit: BoxFit.cover),
+                              Text(
+                                data[index].name,
+                                style: const TextStyle(
+                                  fontSize: 17,
                                 ),
                               ),
-                            ),
-                            Text(
-                              data[index].name,
-                              style: const TextStyle(
-                                fontSize: 17,
-                              ),
-                            ),
-                            IconButton(
-                                onPressed: () async {
-                                  if (data[index].status == "NJ") {
-                                    await sendJoinRequest(data[index].email);
-                                    data[index].status = "S";
-                                  } else {
-                                    await cancelJoinRequest(data[index].email);
-                                    data[index].status = "NJ";
-                                  }
+                              IconButton(
+                                  onPressed: () async {
+                                    if (data[index].status == "NJ") {
+                                      await sendJoinRequest(data[index].email);
+                                      data[index].status = "S";
+                                    } else {
+                                      await cancelJoinRequest(
+                                          data[index].email);
+                                      data[index].status = "NJ";
+                                    }
 
-                                  if (this.mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                                icon: Icon(data[index].status == "NJ"
-                                    ? Icons.person_add_alt
-                                    : Icons.cancel_outlined))
-                          ]),
+                                    if (this.mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                  icon: Icon(data[index].status == "NJ"
+                                      ? Icons.person_add_alt
+                                      : Icons.cancel_outlined))
+                            ]),
+                      ),
                     ),
-                  ),
-                ));
-          });
+                  ));
+            }),
+      );
     });
   }
 

@@ -44,6 +44,8 @@ dependencies:
   internet_connection_checker: ^1.0.0+1
   in_app_review: ^2.0.4
   flutter_sms_inbox: ^1.0.2
+  permission_handler: ^10.2.0
+  app_settings: ^4.1.8
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rohit.settlenow">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_SMS" />
    <application
         android:label="Settle Now"
         android:name="${applicationName}"

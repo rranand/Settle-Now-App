@@ -14,6 +14,7 @@ import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/route_service.dart';
+import 'package:settlenow/screens/BankTransactions.dart';
 import 'package:settlenow/screens/aboutus.dart';
 import 'package:settlenow/screens/contactUs.dart';
 import 'package:settlenow/screens/expenses.dart';
@@ -1396,129 +1397,144 @@ class _DashBoardState extends State<DashBoard> {
                     ))
               ],
             )
-          : ListView.separated(
-              physics: AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.all(8.0),
-              itemCount: RoomRequest.length,
-              separatorBuilder: (context, index) => SizedBox(
-                    height: 5,
-                  ),
-              itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                  child: Card(
-                      elevation: 1.0,
-                      clipBehavior: Clip.antiAlias,
-                      shadowColor: Theme.of(context).primaryColor,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                            color:
-                                Theme.of(context).primaryColor.withAlpha(95)),
-                        borderRadius: BorderRadius.circular(15.0),
+          : Scrollbar(
+              radius: Radius.circular(10.0),
+              thickness: 5.5,
+              child: ListView.separated(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.all(8.0),
+                  itemCount: RoomRequest.length,
+                  separatorBuilder: (context, index) => SizedBox(
+                        height: 5,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CachedNetworkImage(
-                              imageUrl: crypto
-                                          .decrypt(RoomRequest[index]["pic"])
-                                          .length ==
-                                      0
-                                  ? global.driveUrl +
-                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                  : crypto.decrypt(RoomRequest[index]["pic"]),
-                              progressIndicatorBuilder:
-                                  (context, url, downloadProgress) =>
-                                      CircularProgressIndicator(
-                                          value: downloadProgress.progress),
-                              errorWidget: (context, url, error) => Container(
-                                width: 65.0,
-                                height: 65.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/Images/unknown.jpeg'),
-                                      fit: BoxFit.cover),
-                                ),
-                              ),
-                              imageBuilder: (context, imageProvider) =>
-                                  Container(
-                                width: 65.0,
-                                height: 65.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: imageProvider, fit: BoxFit.cover),
-                                ),
-                              ),
-                            ),
+                  itemBuilder: (BuildContext context, int index) {
+                    return SizedBox(
+                      child: Card(
+                          elevation: 1.0,
+                          clipBehavior: Clip.antiAlias,
+                          shadowColor: Theme.of(context).primaryColor,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                                color: Theme.of(context)
+                                    .primaryColor
+                                    .withAlpha(95)),
+                            borderRadius: BorderRadius.circular(15.0),
                           ),
-                          Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      width: MediaQuery.of(context).size.width -
-                                          140,
-                                      child: Text(
-                                        crypto.decrypt(
-                                                RoomRequest[index]["by"]) +
-                                            " invited to join " +
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: CachedNetworkImage(
+                                  imageUrl: crypto
+                                              .decrypt(
+                                                  RoomRequest[index]["pic"])
+                                              .length ==
+                                          0
+                                      ? global.driveUrl +
+                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                      : crypto
+                                          .decrypt(RoomRequest[index]["pic"]),
+                                  progressIndicatorBuilder:
+                                      (context, url, downloadProgress) =>
+                                          CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                    width: 65.0,
+                                    height: 65.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              'assets/Images/unknown.jpeg'),
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                  imageBuilder: (context, imageProvider) =>
+                                      Container(
+                                    width: 65.0,
+                                    height: 65.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width -
+                                              140,
+                                          child: Text(
                                             crypto.decrypt(
-                                                RoomRequest[index]["name"]),
-                                        style: TextStyle(
-                                          overflow: TextOverflow.clip,
-                                          fontSize: 20,
+                                                    RoomRequest[index]["by"]) +
+                                                " invited to join " +
+                                                crypto.decrypt(
+                                                    RoomRequest[index]["name"]),
+                                            style: TextStyle(
+                                              overflow: TextOverflow.clip,
+                                              fontSize: 20,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 8,
-                                    ),
-                                    SizedBox(
-                                      width: MediaQuery.of(context).size.width -
-                                          140,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          IconButton(
-                                              onPressed: () async {
-                                                await JoinRequest(
-                                                    "0",
-                                                    crypto.decrypt(
-                                                        RoomRequest[index]
-                                                            ["key"]));
-                                              },
-                                              icon: Icon(
-                                                Icons.cancel_sharp,
-                                                size: 30,
-                                                color: Colors.red,
-                                              )),
-                                          IconButton(
-                                              onPressed: () async {
-                                                await JoinRequest(
-                                                    "1",
-                                                    crypto.decrypt(
-                                                        RoomRequest[index]
-                                                            ["key"]));
-                                              },
-                                              icon: Icon(Icons.check,
-                                                  size: 30,
-                                                  color: Colors.greenAccent)),
-                                        ],
-                                      ),
-                                    )
-                                  ])),
-                        ],
-                      )),
-                );
-              }),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width -
+                                              140,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceAround,
+                                            mainAxisSize: MainAxisSize.max,
+                                            children: [
+                                              IconButton(
+                                                  onPressed: () async {
+                                                    await JoinRequest(
+                                                        "0",
+                                                        crypto.decrypt(
+                                                            RoomRequest[index]
+                                                                ["key"]));
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.cancel_sharp,
+                                                    size: 30,
+                                                    color: Colors.red,
+                                                  )),
+                                              IconButton(
+                                                  onPressed: () async {
+                                                    await JoinRequest(
+                                                        "1",
+                                                        crypto.decrypt(
+                                                            RoomRequest[index]
+                                                                ["key"]));
+                                                  },
+                                                  icon: Icon(Icons.check,
+                                                      size: 30,
+                                                      color:
+                                                          Colors.greenAccent)),
+                                            ],
+                                          ),
+                                        )
+                                      ])),
+                            ],
+                          )),
+                    );
+                  }),
+            ),
     );
   }
 
@@ -2039,6 +2055,44 @@ class _DashBoardState extends State<DashBoard> {
                   "Len-Den",
                   style: TextStyle(fontSize: 14, color: Colors.white),
                 ),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => BankTransactions(
+                              email: _email.text,
+                              token: _token,
+                            )),
+                  );
+                },
+                leading: Icon(
+                  Icons.payments,
+                  color: Colors.white,
+                  size: 22,
+                ),
+                title: Text(
+                  "Bank Transactions",
+                  style: TextStyle(fontSize: 14, color: Colors.white),
+                ),
+                trailing: Container(
+                    width: 55,
+                    height: 30,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border.all(
+                          color: themeProvider.isDarkTheme
+                              ? Theme.of(context).primaryColor
+                              : Colors.white,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(12))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Text("Beta",
+                          style: TextStyle(fontSize: 13, color: Colors.white)),
+                    )),
               ),
               ListTile(
                 leading: Icon(
