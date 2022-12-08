@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,7 +14,6 @@ import 'package:settlenow/others/crypto.dart';
 import '../functions/additionalFunction.dart';
 import '../functions/filterBankSMS.dart';
 import '../contents.dart' as global;
-import '../models/RoomEach.dart';
 
 class BankTransactions extends StatefulWidget {
   final String email;
@@ -21,7 +21,7 @@ class BankTransactions extends StatefulWidget {
   final bool isBankMessageLoadedOnce;
   final List<dynamic> expenseCategory;
   final List<dynamic> investmentCategory;
-  final List<RoomEach> RoomData;
+  final List<dynamic> roomExpenseCategory;
 
   const BankTransactions({
     Key? key,
@@ -30,7 +30,7 @@ class BankTransactions extends StatefulWidget {
     required this.isBankMessageLoadedOnce,
     required this.expenseCategory,
     required this.investmentCategory,
-    required this.RoomData,
+    required this.roomExpenseCategory,
   }) : super(key: key);
 
   @override
@@ -51,10 +51,71 @@ class _BankTransactionsState extends State<BankTransactions> {
   int roomCategoryIndex = 0;
   List<dynamic> category = [];
   List<dynamic> investmentCat = [];
+  List<dynamic> roomData = [];
   final _formKey = GlobalKey<FormState>();
   final _formKeyRoom = GlobalKey<FormState>();
   final TextEditingController _purpose = TextEditingController();
+  List<dynamic> roomMembers = [];
   List<String> addExpenseTo = [];
+  bool isSplitMemberLoading = false;
+
+  Future<void> getActiveRooms() async {
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + 'room/fullActiveRoom'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+          }));
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        roomData = data['data'];
+        if (roomData.isNotEmpty) {
+          await getMembers(roomData[0]['Key']);
+        }
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> getMembers(String roomkey) async {
+    if (this.mounted) {
+      setState(() {
+        isSplitMemberLoading = true;
+      });
+    }
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + 'room/roomSplitMembers'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode(
+              {'email': crypto.encrypt(widget.email), 'roomKey': roomkey}));
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        roomMembers = data['data'];
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+
+    isSplitMemberLoading = false;
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
 
   Future<void> getAllSms() async {
     category = widget.expenseCategory;
@@ -67,13 +128,12 @@ class _BankTransactionsState extends State<BankTransactions> {
         kinds: [SmsQueryKind.inbox],
       );
       _messages = messages;
+      sbiTransactions = await filterSBISMS(_messages);
+
+      await getActiveRooms();
     } else {
       await Permission.sms.request();
       permissionGranted = await Permission.sms.isDenied;
-    }
-
-    if (permission.isGranted) {
-      sbiTransactions = await filterSBISMS(_messages);
     }
 
     if (this.mounted) {
@@ -382,6 +442,16 @@ class _BankTransactionsState extends State<BankTransactions> {
     );
   }
 
+  bool findElement(List<String> arr, String ele) {
+    for (int i = 0; i < arr.length; i++) {
+      if (arr[i] == ele) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   AddRoomExpense(BuildContext context, String amount, String date) async {
     if (_formKeyRoom.currentState!.validate()) {
       var Tdata = null;
@@ -395,10 +465,11 @@ class _BankTransactionsState extends State<BankTransactions> {
             },
             body: jsonEncode({
               'email': crypto.encrypt(widget.email),
-              'roomKey': crypto.encrypt(widget.RoomData[roomIndex].roomKey),
+              'roomKey': roomData[roomIndex]["Key"],
               'purpose': crypto.encrypt(_purpose.text),
               'amt': crypto.encrypt(amount),
-              'type': crypto.encrypt(category[roomCategoryIndex]),
+              'type':
+                  crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
               "members": crypto.encrypt(addExpenseTo.toString())
             }));
 
@@ -470,7 +541,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 70,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: widget.RoomData.length,
+                          itemCount: roomData.length,
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               child: Padding(
@@ -491,7 +562,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       child: Center(
                                         child: InkWell(
                                           child: Text(
-                                            widget.RoomData[index].roomName,
+                                            crypto.decrypt(
+                                                roomData[index]["Name"]),
                                             style: TextStyle(
                                               fontSize: 16,
                                               color: (index == roomIndex
@@ -507,12 +579,12 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       ),
                                     ),
                                   ),
-                                  onTap: () {
+                                  onTap: () async {
+                                    await getMembers(roomData[index]["Key"]);
+                                    roomIndex = index;
                                     if (this.mounted) {
                                       setState(
-                                        () {
-                                          roomIndex = index;
-                                        },
+                                        () {},
                                       );
                                     }
                                   },
@@ -527,7 +599,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 70,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: category.length,
+                          itemCount: widget.roomExpenseCategory.length,
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               child: Padding(
@@ -548,7 +620,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       child: Center(
                                         child: InkWell(
                                           child: Text(
-                                            category[index],
+                                            widget.roomExpenseCategory[index],
                                             style: TextStyle(
                                               fontSize: 16,
                                               color: (index == roomCategoryIndex
@@ -582,6 +654,176 @@ class _BankTransactionsState extends State<BankTransactions> {
                       SizedBox(
                         height: 15,
                       ),
+                      isSplitMemberLoading
+                          ? CircularProgressIndicator()
+                          : SizedBox(
+                              height: 80,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: roomMembers.length + 1,
+                                itemBuilder: (BuildContext context, int index) {
+                                  if (index == 0) {
+                                    return InkWell(
+                                      child: SizedBox(
+                                        width: 85,
+                                        child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Card(
+                                                color: Theme.of(context)
+                                                    .dialogBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: addExpenseTo
+                                                              .isEmpty
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
+                                                ),
+                                                child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "ALL",
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                        ),
+                                                      ),
+                                                    )))),
+                                      ),
+                                      onTap: () {
+                                        addExpenseTo.clear();
+                                        if (this.mounted) {
+                                          setState(() {});
+                                        }
+                                      },
+                                    );
+                                  } else if (crypto.decrypt(
+                                          roomMembers[index - 1]['email']) ==
+                                      widget.email) {
+                                    return SizedBox();
+                                  } else {
+                                    return InkWell(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Card(
+                                          color: Theme.of(context)
+                                              .dialogBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: findElement(
+                                                        addExpenseTo,
+                                                        crypto.decrypt(
+                                                            roomMembers[index -
+                                                                1]['email']))
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Theme.of(context)
+                                                        .cardColor),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(5.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                CachedNetworkImage(
+                                                  imageUrl: crypto
+                                                              .decrypt(
+                                                                  roomMembers[
+                                                                          index -
+                                                                              1]
+                                                                      ['pic'])
+                                                              .length ==
+                                                          0
+                                                      ? global.driveUrl +
+                                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                      : crypto.decrypt(
+                                                          roomMembers[index - 1]
+                                                              ['pic']),
+                                                  progressIndicatorBuilder: (context,
+                                                          url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          Container(
+                                                    width: 50.0,
+                                                    height: 50.0,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                          image: AssetImage(
+                                                              'assets/Images/unknown.jpeg'),
+                                                          fit: BoxFit.cover),
+                                                    ),
+                                                  ),
+                                                  imageBuilder: (context,
+                                                          imageProvider) =>
+                                                      Container(
+                                                    width: 50.0,
+                                                    height: 50.0,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                          image: imageProvider,
+                                                          fit: BoxFit.cover),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  crypto.decrypt(
+                                                      roomMembers[index - 1]
+                                                          ['Name']),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      onTap: () {
+                                        if (findElement(
+                                            addExpenseTo,
+                                            crypto.decrypt(
+                                                roomMembers[index - 1]
+                                                    ['email']))) {
+                                          addExpenseTo.remove(crypto.decrypt(
+                                              roomMembers[index - 1]['email']));
+                                        } else {
+                                          addExpenseTo.add(crypto.decrypt(
+                                              roomMembers[index - 1]['email']));
+
+                                          if (addExpenseTo.length ==
+                                              roomData.length) {
+                                            addExpenseTo.clear();
+                                          }
+                                        }
+
+                                        if (this.mounted) {
+                                          setState(() {});
+                                        }
+                                      },
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
                       SizedBox(
                         height: 45,
                         width: 90,
@@ -635,7 +877,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                   padding: MediaQuery.of(context).viewInsets,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    height: 185,
+                    height: roomData.isNotEmpty ? 185 : 140,
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Column(
@@ -680,30 +922,35 @@ class _BankTransactionsState extends State<BankTransactions> {
                             SizedBox(
                               height: 10,
                             ),
-                            SizedBox(
-                              height: 45,
-                              width: MediaQuery.of(context).size.width * 0.85,
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  showRoomDialog(amount, date);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  side: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                ),
-                                child: Text(
-                                  "Room",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: themeProvider.isDarkTheme
-                                          ? Colors.white
-                                          : Colors.black),
-                                ),
-                              ),
-                            )
+                            roomData.isNotEmpty
+                                ? SizedBox(
+                                    height: 45,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.85,
+                                    child: OutlinedButton(
+                                      onPressed: () {
+                                        showRoomDialog(amount, date);
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      child: Text(
+                                        "Room",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
+                                    ),
+                                  )
+                                : SizedBox()
                           ]),
                     ),
                   ),
@@ -867,23 +1114,28 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                 sbiTransactions[index].receiver,
                                                 style: TextStyle(fontSize: 24),
                                               ),
-                                              IconButton(
-                                                  onPressed: () {
-                                                    showAddDialog(
-                                                        sbiTransactions[index]
-                                                            .amount,
-                                                        sbiTransactions[index]
-                                                            .date);
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.add,
-                                                    color:
-                                                        sbiTransactions[index]
+                                              sbiTransactions[index].type ==
+                                                      "Credit"
+                                                  ? SizedBox()
+                                                  : IconButton(
+                                                      onPressed: () {
+                                                        showAddDialog(
+                                                            sbiTransactions[
+                                                                    index]
+                                                                .amount,
+                                                            sbiTransactions[
+                                                                    index]
+                                                                .date);
+                                                      },
+                                                      icon: Icon(
+                                                        Icons.add,
+                                                        color: sbiTransactions[
+                                                                        index]
                                                                     .type ==
                                                                 "Credit"
                                                             ? Colors.greenAccent
                                                             : Colors.redAccent,
-                                                  ))
+                                                      ))
                                             ],
                                           ),
                                           Row(

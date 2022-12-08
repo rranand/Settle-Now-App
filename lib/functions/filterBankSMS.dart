@@ -1,4 +1,5 @@
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:intl/intl.dart';
 
 import '../models/FriendEach.dart';
 
@@ -42,10 +43,13 @@ String capitalizeFirstLetter(String text) {
 Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
   String bankName = "SBI";
   List<TransactionEach> Transactions = [];
+  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+  DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
 
   for (int i = 0; i < _messages.length; i++) {
     String messageBody = _messages[i].body.toString().toLowerCase();
-    int dateIndex = _messages[i].date.toString().indexOf(".");
+    DateTime dateTime = dateFormat.parse(_messages[i].date.toString());
+    String timeStrap = dateFormat_new.format(dateTime);
 
     if (_messages[i].sender.toString().contains(bankName)) {
       bool isUPI = _messages[i].sender.toString().contains("UPI");
@@ -88,7 +92,7 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
 
         Transactions.add(TransactionEach(
             amount: amount,
-            date: _messages[i].date.toString().substring(0, dateIndex),
+            date: timeStrap,
             transactionID: transactionID,
             receiver: capitalizeFirstLetter(receiver),
             type: "Debit",
@@ -104,7 +108,7 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
 
           Transactions.add(TransactionEach(
               amount: amount,
-              date: _messages[i].date.toString().substring(0, dateIndex),
+              date: timeStrap,
               transactionID: transactionID,
               receiver: capitalizeFirstLetter(receiver),
               type: "Debit",
@@ -123,7 +127,7 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
         String transactionID = "Unknown";
         Transactions.add(TransactionEach(
             amount: amount,
-            date: _messages[i].date.toString().substring(0, dateIndex),
+            date: timeStrap,
             transactionID: transactionID,
             receiver: "Self",
             type: "Credit",
@@ -134,7 +138,7 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
         String transactionID = getAmount(messageBody, "transaction number ");
         Transactions.add(TransactionEach(
             amount: amount,
-            date: _messages[i].date.toString().substring(0, dateIndex),
+            date: timeStrap,
             transactionID: transactionID,
             receiver: "Self",
             type: "Debit",

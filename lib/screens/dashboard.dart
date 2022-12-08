@@ -98,6 +98,7 @@ class _DashBoardState extends State<DashBoard> {
   bool gotInitialData = false;
   List<dynamic> expenseCategory = [];
   List<dynamic> investmentCategory = [];
+  List<dynamic> roomExpenseCategory = [];
   late ShareMessage shareMessage;
   List<String> Month = [
     'January',
@@ -250,6 +251,10 @@ class _DashBoardState extends State<DashBoard> {
         investmentCategory = data['investmentCategory'];
         for (int i = 0; i < investmentCategory.length; i++) {
           investmentCategory[i] = crypto.decrypt(investmentCategory[i]);
+        }
+        roomExpenseCategory = data['roomExpenseCategory'];
+        for (int i = 0; i < roomExpenseCategory.length; i++) {
+          roomExpenseCategory[i] = crypto.decrypt(roomExpenseCategory[i]);
         }
         shareMessage = ShareMessage.fromJson(data['shareMessage']);
       }
@@ -2084,7 +2089,7 @@ class _DashBoardState extends State<DashBoard> {
                               isBankMessageLoadedOnce: isBankMessageLoadedOnce,
                               expenseCategory: expenseCategory,
                               investmentCategory: investmentCategory,
-                              RoomData: RoomDataO,
+                              roomExpenseCategory: roomExpenseCategory,
                             )),
                   );
                 },
