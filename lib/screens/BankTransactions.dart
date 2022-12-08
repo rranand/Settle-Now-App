@@ -58,6 +58,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   List<dynamic> roomMembers = [];
   List<String> addExpenseTo = [];
   bool isSplitMemberLoading = false;
+  bool openedOnce = false;
 
   Future<void> getActiveRooms() async {
     try {
@@ -169,7 +170,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                           ),
                           IconButton(
                               onPressed: () async {
-                                pref.setBool("isBankMessageLoadedOnce", true);
+                                await pref.setBool(
+                                    "isBankMessageLoadedOnce", true);
                                 Navigator.pop(context);
                               },
                               icon: Icon(Icons.close))
@@ -969,8 +971,13 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.isBankMessageLoadedOnce) {
+    if (!widget.isBankMessageLoadedOnce && !openedOnce) {
+      openedOnce = true;
       Future.delayed(Duration.zero, () => showBankAlert(context));
+
+      if (this.mounted) {
+        setState(() {});
+      }
     }
 
     final themeProvider = Provider.of<ThemeProvider>(context);
