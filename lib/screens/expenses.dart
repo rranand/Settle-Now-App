@@ -368,13 +368,17 @@ class _ExpensesState extends State<Expenses> {
                     "Date: " + date,
                     style: TextStyle(fontSize: 18),
                   ),
-                  roomExpenseType.isEmpty?SizedBox():(SizedBox(
-                    height: 10,
-                  )),
-                  roomExpenseType.isEmpty?SizedBox():(Text(
-                    "Category: " + roomExpenseType,
-                    style: TextStyle(fontSize: 18),
-                  )),
+                  roomExpenseType.isEmpty
+                      ? SizedBox()
+                      : (SizedBox(
+                          height: 10,
+                        )),
+                  roomExpenseType.isEmpty
+                      ? SizedBox()
+                      : (Text(
+                          "Category: " + roomExpenseType,
+                          style: TextStyle(fontSize: 18),
+                        )),
                 ],
               ),
               SizedBox(
@@ -864,7 +868,8 @@ class _ExpensesState extends State<Expenses> {
                                                       filterResult[index]["Date"]),
                                                   "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
                                                   filterResult[index]["room"],
-                                                  crypto.decrypt(filterResult[index]["id"]), ""),
+                                                  crypto.decrypt(filterResult[index]["id"]),
+                                                  ""),
                                             );
                                           },
                                           child: SizedBox(
@@ -1187,7 +1192,8 @@ class _ExpensesState extends State<Expenses> {
                                                   commaSeperator(crypto.decrypt(
                                                       TransList[index]["Amount"])),
                                               TransList[index]["room"],
-                                              crypto.decrypt(TransList[index]["id"]), ""),
+                                              crypto.decrypt(TransList[index]["id"]),
+                                              ""),
                                         );
                                       },
                                       child: SizedBox(
@@ -1394,13 +1400,14 @@ class _ExpensesState extends State<Expenses> {
                                         child: InkWell(
                                           child: Card(
                                             color: Theme.of(context)
-                                                    .scaffoldBackgroundColor,
+                                                .scaffoldBackgroundColor,
                                             shape: RoundedRectangleBorder(
                                               side: BorderSide(
                                                   color: (index == categoryIndex
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .scaffoldBackgroundColor)),
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : Theme.of(context)
+                                                          .scaffoldBackgroundColor)),
                                               borderRadius:
                                                   BorderRadius.circular(10.0),
                                             ),
@@ -1413,13 +1420,6 @@ class _ExpensesState extends State<Expenses> {
                                                     category[index],
                                                     style: TextStyle(
                                                       fontSize: 16,
-                                                      color: (index ==
-                                                              categoryIndex
-                                                          ? Colors.white
-                                                          : Theme.of(context)
-                                                              .textTheme
-                                                              .bodySmall!
-                                                              .color),
                                                       fontWeight:
                                                           FontWeight.w500,
                                                     ),
@@ -1460,14 +1460,15 @@ class _ExpensesState extends State<Expenses> {
                                               child: InkWell(
                                                 child: Card(
                                                   color: Theme.of(context)
-                                                          .scaffoldBackgroundColor,
+                                                      .scaffoldBackgroundColor,
                                                   shape: RoundedRectangleBorder(
                                                     side: BorderSide(
-                                                        color: (index == investIndex
-                                                      ? Theme.of(context)
-                                                          .primaryColor
-                                                      : Theme.of(context)
-                                                          .scaffoldBackgroundColor)),
+                                                        color: (index ==
+                                                                investIndex
+                                                            ? Theme.of(context)
+                                                                .primaryColor
+                                                            : Theme.of(context)
+                                                                .scaffoldBackgroundColor)),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             10.0),
@@ -1482,14 +1483,6 @@ class _ExpensesState extends State<Expenses> {
                                                           investmentCat[index],
                                                           style: TextStyle(
                                                             fontSize: 16,
-                                                            color: (index ==
-                                                                    investIndex
-                                                                ? Colors.white
-                                                                : Theme.of(
-                                                                        context)
-                                                                    .textTheme
-                                                                    .bodySmall!
-                                                                    .color),
                                                             fontWeight:
                                                                 FontWeight.w500,
                                                           ),

@@ -46,7 +46,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<TransactionEach> sbiTransactions = [];
+  List<TransactionEach> allTransactions = [];
   int categoryIndex = 0;
   int investIndex = 0;
   int roomIndex = 0;
@@ -57,6 +57,8 @@ class _BankTransactionsState extends State<BankTransactions> {
     new TextEditingController(text: "10000")
   ];
   List<String> transactionType = ["Credit", "Debit"];
+  List<String> allBanks = ["SBI", "ICICI"];
+  Set<int> allBanksIndex = Set();
   List<String> transactionMode = [
     "UPI",
     "NEFT",
@@ -153,7 +155,16 @@ class _BankTransactionsState extends State<BankTransactions> {
         kinds: [SmsQueryKind.inbox],
       );
       _messages = messages;
-      sbiTransactions = await filterSBISMS(_messages);
+      allTransactions = await filterSBISMS(_messages);
+      allTransactions.addAll(await filterICICISMS(_messages));
+
+      allTransactions.sort((b, a) {
+        DateTime tempDate_1 =
+            new DateFormat("MMM dd yyyy h:mm a").parse(a.date);
+        DateTime tempDate_2 =
+            new DateFormat("MMM dd yyyy h:mm a").parse(b.date);
+        return tempDate_1.compareTo(tempDate_2);
+      });
 
       await getActiveRooms();
     } else {
@@ -206,6 +217,15 @@ class _BankTransactionsState extends State<BankTransactions> {
                       ),
                       Text(
                         "State Bank of India",
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text(
+                        "ICICI",
                         style: TextStyle(
                           fontSize: 18,
                         ),
@@ -1013,44 +1033,95 @@ class _BankTransactionsState extends State<BankTransactions> {
 
     DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
 
-    sbiTransactions.forEach((element) {
-      if ((dateRange.start.isAtSameMomentAs(dateFormat.parse(element.date)) ||
-              dateRange.start.isBefore(dateFormat.parse(element.date))) &&
-          (dateRange.end.isAtSameMomentAs(dateFormat.parse(element.date)) ||
-              dateRange.end.isAfter(dateFormat.parse(element.date)))) {
-        double amt = double.parse(element.amount);
-        if (amt >= int.parse(_amountRangeValues[0].text) &&
-            amt <= int.parse(_amountRangeValues[1].text)) {
-          transactionTypeIndex.forEach((ttIndex) {
-            String ttElement = transactionType[ttIndex];
-            if (ttElement == element.type) {
+    allTransactions.forEach((element) {
+      if (allBanksIndex.isEmpty) {
+        if ((dateRange.start.isAtSameMomentAs(dateFormat.parse(element.date)) ||
+                dateRange.start.isBefore(dateFormat.parse(element.date))) &&
+            (dateRange.end.isAtSameMomentAs(dateFormat.parse(element.date)) ||
+                dateRange.end.isAfter(dateFormat.parse(element.date)))) {
+          double amt = double.parse(element.amount);
+          if (amt >= int.parse(_amountRangeValues[0].text) &&
+              amt <= int.parse(_amountRangeValues[1].text)) {
+            transactionTypeIndex.forEach((ttIndex) {
+              String ttElement = transactionType[ttIndex];
+              if (ttElement == element.type) {
+                transactionModeIndex.forEach((tmIndex) {
+                  String tmElement = transactionMode[tmIndex];
+                  if (tmElement == element.mode) {
+                    filteredResult.add(element);
+                  }
+                });
+              }
+            });
+
+            if (transactionTypeIndex.isEmpty && transactionModeIndex.isEmpty) {
+              filteredResult.add(element);
+            } else if (transactionTypeIndex.isEmpty) {
               transactionModeIndex.forEach((tmIndex) {
                 String tmElement = transactionMode[tmIndex];
                 if (tmElement == element.mode) {
                   filteredResult.add(element);
                 }
               });
+            } else if (transactionModeIndex.isEmpty) {
+              transactionTypeIndex.forEach((ttIndex) {
+                String ttElement = transactionType[ttIndex];
+                if (ttElement == element.type) {
+                  filteredResult.add(element);
+                }
+              });
             }
-          });
-
-          if (transactionTypeIndex.isEmpty && transactionModeIndex.isEmpty) {
-            filteredResult.add(element);
-          } else if (transactionTypeIndex.isEmpty) {
-            transactionModeIndex.forEach((tmIndex) {
-              String tmElement = transactionMode[tmIndex];
-              if (tmElement == element.mode) {
-                filteredResult.add(element);
-              }
-            });
-          } else if (transactionModeIndex.isEmpty) {
-            transactionTypeIndex.forEach((ttIndex) {
-              String ttElement = transactionType[ttIndex];
-              if (ttElement == element.type) {
-                filteredResult.add(element);
-              }
-            });
           }
         }
+      } else {
+        allBanksIndex.forEach((abElement) {
+          String bankName = allBanks[abElement];
+
+          if (bankName == element.bank) {
+            if ((dateRange.start
+                        .isAtSameMomentAs(dateFormat.parse(element.date)) ||
+                    dateRange.start.isBefore(dateFormat.parse(element.date))) &&
+                (dateRange.end
+                        .isAtSameMomentAs(dateFormat.parse(element.date)) ||
+                    dateRange.end.isAfter(dateFormat.parse(element.date)))) {
+              double amt = double.parse(element.amount);
+
+              if (amt >= int.parse(_amountRangeValues[0].text) &&
+                  amt <= int.parse(_amountRangeValues[1].text)) {
+                transactionTypeIndex.forEach((ttIndex) {
+                  String ttElement = transactionType[ttIndex];
+                  if (ttElement == element.type) {
+                    transactionModeIndex.forEach((tmIndex) {
+                      String tmElement = transactionMode[tmIndex];
+                      if (tmElement == element.mode) {
+                        filteredResult.add(element);
+                      }
+                    });
+                  }
+                });
+
+                if (transactionTypeIndex.isEmpty &&
+                    transactionModeIndex.isEmpty) {
+                  filteredResult.add(element);
+                } else if (transactionTypeIndex.isEmpty) {
+                  transactionModeIndex.forEach((tmIndex) {
+                    String tmElement = transactionMode[tmIndex];
+                    if (tmElement == element.mode) {
+                      filteredResult.add(element);
+                    }
+                  });
+                } else if (transactionModeIndex.isEmpty) {
+                  transactionTypeIndex.forEach((ttIndex) {
+                    String ttElement = transactionType[ttIndex];
+                    if (ttElement == element.type) {
+                      filteredResult.add(element);
+                    }
+                  });
+                }
+              }
+            }
+          }
+        });
       }
     });
 
@@ -1071,11 +1142,10 @@ class _BankTransactionsState extends State<BankTransactions> {
   Widget build(BuildContext context) {
     if (!widget.isBankMessageLoadedOnce && !openedOnce) {
       openedOnce = true;
-      Future.delayed(Duration.zero, () => showBankAlert(context));
-
       if (this.mounted) {
         setState(() {});
       }
+      Future.delayed(Duration.zero, () => showBankAlert(context));
     }
 
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -1116,6 +1186,40 @@ class _BankTransactionsState extends State<BankTransactions> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text(
+                        "Bank",
+                        style: TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 100,
+                        width: 250,
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: allBanks.length,
+                            itemBuilder: ((context, index) {
+                              return CheckboxListTile(
+                                title: Text(allBanks[index]),
+                                value: allBanksIndex.contains(index),
+                                onChanged: (_) {
+                                  if (allBanksIndex.contains(index)) {
+                                    allBanksIndex.remove(index);
+                                  } else {
+                                    allBanksIndex.add(index);
+                                  }
+
+                                  if (this.mounted) {
+                                    setState(() {});
+                                  }
+                                },
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              );
+                            })),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Text(
                         "Type",
                         style: TextStyle(
@@ -1451,7 +1555,7 @@ class _BankTransactionsState extends State<BankTransactions> {
               : RefreshIndicator(
                   key: _refreshIndicatorKey,
                   onRefresh: getAllSms,
-                  child: sbiTransactions.isEmpty
+                  child: allTransactions.isEmpty
                       ? ListView(
                           physics: AlwaysScrollableScrollPhysics(),
                           children: [
@@ -1721,7 +1825,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                           height: 5,
                                         ),
                                     shrinkWrap: true,
-                                    itemCount: sbiTransactions.length,
+                                    itemCount: allTransactions.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
                                       return SizedBox(
@@ -1733,7 +1837,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                               .scaffoldBackgroundColor,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
-                                                color: sbiTransactions[index]
+                                                color: allTransactions[index]
                                                             .type ==
                                                         "Credit"
                                                     ? Colors.greenAccent
@@ -1753,28 +1857,28 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                           .spaceBetween,
                                                   children: [
                                                     Text(
-                                                      sbiTransactions[index]
+                                                      allTransactions[index]
                                                           .receiver,
                                                       style: TextStyle(
                                                           fontSize: 24),
                                                     ),
-                                                    sbiTransactions[index]
+                                                    allTransactions[index]
                                                                 .type ==
                                                             "Credit"
                                                         ? SizedBox()
                                                         : IconButton(
                                                             onPressed: () {
                                                               showAddDialog(
-                                                                  sbiTransactions[
+                                                                  allTransactions[
                                                                           index]
                                                                       .amount,
-                                                                  sbiTransactions[
+                                                                  allTransactions[
                                                                           index]
                                                                       .date);
                                                             },
                                                             icon: Icon(
                                                               Icons.add,
-                                                              color: sbiTransactions[
+                                                              color: allTransactions[
                                                                               index]
                                                                           .type ==
                                                                       "Credit"
@@ -1798,7 +1902,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                     .transparent,
                                                                 border:
                                                                     Border.all(
-                                                                  color: sbiTransactions[index]
+                                                                  color: allTransactions[index]
                                                                               .type ==
                                                                           "Credit"
                                                                       ? Colors
@@ -1815,7 +1919,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                               const EdgeInsets
                                                                   .all(4.0),
                                                           child: Text(
-                                                              sbiTransactions[
+                                                              allTransactions[
                                                                       index]
                                                                   .bank,
                                                               style: TextStyle(
@@ -1836,7 +1940,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                     .transparent,
                                                                 border:
                                                                     Border.all(
-                                                                  color: sbiTransactions[index]
+                                                                  color: allTransactions[index]
                                                                               .type ==
                                                                           "Credit"
                                                                       ? Colors
@@ -1853,7 +1957,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                               const EdgeInsets
                                                                   .all(4.0),
                                                           child: Text(
-                                                              sbiTransactions[
+                                                              allTransactions[
                                                                       index]
                                                                   .type,
                                                               style: TextStyle(
@@ -1863,7 +1967,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                     SizedBox(
                                                       width: 8,
                                                     ),
-                                                    sbiTransactions[index]
+                                                    allTransactions[index]
                                                                 .mode ==
                                                             "Unknown"
                                                         ? SizedBox()
@@ -1879,7 +1983,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                     border:
                                                                         Border
                                                                             .all(
-                                                                      color: sbiTransactions[index].type ==
+                                                                      color: allTransactions[index].type ==
                                                                               "Credit"
                                                                           ? Colors
                                                                               .greenAccent
@@ -1894,7 +1998,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                   const EdgeInsets
                                                                       .all(4.0),
                                                               child: Text(
-                                                                  sbiTransactions[
+                                                                  allTransactions[
                                                                           index]
                                                                       .mode,
                                                                   style:
@@ -1910,7 +2014,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                 ),
                                                 Text(
                                                   "Amount: ₹ " +
-                                                      sbiTransactions[index]
+                                                      allTransactions[index]
                                                           .amount,
                                                   style:
                                                       TextStyle(fontSize: 17),
@@ -1920,7 +2024,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                 ),
                                                 Text(
                                                   "Ref ID: " +
-                                                      sbiTransactions[index]
+                                                      allTransactions[index]
                                                           .transactionID,
                                                   style:
                                                       TextStyle(fontSize: 17),
@@ -1930,7 +2034,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                 ),
                                                 Text(
                                                     "Date: " +
-                                                        sbiTransactions[index]
+                                                        allTransactions[index]
                                                             .date,
                                                     style: TextStyle(
                                                         fontSize: 17)),

@@ -139,6 +139,10 @@ class _RoomExpenseState extends State<RoomExpense>
           }
         }
 
+        if (widget.email == membersListEmail[0]) {
+          membersListIndex = 1;
+        }
+
         if (this.mounted) {
           setState(() {});
         }
