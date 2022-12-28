@@ -52,9 +52,12 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
     String timeStrap = dateFormat_new.format(dateTime);
 
     if (_messages[i].sender.toString().contains(bankName)) {
-      bool isUPI = _messages[i].sender.toString().contains("UPI");
-      bool isIMPS = _messages[i].sender.toString().contains("IMPS");
-      bool isNEFT = _messages[i].sender.toString().contains("NEFT");
+      bool isUPI = _messages[i].sender.toString().contains("UPI") ||
+          messageBody.contains("UPI");
+      bool isIMPS = _messages[i].sender.toString().contains("IMPS") ||
+          messageBody.contains("imps");
+      bool isNEFT = _messages[i].sender.toString().contains("NEFT") ||
+          messageBody.contains("neft");
 
       if (messageBody.contains("debited")) {
         String amount = getAmount(messageBody, "rs");
@@ -113,9 +116,7 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
               receiver: capitalizeFirstLetter(receiver),
               type: "Debit",
               bank: bankName,
-              mode: isUPI
-                  ? "UPI"
-                  : (isIMPS ? "IMPS" : (isNEFT ? "NEFT" : "Unknown"))));
+              mode: "Debit Card"));
         }
       } else if (messageBody.contains("credited")) {
         String amount = "";
@@ -132,7 +133,9 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
             receiver: "Self",
             type: "Credit",
             bank: bankName,
-            mode: "Unknown"));
+            mode: isUPI
+                ? "UPI"
+                : (isIMPS ? "IMPS" : (isNEFT ? "NEFT" : "Unknown"))));
       } else if (messageBody.contains("withdrawn")) {
         String amount = getAmount(messageBody, "rs");
         String transactionID = getAmount(messageBody, "transaction number ");

@@ -398,6 +398,8 @@ class _DashBoardState extends State<DashBoard> {
       initalDataLoaded = true;
     }
 
+    String appVersion = await getAppVersion();
+    
     try {
       final response = await http.post(Uri.parse(global.url + 'data'),
           headers: <String, String>{
@@ -406,6 +408,7 @@ class _DashBoardState extends State<DashBoard> {
           },
           body: jsonEncode({
             'email': crypto.encrypt(_email.text),
+            'version': crypto.encrypt(appVersion)
           }));
 
       if (response.statusCode == 200) {
@@ -584,16 +587,20 @@ class _DashBoardState extends State<DashBoard> {
           Map<String, String> notificationData =
               await getDataFromNotification(message.data.toString());
 
-          NavKey.navKey.currentState!.push(MaterialPageRoute(
-              builder: (_) => RoomExpense(
-                  roomKey: notificationData["roomKey"]!,
-                  email: notificationData["email"]!,
-                  roomName: notificationData["roomName"]!,
-                  token: notificationData["token"]!,
-                  roomLink: notificationData["roomLink"]!,
-                  isRoomActive: ((notificationData["isRoomActive"]!) == 'true'
-                      ? true
-                      : false))));
+          if (notificationData.isEmpty) {
+            LocalNotificationService.createanddisplaynotificationAll(message);
+          } else {
+            NavKey.navKey.currentState!.push(MaterialPageRoute(
+                builder: (_) => RoomExpense(
+                    roomKey: notificationData["roomKey"]!,
+                    email: notificationData["email"]!,
+                    roomName: notificationData["roomName"]!,
+                    token: notificationData["token"]!,
+                    roomLink: notificationData["roomLink"]!,
+                    isRoomActive: ((notificationData["isRoomActive"]!) == 'true'
+                        ? true
+                        : false))));
+          }
         }
       },
     );
@@ -601,7 +608,7 @@ class _DashBoardState extends State<DashBoard> {
     FirebaseMessaging.onMessage.listen(
       (message) {
         if (message.notification != null) {
-          LocalNotificationService.createanddisplaynotification(message);
+          LocalNotificationService.createanddisplaynotificationAll(message);
         }
       },
     );
@@ -611,20 +618,23 @@ class _DashBoardState extends State<DashBoard> {
         if (message.notification != null) {
           Map<String, String> notificationData =
               await getDataFromNotification(message.data.toString());
-
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => RoomExpense(
-                      roomKey: notificationData["roomKey"]!,
-                      email: notificationData["email"]!,
-                      roomName: notificationData["roomName"]!,
-                      token: notificationData["token"]!,
-                      roomLink: notificationData["roomLink"]!,
-                      isRoomActive:
-                          ((notificationData["isRoomActive"]!) == 'true'
-                              ? true
-                              : false))));
+          if (notificationData.isEmpty) {
+            LocalNotificationService.createanddisplaynotificationAll(message);
+          } else {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => RoomExpense(
+                        roomKey: notificationData["roomKey"]!,
+                        email: notificationData["email"]!,
+                        roomName: notificationData["roomName"]!,
+                        token: notificationData["token"]!,
+                        roomLink: notificationData["roomLink"]!,
+                        isRoomActive:
+                            ((notificationData["isRoomActive"]!) == 'true'
+                                ? true
+                                : false))));
+          }
         }
       },
     );
@@ -793,16 +803,16 @@ class _DashBoardState extends State<DashBoard> {
                                                   color: dateIndex
                                                       ? (index == from[0]
                                                           ? Colors.white
-                                                          : Theme.of(context)
-                                                              .textTheme
-                                                              .bodySmall!
-                                                              .color)
+                                                          : themeProvider
+                                                                  .isDarkTheme
+                                                              ? Colors.white
+                                                              : Colors.black)
                                                       : (index == to[0]
                                                           ? Colors.white
-                                                          : Theme.of(context)
-                                                              .textTheme
-                                                              .bodySmall!
-                                                              .color),
+                                                          : themeProvider
+                                                                  .isDarkTheme
+                                                              ? Colors.white
+                                                              : Colors.black),
                                                 ),
                                               ),
                                             ),
@@ -874,16 +884,16 @@ class _DashBoardState extends State<DashBoard> {
                                                 color: dateIndex
                                                     ? (index == from[1]
                                                         ? Colors.white
-                                                        : Theme.of(context)
-                                                            .textTheme
-                                                            .bodySmall!
-                                                            .color)
+                                                        : themeProvider
+                                                                .isDarkTheme
+                                                            ? Colors.white
+                                                            : Colors.black)
                                                     : (index == to[1]
                                                         ? Colors.white
-                                                        : Theme.of(context)
-                                                            .textTheme
-                                                            .bodySmall!
-                                                            .color),
+                                                        : themeProvider
+                                                                .isDarkTheme
+                                                            ? Colors.white
+                                                            : Colors.black),
                                               ),
                                             ),
                                           ),
@@ -955,16 +965,16 @@ class _DashBoardState extends State<DashBoard> {
                                                 color: dateIndex
                                                     ? (index == from[2]
                                                         ? Colors.white
-                                                        : Theme.of(context)
-                                                            .textTheme
-                                                            .bodySmall!
-                                                            .color)
+                                                        : themeProvider
+                                                                .isDarkTheme
+                                                            ? Colors.white
+                                                            : Colors.black)
                                                     : (index == to[2]
                                                         ? Colors.white
-                                                        : Theme.of(context)
-                                                            .textTheme
-                                                            .bodySmall!
-                                                            .color),
+                                                        : themeProvider
+                                                                .isDarkTheme
+                                                            ? Colors.white
+                                                            : Colors.black),
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             ),
@@ -1028,10 +1038,10 @@ class _DashBoardState extends State<DashBoard> {
                                                   color:
                                                       (index == roomStatusIndex
                                                           ? Colors.white
-                                                          : Theme.of(context)
-                                                              .textTheme
-                                                              .bodySmall!
-                                                              .color),
+                                                          : themeProvider
+                                                                  .isDarkTheme
+                                                              ? Colors.white
+                                                              : Colors.black),
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               ),

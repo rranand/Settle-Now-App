@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/models/FriendEach.dart';
@@ -44,14 +45,30 @@ class _BankTransactionsState extends State<BankTransactions> {
   final SmsQuery _query = SmsQuery();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<TransactionEach> sbiTransactions = [];
   int categoryIndex = 0;
   int investIndex = 0;
   int roomIndex = 0;
   int roomCategoryIndex = 0;
   List<dynamic> category = [];
+  List<TextEditingController> _amountRangeValues = [
+    new TextEditingController(text: "0"),
+    new TextEditingController(text: "10000")
+  ];
+  List<String> transactionType = ["Credit", "Debit"];
+  List<String> transactionMode = [
+    "UPI",
+    "NEFT",
+    "IMPS",
+    "Debit Card",
+    "Credit Card"
+  ];
+  Set<int> transactionTypeIndex = Set();
+  Set<int> transactionModeIndex = Set();
   List<dynamic> investmentCat = [];
   List<dynamic> roomData = [];
+  bool showFilterResult = false;
   final _formKey = GlobalKey<FormState>();
   final _formKeyRoom = GlobalKey<FormState>();
   final TextEditingController _purpose = TextEditingController();
@@ -59,6 +76,13 @@ class _BankTransactionsState extends State<BankTransactions> {
   List<String> addExpenseTo = [];
   bool isSplitMemberLoading = false;
   bool openedOnce = false;
+  bool filterDialog = false;
+  Set<int> filtercategoryIndex = Set();
+  DateTimeRange dateRange = DateTimeRange(
+      start: new DateTime(DateTime.now().year, DateTime.now().month),
+      end: DateTime.now());
+
+  List<TransactionEach> filteredResult = [];
 
   Future<void> getActiveRooms() async {
     try {
@@ -312,12 +336,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                                             category[index],
                                             style: TextStyle(
                                               fontSize: 16,
-                                              color: (index == categoryIndex
-                                                  ? Colors.white
-                                                  : Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall!
-                                                      .color),
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -373,12 +391,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                   investmentCat[index],
                                                   style: TextStyle(
                                                     fontSize: 16,
-                                                    color: (index == investIndex
-                                                        ? Colors.white
-                                                        : Theme.of(context)
-                                                            .textTheme
-                                                            .bodySmall!
-                                                            .color),
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -568,12 +580,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                 roomData[index]["Name"]),
                                             style: TextStyle(
                                               fontSize: 16,
-                                              color: (index == roomIndex
-                                                  ? Colors.white
-                                                  : Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall!
-                                                      .color),
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -625,12 +631,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                                             widget.roomExpenseCategory[index],
                                             style: TextStyle(
                                               fontSize: 16,
-                                              color: (index == roomCategoryIndex
-                                                  ? Colors.white
-                                                  : Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall!
-                                                      .color),
                                               fontWeight: FontWeight.w500,
                                             ),
                                           ),
@@ -865,6 +865,49 @@ class _BankTransactionsState extends State<BankTransactions> {
     );
   }
 
+  void pickDateRange() async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final picked = await showDateRangePicker(
+        context: context,
+        initialDateRange: dateRange,
+        confirmText: "Ok",
+        helpText: "Select Date",
+        saveText: "Save",
+        firstDate: new DateTime(1999),
+        lastDate: DateTime.now(),
+        builder: (context, child) {
+          return Theme(
+            data: themeProvider.isDarkTheme
+                ? ThemeData.dark().copyWith(
+                    colorScheme: ColorScheme.dark(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                      surface: Theme.of(context).primaryColor,
+                      onSurface: Colors.white,
+                    ),
+                    dialogBackgroundColor: Colors.white,
+                  )
+                : ThemeData.light().copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                      surface: Theme.of(context).primaryColor,
+                      onSurface: Colors.black,
+                    ),
+                    dialogBackgroundColor: Colors.white,
+                  ),
+            child: child!,
+          );
+        });
+    if (picked != null) {
+      if (this.mounted) {
+        setState(() {
+          dateRange = picked;
+        });
+      }
+    }
+  }
+
   void showAddDialog(String amount, String date) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     showDialog(
@@ -961,6 +1004,61 @@ class _BankTransactionsState extends State<BankTransactions> {
         });
   }
 
+  Future<void> getFilterResult() async {
+    if (this.mounted) {
+      setState(() {
+        filteredResult.clear();
+      });
+    }
+
+    DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
+
+    sbiTransactions.forEach((element) {
+      if ((dateRange.start.isAtSameMomentAs(dateFormat.parse(element.date)) ||
+              dateRange.start.isBefore(dateFormat.parse(element.date))) &&
+          (dateRange.end.isAtSameMomentAs(dateFormat.parse(element.date)) ||
+              dateRange.end.isAfter(dateFormat.parse(element.date)))) {
+        double amt = double.parse(element.amount);
+        if (amt >= int.parse(_amountRangeValues[0].text) &&
+            amt <= int.parse(_amountRangeValues[1].text)) {
+          transactionTypeIndex.forEach((ttIndex) {
+            String ttElement = transactionType[ttIndex];
+            if (ttElement == element.type) {
+              transactionModeIndex.forEach((tmIndex) {
+                String tmElement = transactionMode[tmIndex];
+                if (tmElement == element.mode) {
+                  filteredResult.add(element);
+                }
+              });
+            }
+          });
+
+          if (transactionTypeIndex.isEmpty && transactionModeIndex.isEmpty) {
+            filteredResult.add(element);
+          } else if (transactionTypeIndex.isEmpty) {
+            transactionModeIndex.forEach((tmIndex) {
+              String tmElement = transactionMode[tmIndex];
+              if (tmElement == element.mode) {
+                filteredResult.add(element);
+              }
+            });
+          } else if (transactionModeIndex.isEmpty) {
+            transactionTypeIndex.forEach((ttIndex) {
+              String ttElement = transactionType[ttIndex];
+              if (ttElement == element.type) {
+                filteredResult.add(element);
+              }
+            });
+          }
+        }
+      }
+    });
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -984,306 +1082,868 @@ class _BankTransactionsState extends State<BankTransactions> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Bank Transactions"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                filterDialog = _scaffoldKey.currentState!.isEndDrawerOpen;
+                filterDialog = !filterDialog;
+
+                if (filterDialog) {
+                  _scaffoldKey.currentState!.openEndDrawer();
+                } else {
+                  _scaffoldKey.currentState!.closeEndDrawer();
+                }
+              },
+              icon: Icon(Icons.filter_alt_outlined))
+        ],
       ),
-      body: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: permissionGranted
-            ? Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                    child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "SMS Permission Required",
-                      style: TextStyle(
-                        fontSize: 22,
+      body: Scaffold(
+        key: _scaffoldKey,
+        endDrawer: Drawer(
+          backgroundColor: themeProvider.isDarkTheme
+              ? Theme.of(context).scaffoldBackgroundColor
+              : Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView(
+              children: [
+                SizedBox(
+                  height: 10,
+                ),
+                Scrollbar(
+                  radius: Radius.circular(0),
+                  thickness: 0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Type",
+                        style: TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w600),
                       ),
-                    ),
-                    SizedBox(
-                      height: 25,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SizedBox(
-                          height: 50,
-                          width: 140,
-                          child: OutlinedButton(
-                            child: Text(
-                              "Open Setting",
-                              style: TextStyle(
-                                  color: themeProvider.isDarkTheme
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 16),
-                            ),
-                            onPressed: () {
-                              openAppSettings();
-                            },
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              side: BorderSide(
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                          ),
+                      SizedBox(
+                        height: 100,
+                        width: 250,
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: transactionType.length,
+                            itemBuilder: ((context, index) {
+                              return CheckboxListTile(
+                                title: Text(transactionType[index]),
+                                value: transactionTypeIndex.contains(index),
+                                onChanged: (_) {
+                                  if (transactionTypeIndex.contains(index)) {
+                                    transactionTypeIndex.remove(index);
+                                  } else {
+                                    transactionTypeIndex.add(index);
+                                  }
+
+                                  if (this.mounted) {
+                                    setState(() {});
+                                  }
+                                },
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                              );
+                            })),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "Mode",
+                        style: TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w600),
+                      ),
+                      Scrollbar(
+                        radius: Radius.circular(0),
+                        thickness: 0,
+                        child: SizedBox(
+                          width: 250,
+                          height: 300,
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: transactionMode.length,
+                              itemBuilder: ((context, index) {
+                                return CheckboxListTile(
+                                  title: Text(transactionMode[index]),
+                                  value: transactionModeIndex.contains(index),
+                                  onChanged: (_) {
+                                    if (transactionModeIndex.contains(index)) {
+                                      transactionModeIndex.remove(index);
+                                    } else {
+                                      transactionModeIndex.add(index);
+                                    }
+
+                                    if (this.mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                );
+                              })),
                         ),
-                        SizedBox(
-                          height: 50,
-                          width: 140,
-                          child: OutlinedButton(
-                            child: Text(
-                              "Close",
-                              style: TextStyle(
-                                  color: themeProvider.isDarkTheme
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 16),
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              side: BorderSide(
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                          ),
-                        )
-                      ],
-                    )
-                  ],
-                )),
-              )
-            : RefreshIndicator(
-                key: _refreshIndicatorKey,
-                onRefresh: getAllSms,
-                child: sbiTransactions.isEmpty
-                    ? ListView(
-                        physics: AlwaysScrollableScrollPhysics(),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "Amount",
+                        style: TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w600),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.8,
-                            width: MediaQuery.of(context).size.width,
-                            child: Center(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            child: TextFormField(
+                              controller: _amountRangeValues[0],
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.done,
+                              maxLines: 1,
+                              decoration: InputDecoration(
+                                counterText: "",
+                                contentPadding: EdgeInsets.all(8.0),
+                                prefixText: "₹ ",
+                              ),
+                              onChanged: (String s) {
+                                if (this.mounted) {
+                                  setState(() {
+                                    _amountRangeValues[0].text = s;
+                                    _amountRangeValues[0].selection =
+                                        TextSelection.collapsed(
+                                            offset: _amountRangeValues[0]
+                                                .text
+                                                .length);
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.3,
+                            child: TextFormField(
+                              controller: _amountRangeValues[1],
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.done,
+                              maxLines: 1,
+                              decoration: InputDecoration(
+                                counterText: "",
+                                contentPadding: EdgeInsets.all(8.0),
+                                prefixText: "₹ ",
+                              ),
+                              onChanged: (String s) {
+                                if (this.mounted) {
+                                  setState(() {
+                                    _amountRangeValues[1].text = s;
+                                    _amountRangeValues[1].selection =
+                                        TextSelection.collapsed(
+                                            offset: _amountRangeValues[1]
+                                                .text
+                                                .length);
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Date",
+                            style: TextStyle(
+                                fontSize: 21, fontWeight: FontWeight.w600),
+                          ),
+                          IconButton(
+                              onPressed: pickDateRange,
+                              icon: Icon(Icons.date_range)),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            height: 35,
+                            child: ElevatedButton(
+                              onPressed: pickDateRange,
                               child: Text(
-                                "No SMS Found",
+                                DateFormat('dd/MMM/yyyy')
+                                    .format(dateRange.start),
                                 style: TextStyle(
-                                  fontSize: 22,
+                                    fontSize: 16, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 35,
+                            child: ElevatedButton(
+                                onPressed: pickDateRange,
+                                child: Text(
+                                    DateFormat('dd/MMM/yyyy')
+                                        .format(dateRange.end),
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.white))),
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 18,
+                ),
+                SizedBox(
+                  height: 45,
+                  child: OutlinedButton(
+                    child: Text(
+                      "Apply",
+                      style: TextStyle(
+                        color: themeProvider.isDarkTheme
+                            ? Colors.white
+                            : Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    onPressed: () async {
+                      showFilterResult = true;
+                      _scaffoldKey.currentState!.closeEndDrawer();
+                      await getFilterResult();
+                      if (this.mounted) {
+                        setState(() {});
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(13.0),
+                      ),
+                      side: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                SizedBox(
+                  height: 45,
+                  child: OutlinedButton(
+                    child: Text(
+                      "Clear Filter",
+                      style: TextStyle(
+                        color: themeProvider.isDarkTheme
+                            ? Colors.white
+                            : Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(13.0),
+                      ),
+                      side: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
+                    onPressed: () {
+                      showFilterResult = false;
+                      transactionModeIndex.clear();
+                      transactionTypeIndex.clear();
+                      _amountRangeValues[0].text = "0";
+                      _amountRangeValues[1].text = "10000";
+                      dateRange = DateTimeRange(
+                          start: new DateTime(
+                              DateTime.now().year, DateTime.now().month),
+                          end: DateTime.now());
+                      if (this.mounted) {
+                        setState(() {});
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        body: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: permissionGranted
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                      child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "SMS Permission Required",
+                        style: TextStyle(
+                          fontSize: 22,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          SizedBox(
+                            height: 50,
+                            width: 140,
+                            child: OutlinedButton(
+                              child: Text(
+                                "Open Setting",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 16),
+                              ),
+                              onPressed: () {
+                                openAppSettings();
+                              },
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
                                 ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 50,
+                            width: 140,
+                            child: OutlinedButton(
+                              child: Text(
+                                "Close",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 16),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
                               ),
                             ),
                           )
                         ],
                       )
-                    : Padding(
-                        padding: EdgeInsets.all(10.0),
-                        child: Scrollbar(
-                          radius: Radius.circular(10.0),
-                          thickness: 5.5,
-                          child: ListView.separated(
-                              separatorBuilder: (context, index) => SizedBox(
-                                    height: 5,
+                    ],
+                  )),
+                )
+              : RefreshIndicator(
+                  key: _refreshIndicatorKey,
+                  onRefresh: getAllSms,
+                  child: sbiTransactions.isEmpty
+                      ? ListView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.8,
+                              width: MediaQuery.of(context).size.width,
+                              child: Center(
+                                child: Text(
+                                  "No Transaction Found",
+                                  style: TextStyle(
+                                    fontSize: 22,
                                   ),
-                              shrinkWrap: true,
-                              itemCount: sbiTransactions.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  child: Card(
-                                    elevation: 1.0,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: sbiTransactions[index].type ==
-                                                  "Credit"
-                                              ? Colors.greenAccent
-                                              : Colors.redAccent),
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                sbiTransactions[index].receiver,
-                                                style: TextStyle(fontSize: 24),
-                                              ),
-                                              sbiTransactions[index].type ==
-                                                      "Credit"
-                                                  ? SizedBox()
-                                                  : IconButton(
-                                                      onPressed: () {
-                                                        showAddDialog(
-                                                            sbiTransactions[
-                                                                    index]
-                                                                .amount,
-                                                            sbiTransactions[
-                                                                    index]
-                                                                .date);
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.add,
-                                                        color: sbiTransactions[
-                                                                        index]
-                                                                    .type ==
-                                                                "Credit"
-                                                            ? Colors.greenAccent
-                                                            : Colors.redAccent,
-                                                      ))
-                                            ],
+                                ),
+                              ),
+                            )
+                          ],
+                        )
+                      : Padding(
+                          padding: EdgeInsets.all(10.0),
+                          child: Scrollbar(
+                            radius: Radius.circular(10.0),
+                            thickness: 5.5,
+                            child: showFilterResult
+                                ? filteredResult.isEmpty
+                                    ? SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height *
+                                                0.8,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        child: Center(
+                                          child: Text(
+                                            "No Transaction Found",
+                                            style: TextStyle(
+                                              fontSize: 22,
+                                            ),
                                           ),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                  width: 55,
-                                                  height: 30,
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.transparent,
-                                                      border: Border.all(
-                                                        color: sbiTransactions[
-                                                                        index]
+                                        ),
+                                      )
+                                    : ListView.separated(
+                                        separatorBuilder: (context, index) =>
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                        shrinkWrap: true,
+                                        itemCount: filteredResult.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return SizedBox(
+                                            child: Card(
+                                              elevation: 1.0,
+                                              shadowColor: Theme.of(context)
+                                                  .primaryColor,
+                                              color: Theme.of(context)
+                                                  .scaffoldBackgroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: filteredResult[index]
+                                                                .type ==
+                                                            "Credit"
+                                                        ? Colors.greenAccent
+                                                        : Colors.redAccent),
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(10.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Text(
+                                                          filteredResult[index]
+                                                              .receiver,
+                                                          style: TextStyle(
+                                                              fontSize: 24),
+                                                        ),
+                                                        filteredResult[index]
                                                                     .type ==
                                                                 "Credit"
-                                                            ? Colors.greenAccent
-                                                            : Colors.redAccent,
-                                                      ),
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  12))),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            4.0),
-                                                    child: Text(
-                                                        sbiTransactions[index]
-                                                            .bank,
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                        )),
-                                                  )),
-                                              SizedBox(
-                                                width: 8,
-                                              ),
-                                              Container(
-                                                  width: 55,
-                                                  height: 30,
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.transparent,
-                                                      border: Border.all(
-                                                        color: sbiTransactions[
-                                                                        index]
-                                                                    .type ==
-                                                                "Credit"
-                                                            ? Colors.greenAccent
-                                                            : Colors.redAccent,
-                                                      ),
-                                                      borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  12))),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            4.0),
-                                                    child: Text(
-                                                        sbiTransactions[index]
-                                                            .type,
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                        )),
-                                                  )),
-                                              SizedBox(
-                                                width: 8,
-                                              ),
-                                              sbiTransactions[index].mode ==
-                                                      "Unknown"
-                                                  ? SizedBox()
-                                                  : Container(
-                                                      width: 55,
-                                                      height: 30,
-                                                      alignment:
-                                                          Alignment.center,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .transparent,
-                                                          border: Border.all(
-                                                            color: sbiTransactions[
-                                                                            index]
-                                                                        .type ==
-                                                                    "Credit"
-                                                                ? Colors
-                                                                    .greenAccent
-                                                                : Colors
-                                                                    .redAccent,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          12))),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(4.0),
-                                                        child: Text(
-                                                            sbiTransactions[
-                                                                    index]
-                                                                .mode,
-                                                            style: TextStyle(
-                                                              fontSize: 13,
+                                                            ? SizedBox()
+                                                            : IconButton(
+                                                                onPressed: () {
+                                                                  showAddDialog(
+                                                                      filteredResult[
+                                                                              index]
+                                                                          .amount,
+                                                                      filteredResult[
+                                                                              index]
+                                                                          .date);
+                                                                },
+                                                                icon: Icon(
+                                                                  Icons.add,
+                                                                  color: filteredResult[index]
+                                                                              .type ==
+                                                                          "Credit"
+                                                                      ? Colors
+                                                                          .greenAccent
+                                                                      : Colors
+                                                                          .redAccent,
+                                                                ))
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                            width: 55,
+                                                            height: 30,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                                    color: Colors
+                                                                        .transparent,
+                                                                    border:
+                                                                        Border
+                                                                            .all(
+                                                                      color: filteredResult[index].type ==
+                                                                              "Credit"
+                                                                          ? Colors
+                                                                              .greenAccent
+                                                                          : Colors
+                                                                              .redAccent,
+                                                                    ),
+                                                                    borderRadius:
+                                                                        BorderRadius.all(
+                                                                            Radius.circular(12))),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(4.0),
+                                                              child: Text(
+                                                                  filteredResult[
+                                                                          index]
+                                                                      .bank,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        13,
+                                                                  )),
                                                             )),
-                                                      )),
-                                            ],
+                                                        SizedBox(
+                                                          width: 8,
+                                                        ),
+                                                        Container(
+                                                            width: 55,
+                                                            height: 30,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                                    color: Colors
+                                                                        .transparent,
+                                                                    border:
+                                                                        Border
+                                                                            .all(
+                                                                      color: filteredResult[index].type ==
+                                                                              "Credit"
+                                                                          ? Colors
+                                                                              .greenAccent
+                                                                          : Colors
+                                                                              .redAccent,
+                                                                    ),
+                                                                    borderRadius:
+                                                                        BorderRadius.all(
+                                                                            Radius.circular(12))),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(4.0),
+                                                              child: Text(
+                                                                  filteredResult[
+                                                                          index]
+                                                                      .type,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        13,
+                                                                  )),
+                                                            )),
+                                                        SizedBox(
+                                                          width: 8,
+                                                        ),
+                                                        filteredResult[index]
+                                                                    .mode ==
+                                                                "Unknown"
+                                                            ? SizedBox()
+                                                            : Container(
+                                                                height: 30,
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                        color: Colors
+                                                                            .transparent,
+                                                                        border: Border
+                                                                            .all(
+                                                                          color: filteredResult[index].type == "Credit"
+                                                                              ? Colors.greenAccent
+                                                                              : Colors.redAccent,
+                                                                        ),
+                                                                        borderRadius:
+                                                                            BorderRadius.all(Radius.circular(12))),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                              .all(
+                                                                          4.0),
+                                                                  child: Text(
+                                                                      filteredResult[
+                                                                              index]
+                                                                          .mode,
+                                                                      style:
+                                                                          TextStyle(
+                                                                        fontSize:
+                                                                            13,
+                                                                      )),
+                                                                )),
+                                                      ],
+                                                    ),
+                                                    SizedBox(
+                                                      height: 8,
+                                                    ),
+                                                    Text(
+                                                      "Amount: ₹ " +
+                                                          filteredResult[index]
+                                                              .amount,
+                                                      style: TextStyle(
+                                                          fontSize: 17),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                      "Ref ID: " +
+                                                          filteredResult[index]
+                                                              .transactionID,
+                                                      style: TextStyle(
+                                                          fontSize: 17),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 5,
+                                                    ),
+                                                    Text(
+                                                        "Date: " +
+                                                            filteredResult[
+                                                                    index]
+                                                                .date,
+                                                        style: TextStyle(
+                                                            fontSize: 17)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        })
+                                : ListView.separated(
+                                    separatorBuilder: (context, index) =>
+                                        SizedBox(
+                                          height: 5,
+                                        ),
+                                    shrinkWrap: true,
+                                    itemCount: sbiTransactions.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return SizedBox(
+                                        child: Card(
+                                          elevation: 1.0,
+                                          shadowColor:
+                                              Theme.of(context).primaryColor,
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: sbiTransactions[index]
+                                                            .type ==
+                                                        "Credit"
+                                                    ? Colors.greenAccent
+                                                    : Colors.redAccent),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
                                           ),
-                                          SizedBox(
-                                            height: 8,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(10.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      sbiTransactions[index]
+                                                          .receiver,
+                                                      style: TextStyle(
+                                                          fontSize: 24),
+                                                    ),
+                                                    sbiTransactions[index]
+                                                                .type ==
+                                                            "Credit"
+                                                        ? SizedBox()
+                                                        : IconButton(
+                                                            onPressed: () {
+                                                              showAddDialog(
+                                                                  sbiTransactions[
+                                                                          index]
+                                                                      .amount,
+                                                                  sbiTransactions[
+                                                                          index]
+                                                                      .date);
+                                                            },
+                                                            icon: Icon(
+                                                              Icons.add,
+                                                              color: sbiTransactions[
+                                                                              index]
+                                                                          .type ==
+                                                                      "Credit"
+                                                                  ? Colors
+                                                                      .greenAccent
+                                                                  : Colors
+                                                                      .redAccent,
+                                                            ))
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Container(
+                                                        width: 55,
+                                                        height: 30,
+                                                        alignment:
+                                                            Alignment.center,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: Colors
+                                                                    .transparent,
+                                                                border:
+                                                                    Border.all(
+                                                                  color: sbiTransactions[index]
+                                                                              .type ==
+                                                                          "Credit"
+                                                                      ? Colors
+                                                                          .greenAccent
+                                                                      : Colors
+                                                                          .redAccent,
+                                                                ),
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            12))),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4.0),
+                                                          child: Text(
+                                                              sbiTransactions[
+                                                                      index]
+                                                                  .bank,
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                              )),
+                                                        )),
+                                                    SizedBox(
+                                                      width: 8,
+                                                    ),
+                                                    Container(
+                                                        width: 55,
+                                                        height: 30,
+                                                        alignment:
+                                                            Alignment.center,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: Colors
+                                                                    .transparent,
+                                                                border:
+                                                                    Border.all(
+                                                                  color: sbiTransactions[index]
+                                                                              .type ==
+                                                                          "Credit"
+                                                                      ? Colors
+                                                                          .greenAccent
+                                                                      : Colors
+                                                                          .redAccent,
+                                                                ),
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            12))),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(4.0),
+                                                          child: Text(
+                                                              sbiTransactions[
+                                                                      index]
+                                                                  .type,
+                                                              style: TextStyle(
+                                                                fontSize: 13,
+                                                              )),
+                                                        )),
+                                                    SizedBox(
+                                                      width: 8,
+                                                    ),
+                                                    sbiTransactions[index]
+                                                                .mode ==
+                                                            "Unknown"
+                                                        ? SizedBox()
+                                                        : Container(
+                                                            width: 55,
+                                                            height: 30,
+                                                            alignment: Alignment
+                                                                .center,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                                    color: Colors
+                                                                        .transparent,
+                                                                    border:
+                                                                        Border
+                                                                            .all(
+                                                                      color: sbiTransactions[index].type ==
+                                                                              "Credit"
+                                                                          ? Colors
+                                                                              .greenAccent
+                                                                          : Colors
+                                                                              .redAccent,
+                                                                    ),
+                                                                    borderRadius:
+                                                                        BorderRadius.all(
+                                                                            Radius.circular(12))),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(4.0),
+                                                              child: Text(
+                                                                  sbiTransactions[
+                                                                          index]
+                                                                      .mode,
+                                                                  style:
+                                                                      TextStyle(
+                                                                    fontSize:
+                                                                        13,
+                                                                  )),
+                                                            )),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                Text(
+                                                  "Amount: ₹ " +
+                                                      sbiTransactions[index]
+                                                          .amount,
+                                                  style:
+                                                      TextStyle(fontSize: 17),
+                                                ),
+                                                SizedBox(
+                                                  height: 5,
+                                                ),
+                                                Text(
+                                                  "Ref ID: " +
+                                                      sbiTransactions[index]
+                                                          .transactionID,
+                                                  style:
+                                                      TextStyle(fontSize: 17),
+                                                ),
+                                                SizedBox(
+                                                  height: 5,
+                                                ),
+                                                Text(
+                                                    "Date: " +
+                                                        sbiTransactions[index]
+                                                            .date,
+                                                    style: TextStyle(
+                                                        fontSize: 17)),
+                                              ],
+                                            ),
                                           ),
-                                          Text(
-                                            "Amount: ₹ " +
-                                                sbiTransactions[index].amount,
-                                            style: TextStyle(fontSize: 17),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text(
-                                            "Ref ID: " +
-                                                sbiTransactions[index]
-                                                    .transactionID,
-                                            style: TextStyle(fontSize: 17),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text(
-                                              "Date: " +
-                                                  sbiTransactions[index].date,
-                                              style: TextStyle(fontSize: 17)),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              }),
+                                        ),
+                                      );
+                                    }),
+                          ),
                         ),
-                      ),
-              ),
+                ),
+        ),
       ),
     );
   }

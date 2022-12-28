@@ -2126,7 +2126,6 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                     roomExpenseCategory[index],
                                                                                                     style: TextStyle(
                                                                                                       fontSize: 16,
-                                                                                                      color: Colors.white,
                                                                                                       fontWeight: FontWeight.w500,
                                                                                                     ),
                                                                                                   ),
