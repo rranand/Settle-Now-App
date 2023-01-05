@@ -73,6 +73,8 @@ class _DashBoardState extends State<DashBoard> {
   int dash = 0;
   double yourSpend = 0;
   bool isGoogle = false;
+  var now;
+  String date = "";
   final TextEditingController _email = TextEditingController();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController();
@@ -231,6 +233,8 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> getInitialData() async {
+    now = DateTime.now();
+    date = (now.month - 1).toString() + now.year.toString();
     try {
       final response = await http.patch(Uri.parse(global.url + 'profile'),
           headers: <String, String>{
@@ -399,7 +403,7 @@ class _DashBoardState extends State<DashBoard> {
     }
 
     String appVersion = await getAppVersion();
-    
+
     try {
       final response = await http.post(Uri.parse(global.url + 'data'),
           headers: <String, String>{
@@ -1807,6 +1811,36 @@ class _DashBoardState extends State<DashBoard> {
                   )));
   }
 
+  Widget chooseFromBottomNavigator(int dash) {
+    if (dash == 0) {
+      return homeWidget(context);
+    } else if (dash == 1) {
+      return RequestWidget(context);
+    } else if (dash == 2) {
+      return Expenses(
+        email: _email.text,
+        date: date,
+        token: _token,
+        expenseCategory: expenseCategory,
+        investmentCategory: investmentCategory,
+      );
+    } else if (dash == 3) {
+      return LendCredit(
+        email: _email.text,
+        token: _token,
+      );
+    } else {
+      return Profile(
+        email: _email.text,
+        token: _token,
+        closeRoomSpend: amtSpendClose,
+        openRoomSpend: amtSpendOpen,
+        expenseCategory: expenseCategory,
+        investmentCategory: investmentCategory,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -1851,13 +1885,29 @@ class _DashBoardState extends State<DashBoard> {
                       ))
                 ],
               )
-            : AppBar(
-                title: Text(
-                  "Settle Now",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-        body: dash == 0 ? homeWidget(context) : RequestWidget(context),
+            : (dash == 1
+                ? AppBar(
+                    title: Text(
+                      "Room Request",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  )
+                : (dash == 2
+                    ? null
+                    : (dash == 3
+                        ? AppBar(
+                            title: Text(
+                              "Len-Den",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        : AppBar(
+                            title: Text(
+                              "Profile",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          )))),
+        body: chooseFromBottomNavigator(dash),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
           currentIndex: dash,
@@ -1904,6 +1954,27 @@ class _DashBoardState extends State<DashBoard> {
                     : SizedBox()
               ]),
               label: "Request",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.account_balance_outlined,
+                size: 25,
+              ),
+              label: "Personal Expense",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.credit_card,
+                size: 25,
+              ),
+              label: "Len-Den",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.person,
+                size: 25,
+              ),
+              label: "Profile",
             ),
           ],
         ),
@@ -2016,78 +2087,6 @@ class _DashBoardState extends State<DashBoard> {
                       accountEmail: Text(_email.text,
                           style: TextStyle(fontSize: 15, color: Colors.white)),
                     ),
-              ListTile(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => Profile(
-                            email: _email.text,
-                            token: _token,
-                            closeRoomSpend: amtSpendClose,
-                            openRoomSpend: amtSpendOpen,
-                            expenseCategory: expenseCategory,
-                            investmentCategory: investmentCategory,
-                          )),
-                ),
-                leading: Icon(
-                  Icons.person,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                title: Text(
-                  "Profile",
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                ),
-              ),
-              ListTile(
-                onTap: () {
-                  var now = DateTime.now();
-                  String date =
-                      (now.month - 1).toString() + now.year.toString();
-
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => Expenses(
-                              email: _email.text,
-                              date: date,
-                              token: _token,
-                              expenseCategory: expenseCategory,
-                              investmentCategory: investmentCategory,
-                            )),
-                  );
-                },
-                leading: Icon(
-                  Icons.account_balance_outlined,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                title: Text(
-                  "Personal Expenses",
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                ),
-              ),
-              ListTile(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LendCredit(
-                              email: _email.text,
-                              token: _token,
-                            )),
-                  );
-                },
-                leading: Icon(
-                  Icons.credit_card,
-                  color: Colors.white,
-                  size: 22,
-                ),
-                title: Text(
-                  "Len-Den",
-                  style: TextStyle(fontSize: 14, color: Colors.white),
-                ),
-              ),
               ListTile(
                 onTap: () {
                   Navigator.push(

@@ -103,9 +103,6 @@ class _LendCreditState extends State<LendCredit> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Len-Den"),
-      ),
       body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: _initialization,
@@ -169,15 +166,24 @@ class _LendCreditState extends State<LendCredit> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
-                                        Text(
-                                          crypto.decrypt(data[index]["name"]),
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w500,
-                                            foreground: Paint()
-                                              ..shader = linearGradient_1,
+                                        InkWell(
+                                          child: Text(
+                                            crypto.decrypt(data[index]["name"]),
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w500,
+                                              foreground: Paint()
+                                                ..shader = linearGradient_1,
+                                            ),
                                           ),
+                                          onTap: () async {
+                                            showToast(
+                                                context,
+                                                crypto.decrypt(
+                                                    data[index]["name"]),
+                                                Icons.check);
+                                          },
                                         ),
                                         SizedBox(
                                           height: 20,

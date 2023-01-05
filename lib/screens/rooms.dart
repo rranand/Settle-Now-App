@@ -54,6 +54,7 @@ class _RoomExpenseState extends State<RoomExpense>
   String paymentTotalALL = "";
   bool paidTransactionData = false;
   final _formKey = GlobalKey<FormState>();
+  bool showExpenseYouAreIn = false;
 
   String expenseTitle = "All Expense";
   String expenseDetailByMember = "all";
@@ -73,6 +74,7 @@ class _RoomExpenseState extends State<RoomExpense>
   List<String> addExpenseTo = [];
   List<dynamic> roomExpenseCategory = [];
   int roomExpenseCategoryIndex = 0;
+  List<dynamic> filterResult = [];
 
   _getPaymentData() async {
     try {
@@ -131,10 +133,12 @@ class _RoomExpenseState extends State<RoomExpense>
         isClear = list[0]["done"];
         membersListName.clear();
         membersListEmail.clear();
+
         for (int i = 1; i < list.length; i++) {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
-          if (list[i]["done"]) {
+          if (crypto.decrypt(list[i]["email"]) == widget.email &&
+              list[i]["done"]) {
             locked = true;
           }
         }
@@ -780,13 +784,17 @@ class _RoomExpenseState extends State<RoomExpense>
       child: Padding(
         padding: EdgeInsets.all(8.0),
         child: InkWell(
-          onTap: () {
+          onTap: () async {
             if (this.mounted) {
               expenseDetailByMember = crypto.decrypt(list[index]['email']);
               expenseTitle =
                   crypto.decrypt(list[index]['Name']) + "\'s Expense";
             }
-            _extractExpenseData(crypto.decrypt(list[index]['email']));
+            await _extractExpenseData(crypto.decrypt(list[index]['email']));
+
+            if (showExpenseYouAreIn) {
+              getFilterData();
+            }
           },
           child: Card(
             elevation: 1.0,
@@ -866,9 +874,12 @@ class _RoomExpenseState extends State<RoomExpense>
                           height: 8,
                         ),
                         Text(
-                          "Total: ₹ " +
-                              commaSeperator(
-                                  crypto.decrypt(list[index]['Expense'])),
+                          "Total : ₹ " +
+                              commaSeperator((double.parse(crypto
+                                          .decrypt(list[index]['Expense'])) +
+                                      double.parse(crypto.decrypt(
+                                          list[index]['TotalSplitExpense'])))
+                                  .toStringAsFixed(2)),
                           style: TextStyle(
                             fontSize: 17,
                             fontWeight: FontWeight.w500,
@@ -898,7 +909,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                         .toStringAsFixed(2)) <
                                     0
                                 ? Text(
-                                    "Loss: ₹ " +
+                                    "Owe: ₹ " +
                                         commaSeperator(double.parse(
                                                 crypto.decrypt(
                                                     list[index]["current"]))
@@ -1016,20 +1027,50 @@ class _RoomExpenseState extends State<RoomExpense>
     );
   }
 
+  getFilterData() async {
+    if (this.mounted) {
+      setState(() {
+        filterResult.clear();
+      });
+    }
+
+    TransList.forEach((element) {
+      List<dynamic> partialExpense = element["members"];
+      if (partialExpense.isEmpty) {
+        filterResult.add(element);
+      } else {
+        for (int i = 0; i < partialExpense.length; i++) {
+          if (crypto.decrypt(partialExpense[i]['Email']) == widget.email) {
+            filterResult.add(element);
+            break;
+          }
+        }
+      }
+    });
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   Widget memberAll(BuildContext context) {
     return SizedBox(
         width: 140,
         child: Padding(
             padding: EdgeInsets.all(8.0),
             child: InkWell(
-                onTap: () {
+                onTap: () async {
                   if (this.mounted) {
                     setState(() {
                       expenseTitle = "All Expense";
                       expenseDetailByMember = "all";
                     });
                   }
-                  _extractExpenseData("all");
+                  await _extractExpenseData("all");
+
+                  if (showExpenseYouAreIn) {
+                    getFilterData();
+                  }
                 },
                 child: Card(
                     elevation: 1.0,
@@ -1150,7 +1191,8 @@ class _RoomExpenseState extends State<RoomExpense>
                         ),
                         SliverToBoxAdapter(
                           child: ListTile(
-                            title: const Text("Total Expense"),
+                            title:
+                                const Text("Total Expense (Splitted Equally)"),
                             trailing: Text("₹ " +
                                 commaSeperator(
                                     crypto.decrypt(list[0]["TotalExpense"]))),
@@ -1246,9 +1288,36 @@ class _RoomExpenseState extends State<RoomExpense>
                                     },
                                   ),
                                 ),
-                                SizedBox(
-                                  height: 15,
+                                Divider(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Show Expenses You Are In",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    IconButton(
+                                        onPressed: () {
+                                          showExpenseYouAreIn =
+                                              !showExpenseYouAreIn;
+                                          getFilterData();
+                                        },
+                                        icon: Icon(
+                                          showExpenseYouAreIn
+                                              ? Icons.toggle_on
+                                              : Icons.toggle_off,
+                                          size: 40,
+                                          color: showExpenseYouAreIn
+                                              ? Theme.of(context).primaryColor
+                                              : null,
+                                        ))
+                                  ],
                                 ),
+                                Divider(),
                                 Text(
                                   expenseTitle,
                                   style: TextStyle(
@@ -1275,14 +1344,23 @@ class _RoomExpenseState extends State<RoomExpense>
                                       ),
                                     )
                                   : CircularProgressIndicator())
-                          : ExpenseData(
-                              TransList: TransList,
-                              RoomKey: widget.roomKey,
-                              Email: widget.email,
-                              Token: widget.token,
-                              refreshIndicatorKey: _refreshIndicatorKey,
-                              locked: locked,
-                            ),
+                          : (showExpenseYouAreIn
+                              ? ExpenseData(
+                                  TransList: filterResult,
+                                  RoomKey: widget.roomKey,
+                                  Email: widget.email,
+                                  Token: widget.token,
+                                  refreshIndicatorKey: _refreshIndicatorKey,
+                                  locked: locked,
+                                )
+                              : ExpenseData(
+                                  TransList: TransList,
+                                  RoomKey: widget.roomKey,
+                                  Email: widget.email,
+                                  Token: widget.token,
+                                  refreshIndicatorKey: _refreshIndicatorKey,
+                                  locked: locked,
+                                )),
                     ),
                   )
             : Padding(
@@ -2188,7 +2266,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                           }
                                                                                         },
                                                                                       );
-                                                                                    } else if (membersListEmail[index - 1] == widget.email) {
+                                                                                    } else if (list[index]['done'] || membersListEmail[index - 1] == widget.email) {
                                                                                       return SizedBox();
                                                                                     } else {
                                                                                       return InkWell(

@@ -362,67 +362,55 @@ class _LendPageState extends State<LendPage> {
                                 ),
                                 itemCount: data.length,
                                 itemBuilder: (BuildContext context, int index) {
-                                  return SizedBox(
-                                    height: 85,
-                                    child: Card(
-                                      elevation: 1.0,
-                                      color: Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                      shadowColor:
-                                          Theme.of(context).primaryColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: Theme.of(context)
-                                                .cardColor
-                                                .withAlpha(95)),
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(10.0),
-                                        child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Expanded(
-                                                flex: 1,
-                                                child: InkWell(
-                                                  child: Text(
-                                                    crypto.decrypt(
-                                                        data[index]["purpose"]),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w500),
-                                                  ),
-                                                  onTap: () {
-                                                    showToast(
-                                                        context,
-                                                        crypto.decrypt(
-                                                            data[index]
-                                                                ["purpose"]),
-                                                        Icons.check);
-                                                  },
-                                                ),
-                                              ),
-                                              Text(
-                                                "₹ " +
-                                                    commaSeperator(crypto
-                                                        .decrypt(data[index]
-                                                            ["amount"])),
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    color: (crypto.decrypt(data[
-                                                                    index][
-                                                                "amount"])[0] ==
-                                                            "-"
-                                                        ? Colors.red
-                                                        : Colors.green)),
-                                              ),
-                                            ]),
-                                      ),
+                                  return Card(
+                                    elevation: 1.0,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    shadowColor: Theme.of(context).primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          color: Theme.of(context)
+                                              .cardColor
+                                              .withAlpha(95)),
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 18.0, horizontal: 8),
+                                      child: Text.rich(TextSpan(children: [
+                                        TextSpan(
+                                          text: (crypto.decrypt(data[index]
+                                                      ["amount"])[0] ==
+                                                  "-")
+                                              ? "You owe "
+                                              : "You gave ",
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        TextSpan(
+                                          text: ("₹ " +
+                                              commaSeperator(crypto.decrypt(
+                                                  data[index]["amount"]))),
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              color: (crypto.decrypt(data[index]
+                                                          ["amount"])[0] ==
+                                                      "-"
+                                                  ? Colors.red
+                                                  : Colors.green)),
+                                        ),
+                                        TextSpan(
+                                            text: " for ",
+                                            style: TextStyle(fontSize: 18)),
+                                        TextSpan(
+                                          text: (crypto
+                                              .decrypt(data[index]["purpose"])),
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ])),
                                     ),
                                   );
                                 },

@@ -263,357 +263,268 @@ class _ProfileState extends State<Profile> {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Profile"),
-        ),
         body: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+      child: Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 10,
+            ),
+            buildExpenseTile(ExpenseData),
+            SizedBox(
+              height: 10,
+            ),
+            dataMap.isEmpty
+                ? Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3.3,
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: PieChart(
+                      dataMap: dataMap,
+                      chartRadius: MediaQuery.of(context).size.width / 2.5,
+                      animationDuration: Duration(milliseconds: 800),
+                      chartValuesOptions: ChartValuesOptions(
+                        showChartValueBackground: true,
+                        showChartValuesInPercentage: true,
+                        showChartValuesOutside: true,
+                        decimalPlaces: 1,
+                      ),
+                    ),
+                  ),
+            SizedBox(
+              height: 10,
+            ),
+            ExpansionTile(
+              title: Text(
+                "Personal Expense",
+                style: TextStyle(
+                  color:
+                      themeProvider.isDarkTheme ? Colors.white : Colors.black,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              trailing: Icon(
+                Icons.filter_alt_outlined,
+                color: themeProvider.isDarkTheme ? Colors.white : Colors.black,
+              ),
               children: [
                 SizedBox(
-                  height: 10,
-                ),
-                buildExpenseTile(ExpenseData),
-                SizedBox(
-                  height: 10,
-                ),
-                dataMap.isEmpty
-                    ? Center(
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3.3,
-                        ),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: PieChart(
-                          dataMap: dataMap,
-                          chartRadius: MediaQuery.of(context).size.width / 2.5,
-                          animationDuration: Duration(milliseconds: 800),
-                          chartValuesOptions: ChartValuesOptions(
-                            showChartValueBackground: true,
-                            showChartValuesInPercentage: true,
-                            showChartValuesOutside: true,
-                            decimalPlaces: 1,
+                  width: MediaQuery.of(context).size.width,
+                  height: 65,
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: Month.length,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        return SizedBox(
+                          height: 65,
+                          width: 110,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: InkWell(
+                              onTap: () {
+                                if (monthIndex.contains(index)) {
+                                  monthIndex.remove(index);
+                                } else {
+                                  monthIndex.add(index);
+                                }
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              child: Card(
+                                elevation: 1.0,
+                                shadowColor: Theme.of(context).primaryColor,
+                                color: monthIndex.contains(index)
+                                    ? Theme.of(context).primaryColor
+                                    : Theme.of(context).scaffoldBackgroundColor,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: Theme.of(context).cardColor),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Center(
+                                  child: InkWell(
+                                    child: Text(
+                                      Month[index],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: monthIndex.contains(index)
+                                            ? Colors.white
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .bodySmall!
+                                                .color,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      }),
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: 65,
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: Year.length,
+                      shrinkWrap: true,
+                      itemBuilder: (BuildContext context, int index) {
+                        return SizedBox(
+                          height: 65,
+                          width: 100,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: InkWell(
+                              onTap: () {
+                                if (yearIndex.contains(index)) {
+                                  yearIndex.remove(index);
+                                } else {
+                                  yearIndex.add(index);
+                                }
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              child: Card(
+                                elevation: 1.0,
+                                shadowColor: Theme.of(context).primaryColor,
+                                color: yearIndex.contains(index)
+                                    ? Theme.of(context).primaryColor
+                                    : Theme.of(context).scaffoldBackgroundColor,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: Theme.of(context).cardColor),
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Center(
+                                  child: InkWell(
+                                    child: Text(
+                                      Year[index],
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: yearIndex.contains(index)
+                                            ? Colors.white
+                                            : Theme.of(context)
+                                                .textTheme
+                                                .bodySmall!
+                                                .color,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
+                ),
                 SizedBox(
                   height: 10,
                 ),
-                ExpansionTile(
-                  title: Text(
-                    "Personal Expense",
-                    style: TextStyle(
-                      color: themeProvider.isDarkTheme
-                          ? Colors.white
-                          : Colors.black,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  trailing: Icon(
-                    Icons.filter_alt_outlined,
-                    color:
-                        themeProvider.isDarkTheme ? Colors.white : Colors.black,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: 65,
-                      child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: Month.length,
-                          shrinkWrap: true,
-                          itemBuilder: (BuildContext context, int index) {
-                            return SizedBox(
-                              height: 65,
-                              width: 110,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (monthIndex.contains(index)) {
-                                      monthIndex.remove(index);
-                                    } else {
-                                      monthIndex.add(index);
-                                    }
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  child: Card(
-                                    elevation: 1.0,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    color: monthIndex.contains(index)
-                                        ? Theme.of(context).primaryColor
-                                        : Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: Theme.of(context).cardColor),
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    child: Center(
-                                      child: InkWell(
-                                        child: Text(
-                                          Month[index],
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: monthIndex.contains(index)
-                                                ? Colors.white
-                                                : Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall!
-                                                    .color,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: 65,
-                      child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: Year.length,
-                          shrinkWrap: true,
-                          itemBuilder: (BuildContext context, int index) {
-                            return SizedBox(
-                              height: 65,
-                              width: 100,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () {
-                                    if (yearIndex.contains(index)) {
-                                      yearIndex.remove(index);
-                                    } else {
-                                      yearIndex.add(index);
-                                    }
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  child: Card(
-                                    elevation: 1.0,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    color: yearIndex.contains(index)
-                                        ? Theme.of(context).primaryColor
-                                        : Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: Theme.of(context).cardColor),
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                    child: Center(
-                                      child: InkWell(
-                                        child: Text(
-                                          Year[index],
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w500,
-                                            color: yearIndex.contains(index)
-                                                ? Colors.white
-                                                : Theme.of(context)
-                                                    .textTheme
-                                                    .bodySmall!
-                                                    .color,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        SizedBox(
-                          height: 45,
-                          width: 90,
-                          child: OutlinedButton(
-                            child: Text(
-                              "Apply",
-                              style: TextStyle(
-                                color: themeProvider.isDarkTheme
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            onPressed: () {
-                              showfilterResult = true;
-                              getFilterResult();
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                            },
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(13.0),
-                              ),
-                              side: BorderSide(
-                                  color: Theme.of(context).primaryColor),
-                            ),
+                      height: 45,
+                      width: 90,
+                      child: OutlinedButton(
+                        child: Text(
+                          "Apply",
+                          style: TextStyle(
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        SizedBox(
-                          height: 45,
-                          child: OutlinedButton(
-                            child: Text(
-                              "Clear Filter",
-                              style: TextStyle(
-                                color: themeProvider.isDarkTheme
-                                    ? Colors.white
-                                    : Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            onPressed: () {
-                              monthIndex.clear();
-                              yearIndex.clear();
-                              showfilterResult = false;
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                            },
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(13.0),
-                              ),
-                              side: BorderSide(
-                                  color: Theme.of(context).primaryColor),
-                            ),
+                        onPressed: () {
+                          showfilterResult = true;
+                          getFilterResult();
+                          if (this.mounted) {
+                            setState(() {});
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(13.0),
                           ),
+                          side:
+                              BorderSide(color: Theme.of(context).primaryColor),
                         ),
-                      ],
+                      ),
                     ),
                     SizedBox(
-                      height: 10,
+                      height: 45,
+                      child: OutlinedButton(
+                        child: Text(
+                          "Clear Filter",
+                          style: TextStyle(
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        onPressed: () {
+                          monthIndex.clear();
+                          yearIndex.clear();
+                          showfilterResult = false;
+                          if (this.mounted) {
+                            setState(() {});
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(13.0),
+                          ),
+                          side:
+                              BorderSide(color: Theme.of(context).primaryColor),
+                        ),
+                      ),
                     ),
                   ],
                 ),
                 SizedBox(
                   height: 10,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: 150,
-                  child: personalExpense.isEmpty
-                      ? Center(
-                          child: personalLoaded
-                              ? Text(
-                                  "No Personal Expense Found",
-                                  style: TextStyle(fontSize: 20),
-                                )
-                              : CircularProgressIndicator(strokeWidth: 3.3),
-                        )
-                      : (showfilterResult
-                          ? (filterResult.isNotEmpty
-                              ? ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  shrinkWrap: true,
-                                  itemCount: filterResult.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return SizedBox(
-                                      height: 150,
-                                      width: 150,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: InkWell(
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => Expenses(
-                                                      email: widget.email,
-                                                      date: filterResult[index]
-                                                          .Date,
-                                                      token: widget.token,
-                                                      expenseCategory: widget
-                                                          .expenseCategory,
-                                                      investmentCategory: widget
-                                                          .investmentCategory,
-                                                    )),
-                                          ),
-                                          onLongPress: () async {
-                                            updatePieChart(
-                                                filterResult[index].Date);
-                                          },
-                                          child: Card(
-                                            elevation: 1.0,
-                                            shadowColor:
-                                                Theme.of(context).primaryColor,
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                            shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                  color: Theme.of(context)
-                                                      .cardColor),
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                            ),
-                                            child: Column(
-                                              children: [
-                                                SizedBox(
-                                                  height: 10,
-                                                ),
-                                                textWidget(
-                                                  filterResult[index].Month +
-                                                      ",",
-                                                  linearGradient_1,
-                                                ),
-                                                textWidget(
-                                                  filterResult[index].Year,
-                                                  linearGradient_1,
-                                                ),
-                                                SizedBox(
-                                                  height: 20,
-                                                ),
-                                                textWidget(
-                                                    "₹ " +
-                                                        commaSeperator(
-                                                            filterResult[index]
-                                                                .Total
-                                                                .toStringAsFixed(
-                                                                    2)),
-                                                    linearGradient_2)
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Center(
-                                  child: Text(
-                                    "No Personal Expense Found",
-                                    style: TextStyle(fontSize: 20),
-                                  ),
-                                ))
-                          : ListView.builder(
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: 150,
+              child: personalExpense.isEmpty
+                  ? Center(
+                      child: personalLoaded
+                          ? Text(
+                              "No Personal Expense Found",
+                              style: TextStyle(fontSize: 20),
+                            )
+                          : CircularProgressIndicator(strokeWidth: 3.3),
+                    )
+                  : (showfilterResult
+                      ? (filterResult.isNotEmpty
+                          ? ListView.builder(
                               scrollDirection: Axis.horizontal,
                               shrinkWrap: true,
-                              itemCount: personalExpense.length,
+                              itemCount: filterResult.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return SizedBox(
                                   height: 150,
@@ -626,8 +537,8 @@ class _ProfileState extends State<Profile> {
                                         MaterialPageRoute(
                                             builder: (context) => Expenses(
                                                   email: widget.email,
-                                                  date: personalExpense[index]
-                                                      .Date,
+                                                  date:
+                                                      filterResult[index].Date,
                                                   token: widget.token,
                                                   expenseCategory:
                                                       widget.expenseCategory,
@@ -637,7 +548,7 @@ class _ProfileState extends State<Profile> {
                                       ),
                                       onLongPress: () async {
                                         updatePieChart(
-                                            personalExpense[index].Date);
+                                            filterResult[index].Date);
                                       },
                                       child: Card(
                                         elevation: 1.0,
@@ -658,12 +569,11 @@ class _ProfileState extends State<Profile> {
                                               height: 10,
                                             ),
                                             textWidget(
-                                              personalExpense[index].Month +
-                                                  ",",
+                                              filterResult[index].Month + ",",
                                               linearGradient_1,
                                             ),
                                             textWidget(
-                                              personalExpense[index].Year,
+                                              filterResult[index].Year,
                                               linearGradient_1,
                                             ),
                                             SizedBox(
@@ -672,7 +582,7 @@ class _ProfileState extends State<Profile> {
                                             textWidget(
                                                 "₹ " +
                                                     commaSeperator(
-                                                        personalExpense[index]
+                                                        filterResult[index]
                                                             .Total
                                                             .toStringAsFixed(
                                                                 2)),
@@ -684,11 +594,85 @@ class _ProfileState extends State<Profile> {
                                   ),
                                 );
                               },
-                            )),
-                ),
-              ],
+                            )
+                          : Center(
+                              child: Text(
+                                "No Personal Expense Found",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ))
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          shrinkWrap: true,
+                          itemCount: personalExpense.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return SizedBox(
+                              height: 150,
+                              width: 150,
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: InkWell(
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Expenses(
+                                              email: widget.email,
+                                              date: personalExpense[index].Date,
+                                              token: widget.token,
+                                              expenseCategory:
+                                                  widget.expenseCategory,
+                                              investmentCategory:
+                                                  widget.investmentCategory,
+                                            )),
+                                  ),
+                                  onLongPress: () async {
+                                    updatePieChart(personalExpense[index].Date);
+                                  },
+                                  child: Card(
+                                    elevation: 1.0,
+                                    shadowColor: Theme.of(context).primaryColor,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          color: Theme.of(context).cardColor),
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        textWidget(
+                                          personalExpense[index].Month + ",",
+                                          linearGradient_1,
+                                        ),
+                                        textWidget(
+                                          personalExpense[index].Year,
+                                          linearGradient_1,
+                                        ),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
+                                        textWidget(
+                                            "₹ " +
+                                                commaSeperator(
+                                                    personalExpense[index]
+                                                        .Total
+                                                        .toStringAsFixed(2)),
+                                            linearGradient_2)
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        )),
             ),
-          ),
-        ));
+          ],
+        ),
+      ),
+    ));
   }
 }
