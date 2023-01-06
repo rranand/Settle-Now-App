@@ -54,26 +54,4 @@ class LocalNotificationService {
       );
     } on Exception catch (_) {}
   }
-
-  static void createanddisplaynotificationAll(RemoteMessage message) async {
-    try {
-      final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      const NotificationDetails notificationDetails = NotificationDetails(
-        android: AndroidNotificationDetails(
-          "allNotifications",
-          "Miscellaneous",
-          importance: Importance.max,
-          priority: Priority.high,
-        ),
-      );
-
-      await notificationsPlugin.show(
-        id,
-        message.notification!.title,
-        message.notification!.body,
-        notificationDetails,
-        payload: message.data['_id'],
-      );
-    } on Exception catch (_) {}
-  }
 }

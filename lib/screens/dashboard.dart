@@ -591,20 +591,16 @@ class _DashBoardState extends State<DashBoard> {
           Map<String, String> notificationData =
               await getDataFromNotification(message.data.toString());
 
-          if (notificationData.isEmpty) {
-            LocalNotificationService.createanddisplaynotificationAll(message);
-          } else {
-            NavKey.navKey.currentState!.push(MaterialPageRoute(
-                builder: (_) => RoomExpense(
-                    roomKey: notificationData["roomKey"]!,
-                    email: notificationData["email"]!,
-                    roomName: notificationData["roomName"]!,
-                    token: notificationData["token"]!,
-                    roomLink: notificationData["roomLink"]!,
-                    isRoomActive: ((notificationData["isRoomActive"]!) == 'true'
-                        ? true
-                        : false))));
-          }
+          NavKey.navKey.currentState!.push(MaterialPageRoute(
+              builder: (_) => RoomExpense(
+                  roomKey: notificationData["roomKey"]!,
+                  email: notificationData["email"]!,
+                  roomName: notificationData["roomName"]!,
+                  token: notificationData["token"]!,
+                  roomLink: notificationData["roomLink"]!,
+                  isRoomActive: ((notificationData["isRoomActive"]!) == 'true'
+                      ? true
+                      : false))));
         }
       },
     );
@@ -612,7 +608,7 @@ class _DashBoardState extends State<DashBoard> {
     FirebaseMessaging.onMessage.listen(
       (message) {
         if (message.notification != null) {
-          LocalNotificationService.createanddisplaynotificationAll(message);
+          LocalNotificationService.createanddisplaynotification(message);
         }
       },
     );
@@ -622,23 +618,19 @@ class _DashBoardState extends State<DashBoard> {
         if (message.notification != null) {
           Map<String, String> notificationData =
               await getDataFromNotification(message.data.toString());
-          if (notificationData.isEmpty) {
-            LocalNotificationService.createanddisplaynotificationAll(message);
-          } else {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) => RoomExpense(
-                        roomKey: notificationData["roomKey"]!,
-                        email: notificationData["email"]!,
-                        roomName: notificationData["roomName"]!,
-                        token: notificationData["token"]!,
-                        roomLink: notificationData["roomLink"]!,
-                        isRoomActive:
-                            ((notificationData["isRoomActive"]!) == 'true'
-                                ? true
-                                : false))));
-          }
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (_) => RoomExpense(
+                      roomKey: notificationData["roomKey"]!,
+                      email: notificationData["email"]!,
+                      roomName: notificationData["roomName"]!,
+                      token: notificationData["token"]!,
+                      roomLink: notificationData["roomLink"]!,
+                      isRoomActive:
+                          ((notificationData["isRoomActive"]!) == 'true'
+                              ? true
+                              : false))));
         }
       },
     );
@@ -1721,7 +1713,7 @@ class _DashBoardState extends State<DashBoard> {
                                   Text(
                                     (yourSpend >= 0
                                             ? "Gain : ₹ "
-                                            : "Loss : ₹ ") +
+                                            : "Owe : ₹ ") +
                                         commaSeperator(
                                             yourSpend.toStringAsFixed(2)),
                                     style: TextStyle(fontSize: 18),
@@ -1918,15 +1910,15 @@ class _DashBoardState extends State<DashBoard> {
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.home,
-                size: 25,
+                size: 27,
               ),
-              label: "Home",
+              label: "",
             ),
             BottomNavigationBarItem(
               icon: Stack(children: [
                 Icon(
                   Icons.person_add_outlined,
-                  size: 25,
+                  size: 27,
                 ),
                 RoomRequest.isNotEmpty
                     ? Positioned(
@@ -1953,28 +1945,28 @@ class _DashBoardState extends State<DashBoard> {
                       )
                     : SizedBox()
               ]),
-              label: "Request",
+              label: "",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(
+                Icons.wallet,
+                size: 27,
+              ),
+              label: "",
             ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.account_balance_outlined,
-                size: 25,
+                size: 27,
               ),
-              label: "Personal Expense",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(
-                Icons.credit_card,
-                size: 25,
-              ),
-              label: "Len-Den",
+              label: "",
             ),
             BottomNavigationBarItem(
               icon: Icon(
                 Icons.person,
-                size: 25,
+                size: 27,
               ),
-              label: "Profile",
+              label: "",
             ),
           ],
         ),
