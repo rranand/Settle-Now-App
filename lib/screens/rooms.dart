@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:googleapis/keep/v1.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -1060,12 +1059,13 @@ class _RoomExpenseState extends State<RoomExpense>
             padding: EdgeInsets.all(8.0),
             child: InkWell(
                 onTap: () async {
+                  TransList.clear();
+                  expenseTitle = "All Expense";
+                  expenseDetailByMember = "all";
+                  TransList.addAll(allExpenseList);
+
                   if (this.mounted) {
-                    setState(() {
-                      expenseTitle = "All Expense";
-                      expenseDetailByMember = "all";
-                      TransList = allExpenseList;
-                    });
+                    setState(() {});
                   }
 
                   if (showExpenseYouAreIn) {
