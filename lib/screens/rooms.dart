@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -57,6 +57,8 @@ class _RoomExpenseState extends State<RoomExpense>
   bool paidTransactionData = false;
   final _formKey = GlobalKey<FormState>();
   bool showExpenseYouAreIn = false;
+  String yourExpense = "";
+  double totalExpense = 0;
 
   String expenseTitle = "All Expense";
   String expenseDetailByMember = "all";
@@ -123,6 +125,7 @@ class _RoomExpenseState extends State<RoomExpense>
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        totalExpense = 0;
         list.clear();
         roomExpenseCategory.clear();
         list = data['data'];
@@ -139,9 +142,13 @@ class _RoomExpenseState extends State<RoomExpense>
         for (int i = 1; i < list.length; i++) {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
-          if (crypto.decrypt(list[i]["email"]) == widget.email &&
-              list[i]["done"]) {
-            locked = true;
+          totalExpense += double.parse(crypto.decrypt(list[i]["Expense"])) +
+              double.parse(crypto.decrypt(list[i]["TotalSplitExpense"]));
+          if (crypto.decrypt(list[i]["email"]) == widget.email) {
+            yourExpense = crypto.decrypt(list[i]["yourExpense"]);
+            if (list[i]["done"]) {
+              locked = true;
+            }
           }
         }
 
@@ -810,7 +817,7 @@ class _RoomExpenseState extends State<RoomExpense>
                     borderRadius: BorderRadius.circular(15.0),
                   ),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(6.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -852,7 +859,7 @@ class _RoomExpenseState extends State<RoomExpense>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(4.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -870,35 +877,48 @@ class _RoomExpenseState extends State<RoomExpense>
                               crypto.decrypt(list[index]['Name']), Icons.check),
                         ),
                         SizedBox(
-                          height: 8,
+                          height: 4,
                         ),
                         Text(
-                          "Total : ₹ " +
+                          "Contribution : ₹ " +
                               commaSeperator((double.parse(crypto
                                           .decrypt(list[index]['Expense'])) +
                                       double.parse(crypto.decrypt(
                                           list[index]['TotalSplitExpense'])))
                                   .toStringAsFixed(2)),
                           style: TextStyle(
-                            fontSize: 17,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             foreground: Paint()..shader = linearGradient_2,
                           ),
                         ),
                         SizedBox(
-                          height: 8,
+                          height: 3,
+                        ),
+                        Text(
+                            "Spent : ₹ " +
+                                commaSeperator((double.parse(crypto
+                                        .decrypt(list[index]["yourExpense"])))
+                                    .toStringAsFixed(2)),
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              foreground: Paint()..shader = linearGradient_2,
+                            )),
+                        SizedBox(
+                          height: 3,
                         ),
                         double.parse(double.parse(
                                         crypto.decrypt(list[index]["current"]))
                                     .toStringAsFixed(2)) >
                                 0
                             ? Text(
-                                "Gain: ₹ " +
+                                "Gain : ₹ " +
                                     commaSeperator(double.parse(crypto
                                             .decrypt(list[index]["current"]))
                                         .toStringAsFixed(2)),
                                 style: TextStyle(
-                                  fontSize: 17,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.w500,
                                   color: Colors.green,
                                 ),
@@ -908,18 +928,18 @@ class _RoomExpenseState extends State<RoomExpense>
                                         .toStringAsFixed(2)) <
                                     0
                                 ? Text(
-                                    "Owe: ₹ " +
+                                    "Owe : ₹ " +
                                         commaSeperator(double.parse(
                                                 crypto.decrypt(
                                                     list[index]["current"]))
                                             .toStringAsFixed(2)),
                                     style: TextStyle(
-                                      fontSize: 17,
+                                      fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.red,
                                     ),
                                   )
-                                : SizedBox(),
+                                : SizedBox()
                       ],
                     ),
                   )
@@ -1117,44 +1137,44 @@ class _RoomExpenseState extends State<RoomExpense>
             headerSliverBuilder: (context, value) {
               return [
                 SliverToBoxAdapter(
-                  child: Slidable(
-                    endActionPane:
-                        ActionPane(motion: const BehindMotion(), children: [
-                      SlidableAction(
-                        onPressed: (context) async {
-                          await Share.share("Join " +
-                              widget.roomName +
-                              "\nRoom Key: " +
-                              widget.roomKey +
-                              "\n" +
-                              widget.roomLink);
-                        },
-                        backgroundColor: Colors.blue,
-                        label: 'Share',
-                        icon: Icons.share,
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                      )
-                    ]),
+                  child: InkWell(
+                    onTap: () async {
+                      await Share.share("Join " +
+                          widget.roomName +
+                          "\nRoom Key: " +
+                          widget.roomKey +
+                          "\n" +
+                          widget.roomLink);
+                    },
+                    onLongPress: () async {
+                      Clipboard.setData(ClipboardData(text: widget.roomKey));
+                      showToast(context, "Join Key Copied", Icons.check);
+                    },
                     child: ListTile(
-                      title: Text("Room Key"),
+                      title: Row(
+                        children: [
+                          Text("Room Key   "),
+                          Icon(
+                            Icons.share,
+                            size: 17,
+                          )
+                        ],
+                      ),
                       trailing: Text(widget.roomKey),
                     ),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: ListTile(
-                    title: const Text("Total Expense (Splitted Equally)"),
-                    trailing: Text("₹ " +
-                        commaSeperator(
-                            crypto.decrypt(list[0]["TotalExpense"]))),
+                    title: const Text("Total Spent"),
+                    trailing: Text(
+                        "₹ " + commaSeperator(totalExpense.toStringAsFixed(2))),
                   ),
                 ),
                 SliverToBoxAdapter(
                   child: ListTile(
-                    title: const Text("Average Expense"),
-                    trailing: Text("₹ " +
-                        commaSeperator(
-                            crypto.decrypt(list[0]["AverageExpense"]))),
+                    title: const Text("You Spent"),
+                    trailing: Text("₹ " + commaSeperator(yourExpense)),
                   ),
                 ),
                 SliverToBoxAdapter(

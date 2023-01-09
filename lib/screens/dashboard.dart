@@ -71,7 +71,6 @@ class _DashBoardState extends State<DashBoard> {
   AppUpdateInfo? _updateInfo;
   final InAppReview inAppReview = InAppReview.instance;
   int dash = 0;
-  double yourSpend = 0;
   bool isGoogle = false;
   var now;
   String date = "";
@@ -163,6 +162,7 @@ class _DashBoardState extends State<DashBoard> {
   bool haveImg = false;
   bool open = true;
   String amtSpend = "";
+  String due = "";
   double amtSpendOpen = 0;
   double amtSpendClose = 0;
   String _profilePicID = "";
@@ -417,22 +417,20 @@ class _DashBoardState extends State<DashBoard> {
 
       if (response.statusCode == 200) {
         amtSpend = crypto.decrypt(jsonDecode(response.body)['amtSpend']);
+        due = crypto.decrypt(jsonDecode(response.body)['due']);
         List<dynamic> list = jsonDecode(response.body)['data'];
         RoomDataO.clear();
         RoomDataC.clear();
-        yourSpend = 0;
         amtSpendClose = 0;
         amtSpendOpen = 0;
 
         for (int i = 0; i < list.length; i++) {
           if (list[i]['active']) {
             RoomDataO.add(RoomEach.fromJson(list[i]));
-            yourSpend += RoomDataO.last.spend -
-                (RoomDataO.last.total / RoomDataO.last.members);
-            amtSpendOpen += (RoomDataO.last.total / RoomDataO.last.members);
+            amtSpendOpen += RoomDataO.last.spend;
           } else {
             RoomDataC.add(RoomEach.fromJson(list[i]));
-            amtSpendClose += RoomDataC.last.total / RoomDataC.last.members;
+            amtSpendClose += RoomDataC.last.spend;
           }
         }
 
@@ -1579,7 +1577,7 @@ class _DashBoardState extends State<DashBoard> {
                     width: MediaQuery.of(context).size.width,
                     child: Center(
                       child: Text(
-                        "No Rooms to Join, Create One!!!",
+                        "No Room Joined, Create One!!!",
                         style: TextStyle(
                           fontSize: 22,
                         ),
@@ -1710,14 +1708,15 @@ class _DashBoardState extends State<DashBoard> {
                                     "Total : ₹ " + commaSeperator(amtSpend),
                                     style: TextStyle(fontSize: 18),
                                   ),
-                                  Text(
-                                    (yourSpend >= 0
-                                            ? "Gain : ₹ "
-                                            : "Owe : ₹ ") +
-                                        commaSeperator(
-                                            yourSpend.toStringAsFixed(2)),
-                                    style: TextStyle(fontSize: 18),
-                                  ),
+                                  due.isEmpty
+                                      ? Text("")
+                                      : Text(
+                                          (due[0] != "-"
+                                                  ? "Gain : ₹ "
+                                                  : "Owe : ₹ ") +
+                                              commaSeperator(due),
+                                          style: TextStyle(fontSize: 18),
+                                        ),
                                 ],
                               ),
                             )
@@ -2564,6 +2563,30 @@ class RoomWidget extends StatelessWidget {
     );
   }
 
+  Future<List<dynamic>> getMembers(BuildContext context, String roomkey) async {
+    List<dynamic> membersData = [];
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + 'room/roomSplitMembers'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(email),
+            'roomKey': crypto.encrypt(roomkey)
+          }));
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        membersData = data['data'];
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+    return membersData;
+  }
+
   Widget roomSectors(BuildContext context, int index) {
     return InkWell(
       child: SizedBox(
@@ -2583,14 +2606,160 @@ class RoomWidget extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Text(
                         RoomData[index].roomName,
                         textScaleFactor: 1.0,
+                        maxLines: 1,
                         style: TextStyle(
-                          fontSize: 22,
+                            fontSize: 22, overflow: TextOverflow.ellipsis),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: FutureBuilder<List<dynamic>>(
+                          builder:
+                              (context, AsyncSnapshot<List<dynamic>> snapshot) {
+                            List<Widget> allImages = [];
+                            if (snapshot.hasData) {
+                              for (int i = 0; i < snapshot.data!.length; i++) {
+                                if (i == 0) {
+                                  allImages.add(CachedNetworkImage(
+                                    imageUrl: crypto
+                                                .decrypt(
+                                                    snapshot.data![i]['pic'])
+                                                .length ==
+                                            0
+                                        ? global.driveUrl +
+                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                        : crypto
+                                            .decrypt(snapshot.data![i]['pic']),
+                                    progressIndicatorBuilder: (context, url,
+                                            downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                'assets/Images/unknown.jpeg'),
+                                            fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: imageProvider,
+                                            fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                  ));
+                                } else {
+                                  allImages.add(Positioned(
+                                      left: i * 20,
+                                      child: CachedNetworkImage(
+                                        imageUrl: crypto
+                                                    .decrypt(snapshot.data![i]
+                                                        ['pic'])
+                                                    .length ==
+                                                0
+                                            ? global.driveUrl +
+                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                            : crypto.decrypt(
+                                                snapshot.data![i]['pic']),
+                                        progressIndicatorBuilder: (context, url,
+                                                downloadProgress) =>
+                                            CircularProgressIndicator(
+                                                value:
+                                                    downloadProgress.progress),
+                                        errorWidget: (context, url, error) =>
+                                            Container(
+                                          width: 28.0,
+                                          height: 28.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                                image: AssetImage(
+                                                    'assets/Images/unknown.jpeg'),
+                                                fit: BoxFit.cover),
+                                          ),
+                                        ),
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                Container(
+                                          width: 28.0,
+                                          height: 28.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                                image: imageProvider,
+                                                fit: BoxFit.cover),
+                                          ),
+                                        ),
+                                      )));
+                                }
+                              }
+                            } else if (snapshot.hasError) {
+                              for (int i = 0;
+                                  i < RoomData[index].members;
+                                  i++) {
+                                if (i == 0) {
+                                  allImages.add(Container(
+                                    width: 28.0,
+                                    height: 28.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              'assets/Images/unknown.jpeg'),
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ));
+                                } else {
+                                  allImages.add(Positioned(
+                                    left: i * 20,
+                                    child: Container(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                'assets/Images/unknown.jpeg'),
+                                            fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                  ));
+                                }
+                              }
+                            } else {
+                              return Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            return Stack(
+                              children: allImages,
+                            );
+                          },
+                          future: getMembers(context, RoomData[index].roomKey),
                         ),
                       ),
+                    ),
+                    SizedBox(
+                      height: 5,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -2603,13 +2772,6 @@ class RoomWidget extends StatelessWidget {
                               Text(
                                 "Members: " +
                                     RoomData[index].members.toString(),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              Text(
-                                "Created: " + RoomData[index].date,
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 13,
@@ -2645,7 +2807,7 @@ class RoomWidget extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Total Spend: ₹ " +
+                                "Contribution: ₹ " +
                                     commaSeperator(
                                         RoomData[index].total.toString()),
                                 style: TextStyle(
@@ -2654,31 +2816,19 @@ class RoomWidget extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                "Your Spend: ₹ " +
+                                "Spent: ₹ " +
                                     commaSeperator(
                                         RoomData[index].spend.toString()),
                                 style: TextStyle(
                                   color: Theme.of(context).primaryColor,
                                   fontSize: 13,
                                 ),
-                              ),
-                              Text(
-                                "Average Spend: ₹ " +
-                                    commaSeperator(double.parse(
-                                            (RoomData[index].total /
-                                                    RoomData[index].members)
-                                                .toString())
-                                        .toStringAsFixed(2)),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 13,
-                                ),
-                              ),
+                              )
                             ],
                           )
                         ],
                       ),
-                    )
+                    ),
                   ])),
         ),
       ),
