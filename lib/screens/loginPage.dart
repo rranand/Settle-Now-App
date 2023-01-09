@@ -43,7 +43,9 @@ class _LoginPageState extends State<LoginPage> {
     if (prefs.getBool('darkTheme') != null) {
       darkTheme = prefs.getBool('darkTheme')!;
     } else {
-      prefs.setBool('darkTheme', false);
+      darkTheme =
+          (Brightness.dark == MediaQuery.of(context).platformBrightness);
+      prefs.setBool('darkTheme', darkTheme);
     }
 
     final provider = Provider.of<ThemeProvider>(context, listen: false);
@@ -224,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: SizedBox(
                         width: 240,
                         child: Card(
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).primaryColor.withAlpha(255),
                           elevation: 2.5,
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
