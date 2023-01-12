@@ -163,7 +163,9 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     _extractExpenseData(expenseDetailByMember);
