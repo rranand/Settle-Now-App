@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -2703,7 +2704,10 @@ class RoomWidget extends StatelessWidget {
                               (context, AsyncSnapshot<List<dynamic>> snapshot) {
                             List<Widget> allImages = [];
                             if (snapshot.hasData) {
-                              for (int i = 0; i < snapshot.data!.length; i++) {
+                              int length = min(4, snapshot.data!.length);
+                              int leftMembers =
+                                  (snapshot.data!.length - length + 1);
+                              for (int i = 0; i < length; i++) {
                                 if (i == 0) {
                                   allImages.add(CachedNetworkImage(
                                     imageUrl: crypto
@@ -2784,6 +2788,42 @@ class RoomWidget extends StatelessWidget {
                                                 image: imageProvider,
                                                 fit: BoxFit.cover),
                                           ),
+                                        ),
+                                      )));
+                                }
+                                if (leftMembers > 1) {
+                                  allImages.add(Positioned(
+                                      left: 60,
+                                      child: Container(
+                                        width: 28.0,
+                                        height: 28.0,
+                                        decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.white),
+                                        child: Stack(
+                                          alignment:
+                                              AlignmentDirectional.centerStart,
+                                          children: [
+                                            Positioned(
+                                              left:
+                                                  leftMembers > 9 ? -0.2 : 2.5,
+                                              child: Icon(
+                                                Icons.add,
+                                                color: Colors.black,
+                                                size: 15,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              bottom: 6.5,
+                                              left: leftMembers > 9 ? 11 : 15,
+                                              child: Text(
+                                                leftMembers.toString(),
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       )));
                                 }

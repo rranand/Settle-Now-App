@@ -1,11 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
-import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
@@ -96,7 +94,6 @@ class _LendPageState extends State<LendPage> {
     }
 
     load = true;
-
     if (this.mounted) {
       setState(() {});
     }
@@ -218,102 +215,6 @@ class _LendPageState extends State<LendPage> {
                 ))));
   }
 
-  Widget friendListWidget(BuildContext context, List<FriendEach> data) {
-    return StatefulBuilder(builder: (context, setState) {
-      return Scrollbar(
-        radius: Radius.circular(10.0),
-        thickness: 5.5,
-        child: ListView.separated(
-            separatorBuilder: (context, index) => SizedBox(
-                  height: 5,
-                ),
-            shrinkWrap: true,
-            physics: ScrollPhysics(),
-            itemCount: data.length,
-            itemBuilder: (BuildContext context, int index) {
-              return SizedBox(
-                  height: 80,
-                  child: Center(
-                    child: Card(
-                      elevation: 1.0,
-                      shadowColor: Theme.of(context).primaryColor,
-                      color: Theme.of(context).scaffoldBackgroundColor,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                            color: Theme.of(context).cardColor.withAlpha(95)),
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: data[index].isGoogle
-                                    ? data[index].pic
-                                    : (global.driveUrl +
-                                        (data[index].pic.length == 0
-                                            ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                            : data[index].pic)),
-                                progressIndicatorBuilder:
-                                    (context, url, downloadProgress) =>
-                                        CircularProgressIndicator(
-                                            value: downloadProgress.progress),
-                                errorWidget: (context, url, error) => Container(
-                                  width: 120.0,
-                                  height: 120.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/Images/unknown.jpeg'),
-                                        fit: BoxFit.cover),
-                                  ),
-                                ),
-                                imageBuilder: (context, imageProvider) =>
-                                    Container(
-                                  width: 45.0,
-                                  height: 45.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover),
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                data[index].name,
-                                style: const TextStyle(
-                                  fontSize: 17,
-                                ),
-                              ),
-                              IconButton(
-                                  onPressed: () async {
-                                    if (data[index].status == "NJ") {
-                                      //await sendLenDenJoinRequest(data[index].email);
-                                      data[index].status = "S";
-                                    } else {
-                                      //await cancelLenDenJoinRequest(data[index].email);
-                                      data[index].status = "NJ";
-                                    }
-
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  icon: Icon(data[index].status == "NJ"
-                                      ? Icons.person_add_alt
-                                      : Icons.cancel_outlined))
-                            ]),
-                      ),
-                    ),
-                  ));
-            }),
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -334,98 +235,99 @@ class _LendPageState extends State<LendPage> {
       body: RefreshIndicator(
           key: _refreshIndicatorKey,
           onRefresh: _initialization,
-          child: ListView(physics: AlwaysScrollableScrollPhysics(), children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: load
-                  ? (data.isEmpty
-                      ? SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          child: Center(
-                            child: Text(
-                              "No Loan Found",
-                              style: TextStyle(fontSize: 25),
-                            ),
-                          ),
-                        )
-                      : SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.95,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Scrollbar(
-                              radius: Radius.circular(10.0),
-                              thickness: 5.5,
-                              child: ListView.separated(
-                                separatorBuilder: (context, index) => SizedBox(
-                                  height: 10,
-                                ),
-                                itemCount: data.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Card(
-                                    elevation: 1.0,
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: Theme.of(context)
-                                              .cardColor
-                                              .withAlpha(95)),
-                                      borderRadius: BorderRadius.circular(15.0),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 18.0, horizontal: 8),
-                                      child: Text.rich(TextSpan(children: [
-                                        TextSpan(
-                                          text: (crypto.decrypt(data[index]
-                                                      ["amount"])[0] ==
-                                                  "-")
-                                              ? "You owe "
-                                              : "You gave ",
-                                          style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        TextSpan(
-                                          text: ("₹ " +
-                                              commaSeperator(crypto.decrypt(
-                                                  data[index]["amount"]))),
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              color: (crypto.decrypt(data[index]
-                                                          ["amount"])[0] ==
-                                                      "-"
-                                                  ? Colors.red
-                                                  : Colors.green)),
-                                        ),
-                                        TextSpan(
-                                            text: " for ",
-                                            style: TextStyle(fontSize: 18)),
-                                        TextSpan(
-                                          text: (crypto
-                                              .decrypt(data[index]["purpose"])),
-                                          style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                      ])),
-                                    ),
-                                  );
-                                },
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: load
+                ? (data.isEmpty
+                    ? ListView(
+                        physics: AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height - 100,
+                            child: Center(
+                              child: Text(
+                                "No Record Found",
+                                style: TextStyle(fontSize: 25),
                               ),
                             ),
+                          )
+                        ],
+                      )
+                    : Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height - 100,
+                        width: MediaQuery.of(context).size.width * 0.95,
+                        child: ListView.separated(
+                          separatorBuilder: (context, index) => SizedBox(
+                            height: 6,
                           ),
-                        ))
-                  : SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: Center(
-                        child: Text("Loading..."),
+                          itemCount: data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Card(
+                              elevation: 1.0,
+                              color:
+                                  Theme.of(context).scaffoldBackgroundColor,
+                              shadowColor: Theme.of(context).primaryColor,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: Theme.of(context)
+                                        .cardColor
+                                        .withAlpha(95)),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 18.0, horizontal: 8),
+                                child: Text.rich(TextSpan(children: [
+                                  TextSpan(
+                                    text: (crypto.decrypt(
+                                                data[index]["amount"])[0] ==
+                                            "-")
+                                        ? "You owe "
+                                        : "You gave ",
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                  TextSpan(
+                                    text: ("₹ " +
+                                        commaSeperator(crypto
+                                            .decrypt(data[index]["amount"])
+                                            .replaceFirst("-", " "))),
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: (crypto.decrypt(data[index]
+                                                    ["amount"])[0] ==
+                                                "-"
+                                            ? Colors.red
+                                            : Colors.green)),
+                                  ),
+                                  TextSpan(
+                                      text: " for ",
+                                      style: TextStyle(fontSize: 18)),
+                                  TextSpan(
+                                    text: (crypto
+                                        .decrypt(data[index]["purpose"])),
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500),
+                                  ),
+                                ])),
+                              ),
+                            );
+                          },
+                        ),
                       ),
+                    ))
+                : SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: Center(
+                      child: Text("Loading..."),
                     ),
-            ),
-          ])),
+                  ),
+          )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet<void>(

@@ -928,8 +928,10 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
   }
 
-  void showAddDialog(String amount, String date) {
+  void showAddDialog(String amount, String date, String receiver) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    _purpose.text = receiver;
+
     showDialog(
         context: context,
         barrierDismissible: true,
@@ -1651,7 +1653,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                           .amount,
                                                                       filteredResult[
                                                                               index]
-                                                                          .date);
+                                                                          .date,
+                                                                      filteredResult[
+                                                                              index]
+                                                                          .receiver);
                                                                 },
                                                                 icon: Icon(
                                                                   Icons.add,
@@ -1665,10 +1670,16 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                 ))
                                                       ],
                                                     ),
+                                                    filteredResult[index]
+                                                                .type ==
+                                                            "Credit"
+                                                        ? SizedBox(
+                                                            height: 8.0,
+                                                          )
+                                                        : SizedBox(),
                                                     Row(
                                                       children: [
                                                         Container(
-                                                            width: 55,
                                                             height: 30,
                                                             alignment: Alignment
                                                                 .center,
@@ -1690,9 +1701,11 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                         BorderRadius.all(
                                                                             Radius.circular(12))),
                                                             child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(4.0),
+                                                              padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                  vertical: 4.0,
+                                                                  horizontal:
+                                                                      8.0),
                                                               child: Text(
                                                                   filteredResult[
                                                                           index]
@@ -1707,7 +1720,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                           width: 8,
                                                         ),
                                                         Container(
-                                                            width: 55,
                                                             height: 30,
                                                             alignment: Alignment
                                                                 .center,
@@ -1729,9 +1741,11 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                         BorderRadius.all(
                                                                             Radius.circular(12))),
                                                             child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(4.0),
+                                                              padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                  vertical: 4.0,
+                                                                  horizontal:
+                                                                      8.0),
                                                               child: Text(
                                                                   filteredResult[
                                                                           index]
@@ -1767,10 +1781,12 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                         borderRadius:
                                                                             BorderRadius.all(Radius.circular(12))),
                                                                 child: Padding(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                              .all(
-                                                                          4.0),
+                                                                  padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                      vertical:
+                                                                          4.0,
+                                                                      horizontal:
+                                                                          8.0),
                                                                   child: Text(
                                                                       filteredResult[
                                                                               index]
@@ -1874,7 +1890,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                       .amount,
                                                                   allTransactions[
                                                                           index]
-                                                                      .date);
+                                                                      .date,
+                                                                  allTransactions[
+                                                                          index]
+                                                                      .receiver);
                                                             },
                                                             icon: Icon(
                                                               Icons.add,
@@ -1889,10 +1908,15 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                             ))
                                                   ],
                                                 ),
+                                                allTransactions[index].type ==
+                                                        "Credit"
+                                                    ? SizedBox(
+                                                        height: 8.0,
+                                                      )
+                                                    : SizedBox(),
                                                 Row(
                                                   children: [
                                                     Container(
-                                                        width: 55,
                                                         height: 30,
                                                         alignment:
                                                             Alignment.center,
@@ -1917,7 +1941,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                         child: Padding(
                                                           padding:
                                                               const EdgeInsets
-                                                                  .all(4.0),
+                                                                      .symmetric(
+                                                                  vertical: 4.0,
+                                                                  horizontal:
+                                                                      8.0),
                                                           child: Text(
                                                               allTransactions[
                                                                       index]
@@ -1930,7 +1957,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                       width: 8,
                                                     ),
                                                     Container(
-                                                        width: 55,
                                                         height: 30,
                                                         alignment:
                                                             Alignment.center,
@@ -1955,7 +1981,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                         child: Padding(
                                                           padding:
                                                               const EdgeInsets
-                                                                  .all(4.0),
+                                                                      .symmetric(
+                                                                  vertical: 4.0,
+                                                                  horizontal:
+                                                                      8.0),
                                                           child: Text(
                                                               allTransactions[
                                                                       index]
@@ -1972,7 +2001,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                             "Unknown"
                                                         ? SizedBox()
                                                         : Container(
-                                                            width: 55,
                                                             height: 30,
                                                             alignment: Alignment
                                                                 .center,
@@ -1994,9 +2022,11 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                         BorderRadius.all(
                                                                             Radius.circular(12))),
                                                             child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(4.0),
+                                                              padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                  vertical: 4.0,
+                                                                  horizontal:
+                                                                      8.0),
                                                               child: Text(
                                                                   allTransactions[
                                                                           index]
