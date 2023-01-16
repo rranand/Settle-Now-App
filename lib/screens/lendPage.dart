@@ -26,9 +26,12 @@ class _LendPageState extends State<LendPage> {
 
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
+  final TextEditingController _Epurpose = TextEditingController();
+  final TextEditingController _Eamount = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
+  final _updateExpense = GlobalKey<FormState>();
 
   Future<void> addLoan(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
@@ -61,6 +64,188 @@ class _LendPageState extends State<LendPage> {
         await onException(context);
       }
     }
+  }
+
+  _updateTransaction(BuildContext context, String purpose, String id,
+      String amount, String flag) async {
+    try {
+      final response = await http.delete(
+          Uri.parse(global.url + 'lend/transaction'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            "name": crypto.encrypt(widget.name),
+            'email': crypto.encrypt(widget.email),
+            'purpose': crypto.encrypt(purpose),
+            'amount': crypto.encrypt(amount),
+            'id': crypto.encrypt(id),
+            'flag': crypto.encrypt(flag)
+          }));
+
+      var updateMessage = jsonDecode(response.body);
+      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
+      _refreshIndicatorKey.currentState?.show();
+    } on Exception catch (_) {
+      await onException(context);
+    }
+  }
+
+  Widget _buildUpdateDialog(
+      BuildContext context, String id, String purpose, String amount) {
+    return StatefulBuilder(builder: (context, setState) {
+      _Epurpose.text = purpose;
+      _Eamount.text = amount;
+
+      final themeProvider = Provider.of<ThemeProvider>(context);
+      return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          child: SingleChildScrollView(
+            child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Form(
+                      key: _updateExpense,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextFormField(
+                            controller: _Eamount,
+                            keyboardType: TextInputType.number,
+                            maxLength: 10,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 18),
+                            autocorrect: false,
+                            validator: (value) {
+                              RegExp validateNumber =
+                                  RegExp(r'\b[1-9]{1}[\d]*\b');
+                              if (!validateNumber.hasMatch(_Eamount.text)) {
+                                return "Enter Valid Amount";
+                              }
+                              return null;
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: "Enter Amount",
+                              counterText: "",
+                              labelText: "Amount",
+                              errorStyle: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          TextFormField(
+                            controller: _Epurpose,
+                            keyboardType: TextInputType.text,
+                            maxLength: 150,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 18),
+                            autocorrect: false,
+                            validator: (value) {
+                              RegExp validateText = RegExp(r'\b[\w]+\b');
+                              if (!validateText.hasMatch(_Epurpose.text)) {
+                                return "Enter Valid Purpose";
+                              }
+                              return null;
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: "Enter Purpose",
+                              labelText: "Purpose",
+                              counterText: "",
+                              errorStyle: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                height: 43,
+                                width: MediaQuery.of(context).size.width * 0.3,
+                                child: OutlinedButton(
+                                    child: Text(
+                                      "Update",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                    onPressed: () async {
+                                      if (_updateExpense.currentState!
+                                          .validate()) {
+                                        buildShowDialog(context);
+                                        await _updateTransaction(
+                                            context,
+                                            _Epurpose.text,
+                                            id,
+                                            _Eamount.text,
+                                            "0");
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                      }
+                                    }),
+                              ),
+                              SizedBox(
+                                height: 43,
+                                width: MediaQuery.of(context).size.width * 0.3,
+                                child: OutlinedButton(
+                                    child: Text(
+                                      "Delete",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                    onPressed: () async {
+                                      if (_updateExpense.currentState!
+                                          .validate()) {
+                                        buildShowDialog(context);
+                                        await _updateTransaction(
+                                            context,
+                                            _Epurpose.text,
+                                            id,
+                                            _Eamount.text,
+                                            "1");
+                                        Navigator.pop(context);
+                                        Navigator.pop(context);
+                                      }
+                                    }),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ))),
+          ));
+    });
   }
 
   Future _initialization() async {
@@ -255,72 +440,87 @@ class _LendPageState extends State<LendPage> {
                         ],
                       )
                     : Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height - 100,
-                        width: MediaQuery.of(context).size.width * 0.95,
-                        child: ListView.separated(
-                          separatorBuilder: (context, index) => SizedBox(
-                            height: 6,
+                        padding: const EdgeInsets.all(8.0),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height - 100,
+                          width: MediaQuery.of(context).size.width * 0.95,
+                          child: ListView.separated(
+                            separatorBuilder: (context, index) => SizedBox(
+                              height: 6,
+                            ),
+                            itemCount: data.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return InkWell(
+                                onTap: () async {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        _buildUpdateDialog(
+                                            context,
+                                            crypto.decrypt(data[index]["_id"]),
+                                            crypto.decrypt(
+                                                data[index]["purpose"]),
+                                            crypto.decrypt(
+                                                data[index]["amount"])),
+                                  );
+                                },
+                                child: Card(
+                                  elevation: 1.0,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Theme.of(context)
+                                            .cardColor
+                                            .withAlpha(95)),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 18.0, horizontal: 8),
+                                    child: Text.rich(TextSpan(children: [
+                                      TextSpan(
+                                        text: (crypto.decrypt(
+                                                    data[index]["amount"])[0] ==
+                                                "-")
+                                            ? "You owe "
+                                            : "You gave ",
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      TextSpan(
+                                        text: ("₹ " +
+                                            commaSeperator(crypto
+                                                .decrypt(data[index]["amount"])
+                                                .replaceFirst("-", " "))),
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: (crypto.decrypt(data[index]
+                                                        ["amount"])[0] ==
+                                                    "-"
+                                                ? Colors.red
+                                                : Colors.green)),
+                                      ),
+                                      TextSpan(
+                                          text: " for ",
+                                          style: TextStyle(fontSize: 18)),
+                                      TextSpan(
+                                        text: (crypto
+                                            .decrypt(data[index]["purpose"])),
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                    ])),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          itemCount: data.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Card(
-                              elevation: 1.0,
-                              color:
-                                  Theme.of(context).scaffoldBackgroundColor,
-                              shadowColor: Theme.of(context).primaryColor,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    color: Theme.of(context)
-                                        .cardColor
-                                        .withAlpha(95)),
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 18.0, horizontal: 8),
-                                child: Text.rich(TextSpan(children: [
-                                  TextSpan(
-                                    text: (crypto.decrypt(
-                                                data[index]["amount"])[0] ==
-                                            "-")
-                                        ? "You owe "
-                                        : "You gave ",
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                  TextSpan(
-                                    text: ("₹ " +
-                                        commaSeperator(crypto
-                                            .decrypt(data[index]["amount"])
-                                            .replaceFirst("-", " "))),
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        color: (crypto.decrypt(data[index]
-                                                    ["amount"])[0] ==
-                                                "-"
-                                            ? Colors.red
-                                            : Colors.green)),
-                                  ),
-                                  TextSpan(
-                                      text: " for ",
-                                      style: TextStyle(fontSize: 18)),
-                                  TextSpan(
-                                    text: (crypto
-                                        .decrypt(data[index]["purpose"])),
-                                    style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w500),
-                                  ),
-                                ])),
-                              ),
-                            );
-                          },
                         ),
-                      ),
-                    ))
+                      ))
                 : SizedBox(
                     height: MediaQuery.of(context).size.height,
                     child: Center(
@@ -406,6 +606,14 @@ class _LendPageState extends State<LendPage> {
                                 ),
                               ],
                             ),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child:
+                                Text('* Add the amount, you owe with -ve sign'),
                           ),
                           SizedBox(
                             height: 15,
