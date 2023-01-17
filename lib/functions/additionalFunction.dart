@@ -141,6 +141,9 @@ Widget textWidget(String text, Shader gradient) {
 
 Future<Map<String, String>> getDataFromNotification(String? payload) async {
   String text = payload!;
+  if (text.isEmpty) {
+    return {};
+  }
   List<String> cols = text.substring(1, text.length - 1).split(', ');
   final Map<String, String> data = {};
   for (int i = 0; i < cols.length; i++) {

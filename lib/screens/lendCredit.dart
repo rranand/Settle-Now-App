@@ -149,6 +149,10 @@ class _LendCreditState extends State<LendCredit> {
                                               token: widget.token,
                                               name: crypto
                                                   .decrypt(data[index]["name"]),
+                                              roomkey: crypto
+                                                  .decrypt(data[index]["key"]),
+                                              roomLink: crypto.decrypt(
+                                                  data[index]["roomLink"]),
                                             ))),
                                 child: Card(
                                   elevation: 2.0,

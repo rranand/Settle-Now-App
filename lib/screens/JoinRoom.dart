@@ -34,20 +34,39 @@ class _RoomJoinState extends State<RoomJoin> {
         String email = prefs.getString("email")!;
         String _token = prefs.getString("token")!;
 
-        final response = await http.put(Uri.parse(global.url + 'room'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': _token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(email),
-              'roomKey': crypto.encrypt(widget.roomKey),
-            }));
+        if (widget.roomKey.length == 7) {
+          final response = await http.put(Uri.parse(global.url + 'room'),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Auth': _token
+              },
+              body: jsonEncode({
+                'email': crypto.encrypt(email),
+                'roomKey': crypto.encrypt(widget.roomKey),
+              }));
 
-        if (this.mounted) {
-          setState(() {
-            message = crypto.decrypt(jsonDecode(response.body)['Message']);
-          });
+          if (this.mounted) {
+            setState(() {
+              message = crypto.decrypt(jsonDecode(response.body)['Message']);
+            });
+          }
+        } else {
+          final response = await http.post(
+              Uri.parse(global.url + 'lend/addPerson'),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Auth': _token
+              },
+              body: jsonEncode({
+                'email': crypto.encrypt(email),
+                'id': crypto.encrypt(widget.roomKey),
+              }));
+
+          if (this.mounted) {
+            setState(() {
+              message = crypto.decrypt(jsonDecode(response.body)['Message']);
+            });
+          }
         }
 
         Future.delayed(const Duration(milliseconds: 1000), () {

@@ -1404,6 +1404,30 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  Future<void> JoinRequestLend(String flag, String id) async {
+    buildShowDialog(context);
+    try {
+      final response = await http.put(Uri.parse(global.url + 'friend/lend'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode({
+            'id': id,
+            'email': crypto.encrypt(_email.text),
+            'confirm': crypto.encrypt(flag)
+          }));
+
+      var data = jsonDecode(response.body);
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
+      await _requestIndicatorKey.currentState?.show();
+      Navigator.pop(context);
+    } on Exception catch (_) {
+      Navigator.pop(context);
+      await onException(context);
+    }
+  }
+
   Widget updateWidget(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
@@ -1536,7 +1560,14 @@ class _DashBoardState extends State<DashBoard> {
                                                     RoomRequest[index]["by"]) +
                                                 " invited to join " +
                                                 crypto.decrypt(
-                                                    RoomRequest[index]["name"]),
+                                                    RoomRequest[index]
+                                                        ["name"]) +
+                                                (crypto.decrypt(
+                                                            RoomRequest[index]
+                                                                ["type"]) ==
+                                                        "room"
+                                                    ? ""
+                                                    : " (Len-Den)"),
                                             style: TextStyle(
                                               overflow: TextOverflow.clip,
                                               fontSize: 20,
@@ -1558,11 +1589,10 @@ class _DashBoardState extends State<DashBoard> {
                                             children: [
                                               IconButton(
                                                   onPressed: () async {
-                                                    await JoinRequest(
+                                                    await JoinRequestLend(
                                                         "0",
-                                                        crypto.decrypt(
-                                                            RoomRequest[index]
-                                                                ["key"]));
+                                                        RoomRequest[index]
+                                                            ["key"]);
                                                   },
                                                   icon: Icon(
                                                     Icons.cancel_sharp,
@@ -1571,11 +1601,10 @@ class _DashBoardState extends State<DashBoard> {
                                                   )),
                                               IconButton(
                                                   onPressed: () async {
-                                                    await JoinRequest(
+                                                    await JoinRequestLend(
                                                         "1",
-                                                        crypto.decrypt(
-                                                            RoomRequest[index]
-                                                                ["key"]));
+                                                        RoomRequest[index]
+                                                            ["key"]);
                                                   },
                                                   icon: Icon(Icons.check,
                                                       size: 30,

@@ -1,10 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
+import 'package:share_plus/share_plus.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
@@ -12,8 +15,15 @@ class LendPage extends StatefulWidget {
   final String email;
   final String token;
   final String name;
+  final String roomkey;
+  final String roomLink;
   const LendPage(
-      {Key? key, required this.email, required this.token, required this.name})
+      {Key? key,
+      required this.email,
+      required this.token,
+      required this.name,
+      required this.roomkey,
+      required this.roomLink})
       : super(key: key);
 
   @override
@@ -28,10 +38,20 @@ class _LendPageState extends State<LendPage> {
   final TextEditingController _amount = TextEditingController();
   final TextEditingController _Epurpose = TextEditingController();
   final TextEditingController _Eamount = TextEditingController();
+  final TextEditingController _searchFriend = TextEditingController();
+  List<FriendEach> friendDataSearched = [];
+  List<FriendEach> friendData = [];
+  bool loadFriendData = false;
+  Map<String, dynamic> userData = {};
+  Map<String, dynamic> otherUserData = {};
+  bool closed = false;
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   final _updateExpense = GlobalKey<FormState>();
+  bool isFriendDataLoaded = false;
+  bool gaveMoney = false;
+  bool EgaveMoney = false;
 
   Future<void> addLoan(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
@@ -43,8 +63,8 @@ class _LendPageState extends State<LendPage> {
             },
             body: jsonEncode({
               "email": crypto.encrypt(widget.email),
-              "name": crypto.encrypt(widget.name),
-              "amount": crypto.encrypt(_amount.text),
+              "key": crypto.encrypt(widget.roomkey),
+              "amount": crypto.encrypt((gaveMoney ? "" : "-") + _amount.text),
               "purpose": crypto.encrypt(_purpose.text)
             }));
 
@@ -64,6 +84,310 @@ class _LendPageState extends State<LendPage> {
         await onException(context);
       }
     }
+  }
+
+  getFriendData() async {
+    try {
+      if (this.mounted) {
+        setState(() {
+          loadFriendData = false;
+          friendData.clear();
+        });
+      }
+      final response = await http.patch(Uri.parse(global.url + 'friend/lend'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'name': crypto.encrypt(widget.name),
+            'email': crypto.encrypt(widget.email),
+          }));
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        loadFriendData = true;
+        List<dynamic> tempData = data['data'];
+        for (int i = 0; i < tempData.length; i++) {
+          friendData.add(FriendEach.fromJson(tempData[i]));
+        }
+      } else {
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  SearchFriend() {
+    if (this.mounted) {
+      setState(() {
+        friendDataSearched.clear();
+      });
+    }
+
+    for (int i = 0; i < friendData.length; i++) {
+      if (friendData[i]
+          .name
+          .toString()
+          .toLowerCase()
+          .contains(_searchFriend.text.toLowerCase())) {
+        friendDataSearched.add(friendData[i]);
+      }
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  sendJoinRequest(String email) async {
+    buildShowDialog(context);
+    try {
+      final response = await http.post(Uri.parse(global.url + 'friend/lend'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'name': crypto.encrypt(widget.name),
+            'email': crypto.encrypt(widget.email),
+            'fEmail': crypto.encrypt(email)
+          }));
+
+      var data = jsonDecode(response.body);
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
+    } on Exception catch (_) {
+      await onException(context);
+    }
+    Navigator.pop(context);
+  }
+
+  cancelJoinRequest(String email, String id) async {
+    buildShowDialog(context);
+    try {
+      final response = await http.put(Uri.parse(global.url + 'friend/lend'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'id': crypto.encrypt(id),
+            'email': crypto.encrypt(email),
+            'confirm': crypto.encrypt("0")
+          }));
+
+      var data = jsonDecode(response.body);
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
+    } on Exception catch (_) {
+      await onException(context);
+    }
+    Navigator.pop(context);
+  }
+
+  Widget addFriendWidget(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Invite Member",
+                        style: TextStyle(fontSize: 22),
+                      ),
+                      IconButton(
+                          onPressed: () async {
+                            await Share.share("Join " +
+                                widget.name +
+                                " (Len-Den) " +
+                                "\n" +
+                                widget.roomLink);
+                          },
+                          icon: Icon(
+                            Icons.send,
+                            size: 26,
+                          ))
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  loadFriendData
+                      ? friendData.isEmpty
+                          ? SizedBox(
+                              height: MediaQuery.of(context).size.height - 310,
+                              child: Center(
+                                child: Text(
+                                  "No User Found",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            )
+                          : Column(
+                              children: [
+                                TextField(
+                                  controller: _searchFriend,
+                                  keyboardType: TextInputType.text,
+                                  maxLines: 1,
+                                  style: const TextStyle(fontSize: 15),
+                                  autocorrect: false,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.all(8.0),
+                                    labelText: "Enter Name",
+                                    counterText: "",
+                                    errorStyle: const TextStyle(fontSize: 15),
+                                  ),
+                                  onChanged: (String s) {
+                                    _searchFriend.text = s;
+                                    _searchFriend.selection =
+                                        TextSelection.collapsed(
+                                            offset: _searchFriend.text.length);
+                                    SearchFriend();
+                                    if (this.mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                ),
+                                SizedBox(
+                                  height: 13,
+                                ),
+                                SingleChildScrollView(
+                                  child: SizedBox(
+                                    height: MediaQuery.of(context).size.height -
+                                        310,
+                                    child: _searchFriend.text.isEmpty
+                                        ? friendListWidget(context, friendData)
+                                        : (friendDataSearched.isEmpty
+                                            ? Center(
+                                                child: Text(
+                                                  "No User Found",
+                                                  style:
+                                                      TextStyle(fontSize: 18),
+                                                ),
+                                              )
+                                            : friendListWidget(
+                                                context, friendDataSearched)),
+                                  ),
+                                ),
+                              ],
+                            )
+                      : SizedBox(
+                          height: MediaQuery.of(context).size.height - 310,
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                ],
+              ))),
+    );
+  }
+
+  Widget friendListWidget(BuildContext context, List<FriendEach> data) {
+    return StatefulBuilder(builder: (context, setState) {
+      return Scrollbar(
+        radius: Radius.circular(10.0),
+        thickness: 5.5,
+        child: ListView.separated(
+            separatorBuilder: (context, index) => SizedBox(
+                  height: 5,
+                ),
+            shrinkWrap: true,
+            physics: ScrollPhysics(),
+            itemCount: data.length,
+            itemBuilder: (BuildContext context, int index) {
+              return SizedBox(
+                  height: 80,
+                  child: Center(
+                    child: Card(
+                      elevation: 1.0,
+                      shadowColor: Theme.of(context).primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                height: 51,
+                                child: CachedNetworkImage(
+                                  imageUrl: data[index].pic.length == 0
+                                      ? global.driveUrl +
+                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                      : data[index].pic,
+                                  progressIndicatorBuilder:
+                                      (context, url, downloadProgress) =>
+                                          CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                    width: 45.0,
+                                    height: 45.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              'assets/Images/unknown.jpeg'),
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                  imageBuilder: (context, imageProvider) =>
+                                      Container(
+                                    width: 45.0,
+                                    height: 45.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: imageProvider,
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                data[index].name,
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                ),
+                              ),
+                              IconButton(
+                                  onPressed: () async {
+                                    if (data[index].status == "NJ") {
+                                      await sendJoinRequest(data[index].email);
+                                      data[index].status = "S";
+                                    } else {
+                                      await cancelJoinRequest(
+                                          data[index].email, widget.roomkey);
+                                      data[index].status = "NJ";
+                                    }
+
+                                    if (this.mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                  icon: Icon(data[index].status == "NJ"
+                                      ? Icons.person_add_alt
+                                      : Icons.cancel_outlined))
+                            ]),
+                      ),
+                    ),
+                  ));
+            }),
+      );
+    });
   }
 
   _updateTransaction(BuildContext context, String purpose, String id,
@@ -94,9 +418,12 @@ class _LendPageState extends State<LendPage> {
 
   Widget _buildUpdateDialog(
       BuildContext context, String id, String purpose, String amount) {
+    if (amount.isNotEmpty && amount[0] != "-") {
+      EgaveMoney = true;
+    }
     return StatefulBuilder(builder: (context, setState) {
       _Epurpose.text = purpose;
-      _Eamount.text = amount;
+      _Eamount.text = amount.replaceAll("-", "");
 
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -113,6 +440,64 @@ class _LendPageState extends State<LendPage> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      EgaveMoney = true;
+                                    });
+                                  }
+                                },
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: EgaveMoney
+                                            ? Theme.of(context).primaryColor
+                                            : Theme.of(context).cardColor),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(
+                                      "You gave",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      EgaveMoney = false;
+                                    });
+                                  }
+                                },
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: EgaveMoney
+                                            ? Theme.of(context).cardColor
+                                            : Theme.of(context).primaryColor),
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(
+                                      "You owe",
+                                      style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                           TextFormField(
                             controller: _Eamount,
                             keyboardType: TextInputType.number,
@@ -196,7 +581,8 @@ class _LendPageState extends State<LendPage> {
                                             context,
                                             _Epurpose.text,
                                             id,
-                                            _Eamount.text,
+                                            (EgaveMoney ? "" : "-") +
+                                                _Eamount.text,
                                             "0");
                                         Navigator.pop(context);
                                         Navigator.pop(context);
@@ -232,7 +618,8 @@ class _LendPageState extends State<LendPage> {
                                             context,
                                             _Epurpose.text,
                                             id,
-                                            _Eamount.text,
+                                            (EgaveMoney ? "" : "-") +
+                                                _Eamount.text,
                                             "1");
                                         Navigator.pop(context);
                                         Navigator.pop(context);
@@ -264,11 +651,15 @@ class _LendPageState extends State<LendPage> {
           },
           body: jsonEncode({
             "email": crypto.encrypt(widget.email),
-            "name": crypto.encrypt(widget.name)
+            "key": crypto.encrypt(widget.roomkey)
           }));
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
+        userData = jsonDecode(response.body)['user'];
+        otherUserData = jsonDecode(response.body)['otherUser'];
+        closed = jsonDecode(response.body)['closed'] ||
+            jsonDecode(response.body)['closedOther'];
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
@@ -281,6 +672,15 @@ class _LendPageState extends State<LendPage> {
     load = true;
     if (this.mounted) {
       setState(() {});
+    }
+
+    if (otherUserData.isEmpty && !isFriendDataLoaded) {
+      isFriendDataLoaded = true;
+      await getFriendData();
+
+      if (this.mounted) {
+        setState(() {});
+      }
     }
   }
 
@@ -407,6 +807,17 @@ class _LendPageState extends State<LendPage> {
       appBar: AppBar(
         title: Text(widget.name),
         actions: [
+          otherUserData.isNotEmpty
+              ? SizedBox()
+              : IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) =>
+                          addFriendWidget(context),
+                    );
+                  },
+                  icon: Icon(Icons.person_add)),
           IconButton(
               onPressed: () {
                 showDialog(
@@ -450,70 +861,240 @@ class _LendPageState extends State<LendPage> {
                             ),
                             itemCount: data.length,
                             itemBuilder: (BuildContext context, int index) {
-                              return InkWell(
-                                onTap: () async {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        _buildUpdateDialog(
-                                            context,
-                                            crypto.decrypt(data[index]["_id"]),
-                                            crypto.decrypt(
-                                                data[index]["purpose"]),
-                                            crypto.decrypt(
-                                                data[index]["amount"])),
-                                  );
-                                },
-                                child: Card(
-                                  elevation: 1.0,
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  shadowColor: Theme.of(context).primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                        color: Theme.of(context)
-                                            .cardColor
-                                            .withAlpha(95)),
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 18.0, horizontal: 8),
-                                    child: Text.rich(TextSpan(children: [
-                                      TextSpan(
-                                        text: (crypto.decrypt(
-                                                    data[index]["amount"])[0] ==
-                                                "-")
-                                            ? "You owe "
-                                            : "You gave ",
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500),
+                              return Card(
+                                elevation: 1.0,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                shadowColor: Theme.of(context).primaryColor,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: Theme.of(context)
+                                          .cardColor
+                                          .withAlpha(95)),
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical:
+                                          (crypto.decrypt(data[index]["by"]) ==
+                                                  widget.email
+                                              ? 5.0
+                                              : 18.0),
+                                      horizontal:
+                                          (crypto.decrypt(data[index]["by"]) ==
+                                                  widget.email
+                                              ? 8.0
+                                              : 12.0)),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              (crypto.decrypt(
+                                                          data[index]["by"]) ==
+                                                      widget.email
+                                                  ? CachedNetworkImage(
+                                                      imageUrl: crypto
+                                                                  .decrypt(
+                                                                      userData[
+                                                                          'pic'])
+                                                                  .length ==
+                                                              0
+                                                          ? global.driveUrl +
+                                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                          : crypto.decrypt(
+                                                              userData['pic']),
+                                                      progressIndicatorBuilder: (context,
+                                                              url,
+                                                              downloadProgress) =>
+                                                          CircularProgressIndicator(
+                                                              value:
+                                                                  downloadProgress
+                                                                      .progress),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          Container(
+                                                        width: 28,
+                                                        height: 28,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          image: DecorationImage(
+                                                              image: AssetImage(
+                                                                  'assets/Images/unknown.jpeg'),
+                                                              fit:
+                                                                  BoxFit.cover),
+                                                        ),
+                                                      ),
+                                                      imageBuilder: (context,
+                                                              imageProvider) =>
+                                                          Container(
+                                                        width: 28,
+                                                        height: 28,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          image: DecorationImage(
+                                                              image:
+                                                                  imageProvider,
+                                                              fit:
+                                                                  BoxFit.cover),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  : CachedNetworkImage(
+                                                      imageUrl: crypto
+                                                                  .decrypt(
+                                                                      otherUserData[
+                                                                          'pic'])
+                                                                  .length ==
+                                                              0
+                                                          ? global.driveUrl +
+                                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                          : crypto.decrypt(
+                                                              otherUserData[
+                                                                  'pic']),
+                                                      progressIndicatorBuilder: (context,
+                                                              url,
+                                                              downloadProgress) =>
+                                                          CircularProgressIndicator(
+                                                              value:
+                                                                  downloadProgress
+                                                                      .progress),
+                                                      errorWidget: (context,
+                                                              url, error) =>
+                                                          Container(
+                                                        width: 28,
+                                                        height: 28,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          image: DecorationImage(
+                                                              image: AssetImage(
+                                                                  'assets/Images/unknown.jpeg'),
+                                                              fit:
+                                                                  BoxFit.cover),
+                                                        ),
+                                                      ),
+                                                      imageBuilder: (context,
+                                                              imageProvider) =>
+                                                          Container(
+                                                        width: 28,
+                                                        height: 28,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          image: DecorationImage(
+                                                              image:
+                                                                  imageProvider,
+                                                              fit:
+                                                                  BoxFit.cover),
+                                                        ),
+                                                      ),
+                                                    )),
+                                              SizedBox(
+                                                width: 6,
+                                              ),
+                                              Text(
+                                                (crypto.decrypt(data[index]
+                                                            ["by"]) ==
+                                                        widget.email
+                                                    ? crypto.decrypt(
+                                                        userData['name'])
+                                                    : crypto.decrypt(
+                                                        otherUserData['name'])),
+                                                style: TextStyle(fontSize: 18),
+                                              ),
+                                            ],
+                                          ),
+                                          crypto.decrypt(data[index]["by"]) ==
+                                                  widget.email
+                                              ? IconButton(
+                                                  onPressed: () async {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          _buildUpdateDialog(
+                                                              context,
+                                                              crypto.decrypt(
+                                                                  data[index]
+                                                                      ["_id"]),
+                                                              crypto.decrypt(data[
+                                                                      index]
+                                                                  ["purpose"]),
+                                                              crypto.decrypt(data[
+                                                                      index]
+                                                                  ["amount"])),
+                                                    );
+                                                  },
+                                                  icon: Icon(Icons.edit))
+                                              : SizedBox()
+                                        ],
                                       ),
-                                      TextSpan(
-                                        text: ("₹ " +
-                                            commaSeperator(crypto
-                                                .decrypt(data[index]["amount"])
-                                                .replaceFirst("-", " "))),
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            color: (crypto.decrypt(data[index]
-                                                        ["amount"])[0] ==
-                                                    "-"
-                                                ? Colors.red
-                                                : Colors.green)),
-                                      ),
-                                      TextSpan(
-                                          text: " for ",
-                                          style: TextStyle(fontSize: 18)),
-                                      TextSpan(
-                                        text: (crypto
-                                            .decrypt(data[index]["purpose"])),
-                                        style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                    ])),
+                                      (crypto.decrypt(data[index]["by"]) ==
+                                              widget.email
+                                          ? SizedBox()
+                                          : SizedBox(height: 8.0)),
+                                      Text.rich(TextSpan(children: [
+                                        TextSpan(
+                                          text: (crypto.decrypt(data[index]
+                                                      ["amount"])[0] ==
+                                                  "-")
+                                              ? "You owe "
+                                              : "You gave ",
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        TextSpan(
+                                          text: ("₹ " +
+                                              commaSeperator(crypto
+                                                  .decrypt(
+                                                      data[index]["amount"])
+                                                  .replaceFirst("-", " "))),
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              color: (crypto.decrypt(data[index]
+                                                          ["amount"])[0] ==
+                                                      "-"
+                                                  ? Colors.red
+                                                  : Colors.green)),
+                                        ),
+                                        TextSpan(
+                                            text: " for ",
+                                            style: TextStyle(fontSize: 18)),
+                                        TextSpan(
+                                          text: (crypto
+                                              .decrypt(data[index]["purpose"])),
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        TextSpan(
+                                          text: " on ",
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        TextSpan(
+                                          text: (crypto
+                                              .decrypt(data[index]["date"])),
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ])),
+                                    ],
                                   ),
                                 ),
                               );
@@ -528,137 +1109,204 @@ class _LendPageState extends State<LendPage> {
                     ),
                   ),
           )),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              builder: (BuildContext context) {
-                return StatefulBuilder(builder: (context, setState) {
-                  return Padding(
-                    padding: MediaQuery.of(context).viewInsets,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "Add Credit/Debit",
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          Form(
-                            key: _formKey,
+      floatingActionButton: closed
+          ? null
+          : FloatingActionButton(
+              onPressed: () {
+                showModalBottomSheet<void>(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (BuildContext context) {
+                      return StatefulBuilder(builder: (context, setState) {
+                        return Padding(
+                          padding: MediaQuery.of(context).viewInsets,
+                          child: Padding(
+                            padding: const EdgeInsets.all(10.0),
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                TextFormField(
-                                  controller: _purpose,
-                                  keyboardType: TextInputType.text,
-                                  maxLength: 150,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 18),
-                                  validator: (value) {
-                                    RegExp validateText = RegExp(r'\b[\w]+\b');
-                                    if (!validateText.hasMatch(_purpose.text)) {
-                                      return "Enter Valid Purpose";
-                                    }
-                                    return null;
-                                  },
-                                  decoration: const InputDecoration(
-                                    counterText: "",
-                                    contentPadding: EdgeInsets.all(8.0),
-                                    hintText: "Enter Purpose",
-                                    labelText: "Purpose",
-                                    errorStyle: TextStyle(fontSize: 15),
+                                Text(
+                                  "Add Credit/Debit",
+                                  style: TextStyle(
+                                    fontSize: 20,
                                   ),
                                 ),
                                 SizedBox(
                                   height: 10,
                                 ),
-                                TextFormField(
-                                  controller: _amount,
-                                  keyboardType: TextInputType.number,
-                                  maxLength: 20,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 18),
-                                  validator: (value) {
-                                    RegExp validateNumber =
-                                        RegExp(r'\b[1-9]{1}[\d]*\b');
-                                    if (!validateNumber
-                                        .hasMatch(_amount.text)) {
-                                      return "Enter Valid Amount";
-                                    }
-                                    return null;
-                                  },
-                                  decoration: const InputDecoration(
-                                    counterText: "",
-                                    contentPadding: EdgeInsets.all(8.0),
-                                    hintText: "Enter Amount",
-                                    labelText: "Amount",
-                                    errorStyle: TextStyle(fontSize: 15),
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          InkWell(
+                                            onTap: () {
+                                              if (this.mounted) {
+                                                setState(() {
+                                                  gaveMoney = true;
+                                                });
+                                              }
+                                            },
+                                            child: Card(
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: gaveMoney
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
+                                                child: Text(
+                                                  "You gave",
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w500),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          InkWell(
+                                            onTap: () {
+                                              if (this.mounted) {
+                                                setState(() {
+                                                  gaveMoney = false;
+                                                });
+                                              }
+                                            },
+                                            child: Card(
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: gaveMoney
+                                                        ? Theme.of(context)
+                                                            .cardColor
+                                                        : Theme.of(context)
+                                                            .primaryColor),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
+                                                child: Text(
+                                                  "You owe",
+                                                  style: TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.w500),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      TextFormField(
+                                        controller: _purpose,
+                                        keyboardType: TextInputType.text,
+                                        maxLength: 150,
+                                        maxLines: 1,
+                                        style: const TextStyle(fontSize: 18),
+                                        validator: (value) {
+                                          RegExp validateText =
+                                              RegExp(r'\b[\w]+\b');
+                                          if (!validateText
+                                              .hasMatch(_purpose.text)) {
+                                            return "Enter Valid Purpose";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: const InputDecoration(
+                                          counterText: "",
+                                          contentPadding: EdgeInsets.all(8.0),
+                                          hintText: "Enter Purpose",
+                                          labelText: "Purpose",
+                                          errorStyle: TextStyle(fontSize: 15),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      TextFormField(
+                                        controller: _amount,
+                                        keyboardType: TextInputType.number,
+                                        maxLength: 20,
+                                        maxLines: 1,
+                                        style: const TextStyle(fontSize: 18),
+                                        validator: (value) {
+                                          RegExp validateNumber =
+                                              RegExp(r'\b[1-9]{1}[\d]*\b');
+                                          if (!validateNumber
+                                              .hasMatch(_amount.text)) {
+                                            return "Enter Valid Amount";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: const InputDecoration(
+                                          counterText: "",
+                                          contentPadding: EdgeInsets.all(8.0),
+                                          hintText: "Enter Amount",
+                                          labelText: "Amount",
+                                          errorStyle: TextStyle(fontSize: 15),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                SizedBox(
+                                  height: 45,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.95,
+                                  child: OutlinedButton(
+                                    child: Text(
+                                      "Add",
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                    onPressed: () async {
+                                      buildShowDialog(context);
+                                      await addLoan(context);
+                                      Navigator.pop(context);
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(13.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                )
                               ],
                             ),
                           ),
-                          SizedBox(
-                            height: 5,
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child:
-                                Text('* Add the amount, you owe with -ve sign'),
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          SizedBox(
-                            height: 45,
-                            width: MediaQuery.of(context).size.width * 0.95,
-                            child: OutlinedButton(
-                              child: Text(
-                                "Add",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    color: themeProvider.isDarkTheme
-                                        ? Colors.white
-                                        : Colors.black),
-                              ),
-                              onPressed: () async {
-                                buildShowDialog(context);
-                                await addLoan(context);
-                                Navigator.pop(context);
-                              },
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(13.0),
-                                ),
-                                side: BorderSide(
-                                    color: Theme.of(context).primaryColor),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 15,
-                          )
-                        ],
-                      ),
-                    ),
-                  );
-                });
-              });
-        },
-        child: Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
-      ),
+                        );
+                      });
+                    });
+              },
+              child: Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+            ),
     );
   }
 }
