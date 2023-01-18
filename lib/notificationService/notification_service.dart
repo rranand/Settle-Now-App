@@ -99,7 +99,7 @@ class LocalNotificationService {
           message.notification!.title,
           message.notification!.body,
           notificationDetailsOther,
-          payload: message.data.toString(),
+          payload: "",
         );
       }
     } on Exception catch (_) {}

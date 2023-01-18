@@ -72,6 +72,7 @@ class DashBoard extends StatefulWidget {
 class _DashBoardState extends State<DashBoard> {
   AppUpdateInfo? _updateInfo;
   final InAppReview inAppReview = InAppReview.instance;
+  bool requestType = true;
   int dash = 0;
   bool isGoogle = false;
   var now;
@@ -89,6 +90,8 @@ class _DashBoardState extends State<DashBoard> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _requestIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
+  final GlobalKey<RefreshIndicatorState> _sentrequestIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   final _CformKey = GlobalKey<FormState>();
   final _JformKey = GlobalKey<FormState>();
@@ -151,6 +154,7 @@ class _DashBoardState extends State<DashBoard> {
     '31'
   ];
   bool initalDataLoaded = false;
+  bool isSentRoomRequestLoaded = false;
   List<int> from = [];
   List<int> to = [];
   bool error = false;
@@ -169,6 +173,7 @@ class _DashBoardState extends State<DashBoard> {
   double amtSpendClose = 0;
   String _profilePicID = "";
   List<dynamic> RoomRequest = [];
+  List<dynamic> sentRoomRequest = [];
   GoogleSignIn _googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _currentUser;
   bool isBankMessageLoadedOnce = false;
@@ -488,6 +493,11 @@ class _DashBoardState extends State<DashBoard> {
           isRoomRequestLoaded = true;
         }
 
+        if (!isSentRoomRequestLoaded) {
+          await fetchSentRequest();
+          isSentRoomRequestLoaded = true;
+        }
+
         if (!isImageLoaded) {
           await _getImageID();
           isImageLoaded = true;
@@ -603,6 +613,62 @@ class _DashBoardState extends State<DashBoard> {
 
   _updateCheck() async {
     await checkForUpdate();
+  }
+
+  Future<void> fetchSentRequest() async {
+    try {
+      if (this.mounted) {
+        setState(() {
+          sentRoomRequest.clear();
+        });
+      }
+      final response = await http.post(Uri.parse(global.url + 'friend/sender'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(_email.text),
+          }));
+      var data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        sentRoomRequest = data["data"];
+      } else {
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> cancelSentRequest(String id, String type) async {
+    try {
+      final response = await http.put(Uri.parse(global.url + 'friend/sender'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode(
+              {'email': crypto.encrypt(_email.text), 'id': id, 'type': type}));
+      var data = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+
+    await _sentrequestIndicatorKey.currentState?.show();
   }
 
   @override
@@ -1386,7 +1452,7 @@ class _DashBoardState extends State<DashBoard> {
             'Auth': _token
           },
           body: jsonEncode({
-            'roomKey': crypto.encrypt(roomKey),
+            'roomKey': roomKey,
             'email': crypto.encrypt(_email.text),
             'confirm': crypto.encrypt(flag)
           }));
@@ -1456,168 +1522,459 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Widget RequestWidget(BuildContext context) {
-    return RefreshIndicator(
-      key: _requestIndicatorKey,
-      onRefresh: getRoomRequest,
-      child: RoomRequest.isEmpty
-          ? ListView(
-              physics: AlwaysScrollableScrollPhysics(),
+    return Scaffold(
+      bottomNavigationBar: SafeArea(
+        child: Container(
+            padding: EdgeInsets.all(12),
+            margin: EdgeInsets.symmetric(horizontal: 110, vertical: 16),
+            decoration: BoxDecoration(
+                color: Theme.of(context).backgroundColor.withOpacity(0.5),
+                borderRadius: BorderRadius.all(Radius.circular(24))),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                InkWell(
+                  onTap: () {
+                    if (this.mounted) {
+                      setState(() {
+                        requestType = true;
+                      });
+                    }
+                  },
+                  child: Text(
+                    "Receive",
+                    style: TextStyle(
+                        fontSize: 20,
+                        color:
+                            requestType ? Theme.of(context).primaryColor : null,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
                 SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.85,
-                    width: MediaQuery.of(context).size.width,
-                    child: Center(
-                      child: Text(
-                        "No Request Found",
-                        style: TextStyle(
-                          fontSize: 22,
-                        ),
-                      ),
-                    ))
+                  width: 6,
+                ),
+                Text(
+                  "|",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
+                ),
+                SizedBox(
+                  width: 6,
+                ),
+                InkWell(
+                  onTap: () {
+                    if (this.mounted) {
+                      setState(() {
+                        requestType = false;
+                      });
+                    }
+                  },
+                  child: Text(
+                    "Sent",
+                    style: TextStyle(
+                        fontSize: 20,
+                        color:
+                            requestType ? null : Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
               ],
-            )
-          : Scrollbar(
-              radius: Radius.circular(10.0),
-              thickness: 5.5,
-              child: ListView.separated(
-                  physics: AlwaysScrollableScrollPhysics(),
-                  padding: EdgeInsets.all(8.0),
-                  itemCount: RoomRequest.length,
-                  separatorBuilder: (context, index) => SizedBox(
-                        height: 5,
-                      ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return SizedBox(
-                      child: Card(
-                          elevation: 1.0,
-                          clipBehavior: Clip.antiAlias,
-                          shadowColor: Theme.of(context).primaryColor,
-                          color: Theme.of(context).scaffoldBackgroundColor,
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                                color: Theme.of(context)
-                                    .primaryColor
-                                    .withAlpha(95)),
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: CachedNetworkImage(
-                                  imageUrl: crypto
-                                              .decrypt(
-                                                  RoomRequest[index]["pic"])
-                                              .length ==
-                                          0
-                                      ? global.driveUrl +
-                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                      : crypto
-                                          .decrypt(RoomRequest[index]["pic"]),
-                                  progressIndicatorBuilder:
-                                      (context, url, downloadProgress) =>
-                                          CircularProgressIndicator(
-                                              value: downloadProgress.progress),
-                                  errorWidget: (context, url, error) =>
-                                      Container(
-                                    width: 65.0,
-                                    height: 65.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/Images/unknown.jpeg'),
-                                          fit: BoxFit.cover),
-                                    ),
-                                  ),
-                                  imageBuilder: (context, imageProvider) =>
-                                      Container(
-                                    width: 65.0,
-                                    height: 65.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover),
-                                    ),
-                                  ),
+            )),
+      ),
+      body: requestType
+          ? RefreshIndicator(
+              key: _requestIndicatorKey,
+              onRefresh: getRoomRequest,
+              child: RoomRequest.isEmpty
+                  ? ListView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.85,
+                            width: MediaQuery.of(context).size.width,
+                            child: Center(
+                              child: Text(
+                                "No Request Found",
+                                style: TextStyle(
+                                  fontSize: 22,
                                 ),
                               ),
-                              Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              140,
-                                          child: Text(
-                                            crypto.decrypt(
-                                                    RoomRequest[index]["by"]) +
-                                                " invited to join " +
-                                                crypto.decrypt(
-                                                    RoomRequest[index]
-                                                        ["name"]) +
-                                                (crypto.decrypt(
-                                                            RoomRequest[index]
-                                                                ["type"]) ==
-                                                        "room"
-                                                    ? ""
-                                                    : " (Len-Den)"),
-                                            style: TextStyle(
-                                              overflow: TextOverflow.clip,
-                                              fontSize: 20,
+                            ))
+                      ],
+                    )
+                  : Scrollbar(
+                      radius: Radius.circular(10.0),
+                      thickness: 5.5,
+                      child: ListView.separated(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.all(8.0),
+                          itemCount: RoomRequest.length,
+                          separatorBuilder: (context, index) => SizedBox(
+                                height: 5,
+                              ),
+                          itemBuilder: (BuildContext context, int index) {
+                            return SizedBox(
+                              child: Card(
+                                  elevation: 1.0,
+                                  clipBehavior: Clip.antiAlias,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withAlpha(95)),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: CachedNetworkImage(
+                                          imageUrl: crypto
+                                                      .decrypt(
+                                                          RoomRequest[index]
+                                                              ["pic"])
+                                                      .length ==
+                                                  0
+                                              ? global.driveUrl +
+                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                              : crypto.decrypt(
+                                                  RoomRequest[index]["pic"]),
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(
+                                                  value: downloadProgress
+                                                      .progress),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            width: 65.0,
+                                            height: 65.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: AssetImage(
+                                                      'assets/Images/unknown.jpeg'),
+                                                  fit: BoxFit.cover),
+                                            ),
+                                          ),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            width: 65.0,
+                                            height: 65.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: imageProvider,
+                                                  fit: BoxFit.cover),
                                             ),
                                           ),
                                         ),
-                                        SizedBox(
-                                          height: 8,
-                                        ),
-                                        SizedBox(
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              140,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceAround,
-                                            mainAxisSize: MainAxisSize.max,
-                                            children: [
-                                              IconButton(
-                                                  onPressed: () async {
-                                                    await JoinRequestLend(
-                                                        "0",
-                                                        RoomRequest[index]
-                                                            ["key"]);
-                                                  },
-                                                  icon: Icon(
-                                                    Icons.cancel_sharp,
-                                                    size: 30,
-                                                    color: Colors.red,
-                                                  )),
-                                              IconButton(
-                                                  onPressed: () async {
-                                                    await JoinRequestLend(
-                                                        "1",
-                                                        RoomRequest[index]
-                                                            ["key"]);
-                                                  },
-                                                  icon: Icon(Icons.check,
-                                                      size: 30,
-                                                      color:
-                                                          Colors.greenAccent)),
-                                            ],
+                                      ),
+                                      Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      140,
+                                                  child: Text(
+                                                    crypto.decrypt(
+                                                            RoomRequest[index]
+                                                                ["by"]) +
+                                                        " invited to join " +
+                                                        crypto.decrypt(
+                                                            RoomRequest[index]
+                                                                ["name"]) +
+                                                        (crypto.decrypt(RoomRequest[
+                                                                        index]
+                                                                    ["type"]) ==
+                                                                "Room"
+                                                            ? ""
+                                                            : " (Len-Den)"),
+                                                    style: TextStyle(
+                                                      overflow:
+                                                          TextOverflow.clip,
+                                                      fontSize: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      140,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceAround,
+                                                    mainAxisSize:
+                                                        MainAxisSize.max,
+                                                    children: [
+                                                      IconButton(
+                                                          onPressed: () async {
+                                                            if ((crypto.decrypt(
+                                                                    RoomRequest[
+                                                                            index]
+                                                                        [
+                                                                        "type"]) ==
+                                                                "Room")) {
+                                                              await JoinRequest(
+                                                                  "0",
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["key"]);
+                                                            } else {
+                                                              await JoinRequestLend(
+                                                                  "0",
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["key"]);
+                                                            }
+                                                          },
+                                                          icon: Icon(
+                                                            Icons.cancel_sharp,
+                                                            size: 30,
+                                                            color: Colors.red,
+                                                          )),
+                                                      IconButton(
+                                                          onPressed: () async {
+                                                            if ((crypto.decrypt(
+                                                                    RoomRequest[
+                                                                            index]
+                                                                        [
+                                                                        "type"]) ==
+                                                                "Room")) {
+                                                              await JoinRequest(
+                                                                  "1",
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["key"]);
+                                                            } else {
+                                                              await JoinRequestLend(
+                                                                  "1",
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["key"]);
+                                                            }
+                                                          },
+                                                          icon: Icon(
+                                                              Icons.check,
+                                                              size: 30,
+                                                              color: Colors
+                                                                  .greenAccent)),
+                                                    ],
+                                                  ),
+                                                )
+                                              ])),
+                                    ],
+                                  )),
+                            );
+                          }),
+                    ),
+            )
+          : RefreshIndicator(
+              key: _sentrequestIndicatorKey,
+              onRefresh: fetchSentRequest,
+              child: sentRoomRequest.isEmpty
+                  ? ListView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: [
+                        SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.85,
+                            width: MediaQuery.of(context).size.width,
+                            child: Center(
+                              child: Text(
+                                "No Request Found",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                ),
+                              ),
+                            ))
+                      ],
+                    )
+                  : Scrollbar(
+                      radius: Radius.circular(10.0),
+                      thickness: 5.5,
+                      child: ListView.separated(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          padding: EdgeInsets.all(8.0),
+                          itemCount: sentRoomRequest.length,
+                          separatorBuilder: (context, index) => SizedBox(
+                                height: 5,
+                              ),
+                          itemBuilder: (BuildContext context, int index) {
+                            return SizedBox(
+                              child: Card(
+                                  elevation: 1.0,
+                                  clipBehavior: Clip.antiAlias,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withAlpha(95)),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: CachedNetworkImage(
+                                          imageUrl: crypto
+                                                      .decrypt(
+                                                          sentRoomRequest[index]
+                                                              ["pic"])
+                                                      .length ==
+                                                  0
+                                              ? global.driveUrl +
+                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                              : crypto.decrypt(
+                                                  sentRoomRequest[index]
+                                                      ["pic"]),
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(
+                                                  value: downloadProgress
+                                                      .progress),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            width: 65.0,
+                                            height: 65.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: AssetImage(
+                                                      'assets/Images/unknown.jpeg'),
+                                                  fit: BoxFit.cover),
+                                            ),
                                           ),
-                                        )
-                                      ])),
-                            ],
-                          )),
-                    );
-                  }),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            width: 65.0,
+                                            height: 65.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: imageProvider,
+                                                  fit: BoxFit.cover),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      140,
+                                                  child: Text(
+                                                    "You invited " +
+                                                        crypto.decrypt(
+                                                            sentRoomRequest[
+                                                                index]["by"]) +
+                                                        " to join " +
+                                                        crypto.decrypt(
+                                                            sentRoomRequest[
+                                                                    index]
+                                                                ["name"]) +
+                                                        (crypto.decrypt(sentRoomRequest[
+                                                                        index]
+                                                                    ["type"]) ==
+                                                                "Room"
+                                                            ? ""
+                                                            : " (Len-Den)"),
+                                                    style: TextStyle(
+                                                      overflow:
+                                                          TextOverflow.clip,
+                                                      fontSize: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      140,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    children: [
+                                                      InkWell(
+                                                        onTap: () async {
+                                                          buildShowDialog(
+                                                              context);
+                                                          cancelSentRequest(
+                                                              sentRoomRequest[
+                                                                  index]["key"],
+                                                              sentRoomRequest[
+                                                                      index]
+                                                                  ["type"]);
+                                                          Navigator.pop(
+                                                              context);
+                                                        },
+                                                        child: SizedBox(
+                                                          child: Card(
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              side: BorderSide(
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .primaryColor),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10.0),
+                                                            ),
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .all(
+                                                                      12.0),
+                                                              child: Text(
+                                                                "Cancel",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        15,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                )
+                                              ])),
+                                    ],
+                                  )),
+                            );
+                          }),
+                    ),
             ),
     );
   }
