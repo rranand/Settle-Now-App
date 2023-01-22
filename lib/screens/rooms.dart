@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -59,6 +61,7 @@ class _RoomExpenseState extends State<RoomExpense>
   bool showExpenseYouAreIn = false;
   String yourExpense = "";
   double totalExpense = 0;
+  Map<String, double> dataMap = {};
 
   String expenseTitle = "All Expense";
   String expenseDetailByMember = "all";
@@ -79,6 +82,26 @@ class _RoomExpenseState extends State<RoomExpense>
   List<dynamic> roomExpenseCategory = [];
   int roomExpenseCategoryIndex = 0;
   List<dynamic> filterResult = [];
+  double maxAmount = 0;
+  double totalAmount = 0;
+
+  Future<void> initChart() async {
+    for (int i = 0; i < roomExpenseCategory.length; i++) {
+      dataMap[roomExpenseCategory[i]] = 0;
+    }
+    totalAmount = 0;
+
+    for (int i = 0; i < TransList.length; i++) {
+      dataMap[crypto.decrypt(TransList[i]["Type"])] =
+          (dataMap[crypto.decrypt(TransList[i]["Type"])]! +
+              double.parse(crypto.decrypt(TransList[i]["Amount"])));
+    }
+
+    for (int i = 0; i < roomExpenseCategory.length; i++) {
+      totalAmount += dataMap[roomExpenseCategory[i]]!;
+      maxAmount = max(maxAmount, dataMap[roomExpenseCategory[i]]!);
+    }
+  }
 
   _getPaymentData() async {
     try {
@@ -1818,18 +1841,174 @@ class _RoomExpenseState extends State<RoomExpense>
     );
   }
 
+  List<BarChartGroupData> barGroups() {
+    List<BarChartGroupData> data = [];
+
+    for (int i = 0; i < roomExpenseCategory.length; i++) {
+      data.add(BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            width: 20,
+            toY: dataMap[roomExpenseCategory[i]]!,
+            color: global.colorsList[i],
+          )
+        ],
+        showingTooltipIndicators: [0],
+      ));
+    }
+
+    return data;
+  }
+
+  Widget showChart() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    return loaded
+        ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 40,
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: MediaQuery.of(context).size.height - 400,
+                    child: dataMap.isEmpty
+                        ? Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3.3,
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: BarChart(
+                              BarChartData(
+                                barTouchData: BarTouchData(
+                                  enabled: true,
+                                  touchTooltipData: BarTouchTooltipData(
+                                    tooltipBgColor: Colors.transparent,
+                                    tooltipPadding: EdgeInsets.zero,
+                                    tooltipMargin: 8,
+                                    getTooltipItem: (
+                                      BarChartGroupData group,
+                                      int groupIndex,
+                                      BarChartRodData rod,
+                                      int rodIndex,
+                                    ) {
+                                      String percent =
+                                          ((rod.toY / totalAmount) * 100)
+                                              .toStringAsFixed(2);
+                                      if (percent.split('.')[1] == "00") {
+                                        percent = percent.split('.')[0];
+                                      }
+                                      return BarTooltipItem(
+                                        "₹ " +
+                                            rod.toY.round().toString() +
+                                            "\n" +
+                                            percent +
+                                            " %",
+                                        TextStyle(
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                titlesData: FlTitlesData(
+                                  show: true,
+                                  bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  leftTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  topTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  rightTitles: AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                ),
+                                borderData: FlBorderData(
+                                  show: false,
+                                ),
+                                barGroups: barGroups(),
+                                gridData: FlGridData(show: false),
+                                alignment: BarChartAlignment.spaceBetween,
+                                maxY: maxAmount,
+                              ),
+                            ),
+                          ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  SizedBox(
+                    height: 100,
+                    child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount:
+                              (MediaQuery.of(context).size.width / 120).round(),
+                          childAspectRatio: 4.0,
+                        ),
+                        itemCount: roomExpenseCategory.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Row(
+                            children: [
+                              Container(
+                                  height: 10,
+                                  width: 10,
+                                  decoration: BoxDecoration(
+                                      color: global.colorsList[index],
+                                      border: Border.all(
+                                        color: global.colorsList[index],
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20)))),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(roomExpenseCategory[index])
+                            ],
+                          );
+                        }),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : Center(
+            child: CircularProgressIndicator(),
+          );
+  }
+
   Widget chooseFromBottomNavigator(int dash) {
     if (widget.isRoomActive) {
       if (dash == 0) {
         return homeWidget();
       } else if (dash == 1) {
         return addFriendWidget();
+      } else if (dash == 2) {
+        initChart();
+        return showChart();
       } else {
         return paymentDataWidget();
       }
     } else {
       if (dash == 0) {
         return homeWidget();
+      } else if (dash == 1) {
+        initChart();
+        return showChart();
       } else {
         return paymentDataWidget();
       }
@@ -1869,6 +2048,13 @@ class _RoomExpenseState extends State<RoomExpense>
                     ),
                     BottomNavigationBarItem(
                       icon: Icon(
+                        Icons.analytics_outlined,
+                        size: 27,
+                      ),
+                      label: "",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(
                         Icons.transfer_within_a_station_rounded,
                         size: 27,
                       ),
@@ -1879,6 +2065,13 @@ class _RoomExpenseState extends State<RoomExpense>
                     BottomNavigationBarItem(
                       icon: Icon(
                         Icons.home,
+                        size: 27,
+                      ),
+                      label: "",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        Icons.analytics_outlined,
                         size: 27,
                       ),
                       label: "",

@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +13,6 @@ import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
 import '../contents.dart' as global;
 
-import 'package:pie_chart/pie_chart.dart';
 import 'expenses.dart';
 
 class Entry {
@@ -52,6 +53,7 @@ class _ProfileState extends State<Profile> {
   Set<int> monthIndex = Set();
   Set<int> yearIndex = Set();
   List<dynamic> category = [];
+  double maxAmount = 0;
   List<String> Month = [
     'January',
     'February',
@@ -71,6 +73,26 @@ class _ProfileState extends State<Profile> {
   Map<String, double> dataMap = {};
   Map<String, double> yearwiseSpend = {};
   List<PersonalExpenseEach> filterResult = [];
+
+  List<BarChartGroupData> barGroups() {
+    List<BarChartGroupData> data = [];
+
+    for (int i = 0; i < widget.expenseCategory.length; i++) {
+      data.add(BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            width: 20,
+            toY: dataMap[widget.expenseCategory[i]]!,
+            color: global.colorsList[i],
+          )
+        ],
+        showingTooltipIndicators: [0],
+      ));
+    }
+
+    return data;
+  }
 
   Widget buildExpenseTile(Entry root) {
     if (root.children.isEmpty) {
@@ -189,8 +211,10 @@ class _ProfileState extends State<Profile> {
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)['data'];
-
+        maxAmount = 0;
         for (int i = 0; i < category.length; i++) {
+          maxAmount = max(
+              maxAmount, double.parse(crypto.decrypt(tempData[category[i]])));
           dataMap[category[i]] = double.parse(
               double.parse(crypto.decrypt(tempData[category[i]]))
                   .toStringAsFixed(2));
@@ -277,26 +301,101 @@ class _ProfileState extends State<Profile> {
             SizedBox(
               height: 10,
             ),
-            dataMap.isEmpty
-                ? Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3.3,
-                    ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: PieChart(
-                      dataMap: dataMap,
-                      chartRadius: MediaQuery.of(context).size.width / 2.5,
-                      animationDuration: Duration(milliseconds: 800),
-                      chartValuesOptions: ChartValuesOptions(
-                        showChartValueBackground: true,
-                        showChartValuesInPercentage: true,
-                        showChartValuesOutside: true,
-                        decimalPlaces: 1,
+            SizedBox(
+              height: 300,
+              child: dataMap.isEmpty
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3.3,
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: BarChart(
+                        BarChartData(
+                          barTouchData: BarTouchData(
+                            enabled: true,
+                            touchTooltipData: BarTouchTooltipData(
+                              tooltipBgColor: Colors.transparent,
+                              tooltipPadding: EdgeInsets.zero,
+                              tooltipMargin: 8,
+                              getTooltipItem: (
+                                BarChartGroupData group,
+                                int groupIndex,
+                                BarChartRodData rod,
+                                int rodIndex,
+                              ) {
+                                return BarTooltipItem(
+                                  "₹ " + rod.toY.round().toString(),
+                                  TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          titlesData: FlTitlesData(
+                            show: true,
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            leftTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(showTitles: false),
+                            ),
+                          ),
+                          borderData: FlBorderData(
+                            show: false,
+                          ),
+                          barGroups: barGroups(),
+                          gridData: FlGridData(show: false),
+                          alignment: BarChartAlignment.spaceBetween,
+                          maxY: maxAmount,
+                        ),
                       ),
                     ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            SizedBox(
+              height: 100,
+              child: GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount:
+                        (MediaQuery.of(context).size.width / 120).round(),
+                    childAspectRatio: 4.0,
                   ),
+                  itemCount: widget.expenseCategory.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Row(
+                      children: [
+                        Container(
+                            height: 10,
+                            width: 10,
+                            decoration: BoxDecoration(
+                                color: global.colorsList[index],
+                                border: Border.all(
+                                  color: global.colorsList[index],
+                                ),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)))),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        Text(widget.expenseCategory[index])
+                      ],
+                    );
+                  }),
+            ),
             SizedBox(
               height: 10,
             ),
