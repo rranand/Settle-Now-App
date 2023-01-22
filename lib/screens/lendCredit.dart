@@ -7,6 +7,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/screens/lendPage.dart';
+import 'package:shimmer/shimmer.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
@@ -213,9 +214,72 @@ class _LendCreditState extends State<LendCredit> {
                 : ListView(physics: AlwaysScrollableScrollPhysics(), children: [
                     SizedBox(
                       height: MediaQuery.of(context).size.height,
-                      child: Center(
-                        child: Text("Loading..."),
-                      ),
+                      child: Shimmer.fromColors(
+                          baseColor: Theme.of(context).cardColor,
+                          highlightColor: Theme.of(context).primaryColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: GridView.builder(
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount:
+                                    (MediaQuery.of(context).size.width / 250)
+                                        .round(),
+                                childAspectRatio: 1.5,
+                              ),
+                              physics: AlwaysScrollableScrollPhysics(),
+                              itemCount: 16,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Container(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            width: 180,
+                                            height: 20,
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border.all(
+                                                  color: Colors.white,
+                                                ),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
+                                          ),
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          Container(
+                                            width: 110,
+                                            height: 20,
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border.all(
+                                                  color: Colors.white,
+                                                ),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.white,
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20))),
+                                  ),
+                                );
+                              },
+                            ),
+                          )),
                     )
                   ]),
           )),

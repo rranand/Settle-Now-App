@@ -11,6 +11,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:shimmer/shimmer.dart';
 import '../contents.dart' as global;
 import '../others/themes.dart';
 import 'package:share_plus/share_plus.dart';
@@ -104,6 +105,10 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   _getPaymentData() async {
+    paidTransactionData = false;
+    if (this.mounted) {
+      setState(() {});
+    }
     try {
       final response = await http.delete(
           Uri.parse(global.url + 'transaction/all'),
@@ -657,10 +662,114 @@ class _RoomExpenseState extends State<RoomExpense>
                           )
                     : SizedBox(
                         height: MediaQuery.of(context).size.height - 310,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      )
+                        child: Shimmer.fromColors(
+                            baseColor: Theme.of(context).cardColor,
+                            highlightColor: Theme.of(context).primaryColor,
+                            child: Column(
+                              children: [
+                                TextField(
+                                  controller: _searchFriend,
+                                  keyboardType: TextInputType.text,
+                                  maxLines: 1,
+                                  style: const TextStyle(fontSize: 15),
+                                  autocorrect: false,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.all(8.0),
+                                    labelText: "Enter Name",
+                                    counterText: "",
+                                    errorStyle: const TextStyle(fontSize: 15),
+                                  ),
+                                  onChanged: (String s) {
+                                    if (this.mounted) {
+                                      setState(() {
+                                        _searchFriend.text = s;
+                                        _searchFriend.selection =
+                                            TextSelection.collapsed(
+                                                offset:
+                                                    _searchFriend.text.length);
+                                      });
+                                    }
+                                    SearchFriend();
+                                  },
+                                ),
+                                SizedBox(
+                                  height: 13,
+                                ),
+                                SingleChildScrollView(
+                                  child: SizedBox(
+                                      height: 500,
+                                      child: ListView.separated(
+                                          separatorBuilder: (context, index) =>
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                          shrinkWrap: true,
+                                          itemCount: 16,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(12.0),
+                                              child: Container(
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                height: 75,
+                                                decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                      color: Colors.white,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Container(
+                                                            width: 45,
+                                                            height: 45,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              image: DecorationImage(
+                                                                  image: AssetImage(
+                                                                      'assets/Images/unknown.jpeg'),
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            )),
+                                                        Container(
+                                                          width: 200,
+                                                          height: 15.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        Icon(Icons.person_add)
+                                                      ]),
+                                                ),
+                                              ),
+                                            );
+                                          })),
+                                ),
+                              ],
+                            )))
               ],
             )));
   }
@@ -1167,9 +1276,433 @@ class _RoomExpenseState extends State<RoomExpense>
               SizedBox(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                child: Center(
-                  child: Text("Loading..."),
-                ),
+                child: Shimmer.fromColors(
+                    baseColor: Theme.of(context).cardColor,
+                    highlightColor: Theme.of(context).primaryColor,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListTile(
+                            title: Text("Room Key"),
+                            trailing: Container(
+                              width: 150,
+                              height: 15.0,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                            ),
+                          ),
+                          ListTile(
+                            title: Text("Total Spent"),
+                            trailing: Container(
+                              width: 150,
+                              height: 15.0,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                            ),
+                          ),
+                          ListTile(
+                            title: Text("You Spent"),
+                            trailing: Container(
+                              width: 150,
+                              height: 15.0,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                            ),
+                          ),
+                          ListTile(
+                            title: Text("Members"),
+                            trailing: Container(
+                              width: 150,
+                              height: 15.0,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                            ),
+                          ),
+                          ListTile(
+                            title: Text("Created On"),
+                            trailing: Container(
+                              width: 150,
+                              height: 15.0,
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(20))),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Container(
+                              height: 45,
+                              width: MediaQuery.of(context).size.width,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.white,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10))),
+                            ),
+                          ),
+                          Divider(),
+                          Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Member",
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 140,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      shrinkWrap: true,
+                                      itemCount: 4,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        if (index == 0) {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              height: 170,
+                                              width: 140,
+                                              child: Center(
+                                                  child: Text("All",
+                                                      style: TextStyle(
+                                                        fontSize: 24,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ))),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                          );
+                                        } else {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              height: 170,
+                                              width: 260,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Container(
+                                                      width: 65.0,
+                                                      height: 65.0,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        image: DecorationImage(
+                                                            image: AssetImage(
+                                                                'assets/Images/unknown.jpeg'),
+                                                            fit: BoxFit.cover),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            4.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Container(
+                                                          width: 150,
+                                                          height: 18.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 8,
+                                                        ),
+                                                        Container(
+                                                          width: 130,
+                                                          height: 16,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 8,
+                                                        ),
+                                                        Container(
+                                                          width: 130,
+                                                          height: 16,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 8,
+                                                        ),
+                                                        Container(
+                                                          width: 130,
+                                                          height: 16,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  Divider(),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        "Show Expenses You Are In",
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Icon(
+                                        showExpenseYouAreIn
+                                            ? Icons.toggle_on
+                                            : Icons.toggle_off,
+                                        size: 40,
+                                        color: showExpenseYouAreIn
+                                            ? Theme.of(context).primaryColor
+                                            : null,
+                                      )
+                                    ],
+                                  ),
+                                  Divider(),
+                                  Text(
+                                    expenseTitle,
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: 135,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  width: 200,
+                                                  height: 20.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                Container(
+                                                  width: 150,
+                                                  height: 15.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                Container(
+                                                  width: 120,
+                                                  height: 15.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                Container(
+                                                  width: 170,
+                                                  height: 15.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                Container(
+                                                  width: 100,
+                                                  height: 15.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              width: 50,
+                                              height: 30.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.white,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                    ),
+                                  )
+                                ]),
+                          )
+                        ],
+                      ),
+                    )),
               )
             ],
           )
@@ -1735,15 +2268,157 @@ class _RoomExpenseState extends State<RoomExpense>
                               ),
                             ],
                           ))
-                    : Center(
-                        child: Text("Loading..."),
-                      ))
+                    : SizedBox(
+                        height: MediaQuery.of(context).size.height - 380,
+                        child: Shimmer.fromColors(
+                            baseColor: Theme.of(context).cardColor,
+                            highlightColor: Theme.of(context).primaryColor,
+                            child: ListView.builder(
+                              itemCount: 16,
+                              itemBuilder: (_, __) => Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 12),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: 160,
+                                              height: 20.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                            Container(
+                                              width: 160,
+                                              height: 20.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: 8,
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: 180,
+                                              height: 17.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                            Container(
+                                              width: 120,
+                                              height: 17.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ))))
                 : (isLoadedDef
                     ? paymentData.isEmpty
                         ? (payment
-                            ? Center(
-                                child: Text("Loading..."),
-                              )
+                            ? SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height - 380,
+                                child: Shimmer.fromColors(
+                                    baseColor: Theme.of(context).cardColor,
+                                    highlightColor:
+                                        Theme.of(context).primaryColor,
+                                    child: ListView.builder(
+                                      itemCount: 16,
+                                      itemBuilder: (_, __) => Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            vertical: 18, horizontal: 12),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                color: Colors.white,
+                                              ),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(20))),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 180,
+                                                  height: 20.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                                Container(
+                                                  width: 120,
+                                                  height: 20.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )))
                             : Center(
                                 child: Text(
                                   "No Results Found!!!",

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
+import 'package:shimmer/shimmer.dart';
 import '../contents.dart' as global;
 
 class Expenses extends StatefulWidget {
@@ -65,6 +66,7 @@ class _ExpensesState extends State<Expenses> {
   final _updateExpense = GlobalKey<FormState>();
 
   Future _initialization() async {
+    loaded = false;
     category = widget.expenseCategory;
     investmentCat = widget.investmentCategory;
 
@@ -83,6 +85,10 @@ class _ExpensesState extends State<Expenses> {
     }
 
     title = Months[int.parse(mn)] + ", " + yr;
+
+    if (this.mounted) {
+      setState(() {});
+    }
 
     try {
       final response = await http.post(Uri.parse(global.url + 'ptransaction'),
@@ -652,7 +658,121 @@ class _ExpensesState extends State<Expenses> {
                                     style: TextStyle(
                                       fontSize: 23,
                                     ))
-                                : Text("Loading..."),
+                                : Shimmer.fromColors(
+                                    baseColor: Theme.of(context).cardColor,
+                                    highlightColor:
+                                        Theme.of(context).primaryColor,
+                                    child: ListView.separated(
+                                        separatorBuilder: (context, index) =>
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                        shrinkWrap: true,
+                                        itemCount: 16,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Container(
+                                                          width: 240,
+                                                          height: 20.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 14,
+                                                        ),
+                                                        Container(
+                                                          width: 150,
+                                                          height: 15.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 14,
+                                                        ),
+                                                        Container(
+                                                          width: 280,
+                                                          height: 15.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Container(
+                                                      width: 70,
+                                                      height: 35.0,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          border: Border.all(
+                                                            color: Colors.white,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          20))),
+                                                    )
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        })),
                           )))
                     ],
                   )
