@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import '../contents.dart' as global;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -178,4 +179,11 @@ onException(BuildContext context) async {
 commaSeperator(String amount) {
   final numberFormatter = new NumberFormat('##,##,###.##');
   return numberFormatter.format(double.parse(amount));
+}
+
+formatDateTime(String dateTime) {
+  DateFormat dateFormat = DateFormat(global.dateTimeFormat);
+  DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
+  DateTime olddateTime = dateFormat.parse(dateTime);
+  return dateFormat_new.format(olddateTime);
 }

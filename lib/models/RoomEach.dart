@@ -1,5 +1,7 @@
 import 'package:settlenow/others/crypto.dart';
 
+import '../functions/additionalFunction.dart';
+
 class RoomEach {
   final String roomName;
   final int members;
@@ -28,7 +30,7 @@ class RoomEach {
       active: json['active'],
       total: double.parse(crypto.decrypt(json['total'])),
       spend: double.parse(crypto.decrypt(json['spend'])),
-      date: crypto.decrypt(json['date']),
+      date: formatDateTime(crypto.decrypt(json['date'])),
       roomLink: crypto.decrypt(json['joinLink']),
     );
   }

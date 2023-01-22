@@ -469,14 +469,18 @@ class _DashBoardState extends State<DashBoard> {
         }
 
         RoomDataO.sort((b, a) {
-          DateTime tempDate_1 = new DateFormat("MMM dd yyyy").parse(a.date);
-          DateTime tempDate_2 = new DateFormat("MMM dd yyyy").parse(b.date);
+          DateTime tempDate_1 =
+              new DateFormat(global.dateTimeFormat_new).parse(a.date);
+          DateTime tempDate_2 =
+              new DateFormat(global.dateTimeFormat_new).parse(b.date);
           return tempDate_1.compareTo(tempDate_2);
         });
 
         RoomDataC.sort((b, a) {
-          DateTime tempDate_1 = new DateFormat("MMM dd yyyy").parse(a.date);
-          DateTime tempDate_2 = new DateFormat("MMM dd yyyy").parse(b.date);
+          DateTime tempDate_1 =
+              new DateFormat(global.dateTimeFormat_new).parse(a.date);
+          DateTime tempDate_2 =
+              new DateFormat(global.dateTimeFormat_new).parse(b.date);
           return tempDate_1.compareTo(tempDate_2);
         });
 
@@ -1429,8 +1433,8 @@ class _DashBoardState extends State<DashBoard> {
     }
 
     SearchRoomData.sort((b, a) {
-      DateTime tempDate_1 = new DateFormat("MMM dd yyyy").parse(a.date);
-      DateTime tempDate_2 = new DateFormat("MMM dd yyyy").parse(b.date);
+      DateTime tempDate_1 = new DateFormat(global.dateTimeFormat).parse(a.date);
+      DateTime tempDate_2 = new DateFormat(global.dateTimeFormat).parse(b.date);
       return tempDate_1.compareTo(tempDate_2);
     });
 

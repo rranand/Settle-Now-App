@@ -262,6 +262,7 @@ class _BankTransactionsState extends State<BankTransactions> {
             'email': crypto.encrypt(widget.email),
             'purpose': crypto.encrypt(_purpose.text),
             'amt': crypto.encrypt(amount),
+            'date': crypto.encrypt(date),
             'type': crypto.encrypt(categoryIndex.toString()),
             'investType': crypto.encrypt(investIndex.toString()),
           }));

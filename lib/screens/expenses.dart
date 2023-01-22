@@ -695,9 +695,9 @@ class _ExpensesState extends State<Expenses> {
                                                   crypto.decrypt(
                                                       filterResult[index]
                                                           ["RoomName"]),
-                                                  crypto.decrypt(
+                                                  formatDateTime(crypto.decrypt(
                                                       filterResult[index]
-                                                          ["Date"]),
+                                                          ["Date"])),
                                                   "₹ " +
                                                       commaSeperator(crypto.decrypt(
                                                           filterResult[index]
@@ -864,8 +864,8 @@ class _ExpensesState extends State<Expenses> {
                                                               crypto.decrypt(filterResult[index]
                                                                   ["invType"]) +
                                                               ")")),
-                                                  crypto.decrypt(
-                                                      filterResult[index]["Date"]),
+                                                  formatDateTime(crypto.decrypt(
+                                                      filterResult[index]["Date"])),
                                                   "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
                                                   filterResult[index]["room"],
                                                   crypto.decrypt(filterResult[index]["id"]),
@@ -1023,8 +1023,8 @@ class _ExpensesState extends State<Expenses> {
                                                   crypto.decrypt(
                                                       TransList[index]
                                                           ["RoomName"]),
-                                                  crypto.decrypt(
-                                                      TransList[index]["Date"]),
+                                                  formatDateTime(crypto.decrypt(
+                                                      TransList[index]["Date"])),
                                                   "₹ " +
                                                       commaSeperator(
                                                           crypto.decrypt(
@@ -1186,8 +1186,8 @@ class _ExpensesState extends State<Expenses> {
                                                               TransList[index]
                                                                   ["invType"]) +
                                                           ")")),
-                                              crypto.decrypt(
-                                                  TransList[index]["Date"]),
+                                              formatDateTime(crypto.decrypt(
+                                                  TransList[index]["Date"])),
                                               "₹ " +
                                                   commaSeperator(crypto.decrypt(
                                                       TransList[index]["Amount"])),

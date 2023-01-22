@@ -1087,7 +1087,7 @@ class _LendPageState extends State<LendPage> {
                                               fontWeight: FontWeight.w500),
                                         ),
                                         TextSpan(
-                                          text: (crypto
+                                          text: formatDateTime(crypto
                                               .decrypt(data[index]["date"])),
                                           style: const TextStyle(
                                               fontSize: 18,

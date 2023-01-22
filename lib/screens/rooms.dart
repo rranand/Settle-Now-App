@@ -534,22 +534,39 @@ class _RoomExpenseState extends State<RoomExpense>
                       "Invite Member",
                       style: TextStyle(fontSize: 22),
                     ),
-                    IconButton(
-                        onPressed: () async {
-                          if (this.mounted) {
-                            setState(() {
-                              loadFriendData = false;
-                            });
-                            await getFriendData();
-                            setState(() {
-                              loadFriendData = true;
-                            });
-                          }
-                        },
-                        icon: Icon(
-                          Icons.refresh_outlined,
-                          size: 26,
-                        ))
+                    Row(
+                      children: [
+                        IconButton(
+                            onPressed: () async {
+                              if (this.mounted) {
+                                setState(() {
+                                  loadFriendData = false;
+                                });
+                                await getFriendData();
+                                setState(() {
+                                  loadFriendData = true;
+                                });
+                              }
+                            },
+                            icon: Icon(
+                              Icons.refresh_outlined,
+                              size: 26,
+                            )),
+                        IconButton(
+                            onPressed: () async {
+                              await Share.share("Join " +
+                                  widget.roomName +
+                                  "\nRoom Key: " +
+                                  widget.roomKey +
+                                  "\n" +
+                                  widget.roomLink);
+                            },
+                            icon: Icon(
+                              Icons.send,
+                              size: 26,
+                            )),
+                      ],
+                    )
                   ],
                 ),
                 SizedBox(
@@ -1153,15 +1170,7 @@ class _RoomExpenseState extends State<RoomExpense>
                       showToast(context, "Join Key Copied", Icons.check);
                     },
                     child: ListTile(
-                      title: Row(
-                        children: [
-                          Text("Room Key   "),
-                          Icon(
-                            Icons.share,
-                            size: 17,
-                          )
-                        ],
-                      ),
+                      title: Text("Room Key   "),
                       trailing: Text(widget.roomKey),
                     ),
                   ),
@@ -1188,7 +1197,8 @@ class _RoomExpenseState extends State<RoomExpense>
                 SliverToBoxAdapter(
                   child: ListTile(
                     title: const Text("Created On"),
-                    trailing: Text(crypto.decrypt(list[0]["date"])),
+                    trailing:
+                        Text(formatDateTime(crypto.decrypt(list[0]["date"]))),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -1771,9 +1781,12 @@ class _RoomExpenseState extends State<RoomExpense>
                                                       Opacity(
                                                         opacity: 0.8,
                                                         child: Text(
-                                                          crypto.decrypt(
-                                                              paymentData[index]
-                                                                  ["Date"]),
+                                                          formatDateTime(
+                                                              crypto.decrypt(
+                                                                  paymentData[
+                                                                          index]
+                                                                      [
+                                                                      "Date"])),
                                                           style:
                                                               const TextStyle(
                                                             fontSize: 18,
@@ -1806,12 +1819,20 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Widget chooseFromBottomNavigator(int dash) {
-    if (dash == 0) {
-      return homeWidget();
-    } else if (dash == 1) {
-      return addFriendWidget();
+    if (widget.isRoomActive) {
+      if (dash == 0) {
+        return homeWidget();
+      } else if (dash == 1) {
+        return addFriendWidget();
+      } else {
+        return paymentDataWidget();
+      }
     } else {
-      return paymentDataWidget();
+      if (dash == 0) {
+        return homeWidget();
+      } else {
+        return paymentDataWidget();
+      }
     }
   }
 
@@ -1830,29 +1851,46 @@ class _RoomExpenseState extends State<RoomExpense>
             onTap: (index) => setState(() {
                   dash = index;
                 }),
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.home,
-                  size: 27,
-                ),
-                label: "",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.person_add,
-                  size: 27,
-                ),
-                label: "",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.transfer_within_a_station_rounded,
-                  size: 27,
-                ),
-                label: "",
-              )
-            ]),
+            items: widget.isRoomActive
+                ? [
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        Icons.home,
+                        size: 27,
+                      ),
+                      label: "",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        Icons.person_add,
+                        size: 27,
+                      ),
+                      label: "",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        Icons.transfer_within_a_station_rounded,
+                        size: 27,
+                      ),
+                      label: "",
+                    )
+                  ]
+                : [
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        Icons.home,
+                        size: 27,
+                      ),
+                      label: "",
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(
+                        Icons.transfer_within_a_station_rounded,
+                        size: 27,
+                      ),
+                      label: "",
+                    )
+                  ]),
         floatingActionButton: dash == 0
             ? (widget.isRoomActive
                 ? FloatingActionButton(
@@ -2878,7 +2916,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                   builder: (BuildContext context) => _buildPopupDialog(
                       context,
                       crypto.decrypt(widget.TransList[index]["Name"]),
-                      crypto.decrypt(widget.TransList[index]["Date"]),
+                      formatDateTime(
+                          crypto.decrypt(widget.TransList[index]["Date"])),
                       crypto.decrypt(widget.TransList[index]["Email"]),
                       crypto.decrypt(widget.TransList[index]["id"]),
                       crypto.decrypt(widget.TransList[index]["Purpose"]),
@@ -2968,8 +3007,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                       Opacity(
                                         opacity: 0.8,
                                         child: Text(
-                                          crypto.decrypt(
-                                              widget.TransList[index]["Date"]),
+                                          formatDateTime(crypto.decrypt(
+                                              widget.TransList[index]["Date"])),
                                           style: const TextStyle(
                                             fontSize: 17,
                                           ),
