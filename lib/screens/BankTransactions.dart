@@ -66,14 +66,19 @@ class _BankTransactionsState extends State<BankTransactions> {
     "Debit Card",
     "Credit Card"
   ];
+  int lenDenIndex = 0;
   Set<int> transactionTypeIndex = Set();
   Set<int> transactionModeIndex = Set();
   List<dynamic> investmentCat = [];
   List<dynamic> roomData = [];
+  List<dynamic> LenDenData = [];
   bool showFilterResult = false;
   final _formKey = GlobalKey<FormState>();
   final _formKeyRoom = GlobalKey<FormState>();
+  final _formKeyLenDen = GlobalKey<FormState>();
   final TextEditingController _purpose = TextEditingController();
+  final TextEditingController _lenDenRoom = TextEditingController();
+  String LenDenRoomID = "";
   List<dynamic> roomMembers = [];
   List<String> addExpenseTo = [];
   bool isSplitMemberLoading = false;
@@ -85,6 +90,35 @@ class _BankTransactionsState extends State<BankTransactions> {
       end: DateTime.now());
 
   List<TransactionEach> filteredResult = [];
+
+  Future<void> getLenDenData() async {
+    try {
+      final response = await http.patch(Uri.parse(global.url + 'lend'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({"email": crypto.encrypt(widget.email)}));
+
+      if (response.statusCode == 200) {
+        List<dynamic> temp = jsonDecode(response.body)['data'];
+
+        for (int i = 0; i < temp.length; i++) {
+          if (!temp[i]["closed"]) {
+            LenDenData.add(temp[i]);
+          }
+        }
+      } else {
+        showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+            Icons.close);
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
 
   Future<void> getActiveRooms() async {
     try {
@@ -167,6 +201,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       });
 
       await getActiveRooms();
+      await getLenDenData();
     } else {
       await Permission.sms.request();
       permissionGranted = await Permission.sms.isDenied;
@@ -487,6 +522,77 @@ class _BankTransactionsState extends State<BankTransactions> {
     return false;
   }
 
+  Future createLenDenRoom(BuildContext context) async {
+    try {
+      buildShowDialog(context);
+      final response = await http.post(Uri.parse(global.url + 'lend'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            "email": crypto.encrypt(widget.email),
+            "name": crypto.encrypt(_lenDenRoom.text)
+          }));
+
+      if (response.statusCode == 200) {
+        LenDenRoomID = jsonDecode(response.body)["id"];
+        _lenDenRoom.text = "";
+      } else {
+        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
+            Icons.close);
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+
+    Navigator.pop(context);
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  AddLenDen(BuildContext context, String amount, String date, String id) async {
+    if (_formKeyLenDen.currentState!.validate()) {
+      var Tdata = null;
+      buildShowDialog(context);
+
+      try {
+        final response = await http.delete(Uri.parse(global.url + 'lend'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Auth': widget.token
+            },
+            body: jsonEncode({
+              'email': crypto.encrypt(widget.email),
+              'key': id,
+              'purpose': crypto.encrypt(_purpose.text),
+              'amount': crypto.encrypt(amount),
+              "date": crypto.encrypt(date)
+            }));
+
+        _purpose.text = "";
+        Tdata = jsonDecode(response.body);
+        Navigator.pop(context);
+        Navigator.pop(context);
+        Navigator.pop(context);
+
+        if (response.statusCode == 422) {
+          showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
+        } else {
+          showToast(context, "Expense Added Successfully", Icons.check);
+        }
+      } on Exception catch (_) {
+        Navigator.pop(context);
+        await onException(context);
+      }
+      LenDenRoomID = "";
+      if (this.mounted) {
+        setState(() {});
+      }
+    }
+  }
+
   AddRoomExpense(BuildContext context, String amount, String date) async {
     if (_formKeyRoom.currentState!.validate()) {
       var Tdata = null;
@@ -505,7 +611,8 @@ class _BankTransactionsState extends State<BankTransactions> {
               'amt': crypto.encrypt(amount),
               'type':
                   crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
-              "members": crypto.encrypt(addExpenseTo.toString())
+              "members": crypto.encrypt(addExpenseTo.toString()),
+              "date": crypto.encrypt(date)
             }));
 
         _purpose.text = "";
@@ -527,6 +634,217 @@ class _BankTransactionsState extends State<BankTransactions> {
         setState(() {});
       }
     }
+  }
+
+  void showLenDenDialog(String amount, String date) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(builder: (context, setState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0)),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.9,
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Form(
+                  key: _formKeyLenDen,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      TextFormField(
+                        controller: _purpose,
+                        keyboardType: TextInputType.text,
+                        maxLength: 150,
+                        maxLines: 1,
+                        style: const TextStyle(fontSize: 18),
+                        autocorrect: false,
+                        validator: (value) {
+                          RegExp validateText = RegExp(r'\b[\w]+\b');
+                          if (!validateText.hasMatch(_purpose.text)) {
+                            return "Enter Valid Purpose";
+                          }
+                          return null;
+                        },
+                        decoration: const InputDecoration(
+                          counterText: "",
+                          contentPadding: EdgeInsets.all(8.0),
+                          hintText: "Enter Purpose",
+                          labelText: "Purpose",
+                          errorStyle: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.96,
+                        height: 70,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: LenDenData.length + 1,
+                          itemBuilder: (BuildContext context, int index) {
+                            if (index == LenDenData.length) {
+                              return SizedBox(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: InkWell(
+                                    child: Card(
+                                      color: Theme.of(context)
+                                          .dialogBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: index == lenDenIndex
+                                                ? Theme.of(context).primaryColor
+                                                : Theme.of(context).cardColor),
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Center(
+                                          child: InkWell(
+                                            child: Text(
+                                              "Create New",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    onTap: () async {
+                                      lenDenIndex = index;
+                                      if (this.mounted) {
+                                        setState(
+                                          () {},
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return SizedBox(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: InkWell(
+                                    child: Card(
+                                      color: Theme.of(context)
+                                          .dialogBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: index == lenDenIndex
+                                                ? Theme.of(context).primaryColor
+                                                : Theme.of(context).cardColor),
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Center(
+                                          child: InkWell(
+                                            child: Text(
+                                              crypto.decrypt(
+                                                  LenDenData[index]["name"]),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    onTap: () async {
+                                      lenDenIndex = index;
+                                      if (this.mounted) {
+                                        setState(
+                                          () {},
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      lenDenIndex == LenDenData.length
+                          ? TextFormField(
+                              controller: _lenDenRoom,
+                              keyboardType: TextInputType.text,
+                              maxLength: 150,
+                              maxLines: 1,
+                              style: const TextStyle(fontSize: 18),
+                              autocorrect: false,
+                              validator: (value) {
+                                RegExp validateText = RegExp(r'\b[\w]+\b');
+                                if (!validateText.hasMatch(_purpose.text)) {
+                                  return "Enter Valid Room Name";
+                                }
+                                return null;
+                              },
+                              decoration: const InputDecoration(
+                                counterText: "",
+                                contentPadding: EdgeInsets.all(8.0),
+                                hintText: "Enter Room Name",
+                                labelText: "Room Name",
+                                errorStyle: TextStyle(fontSize: 15),
+                              ),
+                            )
+                          : SizedBox(),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      SizedBox(
+                        height: 45,
+                        width: 90,
+                        child: OutlinedButton(
+                            child: Text(
+                              "Add",
+                              style: TextStyle(
+                                  color: themeProvider.isDarkTheme
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontSize: 16),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              side: BorderSide(
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            onPressed: () async {
+                              if (_formKeyLenDen.currentState!.validate()) {
+                                if (lenDenIndex == LenDenData.length) {
+                                  await createLenDenRoom(context);
+                                  AddLenDen(
+                                      context, amount, date, LenDenRoomID);
+                                } else {
+                                  AddLenDen(context, amount, date,
+                                      LenDenData[lenDenIndex]["key"]);
+                                }
+                              }
+                            }),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        });
+      },
+    );
   }
 
   void showRoomDialog(String amount, String date) {
@@ -945,7 +1263,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                   padding: MediaQuery.of(context).viewInsets,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    height: roomData.isNotEmpty ? 185 : 140,
+                    height: roomData.isNotEmpty ? 240 : 185,
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Column(
@@ -987,9 +1305,11 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 ),
                               ),
                             ),
-                            SizedBox(
-                              height: 10,
-                            ),
+                            roomData.isNotEmpty
+                                ? SizedBox(
+                                    height: 10,
+                                  )
+                                : SizedBox(),
                             roomData.isNotEmpty
                                 ? SizedBox(
                                     height: 45,
@@ -1018,7 +1338,34 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       ),
                                     ),
                                   )
-                                : SizedBox()
+                                : SizedBox(),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            SizedBox(
+                              height: 45,
+                              width: MediaQuery.of(context).size.width * 0.85,
+                              child: OutlinedButton(
+                                onPressed: () {
+                                  showLenDenDialog(amount, date);
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                                child: Text(
+                                  "Len-Den",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                              ),
+                            )
                           ]),
                     ),
                   ),

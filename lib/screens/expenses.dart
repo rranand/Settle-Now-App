@@ -289,7 +289,7 @@ class _ExpensesState extends State<Expenses> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.95,
+        width: MediaQuery.of(context).size.width * 0.96,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Column(
@@ -365,7 +365,7 @@ class _ExpensesState extends State<Expenses> {
                     height: 10,
                   ),
                   Text(
-                    "Date: " + date,
+                    "Date: " + formatDateTime(date),
                     style: TextStyle(fontSize: 18),
                   ),
                   roomExpenseType.isEmpty
@@ -689,13 +689,12 @@ class _ExpensesState extends State<Expenses> {
                                               context: context,
                                               builder: (BuildContext context) => _buildPopupDialog(
                                                   context,
-                                                  crypto.decrypt(
-                                                      filterResult[index]
-                                                          ["Purpose"]),
+                                                  crypto.decrypt(filterResult[index]
+                                                      ["Purpose"]),
                                                   crypto.decrypt(
                                                       filterResult[index]
                                                           ["RoomName"]),
-                                                  formatDateTime(crypto.decrypt(
+                                                  (crypto.decrypt(
                                                       filterResult[index]
                                                           ["Date"])),
                                                   "₹ " +
@@ -803,10 +802,10 @@ class _ExpensesState extends State<Expenses> {
                                                                 Opacity(
                                                                   opacity: 0.8,
                                                                   child: Text(
-                                                                    crypto.decrypt(
+                                                                    formatDateTime(crypto.decrypt(
                                                                         filterResult[index]
                                                                             [
-                                                                            "Date"]),
+                                                                            "Date"])),
                                                                     style:
                                                                         const TextStyle(
                                                                       fontSize:
@@ -864,7 +863,7 @@ class _ExpensesState extends State<Expenses> {
                                                               crypto.decrypt(filterResult[index]
                                                                   ["invType"]) +
                                                               ")")),
-                                                  formatDateTime(crypto.decrypt(
+                                                  (crypto.decrypt(
                                                       filterResult[index]["Date"])),
                                                   "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
                                                   filterResult[index]["room"],
@@ -955,10 +954,10 @@ class _ExpensesState extends State<Expenses> {
                                                                 Opacity(
                                                                   opacity: 0.8,
                                                                   child: Text(
-                                                                    crypto.decrypt(
+                                                                    formatDateTime(crypto.decrypt(
                                                                         filterResult[index]
                                                                             [
-                                                                            "Date"]),
+                                                                            "Date"])),
                                                                     style:
                                                                         const TextStyle(
                                                                       fontSize:
@@ -1017,14 +1016,12 @@ class _ExpensesState extends State<Expenses> {
                                           builder: (BuildContext context) =>
                                               _buildPopupDialog(
                                                   context,
-                                                  crypto.decrypt(
-                                                      TransList[index]
-                                                          ["Purpose"]),
-                                                  crypto.decrypt(
-                                                      TransList[index]
-                                                          ["RoomName"]),
-                                                  formatDateTime(crypto.decrypt(
-                                                      TransList[index]["Date"])),
+                                                  crypto.decrypt(TransList[index]
+                                                      ["Purpose"]),
+                                                  crypto.decrypt(TransList[index]
+                                                      ["RoomName"]),
+                                                  (crypto.decrypt(TransList[index]
+                                                      ["Date"])),
                                                   "₹ " +
                                                       commaSeperator(
                                                           crypto.decrypt(
@@ -1130,11 +1127,11 @@ class _ExpensesState extends State<Expenses> {
                                                             Opacity(
                                                               opacity: 0.8,
                                                               child: Text(
-                                                                crypto.decrypt(
-                                                                    TransList[
+                                                                formatDateTime(crypto
+                                                                    .decrypt(TransList[
                                                                             index]
                                                                         [
-                                                                        "Date"]),
+                                                                        "Date"])),
                                                                 style:
                                                                     const TextStyle(
                                                                   fontSize: 17,
@@ -1186,7 +1183,7 @@ class _ExpensesState extends State<Expenses> {
                                                               TransList[index]
                                                                   ["invType"]) +
                                                           ")")),
-                                              formatDateTime(crypto.decrypt(
+                                              (crypto.decrypt(
                                                   TransList[index]["Date"])),
                                               "₹ " +
                                                   commaSeperator(crypto.decrypt(
@@ -1277,11 +1274,11 @@ class _ExpensesState extends State<Expenses> {
                                                             Opacity(
                                                               opacity: 0.8,
                                                               child: Text(
-                                                                crypto.decrypt(
-                                                                    TransList[
+                                                                formatDateTime(crypto
+                                                                    .decrypt(TransList[
                                                                             index]
                                                                         [
-                                                                        "Date"]),
+                                                                        "Date"])),
                                                                 style:
                                                                     const TextStyle(
                                                                   fontSize: 17,
