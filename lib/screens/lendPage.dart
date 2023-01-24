@@ -1122,90 +1122,88 @@ class _LendPageState extends State<LendPage> {
                                         BorderRadius.all(Radius.circular(20))),
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
-                                  child: Expanded(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                    width: 28,
-                                                    height: 28,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                  width: 28,
+                                                  height: 28,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                        image: AssetImage(
+                                                            'assets/Images/unknown.jpeg'),
+                                                        fit: BoxFit.cover),
+                                                  )),
+                                              SizedBox(
+                                                width: 6,
+                                              ),
+                                              Column(
+                                                children: [
+                                                  Container(
+                                                    width: 200,
+                                                    height: 15.0,
                                                     decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: AssetImage(
-                                                              'assets/Images/unknown.jpeg'),
-                                                          fit: BoxFit.cover),
-                                                    )),
-                                                SizedBox(
-                                                  width: 6,
-                                                ),
-                                                Column(
-                                                  children: [
-                                                    Container(
-                                                      width: 200,
-                                                      height: 15.0,
-                                                      decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        border: Border.all(
                                                           color: Colors.white,
-                                                          border: Border.all(
-                                                            color: Colors.white,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          20))),
-                                                    ),
-                                                  ],
+                                                        ),
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                                Radius
+                                                                    .circular(
+                                                                        20))),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 6,
+                                          ),
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width -
+                                                50,
+                                            height: 15.0,
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border.all(
+                                                  color: Colors.white,
                                                 ),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 6,
-                                            ),
-                                            Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  50,
-                                              height: 15.0,
-                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.all(
+                                                        Radius.circular(20))),
+                                          ),
+                                          SizedBox(
+                                            height: 4,
+                                          ),
+                                          Container(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width -
+                                                50,
+                                            height: 15.0,
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border.all(
                                                   color: Colors.white,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            ),
-                                            SizedBox(
-                                              height: 4,
-                                            ),
-                                            Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  50,
-                                              height: 15.0,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.all(
+                                                        Radius.circular(20))),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
                                 ),
                               ))),

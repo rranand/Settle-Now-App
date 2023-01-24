@@ -140,6 +140,20 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future _initialisation() async {
+    if (this.mounted) {
+      setState(() {
+        heightExpense = 0;
+        loaded = false;
+        allExpenseList.clear();
+        TransList.clear();
+        totalExpense = 0;
+        list.clear();
+        roomExpenseCategory.clear();
+        membersListName.clear();
+        membersListEmail.clear();
+      });
+    }
+
     try {
       final response = await http.patch(Uri.parse(global.url + 'data'),
           headers: <String, String>{
@@ -153,9 +167,6 @@ class _RoomExpenseState extends State<RoomExpense>
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        totalExpense = 0;
-        list.clear();
-        roomExpenseCategory.clear();
         list = data['data'];
         roomExpenseCategory = data['roomExpenseCategory'];
 
@@ -164,8 +175,6 @@ class _RoomExpenseState extends State<RoomExpense>
         }
 
         isClear = list[0]["done"];
-        membersListName.clear();
-        membersListEmail.clear();
 
         for (int i = 1; i < list.length; i++) {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
@@ -262,13 +271,6 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future _extractExpenseData(String email) async {
-    if (this.mounted) {
-      setState(() {
-        heightExpense = 0;
-        loaded = false;
-        allExpenseList.clear();
-      });
-    }
     try {
       final response = await http.post(Uri.parse(global.url + 'transaction'),
           headers: <String, String>{
