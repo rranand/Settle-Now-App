@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -12,7 +11,9 @@ import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
+import '../models/ChartData.dart';
 import '../others/themes.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -62,10 +63,10 @@ class _RoomExpenseState extends State<RoomExpense>
   bool showExpenseYouAreIn = false;
   String yourExpense = "";
   double totalExpense = 0;
-  Map<String, double> dataMap = {};
+  List<ChartData> dataMap = [];
+  List<ChartData> dataMapByUser = [];
 
   String expenseTitle = "All Expense";
-  String expenseDetailByMember = "all";
   List<String> membersListName = [];
   List<String> membersListEmail = [];
   int membersListIndex = 0;
@@ -83,24 +84,25 @@ class _RoomExpenseState extends State<RoomExpense>
   List<dynamic> roomExpenseCategory = [];
   int roomExpenseCategoryIndex = 0;
   List<dynamic> filterResult = [];
-  double maxAmount = 0;
   double totalAmount = 0;
 
   Future<void> initChart() async {
+    Map<String, double> tempMap = {};
     for (int i = 0; i < roomExpenseCategory.length; i++) {
-      dataMap[roomExpenseCategory[i]] = 0;
+      tempMap[roomExpenseCategory[i]] = 0;
     }
     totalAmount = 0;
 
     for (int i = 0; i < TransList.length; i++) {
-      dataMap[crypto.decrypt(TransList[i]["Type"])] =
-          (dataMap[crypto.decrypt(TransList[i]["Type"])]! +
+      tempMap[crypto.decrypt(TransList[i]["Type"])] =
+          (tempMap[crypto.decrypt(TransList[i]["Type"])]! +
               double.parse(crypto.decrypt(TransList[i]["Amount"])));
     }
 
     for (int i = 0; i < roomExpenseCategory.length; i++) {
-      totalAmount += dataMap[roomExpenseCategory[i]]!;
-      maxAmount = max(maxAmount, dataMap[roomExpenseCategory[i]]!);
+      totalAmount += tempMap[roomExpenseCategory[i]]!;
+      dataMap.add(ChartData.byType(
+          roomExpenseCategory[i], tempMap[roomExpenseCategory[i]]!));
     }
   }
 
@@ -151,6 +153,8 @@ class _RoomExpenseState extends State<RoomExpense>
         roomExpenseCategory.clear();
         membersListName.clear();
         membersListEmail.clear();
+        dataMapByUser.clear();
+        dataMap.clear();
       });
     }
 
@@ -179,6 +183,11 @@ class _RoomExpenseState extends State<RoomExpense>
         for (int i = 1; i < list.length; i++) {
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
+          dataMapByUser.add(ChartData.byUser(
+              crypto.decrypt(list[i]["Name"]),
+              crypto.decrypt(list[i]["email"]),
+              crypto.decrypt(list[i]["pic"]),
+              double.parse(crypto.decrypt(list[i]["yourExpense"]))));
           totalExpense += double.parse(crypto.decrypt(list[i]["Expense"])) +
               double.parse(crypto.decrypt(list[i]["TotalSplitExpense"]));
           if (crypto.decrypt(list[i]["email"]) == widget.email) {
@@ -205,7 +214,7 @@ class _RoomExpenseState extends State<RoomExpense>
       }
     }
 
-    _extractExpenseData(expenseDetailByMember);
+    _extractExpenseData();
     if (widget.isRoomActive) {
       getFriendData();
     }
@@ -270,7 +279,7 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
-  Future _extractExpenseData(String email) async {
+  Future _extractExpenseData() async {
     try {
       final response = await http.post(Uri.parse(global.url + 'transaction'),
           headers: <String, String>{
@@ -278,7 +287,7 @@ class _RoomExpenseState extends State<RoomExpense>
             'Auth': widget.token
           },
           body: jsonEncode({
-            'email': crypto.encrypt(email),
+            'email': crypto.encrypt(widget.email),
             'roomKey': crypto.encrypt(widget.roomKey),
           }));
 
@@ -945,7 +954,6 @@ class _RoomExpenseState extends State<RoomExpense>
               }
             });
 
-            expenseDetailByMember = crypto.decrypt(list[index]['email']);
             expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
             if (this.mounted) {
               setState(() {});
@@ -1234,7 +1242,6 @@ class _RoomExpenseState extends State<RoomExpense>
                 onTap: () async {
                   TransList.clear();
                   expenseTitle = "All Expense";
-                  expenseDetailByMember = "all";
                   TransList.addAll(allExpenseList);
 
                   if (this.mounted) {
@@ -2518,154 +2525,163 @@ class _RoomExpenseState extends State<RoomExpense>
     );
   }
 
-  List<BarChartGroupData> barGroups() {
-    List<BarChartGroupData> data = [];
-
-    for (int i = 0; i < roomExpenseCategory.length; i++) {
-      data.add(BarChartGroupData(
-        x: i,
-        barRods: [
-          BarChartRodData(
-            width: 20,
-            toY: dataMap[roomExpenseCategory[i]]!,
-            color: global.colorsList[i],
-          )
-        ],
-        showingTooltipIndicators: [0],
-      ));
-    }
-
-    return data;
-  }
-
   Widget showChart() {
-    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    return loaded
-        ? Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: loaded
+          ? SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 40,
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    height: MediaQuery.of(context).size.height - 400,
-                    child: dataMap.isEmpty
-                        ? Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3.3,
-                            ),
-                          )
-                        : Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: BarChart(
-                              BarChartData(
-                                barTouchData: BarTouchData(
-                                  enabled: true,
-                                  touchTooltipData: BarTouchTooltipData(
-                                    tooltipBgColor: Colors.transparent,
-                                    tooltipPadding: EdgeInsets.zero,
-                                    tooltipMargin: 8,
-                                    getTooltipItem: (
-                                      BarChartGroupData group,
-                                      int groupIndex,
-                                      BarChartRodData rod,
-                                      int rodIndex,
-                                    ) {
-                                      String percent =
-                                          ((rod.toY / totalAmount) * 100)
-                                              .toStringAsFixed(2);
-                                      if (percent.split('.')[1] == "00") {
-                                        percent = percent.split('.')[0];
-                                      }
-                                      return BarTooltipItem(
-                                        "₹ " +
-                                            rod.toY.round().toString() +
-                                            "\n" +
-                                            percent +
-                                            " %",
-                                        TextStyle(
-                                          color: themeProvider.isDarkTheme
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                titlesData: FlTitlesData(
-                                  show: true,
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  topTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  rightTitles: AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                ),
-                                borderData: FlBorderData(
-                                  show: false,
-                                ),
-                                barGroups: barGroups(),
-                                gridData: FlGridData(show: false),
-                                alignment: BarChartAlignment.spaceBetween,
-                                maxY: maxAmount,
-                              ),
-                            ),
-                          ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  SizedBox(
-                    height: 100,
-                    child: GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:
-                              (MediaQuery.of(context).size.width / 120).round(),
-                          childAspectRatio: 4.0,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Expense by Category",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
-                        itemCount: roomExpenseCategory.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Row(
-                            children: [
-                              Container(
-                                  height: 10,
-                                  width: 10,
-                                  decoration: BoxDecoration(
-                                      color: global.colorsList[index],
-                                      border: Border.all(
-                                        color: global.colorsList[index],
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20)))),
-                              SizedBox(
-                                width: 5,
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Center(
+                        child: dataMap.isEmpty
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3.3,
+                                ),
+                              )
+                            : SizedBox(
+                                height: 50 * roomExpenseCategory.length * 1.0,
+                                child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: SfCartesianChart(
+                                        primaryXAxis:
+                                            CategoryAxis(isVisible: false),
+                                        primaryYAxis:
+                                            NumericAxis(isVisible: false),
+                                        tooltipBehavior: TooltipBehavior(
+                                            enable: true,
+                                            header: "",
+                                            format: "point.x : ₹ point.y"),
+                                        plotAreaBorderWidth: 0,
+                                        series: <BarSeries<ChartData, String>>[
+                                          BarSeries<ChartData, String>(
+                                              dataSource: dataMap,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              xValueMapper: (ChartData data, _) =>
+                                                  data.type,
+                                              yValueMapper:
+                                                  (ChartData data, _) =>
+                                                      data.amount,
+                                              isVisibleInLegend: true,
+                                              width: 0.8,
+                                              pointColorMapper: (ChartData data,
+                                                      _) =>
+                                                  global.colorsList[
+                                                      roomExpenseCategory
+                                                          .indexOf(data.type)],
+                                              dataLabelMapper: (datum, index) =>
+                                                  datum.type +
+                                                  "\n₹ " +
+                                                  datum.amount
+                                                      .toStringAsFixed(2),
+                                              dataLabelSettings:
+                                                  DataLabelSettings(isVisible: true),
+                                              xAxisName: "Category",
+                                              yAxisName: "Amount")
+                                        ])),
                               ),
-                              Text(roomExpenseCategory[index])
-                            ],
-                          );
-                        }),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Divider(),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Text(
+                        "Expense by User",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      Center(
+                        child: dataMapByUser.isEmpty
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3.3,
+                                ),
+                              )
+                            : SizedBox(
+                                height: 53 * membersListEmail.length * 1.0,
+                                child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: SfCartesianChart(
+                                        primaryXAxis:
+                                            CategoryAxis(isVisible: false),
+                                        primaryYAxis:
+                                            NumericAxis(isVisible: false),
+                                        tooltipBehavior: TooltipBehavior(
+                                            enable: true,
+                                            header: "",
+                                            format: "point.x : ₹ point.y"),
+                                        plotAreaBorderWidth: 0,
+                                        series: <BarSeries<ChartData, String>>[
+                                          BarSeries<ChartData, String>(
+                                              dataSource: dataMapByUser,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              width: 0.8,
+                                              xValueMapper: (ChartData data, _) =>
+                                                  data.name,
+                                              yValueMapper:
+                                                  (ChartData data, _) =>
+                                                      data.amount,
+                                              isVisibleInLegend: true,
+                                              pointColorMapper: (ChartData data,
+                                                      _) =>
+                                                  global.colorsList[
+                                                      membersListEmail
+                                                          .indexOf(data.email)],
+                                              dataLabelMapper: (datum, index) =>
+                                                  datum.name +
+                                                  "\n₹ " +
+                                                  datum.amount
+                                                      .toStringAsFixed(2),
+                                              dataLabelSettings:
+                                                  DataLabelSettings(isVisible: true),
+                                              xAxisName: "User",
+                                              yAxisName: "Amount")
+                                        ])),
+                              ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
+              ),
+            )
+          : SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Center(
+                child: CircularProgressIndicator(),
               ),
             ),
-          )
-        : Center(
-            child: CircularProgressIndicator(),
-          );
+    );
   }
 
   Widget chooseFromBottomNavigator(int dash) {

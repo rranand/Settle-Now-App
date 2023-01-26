@@ -18,6 +18,7 @@ import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/route_service.dart';
 import 'package:settlenow/screens/BankTransactions.dart';
 import 'package:settlenow/screens/aboutus.dart';
+import 'package:settlenow/screens/analysis.dart';
 import 'package:settlenow/screens/contactUs.dart';
 import 'package:settlenow/screens/expenses.dart';
 import 'package:settlenow/screens/lendCredit.dart';
@@ -2813,6 +2814,14 @@ class _DashBoardState extends State<DashBoard> {
         email: _email.text,
         token: _token,
       );
+    } else if (dash == 4) {
+      return Analysis(
+        RoomDataC: RoomDataC,
+        RoomDataO: RoomDataO,
+        email: _email.text,
+        token: _token,
+        RoomExpenseCategory: roomExpenseCategory,
+      );
     } else {
       return Profile(
         email: _email.text,
@@ -2887,12 +2896,21 @@ class _DashBoardState extends State<DashBoard> {
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               )
-                            : AppBar(
-                                title: Text(
-                                  "Profile",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              )))),
+                            : (dash == 4
+                                ? AppBar(
+                                    title: Text(
+                                      "Analysis",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  )
+                                : AppBar(
+                                    title: Text(
+                                      "Profile",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ))))),
             body: chooseFromBottomNavigator(dash),
             bottomNavigationBar: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
@@ -2951,6 +2969,13 @@ class _DashBoardState extends State<DashBoard> {
                 BottomNavigationBarItem(
                   icon: Icon(
                     Icons.account_balance_outlined,
+                    size: 27,
+                  ),
+                  label: "",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.analytics_outlined,
                     size: 27,
                   ),
                   label: "",

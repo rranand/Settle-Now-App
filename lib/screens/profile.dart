@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -12,8 +11,10 @@ import 'package:settlenow/models/PersonalExpenseEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
 
+import '../models/ChartData.dart';
 import 'expenses.dart';
 
 class Entry {
@@ -54,7 +55,6 @@ class _ProfileState extends State<Profile> {
   Set<int> monthIndex = Set();
   Set<int> yearIndex = Set();
   List<dynamic> category = [];
-  double maxAmount = 0;
   List<String> Month = [
     'January',
     'February',
@@ -71,29 +71,9 @@ class _ProfileState extends State<Profile> {
   ];
 
   List<String> Year = [];
-  Map<String, double> dataMap = {};
+  List<ChartData> dataMap = [];
   Map<String, double> yearwiseSpend = {};
   List<PersonalExpenseEach> filterResult = [];
-
-  List<BarChartGroupData> barGroups() {
-    List<BarChartGroupData> data = [];
-
-    for (int i = 0; i < widget.expenseCategory.length; i++) {
-      data.add(BarChartGroupData(
-        x: i,
-        barRods: [
-          BarChartRodData(
-            width: 20,
-            toY: dataMap[widget.expenseCategory[i]]!,
-            color: global.colorsList[i],
-          )
-        ],
-        showingTooltipIndicators: [0],
-      ));
-    }
-
-    return data;
-  }
 
   Widget buildExpenseTile(Entry root) {
     if (root.children.isEmpty) {
@@ -218,13 +198,10 @@ class _ProfileState extends State<Profile> {
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)['data'];
-        maxAmount = 0;
+
         for (int i = 0; i < category.length; i++) {
-          maxAmount = max(
-              maxAmount, double.parse(crypto.decrypt(tempData[category[i]])));
-          dataMap[category[i]] = double.parse(
-              double.parse(crypto.decrypt(tempData[category[i]]))
-                  .toStringAsFixed(2));
+          dataMap.add(ChartData.byType(category[i],
+              double.parse(crypto.decrypt(tempData[category[i]]))));
         }
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
@@ -308,101 +285,48 @@ class _ProfileState extends State<Profile> {
             SizedBox(
               height: 10,
             ),
-            SizedBox(
-              height: 300,
-              child: dataMap.isEmpty
-                  ? Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3.3,
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: BarChart(
-                        BarChartData(
-                          barTouchData: BarTouchData(
-                            enabled: true,
-                            touchTooltipData: BarTouchTooltipData(
-                              tooltipBgColor: Colors.transparent,
-                              tooltipPadding: EdgeInsets.zero,
-                              tooltipMargin: 8,
-                              getTooltipItem: (
-                                BarChartGroupData group,
-                                int groupIndex,
-                                BarChartRodData rod,
-                                int rodIndex,
-                              ) {
-                                return BarTooltipItem(
-                                  "₹ " + rod.toY.round().toString(),
-                                  TextStyle(
-                                    color: themeProvider.isDarkTheme
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          titlesData: FlTitlesData(
-                            show: true,
-                            bottomTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            leftTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false),
-                            ),
-                          ),
-                          borderData: FlBorderData(
-                            show: false,
-                          ),
-                          barGroups: barGroups(),
-                          gridData: FlGridData(show: false),
-                          alignment: BarChartAlignment.spaceBetween,
-                          maxY: maxAmount,
-                        ),
-                      ),
+            dataMap.isEmpty
+                ? Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3.3,
                     ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: 100,
-              child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount:
-                        (MediaQuery.of(context).size.width / 120).round(),
-                    childAspectRatio: 4.0,
+                  )
+                : SizedBox(
+                    height: 50 * category.length * 1.0,
+                    child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: SfCartesianChart(
+                            primaryXAxis: CategoryAxis(isVisible: false),
+                            primaryYAxis:
+                                NumericAxis(minimum: 0, isVisible: false),
+                            tooltipBehavior: TooltipBehavior(
+                                enable: true,
+                                header: "",
+                                format: "point.x : ₹ point.y"),
+                            plotAreaBorderWidth: 0,
+                            series: <BarSeries<ChartData, String>>[
+                              BarSeries<ChartData, String>(
+                                  dataSource: dataMap,
+                                  borderRadius: BorderRadius.circular(20),
+                                  xValueMapper: (ChartData data, _) =>
+                                      data.type,
+                                  yValueMapper: (ChartData data, _) =>
+                                      data.amount,
+                                  isVisibleInLegend: true,
+                                  width: 0.8,
+                                  pointColorMapper: (ChartData data, _) =>
+                                      global.colorsList[
+                                          category.indexOf(data.type)],
+                                  dataLabelMapper: (datum, index) =>
+                                      datum.type +
+                                      "\n₹ " +
+                                      datum.amount.toStringAsFixed(2),
+                                  dataLabelSettings:
+                                      DataLabelSettings(isVisible: true),
+                                  xAxisName: "Category",
+                                  yAxisName: "Amount")
+                            ])),
                   ),
-                  itemCount: widget.expenseCategory.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Row(
-                      children: [
-                        Container(
-                            height: 10,
-                            width: 10,
-                            decoration: BoxDecoration(
-                                color: global.colorsList[index],
-                                border: Border.all(
-                                  color: global.colorsList[index],
-                                ),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20)))),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text(widget.expenseCategory[index])
-                      ],
-                    );
-                  }),
-            ),
             SizedBox(
               height: 10,
             ),
