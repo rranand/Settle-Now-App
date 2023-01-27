@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -217,9 +218,17 @@ class _AnalysisState extends State<Analysis> {
                   SizedBox(
                     height: 8,
                   ),
-                  Text(
-                    "Select Room",
-                    style: TextStyle(fontSize: 22),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Select Room",
+                        style: TextStyle(fontSize: 22),
+                      ),
+                      IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(Icons.cancel_outlined))
+                    ],
                   ),
                   SizedBox(
                     height: 20,
@@ -676,7 +685,7 @@ class _AnalysisState extends State<Analysis> {
                         compareBetween.isNotEmpty
                             ? SizedBox(
                                 width: MediaQuery.of(context).size.width,
-                                height: 60,
+                                height: 50,
                                 child: ListView.separated(
                                     physics: AlwaysScrollableScrollPhysics(),
                                     separatorBuilder: (context, index) =>
@@ -690,52 +699,40 @@ class _AnalysisState extends State<Analysis> {
                                         (BuildContext context, int index) {
                                       RoomEach tempRoom =
                                           compareBetween.elementAt(index);
-                                      return SizedBox(
-                                          height: 55,
-                                          child: Card(
-                                            elevation: 1.0,
-                                            shadowColor:
-                                                Theme.of(context).primaryColor,
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                            shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                  color: Theme.of(context)
-                                                      .primaryColor),
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
+                                      return Card(
+                                        elevation: 1.0,
+                                        shadowColor:
+                                            Theme.of(context).primaryColor,
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor
+                                                  .withOpacity(0.6)),
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Center(
+                                            child: InkWell(
+                                              onTap: () async {
+                                                compareBetween.remove(tempRoom);
+                                                if (this.mounted) {
+                                                  setState(() {});
+                                                }
+                                              },
+                                              child: Text(
+                                                tempRoom.roomName,
+                                                style: const TextStyle(
+                                                  fontSize: 17,
+                                                ),
+                                              ),
                                             ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(10.0),
-                                              child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      tempRoom.roomName,
-                                                      style: const TextStyle(
-                                                        fontSize: 17,
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 6,
-                                                    ),
-                                                    IconButton(
-                                                        onPressed: () async {
-                                                          compareBetween
-                                                              .remove(tempRoom);
-                                                          if (this.mounted) {
-                                                            setState(() {});
-                                                          }
-                                                        },
-                                                        icon: Icon(Icons
-                                                            .cancel_outlined))
-                                                  ]),
-                                            ),
-                                          ));
+                                          ),
+                                        ),
+                                      );
                                     }),
                               )
                             : SizedBox(),
@@ -749,7 +746,7 @@ class _AnalysisState extends State<Analysis> {
                           width: MediaQuery.of(context).size.width,
                           child: OutlinedButton(
                             child: Text(
-                              "Search Room",
+                              "Select Room",
                               style: TextStyle(
                                   color: themeProvider.isDarkTheme
                                       ? Colors.white
@@ -809,17 +806,17 @@ class _AnalysisState extends State<Analysis> {
                                   await getRoomData(roomKeys);
                               List<List<ChartData>> tempGraphData = [];
 
-                              for (int i = 0;
-                                  i < widget.RoomExpenseCategory.length;
-                                  i++) {
+                              for (int i = 0; i < roomData.length; i++) {
                                 List<ChartData> temp = [];
-                                for (int j = 0; j < roomData.length; j++) {
+                                for (int j = 0;
+                                    j < widget.RoomExpenseCategory.length;
+                                    j++) {
                                   temp.add(ChartData.byRoom(
-                                      crypto.decrypt(roomData[j]["roomName"]),
-                                      widget.RoomExpenseCategory[i],
-                                      double.parse(crypto.decrypt(roomData[j]
+                                      crypto.decrypt(roomData[i]["roomName"]),
+                                      widget.RoomExpenseCategory[j],
+                                      double.parse(crypto.decrypt(roomData[i]
                                               ["expense"]
-                                          [widget.RoomExpenseCategory[i]]))));
+                                          [widget.RoomExpenseCategory[j]]))));
                                 }
                                 tempGraphData.add(temp);
                               }
@@ -827,16 +824,20 @@ class _AnalysisState extends State<Analysis> {
                               for (int i = 0; i < tempGraphData.length; i++) {
                                 graphData.add(BarSeries<ChartData, String>(
                                     dataSource: tempGraphData[i],
-                                    borderRadius: BorderRadius.circular(15),
+                                    borderRadius: BorderRadius.circular(20),
+                                    width: 0.8,
                                     xValueMapper: (ChartData data, _) =>
                                         data.type,
                                     yValueMapper: (ChartData data, _) =>
                                         data.amount,
-                                    width: 0.8,
+                                    isVisibleInLegend: true,
                                     pointColorMapper: (ChartData data, _) =>
                                         global.colorsList[i],
                                     dataLabelMapper: (datum, index) =>
                                         datum.name +
+                                        " (" +
+                                        datum.type +
+                                        ")" +
                                         "\n₹ " +
                                         datum.amount.toStringAsFixed(2),
                                     dataLabelSettings:
@@ -861,25 +862,26 @@ class _AnalysisState extends State<Analysis> {
                               )
                             : (graphData.isNotEmpty
                                 ? SizedBox(
-                                    height: 40 *
-                                        compareBetween.length *
+                                    height: 50 *
+                                        graphData.length *
                                         widget.RoomExpenseCategory.length *
                                         1.0,
                                     child: Padding(
                                         padding: const EdgeInsets.all(6),
                                         child: SfCartesianChart(
-                                            primaryXAxis: CategoryAxis(
-                                              isVisible: false,
-                                            ),
-                                            primaryYAxis: NumericAxis(
-                                              isVisible: false,
-                                            ),
+                                            primaryXAxis:
+                                                CategoryAxis(isVisible: false),
+                                            primaryYAxis:
+                                                NumericAxis(isVisible: false),
                                             tooltipBehavior: TooltipBehavior(
                                                 enable: true,
                                                 header: "",
                                                 format: "point.x : ₹ point.y"),
                                             plotAreaBorderWidth: 0,
-                                            series: graphData)),
+                                            series: <
+                                                BarSeries<ChartData, String>>[
+                                              ...graphData
+                                            ])),
                                   )
                                 : SizedBox(
                                     height: 200,
