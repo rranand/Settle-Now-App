@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -2574,25 +2575,26 @@ class _RoomExpenseState extends State<RoomExpense>
                                               dataSource: dataMap,
                                               borderRadius:
                                                   BorderRadius.circular(20),
-                                              xValueMapper: (ChartData data, _) =>
-                                                  data.type,
+                                              xValueMapper:
+                                                  (ChartData data, _) =>
+                                                      data.type,
                                               yValueMapper:
                                                   (ChartData data, _) =>
                                                       data.amount,
                                               isVisibleInLegend: true,
                                               width: 0.8,
-                                              pointColorMapper: (ChartData data,
-                                                      _) =>
-                                                  global.colorsList[
-                                                      roomExpenseCategory
-                                                          .indexOf(data.type)],
+                                              pointColorMapper:
+                                                  (ChartData data, _) => Color(
+                                                      Random()
+                                                          .nextInt(0xffffffff)),
                                               dataLabelMapper: (datum, index) =>
                                                   datum.type +
                                                   "\n₹ " +
                                                   datum.amount
                                                       .toStringAsFixed(2),
                                               dataLabelSettings:
-                                                  DataLabelSettings(isVisible: true),
+                                                  DataLabelSettings(
+                                                      isVisible: true),
                                               xAxisName: "Category",
                                               yAxisName: "Amount")
                                         ])),
@@ -2645,24 +2647,25 @@ class _RoomExpenseState extends State<RoomExpense>
                                               borderRadius:
                                                   BorderRadius.circular(20),
                                               width: 0.8,
-                                              xValueMapper: (ChartData data, _) =>
-                                                  data.name,
+                                              xValueMapper:
+                                                  (ChartData data, _) =>
+                                                      data.name,
                                               yValueMapper:
                                                   (ChartData data, _) =>
                                                       data.amount,
                                               isVisibleInLegend: true,
-                                              pointColorMapper: (ChartData data,
-                                                      _) =>
-                                                  global.colorsList[
-                                                      membersListEmail
-                                                          .indexOf(data.email)],
+                                              pointColorMapper:
+                                                  (ChartData data, _) => Color(
+                                                      Random()
+                                                          .nextInt(0xffffffff)),
                                               dataLabelMapper: (datum, index) =>
                                                   datum.name +
                                                   "\n₹ " +
                                                   datum.amount
                                                       .toStringAsFixed(2),
                                               dataLabelSettings:
-                                                  DataLabelSettings(isVisible: true),
+                                                  DataLabelSettings(
+                                                      isVisible: true),
                                               xAxisName: "User",
                                               yAxisName: "Amount")
                                         ])),

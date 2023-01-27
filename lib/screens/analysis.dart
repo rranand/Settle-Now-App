@@ -656,8 +656,7 @@ class _AnalysisState extends State<Analysis> {
                                         isVisibleInLegend: true,
                                         width: 0.8,
                                         pointColorMapper: (RoomEach data, _) =>
-                                            global.colorsList[
-                                                widget.RoomDataO.indexOf(data)],
+                                            Color(Random().nextInt(0xffffffff)),
                                         dataLabelMapper: (datum, index) =>
                                             datum.roomName +
                                             "\n₹ " +
@@ -832,7 +831,7 @@ class _AnalysisState extends State<Analysis> {
                                         data.amount,
                                     isVisibleInLegend: true,
                                     pointColorMapper: (ChartData data, _) =>
-                                        global.colorsList[i],
+                                        Color(Random().nextInt(0xffffffff)),
                                     dataLabelMapper: (datum, index) =>
                                         datum.name +
                                         " (" +
