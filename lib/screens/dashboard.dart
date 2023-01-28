@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
-import '../notificationService/notification_service.dart';
+import '../notificationService/NotificationController.dart';
 import '../others/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -691,7 +692,24 @@ class _DashBoardState extends State<DashBoard> {
     super.initState();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
-    LocalNotificationService.initialize();
+    AwesomeNotifications().initialize(null, [
+      NotificationChannel(
+        channelKey: "roomID",
+        channelName: "Room",
+        channelDescription: 'Notification channel for Room',
+        defaultColor: Colors.deepPurple,
+      ),
+      NotificationChannel(
+          channelKey: "lendenID",
+          channelName: "Len-Den",
+          channelDescription: 'Notification channel for Len-Den',
+          defaultColor: Colors.deepPurple),
+      NotificationChannel(
+          channelKey: "requestID",
+          channelName: "Room Request",
+          channelDescription: 'Notification channel for Room Request',
+          defaultColor: Colors.deepPurple),
+    ]);
 
     FirebaseMessaging.instance.getInitialMessage().then(
       (message) async {
@@ -714,9 +732,50 @@ class _DashBoardState extends State<DashBoard> {
     );
 
     FirebaseMessaging.onMessage.listen(
-      (message) {
+      (message) async {
         if (message.notification != null) {
-          LocalNotificationService.createanddisplaynotification(message);
+          final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+          String notificationFrom = "";
+
+          if (message.data.isNotEmpty) {
+            notificationFrom = crypto.decrypt(message.data["type"]);
+          }
+
+          if (notificationFrom == "room") {
+            Map<String, String> notificationData =
+                await getDataFromNotification(message.data.toString());
+            AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                    id: id,
+                    channelKey: 'roomID',
+                    title: message.notification!.title,
+                    body: message.notification!.body,
+                    payload: notificationData));
+          } else if (notificationFrom == "lend") {
+            Map<String, String> notificationData =
+                await getDataFromNotification(message.data.toString());
+            AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                    id: id,
+                    channelKey: 'lendenID',
+                    title: message.notification!.title,
+                    body: message.notification!.body,
+                    payload: notificationData));
+          } else {
+            Map<String, String> notificationData =
+                await getDataFromNotification(message.data.toString());
+            AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                    id: id,
+                    channelKey: 'requestID',
+                    title: message.notification!.title,
+                    body: message.notification!.body,
+                    payload: notificationData),
+                actionButtons: [
+                  NotificationActionButton(key: 'JOIN', label: 'Join'),
+                  NotificationActionButton(key: 'CANCEL', label: 'Cancel'),
+                ]);
+          }
         }
       },
     );
@@ -740,6 +799,25 @@ class _DashBoardState extends State<DashBoard> {
                               ? true
                               : false))));
         }
+      },
+    );
+
+    AwesomeNotifications().setListeners(
+      onActionReceivedMethod: (ReceivedAction receivedAction) async {
+        NotificationController.onActionReceivedMethod(receivedAction);
+      },
+      onNotificationCreatedMethod:
+          (ReceivedNotification receivedNotification) async {
+        NotificationController.onNotificationCreatedMethod(
+            receivedNotification);
+      },
+      onNotificationDisplayedMethod:
+          (ReceivedNotification receivedNotification) async {
+        NotificationController.onNotificationDisplayedMethod(
+            receivedNotification);
+      },
+      onDismissActionReceivedMethod: (ReceivedAction receivedAction) async {
+        NotificationController.onDismissActionReceivedMethod(receivedAction);
       },
     );
 

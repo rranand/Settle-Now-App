@@ -1,21 +1,41 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'firebase_options.dart';
-import 'notificationService/notification_service.dart';
 import 'others/route_service.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  AwesomeNotifications().createNotificationFromJsonData(message.data);
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  LocalNotificationService.initialize();
+
+  AwesomeNotifications().initialize(null, [
+    NotificationChannel(
+        channelKey: "roomID",
+        channelName: "Room",
+        channelDescription: 'Notification channel for Room',
+        defaultColor: Colors.deepPurple),
+    NotificationChannel(
+        channelKey: "lendenID",
+        channelName: "Len-Den",
+        channelDescription: 'Notification channel for Len-Den',
+        defaultColor: Colors.deepPurple),
+    NotificationChannel(
+        channelKey: "requestID",
+        channelName: "Room Request",
+        channelDescription: 'Notification channel for Room Request',
+        defaultColor: Colors.deepPurple),
+  ]);
+
   runApp(MyApp());
 }
 
