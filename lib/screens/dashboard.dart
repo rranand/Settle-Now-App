@@ -203,7 +203,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future _getImageID() async {
+  Future<void> _getImageID() async {
     if (this.mounted) {
       setState(() {
         haveImg = false;
@@ -435,12 +435,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future _extractEmail() async {
-    if (!initalDataLoaded) {
-      await initalDataLoad();
-      await manualUpdateCheck();
-      initalDataLoaded = true;
-    }
+  Future<void> _extractEmail() async {
     roomDataFetched = false;
     RoomDataO.clear();
     RoomDataC.clear();
@@ -496,25 +491,6 @@ class _DashBoardState extends State<DashBoard> {
         roomDataFetched = true;
         if (this.mounted) {
           setState(() {});
-        }
-
-        do {
-          await getInitialData();
-        } while (!gotInitialData);
-
-        if (!isRoomRequestLoaded) {
-          await getRoomRequest();
-          isRoomRequestLoaded = true;
-        }
-
-        if (!isSentRoomRequestLoaded) {
-          await fetchSentRequest();
-          isSentRoomRequestLoaded = true;
-        }
-
-        if (!isImageLoaded) {
-          await _getImageID();
-          isImageLoaded = true;
         }
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
@@ -627,7 +603,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  _updateCheck() async {
+  Future<void> _updateCheck() async {
     await checkForUpdate();
   }
 
@@ -734,11 +710,27 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  executeParallel() async {
+    if (!initalDataLoaded) {
+      await initalDataLoad();
+      initalDataLoaded = true;
+    }
+
+    await Future.wait([
+      _getImageID(),
+      getInitialData(),
+      manualUpdateCheck(),
+      _extractEmail(),
+      _updateCheck(),
+      getRoomRequest(),
+      fetchSentRequest(),
+    ]);
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    executeParallel();
     AwesomeNotifications().initialize(null, [
       NotificationChannel(
         channelKey: "roomID",
@@ -801,8 +793,6 @@ class _DashBoardState extends State<DashBoard> {
             context, receivedAction);
       },
     );
-
-    _updateCheck();
   }
 
   deleteToken() async {

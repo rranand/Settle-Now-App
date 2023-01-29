@@ -106,7 +106,7 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
-  _getPaymentData() async {
+  Future<void> _getPaymentData() async {
     paidTransactionData = false;
     if (this.mounted) {
       setState(() {});
@@ -213,15 +213,13 @@ class _RoomExpenseState extends State<RoomExpense>
         await onException(context);
       }
     }
-
-    _extractExpenseData();
-    if (widget.isRoomActive) {
-      getFriendData();
-    }
-    _getPaymentData();
   }
 
-  getFriendData() async {
+  Future<void> getFriendData() async {
+    if (!widget.isRoomActive) {
+      return null;
+    }
+
     try {
       if (this.mounted) {
         setState(() {
@@ -279,7 +277,7 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
-  Future _extractExpenseData() async {
+  Future<void> _extractExpenseData() async {
     try {
       final response = await http.post(Uri.parse(global.url + 'transaction'),
           headers: <String, String>{
@@ -548,12 +546,19 @@ class _RoomExpenseState extends State<RoomExpense>
                 ))));
   }
 
+  Future<void> executeParallel() async {
+    await Future.wait([
+      _initialisation(),
+      _extractExpenseData(),
+      _getPaymentData(),
+      getFriendData(),
+    ]);
+  }
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
-    _initialisation();
+    executeParallel();
   }
 
   Widget addFriendWidget() {
@@ -1886,7 +1891,7 @@ class _RoomExpenseState extends State<RoomExpense>
             },
             body: RefreshIndicator(
               key: _refreshIndicatorKey,
-              onRefresh: _initialisation,
+              onRefresh: executeParallel,
               child: allExpenseList.isEmpty
                   ? Center(
                       child: loaded
