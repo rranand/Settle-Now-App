@@ -1523,9 +1523,10 @@ class _DashBoardState extends State<DashBoard> {
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
-      await _requestIndicatorKey.currentState?.show();
       if (flag == "1") {
-        await _extractEmail();
+        await Future.wait([_extractEmail(), getRoomRequest()]);
+      } else {
+        await _requestIndicatorKey.currentState?.show();
       }
       Navigator.pop(context);
     } on Exception catch (_) {
