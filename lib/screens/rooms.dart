@@ -807,6 +807,15 @@ class _RoomExpenseState extends State<RoomExpense>
     Navigator.pop(context);
   }
 
+  keepAlive() async {
+    await http.get(
+      Uri.parse(global.url + 'login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+  }
+
   cancelJoinRequest(String email) async {
     buildShowDialog(context);
     try {
@@ -924,6 +933,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                       data[index].status = "NJ";
                                     }
 
+                                    await keepAlive();
                                     if (this.mounted) {
                                       setState(() {});
                                     }

@@ -54,6 +54,15 @@ class _LendPageState extends State<LendPage> {
   bool gaveMoney = false;
   bool EgaveMoney = false;
 
+  keepAlive() async {
+    await http.get(
+      Uri.parse(global.url + 'login'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+  }
+
   Future<void> addLoan(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       try {
@@ -374,7 +383,7 @@ class _LendPageState extends State<LendPage> {
                                           data[index].email, widget.roomkey);
                                       data[index].status = "NJ";
                                     }
-
+                                    await keepAlive();
                                     if (this.mounted) {
                                       setState(() {});
                                     }
@@ -1157,9 +1166,8 @@ class _LendPageState extends State<LendPage> {
                                                         ),
                                                         borderRadius:
                                                             BorderRadius.all(
-                                                                Radius
-                                                                    .circular(
-                                                                        20))),
+                                                                Radius.circular(
+                                                                    20))),
                                                   ),
                                                 ],
                                               ),
@@ -1179,9 +1187,8 @@ class _LendPageState extends State<LendPage> {
                                                 border: Border.all(
                                                   color: Colors.white,
                                                 ),
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(20))),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
                                           ),
                                           SizedBox(
                                             height: 4,
@@ -1197,9 +1204,8 @@ class _LendPageState extends State<LendPage> {
                                                 border: Border.all(
                                                   color: Colors.white,
                                                 ),
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(20))),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
                                           ),
                                         ],
                                       )

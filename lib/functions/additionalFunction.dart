@@ -160,6 +160,7 @@ Future<Map<String, String>> getDataFromNotification(String? payload) async {
       prefs.getString("pushToken") != null) {
     data["email"] = prefs.getString("email")!;
     data["token"] = prefs.getString("token")!;
+    data["version"] = await getAppVersion();
     return data;
   } else {
     return {};

@@ -16,7 +16,6 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
-import 'package:settlenow/others/route_service.dart';
 import 'package:settlenow/screens/BankTransactions.dart';
 import 'package:settlenow/screens/aboutus.dart';
 import 'package:settlenow/screens/analysis.dart';
@@ -66,7 +65,9 @@ class ShareMessage {
 
 class DashBoard extends StatefulWidget {
   final String version;
-  const DashBoard({Key? key, required this.version}) : super(key: key);
+  final int dash;
+  const DashBoard({Key? key, required this.version, this.dash = 0})
+      : super(key: key);
 
   @override
   _DashBoardState createState() => _DashBoardState();
@@ -366,6 +367,7 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> initalDataLoad() async {
+    dash = widget.dash;
     var date = DateTime.now();
     from = [0, date.month - 1, date.day - 1];
     to = [0, date.month - 1, date.day - 1];
@@ -782,20 +784,21 @@ class _DashBoardState extends State<DashBoard> {
 
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: (ReceivedAction receivedAction) async {
-        NotificationController.onActionReceivedMethod(receivedAction);
+        NotificationController.onActionReceivedMethod(context, receivedAction);
       },
       onNotificationCreatedMethod:
           (ReceivedNotification receivedNotification) async {
         NotificationController.onNotificationCreatedMethod(
-            receivedNotification);
+            context, receivedNotification);
       },
       onNotificationDisplayedMethod:
           (ReceivedNotification receivedNotification) async {
         NotificationController.onNotificationDisplayedMethod(
-            receivedNotification);
+            context, receivedNotification);
       },
       onDismissActionReceivedMethod: (ReceivedAction receivedAction) async {
-        NotificationController.onDismissActionReceivedMethod(receivedAction);
+        NotificationController.onDismissActionReceivedMethod(
+            context, receivedAction);
       },
     );
 
