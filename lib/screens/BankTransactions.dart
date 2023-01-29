@@ -1159,7 +1159,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                               roomMembers[index - 1]['email']));
 
                                           if (addExpenseTo.length ==
-                                              roomData.length) {
+                                              roomMembers.length - 1) {
                                             addExpenseTo.clear();
                                           }
                                         }

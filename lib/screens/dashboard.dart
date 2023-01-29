@@ -687,6 +687,51 @@ class _DashBoardState extends State<DashBoard> {
     await _sentrequestIndicatorKey.currentState?.show();
   }
 
+  notificationProcessor(message) async {
+    final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    String notificationFrom = "";
+
+    if (message.data.isNotEmpty) {
+      notificationFrom = crypto.decrypt(message.data["type"]);
+    }
+
+    if (notificationFrom == "room") {
+      Map<String, String> notificationData =
+          await getDataFromNotification(message.data.toString());
+      AwesomeNotifications().createNotification(
+          content: NotificationContent(
+              id: id,
+              channelKey: 'roomID',
+              title: message.notification!.title,
+              body: message.notification!.body,
+              payload: notificationData));
+    } else if (notificationFrom == "lend") {
+      Map<String, String> notificationData =
+          await getDataFromNotification(message.data.toString());
+      AwesomeNotifications().createNotification(
+          content: NotificationContent(
+              id: id,
+              channelKey: 'lendenID',
+              title: message.notification!.title,
+              body: message.notification!.body,
+              payload: notificationData));
+    } else {
+      Map<String, String> notificationData =
+          await getDataFromNotification(message.data.toString());
+      AwesomeNotifications().createNotification(
+          content: NotificationContent(
+              id: id,
+              channelKey: 'requestID',
+              title: message.notification!.title,
+              body: message.notification!.body,
+              payload: notificationData),
+          actionButtons: [
+            NotificationActionButton(key: 'JOIN', label: 'Join'),
+            NotificationActionButton(key: 'CANCEL', label: 'Cancel'),
+          ]);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -714,19 +759,7 @@ class _DashBoardState extends State<DashBoard> {
     FirebaseMessaging.instance.getInitialMessage().then(
       (message) async {
         if (message != null) {
-          Map<String, String> notificationData =
-              await getDataFromNotification(message.data.toString());
-
-          NavKey.navKey.currentState!.push(MaterialPageRoute(
-              builder: (_) => RoomExpense(
-                  roomKey: notificationData["roomKey"]!,
-                  email: notificationData["email"]!,
-                  roomName: notificationData["roomName"]!,
-                  token: notificationData["token"]!,
-                  roomLink: notificationData["roomLink"]!,
-                  isRoomActive: ((notificationData["isRoomActive"]!) == 'true'
-                      ? true
-                      : false))));
+          await notificationProcessor(message);
         }
       },
     );
@@ -734,48 +767,7 @@ class _DashBoardState extends State<DashBoard> {
     FirebaseMessaging.onMessage.listen(
       (message) async {
         if (message.notification != null) {
-          final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-          String notificationFrom = "";
-
-          if (message.data.isNotEmpty) {
-            notificationFrom = crypto.decrypt(message.data["type"]);
-          }
-
-          if (notificationFrom == "room") {
-            Map<String, String> notificationData =
-                await getDataFromNotification(message.data.toString());
-            AwesomeNotifications().createNotification(
-                content: NotificationContent(
-                    id: id,
-                    channelKey: 'roomID',
-                    title: message.notification!.title,
-                    body: message.notification!.body,
-                    payload: notificationData));
-          } else if (notificationFrom == "lend") {
-            Map<String, String> notificationData =
-                await getDataFromNotification(message.data.toString());
-            AwesomeNotifications().createNotification(
-                content: NotificationContent(
-                    id: id,
-                    channelKey: 'lendenID',
-                    title: message.notification!.title,
-                    body: message.notification!.body,
-                    payload: notificationData));
-          } else {
-            Map<String, String> notificationData =
-                await getDataFromNotification(message.data.toString());
-            AwesomeNotifications().createNotification(
-                content: NotificationContent(
-                    id: id,
-                    channelKey: 'requestID',
-                    title: message.notification!.title,
-                    body: message.notification!.body,
-                    payload: notificationData),
-                actionButtons: [
-                  NotificationActionButton(key: 'JOIN', label: 'Join'),
-                  NotificationActionButton(key: 'CANCEL', label: 'Cancel'),
-                ]);
-          }
+          await notificationProcessor(message);
         }
       },
     );
@@ -783,21 +775,7 @@ class _DashBoardState extends State<DashBoard> {
     FirebaseMessaging.onMessageOpenedApp.listen(
       (message) async {
         if (message.notification != null) {
-          Map<String, String> notificationData =
-              await getDataFromNotification(message.data.toString());
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => RoomExpense(
-                      roomKey: notificationData["roomKey"]!,
-                      email: notificationData["email"]!,
-                      roomName: notificationData["roomName"]!,
-                      token: notificationData["token"]!,
-                      roomLink: notificationData["roomLink"]!,
-                      isRoomActive:
-                          ((notificationData["isRoomActive"]!) == 'true'
-                              ? true
-                              : false))));
+          await notificationProcessor(message);
         }
       },
     );

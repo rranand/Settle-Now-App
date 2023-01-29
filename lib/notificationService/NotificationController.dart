@@ -62,8 +62,8 @@ class NotificationController {
             },
             body: jsonEncode({
               'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
-              'email': crypto.encrypt(
-                  crypto.encrypt(receivedAction.payload!["email"].toString())),
+              'email':
+                  crypto.encrypt(receivedAction.payload!["email"].toString()),
               'confirm': crypto.encrypt("1")
             }));
       } else {
@@ -74,8 +74,8 @@ class NotificationController {
             },
             body: jsonEncode({
               'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
-              'email': crypto.encrypt(
-                  crypto.encrypt(receivedAction.payload!["email"].toString())),
+              'email':
+                  crypto.encrypt(receivedAction.payload!["email"].toString()),
               'confirm': crypto.encrypt("0")
             }));
       }
