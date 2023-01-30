@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
+import 'package:settlenow/screens/maintain.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import '../contents.dart' as global;
@@ -670,6 +671,13 @@ class _LendPageState extends State<LendPage> {
         otherUserData = jsonDecode(response.body)['otherUser'];
         closed = jsonDecode(response.body)['closed'] ||
             jsonDecode(response.body)['closedOther'];
+      } else if (jsonDecode(response.body)['maintenance'] != null &&
+          jsonDecode(response.body)['maintenance']) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Maintenance()),
+          (Route<dynamic> route) => false,
+        );
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);

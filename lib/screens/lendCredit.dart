@@ -7,6 +7,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/screens/lendPage.dart';
+import 'package:settlenow/screens/maintain.dart';
 import 'package:shimmer/shimmer.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
@@ -77,6 +78,13 @@ class _LendCreditState extends State<LendCredit> {
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
+      } else if (jsonDecode(response.body)['maintenance'] != null &&
+          jsonDecode(response.body)['maintenance']) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Maintenance()),
+          (Route<dynamic> route) => false,
+        );
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);

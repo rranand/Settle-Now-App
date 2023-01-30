@@ -390,18 +390,18 @@ class _DashBoardState extends State<DashBoard> {
         prefs.setInt("appOpened", 1);
       }
 
-      if (prefs.getBool("isGoogle") != null) {
-        isGoogle = prefs.getBool("isGoogle")!;
+      if (await prefs.getBool("isGoogle") != null) {
+        isGoogle = await prefs.getBool("isGoogle")!;
       }
 
       if (isGoogle) {
-        _googleSignIn.onCurrentUserChanged
+        await _googleSignIn.onCurrentUserChanged
             .listen((GoogleSignInAccount? account) {
           setState(() {
             _currentUser = account;
           });
         });
-        _googleSignIn.signInSilently();
+        await _googleSignIn.signInSilently();
       }
 
       if (prefs.getString("email") != null &&
@@ -411,6 +411,7 @@ class _DashBoardState extends State<DashBoard> {
         _email.text = prefs.getString("email")!;
         _name.text = prefs.getString("name")!;
         _token = prefs.getString("token")!;
+        initalDataLoaded = true;
       } else {
         await prefs.remove("email");
         await prefs.remove("name");
@@ -711,10 +712,9 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   executeParallel() async {
-    if (!initalDataLoaded) {
+    do {
       await initalDataLoad();
-      initalDataLoaded = true;
-    }
+    } while (!initalDataLoaded);
 
     await Future.wait([
       _getImageID(),

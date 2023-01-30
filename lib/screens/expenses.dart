@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
+import 'package:settlenow/screens/maintain.dart';
 import 'package:shimmer/shimmer.dart';
 import '../contents.dart' as global;
 
@@ -105,6 +106,13 @@ class _ExpensesState extends State<Expenses> {
       if (response.statusCode == 200) {
         loaded = true;
         TransList = jsonDecode(response.body)['data'];
+      } else if (jsonDecode(response.body)['maintenance'] != null &&
+          jsonDecode(response.body)['maintenance']) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Maintenance()),
+          (Route<dynamic> route) => false,
+        );
       } else {
         showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
       }

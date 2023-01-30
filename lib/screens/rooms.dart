@@ -10,6 +10,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/screens/maintain.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
@@ -205,6 +206,13 @@ class _RoomExpenseState extends State<RoomExpense>
         if (this.mounted) {
           setState(() {});
         }
+      } else if (jsonDecode(response.body)['maintenance'] != null &&
+          jsonDecode(response.body)['maintenance']) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Maintenance()),
+          (Route<dynamic> route) => false,
+        );
       } else {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/screens/maintain.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:settlenow/screens/otpName.dart';
@@ -35,7 +36,27 @@ class _LoginPageState extends State<LoginPage> {
   double textScale = 1.0;
   String version = "";
 
-  Future _extractEmail() async {
+  Future<void> keepAlive() async {
+    try {
+      final response = await http.get(
+        Uri.parse(global.url + 'login'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+      
+      if (jsonDecode(response.body)['maintenance'] != null &&
+          jsonDecode(response.body)['maintenance']) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Maintenance()),
+          (Route<dynamic> route) => false,
+        );
+      }
+    } on Exception catch (_) {}
+  }
+
+  Future<void> _extractEmail() async {
     version = await getAppVersion();
     prefs = await SharedPreferences.getInstance();
     _deviceData = await initPlatformState();
@@ -78,10 +99,14 @@ class _LoginPageState extends State<LoginPage> {
     deviceToken = token.toString();
   }
 
+  executeParallel() async {
+    await Future.wait([_extractEmail(), keepAlive()]);
+  }
+
   @override
   void initState() {
     super.initState();
-    _extractEmail();
+    executeParallel();
   }
 
   @override

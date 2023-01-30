@@ -10,6 +10,7 @@ import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/models/PersonalExpenseEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
+import 'package:settlenow/screens/maintain.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
@@ -162,7 +163,14 @@ class _ProfileState extends State<Profile> {
         if (this.mounted) {
           setState(() {});
         }
-      } else {
+      } else if (jsonDecode(response_1.body)['maintenance'] != null &&
+          jsonDecode(response_1.body)['maintenance']) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Maintenance()),
+          (Route<dynamic> route) => false,
+        );
+      }  else {
         showToast(
             context,
             crypto.decrypt(jsonDecode(response_1.body)["Message"]),
