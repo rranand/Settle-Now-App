@@ -170,7 +170,6 @@ class _DashBoardState extends State<DashBoard> {
   List<String> roomStatus = ['All', 'Active', 'Closed'];
   int roomStatusIndex = 0;
   bool imageUploading = false;
-  bool haveImg = false;
   bool open = true;
   String amtSpend = "";
   String due = "";
@@ -204,36 +203,27 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> _getImageID() async {
-    if (this.mounted) {
-      setState(() {
-        haveImg = false;
-      });
+    if (isGoogle) {
+      return;
     }
 
     try {
-      if (isGoogle) {
-        _profilePicID = (await _currentUser!.photoUrl).toString();
-        haveImg = true;
-      } else {
-        final response = await http.put(Uri.parse(global.url + 'login'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': _token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(_email.text),
-            }));
+      final response = await http.put(Uri.parse(global.url + 'login'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(_email.text),
+          }));
 
-        if (response.statusCode == 200) {
-          var imgData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        var imgData = jsonDecode(response.body);
 
-          if (imgData['havePic']) {
-            _profilePicID = crypto.decrypt(imgData["fileId"]);
-            haveImg = true;
-          } else {
-            _profilePicID = "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8";
-            haveImg = true;
-          }
+        if (imgData['havePic']) {
+          _profilePicID = crypto.decrypt(imgData["fileId"]);
+        } else {
+          _profilePicID = "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8";
         }
       }
     } on Exception catch (_) {
@@ -395,13 +385,13 @@ class _DashBoardState extends State<DashBoard> {
       }
 
       if (isGoogle) {
-        await _googleSignIn.onCurrentUserChanged
-            .listen((GoogleSignInAccount? account) {
+        _googleSignIn.onCurrentUserChanged
+            .listen((GoogleSignInAccount? account) async {
           setState(() {
             _currentUser = account;
           });
         });
-        await _googleSignIn.signInSilently();
+        _googleSignIn.signInSilently();
       }
 
       if (prefs.getString("email") != null &&
@@ -717,13 +707,13 @@ class _DashBoardState extends State<DashBoard> {
     } while (!initalDataLoaded);
 
     await Future.wait([
-      _getImageID(),
       getInitialData(),
       manualUpdateCheck(),
       _extractEmail(),
       _updateCheck(),
       getRoomRequest(),
       fetchSentRequest(),
+      _getImageID()
     ]);
   }
 
@@ -3056,7 +3046,10 @@ class _DashBoardState extends State<DashBoard> {
                             children: [
                               CachedNetworkImage(
                                 imageUrl: isGoogle
-                                    ? _profilePicID
+                                    ? (_currentUser != null
+                                        ? _currentUser!.photoUrl.toString()
+                                        : global.driveUrl +
+                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
                                     : (global.driveUrl +
                                         (_profilePicID.length == 0
                                             ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
