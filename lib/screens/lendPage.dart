@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/FriendEach.dart';
@@ -47,6 +49,7 @@ class _LendPageState extends State<LendPage> {
   bool loadFriendData = false;
   Map<String, dynamic> userData = {};
   Map<String, dynamic> otherUserData = {};
+  DateTime expenseDate = DateTime.now();
   bool closed = false;
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -77,7 +80,9 @@ class _LendPageState extends State<LendPage> {
               "email": crypto.encrypt(widget.email),
               "key": crypto.encrypt(widget.roomkey),
               "amount": crypto.encrypt((gaveMoney ? "" : "-") + _amount.text),
-              "purpose": crypto.encrypt(_purpose.text)
+              "purpose": crypto.encrypt(_purpose.text),
+              'date': crypto
+                  .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate))
             }));
 
         if (response.statusCode == 200) {
@@ -680,6 +685,14 @@ class _LendPageState extends State<LendPage> {
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
+        data.sort((b, a) {
+          DateTime tempDate_1 = new DateFormat(global.dateTimeFormat)
+              .parse(crypto.decrypt(a["date"]));
+          DateTime tempDate_2 = new DateFormat(global.dateTimeFormat)
+              .parse(crypto.decrypt(b["date"]));
+          return tempDate_1.compareTo(tempDate_2);
+        });
+
         userData = jsonDecode(response.body)['user'];
         otherUserData = jsonDecode(response.body)['otherUser'];
         closed = jsonDecode(response.body)['closed'] ||
@@ -1241,6 +1254,7 @@ class _LendPageState extends State<LendPage> {
           ? null
           : FloatingActionButton(
               onPressed: () {
+                expenseDate = DateTime.now();
                 showModalBottomSheet<void>(
                     context: context,
                     isScrollControlled: true,
@@ -1386,6 +1400,111 @@ class _LendPageState extends State<LendPage> {
                                         ),
                                       ),
                                     ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.9,
+                                  child: Center(
+                                    child: InkWell(
+                                      onTap: () async {
+                                        DateTime? dateTime =
+                                            await showOmniDateTimePicker(
+                                          context: context,
+                                          primaryColor:
+                                              Theme.of(context).primaryColor,
+                                          backgroundColor:
+                                              themeProvider.isDarkTheme
+                                                  ? Colors.grey[900]
+                                                  : Colors.white,
+                                          calendarTextColor:
+                                              !themeProvider.isDarkTheme
+                                                  ? Colors.grey[900]
+                                                  : Colors.white,
+                                          tabTextColor:
+                                              !themeProvider.isDarkTheme
+                                                  ? Colors.grey[900]
+                                                  : Colors.white,
+                                          unselectedTabBackgroundColor:
+                                              Colors.grey[700],
+                                          buttonTextColor:
+                                              !themeProvider.isDarkTheme
+                                                  ? Colors.grey[900]
+                                                  : Colors.white,
+                                          timeSpinnerTextStyle: TextStyle(
+                                              color: !themeProvider.isDarkTheme
+                                                  ? Colors.grey[900]
+                                                  : Colors.white70,
+                                              fontSize: 18),
+                                          timeSpinnerHighlightedTextStyle:
+                                              TextStyle(
+                                                  color:
+                                                      !themeProvider.isDarkTheme
+                                                          ? Colors.grey[900]
+                                                          : Colors.white,
+                                                  fontSize: 24),
+                                          is24HourMode: false,
+                                          isShowSeconds: false,
+                                          startInitialDate: expenseDate,
+                                          startFirstDate: DateTime(2018),
+                                          startLastDate: DateTime.now(),
+                                          borderRadius:
+                                              const Radius.circular(16),
+                                        );
+
+                                        if (dateTime != null) {
+                                          if (this.mounted) {
+                                            setState(() {
+                                              expenseDate = dateTime;
+                                            });
+                                          }
+                                        }
+                                      },
+                                      child: SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                    0.8 -
+                                                100,
+                                        child: Card(
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .primaryColor),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(10.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  DateFormat("dd-MMM-yyyy")
+                                                      .format(expenseDate),
+                                                  style:
+                                                      TextStyle(fontSize: 18),
+                                                ),
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                Text(
+                                                  DateFormat("h:mm a")
+                                                      .format(expenseDate),
+                                                  style:
+                                                      TextStyle(fontSize: 18),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 SizedBox(
