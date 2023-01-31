@@ -3084,18 +3084,18 @@ class _DashBoardState extends State<DashBoard> {
                               isGoogle
                                   ? SizedBox()
                                   : Positioned(
-                                      left: 40,
-                                      top: 43,
+                                      left: 50,
+                                      top: 51,
                                       child: Container(
-                                        width: 35,
-                                        height: 35,
+                                        width: 25,
+                                        height: 25,
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           shape: BoxShape.circle,
                                         ),
                                         child: Center(
-                                          child: IconButton(
-                                            onPressed: () {
+                                          child: InkWell(
+                                            onTap: () async {
                                               showModalBottomSheet<void>(
                                                 context: context,
                                                 isScrollControlled: true,
@@ -3136,7 +3136,7 @@ class _DashBoardState extends State<DashBoard> {
                                                 },
                                               );
                                             },
-                                            icon: const Icon(
+                                            child: Icon(
                                               Icons.camera_alt,
                                               size: 20,
                                               color: Colors.blueGrey,
