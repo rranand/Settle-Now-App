@@ -3764,8 +3764,10 @@ class RoomWidget extends StatelessWidget {
           shadowColor: Theme.of(context).primaryColor,
           color: Theme.of(context).scaffoldBackgroundColor,
           shape: RoundedRectangleBorder(
-            side:
-                BorderSide(color: Theme.of(context).primaryColor.withAlpha(95)),
+            side: BorderSide(
+                color: RoomData[index].done
+                    ? Colors.red
+                    : Theme.of(context).primaryColor.withAlpha(95)),
             borderRadius: BorderRadius.circular(15.0),
           ),
           child: Padding(
