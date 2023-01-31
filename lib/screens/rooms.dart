@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -929,10 +930,22 @@ class _RoomExpenseState extends State<RoomExpense>
                                   ),
                                 ),
                               ),
-                              Text(
-                                data[index].name,
-                                style: const TextStyle(
-                                  fontSize: 17,
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width - 250,
+                                child: InkWell(
+                                  onTap: () {
+                                    showToast(context, data[index].name,
+                                        Icons.person);
+                                  },
+                                  child: AutoSizeText(
+                                    data[index].name,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(fontSize: 17),
+                                    maxFontSize: 21,
+                                    minFontSize: 17,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                               IconButton(
@@ -3087,7 +3100,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                   TextFormField(
                                                                                     controller: _purpose,
                                                                                     keyboardType: TextInputType.text,
-                                                                                    maxLength: 150,
+                                                                                    maxLength: 1000,
                                                                                     maxLines: 1,
                                                                                     style: const TextStyle(fontSize: 18),
                                                                                     autocorrect: false,
@@ -3126,13 +3139,11 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                 child: Padding(
                                                                                                   padding: const EdgeInsets.all(12.0),
                                                                                                   child: Center(
-                                                                                                    child: InkWell(
-                                                                                                      child: Text(
-                                                                                                        roomExpenseCategory[index],
-                                                                                                        style: TextStyle(
-                                                                                                          fontSize: 16,
-                                                                                                          fontWeight: FontWeight.w500,
-                                                                                                        ),
+                                                                                                    child: Text(
+                                                                                                      roomExpenseCategory[index],
+                                                                                                      style: TextStyle(
+                                                                                                        fontSize: 16,
+                                                                                                        fontWeight: FontWeight.w500,
                                                                                                       ),
                                                                                                     ),
                                                                                                   ),
@@ -3438,7 +3449,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                           TextFormField(
                             controller: _purpose,
                             keyboardType: TextInputType.text,
-                            maxLength: 150,
+                            maxLength: 1000,
                             maxLines: 1,
                             style: const TextStyle(fontSize: 18),
                             autocorrect: false,

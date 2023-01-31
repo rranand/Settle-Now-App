@@ -323,7 +323,7 @@ class _LendCreditState extends State<LendCredit> {
                           TextField(
                             controller: _name,
                             keyboardType: TextInputType.text,
-                            maxLength: 150,
+                            maxLength: 1000,
                             maxLines: 1,
                             style: const TextStyle(fontSize: 18),
                             decoration: InputDecoration(

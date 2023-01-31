@@ -229,7 +229,7 @@ class _ExpensesState extends State<Expenses> {
                           TextFormField(
                             controller: _updatePurpose,
                             keyboardType: TextInputType.text,
-                            maxLength: 150,
+                            maxLength: 1000,
                             maxLines: 1,
                             style: const TextStyle(fontSize: 18),
                             autocorrect: false,
@@ -1492,7 +1492,7 @@ class _ExpensesState extends State<Expenses> {
                               TextFormField(
                                 controller: _purpose,
                                 keyboardType: TextInputType.text,
-                                maxLength: 150,
+                                maxLength: 1000,
                                 maxLines: 1,
                                 style: const TextStyle(fontSize: 18),
                                 autocorrect: false,

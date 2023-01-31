@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_cropper/image_cropper.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
@@ -302,19 +303,41 @@ class _DashBoardState extends State<DashBoard> {
 
   Future imageUpload(ImageSource imageSource) async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(
+
+    final XFile? orgImage = await _picker.pickImage(
       source: imageSource,
-      imageQuality: 25,
+      imageQuality: 50,
     );
+
+    CroppedFile? image = await ImageCropper().cropImage(
+      sourcePath: orgImage!.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio16x9
+      ],
+      uiSettings: [
+        AndroidUiSettings(
+            toolbarTitle: 'Crop',
+            toolbarColor: Theme.of(context).primaryColor.withOpacity(0.9),
+            activeControlsWidgetColor:
+                Theme.of(context).primaryColor.withOpacity(0.9),
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false),
+      ],
+    );
+
     Dio dio = new Dio();
 
     if (image != null) {
-      double sz = (await image.length()) / (1024 * 1024);
+      double sz = (await image.readAsBytes()).lengthInBytes / (1024 * 1024);
       if (sz > 10) {
-        showToast(context, "Image Size is too large", Icons.close);
+        showToast(context, "Image Size is too large", Icons.warning);
         return;
       }
-
       if (this.mounted) {
         setState(() {
           imageUploading = true;
@@ -3044,43 +3067,79 @@ class _DashBoardState extends State<DashBoard> {
                           margin: EdgeInsets.all(0),
                           currentAccountPicture: Stack(
                             children: [
-                              CachedNetworkImage(
-                                imageUrl: isGoogle
-                                    ? (_currentUser != null
-                                        ? _currentUser!.photoUrl.toString()
-                                        : global.driveUrl +
-                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
-                                    : (global.driveUrl +
-                                        (_profilePicID.length == 0
-                                            ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                            : _profilePicID)),
-                                progressIndicatorBuilder:
-                                    (context, url, downloadProgress) =>
-                                        CircularProgressIndicator(
-                                            value: downloadProgress.progress),
-                                errorWidget: (context, url, error) => Container(
-                                  width: 120.0,
-                                  height: 120.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: AssetImage(
-                                            'assets/Images/unknown.jpeg'),
-                                        fit: BoxFit.cover),
-                                  ),
-                                ),
-                                imageBuilder: (context, imageProvider) =>
-                                    Container(
-                                  width: 120.0,
-                                  height: 120.0,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: DecorationImage(
-                                        image: imageProvider,
-                                        fit: BoxFit.cover),
-                                  ),
-                                ),
-                              ),
+                              isGoogle
+                                  ? CachedNetworkImage(
+                                      imageUrl: (_currentUser != null
+                                          ? _currentUser!.photoUrl.toString()
+                                          : global.driveUrl +
+                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"),
+                                      progressIndicatorBuilder: (context, url,
+                                              downloadProgress) =>
+                                          CircularProgressIndicator(
+                                              value: downloadProgress.progress),
+                                      errorWidget: (context, url, error) =>
+                                          Container(
+                                        width: 120.0,
+                                        height: 120.0,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                              image: AssetImage(
+                                                  'assets/Images/unknown.jpeg'),
+                                              fit: BoxFit.cover),
+                                        ),
+                                      ),
+                                      imageBuilder: (context, imageProvider) =>
+                                          Container(
+                                        width: 120.0,
+                                        height: 120.0,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                              image: imageProvider,
+                                              fit: BoxFit.cover),
+                                        ),
+                                      ),
+                                    )
+                                  : (imageUploading
+                                      ? Center(
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : CachedNetworkImage(
+                                          imageUrl: (global.driveUrl +
+                                              (_profilePicID.length == 0
+                                                  ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  : _profilePicID)),
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(
+                                                  value: downloadProgress
+                                                      .progress),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            width: 120.0,
+                                            height: 120.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: AssetImage(
+                                                      'assets/Images/unknown.jpeg'),
+                                                  fit: BoxFit.cover),
+                                            ),
+                                          ),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            width: 120.0,
+                                            height: 120.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: imageProvider,
+                                                  fit: BoxFit.cover),
+                                            ),
+                                          ),
+                                        )),
                               isGoogle
                                   ? SizedBox()
                                   : Positioned(
