@@ -8,6 +8,16 @@ class onBoarding extends StatefulWidget {
 }
 
 class _onBoardingState extends State<onBoarding> {
+  final pageController = PageController();
+  int pageIndex = 0;
+  bool isLastPage = false;
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -17,8 +27,69 @@ class _onBoardingState extends State<onBoarding> {
         color: Theme.of(context).scaffoldBackgroundColor,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: SizedBox(),
+          child: PageView(
+            controller: pageController,
+            onPageChanged: (index) {
+              if (this.mounted) {
+                setState(() {
+                  pageIndex = index;
+                });
+              }
+            },
+          ),
         ),
+      ),
+      bottomSheet: SafeArea(
+        child: Container(
+            padding: EdgeInsets.all(12),
+            margin: EdgeInsets.symmetric(horizontal: 110, vertical: 16),
+            decoration: BoxDecoration(
+                color: Theme.of(context).backgroundColor.withOpacity(0.5),
+                borderRadius: BorderRadius.all(Radius.circular(24))),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () {
+                    if (this.mounted) {
+                      setState(() {});
+                    }
+                  },
+                  child: Text(
+                    "Receive",
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+                SizedBox(
+                  width: 6,
+                ),
+                Text(
+                  "|",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
+                ),
+                SizedBox(
+                  width: 6,
+                ),
+                InkWell(
+                  onTap: () {
+                    if (this.mounted) {
+                      setState(() {});
+                    }
+                  },
+                  child: Text(
+                    "Sent",
+                    style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            )),
       ),
     );
   }
