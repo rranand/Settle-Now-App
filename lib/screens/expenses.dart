@@ -127,7 +127,7 @@ class _ExpensesState extends State<Expenses> {
     }
   }
 
-  removeRoomTransaction(String id) async {
+  removeRoomTransaction(String id, int index) async {
     try {
       final response = await http.delete(
           Uri.parse(global.url + 'transaction/personalExpense'),
@@ -141,8 +141,10 @@ class _ExpensesState extends State<Expenses> {
           }));
 
       var TransData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        TransList.removeAt(index);
+      }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
-      await _initialization();
     } on Exception catch (_) {
       await onException(context);
     }
@@ -152,7 +154,7 @@ class _ExpensesState extends State<Expenses> {
   }
 
   updatePersonalTransaction(
-      String purpose, String amount, String flag, String id) async {
+      String purpose, String amount, String flag, String id, int index) async {
     try {
       final response = await http.put(Uri.parse(global.url + 'ptransaction'),
           headers: <String, String>{
@@ -168,8 +170,15 @@ class _ExpensesState extends State<Expenses> {
           }));
 
       var TransData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        if (flag == "1") {
+          TransList.removeAt(index);
+        } else {
+          TransList[index]['Amount'] = crypto.encrypt(amount);
+          TransList[index]['Purpose'] = crypto.encrypt(purpose);
+        }
+      }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
-      await _initialization();
     } on Exception catch (_) {
       await onException(context);
     }
@@ -179,7 +188,7 @@ class _ExpensesState extends State<Expenses> {
   }
 
   Widget _buildUpdateDialog(
-      BuildContext context, String id, String purpose, String amount) {
+      BuildContext context, String id, String purpose, String amount, int index) {
     TextEditingController _updatePurpose = TextEditingController();
     TextEditingController _updateAmount = TextEditingController();
 
@@ -279,7 +288,7 @@ class _ExpensesState extends State<Expenses> {
                                         _updatePurpose.text,
                                         _updateAmount.text,
                                         "0",
-                                        id);
+                                        id, index);
                                     Navigator.pop(context);
                                     Navigator.pop(context);
                                     Navigator.pop(context);
@@ -295,6 +304,7 @@ class _ExpensesState extends State<Expenses> {
 
   Widget _buildPopupDialog(
       BuildContext context,
+      int index,
       String purpose,
       String type,
       String date,
@@ -325,7 +335,7 @@ class _ExpensesState extends State<Expenses> {
                           ? IconButton(
                               onPressed: () async {
                                 buildShowDialog(context);
-                                await removeRoomTransaction(id);
+                                await removeRoomTransaction(id, index);
                                 Navigator.pop(context);
                                 Navigator.pop(context);
                               },
@@ -336,7 +346,7 @@ class _ExpensesState extends State<Expenses> {
                                     onPressed: () async {
                                       buildShowDialog(context);
                                       await updatePersonalTransaction(
-                                          purpose, amount, "1", id);
+                                          purpose, amount, "1", id, index);
                                       Navigator.pop(context);
                                       Navigator.pop(context);
                                     },
@@ -347,7 +357,7 @@ class _ExpensesState extends State<Expenses> {
                                         context: context,
                                         builder: (BuildContext context) =>
                                             _buildUpdateDialog(
-                                                context, id, purpose, amount),
+                                                context, id, purpose, amount, index),
                                       );
                                     },
                                     icon: Icon(Icons.edit)),
@@ -451,12 +461,13 @@ class _ExpensesState extends State<Expenses> {
                 .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
           }));
 
-      _amt.text = "";
-      _purpose.text = "";
       Tdata = jsonDecode(response.body);
       Navigator.pop(context);
       Navigator.pop(context);
 
+      if (response.statusCode == 200) {
+        TransList.insert(0, Tdata['data']);
+      }
       _refreshIndicatorKey.currentState?.show();
 
       if (response.statusCode == 422) {
@@ -466,6 +477,10 @@ class _ExpensesState extends State<Expenses> {
       Navigator.pop(context);
       await onException(context);
     }
+
+    _amt.text = "";
+    _purpose.text = "";
+
     if (this.mounted) {
       setState(() {});
     }
@@ -822,6 +837,7 @@ class _ExpensesState extends State<Expenses> {
                                               context: context,
                                               builder: (BuildContext context) => _buildPopupDialog(
                                                   context,
+                                                  index,
                                                   crypto.decrypt(filterResult[index]
                                                       ["Purpose"]),
                                                   crypto.decrypt(
@@ -983,6 +999,7 @@ class _ExpensesState extends State<Expenses> {
                                               context: context,
                                               builder: (BuildContext context) => _buildPopupDialog(
                                                   context,
+                                                  index,
                                                   crypto.decrypt(
                                                       filterResult[index]
                                                           ["Purpose"]),
@@ -1149,6 +1166,7 @@ class _ExpensesState extends State<Expenses> {
                                           builder: (BuildContext context) =>
                                               _buildPopupDialog(
                                                   context,
+                                                  index,
                                                   crypto.decrypt(TransList[index]
                                                       ["Purpose"]),
                                                   crypto.decrypt(TransList[index]
@@ -1306,6 +1324,7 @@ class _ExpensesState extends State<Expenses> {
                                           context: context,
                                           builder: (BuildContext context) => _buildPopupDialog(
                                               context,
+                                              index,
                                               crypto.decrypt(
                                                   TransList[index]["Purpose"]),
                                               crypto.decrypt(TransList[index]["type"]) +
