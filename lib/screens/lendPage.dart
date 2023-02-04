@@ -1366,32 +1366,6 @@ class _LendPageState extends State<LendPage> {
                                         ],
                                       ),
                                       TextFormField(
-                                        controller: _purpose,
-                                        keyboardType: TextInputType.text,
-                                        maxLength: 1000,
-                                        maxLines: 1,
-                                        style: const TextStyle(fontSize: 18),
-                                        validator: (value) {
-                                          RegExp validateText =
-                                              RegExp(r'\b[\w]+\b');
-                                          if (!validateText
-                                              .hasMatch(_purpose.text)) {
-                                            return "Enter Valid Purpose";
-                                          }
-                                          return null;
-                                        },
-                                        decoration: const InputDecoration(
-                                          counterText: "",
-                                          contentPadding: EdgeInsets.all(8.0),
-                                          hintText: "Enter Purpose",
-                                          labelText: "Purpose",
-                                          errorStyle: TextStyle(fontSize: 15),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextFormField(
                                         controller: _amount,
                                         keyboardType: TextInputType.number,
                                         maxLength: 20,
@@ -1411,6 +1385,32 @@ class _LendPageState extends State<LendPage> {
                                           contentPadding: EdgeInsets.all(8.0),
                                           hintText: "Enter Amount",
                                           labelText: "Amount",
+                                          errorStyle: TextStyle(fontSize: 15),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      TextFormField(
+                                        controller: _purpose,
+                                        keyboardType: TextInputType.text,
+                                        maxLength: 1000,
+                                        maxLines: 1,
+                                        style: const TextStyle(fontSize: 18),
+                                        validator: (value) {
+                                          RegExp validateText =
+                                              RegExp(r'\b[\w]+\b');
+                                          if (!validateText
+                                              .hasMatch(_purpose.text)) {
+                                            return "Enter Valid Purpose";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: const InputDecoration(
+                                          counterText: "",
+                                          contentPadding: EdgeInsets.all(8.0),
+                                          hintText: "Enter Purpose",
+                                          labelText: "Purpose",
                                           errorStyle: TextStyle(fontSize: 15),
                                         ),
                                       ),
