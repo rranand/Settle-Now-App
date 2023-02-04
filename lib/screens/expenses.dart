@@ -327,9 +327,14 @@ class _ExpensesState extends State<Expenses> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    purpose,
-                    style: TextStyle(fontSize: 26),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5 - 20,
+                    child: Text(
+                      purpose,
+                      style: TextStyle(fontSize: 26),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 6,
+                    ),
                   ),
                   CurDate == widget.date
                       ? (room
@@ -741,7 +746,7 @@ class _ExpensesState extends State<Expenses> {
                                                                               20))),
                                                         ),
                                                         SizedBox(
-                                                          height: 14,
+                                                          height: 12,
                                                         ),
                                                         Container(
                                                           width: 150,
@@ -761,7 +766,7 @@ class _ExpensesState extends State<Expenses> {
                                                                               20))),
                                                         ),
                                                         SizedBox(
-                                                          height: 14,
+                                                          height: 12,
                                                         ),
                                                         Container(
                                                           width: 280,
@@ -887,7 +892,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       context)
                                                                   .size
                                                                   .width *
-                                                              0.90,
+                                                              0.80,
                                                           child: Column(
                                                               crossAxisAlignment:
                                                                   CrossAxisAlignment
@@ -905,6 +910,7 @@ class _ExpensesState extends State<Expenses> {
                                                                   overflow:
                                                                       TextOverflow
                                                                           .ellipsis,
+                                                                  maxLines: 5,
                                                                   style: const TextStyle(
                                                                       fontSize:
                                                                           23,
@@ -973,7 +979,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       context)
                                                                   .size
                                                                   .width *
-                                                              0.20,
+                                                              0.30,
                                                           child: Text(
                                                             "₹ " +
                                                                 commaSeperator(crypto.decrypt(
@@ -1052,7 +1058,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       context)
                                                                   .size
                                                                   .width *
-                                                              0.90,
+                                                              0.80,
                                                           child: Column(
                                                               crossAxisAlignment:
                                                                   CrossAxisAlignment
@@ -1070,6 +1076,7 @@ class _ExpensesState extends State<Expenses> {
                                                                   overflow:
                                                                       TextOverflow
                                                                           .ellipsis,
+                                                                  maxLines: 5,
                                                                   style: const TextStyle(
                                                                       fontSize:
                                                                           23,
@@ -1126,7 +1133,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       context)
                                                                   .size
                                                                   .width *
-                                                              0.20,
+                                                              0.30,
                                                           child: Text(
                                                             "₹ " +
                                                                 commaSeperator(crypto.decrypt(
@@ -1215,7 +1222,7 @@ class _ExpensesState extends State<Expenses> {
                                                           MediaQuery.of(context)
                                                                   .size
                                                                   .width *
-                                                              0.90,
+                                                              0.80,
                                                       child: Column(
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
@@ -1233,6 +1240,7 @@ class _ExpensesState extends State<Expenses> {
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
+                                                              maxLines: 5,
                                                               style: const TextStyle(
                                                                   fontSize: 23,
                                                                   fontWeight:
@@ -1300,7 +1308,7 @@ class _ExpensesState extends State<Expenses> {
                                                           MediaQuery.of(context)
                                                                   .size
                                                                   .width *
-                                                              0.20,
+                                                              0.30,
                                                       child: Text(
                                                         "₹ " +
                                                             commaSeperator(crypto
@@ -1375,7 +1383,7 @@ class _ExpensesState extends State<Expenses> {
                                                           MediaQuery.of(context)
                                                                   .size
                                                                   .width *
-                                                              0.90,
+                                                              0.80,
                                                       child: Column(
                                                           crossAxisAlignment:
                                                               CrossAxisAlignment
@@ -1393,6 +1401,7 @@ class _ExpensesState extends State<Expenses> {
                                                               overflow:
                                                                   TextOverflow
                                                                       .ellipsis,
+                                                              maxLines: 5,
                                                               style: const TextStyle(
                                                                   fontSize: 23,
                                                                   fontWeight:
@@ -1400,7 +1409,7 @@ class _ExpensesState extends State<Expenses> {
                                                                           .w500),
                                                             ),
                                                             SizedBox(
-                                                              height: 15,
+                                                              height: 8,
                                                             ),
                                                             Opacity(
                                                               opacity: 0.8,
@@ -1422,7 +1431,7 @@ class _ExpensesState extends State<Expenses> {
                                                               ),
                                                             ),
                                                             SizedBox(
-                                                              height: 15,
+                                                              height: 8,
                                                             ),
                                                             Opacity(
                                                               opacity: 0.8,
@@ -1448,7 +1457,7 @@ class _ExpensesState extends State<Expenses> {
                                                           MediaQuery.of(context)
                                                                   .size
                                                                   .width *
-                                                              0.20,
+                                                              0.30,
                                                       child: Text(
                                                         "₹ " +
                                                             commaSeperator(crypto

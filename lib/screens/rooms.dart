@@ -3943,7 +3943,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                             Expanded(
                               flex: 1,
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.90,
+                                width: MediaQuery.of(context).size.width * 0.80,
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -4017,11 +4017,11 @@ class _ExpenseDataState extends State<ExpenseData> {
                             Expanded(
                               flex: 0,
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.20,
+                                width: MediaQuery.of(context).size.width * 0.25,
                                 child: Text(
                                   "₹ " +
-                                      crypto.decrypt(
-                                          widget.TransList[index]["Amount"]),
+                                      commaSeperator(crypto.decrypt(
+                                          widget.TransList[index]["Amount"])),
                                   style: const TextStyle(
                                     fontSize: 19,
                                   ),
