@@ -77,7 +77,12 @@ class _LendCreditState extends State<LendCredit> {
               {"email": crypto.encrypt(widget.email), "roomKey": roomID}));
 
       if (response.statusCode == 200) {
-        data[index] = jsonDecode(response.body)["data"];
+        bool isDeleted = jsonDecode(response.body)["isDeleted"];
+        if (isDeleted) {
+          data.removeAt(index);
+        } else {
+          data[index] = jsonDecode(response.body)["data"];
+        }
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
             Icons.close);

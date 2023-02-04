@@ -3289,67 +3289,58 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                     ),
                                                                                   ),
                                                                                   SizedBox(
-                                                                                    height: 10,
+                                                                                    height: 7,
                                                                                   ),
-                                                                                  InkWell(
-                                                                                    onTap: () async {
-                                                                                      DateTime? dateTime = await showOmniDateTimePicker(
-                                                                                        context: context,
-                                                                                        primaryColor: Theme.of(context).primaryColor,
-                                                                                        backgroundColor: themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
-                                                                                        calendarTextColor: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
-                                                                                        tabTextColor: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
-                                                                                        unselectedTabBackgroundColor: Colors.grey[700],
-                                                                                        buttonTextColor: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
-                                                                                        timeSpinnerTextStyle: TextStyle(color: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white70, fontSize: 18),
-                                                                                        timeSpinnerHighlightedTextStyle: TextStyle(color: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white, fontSize: 24),
-                                                                                        is24HourMode: false,
-                                                                                        isShowSeconds: false,
-                                                                                        startInitialDate: expenseDate,
-                                                                                        startFirstDate: DateTime(2018),
-                                                                                        startLastDate: DateTime.now(),
-                                                                                        borderRadius: const Radius.circular(16),
-                                                                                      );
-
-                                                                                      if (dateTime != null) {
-                                                                                        if (this.mounted) {
-                                                                                          setState(() {
-                                                                                            expenseDate = dateTime;
-                                                                                          });
-                                                                                        }
-                                                                                      }
-                                                                                    },
-                                                                                    child: SizedBox(
-                                                                                      width: MediaQuery.of(context).size.width * 0.8 - 100,
-                                                                                      child: Card(
-                                                                                        shape: RoundedRectangleBorder(
-                                                                                          side: BorderSide(color: Theme.of(context).primaryColor),
-                                                                                          borderRadius: BorderRadius.circular(15.0),
-                                                                                        ),
-                                                                                        child: Padding(
-                                                                                          padding: const EdgeInsets.all(10.0),
-                                                                                          child: Column(
-                                                                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                                                                            children: [
-                                                                                              Text(
-                                                                                                DateFormat("dd-MMM-yyyy").format(expenseDate),
-                                                                                                style: TextStyle(fontSize: 18),
-                                                                                              ),
-                                                                                              SizedBox(
-                                                                                                height: 8,
-                                                                                              ),
-                                                                                              Text(
-                                                                                                DateFormat("h:mm a").format(expenseDate),
-                                                                                                style: TextStyle(fontSize: 18),
-                                                                                              ),
-                                                                                            ],
+                                                                                  SizedBox(
+                                                                                    width: MediaQuery.of(context).size.width * 0.8,
+                                                                                    child: Padding(
+                                                                                      padding: const EdgeInsets.all(10.0),
+                                                                                      child: Row(
+                                                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                        children: [
+                                                                                          Text(
+                                                                                            DateFormat(global.dateTimeFormat_new).format(expenseDate),
+                                                                                            style: TextStyle(fontSize: 18),
                                                                                           ),
-                                                                                        ),
+                                                                                          InkWell(
+                                                                                            onTap: () async {
+                                                                                              DateTime? dateTime = await showOmniDateTimePicker(
+                                                                                                context: context,
+                                                                                                primaryColor: Theme.of(context).primaryColor,
+                                                                                                backgroundColor: themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
+                                                                                                calendarTextColor: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
+                                                                                                tabTextColor: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
+                                                                                                unselectedTabBackgroundColor: Colors.grey[700],
+                                                                                                buttonTextColor: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white,
+                                                                                                timeSpinnerTextStyle: TextStyle(color: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white70, fontSize: 18),
+                                                                                                timeSpinnerHighlightedTextStyle: TextStyle(color: !themeProvider.isDarkTheme ? Colors.grey[900] : Colors.white, fontSize: 24),
+                                                                                                is24HourMode: false,
+                                                                                                isShowSeconds: false,
+                                                                                                startInitialDate: expenseDate,
+                                                                                                startFirstDate: DateTime(2018),
+                                                                                                startLastDate: DateTime.now(),
+                                                                                                borderRadius: const Radius.circular(16),
+                                                                                              );
+
+                                                                                              if (dateTime != null) {
+                                                                                                if (this.mounted) {
+                                                                                                  setState(() {
+                                                                                                    expenseDate = dateTime;
+                                                                                                  });
+                                                                                                }
+                                                                                              }
+                                                                                            },
+                                                                                            child: Icon(
+                                                                                              Icons.edit_calendar,
+                                                                                              size: 22,
+                                                                                            ),
+                                                                                          )
+                                                                                        ],
                                                                                       ),
                                                                                     ),
                                                                                   ),
                                                                                   SizedBox(
-                                                                                    height: 10,
+                                                                                    height: 7,
                                                                                   ),
                                                                                   Padding(
                                                                                     padding: const EdgeInsets.all(8.0),
