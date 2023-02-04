@@ -49,6 +49,7 @@ dependencies:
   image_cropper: ^3.0.1
   auto_size_text: ^3.0.0
   omni_datetime_picker: ^0.0.3+1
+  carousel_slider: ^4.2.1
 
 dev_dependencies:
   flutter_test:
@@ -65,4 +66,16 @@ flutter:
 
   assets:
     - "assets/Images/"
+    - "assets/onBoarding/1/dark/"
+    - "assets/onBoarding/2/dark/"
+    - "assets/onBoarding/3/dark/"
+    - "assets/onBoarding/4/dark/"
+    - "assets/onBoarding/5/dark/"
+    - "assets/onBoarding/6/dark/"
+    - "assets/onBoarding/1/light/"
+    - "assets/onBoarding/2/light/"
+    - "assets/onBoarding/3/light/"
+    - "assets/onBoarding/4/light/"
+    - "assets/onBoarding/5/light/"
+    - "assets/onBoarding/6/light/"
     - "assets/icon/"

@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/screens/loginPage.dart';
+import 'package:settlenow/screens/onBoarding.dart';
 import 'firebase_options.dart';
 import 'others/route_service.dart';
 import 'others/themes.dart';
@@ -88,7 +89,7 @@ class _MyAppState extends State<MyApp> {
             darkTheme: MyTheme.darTheme(context),
             title: "Settle Now",
             home: SafeArea(
-              child: LoginPage(),
+              child: onBoarding() /*LoginPage()*/,
             ),
             onGenerateRoute: RouteServices.generateRoute,
           );
