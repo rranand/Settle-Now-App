@@ -52,6 +52,8 @@ class _RoomExpenseState extends State<RoomExpense>
   List<dynamic> allTransactionData = [];
   int dash = 0;
   bool locked = false;
+  final ValueNotifier<bool> isPreviousPageNeedToBeUpdated =
+      ValueNotifier(false);
   final TextEditingController _amt = TextEditingController();
   final TextEditingController _searchFriend = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
@@ -349,6 +351,7 @@ class _RoomExpenseState extends State<RoomExpense>
         _amt.text = "";
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
+        isPreviousPageNeedToBeUpdated.value = true;
         Navigator.pop(context);
         Navigator.pop(context);
         Navigator.pop(context);
@@ -391,9 +394,10 @@ class _RoomExpenseState extends State<RoomExpense>
         Navigator.pop(context);
         Navigator.pop(context);
         Navigator.pop(context);
-
-        _refreshIndicatorKey.currentState?.show();
-
+        await Future.wait([
+          _initialisation(),
+          _getPaymentData(),
+        ]);
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
       } on Exception catch (_) {
         Navigator.pop(context);
@@ -468,9 +472,11 @@ class _RoomExpenseState extends State<RoomExpense>
           }));
       isClear = true;
       CloseData = jsonDecode(response.body);
+      isPreviousPageNeedToBeUpdated.value = true;
       showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
       Navigator.pop(context);
-      _refreshIndicatorKey.currentState?.show();
+      Navigator.pop(context);
+      await _initialisation();
     } on Exception catch (_) {
       Navigator.pop(context);
       await onException(context);
@@ -539,10 +545,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                     color: Theme.of(context).primaryColor),
                               ),
                               onPressed: () async {
-                                buildShowDialog(context);
                                 await CloseRoom(context);
-                                Navigator.pop(context);
-                                Navigator.pop(context);
                               },
                               child: Text(
                                 "Yes",
@@ -1936,6 +1939,8 @@ class _RoomExpenseState extends State<RoomExpense>
                           Token: widget.token,
                           refreshIndicatorKey: _refreshIndicatorKey,
                           locked: locked,
+                          isPreviousPageNeedToBeUpdated:
+                              isPreviousPageNeedToBeUpdated,
                         )
                       : ExpenseData(
                           TransList: TransList,
@@ -1944,6 +1949,8 @@ class _RoomExpenseState extends State<RoomExpense>
                           Token: widget.token,
                           refreshIndicatorKey: _refreshIndicatorKey,
                           locked: locked,
+                          isPreviousPageNeedToBeUpdated:
+                              isPreviousPageNeedToBeUpdated,
                         )),
             ),
           );
@@ -2759,7 +2766,12 @@ class _RoomExpenseState extends State<RoomExpense>
         appBar: AppBar(
           title: Text(widget.roomName),
         ),
-        body: chooseFromBottomNavigator(dash),
+        body: WillPopScope(
+            onWillPop: () {
+              Navigator.pop(context, isPreviousPageNeedToBeUpdated.value);
+              return new Future(() => false);
+            },
+            child: chooseFromBottomNavigator(dash)),
         bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             currentIndex: dash,
@@ -3423,6 +3435,7 @@ class ExpenseData extends StatefulWidget {
   final String Token;
   final bool locked;
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
+  final ValueNotifier isPreviousPageNeedToBeUpdated;
   ExpenseData(
       {Key? key,
       required this.TransList,
@@ -3430,7 +3443,8 @@ class ExpenseData extends StatefulWidget {
       required this.Email,
       required this.Token,
       required this.refreshIndicatorKey,
-      required this.locked})
+      required this.locked,
+      required this.isPreviousPageNeedToBeUpdated})
       : super(key: key);
 
   @override
@@ -3462,6 +3476,7 @@ class _ExpenseDataState extends State<ExpenseData> {
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
+      widget.isPreviousPageNeedToBeUpdated.value = true;
       widget.refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
       await onException(context);

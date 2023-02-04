@@ -38,6 +38,7 @@ class LendPage extends StatefulWidget {
 class _LendPageState extends State<LendPage> {
   List<dynamic> data = [];
   bool load = false;
+  bool isPreviousPageNeedToBeUpdated = false;
 
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
@@ -86,6 +87,7 @@ class _LendPageState extends State<LendPage> {
             }));
 
         if (response.statusCode == 200) {
+          isPreviousPageNeedToBeUpdated = true;
           _purpose.text = "";
           _amount.text = "";
           Navigator.pop(context);
@@ -439,6 +441,7 @@ class _LendPageState extends State<LendPage> {
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
+      isPreviousPageNeedToBeUpdated = true;
       _refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
       await onException(context);
@@ -736,6 +739,7 @@ class _LendPageState extends State<LendPage> {
   }
 
   CloseRoom(BuildContext context) async {
+    buildShowDialog(context);
     try {
       var CloseData = null;
       final response = await http.post(Uri.parse(global.url + 'lend/delete'),
@@ -749,6 +753,10 @@ class _LendPageState extends State<LendPage> {
           }));
 
       CloseData = jsonDecode(response.body);
+      isPreviousPageNeedToBeUpdated = true;
+      Navigator.pop(context);
+      Navigator.pop(context);
+      Navigator.pop(context, isPreviousPageNeedToBeUpdated);
       showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
     } on Exception catch (_) {
       Navigator.pop(context);
@@ -814,11 +822,7 @@ class _LendPageState extends State<LendPage> {
                             height: 37,
                             child: OutlinedButton(
                               onPressed: () async {
-                                buildShowDialog(context);
                                 await CloseRoom(context);
-                                Navigator.pop(context);
-                                Navigator.pop(context);
-                                Navigator.pop(context);
                               },
                               style: OutlinedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
@@ -872,384 +876,395 @@ class _LendPageState extends State<LendPage> {
               icon: Icon(Icons.delete))
         ],
       ),
-      body: RefreshIndicator(
-          key: _refreshIndicatorKey,
-          onRefresh: _initialization,
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: load
-                ? (data.isEmpty
-                    ? ListView(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height - 100,
-                            child: Center(
-                              child: Text(
-                                "No Record Found",
-                                style: TextStyle(fontSize: 25),
-                              ),
-                            ),
-                          )
-                        ],
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height - 100,
-                          width: MediaQuery.of(context).size.width * 0.95,
-                          child: ListView.separated(
-                            separatorBuilder: (context, index) => SizedBox(
-                              height: 6,
-                            ),
-                            itemCount: data.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Card(
-                                elevation: 1.0,
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                shadowColor: Theme.of(context).primaryColor,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      color: Theme.of(context)
-                                          .cardColor
-                                          .withAlpha(95)),
-                                  borderRadius: BorderRadius.circular(15.0),
+      body: WillPopScope(
+        onWillPop: () {
+          Navigator.pop(context, isPreviousPageNeedToBeUpdated);
+          return new Future(() => false);
+        },
+        child: RefreshIndicator(
+            key: _refreshIndicatorKey,
+            onRefresh: _initialization,
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: load
+                  ? (data.isEmpty
+                      ? ListView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height - 100,
+                              child: Center(
+                                child: Text(
+                                  "No Record Found",
+                                  style: TextStyle(fontSize: 25),
                                 ),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      vertical:
-                                          (crypto.decrypt(data[index]["by"]) ==
-                                                  widget.email
-                                              ? 5.0
-                                              : 18.0),
-                                      horizontal:
-                                          (crypto.decrypt(data[index]["by"]) ==
-                                                  widget.email
-                                              ? 8.0
-                                              : 12.0)),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              (crypto.decrypt(
-                                                          data[index]["by"]) ==
-                                                      widget.email
-                                                  ? CachedNetworkImage(
-                                                      imageUrl: crypto
-                                                                  .decrypt(
-                                                                      userData[
-                                                                          'pic'])
-                                                                  .length ==
-                                                              0
-                                                          ? global.driveUrl +
-                                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                          : crypto.decrypt(
-                                                              userData['pic']),
-                                                      progressIndicatorBuilder: (context,
-                                                              url,
-                                                              downloadProgress) =>
-                                                          CircularProgressIndicator(
-                                                              value:
-                                                                  downloadProgress
-                                                                      .progress),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          Container(
-                                                        width: 28,
-                                                        height: 28,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          image: DecorationImage(
-                                                              image: AssetImage(
-                                                                  'assets/Images/unknown.jpeg'),
-                                                              fit:
-                                                                  BoxFit.cover),
-                                                        ),
-                                                      ),
-                                                      imageBuilder: (context,
-                                                              imageProvider) =>
-                                                          Container(
-                                                        width: 28,
-                                                        height: 28,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          image: DecorationImage(
-                                                              image:
-                                                                  imageProvider,
-                                                              fit:
-                                                                  BoxFit.cover),
-                                                        ),
-                                                      ),
-                                                    )
-                                                  : CachedNetworkImage(
-                                                      imageUrl: crypto
-                                                                  .decrypt(
-                                                                      otherUserData[
-                                                                          'pic'])
-                                                                  .length ==
-                                                              0
-                                                          ? global.driveUrl +
-                                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                          : crypto.decrypt(
-                                                              otherUserData[
-                                                                  'pic']),
-                                                      progressIndicatorBuilder: (context,
-                                                              url,
-                                                              downloadProgress) =>
-                                                          CircularProgressIndicator(
-                                                              value:
-                                                                  downloadProgress
-                                                                      .progress),
-                                                      errorWidget: (context,
-                                                              url, error) =>
-                                                          Container(
-                                                        width: 28,
-                                                        height: 28,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          image: DecorationImage(
-                                                              image: AssetImage(
-                                                                  'assets/Images/unknown.jpeg'),
-                                                              fit:
-                                                                  BoxFit.cover),
-                                                        ),
-                                                      ),
-                                                      imageBuilder: (context,
-                                                              imageProvider) =>
-                                                          Container(
-                                                        width: 28,
-                                                        height: 28,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          shape:
-                                                              BoxShape.circle,
-                                                          image: DecorationImage(
-                                                              image:
-                                                                  imageProvider,
-                                                              fit:
-                                                                  BoxFit.cover),
-                                                        ),
-                                                      ),
-                                                    )),
-                                              SizedBox(
-                                                width: 6,
-                                              ),
-                                              Text(
+                              ),
+                            )
+                          ],
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height - 100,
+                            width: MediaQuery.of(context).size.width * 0.95,
+                            child: ListView.separated(
+                              separatorBuilder: (context, index) => SizedBox(
+                                height: 6,
+                              ),
+                              itemCount: data.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return Card(
+                                  elevation: 1.0,
+                                  color:
+                                      Theme.of(context).scaffoldBackgroundColor,
+                                  shadowColor: Theme.of(context).primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Theme.of(context)
+                                            .cardColor
+                                            .withAlpha(95)),
+                                    borderRadius: BorderRadius.circular(15.0),
+                                  ),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: (crypto.decrypt(
+                                                    data[index]["by"]) ==
+                                                widget.email
+                                            ? 5.0
+                                            : 18.0),
+                                        horizontal: (crypto.decrypt(
+                                                    data[index]["by"]) ==
+                                                widget.email
+                                            ? 8.0
+                                            : 12.0)),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
                                                 (crypto.decrypt(data[index]
                                                             ["by"]) ==
                                                         widget.email
-                                                    ? crypto.decrypt(
-                                                        userData['name'])
-                                                    : crypto.decrypt(
-                                                        otherUserData['name'])),
-                                                style: TextStyle(fontSize: 18),
-                                              ),
-                                            ],
-                                          ),
-                                          crypto.decrypt(data[index]["by"]) ==
-                                                  widget.email
-                                              ? IconButton(
-                                                  onPressed: () async {
-                                                    showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext
-                                                              context) =>
-                                                          _buildUpdateDialog(
-                                                              context,
-                                                              crypto.decrypt(
-                                                                  data[index]
-                                                                      ["_id"]),
-                                                              crypto.decrypt(data[
-                                                                      index]
-                                                                  ["purpose"]),
-                                                              crypto.decrypt(data[
-                                                                      index]
-                                                                  ["amount"])),
-                                                    );
-                                                  },
-                                                  icon: Icon(Icons.edit))
-                                              : SizedBox()
-                                        ],
-                                      ),
-                                      (crypto.decrypt(data[index]["by"]) ==
-                                              widget.email
-                                          ? SizedBox()
-                                          : SizedBox(height: 8.0)),
-                                      Text.rich(TextSpan(children: [
-                                        TextSpan(
-                                          text: (crypto.decrypt(data[index]
-                                                      ["amount"])[0] ==
-                                                  "-")
-                                              ? "You owe "
-                                              : "You gave ",
-                                          style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        TextSpan(
-                                          text: ("₹ " +
-                                              commaSeperator(crypto
-                                                  .decrypt(
-                                                      data[index]["amount"])
-                                                  .replaceFirst("-", " "))),
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              color: (crypto.decrypt(data[index]
-                                                          ["amount"])[0] ==
-                                                      "-"
-                                                  ? Colors.red
-                                                  : Colors.green)),
-                                        ),
-                                        TextSpan(
-                                            text: " for ",
-                                            style: TextStyle(fontSize: 18)),
-                                        TextSpan(
-                                          text: (crypto
-                                              .decrypt(data[index]["purpose"])),
-                                          style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        TextSpan(
-                                          text: " on ",
-                                          style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                        TextSpan(
-                                          text: formatDateTime(crypto
-                                              .decrypt(data[index]["date"])),
-                                          style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w500),
-                                        ),
-                                      ])),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ))
-                : SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    child: Shimmer.fromColors(
-                      baseColor: Theme.of(context).cardColor,
-                      highlightColor: Theme.of(context).primaryColor,
-                      child: ListView.builder(
-                          itemCount: 16,
-                          itemBuilder: (_, __) => Padding(
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 12),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Colors.white,
-                                    ),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20))),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Container(
-                                                  width: 28,
-                                                  height: 28,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                        image: AssetImage(
-                                                            'assets/Images/unknown.jpeg'),
-                                                        fit: BoxFit.cover),
-                                                  )),
-                                              SizedBox(
-                                                width: 6,
-                                              ),
-                                              Column(
-                                                children: [
-                                                  Container(
-                                                    width: 200,
-                                                    height: 15.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
+                                                    ? CachedNetworkImage(
+                                                        imageUrl: crypto
+                                                                    .decrypt(
+                                                                        userData[
+                                                                            'pic'])
+                                                                    .length ==
+                                                                0
+                                                            ? global.driveUrl +
+                                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                            : crypto.decrypt(
+                                                                userData[
+                                                                    'pic']),
+                                                        progressIndicatorBuilder: (context,
+                                                                url,
+                                                                downloadProgress) =>
+                                                            CircularProgressIndicator(
+                                                                value: downloadProgress
+                                                                    .progress),
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            Container(
+                                                          width: 28,
+                                                          height: 28,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            image: DecorationImage(
+                                                                image: AssetImage(
+                                                                    'assets/Images/unknown.jpeg'),
+                                                                fit: BoxFit
+                                                                    .cover),
+                                                          ),
                                                         ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 6,
-                                          ),
-                                          Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                50,
-                                            height: 15.0,
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(
-                                                  color: Colors.white,
+                                                        imageBuilder: (context,
+                                                                imageProvider) =>
+                                                            Container(
+                                                          width: 28,
+                                                          height: 28,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            image: DecorationImage(
+                                                                image:
+                                                                    imageProvider,
+                                                                fit: BoxFit
+                                                                    .cover),
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : CachedNetworkImage(
+                                                        imageUrl: crypto
+                                                                    .decrypt(
+                                                                        otherUserData[
+                                                                            'pic'])
+                                                                    .length ==
+                                                                0
+                                                            ? global.driveUrl +
+                                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                            : crypto.decrypt(
+                                                                otherUserData[
+                                                                    'pic']),
+                                                        progressIndicatorBuilder: (context,
+                                                                url,
+                                                                downloadProgress) =>
+                                                            CircularProgressIndicator(
+                                                                value: downloadProgress
+                                                                    .progress),
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            Container(
+                                                          width: 28,
+                                                          height: 28,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            image: DecorationImage(
+                                                                image: AssetImage(
+                                                                    'assets/Images/unknown.jpeg'),
+                                                                fit: BoxFit
+                                                                    .cover),
+                                                          ),
+                                                        ),
+                                                        imageBuilder: (context,
+                                                                imageProvider) =>
+                                                            Container(
+                                                          width: 28,
+                                                          height: 28,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            shape:
+                                                                BoxShape.circle,
+                                                            image: DecorationImage(
+                                                                image:
+                                                                    imageProvider,
+                                                                fit: BoxFit
+                                                                    .cover),
+                                                          ),
+                                                        ),
+                                                      )),
+                                                SizedBox(
+                                                  width: 6,
                                                 ),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                          ),
-                                          SizedBox(
-                                            height: 4,
-                                          ),
-                                          Container(
-                                            width: MediaQuery.of(context)
-                                                    .size
-                                                    .width -
-                                                50,
-                                            height: 15.0,
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(
-                                                  color: Colors.white,
+                                                Text(
+                                                  (crypto.decrypt(data[index]
+                                                              ["by"]) ==
+                                                          widget.email
+                                                      ? crypto.decrypt(
+                                                          userData['name'])
+                                                      : crypto.decrypt(
+                                                          otherUserData[
+                                                              'name'])),
+                                                  style:
+                                                      TextStyle(fontSize: 18),
                                                 ),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
+                                              ],
+                                            ),
+                                            crypto.decrypt(data[index]["by"]) ==
+                                                    widget.email
+                                                ? IconButton(
+                                                    onPressed: () async {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (BuildContext
+                                                                context) =>
+                                                            _buildUpdateDialog(
+                                                                context,
+                                                                crypto.decrypt(
+                                                                    data[index][
+                                                                        "_id"]),
+                                                                crypto.decrypt(
+                                                                    data[index][
+                                                                        "purpose"]),
+                                                                crypto.decrypt(
+                                                                    data[index][
+                                                                        "amount"])),
+                                                      );
+                                                    },
+                                                    icon: Icon(Icons.edit))
+                                                : SizedBox()
+                                          ],
+                                        ),
+                                        (crypto.decrypt(data[index]["by"]) ==
+                                                widget.email
+                                            ? SizedBox()
+                                            : SizedBox(height: 8.0)),
+                                        Text.rich(TextSpan(children: [
+                                          TextSpan(
+                                            text: (crypto.decrypt(data[index]
+                                                        ["amount"])[0] ==
+                                                    "-")
+                                                ? "You owe "
+                                                : "You gave ",
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500),
                                           ),
-                                        ],
-                                      )
-                                    ],
+                                          TextSpan(
+                                            text: ("₹ " +
+                                                commaSeperator(crypto
+                                                    .decrypt(
+                                                        data[index]["amount"])
+                                                    .replaceFirst("-", " "))),
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                color: (crypto.decrypt(data[
+                                                                index]
+                                                            ["amount"])[0] ==
+                                                        "-"
+                                                    ? Colors.red
+                                                    : Colors.green)),
+                                          ),
+                                          TextSpan(
+                                              text: " for ",
+                                              style: TextStyle(fontSize: 18)),
+                                          TextSpan(
+                                            text: (crypto.decrypt(
+                                                data[index]["purpose"])),
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                          TextSpan(
+                                            text: " on ",
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                          TextSpan(
+                                            text: formatDateTime(crypto
+                                                .decrypt(data[index]["date"])),
+                                            style: const TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500),
+                                          ),
+                                        ])),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ))),
+                                );
+                              },
+                            ),
+                          ),
+                        ))
+                  : SizedBox(
+                      height: MediaQuery.of(context).size.height,
+                      child: Shimmer.fromColors(
+                        baseColor: Theme.of(context).cardColor,
+                        highlightColor: Theme.of(context).primaryColor,
+                        child: ListView.builder(
+                            itemCount: 16,
+                            itemBuilder: (_, __) => Padding(
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 12),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color: Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                    width: 28,
+                                                    height: 28,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                          image: AssetImage(
+                                                              'assets/Images/unknown.jpeg'),
+                                                          fit: BoxFit.cover),
+                                                    )),
+                                                SizedBox(
+                                                  width: 6,
+                                                ),
+                                                Column(
+                                                  children: [
+                                                    Container(
+                                                      width: 200,
+                                                      height: 15.0,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          border: Border.all(
+                                                            color: Colors.white,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          20))),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 6,
+                                            ),
+                                            Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width -
+                                                  50,
+                                              height: 15.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                            SizedBox(
+                                              height: 4,
+                                            ),
+                                            Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width -
+                                                  50,
+                                              height: 15.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                ))),
+                      ),
                     ),
-                  ),
-          )),
+            )),
+      ),
       floatingActionButton: closed
           ? null
           : FloatingActionButton(

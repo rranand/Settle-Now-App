@@ -170,7 +170,7 @@ class _ProfileState extends State<Profile> {
           MaterialPageRoute(builder: (context) => Maintenance()),
           (Route<dynamic> route) => false,
         );
-      }  else {
+      } else {
         showToast(
             context,
             crypto.decrypt(jsonDecode(response_1.body)["Message"]),
@@ -638,68 +638,76 @@ class _ProfileState extends State<Profile> {
                               shrinkWrap: true,
                               itemCount: filterResult.length,
                               itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: 150,
-                                  width: 150,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: InkWell(
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => Expenses(
-                                                  email: widget.email,
-                                                  date:
-                                                      filterResult[index].Date,
-                                                  token: widget.token,
-                                                  expenseCategory:
-                                                      widget.expenseCategory,
-                                                  investmentCategory:
-                                                      widget.investmentCategory,
-                                                )),
-                                      ),
-                                      onLongPress: () async {
-                                        updatePieChart(
-                                            filterResult[index].Date);
-                                      },
-                                      child: Card(
-                                        elevation: 1.0,
-                                        shadowColor:
-                                            Theme.of(context).primaryColor,
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color:
-                                                  Theme.of(context).cardColor),
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
+                                return ConstrainedBox(
+                                  constraints: new BoxConstraints(
+                                    minWidth: 150.0,
+                                  ),
+                                  child: SizedBox(
+                                    height: 150,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Expenses(
+                                                    email: widget.email,
+                                                    date: filterResult[index]
+                                                        .Date,
+                                                    token: widget.token,
+                                                    expenseCategory:
+                                                        widget.expenseCategory,
+                                                    investmentCategory: widget
+                                                        .investmentCategory,
+                                                  )),
                                         ),
-                                        child: Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            textWidget(
-                                              filterResult[index].Month + ",",
-                                              linearGradient_1,
-                                            ),
-                                            textWidget(
-                                              filterResult[index].Year,
-                                              linearGradient_1,
-                                            ),
-                                            SizedBox(
-                                              height: 20,
-                                            ),
-                                            textWidget(
-                                                "₹ " +
-                                                    commaSeperator(
-                                                        filterResult[index]
-                                                            .Total
-                                                            .toStringAsFixed(
-                                                                2)),
-                                                linearGradient_2)
-                                          ],
+                                        onLongPress: () async {
+                                          updatePieChart(
+                                              filterResult[index].Date);
+                                        },
+                                        child: Card(
+                                          elevation: 1.0,
+                                          shadowColor:
+                                              Theme.of(context).primaryColor,
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .cardColor),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              textWidget(
+                                                filterResult[index].Month + ",",
+                                                linearGradient_1,
+                                              ),
+                                              textWidget(
+                                                filterResult[index].Year,
+                                                linearGradient_1,
+                                              ),
+                                              SizedBox(
+                                                height: 20,
+                                              ),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: textWidget(
+                                                    "₹ " +
+                                                        commaSeperator(
+                                                            filterResult[index]
+                                                                .Total
+                                                                .toStringAsFixed(
+                                                                    2)),
+                                                    linearGradient_2),
+                                              )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -718,62 +726,74 @@ class _ProfileState extends State<Profile> {
                           shrinkWrap: true,
                           itemCount: personalExpense.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return SizedBox(
-                              height: 150,
-                              width: 150,
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: InkWell(
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => Expenses(
-                                              email: widget.email,
-                                              date: personalExpense[index].Date,
-                                              token: widget.token,
-                                              expenseCategory:
-                                                  widget.expenseCategory,
-                                              investmentCategory:
-                                                  widget.investmentCategory,
-                                            )),
-                                  ),
-                                  onLongPress: () async {
-                                    updatePieChart(personalExpense[index].Date);
-                                  },
-                                  child: Card(
-                                    elevation: 1.0,
-                                    shadowColor: Theme.of(context).primaryColor,
-                                    color: Theme.of(context)
-                                        .scaffoldBackgroundColor,
-                                    shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          color: Theme.of(context).cardColor),
-                                      borderRadius: BorderRadius.circular(15.0),
+                            return ConstrainedBox(
+                              constraints: new BoxConstraints(
+                                minWidth: 150.0,
+                              ),
+                              child: SizedBox(
+                                height: 150,
+                                child: Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: InkWell(
+                                    onTap: () => Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => Expenses(
+                                                email: widget.email,
+                                                date:
+                                                    personalExpense[index].Date,
+                                                token: widget.token,
+                                                expenseCategory:
+                                                    widget.expenseCategory,
+                                                investmentCategory:
+                                                    widget.investmentCategory,
+                                              )),
                                     ),
-                                    child: Column(
-                                      children: [
-                                        SizedBox(
-                                          height: 10,
-                                        ),
-                                        textWidget(
-                                          personalExpense[index].Month + ",",
-                                          linearGradient_1,
-                                        ),
-                                        textWidget(
-                                          personalExpense[index].Year,
-                                          linearGradient_1,
-                                        ),
-                                        SizedBox(
-                                          height: 20,
-                                        ),
-                                        textWidget(
-                                            "₹ " +
-                                                commaSeperator(
-                                                    personalExpense[index]
-                                                        .Total
-                                                        .toStringAsFixed(2)),
-                                            linearGradient_2)
-                                      ],
+                                    onLongPress: () async {
+                                      updatePieChart(
+                                          personalExpense[index].Date);
+                                    },
+                                    child: Card(
+                                      elevation: 1.0,
+                                      shadowColor:
+                                          Theme.of(context).primaryColor,
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: Theme.of(context).cardColor),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          textWidget(
+                                            personalExpense[index].Month + ",",
+                                            linearGradient_1,
+                                          ),
+                                          textWidget(
+                                            personalExpense[index].Year,
+                                            linearGradient_1,
+                                          ),
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: textWidget(
+                                                "₹ " +
+                                                    commaSeperator(
+                                                        personalExpense[index]
+                                                            .Total
+                                                            .toStringAsFixed(
+                                                                2)),
+                                                linearGradient_2),
+                                          )
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),

@@ -89,9 +89,9 @@ class _DashBoardState extends State<DashBoard> {
   int appOpened = 0;
   late SharedPreferences prefs;
   final TextEditingController _NRoom = TextEditingController();
-  final List<RoomEach> RoomDataO = [];
-  final List<RoomEach> RoomDataC = [];
-  final List<RoomEach> SearchRoomData = [];
+  final ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
+  final ValueNotifier<List<RoomEach>> RoomDataC = ValueNotifier([]);
+  final ValueNotifier<List<RoomEach>> SearchRoomData = ValueNotifier([]);
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   final GlobalKey<RefreshIndicatorState> _requestIndicatorKey =
@@ -451,8 +451,8 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> _extractEmail() async {
     roomDataFetched = false;
-    RoomDataO.clear();
-    RoomDataC.clear();
+    RoomDataO.value.clear();
+    RoomDataC.value.clear();
     amtSpendClose = 0;
     amtSpendOpen = 0;
     String appVersion = await getAppVersion();
@@ -479,15 +479,15 @@ class _DashBoardState extends State<DashBoard> {
 
         for (int i = 0; i < list.length; i++) {
           if (list[i]['active']) {
-            RoomDataO.add(RoomEach.fromJson(list[i]));
-            amtSpendOpen += RoomDataO.last.spend;
+            RoomDataO.value.add(RoomEach.fromJson(list[i]));
+            amtSpendOpen += RoomDataO.value.last.spend;
           } else {
-            RoomDataC.add(RoomEach.fromJson(list[i]));
-            amtSpendClose += RoomDataC.last.spend;
+            RoomDataC.value.add(RoomEach.fromJson(list[i]));
+            amtSpendClose += RoomDataC.value.last.spend;
           }
         }
 
-        RoomDataO.sort((b, a) {
+        RoomDataO.value.sort((b, a) {
           DateTime tempDate_1 =
               new DateFormat(global.dateTimeFormat_new).parse(a.date);
           DateTime tempDate_2 =
@@ -495,7 +495,7 @@ class _DashBoardState extends State<DashBoard> {
           return tempDate_1.compareTo(tempDate_2);
         });
 
-        RoomDataC.sort((b, a) {
+        RoomDataC.value.sort((b, a) {
           DateTime tempDate_1 =
               new DateFormat(global.dateTimeFormat_new).parse(a.date);
           DateTime tempDate_2 =
@@ -607,7 +607,8 @@ class _DashBoardState extends State<DashBoard> {
       Navigator.pop(context);
 
       if (response.statusCode == 200) {
-        _refreshIndicatorKey.currentState?.show();
+        RoomDataO.value
+            .insert(0, RoomEach.fromJson(jsonDecode(response.body)['data']));
       } else {
         showToast(context, crypto.decrypt(JsonData["Message"]), Icons.close);
       }
@@ -1382,139 +1383,137 @@ class _DashBoardState extends State<DashBoard> {
     if (this.mounted) {
       setState(() {
         searching = true;
-        SearchRoomData.clear();
+        SearchRoomData.value.clear();
       });
     }
 
-    SearchRoomData.clear();
+    SearchRoomData.value.clear();
 
     if (roomStatusIndex == 0) {
-      for (int i = 0; i < RoomDataC.length; i++) {
+      for (int i = 0; i < RoomDataC.value.length; i++) {
         if (_search.text.length > 0 &&
-            RoomDataC[i]
-                .roomName
+            RoomDataC.value[i].roomName
                 .toLowerCase()
                 .contains(_search.text.toLowerCase())) {
           if (DateChanged) {
-            if (getDate(RoomDataC[i].date)) {
-              SearchRoomData.add(RoomDataC[i]);
+            if (getDate(RoomDataC.value[i].date)) {
+              SearchRoomData.value.add(RoomDataC.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataC[i]);
+            SearchRoomData.value.add(RoomDataC.value[i]);
           }
         } else if (_search.text.length == 7 &&
-            RoomDataC[i].roomKey == _search.text) {
+            RoomDataC.value[i].roomKey == _search.text) {
           if (DateChanged) {
-            if (getDate(RoomDataC[i].date)) {
-              SearchRoomData.add(RoomDataC[i]);
+            if (getDate(RoomDataC.value[i].date)) {
+              SearchRoomData.value.add(RoomDataC.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataC[i]);
+            SearchRoomData.value.add(RoomDataC.value[i]);
           }
         } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataC[i].date)) {
-            SearchRoomData.add(RoomDataC[i]);
+          if (DateChanged && getDate(RoomDataC.value[i].date)) {
+            SearchRoomData.value.add(RoomDataC.value[i]);
           }
         }
       }
-      for (int i = 0; i < RoomDataO.length; i++) {
+      for (int i = 0; i < RoomDataO.value.length; i++) {
         if (_search.text.length > 0 &&
-            RoomDataO[i]
-                .roomName
+            RoomDataO.value[i].roomName
                 .toLowerCase()
                 .contains(_search.text.toLowerCase())) {
           if (DateChanged) {
-            if (getDate(RoomDataO[i].date)) {
-              SearchRoomData.add(RoomDataO[i]);
+            if (getDate(RoomDataO.value[i].date)) {
+              SearchRoomData.value.add(RoomDataO.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataO[i]);
+            SearchRoomData.value.add(RoomDataO.value[i]);
           }
         } else if (_search.text.length == 7 &&
-            RoomDataO[i].roomKey == _search.text) {
+            RoomDataO.value[i].roomKey == _search.text) {
           if (DateChanged) {
-            if (getDate(RoomDataO[i].date)) {
-              SearchRoomData.add(RoomDataO[i]);
+            if (getDate(RoomDataO.value[i].date)) {
+              SearchRoomData.value.add(RoomDataO.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataO[i]);
+            SearchRoomData.value.add(RoomDataO.value[i]);
           }
         } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataO[i].date)) {
-            SearchRoomData.add(RoomDataO[i]);
+          if (DateChanged && getDate(RoomDataO.value[i].date)) {
+            SearchRoomData.value.add(RoomDataO.value[i]);
           }
         }
       }
     } else if (roomStatusIndex == 1) {
-      for (int i = 0; i < RoomDataO.length; i++) {
+      for (int i = 0; i < RoomDataO.value.length; i++) {
         if (_search.text.length > 0 &&
-            RoomDataO[i]
-                .roomName
+            RoomDataO.value[i].roomName
                 .toLowerCase()
                 .contains(_search.text.toLowerCase())) {
           if (DateChanged) {
-            if (getDate(RoomDataO[i].date)) {
-              SearchRoomData.add(RoomDataO[i]);
+            if (getDate(RoomDataO.value[i].date)) {
+              SearchRoomData.value.add(RoomDataO.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataO[i]);
+            SearchRoomData.value.add(RoomDataO.value[i]);
           }
         } else if (_search.text.length == 7 &&
-            RoomDataO[i].roomKey == _search.text) {
+            RoomDataO.value[i].roomKey == _search.text) {
           if (DateChanged) {
-            if (getDate(RoomDataO[i].date)) {
-              SearchRoomData.add(RoomDataO[i]);
+            if (getDate(RoomDataO.value[i].date)) {
+              SearchRoomData.value.add(RoomDataO.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataO[i]);
+            SearchRoomData.value.add(RoomDataO.value[i]);
           }
         } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataO[i].date)) {
-            SearchRoomData.add(RoomDataO[i]);
+          if (DateChanged && getDate(RoomDataO.value[i].date)) {
+            SearchRoomData.value.add(RoomDataO.value[i]);
           }
         }
       }
     } else {
-      for (int i = 0; i < RoomDataC.length; i++) {
+      for (int i = 0; i < RoomDataC.value.length; i++) {
         if (_search.text.length > 0 &&
-            RoomDataC[i]
-                .roomName
+            RoomDataC.value[i].roomName
                 .toLowerCase()
                 .contains(_search.text.toLowerCase())) {
           if (DateChanged) {
-            if (getDate(RoomDataC[i].date)) {
-              SearchRoomData.add(RoomDataC[i]);
+            if (getDate(RoomDataC.value[i].date)) {
+              SearchRoomData.value.add(RoomDataC.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataC[i]);
+            SearchRoomData.value.add(RoomDataC.value[i]);
           }
         } else if (_search.text.length == 7 &&
-            RoomDataC[i].roomKey == _search.text) {
+            RoomDataC.value[i].roomKey == _search.text) {
           if (DateChanged) {
-            if (getDate(RoomDataC[i].date)) {
-              SearchRoomData.add(RoomDataC[i]);
+            if (getDate(RoomDataC.value[i].date)) {
+              SearchRoomData.value.add(RoomDataC.value[i]);
             }
           } else {
-            SearchRoomData.add(RoomDataC[i]);
+            SearchRoomData.value.add(RoomDataC.value[i]);
           }
         } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataC[i].date)) {
-            SearchRoomData.add(RoomDataC[i]);
+          if (DateChanged && getDate(RoomDataC.value[i].date)) {
+            SearchRoomData.value.add(RoomDataC.value[i]);
           }
         }
       }
     }
 
-    SearchRoomData.sort((b, a) {
-      DateTime tempDate_1 = new DateFormat(global.dateTimeFormat).parse(a.date);
-      DateTime tempDate_2 = new DateFormat(global.dateTimeFormat).parse(b.date);
+    SearchRoomData.value.sort((b, a) {
+      DateTime tempDate_1 =
+          new DateFormat(global.dateTimeFormat_new).parse(a.date);
+      DateTime tempDate_2 =
+          new DateFormat(global.dateTimeFormat_new).parse(b.date);
       return tempDate_1.compareTo(tempDate_2);
     });
 
     if (this.mounted) {
       setState(() {
         heightSearched =
-            SearchRoomData.length * 115 + SearchRoomData.length * 5;
+            SearchRoomData.value.length * 115 + SearchRoomData.value.length * 5;
         searching = false;
       });
     }
@@ -2325,7 +2324,7 @@ class _DashBoardState extends State<DashBoard> {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _extractEmail,
-        child: (RoomDataO.isEmpty && RoomDataC.isEmpty)
+        child: (RoomDataO.value.isEmpty && RoomDataC.value.isEmpty)
             ? (roomDataFetched
                 ? ListView(
                     physics: AlwaysScrollableScrollPhysics(),
@@ -2644,7 +2643,7 @@ class _DashBoardState extends State<DashBoard> {
                     ),
                   ))
             : (searchTrigger
-                ? _search.text.length == 0 && SearchRoomData.isEmpty
+                ? _search.text.length == 0 && SearchRoomData.value.isEmpty
                     ? Center(
                         child: Text(
                           "Search Rooms...",
@@ -2653,7 +2652,7 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                         ),
                       )
-                    : (SearchRoomData.isEmpty
+                    : (SearchRoomData.value.isEmpty
                         ? Center(
                             child: searching
                                 ? CircularProgressIndicator()
@@ -2667,17 +2666,21 @@ class _DashBoardState extends State<DashBoard> {
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 15.0, vertical: 10.0),
-                                  child: Text(SearchRoomData.length.toString() +
-                                      " Results Found"),
+                                  child: Text(
+                                      SearchRoomData.value.length.toString() +
+                                          " Results Found"),
                                 ),
                                 SizedBox(
                                   height:
                                       MediaQuery.of(context).size.height - 180,
                                   child: RoomWidget(
-                                      RoomData: SearchRoomData,
-                                      email: _email.text,
-                                      flag: true,
-                                      token: _token),
+                                    RoomData: SearchRoomData,
+                                    ClosedRoomData: RoomDataC,
+                                    email: _email.text,
+                                    flag: true,
+                                    token: _token,
+                                    refreshKey: _refreshIndicatorKey,
+                                  ),
                                 ),
                               ],
                             ),
@@ -2797,7 +2800,7 @@ class _DashBoardState extends State<DashBoard> {
                               ? (MediaQuery.of(context).size.height - 250)
                               : (MediaQuery.of(context).size.height - 220),
                           child: open
-                              ? RoomDataO.isEmpty
+                              ? RoomDataO.value.isEmpty
                                   ? Scrollbar(
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
@@ -2821,11 +2824,14 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                          RoomData: RoomDataO,
-                                          email: _email.text,
-                                          flag: false,
-                                          token: _token))
-                              : (RoomDataC.isEmpty
+                                        RoomData: RoomDataO,
+                                        ClosedRoomData: RoomDataC,
+                                        email: _email.text,
+                                        flag: false,
+                                        token: _token,
+                                        refreshKey: _refreshIndicatorKey,
+                                      ))
+                              : (RoomDataC.value.isEmpty
                                   ? Scrollbar(
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
@@ -2849,10 +2855,13 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                          RoomData: RoomDataC,
-                                          email: _email.text,
-                                          flag: false,
-                                          token: _token))),
+                                        RoomData: RoomDataC,
+                                        ClosedRoomData: RoomDataC,
+                                        email: _email.text,
+                                        flag: false,
+                                        token: _token,
+                                        refreshKey: _refreshIndicatorKey,
+                                      ))),
                         ),
                       ),
                     ],
@@ -2879,8 +2888,8 @@ class _DashBoardState extends State<DashBoard> {
       );
     } else if (dash == 4) {
       return Analysis(
-        RoomDataC: RoomDataC,
-        RoomDataO: RoomDataO,
+        RoomDataC: RoomDataC.value,
+        RoomDataO: RoomDataO.value,
         email: _email.text,
         token: _token,
         RoomExpenseCategory: roomExpenseCategory,
@@ -3687,12 +3696,29 @@ class _DashBoardState extends State<DashBoard> {
   }
 }
 
-class RoomWidget extends StatelessWidget {
-  final List<dynamic> RoomData;
+class RoomWidget extends StatefulWidget {
+  final ValueNotifier<List<RoomEach>> RoomData;
+  final ValueNotifier<List<RoomEach>> ClosedRoomData;
   final String email;
   final bool flag;
   final String token;
+  final GlobalKey<RefreshIndicatorState> refreshKey;
 
+  RoomWidget(
+      {Key? key,
+      required this.RoomData,
+      required this.ClosedRoomData,
+      required this.email,
+      required this.flag,
+      required this.token,
+      required this.refreshKey})
+      : super(key: key);
+
+  @override
+  State<RoomWidget> createState() => _RoomWidgetState();
+}
+
+class _RoomWidgetState extends State<RoomWidget> {
   final Shader linearGradient = LinearGradient(
     colors: <Color>[
       Color.fromARGB(255, 243, 33, 112),
@@ -3708,27 +3734,63 @@ class RoomWidget extends StatelessWidget {
       Color.fromARGB(255, 252, 0, 255)
     ],
   ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
+  int indexLoading = -1;
 
-  RoomWidget(
-      {Key? key,
-      required this.RoomData,
-      required this.email,
-      required this.flag,
-      required this.token})
-      : super(key: key);
+  Future updateRoom(BuildContext context, int index, String roomID) async {
+    if (this.mounted) {
+      setState(() {
+        indexLoading = index;
+      });
+    }
+    try {
+      final response = await http.post(Uri.parse(global.url + 'update/room'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            "email": crypto.encrypt(widget.email),
+            "roomKey": crypto.encrypt(roomID)
+          }));
 
-  _MoveToNext(BuildContext context, int index) {
-    Navigator.push(
+      if (response.statusCode == 200) {
+        RoomEach tempData =
+            RoomEach.fromJson(jsonDecode(response.body)["data"]);
+        if (tempData.active) {
+          widget.RoomData.value[index] = tempData;
+        } else {
+          widget.RoomData.value.removeAt(index);
+          widget.ClosedRoomData.value.insert(0, tempData);
+        }
+      } else {
+        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
+            Icons.close);
+      }
+    } on Exception catch (_) {
+      await onException(context);
+    }
+
+    indexLoading = -1;
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  _MoveToNext(BuildContext context, int index) async {
+    final dataFrom = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => RoomExpense(
-              roomKey: RoomData[index].roomKey,
-              email: email,
-              roomName: RoomData[index].roomName,
-              token: token,
-              roomLink: RoomData[index].roomLink,
-              isRoomActive: RoomData[index].active)),
+              roomKey: widget.RoomData.value[index].roomKey,
+              email: widget.email,
+              roomName: widget.RoomData.value[index].roomName,
+              token: widget.token,
+              roomLink: widget.RoomData.value[index].roomLink,
+              isRoomActive: widget.RoomData.value[index].active)),
     );
+    if (dataFrom) {
+      await updateRoom(context, index, widget.RoomData.value[index].roomKey);
+    }
   }
 
   Future<List<dynamic>> getMembers(BuildContext context, String roomkey) async {
@@ -3738,10 +3800,10 @@ class RoomWidget extends StatelessWidget {
           Uri.parse(global.url + 'room/roomSplitMembers'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': token
+            'Auth': widget.token
           },
           body: jsonEncode({
-            'email': crypto.encrypt(email),
+            'email': crypto.encrypt(widget.email),
             'roomKey': crypto.encrypt(roomkey)
           }));
 
@@ -3765,59 +3827,57 @@ class RoomWidget extends StatelessWidget {
           color: Theme.of(context).scaffoldBackgroundColor,
           shape: RoundedRectangleBorder(
             side: BorderSide(
-                color: RoomData[index].done
+                color: widget.RoomData.value[index].done
                     ? Colors.red
                     : Theme.of(context).primaryColor.withAlpha(95)),
             borderRadius: BorderRadius.circular(15.0),
           ),
-          child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        RoomData[index].roomName,
-                        textScaleFactor: 1.0,
-                        maxLines: 1,
-                        style: TextStyle(
-                            fontSize: 22, overflow: TextOverflow.ellipsis),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        child: FutureBuilder<List<dynamic>>(
-                          builder:
-                              (context, AsyncSnapshot<List<dynamic>> snapshot) {
-                            List<Widget> allImages = [];
-                            if (snapshot.hasData) {
-                              int length = min(4, snapshot.data!.length);
-                              int leftMembers =
-                                  (snapshot.data!.length - length + 1);
-                              for (int i = 0; i < length; i++) {
-                                if (i == 0) {
-                                  allImages.add(CachedNetworkImage(
-                                    imageUrl: crypto
-                                                .decrypt(
-                                                    snapshot.data![i]['pic'])
-                                                .length ==
-                                            0
-                                        ? global.driveUrl +
-                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                        : crypto
-                                            .decrypt(snapshot.data![i]['pic']),
-                                    progressIndicatorBuilder: (context, url,
-                                            downloadProgress) =>
-                                        CircularProgressIndicator(
-                                            value: downloadProgress.progress),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
+          child: indexLoading == index
+              ? Shimmer.fromColors(
+                  baseColor: Theme.of(context).cardColor,
+                  highlightColor: Theme.of(context).primaryColor,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white,
+                        ),
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 250,
+                            height: 18.0,
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
+                                  color: Colors.white,
+                                ),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    width: 28.0,
+                                    height: 28.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              'assets/Images/unknown.jpeg'),
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: 20,
+                                    child: Container(
                                       width: 28.0,
                                       height: 28.0,
                                       decoration: BoxDecoration(
@@ -3828,22 +3888,146 @@ class RoomWidget extends StatelessWidget {
                                             fit: BoxFit.cover),
                                       ),
                                     ),
-                                    imageBuilder: (context, imageProvider) =>
-                                        Container(
+                                  ),
+                                  Positioned(
+                                    left: 40,
+                                    child: Container(
                                       width: 28.0,
                                       height: 28.0,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         image: DecorationImage(
-                                            image: imageProvider,
+                                            image: AssetImage(
+                                                'assets/Images/unknown.jpeg'),
                                             fit: BoxFit.cover),
                                       ),
                                     ),
-                                  ));
-                                } else {
-                                  allImages.add(Positioned(
-                                      left: i * 20,
-                                      child: CachedNetworkImage(
+                                  ),
+                                  Positioned(
+                                    left: 60,
+                                    child: Container(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                'assets/Images/unknown.jpeg'),
+                                            fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 150,
+                                      height: 14.0,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                    ),
+                                    SizedBox(
+                                      height: 6,
+                                    ),
+                                    Container(
+                                      width: 150,
+                                      height: 14.0,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                    )
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: 150,
+                                      height: 14.0,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                    ),
+                                    SizedBox(
+                                      height: 6,
+                                    ),
+                                    Container(
+                                      width: 150,
+                                      height: 14.0,
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color: Colors.white,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            widget.RoomData.value[index].roomName,
+                            textScaleFactor: 1.0,
+                            maxLines: 1,
+                            style: TextStyle(
+                                fontSize: 22, overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            child: FutureBuilder<List<dynamic>>(
+                              builder: (context,
+                                  AsyncSnapshot<List<dynamic>> snapshot) {
+                                List<Widget> allImages = [];
+                                if (snapshot.hasData) {
+                                  int length = min(4, snapshot.data!.length);
+                                  int leftMembers =
+                                      (snapshot.data!.length - length + 1);
+                                  for (int i = 0; i < length; i++) {
+                                    if (i == 0) {
+                                      allImages.add(CachedNetworkImage(
                                         imageUrl: crypto
                                                     .decrypt(snapshot.data![i]
                                                         ['pic'])
@@ -3882,167 +4066,221 @@ class RoomWidget extends StatelessWidget {
                                                 fit: BoxFit.cover),
                                           ),
                                         ),
-                                      )));
-                                }
-                                if (leftMembers > 1) {
-                                  allImages.add(Positioned(
-                                      left: 60,
-                                      child: Container(
+                                      ));
+                                    } else {
+                                      allImages.add(Positioned(
+                                          left: i * 20,
+                                          child: CachedNetworkImage(
+                                            imageUrl: crypto
+                                                        .decrypt(snapshot
+                                                            .data![i]['pic'])
+                                                        .length ==
+                                                    0
+                                                ? global.driveUrl +
+                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                : crypto.decrypt(
+                                                    snapshot.data![i]['pic']),
+                                            progressIndicatorBuilder: (context,
+                                                    url, downloadProgress) =>
+                                                CircularProgressIndicator(
+                                                    value: downloadProgress
+                                                        .progress),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    Container(
+                                              width: 28.0,
+                                              height: 28.0,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                    image: AssetImage(
+                                                        'assets/Images/unknown.jpeg'),
+                                                    fit: BoxFit.cover),
+                                              ),
+                                            ),
+                                            imageBuilder:
+                                                (context, imageProvider) =>
+                                                    Container(
+                                              width: 28.0,
+                                              height: 28.0,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                image: DecorationImage(
+                                                    image: imageProvider,
+                                                    fit: BoxFit.cover),
+                                              ),
+                                            ),
+                                          )));
+                                    }
+                                    if (leftMembers > 1) {
+                                      allImages.add(Positioned(
+                                          left: 60,
+                                          child: Container(
+                                            width: 28.0,
+                                            height: 28.0,
+                                            decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: Colors.white),
+                                            child: Stack(
+                                              alignment: AlignmentDirectional
+                                                  .centerStart,
+                                              children: [
+                                                Positioned(
+                                                  left: leftMembers > 9
+                                                      ? -0.2
+                                                      : 2.5,
+                                                  child: Icon(
+                                                    Icons.add,
+                                                    color: Colors.black,
+                                                    size: 15,
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  bottom: 6.5,
+                                                  left:
+                                                      leftMembers > 9 ? 11 : 15,
+                                                  child: Text(
+                                                    leftMembers.toString(),
+                                                    style: TextStyle(
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )));
+                                    }
+                                  }
+                                } else if (snapshot.hasError) {
+                                  for (int i = 0;
+                                      i < widget.RoomData.value[index].members;
+                                      i++) {
+                                    if (i == 0) {
+                                      allImages.add(Container(
                                         width: 28.0,
                                         height: 28.0,
                                         decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            color: Colors.white),
-                                        child: Stack(
-                                          alignment:
-                                              AlignmentDirectional.centerStart,
-                                          children: [
-                                            Positioned(
-                                              left:
-                                                  leftMembers > 9 ? -0.2 : 2.5,
-                                              child: Icon(
-                                                Icons.add,
-                                                color: Colors.black,
-                                                size: 15,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              bottom: 6.5,
-                                              left: leftMembers > 9 ? 11 : 15,
-                                              child: Text(
-                                                leftMembers.toString(),
-                                                style: TextStyle(
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                          shape: BoxShape.circle,
+                                          image: DecorationImage(
+                                              image: AssetImage(
+                                                  'assets/Images/unknown.jpeg'),
+                                              fit: BoxFit.cover),
                                         ),
-                                      )));
-                                }
-                              }
-                            } else if (snapshot.hasError) {
-                              for (int i = 0;
-                                  i < RoomData[index].members;
-                                  i++) {
-                                if (i == 0) {
-                                  allImages.add(Container(
-                                    width: 28.0,
-                                    height: 28.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/Images/unknown.jpeg'),
-                                          fit: BoxFit.cover),
-                                    ),
-                                  ));
+                                      ));
+                                    } else {
+                                      allImages.add(Positioned(
+                                        left: i * 20,
+                                        child: Container(
+                                          width: 28.0,
+                                          height: 28.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                                image: AssetImage(
+                                                    'assets/Images/unknown.jpeg'),
+                                                fit: BoxFit.cover),
+                                          ),
+                                        ),
+                                      ));
+                                    }
+                                  }
                                 } else {
-                                  allImages.add(Positioned(
-                                    left: i * 20,
-                                    child: Container(
-                                      width: 28.0,
-                                      height: 28.0,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                'assets/Images/unknown.jpeg'),
-                                            fit: BoxFit.cover),
+                                  return Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                return Stack(
+                                  children: allImages,
+                                );
+                              },
+                              future: getMembers(context,
+                                  widget.RoomData.value[index].roomKey),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Members: " +
+                                        widget.RoomData.value[index].members
+                                            .toString(),
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () async {
+                                      await Share.share("Join " +
+                                          widget
+                                              .RoomData.value[index].roomName +
+                                          "\nRoom Key: " +
+                                          widget.RoomData.value[index].roomKey +
+                                          "\n" +
+                                          widget
+                                              .RoomData.value[index].roomLink);
+                                    },
+                                    onLongPress: () async {
+                                      Clipboard.setData(ClipboardData(
+                                          text: widget
+                                              .RoomData.value[index].roomKey));
+                                      showToast(context, "Join Key Copied",
+                                          Icons.check);
+                                    },
+                                    child: Text(
+                                      "Room Key: " +
+                                          widget.RoomData.value[index].roomKey,
+                                      textScaleFactor: 1.0,
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                        fontSize: 13,
                                       ),
                                     ),
-                                  ));
-                                }
-                              }
-                            } else {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                            return Stack(
-                              children: allImages,
-                            );
-                          },
-                          future: getMembers(context, RoomData[index].roomKey),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Members: " +
-                                    RoomData[index].members.toString(),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () async {
-                                  await Share.share("Join " +
-                                      RoomData[index].roomName +
-                                      "\nRoom Key: " +
-                                      RoomData[index].roomKey +
-                                      "\n" +
-                                      RoomData[index].roomLink);
-                                },
-                                onLongPress: () async {
-                                  Clipboard.setData(ClipboardData(
-                                      text: RoomData[index].roomKey));
-                                  showToast(
-                                      context, "Join Key Copied", Icons.check);
-                                },
-                                child: Text(
-                                  "Room Key: " + RoomData[index].roomKey,
-                                  textScaleFactor: 1.0,
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 13,
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Contribution: ₹ " +
-                                    commaSeperator(
-                                        RoomData[index].total.toString()),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              Text(
-                                "Spent: ₹ " +
-                                    commaSeperator(
-                                        RoomData[index].spend.toString()),
-                                style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
-                                  fontSize: 13,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Contribution: ₹ " +
+                                        commaSeperator(widget
+                                            .RoomData.value[index].total
+                                            .toString()),
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Spent: ₹ " +
+                                        commaSeperator(widget
+                                            .RoomData.value[index].spend
+                                            .toString()),
+                                    style: TextStyle(
+                                      color: Theme.of(context).primaryColor,
+                                      fontSize: 13,
+                                    ),
+                                  )
+                                ],
                               )
                             ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ])),
+                          ),
+                        ),
+                      ])),
         ),
       ),
-      onTap: () {
-        _MoveToNext(context, index);
+      onTap: () async {
+        await _MoveToNext(context, index);
       },
     );
   }
@@ -4050,9 +4288,9 @@ class RoomWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      physics: flag ? ScrollPhysics() : null,
+      physics: widget.flag ? ScrollPhysics() : null,
       padding: EdgeInsets.all(8.0),
-      itemCount: RoomData.length,
+      itemCount: widget.RoomData.value.length,
       separatorBuilder: (context, index) => SizedBox(
         height: 5,
       ),
