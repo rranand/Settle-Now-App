@@ -187,8 +187,8 @@ class _ExpensesState extends State<Expenses> {
     }
   }
 
-  Widget _buildUpdateDialog(
-      BuildContext context, String id, String purpose, String amount, int index) {
+  Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
+      String amount, int index) {
     TextEditingController _updatePurpose = TextEditingController();
     TextEditingController _updateAmount = TextEditingController();
 
@@ -288,7 +288,8 @@ class _ExpensesState extends State<Expenses> {
                                         _updatePurpose.text,
                                         _updateAmount.text,
                                         "0",
-                                        id, index);
+                                        id,
+                                        index);
                                     Navigator.pop(context);
                                     Navigator.pop(context);
                                     Navigator.pop(context);
@@ -356,8 +357,8 @@ class _ExpensesState extends State<Expenses> {
                                       showDialog(
                                         context: context,
                                         builder: (BuildContext context) =>
-                                            _buildUpdateDialog(
-                                                context, id, purpose, amount, index),
+                                            _buildUpdateDialog(context, id,
+                                                purpose, amount, index),
                                       );
                                     },
                                     icon: Icon(Icons.edit)),
