@@ -247,51 +247,44 @@ class _onBoardingState extends State<onBoarding> {
                         SizedBox(
                           height: 20,
                         ),
-                        Container(
-                          height: 72,
-                          decoration: BoxDecoration(
-                              color: themeProvider.isDarkTheme
-                                  ? Theme.of(context).scaffoldBackgroundColor
-                                  : Colors.grey.shade50,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(24))),
-                          child: Center(
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: BottomNavigationBar(
-                                type: BottomNavigationBarType.fixed,
-                                elevation: 0,
-                                currentIndex: data[i].bottomIndex,
-                                selectedIconTheme: IconThemeData(size: 40),
-                                unselectedIconTheme: IconThemeData(size: 25),
-                                items: [
-                                  BottomNavigationBarItem(
-                                    icon: Icon(Icons.home),
-                                    label: "",
-                                  ),
-                                  BottomNavigationBarItem(
-                                    icon: Icon(Icons.person_add_outlined),
-                                    label: "",
-                                  ),
-                                  BottomNavigationBarItem(
-                                    icon: Icon(Icons.wallet),
-                                    label: "",
-                                  ),
-                                  BottomNavigationBarItem(
-                                    icon: Icon(Icons.account_balance_outlined),
-                                    label: "",
-                                  ),
-                                  BottomNavigationBarItem(
-                                    icon: Icon(Icons.analytics_outlined),
-                                    label: "",
-                                  ),
-                                  BottomNavigationBarItem(
-                                    icon: Icon(Icons.person),
-                                    label: "",
-                                  ),
-                                ],
-                              ),
+                        Center(
+                          child: Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: BottomNavigationBar(
+                              backgroundColor:
+                                  Theme.of(context).scaffoldBackgroundColor,
+                              type: BottomNavigationBarType.fixed,
+                              elevation: 0,
+                              currentIndex: data[i].bottomIndex,
+                              selectedIconTheme: IconThemeData(size: 40),
+                              unselectedIconTheme: IconThemeData(size: 25),
+                              items: [
+                                BottomNavigationBarItem(
+                                  icon: Icon(Icons.home),
+                                  label: "",
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: Icon(Icons.person_add_outlined),
+                                  label: "",
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: Icon(Icons.wallet),
+                                  label: "",
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: Icon(Icons.account_balance_outlined),
+                                  label: "",
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: Icon(Icons.analytics_outlined),
+                                  label: "",
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: Icon(Icons.person),
+                                  label: "",
+                                ),
+                              ],
                             ),
                           ),
                         ),
