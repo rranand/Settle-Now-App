@@ -188,24 +188,20 @@ class _onBoardingState extends State<onBoarding> {
                                         .primaryColor
                                         .withOpacity(0.2))),
                             width: MediaQuery.of(context).size.width * 0.95,
-                            child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: data[i].widgets.length,
-                                shrinkWrap: true,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return SizedBox(
+                            child: data[i].widgets.length == 1
+                                ? SizedBox(
                                     width: MediaQuery.of(context).size.width *
                                         0.95,
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Column(
                                         children: [
-                                          data[i].widgets[index],
+                                          data[i].widgets[0],
                                           SizedBox(
                                             height: 10,
                                           ),
                                           Text(
-                                            data[i].ImageText[index],
+                                            data[i].ImageText[0],
                                             style: TextStyle(
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.w400),
@@ -221,9 +217,8 @@ class _onBoardingState extends State<onBoarding> {
                                                 data[i].widgets.length,
                                                 (indexDot) => Container(
                                                   height: 10,
-                                                  width: indexDot == index
-                                                      ? 25
-                                                      : 10,
+                                                  width:
+                                                      indexDot == 0 ? 25 : 10,
                                                   margin:
                                                       EdgeInsets.only(right: 5),
                                                   decoration: BoxDecoration(
@@ -240,8 +235,64 @@ class _onBoardingState extends State<onBoarding> {
                                         ],
                                       ),
                                     ),
-                                  );
-                                }),
+                                  )
+                                : ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: data[i].widgets.length,
+                                    shrinkWrap: true,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.95,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            children: [
+                                              data[i].widgets[index],
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Text(
+                                                data[i].ImageText[index],
+                                                style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                              ),
+                                              Expanded(
+                                                child: SizedBox(),
+                                              ),
+                                              Container(
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: List.generate(
+                                                    data[i].widgets.length,
+                                                    (indexDot) => Container(
+                                                      height: 10,
+                                                      width: indexDot == index
+                                                          ? 25
+                                                          : 10,
+                                                      margin: EdgeInsets.only(
+                                                          right: 5),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                        color: Theme.of(context)
+                                                            .primaryColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    }),
                           ),
                         ),
                         SizedBox(
