@@ -124,18 +124,20 @@ class _onBoardingState extends State<onBoarding> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: InkWell(
-                  onTap: () {
-                    MoveToDashBoard();
-                  },
-                  child: Text(
-                    "Skip",
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-              ),
+              pageIndex != data.length - 1
+                  ? SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: InkWell(
+                        onTap: () {
+                          MoveToDashBoard();
+                        },
+                        child: Text(
+                          "Skip",
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    )
+                  : SizedBox(),
               SizedBox(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height * 0.70,

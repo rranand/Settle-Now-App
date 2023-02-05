@@ -323,7 +323,7 @@ class _ProfileState extends State<Profile> {
                                   isVisibleInLegend: true,
                                   width: 0.8,
                                   pointColorMapper: (ChartData data, _) =>
-                                      Color(Random().nextInt(0xffffffff)),
+                                      global.colorsList[_],
                                   dataLabelMapper: (datum, index) =>
                                       datum.type +
                                       "\n₹ " +

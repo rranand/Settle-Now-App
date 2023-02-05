@@ -1,8 +1,7 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
+import '../contents.dart' as global;
 
 Widget samplePE(BuildContext context) => SizedBox(
       child: Card(
@@ -343,8 +342,7 @@ Widget sampleRoomGraph(BuildContext context) {
                   yValueMapper: (RoomEach data, _) => data.spend,
                   isVisibleInLegend: true,
                   width: 0.8,
-                  pointColorMapper: (RoomEach data, _) =>
-                      Color(Random().nextInt(0xffffffff)),
+                  pointColorMapper: (RoomEach data, _) => global.colorsList[_],
                   dataLabelMapper: (datum, index) =>
                       datum.roomName + "\n₹ " + datum.spend.toStringAsFixed(2),
                   dataLabelSettings: DataLabelSettings(isVisible: true),

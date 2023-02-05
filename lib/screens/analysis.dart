@@ -1,6 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
-
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -656,7 +654,7 @@ class _AnalysisState extends State<Analysis> {
                                         isVisibleInLegend: true,
                                         width: 0.8,
                                         pointColorMapper: (RoomEach data, _) =>
-                                            Color(Random().nextInt(0xffffffff)),
+                                            global.colorsList[_],
                                         dataLabelMapper: (datum, index) =>
                                             datum.roomName +
                                             "\n₹ " +
@@ -831,7 +829,7 @@ class _AnalysisState extends State<Analysis> {
                                         data.amount,
                                     isVisibleInLegend: true,
                                     pointColorMapper: (ChartData data, _) =>
-                                        Color(Random().nextInt(0xffffffff)),
+                                        global.colorsList[_],
                                     dataLabelMapper: (datum, index) =>
                                         datum.name +
                                         " (" +

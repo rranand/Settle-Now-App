@@ -2632,9 +2632,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                               isVisibleInLegend: true,
                                               width: 0.8,
                                               pointColorMapper:
-                                                  (ChartData data, _) => Color(
-                                                      Random()
-                                                          .nextInt(0xffffffff)),
+                                                  (ChartData data, _) =>
+                                                      global.colorsList[_],
                                               dataLabelMapper: (datum, index) =>
                                                   datum.type +
                                                   "\n₹ " +
@@ -2703,9 +2702,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                                       data.amount,
                                               isVisibleInLegend: true,
                                               pointColorMapper:
-                                                  (ChartData data, _) => Color(
-                                                      Random()
-                                                          .nextInt(0xffffffff)),
+                                                  (ChartData data, _) =>
+                                                      global.colorsList[_],
                                               dataLabelMapper: (datum, index) =>
                                                   datum.name +
                                                   "\n₹ " +
