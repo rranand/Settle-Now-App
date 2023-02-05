@@ -39,40 +39,38 @@ class _onBoardingState extends State<onBoarding> {
     data.add(onBoardingData(
         title: "Room",
         body:
-            "Create your personalised room to split bills according to people and then send the room key to everyone, so that everyone could join the room.",
+            "Create your personalized room and invite your friends/family to join the room. Add expenses in the room and get the total expense split between members.",
         widgets: [sampleRoom(context)],
         ImageText: [
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
+          'Open room by tapping button and see details of the room, like, members, room key, total expenditure, your spendings in the room, and other such information.',
         ],
         bottomIndex: 0));
     data.add(onBoardingData(
         title: "Personal Expense",
         body:
-            "Keep track of your personal expense month wise. You can also categorize your expenses so that you can analyze it later",
+            "Track personal monthly expenses by adding expenses in different categories and analyze them later.",
         widgets: [samplePE(context)],
         ImageText: [
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
+          'Image shows one of personal expense with its amount, category as Miscellaneous and creation date-time.'
         ],
         bottomIndex: 2));
     data.add(onBoardingData(
         title: "Len-Den",
         body:
-            "Keep track of to whom you are lending money or borrow. You can invite that person to join so that ledger are in sync",
+            "Track lend/borrow money with single person in Len-Den category. Invite that person to join the room to keep both person in sync.",
         widgets: [getSampleLD(context)],
         ImageText: [
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
+          'You can check how much money you gave/borrowed from your friend.',
         ],
         bottomIndex: 3));
     data.add(onBoardingData(
         title: "Analysis",
-        body: "Analyze of personal expenses and room expenses using charts",
+        body:
+            "Attractive graphs to help you analyze room expenses and personal expenses.",
         widgets: [sampleRoomGraph(context), samplePEGraph(context)],
         ImageText: [
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
-          'aiownfona fi aoi fioanfoianfoia of aoo oaifoiafoianofn aof a',
+          'Analyze each month total expense with the help of bar chart.',
+          'Analyze each year total expense with the help of line chart.',
         ],
         bottomIndex: 4));
   }
@@ -115,7 +113,6 @@ class _onBoardingState extends State<onBoarding> {
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
     data.clear();
     contextBuilder(context);
     return Scaffold(
@@ -184,55 +181,23 @@ class _onBoardingState extends State<onBoarding> {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(24)),
                                 border: Border.all(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.2))),
+                                    color: data[i].widgets.length == 1
+                                        ? Theme.of(context)
+                                            .scaffoldBackgroundColor
+                                        : Theme.of(context)
+                                            .primaryColor
+                                            .withOpacity(0.2))),
                             width: MediaQuery.of(context).size.width * 0.95,
                             child: data[i].widgets.length == 1
                                 ? SizedBox(
                                     width: MediaQuery.of(context).size.width *
                                         0.95,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Column(
-                                        children: [
-                                          data[i].widgets[0],
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Text(
-                                            data[i].ImageText[0],
-                                            style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w400),
-                                          ),
-                                          Expanded(
-                                            child: SizedBox(),
-                                          ),
-                                          Container(
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: List.generate(
-                                                data[i].widgets.length,
-                                                (indexDot) => Container(
-                                                  height: 10,
-                                                  width:
-                                                      indexDot == 0 ? 25 : 10,
-                                                  margin:
-                                                      EdgeInsets.only(right: 5),
-                                                  decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                    color: Theme.of(context)
-                                                        .primaryColor,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                        ],
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: SizedBox(
+                                            height: 165,
+                                            child: data[i].widgets[0]),
                                       ),
                                     ),
                                   )
@@ -251,7 +216,7 @@ class _onBoardingState extends State<onBoarding> {
                                           child: Column(
                                             children: [
                                               data[i].widgets[index],
-                                              SizedBox(
+                                              /*SizedBox(
                                                 height: 10,
                                               ),
                                               Text(
@@ -260,7 +225,7 @@ class _onBoardingState extends State<onBoarding> {
                                                     fontSize: 18,
                                                     fontWeight:
                                                         FontWeight.w400),
-                                              ),
+                                              ),*/
                                               Expanded(
                                                 child: SizedBox(),
                                               ),

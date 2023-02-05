@@ -201,7 +201,7 @@ Widget getSampleLD(BuildContext context) => Card(
       color: Theme.of(context).scaffoldBackgroundColor,
       shadowColor: Theme.of(context).primaryColor,
       shape: RoundedRectangleBorder(
-        side: BorderSide(color: Theme.of(context).cardColor.withAlpha(95)),
+        side: BorderSide(color: Theme.of(context).primaryColor.withAlpha(95)),
         borderRadius: BorderRadius.circular(15.0),
       ),
       child: Padding(
@@ -326,7 +326,7 @@ Widget sampleRoomGraph(BuildContext context) {
       done: false));
 
   return SizedBox(
-    height: 45 * data.length * 1.0,
+    height: 300,
     child: Padding(
         padding: const EdgeInsets.all(6),
         child: SfCartesianChart(
@@ -373,7 +373,7 @@ Widget samplePEGraph(BuildContext context) {
     "amount": 146000,
   });
   return SizedBox(
-    height: 250,
+    height: 300,
     child: Padding(
         padding: const EdgeInsets.all(6),
         child: SfCartesianChart(
