@@ -20,20 +20,20 @@ import '../contents.dart' as global;
 class BankTransactions extends StatefulWidget {
   final String email;
   final String token;
-  final bool isBankMessageLoadedOnce;
   final List<dynamic> expenseCategory;
   final List<dynamic> investmentCategory;
   final List<dynamic> roomExpenseCategory;
+  final bool fromDashboard;
 
-  const BankTransactions({
-    Key? key,
-    required this.email,
-    required this.token,
-    required this.isBankMessageLoadedOnce,
-    required this.expenseCategory,
-    required this.investmentCategory,
-    required this.roomExpenseCategory,
-  }) : super(key: key);
+  const BankTransactions(
+      {Key? key,
+      required this.email,
+      required this.token,
+      required this.expenseCategory,
+      required this.investmentCategory,
+      required this.roomExpenseCategory,
+      required this.fromDashboard})
+      : super(key: key);
 
   @override
   State<BankTransactions> createState() => _BankTransactionsState();
@@ -68,6 +68,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     "Credit Card"
   ];
   int lenDenIndex = 0;
+  late SharedPreferences prefs;
   Set<int> transactionTypeIndex = Set();
   Set<int> transactionModeIndex = Set();
   List<dynamic> investmentCat = [];
@@ -180,15 +181,31 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
   }
 
-  Future<void> getAllSms() async {
+  checkForBankMessageStatus() async {
+    prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("isBankMessageLoadedOnce", true);
+  }
+
+  Future<void> executeParallel() async {
     dataFetched = false;
+    if (this.mounted) {
+      setState(() {});
+    }
+    await Future.wait([getAllSms(), getActiveRooms(), getLenDenData()]);
+
+    dataFetched = true;
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> getAllSms() async {
     category = widget.expenseCategory;
     investmentCat = widget.investmentCategory;
 
     if (this.mounted) {
       setState(() {});
     }
-    pref = await SharedPreferences.getInstance();
 
     var permission = await Permission.sms.status;
     if (permission.isGranted) {
@@ -206,13 +223,13 @@ class _BankTransactionsState extends State<BankTransactions> {
             new DateFormat("MMM dd yyyy h:mm a").parse(b.date);
         return tempDate_1.compareTo(tempDate_2);
       });
-
-      await getActiveRooms();
-      await getLenDenData();
-      dataFetched = true;
     } else {
       await Permission.sms.request();
       permissionGranted = await Permission.sms.isDenied;
+
+      if (!permissionGranted) {
+        await getAllSms();
+      }
     }
 
     if (this.mounted) {
@@ -248,8 +265,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                           ),
                           IconButton(
                               onPressed: () async {
-                                await pref.setBool(
-                                    "isBankMessageLoadedOnce", true);
                                 Navigator.pop(context);
                               },
                               icon: Icon(Icons.close))
@@ -1491,14 +1506,13 @@ class _BankTransactionsState extends State<BankTransactions> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    checkForBankMessageStatus();
+    executeParallel();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.isBankMessageLoadedOnce && !openedOnce) {
+    if (!widget.fromDashboard && !openedOnce) {
       openedOnce = true;
       if (this.mounted) {
         setState(() {});
@@ -1835,739 +1849,751 @@ class _BankTransactionsState extends State<BankTransactions> {
             ),
           ),
         ),
-        body: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: permissionGranted
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                      child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "SMS Permission Required",
-                        style: TextStyle(
-                          fontSize: 22,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 25,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          SizedBox(
-                            height: 50,
-                            width: 140,
-                            child: OutlinedButton(
-                              child: Text(
-                                "Open Setting",
-                                style: TextStyle(
-                                    color: themeProvider.isDarkTheme
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 16),
-                              ),
-                              onPressed: () {
-                                openAppSettings();
-                              },
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                side: BorderSide(
-                                    color: Theme.of(context).primaryColor),
-                              ),
-                            ),
+        body: WillPopScope(
+          onWillPop: () {
+            Navigator.pop(context, true);
+            return new Future(() => true);
+          },
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: permissionGranted
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "SMS Permission Required",
+                          style: TextStyle(
+                            fontSize: 22,
                           ),
-                          SizedBox(
-                            height: 50,
-                            width: 140,
-                            child: OutlinedButton(
-                              child: Text(
-                                "Close",
-                                style: TextStyle(
-                                    color: themeProvider.isDarkTheme
-                                        ? Colors.white
-                                        : Colors.black,
-                                    fontSize: 16),
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        SizedBox(
+                          height: 25,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            SizedBox(
+                              height: 50,
+                              width: 140,
+                              child: OutlinedButton(
+                                child: Text(
+                                  "Open Setting",
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16),
                                 ),
-                                side: BorderSide(
-                                    color: Theme.of(context).primaryColor),
+                                onPressed: () {
+                                  openAppSettings();
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
                               ),
                             ),
-                          )
-                        ],
-                      )
-                    ],
-                  )),
-                )
-              : RefreshIndicator(
-                  key: _refreshIndicatorKey,
-                  onRefresh: getAllSms,
-                  child: dataFetched
-                      ? (allTransactions.isEmpty
-                          ? ListView(
-                              physics: AlwaysScrollableScrollPhysics(),
-                              children: [
-                                SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height * 0.8,
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Center(
-                                    child: Text(
-                                      "No Transaction Found",
-                                      style: TextStyle(
-                                        fontSize: 22,
+                            SizedBox(
+                              height: 50,
+                              width: 140,
+                              child: OutlinedButton(
+                                child: Text(
+                                  "Close",
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16),
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                              ),
+                            )
+                          ],
+                        )
+                      ],
+                    )),
+                  )
+                : RefreshIndicator(
+                    key: _refreshIndicatorKey,
+                    onRefresh: executeParallel,
+                    child: dataFetched
+                        ? (allTransactions.isEmpty
+                            ? ListView(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                children: [
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.8,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Center(
+                                      child: Text(
+                                        "No Transaction Found",
+                                        style: TextStyle(
+                                          fontSize: 22,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                )
-                              ],
-                            )
-                          : Padding(
-                              padding: EdgeInsets.all(10.0),
-                              child: Scrollbar(
-                                radius: Radius.circular(10.0),
-                                thickness: 5.5,
-                                child: showFilterResult
-                                    ? filteredResult.isEmpty
-                                        ? SizedBox(
-                                            height: MediaQuery.of(context)
-                                                    .size
-                                                    .height *
-                                                0.8,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            child: Center(
-                                              child: Text(
-                                                "No Transaction Found",
-                                                style: TextStyle(
-                                                  fontSize: 22,
+                                  )
+                                ],
+                              )
+                            : Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: Scrollbar(
+                                  radius: Radius.circular(10.0),
+                                  thickness: 5.5,
+                                  child: showFilterResult
+                                      ? filteredResult.isEmpty
+                                          ? SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.8,
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              child: Center(
+                                                child: Text(
+                                                  "No Transaction Found",
+                                                  style: TextStyle(
+                                                    fontSize: 22,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          )
-                                        : ListView.separated(
-                                            separatorBuilder:
-                                                (context, index) => SizedBox(
-                                                      height: 5,
+                                            )
+                                          : ListView.separated(
+                                              separatorBuilder:
+                                                  (context, index) => SizedBox(
+                                                        height: 5,
+                                                      ),
+                                              shrinkWrap: true,
+                                              itemCount: filteredResult.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return SizedBox(
+                                                  child: Card(
+                                                    elevation: 1.0,
+                                                    shadowColor:
+                                                        Theme.of(context)
+                                                            .primaryColor,
+                                                    color: Theme.of(context)
+                                                        .scaffoldBackgroundColor,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      side: BorderSide(
+                                                          color: filteredResult[
+                                                                          index]
+                                                                      .type ==
+                                                                  "Credit"
+                                                              ? Colors
+                                                                  .greenAccent
+                                                              : Colors
+                                                                  .redAccent),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15.0),
                                                     ),
-                                            shrinkWrap: true,
-                                            itemCount: filteredResult.length,
-                                            itemBuilder: (BuildContext context,
-                                                int index) {
-                                              return SizedBox(
-                                                child: Card(
-                                                  elevation: 1.0,
-                                                  shadowColor: Theme.of(context)
-                                                      .primaryColor,
-                                                  color: Theme.of(context)
-                                                      .scaffoldBackgroundColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: filteredResult[
-                                                                        index]
-                                                                    .type ==
-                                                                "Credit"
-                                                            ? Colors.greenAccent
-                                                            : Colors.redAccent),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15.0),
-                                                  ),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Text(
-                                                              filteredResult[
-                                                                      index]
-                                                                  .receiver,
-                                                              style: TextStyle(
-                                                                  fontSize: 24),
-                                                            ),
-                                                            filteredResult[index]
-                                                                        .type ==
-                                                                    "Credit"
-                                                                ? SizedBox()
-                                                                : IconButton(
-                                                                    onPressed:
-                                                                        () {
-                                                                      showAddDialog(
-                                                                          filteredResult[index]
-                                                                              .amount,
-                                                                          filteredResult[index]
-                                                                              .date,
-                                                                          filteredResult[index]
-                                                                              .receiver);
-                                                                    },
-                                                                    icon: Icon(
-                                                                      Icons.add,
-                                                                      color: filteredResult[index].type ==
-                                                                              "Credit"
-                                                                          ? Colors
-                                                                              .greenAccent
-                                                                          : Colors
-                                                                              .redAccent,
-                                                                    ))
-                                                          ],
-                                                        ),
-                                                        filteredResult[index]
-                                                                    .type ==
-                                                                "Credit"
-                                                            ? SizedBox(
-                                                                height: 8.0,
-                                                              )
-                                                            : SizedBox(),
-                                                        Row(
-                                                          children: [
-                                                            Container(
-                                                                height: 30,
-                                                                alignment:
-                                                                    Alignment
-                                                                        .center,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        color: Colors
-                                                                            .transparent,
-                                                                        border: Border
-                                                                            .all(
-                                                                          color: filteredResult[index].type == "Credit"
-                                                                              ? Colors.greenAccent
-                                                                              : Colors.redAccent,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(Radius.circular(12))),
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                      vertical:
-                                                                          4.0,
-                                                                      horizontal:
-                                                                          8.0),
-                                                                  child: Text(
-                                                                      filteredResult[
-                                                                              index]
-                                                                          .bank,
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            13,
-                                                                      )),
-                                                                )),
-                                                            SizedBox(
-                                                              width: 8,
-                                                            ),
-                                                            Container(
-                                                                height: 30,
-                                                                alignment:
-                                                                    Alignment
-                                                                        .center,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        color: Colors
-                                                                            .transparent,
-                                                                        border: Border
-                                                                            .all(
-                                                                          color: filteredResult[index].type == "Credit"
-                                                                              ? Colors.greenAccent
-                                                                              : Colors.redAccent,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(Radius.circular(12))),
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                      vertical:
-                                                                          4.0,
-                                                                      horizontal:
-                                                                          8.0),
-                                                                  child: Text(
-                                                                      filteredResult[
-                                                                              index]
-                                                                          .type,
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            13,
-                                                                      )),
-                                                                )),
-                                                            SizedBox(
-                                                              width: 8,
-                                                            ),
-                                                            filteredResult[index]
-                                                                        .mode ==
-                                                                    "Unknown"
-                                                                ? SizedBox()
-                                                                : Container(
-                                                                    height: 30,
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    decoration: BoxDecoration(
-                                                                        color: Colors.transparent,
-                                                                        border: Border.all(
-                                                                          color: filteredResult[index].type == "Credit"
-                                                                              ? Colors.greenAccent
-                                                                              : Colors.redAccent,
-                                                                        ),
-                                                                        borderRadius: BorderRadius.all(Radius.circular(12))),
-                                                                    child: Padding(
-                                                                      padding: const EdgeInsets
-                                                                              .symmetric(
-                                                                          vertical:
-                                                                              4.0,
-                                                                          horizontal:
-                                                                              8.0),
-                                                                      child: Text(
-                                                                          filteredResult[index]
-                                                                              .mode,
-                                                                          style:
-                                                                              TextStyle(
-                                                                            fontSize:
-                                                                                13,
-                                                                          )),
-                                                                    )),
-                                                          ],
-                                                        ),
-                                                        SizedBox(
-                                                          height: 8,
-                                                        ),
-                                                        Text(
-                                                          "Amount: ₹ " +
-                                                              filteredResult[
-                                                                      index]
-                                                                  .amount,
-                                                          style: TextStyle(
-                                                              fontSize: 17),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                          "Ref ID: " +
-                                                              filteredResult[
-                                                                      index]
-                                                                  .transactionID,
-                                                          style: TextStyle(
-                                                              fontSize: 17),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                        Text(
-                                                            "Date: " +
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              10.0),
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Text(
                                                                 filteredResult[
                                                                         index]
-                                                                    .date,
+                                                                    .receiver,
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        24),
+                                                              ),
+                                                              filteredResult[index]
+                                                                          .type ==
+                                                                      "Credit"
+                                                                  ? SizedBox()
+                                                                  : IconButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        showAddDialog(
+                                                                            filteredResult[index].amount,
+                                                                            filteredResult[index].date,
+                                                                            filteredResult[index].receiver);
+                                                                      },
+                                                                      icon:
+                                                                          Icon(
+                                                                        Icons
+                                                                            .add,
+                                                                        color: filteredResult[index].type ==
+                                                                                "Credit"
+                                                                            ? Colors.greenAccent
+                                                                            : Colors.redAccent,
+                                                                      ))
+                                                            ],
+                                                          ),
+                                                          filteredResult[index]
+                                                                      .type ==
+                                                                  "Credit"
+                                                              ? SizedBox(
+                                                                  height: 8.0,
+                                                                )
+                                                              : SizedBox(),
+                                                          Row(
+                                                            children: [
+                                                              Container(
+                                                                  height: 30,
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .center,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          color: Colors
+                                                                              .transparent,
+                                                                          border: Border
+                                                                              .all(
+                                                                            color: filteredResult[index].type == "Credit"
+                                                                                ? Colors.greenAccent
+                                                                                : Colors.redAccent,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(12))),
+                                                                  child: Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                        vertical:
+                                                                            4.0,
+                                                                        horizontal:
+                                                                            8.0),
+                                                                    child: Text(
+                                                                        filteredResult[index]
+                                                                            .bank,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              13,
+                                                                        )),
+                                                                  )),
+                                                              SizedBox(
+                                                                width: 8,
+                                                              ),
+                                                              Container(
+                                                                  height: 30,
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .center,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          color: Colors
+                                                                              .transparent,
+                                                                          border: Border
+                                                                              .all(
+                                                                            color: filteredResult[index].type == "Credit"
+                                                                                ? Colors.greenAccent
+                                                                                : Colors.redAccent,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(12))),
+                                                                  child: Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                        vertical:
+                                                                            4.0,
+                                                                        horizontal:
+                                                                            8.0),
+                                                                    child: Text(
+                                                                        filteredResult[index]
+                                                                            .type,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              13,
+                                                                        )),
+                                                                  )),
+                                                              SizedBox(
+                                                                width: 8,
+                                                              ),
+                                                              filteredResult[index]
+                                                                          .mode ==
+                                                                      "Unknown"
+                                                                  ? SizedBox()
+                                                                  : Container(
+                                                                      height:
+                                                                          30,
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      decoration: BoxDecoration(
+                                                                          color: Colors.transparent,
+                                                                          border: Border.all(
+                                                                            color: filteredResult[index].type == "Credit"
+                                                                                ? Colors.greenAccent
+                                                                                : Colors.redAccent,
+                                                                          ),
+                                                                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                                                                      child: Padding(
+                                                                        padding: const EdgeInsets.symmetric(
+                                                                            vertical:
+                                                                                4.0,
+                                                                            horizontal:
+                                                                                8.0),
+                                                                        child: Text(
+                                                                            filteredResult[index]
+                                                                                .mode,
+                                                                            style:
+                                                                                TextStyle(
+                                                                              fontSize: 13,
+                                                                            )),
+                                                                      )),
+                                                            ],
+                                                          ),
+                                                          SizedBox(
+                                                            height: 8,
+                                                          ),
+                                                          Text(
+                                                            "Amount: ₹ " +
+                                                                filteredResult[
+                                                                        index]
+                                                                    .amount,
                                                             style: TextStyle(
-                                                                fontSize: 17)),
-                                                      ],
+                                                                fontSize: 17),
+                                                          ),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Text(
+                                                            "Ref ID: " +
+                                                                filteredResult[
+                                                                        index]
+                                                                    .transactionID,
+                                                            style: TextStyle(
+                                                                fontSize: 17),
+                                                          ),
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                          Text(
+                                                              "Date: " +
+                                                                  filteredResult[
+                                                                          index]
+                                                                      .date,
+                                                              style: TextStyle(
+                                                                  fontSize:
+                                                                      17)),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
+                                                );
+                                              })
+                                      : ListView.separated(
+                                          separatorBuilder: (context, index) =>
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                          shrinkWrap: true,
+                                          itemCount: allTransactions.length,
+                                          itemBuilder: (BuildContext context,
+                                              int index) {
+                                            return SizedBox(
+                                              child: Card(
+                                                elevation: 1.0,
+                                                shadowColor: Theme.of(context)
+                                                    .primaryColor,
+                                                color: Theme.of(context)
+                                                    .scaffoldBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: allTransactions[
+                                                                      index]
+                                                                  .type ==
+                                                              "Credit"
+                                                          ? Colors.greenAccent
+                                                          : Colors.redAccent),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
                                                 ),
-                                              );
-                                            })
-                                    : ListView.separated(
-                                        separatorBuilder: (context, index) =>
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      10.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            allTransactions[
+                                                                    index]
+                                                                .receiver,
+                                                            style: TextStyle(
+                                                                fontSize: 24),
+                                                          ),
+                                                          allTransactions[index]
+                                                                      .type ==
+                                                                  "Credit"
+                                                              ? SizedBox()
+                                                              : IconButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    showAddDialog(
+                                                                        allTransactions[index]
+                                                                            .amount,
+                                                                        allTransactions[index]
+                                                                            .date,
+                                                                        allTransactions[index]
+                                                                            .receiver);
+                                                                  },
+                                                                  icon: Icon(
+                                                                    Icons.add,
+                                                                    color: allTransactions[index].type ==
+                                                                            "Credit"
+                                                                        ? Colors
+                                                                            .greenAccent
+                                                                        : Colors
+                                                                            .redAccent,
+                                                                  ))
+                                                        ],
+                                                      ),
+                                                      allTransactions[index]
+                                                                  .type ==
+                                                              "Credit"
+                                                          ? SizedBox(
+                                                              height: 8.0,
+                                                            )
+                                                          : SizedBox(),
+                                                      Row(
+                                                        children: [
+                                                          Container(
+                                                              height: 30,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                      color: Colors
+                                                                          .transparent,
+                                                                      border:
+                                                                          Border
+                                                                              .all(
+                                                                        color: allTransactions[index].type ==
+                                                                                "Credit"
+                                                                            ? Colors.greenAccent
+                                                                            : Colors.redAccent,
+                                                                      ),
+                                                                      borderRadius:
+                                                                          BorderRadius.all(
+                                                                              Radius.circular(12))),
+                                                              child: Padding(
+                                                                padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                    vertical:
+                                                                        4.0,
+                                                                    horizontal:
+                                                                        8.0),
+                                                                child: Text(
+                                                                    allTransactions[
+                                                                            index]
+                                                                        .bank,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          13,
+                                                                    )),
+                                                              )),
+                                                          SizedBox(
+                                                            width: 8,
+                                                          ),
+                                                          Container(
+                                                              height: 30,
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                      color: Colors
+                                                                          .transparent,
+                                                                      border:
+                                                                          Border
+                                                                              .all(
+                                                                        color: allTransactions[index].type ==
+                                                                                "Credit"
+                                                                            ? Colors.greenAccent
+                                                                            : Colors.redAccent,
+                                                                      ),
+                                                                      borderRadius:
+                                                                          BorderRadius.all(
+                                                                              Radius.circular(12))),
+                                                              child: Padding(
+                                                                padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                    vertical:
+                                                                        4.0,
+                                                                    horizontal:
+                                                                        8.0),
+                                                                child: Text(
+                                                                    allTransactions[
+                                                                            index]
+                                                                        .type,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          13,
+                                                                    )),
+                                                              )),
+                                                          SizedBox(
+                                                            width: 8,
+                                                          ),
+                                                          allTransactions[index]
+                                                                      .mode ==
+                                                                  "Unknown"
+                                                              ? SizedBox()
+                                                              : Container(
+                                                                  height: 30,
+                                                                  alignment:
+                                                                      Alignment
+                                                                          .center,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          color: Colors
+                                                                              .transparent,
+                                                                          border: Border
+                                                                              .all(
+                                                                            color: allTransactions[index].type == "Credit"
+                                                                                ? Colors.greenAccent
+                                                                                : Colors.redAccent,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(12))),
+                                                                  child: Padding(
+                                                                    padding: const EdgeInsets
+                                                                            .symmetric(
+                                                                        vertical:
+                                                                            4.0,
+                                                                        horizontal:
+                                                                            8.0),
+                                                                    child: Text(
+                                                                        allTransactions[index]
+                                                                            .mode,
+                                                                        style:
+                                                                            TextStyle(
+                                                                          fontSize:
+                                                                              13,
+                                                                        )),
+                                                                  )),
+                                                        ],
+                                                      ),
+                                                      SizedBox(
+                                                        height: 8,
+                                                      ),
+                                                      Text(
+                                                        "Amount: ₹ " +
+                                                            allTransactions[
+                                                                    index]
+                                                                .amount,
+                                                        style: TextStyle(
+                                                            fontSize: 17),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 5,
+                                                      ),
+                                                      Text(
+                                                        "Ref ID: " +
+                                                            allTransactions[
+                                                                    index]
+                                                                .transactionID,
+                                                        style: TextStyle(
+                                                            fontSize: 17),
+                                                      ),
+                                                      SizedBox(
+                                                        height: 5,
+                                                      ),
+                                                      Text(
+                                                          "Date: " +
+                                                              allTransactions[
+                                                                      index]
+                                                                  .date,
+                                                          style: TextStyle(
+                                                              fontSize: 17)),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          }),
+                                ),
+                              ))
+                        : Shimmer.fromColors(
+                            baseColor: Theme.of(context).cardColor,
+                            highlightColor: Theme.of(context).primaryColor,
+                            child: ListView.separated(
+                                separatorBuilder: (context, index) => SizedBox(
+                                      height: 5,
+                                    ),
+                                shrinkWrap: true,
+                                itemCount: 16,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.white,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(20))),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 300,
+                                                  height: 15.0,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  20))),
+                                                ),
+                                                Icon(Icons.add)
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Container(
+                                                  width: 50,
+                                                  height: 30,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  12))),
+                                                ),
+                                                SizedBox(
+                                                  width: 8,
+                                                ),
+                                                Container(
+                                                  width: 50,
+                                                  height: 30,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  12))),
+                                                ),
+                                                SizedBox(
+                                                  width: 8,
+                                                ),
+                                                Container(
+                                                  width: 50,
+                                                  height: 30,
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  12))),
+                                                )
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 8,
+                                            ),
+                                            Container(
+                                              width: 170,
+                                              height: 15.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            ),
                                             SizedBox(
                                               height: 5,
                                             ),
-                                        shrinkWrap: true,
-                                        itemCount: allTransactions.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return SizedBox(
-                                            child: Card(
-                                              elevation: 1.0,
-                                              shadowColor: Theme.of(context)
-                                                  .primaryColor,
-                                              color: Theme.of(context)
-                                                  .scaffoldBackgroundColor,
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color:
-                                                        allTransactions[index]
-                                                                    .type ==
-                                                                "Credit"
-                                                            ? Colors.greenAccent
-                                                            : Colors.redAccent),
-                                                borderRadius:
-                                                    BorderRadius.circular(15.0),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Text(
-                                                          allTransactions[index]
-                                                              .receiver,
-                                                          style: TextStyle(
-                                                              fontSize: 24),
-                                                        ),
-                                                        allTransactions[index]
-                                                                    .type ==
-                                                                "Credit"
-                                                            ? SizedBox()
-                                                            : IconButton(
-                                                                onPressed: () {
-                                                                  showAddDialog(
-                                                                      allTransactions[
-                                                                              index]
-                                                                          .amount,
-                                                                      allTransactions[
-                                                                              index]
-                                                                          .date,
-                                                                      allTransactions[
-                                                                              index]
-                                                                          .receiver);
-                                                                },
-                                                                icon: Icon(
-                                                                  Icons.add,
-                                                                  color: allTransactions[index]
-                                                                              .type ==
-                                                                          "Credit"
-                                                                      ? Colors
-                                                                          .greenAccent
-                                                                      : Colors
-                                                                          .redAccent,
-                                                                ))
-                                                      ],
-                                                    ),
-                                                    allTransactions[index]
-                                                                .type ==
-                                                            "Credit"
-                                                        ? SizedBox(
-                                                            height: 8.0,
-                                                          )
-                                                        : SizedBox(),
-                                                    Row(
-                                                      children: [
-                                                        Container(
-                                                            height: 30,
-                                                            alignment: Alignment
-                                                                .center,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                                    color: Colors
-                                                                        .transparent,
-                                                                    border:
-                                                                        Border
-                                                                            .all(
-                                                                      color: allTransactions[index].type ==
-                                                                              "Credit"
-                                                                          ? Colors
-                                                                              .greenAccent
-                                                                          : Colors
-                                                                              .redAccent,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.all(
-                                                                            Radius.circular(12))),
-                                                            child: Padding(
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  vertical: 4.0,
-                                                                  horizontal:
-                                                                      8.0),
-                                                              child: Text(
-                                                                  allTransactions[
-                                                                          index]
-                                                                      .bank,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        13,
-                                                                  )),
-                                                            )),
-                                                        SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        Container(
-                                                            height: 30,
-                                                            alignment: Alignment
-                                                                .center,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                                    color: Colors
-                                                                        .transparent,
-                                                                    border:
-                                                                        Border
-                                                                            .all(
-                                                                      color: allTransactions[index].type ==
-                                                                              "Credit"
-                                                                          ? Colors
-                                                                              .greenAccent
-                                                                          : Colors
-                                                                              .redAccent,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.all(
-                                                                            Radius.circular(12))),
-                                                            child: Padding(
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  vertical: 4.0,
-                                                                  horizontal:
-                                                                      8.0),
-                                                              child: Text(
-                                                                  allTransactions[
-                                                                          index]
-                                                                      .type,
-                                                                  style:
-                                                                      TextStyle(
-                                                                    fontSize:
-                                                                        13,
-                                                                  )),
-                                                            )),
-                                                        SizedBox(
-                                                          width: 8,
-                                                        ),
-                                                        allTransactions[index]
-                                                                    .mode ==
-                                                                "Unknown"
-                                                            ? SizedBox()
-                                                            : Container(
-                                                                height: 30,
-                                                                alignment:
-                                                                    Alignment
-                                                                        .center,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        color: Colors
-                                                                            .transparent,
-                                                                        border: Border
-                                                                            .all(
-                                                                          color: allTransactions[index].type == "Credit"
-                                                                              ? Colors.greenAccent
-                                                                              : Colors.redAccent,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(Radius.circular(12))),
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                          .symmetric(
-                                                                      vertical:
-                                                                          4.0,
-                                                                      horizontal:
-                                                                          8.0),
-                                                                  child: Text(
-                                                                      allTransactions[
-                                                                              index]
-                                                                          .mode,
-                                                                      style:
-                                                                          TextStyle(
-                                                                        fontSize:
-                                                                            13,
-                                                                      )),
-                                                                )),
-                                                      ],
-                                                    ),
-                                                    SizedBox(
-                                                      height: 8,
-                                                    ),
-                                                    Text(
-                                                      "Amount: ₹ " +
-                                                          allTransactions[index]
-                                                              .amount,
-                                                      style: TextStyle(
-                                                          fontSize: 17),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 5,
-                                                    ),
-                                                    Text(
-                                                      "Ref ID: " +
-                                                          allTransactions[index]
-                                                              .transactionID,
-                                                      style: TextStyle(
-                                                          fontSize: 17),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 5,
-                                                    ),
-                                                    Text(
-                                                        "Date: " +
-                                                            allTransactions[
-                                                                    index]
-                                                                .date,
-                                                        style: TextStyle(
-                                                            fontSize: 17)),
-                                                  ],
-                                                ),
-                                              ),
+                                            Container(
+                                              width: 140,
+                                              height: 15.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
                                             ),
-                                          );
-                                        }),
-                              ),
-                            ))
-                      : Shimmer.fromColors(
-                          baseColor: Theme.of(context).cardColor,
-                          highlightColor: Theme.of(context).primaryColor,
-                          child: ListView.separated(
-                              separatorBuilder: (context, index) => SizedBox(
-                                    height: 5,
-                                  ),
-                              shrinkWrap: true,
-                              itemCount: 16,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Padding(
-                                  padding: const EdgeInsets.all(10.0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: Colors.white,
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Container(
+                                              width: 210,
+                                              height: 15.0,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  border: Border.all(
+                                                    color: Colors.white,
+                                                  ),
+                                                  borderRadius:
+                                                      BorderRadius.all(
+                                                          Radius.circular(20))),
+                                            )
+                                          ],
                                         ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(20))),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Container(
-                                                width: 300,
-                                                height: 15.0,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    border: Border.all(
-                                                      color: Colors.white,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                20))),
-                                              ),
-                                              Icon(Icons.add)
-                                            ],
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                width: 50,
-                                                height: 30,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                12))),
-                                              ),
-                                              SizedBox(
-                                                width: 8,
-                                              ),
-                                              Container(
-                                                width: 50,
-                                                height: 30,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                12))),
-                                              ),
-                                              SizedBox(
-                                                width: 8,
-                                              ),
-                                              Container(
-                                                width: 50,
-                                                height: 30,
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                12))),
-                                              )
-                                            ],
-                                          ),
-                                          SizedBox(
-                                            height: 8,
-                                          ),
-                                          Container(
-                                            width: 170,
-                                            height: 15.0,
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(
-                                                  color: Colors.white,
-                                                ),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Container(
-                                            width: 140,
-                                            height: 15.0,
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(
-                                                  color: Colors.white,
-                                                ),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Container(
-                                            width: 210,
-                                            height: 15.0,
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(
-                                                  color: Colors.white,
-                                                ),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                          )
-                                        ],
                                       ),
                                     ),
-                                  ),
-                                );
-                              }),
-                        )),
+                                  );
+                                }),
+                          )),
+          ),
         ),
       ),
     );

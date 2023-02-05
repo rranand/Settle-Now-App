@@ -86,7 +86,6 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController();
   String _token = "";
-  int appOpened = 0;
   late SharedPreferences prefs;
   final TextEditingController _NRoom = TextEditingController();
   final ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
@@ -160,6 +159,7 @@ class _DashBoardState extends State<DashBoard> {
     '31'
   ];
   bool initalDataLoaded = false;
+  bool bankMessageShowedOnce = false;
   bool isSentRoomRequestLoaded = false;
   List<int> from = [];
   List<int> to = [];
@@ -181,7 +181,6 @@ class _DashBoardState extends State<DashBoard> {
   List<dynamic> sentRoomRequest = [];
   GoogleSignIn _googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _currentUser;
-  bool isBankMessageLoadedOnce = false;
   bool _flexibleUpdateAvailable = false;
   bool importantUpdate = false;
 
@@ -393,14 +392,7 @@ class _DashBoardState extends State<DashBoard> {
       prefs = await SharedPreferences.getInstance();
 
       if (prefs.getBool("isBankMessageLoadedOnce") != null) {
-        isBankMessageLoadedOnce = prefs.getBool("isBankMessageLoadedOnce")!;
-      }
-
-      if (prefs.getInt("appOpened") != null) {
-        appOpened = prefs.getInt("appOpened")!;
-        prefs.setInt("appOpened", 1 + appOpened);
-      } else {
-        prefs.setInt("appOpened", 1);
+        bankMessageShowedOnce =  await prefs.getBool("isBankMessageLoadedOnce")!;
       }
 
       if (await prefs.getBool("isGoogle") != null) {
@@ -3222,20 +3214,27 @@ class _DashBoardState extends State<DashBoard> {
                                   TextStyle(fontSize: 15, color: Colors.white)),
                         ),
                   ListTile(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      final dataFrom = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) => BankTransactions(
                                   email: _email.text,
                                   token: _token,
-                                  isBankMessageLoadedOnce:
-                                      isBankMessageLoadedOnce,
+                                  fromDashboard: bankMessageShowedOnce,
                                   expenseCategory: expenseCategory,
                                   investmentCategory: investmentCategory,
                                   roomExpenseCategory: roomExpenseCategory,
                                 )),
                       );
+
+                      if (dataFrom) {
+                        bankMessageShowedOnce = dataFrom;
+                      }
+
+                      if (this.mounted) {
+                        setState(() {});
+                      }
                     },
                     leading: Icon(
                       Icons.payments,
