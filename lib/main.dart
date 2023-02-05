@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
             darkTheme: MyTheme.darTheme(context),
             title: "Settle Now",
             home: SafeArea(
-              child: onBoarding() /*LoginPage()*/,
+              child: LoginPage(),
             ),
             onGenerateRoute: RouteServices.generateRoute,
           );

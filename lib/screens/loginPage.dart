@@ -9,6 +9,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/screens/onBoarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:settlenow/screens/otpName.dart';
@@ -35,6 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   double textScale = 1.0;
   String version = "";
+  bool isOnBoardingCompleted = false;
 
   Future<void> keepAlive() async {
     try {
@@ -44,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-      
+
       if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
         Navigator.pushAndRemoveUntil(
@@ -72,19 +74,35 @@ class _LoginPageState extends State<LoginPage> {
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
 
+    if (prefs.getBool("isOnBoardingCompleted") != null) {
+      isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
+    } else {
+      await prefs.setBool("isOnBoardingCompleted", false);
+    }
+
     if (prefs.getString("email") != null &&
         prefs.getString("name") != null &&
         prefs.getString("token") != null &&
         prefs.getString("pushToken") != null) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DashBoard(
-            version: version,
-          ),
-        ),
-        (Route<dynamic> route) => false,
-      );
+      isOnBoardingCompleted
+          ? Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DashBoard(
+                  version: version,
+                ),
+              ),
+              (Route<dynamic> route) => false,
+            )
+          : Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => onBoarding(
+                  version: version,
+                ),
+              ),
+              (Route<dynamic> route) => false,
+            );
     } else {
       canLoad = true;
     }
@@ -238,15 +256,25 @@ class _LoginPageState extends State<LoginPage> {
                             }));
 
                         Navigator.pop(context);
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DashBoard(
-                              version: version,
-                            ),
-                          ),
-                          (Route<dynamic> route) => false,
-                        );
+                        isOnBoardingCompleted
+                            ? Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DashBoard(
+                                    version: version,
+                                  ),
+                                ),
+                                (Route<dynamic> route) => false,
+                              )
+                            : Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => onBoarding(
+                                    version: version,
+                                  ),
+                                ),
+                                (Route<dynamic> route) => false,
+                              );
                       },
                       child: SizedBox(
                         width: 240,

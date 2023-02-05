@@ -9,6 +9,7 @@ import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/screens/onBoarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
@@ -41,6 +42,7 @@ class _OtpNameState extends State<OtpName> {
   final TextEditingController _otp = TextEditingController();
   late SharedPreferences prefs;
   Map<String, dynamic> _deviceData = <String, dynamic>{};
+  bool isOnBoardingCompleted = false;
 
   Future _initialisation() async {
     prefs = await SharedPreferences.getInstance();
@@ -91,6 +93,12 @@ class _OtpNameState extends State<OtpName> {
         MaterialPageRoute(builder: (context) => const LoginPage()),
         (Route<dynamic> route) => false,
       );
+    }
+
+    if (prefs.getBool("isOnBoardingCompleted") != null) {
+      isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
+    } else {
+      await prefs.setBool("isOnBoardingCompleted", false);
     }
   }
 
@@ -147,14 +155,25 @@ class _OtpNameState extends State<OtpName> {
 
         Navigator.pop(context);
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => DashBoard(
+        isOnBoardingCompleted
+            ? Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DashBoard(
                     version: widget.version,
-                  )),
-          (Route<dynamic> route) => false,
-        );
+                  ),
+                ),
+                (Route<dynamic> route) => false,
+              )
+            : Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => onBoarding(
+                    version: widget.version,
+                  ),
+                ),
+                (Route<dynamic> route) => false,
+              );
       } else {
         error = true;
         if (this.mounted) {
