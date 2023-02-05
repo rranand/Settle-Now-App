@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/sampleWidget/room.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
