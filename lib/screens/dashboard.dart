@@ -90,6 +90,8 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _NRoom = TextEditingController();
   final ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
   final ValueNotifier<List<RoomEach>> RoomDataC = ValueNotifier([]);
+  final ValueNotifier<double> amtSpend = ValueNotifier(0);
+  final ValueNotifier<double> due = ValueNotifier(0);
   final ValueNotifier<List<RoomEach>> SearchRoomData = ValueNotifier([]);
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
@@ -172,8 +174,6 @@ class _DashBoardState extends State<DashBoard> {
   int roomStatusIndex = 0;
   bool imageUploading = false;
   bool open = true;
-  String amtSpend = "";
-  String due = "";
   double amtSpendOpen = 0;
   double amtSpendClose = 0;
   String _profilePicID = "";
@@ -392,7 +392,7 @@ class _DashBoardState extends State<DashBoard> {
       prefs = await SharedPreferences.getInstance();
 
       if (prefs.getBool("isBankMessageLoadedOnce") != null) {
-        bankMessageShowedOnce =  await prefs.getBool("isBankMessageLoadedOnce")!;
+        bankMessageShowedOnce = await prefs.getBool("isBankMessageLoadedOnce")!;
       }
 
       if (await prefs.getBool("isGoogle") != null) {
@@ -465,8 +465,10 @@ class _DashBoardState extends State<DashBoard> {
           }));
 
       if (response.statusCode == 200) {
-        amtSpend = crypto.decrypt(jsonDecode(response.body)['amtSpend']);
-        due = crypto.decrypt(jsonDecode(response.body)['due']);
+        amtSpend.value =
+            double.parse(crypto.decrypt(jsonDecode(response.body)['amtSpend']));
+        due.value =
+            double.parse(crypto.decrypt(jsonDecode(response.body)['due']));
         List<dynamic> list = jsonDecode(response.body)['data'];
 
         for (int i = 0; i < list.length; i++) {
@@ -2666,6 +2668,8 @@ class _DashBoardState extends State<DashBoard> {
                                   height:
                                       MediaQuery.of(context).size.height - 180,
                                   child: RoomWidget(
+                                    totalSpent: amtSpend,
+                                    spent: due,
                                     RoomData: SearchRoomData,
                                     ClosedRoomData: RoomDataC,
                                     email: _email.text,
@@ -2757,16 +2761,19 @@ class _DashBoardState extends State<DashBoard> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    "Total : ₹ " + commaSeperator(amtSpend),
+                                    "Total : ₹ " +
+                                        commaSeperator(
+                                            amtSpend.value.toStringAsFixed(2)),
                                     style: TextStyle(fontSize: 18),
                                   ),
-                                  due.isEmpty
+                                  due.value == 0
                                       ? Text("")
                                       : Text(
-                                          (due[0] != "-"
+                                          (due.value > 0
                                                   ? "Gain : ₹ "
                                                   : "Owe : ₹ ") +
-                                              commaSeperator(due),
+                                              commaSeperator(
+                                                  due.value.toStringAsFixed(2)),
                                           style: TextStyle(fontSize: 18),
                                         ),
                                 ],
@@ -2816,6 +2823,8 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
+                                        totalSpent: amtSpend,
+                                        spent: due,
                                         RoomData: RoomDataO,
                                         ClosedRoomData: RoomDataC,
                                         email: _email.text,
@@ -2847,6 +2856,8 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
+                                        totalSpent: amtSpend,
+                                        spent: due,
                                         RoomData: RoomDataC,
                                         ClosedRoomData: RoomDataC,
                                         email: _email.text,
@@ -3696,6 +3707,8 @@ class _DashBoardState extends State<DashBoard> {
 }
 
 class RoomWidget extends StatefulWidget {
+  final ValueNotifier<double> totalSpent;
+  final ValueNotifier<double> spent;
   final ValueNotifier<List<RoomEach>> RoomData;
   final ValueNotifier<List<RoomEach>> ClosedRoomData;
   final String email;
@@ -3705,6 +3718,8 @@ class RoomWidget extends StatefulWidget {
 
   RoomWidget(
       {Key? key,
+      required this.totalSpent,
+      required this.spent,
       required this.RoomData,
       required this.ClosedRoomData,
       required this.email,
@@ -3755,8 +3770,12 @@ class _RoomWidgetState extends State<RoomWidget> {
       if (response.statusCode == 200) {
         RoomEach tempData =
             RoomEach.fromJson(jsonDecode(response.body)["data"]);
+        widget.totalSpent.value -= widget.RoomData.value[index].total;
+        widget.spent.value -= widget.RoomData.value[index].spend;
         if (tempData.active) {
           widget.RoomData.value[index] = tempData;
+          widget.totalSpent.value += widget.RoomData.value[index].total;
+          widget.spent.value += widget.RoomData.value[index].spend;
         } else {
           widget.RoomData.value.removeAt(index);
           widget.ClosedRoomData.value.insert(0, tempData);
