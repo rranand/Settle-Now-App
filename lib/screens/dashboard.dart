@@ -2668,15 +2668,13 @@ class _DashBoardState extends State<DashBoard> {
                                   height:
                                       MediaQuery.of(context).size.height - 180,
                                   child: RoomWidget(
-                                    totalSpent: amtSpend,
-                                    spent: due,
-                                    RoomData: SearchRoomData,
-                                    ClosedRoomData: RoomDataC,
-                                    email: _email.text,
-                                    flag: true,
-                                    token: _token,
-                                    refreshKey: _refreshIndicatorKey,
-                                  ),
+                                      totalSpent: amtSpend,
+                                      spent: due,
+                                      RoomData: SearchRoomData,
+                                      ClosedRoomData: RoomDataC,
+                                      email: _email.text,
+                                      flag: true,
+                                      token: _token),
                                 ),
                               ],
                             ),
@@ -2823,15 +2821,13 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                        totalSpent: amtSpend,
-                                        spent: due,
-                                        RoomData: RoomDataO,
-                                        ClosedRoomData: RoomDataC,
-                                        email: _email.text,
-                                        flag: false,
-                                        token: _token,
-                                        refreshKey: _refreshIndicatorKey,
-                                      ))
+                                          totalSpent: amtSpend,
+                                          spent: due,
+                                          RoomData: RoomDataO,
+                                          ClosedRoomData: RoomDataC,
+                                          email: _email.text,
+                                          flag: false,
+                                          token: _token))
                               : (RoomDataC.value.isEmpty
                                   ? Scrollbar(
                                       radius: Radius.circular(10.0),
@@ -2856,15 +2852,13 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                        totalSpent: amtSpend,
-                                        spent: due,
-                                        RoomData: RoomDataC,
-                                        ClosedRoomData: RoomDataC,
-                                        email: _email.text,
-                                        flag: false,
-                                        token: _token,
-                                        refreshKey: _refreshIndicatorKey,
-                                      ))),
+                                          totalSpent: amtSpend,
+                                          spent: due,
+                                          RoomData: RoomDataC,
+                                          ClosedRoomData: RoomDataC,
+                                          email: _email.text,
+                                          flag: false,
+                                          token: _token))),
                         ),
                       ),
                     ],
@@ -3714,7 +3708,6 @@ class RoomWidget extends StatefulWidget {
   final String email;
   final bool flag;
   final String token;
-  final GlobalKey<RefreshIndicatorState> refreshKey;
 
   RoomWidget(
       {Key? key,
@@ -3724,8 +3717,7 @@ class RoomWidget extends StatefulWidget {
       required this.ClosedRoomData,
       required this.email,
       required this.flag,
-      required this.token,
-      required this.refreshKey})
+      required this.token})
       : super(key: key);
 
   @override
