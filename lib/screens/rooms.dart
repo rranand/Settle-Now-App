@@ -356,10 +356,13 @@ class _RoomExpenseState extends State<RoomExpense>
         Navigator.pop(context);
         Navigator.pop(context);
 
-        _refreshIndicatorKey.currentState?.show();
-
         if (response.statusCode == 422) {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
+        } else {
+          await Future.wait([
+            _initialisation(),
+            _extractExpenseData(),
+          ]);
         }
       } on Exception catch (_) {
         Navigator.pop(context);
