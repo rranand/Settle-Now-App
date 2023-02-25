@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -92,6 +91,7 @@ class _RoomExpenseState extends State<RoomExpense>
   int roomExpenseCategoryIndex = 0;
   List<dynamic> filterResult = [];
   double totalAmount = 0;
+  bool isClosedany = false;
 
   Future<void> initChart() async {
     Map<String, double> tempMap = {};
@@ -151,6 +151,7 @@ class _RoomExpenseState extends State<RoomExpense>
   Future _initialisation() async {
     if (this.mounted) {
       setState(() {
+        isClosedany = false;
         heightExpense = 0;
         loaded = false;
         allExpenseList.clear();
@@ -188,6 +189,7 @@ class _RoomExpenseState extends State<RoomExpense>
         isClear = list[0]["done"];
 
         for (int i = 1; i < list.length; i++) {
+          isClosedany = isClosedany || list[i]["done"];
           membersListName.add(crypto.decrypt(list[i]["Name"]));
           membersListEmail.add(crypto.decrypt(list[i]["email"]));
           dataMapByUser.add(ChartData.byUser(
@@ -397,11 +399,12 @@ class _RoomExpenseState extends State<RoomExpense>
         Navigator.pop(context);
         Navigator.pop(context);
         Navigator.pop(context);
-        await Future.wait([
-          _initialisation(),
-          _getPaymentData(),
-        ]);
-        showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
+        if (response.statusCode == 200) {
+          showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
+          await executeParallel();
+        } else {
+          showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
+        }
       } on Exception catch (_) {
         Navigator.pop(context);
         await onException(context);
@@ -3190,35 +3193,37 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                       itemCount: list.length,
                                                                                       itemBuilder: (BuildContext context, int index) {
                                                                                         if (index == 0) {
-                                                                                          return InkWell(
-                                                                                            child: SizedBox(
-                                                                                              width: 85,
-                                                                                              child: Padding(
-                                                                                                  padding: EdgeInsets.all(8.0),
-                                                                                                  child: Card(
-                                                                                                      color: Theme.of(context).dialogBackgroundColor,
-                                                                                                      shape: RoundedRectangleBorder(
-                                                                                                        side: BorderSide(color: addExpenseTo.isEmpty ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
-                                                                                                        borderRadius: BorderRadius.circular(15.0),
-                                                                                                      ),
-                                                                                                      child: Padding(
-                                                                                                          padding: const EdgeInsets.all(8.0),
-                                                                                                          child: Center(
-                                                                                                            child: Text(
-                                                                                                              "ALL",
-                                                                                                              style: TextStyle(
-                                                                                                                fontSize: 14,
-                                                                                                              ),
+                                                                                          return isClosedany
+                                                                                              ? SizedBox()
+                                                                                              : InkWell(
+                                                                                                  child: SizedBox(
+                                                                                                    width: 85,
+                                                                                                    child: Padding(
+                                                                                                        padding: EdgeInsets.all(8.0),
+                                                                                                        child: Card(
+                                                                                                            color: Theme.of(context).dialogBackgroundColor,
+                                                                                                            shape: RoundedRectangleBorder(
+                                                                                                              side: BorderSide(color: addExpenseTo.isEmpty ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                                                                                                              borderRadius: BorderRadius.circular(15.0),
                                                                                                             ),
-                                                                                                          )))),
-                                                                                            ),
-                                                                                            onTap: () {
-                                                                                              addExpenseTo.clear();
-                                                                                              if (this.mounted) {
-                                                                                                setState(() {});
-                                                                                              }
-                                                                                            },
-                                                                                          );
+                                                                                                            child: Padding(
+                                                                                                                padding: const EdgeInsets.all(8.0),
+                                                                                                                child: Center(
+                                                                                                                  child: Text(
+                                                                                                                    "ALL",
+                                                                                                                    style: TextStyle(
+                                                                                                                      fontSize: 14,
+                                                                                                                    ),
+                                                                                                                  ),
+                                                                                                                )))),
+                                                                                                  ),
+                                                                                                  onTap: () {
+                                                                                                    addExpenseTo.clear();
+                                                                                                    if (this.mounted) {
+                                                                                                      setState(() {});
+                                                                                                    }
+                                                                                                  },
+                                                                                                );
                                                                                         } else if (list[index]['done'] || membersListEmail[index - 1] == widget.email) {
                                                                                           return SizedBox();
                                                                                         } else {

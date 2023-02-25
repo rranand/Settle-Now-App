@@ -309,9 +309,13 @@ class _LendCreditState extends State<LendCredit> {
                                                             ["total"])),
                                                 style: TextStyle(
                                                   fontSize: 18,
+                                                  color: crypto.decrypt(data[
+                                                                  index]
+                                                              ["total"])[0] ==
+                                                          '-'
+                                                      ? Colors.red
+                                                      : Colors.green,
                                                   fontWeight: FontWeight.w500,
-                                                  foreground: Paint()
-                                                    ..shader = linearGradient_2,
                                                 ),
                                               ),
                                             ]),

@@ -93,6 +93,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       end: DateTime.now());
 
   List<TransactionEach> filteredResult = [];
+  bool isClosedany = false;
 
   Future<void> getLenDenData() async {
     try {
@@ -154,6 +155,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   Future<void> getMembers(String roomkey) async {
     if (this.mounted) {
       setState(() {
+        isClosedany = false;
         isSplitMemberLoading = true;
       });
     }
@@ -170,6 +172,11 @@ class _BankTransactionsState extends State<BankTransactions> {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         roomMembers = data['data'];
+        roomMembers.forEach((element) {
+          if (element['done']) {
+            isClosedany = true;
+          }
+        });
       }
     } on Exception catch (_) {
       await onException(context);
@@ -1027,49 +1034,55 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 itemCount: roomMembers.length + 1,
                                 itemBuilder: (BuildContext context, int index) {
                                   if (index == 0) {
-                                    return InkWell(
-                                      child: SizedBox(
-                                        width: 85,
-                                        child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: Card(
-                                                color: Theme.of(context)
-                                                    .dialogBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: addExpenseTo
-                                                              .isEmpty
-                                                          ? Theme.of(context)
-                                                              .primaryColor
-                                                          : Theme.of(context)
-                                                              .cardColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Center(
-                                                      child: Text(
-                                                        "ALL",
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                        ),
+                                    return isClosedany
+                                        ? SizedBox()
+                                        : InkWell(
+                                            child: SizedBox(
+                                              width: 85,
+                                              child: Padding(
+                                                  padding: EdgeInsets.all(8.0),
+                                                  child: Card(
+                                                      color: Theme.of(context)
+                                                          .dialogBackgroundColor,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        side: BorderSide(
+                                                            color: addExpenseTo
+                                                                    .isEmpty
+                                                                ? Theme.of(
+                                                                        context)
+                                                                    .primaryColor
+                                                                : Theme.of(
+                                                                        context)
+                                                                    .cardColor),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.0),
                                                       ),
-                                                    )))),
-                                      ),
-                                      onTap: () {
-                                        addExpenseTo.clear();
-                                        if (this.mounted) {
-                                          setState(() {});
-                                        }
-                                      },
-                                    );
-                                  } else if (crypto.decrypt(
-                                          roomMembers[index - 1]['email']) ==
-                                      widget.email) {
+                                                      child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(8.0),
+                                                          child: Center(
+                                                            child: Text(
+                                                              "ALL",
+                                                              style: TextStyle(
+                                                                fontSize: 14,
+                                                              ),
+                                                            ),
+                                                          )))),
+                                            ),
+                                            onTap: () {
+                                              addExpenseTo.clear();
+                                              if (this.mounted) {
+                                                setState(() {});
+                                              }
+                                            },
+                                          );
+                                  } else if (roomMembers[index - 1]['done'] ||
+                                      crypto.decrypt(roomMembers[index - 1]
+                                              ['email']) ==
+                                          widget.email) {
                                     return SizedBox();
                                   } else {
                                     return InkWell(
