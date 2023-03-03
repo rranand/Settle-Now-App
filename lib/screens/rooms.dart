@@ -140,7 +140,9 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -216,17 +218,21 @@ class _RoomExpenseState extends State<RoomExpense>
         }
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
+        }
       } else {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
       if (this.mounted) {
-        await onException(context);
+        if (this.mounted) {
+          await onException(context);
+        }
       }
     }
   }
@@ -264,7 +270,9 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -316,7 +324,9 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     heightExpense =
@@ -354,9 +364,15 @@ class _RoomExpenseState extends State<RoomExpense>
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
         isPreviousPageNeedToBeUpdated.value = true;
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pop(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
 
         if (response.statusCode == 422) {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
@@ -367,8 +383,12 @@ class _RoomExpenseState extends State<RoomExpense>
           ]);
         }
       } on Exception catch (_) {
-        Navigator.pop(context);
-        await onException(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          await onException(context);
+        }
       }
       if (this.mounted) {
         setState(() {});
@@ -396,9 +416,15 @@ class _RoomExpenseState extends State<RoomExpense>
 
         _amt.text = "";
         Tdata = jsonDecode(response.body);
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pop(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
         if (response.statusCode == 200) {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
           await executeParallel();
@@ -406,8 +432,12 @@ class _RoomExpenseState extends State<RoomExpense>
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
       } on Exception catch (_) {
-        Navigator.pop(context);
-        await onException(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          await onException(context);
+        }
       }
       if (this.mounted) {
         setState(() {});
@@ -455,8 +485,12 @@ class _RoomExpenseState extends State<RoomExpense>
         }
       }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -480,12 +514,20 @@ class _RoomExpenseState extends State<RoomExpense>
       CloseData = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated.value = true;
       showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
-      Navigator.pop(context);
-      Navigator.pop(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
       await _initialisation();
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -522,7 +564,9 @@ class _RoomExpenseState extends State<RoomExpense>
                             width: 80,
                             child: OutlinedButton(
                               onPressed: () {
-                                Navigator.pop(context);
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
                               },
                               style: OutlinedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
@@ -830,9 +874,13 @@ class _RoomExpenseState extends State<RoomExpense>
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
-    Navigator.pop(context);
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   keepAlive() async {
@@ -861,9 +909,13 @@ class _RoomExpenseState extends State<RoomExpense>
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
-    Navigator.pop(context);
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   closeRoomRequest() async {
@@ -881,7 +933,9 @@ class _RoomExpenseState extends State<RoomExpense>
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
   }
 
@@ -2874,8 +2928,12 @@ class _RoomExpenseState extends State<RoomExpense>
                                                 onTap: () async {
                                                   buildShowDialog(context);
                                                   await closeRoomRequest();
-                                                  Navigator.pop(context);
-                                                  Navigator.pop(context);
+                                                  if (this.mounted) {
+                                                    Navigator.pop(context);
+                                                  }
+                                                  if (this.mounted) {
+                                                    Navigator.pop(context);
+                                                  }
                                                 },
                                               ),
                                               !isClear
@@ -3006,7 +3064,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                     style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                                                                                                   ),
                                                                                                   onPressed: () {
-                                                                                                    Navigator.pop(context);
+                                                                                                    if (this.mounted) {
+                                                                                                      Navigator.pop(context);
+                                                                                                    }
                                                                                                   }),
                                                                                             ),
                                                                                             SizedBox(
@@ -3368,7 +3428,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                 style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                                                                                               ),
                                                                                               onPressed: () {
-                                                                                                Navigator.pop(context);
+                                                                                                if (this.mounted) {
+                                                                                                  Navigator.pop(context);
+                                                                                                }
                                                                                               }),
                                                                                         ),
                                                                                         SizedBox(
@@ -3476,7 +3538,9 @@ class _ExpenseDataState extends State<ExpenseData> {
       widget.isPreviousPageNeedToBeUpdated.value = true;
       widget.refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
   }
 
@@ -3581,9 +3645,15 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         _amount.text,
                                         "0",
                                         split);
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
                                   }
                                 }),
                           ),
@@ -3613,9 +3683,13 @@ class _ExpenseDataState extends State<ExpenseData> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
-    Navigator.pop(context);
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   bool userInPartialExpense(List<dynamic> partialExpense, String email) {
@@ -3672,8 +3746,12 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         _amount.text,
                                         "1",
                                         partialExpense.isEmpty ? "0" : "1");
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
                                   },
                                   icon: Icon(Icons.delete)),
                               IconButton(
@@ -3836,8 +3914,12 @@ class _ExpenseDataState extends State<ExpenseData> {
                             buildShowDialog(context);
                             await addToPersonalExpense(
                                 id, partialExpense.isEmpty ? "0" : "1");
-                            Navigator.pop(context);
-                            Navigator.pop(context);
+                            if (this.mounted) {
+                              Navigator.pop(context);
+                            }
+                            if (this.mounted) {
+                              Navigator.pop(context);
+                            }
                           },
                           style: OutlinedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -3882,7 +3964,9 @@ class _ExpenseDataState extends State<ExpenseData> {
                       side: BorderSide(color: Theme.of(context).primaryColor),
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
+                      if (this.mounted) {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
                 ),

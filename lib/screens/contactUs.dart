@@ -46,12 +46,18 @@ class _ContactUsState extends State<ContactUs> {
         _subject.text = "";
         _message.text = "";
         Tdata = jsonDecode(response.body);
-        Navigator.pop(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
 
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
       } on Exception catch (_) {
-        Navigator.pop(context);
-        await onException(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          await onException(context);
+        }
       }
 
       if (this.mounted) {
@@ -79,7 +85,9 @@ class _ContactUsState extends State<ContactUs> {
         }
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     return contactData;
   }

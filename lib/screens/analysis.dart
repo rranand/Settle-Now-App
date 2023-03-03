@@ -97,7 +97,9 @@ class _AnalysisState extends State<Analysis> {
         });
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -311,7 +313,9 @@ class _AnalysisState extends State<Analysis> {
         RoomData = jsonDecode(response.body)['data'];
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     return RoomData;
   }

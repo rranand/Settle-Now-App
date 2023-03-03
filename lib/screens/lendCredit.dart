@@ -45,7 +45,9 @@ class _LendCreditState extends State<LendCredit> {
           }));
 
       if (response.statusCode == 200) {
-        Navigator.pop(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
         data.add(jsonDecode(response.body)['data']);
         _name.text = "";
       } else {
@@ -53,7 +55,9 @@ class _LendCreditState extends State<LendCredit> {
             Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -88,7 +92,9 @@ class _LendCreditState extends State<LendCredit> {
             Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     indexLoading = -1;
@@ -117,18 +123,24 @@ class _LendCreditState extends State<LendCredit> {
         data = jsonDecode(response.body)['data'];
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
+        }
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     load = true;
@@ -188,22 +200,24 @@ class _LendCreditState extends State<LendCredit> {
                               padding: const EdgeInsets.all(8.0),
                               child: InkWell(
                                 onTap: () async {
-                                  final dataFrom = await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => LendPage(
-                                                email: widget.email,
-                                                token: widget.token,
-                                                name: crypto.decrypt(
-                                                    data[index]["name"]),
-                                                roomkey: crypto.decrypt(
-                                                    data[index]["key"]),
-                                                roomLink: crypto.decrypt(
-                                                    data[index]["roomLink"]),
-                                              )));
-                                  if (dataFrom) {
-                                    await updateRoom(
-                                        context, index, data[index]["key"]);
+                                  if (this.mounted) {
+                                    final dataFrom = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) => LendPage(
+                                                  email: widget.email,
+                                                  token: widget.token,
+                                                  name: crypto.decrypt(
+                                                      data[index]["name"]),
+                                                  roomkey: crypto.decrypt(
+                                                      data[index]["key"]),
+                                                  roomLink: crypto.decrypt(
+                                                      data[index]["roomLink"]),
+                                                )));
+                                    if (dataFrom) {
+                                      await updateRoom(
+                                          context, index, data[index]["key"]);
+                                    }
                                   }
                                 },
                                 child: Card(
@@ -469,7 +483,9 @@ class _LendCreditState extends State<LendCredit> {
                                   validateText = false;
                                   buildShowDialog(context);
                                   await createRoom(context);
-                                  Navigator.pop(context);
+                                  if (this.mounted) {
+                                    Navigator.pop(context);
+                                  }
                                 } else {
                                   validateText = true;
                                 }

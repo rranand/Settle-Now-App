@@ -49,11 +49,13 @@ class _LoginPageState extends State<LoginPage> {
 
       if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
+        }
       }
     } on Exception catch (_) {}
   }
@@ -84,25 +86,27 @@ class _LoginPageState extends State<LoginPage> {
         prefs.getString("name") != null &&
         prefs.getString("token") != null &&
         prefs.getString("pushToken") != null) {
-      isOnBoardingCompleted
-          ? Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DashBoard(
-                  version: version,
+      if (this.mounted) {
+        isOnBoardingCompleted
+            ? Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DashBoard(
+                    version: version,
+                  ),
                 ),
-              ),
-              (Route<dynamic> route) => false,
-            )
-          : Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => onBoarding(
-                  version: version,
+                (Route<dynamic> route) => false,
+              )
+            : Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => onBoarding(
+                    version: version,
+                  ),
                 ),
-              ),
-              (Route<dynamic> route) => false,
-            );
+                (Route<dynamic> route) => false,
+              );
+      }
     } else {
       canLoad = true;
     }
@@ -117,14 +121,11 @@ class _LoginPageState extends State<LoginPage> {
     deviceToken = token.toString();
   }
 
-  executeParallel() async {
-    await Future.wait([_extractEmail(), keepAlive()]);
-  }
-
   @override
   void initState() {
     super.initState();
-    executeParallel();
+    _extractEmail();
+    keepAlive();
   }
 
   @override
@@ -195,86 +196,101 @@ class _LoginPageState extends State<LoginPage> {
                       width: 140,
                       height: 45,
                       child: ElevatedButton(
-                        child: Text(
-                          "Send OTP",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 17,
-                              color: Colors.white),
-                        ),
-                        onPressed: () => MoveToNext(
-                            context,
-                            OtpName(email: _emailId.text, version: version),
-                            _formKey),
-                      ),
+                          child: Text(
+                            "Send OTP",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 17,
+                                color: Colors.white),
+                          ),
+                          onPressed: () {
+                            if (this.mounted) {
+                              MoveToNext(
+                                  context,
+                                  OtpName(
+                                      email: _emailId.text, version: version),
+                                  _formKey);
+                            }
+                          }),
                     ),
                     SizedBox(
                       height: 10,
                     ),
                     InkWell(
                       onTap: () async {
-                        final user = await GoogleSignIN.login();
+                        try {
+                          final user = await GoogleSignIN.login();
 
-                        buildShowDialog(context);
-                        String token = crypto.encrypt((user?.email).toString() +
-                            "#" +
-                            _deviceData['id'] +
-                            "#" +
-                            DateTime.now().toString());
-                        await getDeviceTokenToSendNotification();
+                          buildShowDialog(context);
+                          String token = crypto.encrypt(
+                              (user?.email).toString() +
+                                  "#" +
+                                  _deviceData['id'] +
+                                  "#" +
+                                  DateTime.now().toString());
+                          await getDeviceTokenToSendNotification();
 
-                        final ipAdd = await http.get(
-                          Uri.parse('http://ip-api.com/json'),
-                        );
+                          final ipAdd = await http.get(
+                            Uri.parse('http://ip-api.com/json'),
+                          );
 
-                        final JD = jsonDecode(ipAdd.body);
-                        prefs.setBool("isGoogle", true);
-                        prefs.setString("email", (user?.email).toString());
-                        prefs.setString("name", (user?.displayName).toString());
-                        prefs.setString("token", token);
-                        prefs.setString("pushToken", deviceToken);
+                          final JD = jsonDecode(ipAdd.body);
+                          prefs.setBool("isGoogle", true);
+                          prefs.setString("email", (user?.email).toString());
+                          prefs.setString(
+                              "name", (user?.displayName).toString());
+                          prefs.setString("token", token);
+                          prefs.setString("pushToken", deviceToken);
 
-                        await http.post(Uri.parse(global.url + 'login/google'),
-                            headers: <String, String>{
-                              'Content-Type': 'application/json; charset=UTF-8',
-                            },
-                            body: jsonEncode({
-                              'email': crypto.encrypt((user?.email).toString()),
-                              'name': crypto
-                                  .encrypt((user?.displayName).toString()),
-                              'profilePic':
-                                  crypto.encrypt((user?.photoUrl).toString()),
-                              'country': crypto.encrypt(JD['country']),
-                              'ip': crypto.encrypt(JD['query']),
-                              'state': crypto.encrypt(JD['regionName']),
-                              'city': crypto.encrypt(JD['city']),
-                              'isp': crypto.encrypt(JD['isp']),
-                              'device': crypto.encrypt(_deviceData['device']),
-                              'deviceID': crypto.encrypt(_deviceData['id']),
-                              'deviceToken': crypto.encrypt(deviceToken),
-                              "token": crypto.encrypt(token)
-                            }));
+                          await http.post(
+                              Uri.parse(global.url + 'login/google'),
+                              headers: <String, String>{
+                                'Content-Type':
+                                    'application/json; charset=UTF-8',
+                              },
+                              body: jsonEncode({
+                                'email':
+                                    crypto.encrypt((user?.email).toString()),
+                                'name': crypto
+                                    .encrypt((user?.displayName).toString()),
+                                'profilePic':
+                                    crypto.encrypt((user?.photoUrl).toString()),
+                                'country': crypto.encrypt(JD['country']),
+                                'ip': crypto.encrypt(JD['query']),
+                                'state': crypto.encrypt(JD['regionName']),
+                                'city': crypto.encrypt(JD['city']),
+                                'isp': crypto.encrypt(JD['isp']),
+                                'device': crypto.encrypt(_deviceData['device']),
+                                'deviceID': crypto.encrypt(_deviceData['id']),
+                                'deviceToken': crypto.encrypt(deviceToken),
+                                "token": crypto.encrypt(token)
+                              }));
 
-                        Navigator.pop(context);
-                        isOnBoardingCompleted
-                            ? Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DashBoard(
-                                    version: version,
-                                  ),
-                                ),
-                                (Route<dynamic> route) => false,
-                              )
-                            : Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => onBoarding(
-                                    version: version,
-                                  ),
-                                ),
-                                (Route<dynamic> route) => false,
-                              );
+                          if (this.mounted) {
+                            Navigator.pop(context);
+                          }
+                          if (this.mounted) {
+                            isOnBoardingCompleted
+                                ? Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DashBoard(
+                                        version: version,
+                                      ),
+                                    ),
+                                    (Route<dynamic> route) => false,
+                                  )
+                                : Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => onBoarding(
+                                        version: version,
+                                      ),
+                                    ),
+                                    (Route<dynamic> route) => false,
+                                  );
+                          }
+                        } on Exception catch (_) {}
                       },
                       child: SizedBox(
                         width: 240,

@@ -105,7 +105,6 @@ showToast(BuildContext context, String show, IconData icon) {
       color: Colors.grey.shade700,
     ),
     child: Row(
-      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           icon,
@@ -114,9 +113,11 @@ showToast(BuildContext context, String show, IconData icon) {
         SizedBox(
           width: 12.0,
         ),
-        Text(
-          show,
-          style: TextStyle(color: Colors.white),
+        Expanded(
+          child: Text(
+            show,
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ],
     ),

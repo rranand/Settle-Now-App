@@ -227,7 +227,9 @@ class _DashBoardState extends State<DashBoard> {
         }
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -428,11 +430,13 @@ class _DashBoardState extends State<DashBoard> {
           await GoogleSignIN.logout();
         }
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginPage()),
+            (Route<dynamic> route) => false,
+          );
+        }
       }
     }
 
@@ -463,7 +467,6 @@ class _DashBoardState extends State<DashBoard> {
             'email': crypto.encrypt(_email.text),
             'version': crypto.encrypt(appVersion)
           }));
-
       if (response.statusCode == 200) {
         amtSpend.value =
             double.parse(crypto.decrypt(jsonDecode(response.body)['amtSpend']));
@@ -502,30 +505,42 @@ class _DashBoardState extends State<DashBoard> {
         }
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
-      } else {
-        await prefs.remove("email");
-        await prefs.remove("name");
-        await prefs.remove("token");
-        await prefs.remove("pushToken");
-        await deleteToken();
-
-        if (isGoogle) {
-          await GoogleSignIN.logout();
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
         }
+      } else {
+        String errorMessage =
+            crypto.decrypt(jsonDecode(response.body)['Message']);
+        if (this.mounted) {
+          showToast(context, errorMessage, Icons.close);
+        }
+        if (errorMessage == 'Login Expired') {
+          await prefs.remove("email");
+          await prefs.remove("name");
+          await prefs.remove("token");
+          await prefs.remove("pushToken");
+          await deleteToken();
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-          (Route<dynamic> route) => false,
-        );
+          if (isGoogle) {
+            await GoogleSignIN.logout();
+          }
+          if (this.mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+              (Route<dynamic> route) => false,
+            );
+          }
+        }
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -554,10 +569,33 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode == 200) {
         RoomRequest = data["data"];
       } else {
-        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+        String errorMessage = crypto.decrypt(data["Message"]);
+        if (this.mounted) {
+          showToast(context, errorMessage, Icons.close);
+        }
+        if (errorMessage == 'Login Expired') {
+          await prefs.remove("email");
+          await prefs.remove("name");
+          await prefs.remove("token");
+          await prefs.remove("pushToken");
+          await deleteToken();
+
+          if (isGoogle) {
+            await GoogleSignIN.logout();
+          }
+          if (this.mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+              (Route<dynamic> route) => false,
+            );
+          }
+        }
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     isRoomRequestLoaded = true;
@@ -596,9 +634,15 @@ class _DashBoardState extends State<DashBoard> {
       _NRoom.text = "";
       var JsonData = jsonDecode(response.body);
 
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pop(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
 
       if (response.statusCode == 200) {
         RoomDataO.value
@@ -607,8 +651,12 @@ class _DashBoardState extends State<DashBoard> {
         showToast(context, crypto.decrypt(JsonData["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
   }
 
@@ -637,10 +685,33 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode == 200) {
         sentRoomRequest = data["data"];
       } else {
-        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+        String errorMessage = crypto.decrypt(data["Message"]);
+        if (this.mounted) {
+          showToast(context, errorMessage, Icons.close);
+        }
+        if (errorMessage == 'Login Expired') {
+          await prefs.remove("email");
+          await prefs.remove("name");
+          await prefs.remove("token");
+          await prefs.remove("pushToken");
+          await deleteToken();
+
+          if (isGoogle) {
+            await GoogleSignIN.logout();
+          }
+          if (this.mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginPage()),
+              (Route<dynamic> route) => false,
+            );
+          }
+        }
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     isSentRoomRequestLoaded = true;
 
@@ -664,7 +735,9 @@ class _DashBoardState extends State<DashBoard> {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -817,7 +890,9 @@ class _DashBoardState extends State<DashBoard> {
           }));
     } on Exception catch (_) {}
 
-    Navigator.pop(context);
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   buildFilterDialog(BuildContext context) {
@@ -1246,7 +1321,9 @@ class _DashBoardState extends State<DashBoard> {
                                       fontSize: 16),
                                 ),
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  if (this.mounted) {
+                                    Navigator.pop(context);
+                                  }
                                 },
                                 style: OutlinedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
@@ -1331,7 +1408,9 @@ class _DashBoardState extends State<DashBoard> {
                                   }
                                   if (!error) {
                                     DateChanged = true;
-                                    Navigator.pop(context);
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
                                   }
                                   setState(() {});
                                 },
@@ -1534,10 +1613,16 @@ class _DashBoardState extends State<DashBoard> {
       } else {
         await _requestIndicatorKey.currentState?.show();
       }
-      Navigator.pop(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
   }
 
@@ -1558,10 +1643,16 @@ class _DashBoardState extends State<DashBoard> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
       await _requestIndicatorKey.currentState?.show();
-      Navigator.pop(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
   }
 
@@ -3220,25 +3311,27 @@ class _DashBoardState extends State<DashBoard> {
                         ),
                   ListTile(
                     onTap: () async {
-                      final dataFrom = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => BankTransactions(
-                                  email: _email.text,
-                                  token: _token,
-                                  fromDashboard: bankMessageShowedOnce,
-                                  expenseCategory: expenseCategory,
-                                  investmentCategory: investmentCategory,
-                                  roomExpenseCategory: roomExpenseCategory,
-                                )),
-                      );
-
-                      if (dataFrom) {
-                        bankMessageShowedOnce = dataFrom;
-                      }
-
                       if (this.mounted) {
-                        setState(() {});
+                        final dataFrom = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BankTransactions(
+                                    email: _email.text,
+                                    token: _token,
+                                    fromDashboard: bankMessageShowedOnce,
+                                    expenseCategory: expenseCategory,
+                                    investmentCategory: investmentCategory,
+                                    roomExpenseCategory: roomExpenseCategory,
+                                  )),
+                        );
+
+                        if (dataFrom) {
+                          bankMessageShowedOnce = dataFrom;
+                        }
+
+                        if (this.mounted) {
+                          setState(() {});
+                        }
                       }
                     },
                     leading: Icon(
@@ -3314,10 +3407,14 @@ class _DashBoardState extends State<DashBoard> {
                     ),
                   ),
                   ListTile(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AboutUs()),
-                    ),
+                    onTap: () {
+                      if (this.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => AboutUs()),
+                        );
+                      }
+                    },
                     leading: Icon(
                       Icons.book_outlined,
                       color: Colors.white,
@@ -3329,14 +3426,18 @@ class _DashBoardState extends State<DashBoard> {
                     ),
                   ),
                   ListTile(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => ContactUs(
-                                email: _email.text,
-                                token: _token,
-                              )),
-                    ),
+                    onTap: () {
+                      if (this.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ContactUs(
+                                    email: _email.text,
+                                    token: _token,
+                                  )),
+                        );
+                      }
+                    },
                     leading: Icon(
                       Icons.rate_review_outlined,
                       color: Colors.white,
@@ -3372,12 +3473,13 @@ class _DashBoardState extends State<DashBoard> {
                       if (isGoogle) {
                         await GoogleSignIN.logout();
                       }
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                        (Route<dynamic> route) => false,
-                      );
+                      if (this.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                          (Route<dynamic> route) => false,
+                        );
+                      }
                     },
                     leading: Icon(
                       Icons.logout,
@@ -3777,7 +3879,9 @@ class _RoomWidgetState extends State<RoomWidget> {
             Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     indexLoading = -1;
@@ -3822,7 +3926,9 @@ class _RoomWidgetState extends State<RoomWidget> {
         membersData = data['data'];
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     return membersData;
   }
@@ -4290,7 +4396,9 @@ class _RoomWidgetState extends State<RoomWidget> {
         ),
       ),
       onTap: () async {
-        await _MoveToNext(context, index);
+        if (this.mounted) {
+          await _MoveToNext(context, index);
+        }
       },
     );
   }

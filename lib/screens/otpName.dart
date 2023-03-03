@@ -80,11 +80,13 @@ class _OtpNameState extends State<OtpName> {
       }
     } else if (jsonDecode(response.body)['maintenance'] != null &&
         jsonDecode(response.body)['maintenance']) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => Maintenance()),
-        (Route<dynamic> route) => false,
-      );
+      if (this.mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => Maintenance()),
+          (Route<dynamic> route) => false,
+        );
+      }
     } else {
       showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
           Icons.close);
@@ -153,27 +155,30 @@ class _OtpNameState extends State<OtpName> {
               'deviceToken': crypto.encrypt(deviceToken)
             }));
 
-        Navigator.pop(context);
-
-        isOnBoardingCompleted
-            ? Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DashBoard(
-                    version: widget.version,
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          isOnBoardingCompleted
+              ? Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashBoard(
+                      version: widget.version,
+                    ),
                   ),
-                ),
-                (Route<dynamic> route) => false,
-              )
-            : Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => onBoarding(
-                    version: widget.version,
+                  (Route<dynamic> route) => false,
+                )
+              : Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => onBoarding(
+                      version: widget.version,
+                    ),
                   ),
-                ),
-                (Route<dynamic> route) => false,
-              );
+                  (Route<dynamic> route) => false,
+                );
+        }
       } else {
         error = true;
         if (this.mounted) {
@@ -181,11 +186,17 @@ class _OtpNameState extends State<OtpName> {
             errorText = crypto.decrypt(JsonData['Message']);
           });
         }
-        Navigator.pop(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
       }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
   }
 

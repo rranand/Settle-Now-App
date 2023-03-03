@@ -165,11 +165,13 @@ class _ProfileState extends State<Profile> {
         }
       } else if (jsonDecode(response_1.body)['maintenance'] != null &&
           jsonDecode(response_1.body)['maintenance']) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
+        }
       } else {
         showToast(
             context,
@@ -179,7 +181,9 @@ class _ProfileState extends State<Profile> {
 
       updatePieChart("all");
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -216,7 +220,9 @@ class _ProfileState extends State<Profile> {
             Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -647,20 +653,26 @@ class _ProfileState extends State<Profile> {
                                     child: Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: InkWell(
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Expenses(
-                                                    email: widget.email,
-                                                    date: filterResult[index]
-                                                        .Date,
-                                                    token: widget.token,
-                                                    expenseCategory:
-                                                        widget.expenseCategory,
-                                                    investmentCategory: widget
-                                                        .investmentCategory,
-                                                  )),
-                                        ),
+                                        onTap: () {
+                                          if (this.mounted) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Expenses(
+                                                        email: widget.email,
+                                                        date:
+                                                            filterResult[index]
+                                                                .Date,
+                                                        token: widget.token,
+                                                        expenseCategory: widget
+                                                            .expenseCategory,
+                                                        investmentCategory: widget
+                                                            .investmentCategory,
+                                                      )),
+                                            );
+                                          }
+                                        },
                                         onLongPress: () async {
                                           updatePieChart(
                                               filterResult[index].Date);
@@ -735,20 +747,24 @@ class _ProfileState extends State<Profile> {
                                 child: Padding(
                                   padding: EdgeInsets.all(8.0),
                                   child: InkWell(
-                                    onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Expenses(
-                                                email: widget.email,
-                                                date:
-                                                    personalExpense[index].Date,
-                                                token: widget.token,
-                                                expenseCategory:
-                                                    widget.expenseCategory,
-                                                investmentCategory:
-                                                    widget.investmentCategory,
-                                              )),
-                                    ),
+                                    onTap: () {
+                                      if (this.mounted) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => Expenses(
+                                                    email: widget.email,
+                                                    date: personalExpense[index]
+                                                        .Date,
+                                                    token: widget.token,
+                                                    expenseCategory:
+                                                        widget.expenseCategory,
+                                                    investmentCategory: widget
+                                                        .investmentCategory,
+                                                  )),
+                                        );
+                                      }
+                                    },
                                     onLongPress: () async {
                                       updatePieChart(
                                           personalExpense[index].Date);

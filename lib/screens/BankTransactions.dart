@@ -117,7 +117,9 @@ class _BankTransactionsState extends State<BankTransactions> {
             Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -144,7 +146,9 @@ class _BankTransactionsState extends State<BankTransactions> {
         }
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -179,7 +183,9 @@ class _BankTransactionsState extends State<BankTransactions> {
         });
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     isSplitMemberLoading = false;
@@ -272,7 +278,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                           ),
                           IconButton(
                               onPressed: () async {
-                                Navigator.pop(context);
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
                               },
                               icon: Icon(Icons.close))
                         ],
@@ -334,9 +342,15 @@ class _BankTransactionsState extends State<BankTransactions> {
 
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pop(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
 
       if (response.statusCode == 422) {
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
@@ -344,8 +358,12 @@ class _BankTransactionsState extends State<BankTransactions> {
         showToast(context, "Expense Added Successfully", Icons.check);
       }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -573,10 +591,14 @@ class _BankTransactionsState extends State<BankTransactions> {
             Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
-    Navigator.pop(context);
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
     if (this.mounted) {
       setState(() {});
     }
@@ -603,9 +625,15 @@ class _BankTransactionsState extends State<BankTransactions> {
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pop(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
 
         if (response.statusCode == 422) {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
@@ -613,8 +641,9 @@ class _BankTransactionsState extends State<BankTransactions> {
           showToast(context, "Expense Added Successfully", Icons.check);
         }
       } on Exception catch (_) {
-        Navigator.pop(context);
-        await onException(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
       }
       LenDenRoomID = "";
       if (this.mounted) {
@@ -647,9 +676,15 @@ class _BankTransactionsState extends State<BankTransactions> {
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
-        Navigator.pop(context);
-        Navigator.pop(context);
-        Navigator.pop(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
 
         if (response.statusCode == 422) {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
@@ -657,8 +692,12 @@ class _BankTransactionsState extends State<BankTransactions> {
           showToast(context, "Expense Added Successfully", Icons.check);
         }
       } on Exception catch (_) {
-        Navigator.pop(context);
-        await onException(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          await onException(context);
+        }
       }
       if (this.mounted) {
         setState(() {});
@@ -1926,7 +1965,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       fontSize: 16),
                                 ),
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  if (this.mounted) {
+                                    Navigator.pop(context);
+                                  }
                                 },
                                 style: OutlinedButton.styleFrom(
                                   shape: RoundedRectangleBorder(

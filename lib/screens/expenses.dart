@@ -111,16 +111,20 @@ class _ExpensesState extends State<Expenses> {
         TransList = jsonDecode(response.body)['data'];
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
+        }
       } else {
         showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -146,7 +150,9 @@ class _ExpensesState extends State<Expenses> {
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -180,7 +186,9 @@ class _ExpensesState extends State<Expenses> {
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -290,9 +298,15 @@ class _ExpensesState extends State<Expenses> {
                                         "0",
                                         id,
                                         index);
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
                                   }
                                 }),
                           ),
@@ -342,8 +356,12 @@ class _ExpensesState extends State<Expenses> {
                               onPressed: () async {
                                 buildShowDialog(context);
                                 await removeRoomTransaction(id, index);
-                                Navigator.pop(context);
-                                Navigator.pop(context);
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
                               },
                               icon: Icon(Icons.delete))
                           : Row(
@@ -353,8 +371,12 @@ class _ExpensesState extends State<Expenses> {
                                       buildShowDialog(context);
                                       await updatePersonalTransaction(
                                           purpose, amount, "1", id, index);
-                                      Navigator.pop(context);
-                                      Navigator.pop(context);
+                                      if (this.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                      if (this.mounted) {
+                                        Navigator.pop(context);
+                                      }
                                     },
                                     icon: Icon(Icons.delete)),
                                 IconButton(
@@ -436,7 +458,9 @@ class _ExpensesState extends State<Expenses> {
                     side: BorderSide(color: Theme.of(context).primaryColor),
                   ),
                   onPressed: () {
-                    Navigator.pop(context);
+                    if (this.mounted) {
+                      Navigator.pop(context);
+                    }
                   },
                 ),
               ),
@@ -468,8 +492,12 @@ class _ExpensesState extends State<Expenses> {
           }));
 
       Tdata = jsonDecode(response.body);
-      Navigator.pop(context);
-      Navigator.pop(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
 
       if (response.statusCode == 200) {
         TransList.insert(0, Tdata['data']);
@@ -480,8 +508,12 @@ class _ExpensesState extends State<Expenses> {
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     _amt.text = "";

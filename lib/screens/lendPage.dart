@@ -90,7 +90,9 @@ class _LendPageState extends State<LendPage> {
           isPreviousPageNeedToBeUpdated = true;
           _purpose.text = "";
           _amount.text = "";
-          Navigator.pop(context);
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
           _refreshIndicatorKey.currentState?.show();
         } else {
           showToast(
@@ -99,8 +101,12 @@ class _LendPageState extends State<LendPage> {
               Icons.close);
         }
       } on Exception catch (_) {
-        Navigator.pop(context);
-        await onException(context);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          await onException(context);
+        }
       }
     }
   }
@@ -134,7 +140,9 @@ class _LendPageState extends State<LendPage> {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
     if (this.mounted) {
       setState(() {});
@@ -180,9 +188,13 @@ class _LendPageState extends State<LendPage> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
-    Navigator.pop(context);
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   cancelJoinRequest(String email, String id) async {
@@ -202,9 +214,13 @@ class _LendPageState extends State<LendPage> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
-    Navigator.pop(context);
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   Widget addFriendWidget(BuildContext context) {
@@ -444,7 +460,9 @@ class _LendPageState extends State<LendPage> {
       isPreviousPageNeedToBeUpdated = true;
       _refreshIndicatorKey.currentState?.show();
     } on Exception catch (_) {
-      await onException(context);
+      if (this.mounted) {
+        await onException(context);
+      }
     }
   }
 
@@ -616,8 +634,12 @@ class _LendPageState extends State<LendPage> {
                                             (EgaveMoney ? "" : "-") +
                                                 _Eamount.text,
                                             "0");
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
+                                        if (this.mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                        if (this.mounted) {
+                                          Navigator.pop(context);
+                                        }
                                       }
                                     }),
                               ),
@@ -653,8 +675,12 @@ class _LendPageState extends State<LendPage> {
                                             (EgaveMoney ? "" : "-") +
                                                 _Eamount.text,
                                             "1");
-                                        Navigator.pop(context);
-                                        Navigator.pop(context);
+                                        if (this.mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                        if (this.mounted) {
+                                          Navigator.pop(context);
+                                        }
                                       }
                                     }),
                               ),
@@ -702,18 +728,24 @@ class _LendPageState extends State<LendPage> {
             jsonDecode(response.body)['closedOther'];
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
+        }
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     load = true;
@@ -754,13 +786,21 @@ class _LendPageState extends State<LendPage> {
 
       CloseData = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated = true;
-      Navigator.pop(context);
-      Navigator.pop(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
       Navigator.pop(context, isPreviousPageNeedToBeUpdated);
       showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
     } on Exception catch (_) {
-      Navigator.pop(context);
-      await onException(context);
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
     }
 
     if (this.mounted) {
@@ -805,7 +845,9 @@ class _LendPageState extends State<LendPage> {
                                     color: Theme.of(context).primaryColor),
                               ),
                               onPressed: () {
-                                Navigator.pop(context);
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
                               },
                               child: Text(
                                 "No",
@@ -1517,7 +1559,9 @@ class _LendPageState extends State<LendPage> {
                                     onPressed: () async {
                                       buildShowDialog(context);
                                       await addLoan(context);
-                                      Navigator.pop(context);
+                                      if (this.mounted) {
+                                        Navigator.pop(context);
+                                      }
                                     },
                                     style: OutlinedButton.styleFrom(
                                       shape: RoundedRectangleBorder(
