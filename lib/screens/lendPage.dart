@@ -125,7 +125,7 @@ class _LendPageState extends State<LendPage> {
             'Auth': widget.token
           },
           body: jsonEncode({
-            'name': crypto.encrypt(widget.name),
+            'key': crypto.encrypt(widget.roomkey),
             'email': crypto.encrypt(widget.email),
           }));
 
@@ -180,7 +180,7 @@ class _LendPageState extends State<LendPage> {
             'Auth': widget.token
           },
           body: jsonEncode({
-            'name': crypto.encrypt(widget.name),
+            'key': crypto.encrypt(widget.roomkey),
             'email': crypto.encrypt(widget.email),
             'fEmail': crypto.encrypt(email)
           }));
