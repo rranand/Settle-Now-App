@@ -36,6 +36,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
+import 'ScheduleNotification.dart';
 import 'maintain.dart';
 import 'package:http_parser/http_parser.dart';
 
@@ -3362,6 +3363,29 @@ class _DashBoardState extends State<DashBoard> {
                               style:
                                   TextStyle(fontSize: 13, color: Colors.white)),
                         )),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      if (this.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => ScheduleNotification(
+                                    email: _email.text,
+                                    token: _token,
+                                  )),
+                        );
+                      }
+                    },
+                    leading: Icon(
+                      Icons.notifications_outlined,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    title: Text(
+                      "Remainder",
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    ),
                   ),
                   ListTile(
                     leading: Icon(
