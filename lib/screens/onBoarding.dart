@@ -92,6 +92,7 @@ class _onBoardingState extends State<onBoarding> {
       MaterialPageRoute(
           builder: (context) => DashBoard(
                 version: widget.version,
+                firstTime: false,
               )),
       (Route<dynamic> route) => false,
     );

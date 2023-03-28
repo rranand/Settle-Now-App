@@ -94,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
                 MaterialPageRoute(
                   builder: (context) => DashBoard(
                     version: version,
+                    firstTime: false,
                   ),
                 ),
                 (Route<dynamic> route) => false,
@@ -278,6 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                                     MaterialPageRoute(
                                       builder: (context) => DashBoard(
                                         version: version,
+                                        firstTime: true,
                                       ),
                                     ),
                                     (Route<dynamic> route) => false,

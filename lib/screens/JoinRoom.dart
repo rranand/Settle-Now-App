@@ -75,6 +75,7 @@ class _RoomJoinState extends State<RoomJoin> {
             MaterialPageRoute(
               builder: (context) => DashBoard(
                 version: version,
+                  firstTime: false,
               ),
             ),
             (Route<dynamic> route) => false,
@@ -95,6 +96,7 @@ class _RoomJoinState extends State<RoomJoin> {
         MaterialPageRoute(
           builder: (context) => DashBoard(
             version: version,
+            firstTime: false,
           ),
         ),
         (Route<dynamic> route) => false,

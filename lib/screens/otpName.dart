@@ -165,6 +165,7 @@ class _OtpNameState extends State<OtpName> {
                   MaterialPageRoute(
                     builder: (context) => DashBoard(
                       version: widget.version,
+                      firstTime: true,
                     ),
                   ),
                   (Route<dynamic> route) => false,

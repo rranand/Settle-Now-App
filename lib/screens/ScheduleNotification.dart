@@ -176,7 +176,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         var Tdata = jsonDecode(response.body);
         if (response.statusCode == 200) {
           data.add(Tdata['data']);
-          for (int i = 0; i < 4; i++) {
+          for (int i = 0; i < IDs.length; i++) {
             await AwesomeNotifications().createNotification(
                 content: NotificationContent(
                     id: IDs[i],

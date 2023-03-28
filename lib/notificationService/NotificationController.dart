@@ -58,6 +58,7 @@ class NotificationController {
             builder: (_) => DashBoard(
                   version: receivedAction.payload!["version"].toString(),
                   dash: 1,
+                  firstTime: false,
                 )));
       }
     } else if (receivedAction.payload!["type"] == "LenDenRequest") {
@@ -90,6 +91,7 @@ class NotificationController {
             builder: (_) => DashBoard(
                   version: receivedAction.payload!["version"].toString(),
                   dash: 1,
+                  firstTime: false,
                 )));
       }
     } else {

@@ -68,7 +68,9 @@ class ShareMessage {
 class DashBoard extends StatefulWidget {
   final String version;
   final int dash;
-  const DashBoard({Key? key, required this.version, this.dash = 0})
+  final bool firstTime;
+  const DashBoard(
+      {Key? key, required this.version, this.dash = 0, required this.firstTime})
       : super(key: key);
 
   @override
@@ -83,6 +85,7 @@ class _DashBoardState extends State<DashBoard> {
   bool isGoogle = false;
   var now;
   String date = "";
+  bool notificationSetupComplete = false;
   final TextEditingController _email = TextEditingController();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController();
@@ -184,6 +187,51 @@ class _DashBoardState extends State<DashBoard> {
   GoogleSignInAccount? _currentUser;
   bool _flexibleUpdateAvailable = false;
   bool importantUpdate = false;
+
+  Future<void> checkforScheduledNotifications() async {
+    if (widget.firstTime && !notificationSetupComplete) {
+      List<dynamic> data = [];
+      try {
+        final response = await http.post(Uri.parse(global.url + 'remainder'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Auth': _token
+            },
+            body: jsonEncode({
+              "email": crypto.encrypt(_email.text),
+            }));
+
+        if (response.statusCode == 200) {
+          var tempData = jsonDecode(response.body);
+          data = tempData['data'];
+
+          for (int i = 0; i < data.length; i++) {
+            String notID = crypto.decrypt(data[i]["notID"]);
+            List<String> IDs = notID.substring(1, notID.length - 1).split(', ');
+            for (int j = 0; j < IDs.length; j++) {
+              await AwesomeNotifications().createNotification(
+                  content: NotificationContent(
+                      id: int.parse(IDs[j]),
+                      channelKey: 'remainderID',
+                      title: "Remainder",
+                      body: crypto.decrypt(data[i]['name']),
+                      payload: null),
+                  schedule: NotificationCalendar(
+                      day: int.parse(crypto.decrypt(data[i]["dates"])),
+                      hour: 7 + (i * 4),
+                      allowWhileIdle: true,
+                      timeZone: "Asia/Kolkata"));
+            }
+          }
+        }
+      } on Exception catch (_) {}
+      if (this.mounted) {
+        setState(() {
+          notificationSetupComplete = true;
+        });
+      }
+    }
+  }
 
   Future<void> checkForUpdate() async {
     await InAppUpdate.checkForUpdate().then((info) {
@@ -425,6 +473,7 @@ class _DashBoardState extends State<DashBoard> {
         await prefs.remove("name");
         await prefs.remove("token");
         await prefs.remove("pushToken");
+        await AwesomeNotifications().cancelAllSchedules();
         await deleteToken();
 
         if (isGoogle) {
@@ -521,6 +570,7 @@ class _DashBoardState extends State<DashBoard> {
         }
         if (errorMessage == 'Login Expired') {
           await prefs.remove("email");
+          await AwesomeNotifications().cancelAllSchedules();
           await prefs.remove("name");
           await prefs.remove("token");
           await prefs.remove("pushToken");
@@ -577,6 +627,7 @@ class _DashBoardState extends State<DashBoard> {
         if (errorMessage == 'Login Expired') {
           await prefs.remove("email");
           await prefs.remove("name");
+          await AwesomeNotifications().cancelAllSchedules();
           await prefs.remove("token");
           await prefs.remove("pushToken");
           await deleteToken();
@@ -693,6 +744,7 @@ class _DashBoardState extends State<DashBoard> {
         if (errorMessage == 'Login Expired') {
           await prefs.remove("email");
           await prefs.remove("name");
+          await AwesomeNotifications().cancelAllSchedules();
           await prefs.remove("token");
           await prefs.remove("pushToken");
           await deleteToken();
@@ -801,6 +853,7 @@ class _DashBoardState extends State<DashBoard> {
     await Future.wait([
       getInitialData(),
       manualUpdateCheck(),
+      checkforScheduledNotifications(),
       _extractEmail(),
       _updateCheck(),
       getRoomRequest(),
