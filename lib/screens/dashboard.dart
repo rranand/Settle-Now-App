@@ -830,6 +830,11 @@ class _DashBoardState extends State<DashBoard> {
           channelName: "Room Request",
           channelDescription: 'Notification channel for Room Request',
           defaultColor: Colors.deepPurple),
+      NotificationChannel(
+          channelKey: "remainderID",
+          channelName: "Remainder",
+          channelDescription: 'Notification channel for Remainders',
+          defaultColor: Colors.deepPurple),
     ]);
 
     FirebaseMessaging.instance.getInitialMessage().then(

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
@@ -26,14 +26,11 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   final TextEditingController _name = TextEditingController();
+  int currentDateIndex = 0;
   bool load = true;
-  List<dynamic> data = [
-    {"id": "A", "name": "Rent", "dates": "1"},
-    {"id": "B", "name": "Checkup", "dates": "13"},
-    {"id": "C", "name": "Bill", "dates": "15"}
-  ];
-  String currentDateTime = "";
-  DateFormat dateFormat_new = DateFormat("EEE, MMM dd yyyy");
+  final _formKey = GlobalKey<FormState>();
+  List<dynamic> data = [];
+  List<String> dates = [];
 
   @override
   void initState() {
@@ -47,13 +44,17 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       if (this.mounted) {
         setState(() {
           load = false;
-          //data.clear();
+          data.clear();
+          dates.clear();
         });
       }
 
-      currentDateTime = dateFormat_new.format(DateTime.now());
+      currentDateIndex = DateTime.now().day - 1;
+      for (int i = 0; i < 31; i++) {
+        dates.add((i + 1).toString());
+      }
 
-      /*final response = await http.put(Uri.parse(global.url + 'lend'),
+      final response = await http.post(Uri.parse(global.url + 'remainder'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'Auth': widget.token
@@ -63,6 +64,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
           }));
 
       if (response.statusCode == 200) {
+        var tempData = jsonDecode(response.body);
+        data = tempData['data'];
       } else if (jsonDecode(response.body)['maintenance'] != null &&
           jsonDecode(response.body)['maintenance']) {
         if (this.mounted) {
@@ -75,7 +78,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
-      }*/
+      }
     } on Exception catch (_) {
       if (this.mounted) {
         Navigator.pop(context);
@@ -91,7 +94,123 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
     }
   }
 
-  void showDetailsPopUp(String name, String dates, String id) {
+  Future _deleteRemainder(String id, int index, String notID) async {
+    notID = crypto.decrypt(notID);
+    List<String> IDs = notID.substring(1, notID.length - 1).split(', ');
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+
+    try {
+      final response = await http.delete(Uri.parse(global.url + 'remainder'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'id': crypto.encrypt(id)
+          }));
+
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+
+      var Tdata = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        for (int i = 0; i < IDs.length; i++) {
+          await AwesomeNotifications().cancelSchedule(int.parse(IDs[i]));
+        }
+        data.removeAt(index);
+        showToast(context, "Remainder Deleted", Icons.check);
+      } else {
+        showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Future _addRemainder() async {
+    if (_formKey.currentState!.validate()) {
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
+
+      List<int> IDs = [];
+      for (int i = 0; i < 4; i++) {
+        IDs.add(
+            DateTime.now().add(Duration(hours: i * 4)).millisecondsSinceEpoch ~/
+                1000);
+      }
+
+      try {
+        final response = await http.patch(Uri.parse(global.url + 'remainder'),
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Auth': widget.token
+            },
+            body: jsonEncode({
+              'email': crypto.encrypt(widget.email),
+              'name': crypto.encrypt(_name.text),
+              'date': crypto.encrypt(dates[currentDateIndex]),
+              'notID': crypto.encrypt(IDs.toString())
+            }));
+
+        _name.text = "";
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+
+        var Tdata = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          data.add(Tdata['data']);
+          for (int i = 0; i < 4; i++) {
+            await AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                    id: IDs[i],
+                    channelKey: 'remainderID',
+                    title: "Remainder",
+                    body: crypto.decrypt(data.last['name']),
+                    payload: null),
+                schedule: NotificationCalendar(
+                    day: int.parse(dates[currentDateIndex]),
+                    hour: 7 + (i * 4),
+                    allowWhileIdle: true,
+                    timeZone: "Asia/Kolkata"));
+          }
+
+          showToast(context, "Remainder Created", Icons.check);
+        } else {
+          showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
+        }
+      } on Exception catch (_) {
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          await onException(context);
+        }
+      }
+      if (this.mounted) {
+        setState(() {});
+      }
+    }
+  }
+
+  void showDetailsPopUp(
+      String name, String dates, String id, int index, String notID) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
     showDialog(
@@ -117,13 +236,16 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                               height: 8,
                             ),
                             Text(
-                              name,
+                              crypto.decrypt(name),
                               style: TextStyle(fontSize: 24),
                             ),
                             SizedBox(
                               height: 16,
                             ),
-                            Text("On Every " + dates + " of Month",
+                            Text(
+                                "On Every " +
+                                    crypto.decrypt(dates) +
+                                    " of Month",
                                 style: TextStyle(fontSize: 19)),
                             SizedBox(
                               height: 16,
@@ -135,7 +257,12 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                   height: 40,
                                   width: 100,
                                   child: OutlinedButton(
-                                    onPressed: () {},
+                                    onPressed: () async {
+                                      await _deleteRemainder(id, index, notID);
+                                      if (this.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    },
                                     style: OutlinedButton.styleFrom(
                                       shape: RoundedRectangleBorder(
                                         borderRadius:
@@ -204,103 +331,135 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0)),
                 child: Padding(
-                  padding: MediaQuery.of(context).viewInsets,
+                  padding: const EdgeInsets.all(8.0),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              height: 8,
-                            ),
-                            Text(
-                              "Add Remainder",
-                              style: TextStyle(fontSize: 24),
-                            ),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            TextFormField(
-                              controller: _name,
-                              keyboardType: TextInputType.text,
-                              maxLength: 1000,
-                              maxLines: 1,
-                              style: const TextStyle(fontSize: 18),
-                              autocorrect: false,
-                              validator: (value) {
-                                if (_name.text.length <= 2) {
-                                  return "Enter Valid Remind Message";
-                                }
-                                return null;
-                              },
-                              decoration: const InputDecoration(
-                                counterText: "",
-                                contentPadding: EdgeInsets.all(8.0),
-                                hintText: "Enter Remind Message",
-                                labelText: "Remind me to",
-                                errorStyle: TextStyle(fontSize: 15),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                height: 8,
                               ),
-                            ),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            InkWell(
-                              onTap: () async {
-                                DateTime? result = await showDatePicker(
-                                  context: context,
-                                  firstDate: DateTime.now(),
-                                  lastDate: DateTime(2030, 12, 31),
-                                  initialDate: DateTime.now(),
-                                );
-                                if (result == null) {
-                                  currentDateTime = currentDateTime;
-                                } else {
-                                  currentDateTime =
-                                      dateFormat_new.format(result);
-                                }
-
-                                if (this.mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              child: Padding(
+                              Text(
+                                "Add Remainder",
+                                style: TextStyle(fontSize: 24),
+                              ),
+                              SizedBox(
+                                height: 16,
+                              ),
+                              TextFormField(
+                                controller: _name,
+                                keyboardType: TextInputType.text,
+                                maxLength: 1000,
+                                maxLines: 1,
+                                style: const TextStyle(fontSize: 18),
+                                autocorrect: false,
+                                validator: (value) {
+                                  if (_name.text.length <= 2) {
+                                    return "Enter Valid Remind Message";
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  counterText: "",
+                                  contentPadding: EdgeInsets.all(8.0),
+                                  hintText: "Enter Remind Message",
+                                  labelText: "Remind me to",
+                                  errorStyle: TextStyle(fontSize: 15),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 16,
+                              ),
+                              Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                  currentDateTime,
+                                  "On Every " +
+                                      dates[currentDateIndex] +
+                                      " of Month",
                                   style: TextStyle(fontSize: 19),
                                 ),
                               ),
-                            ),
-                            SizedBox(
-                              height: 16,
-                            ),
-                            SizedBox(
-                              height: 40,
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              child: OutlinedButton(
-                                onPressed: () {},
-                                style: OutlinedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  side: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                ),
-                                child: Text(
-                                  "Add",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: themeProvider.isDarkTheme
-                                          ? Colors.white
-                                          : Colors.black),
-                                ),
+                              SizedBox(
+                                height: 16,
                               ),
-                            )
-                          ]),
+                              SizedBox(
+                                height: 220,
+                                child: GridView.builder(
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount:
+                                          (MediaQuery.of(context).size.width /
+                                                  60)
+                                              .round(),
+                                      childAspectRatio: 1.1,
+                                    ),
+                                    physics: AlwaysScrollableScrollPhysics(),
+                                    itemCount: dates.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return InkWell(
+                                        onTap: () async {
+                                          if (this.mounted) {
+                                            setState(() {
+                                              currentDateIndex = index;
+                                            });
+                                          }
+                                        },
+                                        child: Container(
+                                          width: 25,
+                                          height: 25,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: (currentDateIndex == index)
+                                                ? Theme.of(context).primaryColor
+                                                : null,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Center(
+                                              child: Text(
+                                                dates[index],
+                                                style: TextStyle(fontSize: 15),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                              ),
+                              SizedBox(
+                                height: 40,
+                                width: MediaQuery.of(context).size.width * 0.9,
+                                child: OutlinedButton(
+                                  onPressed: () async {
+                                    await _addRemainder();
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    side: BorderSide(
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                  child: Text(
+                                    "Add",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black),
+                                  ),
+                                ),
+                              )
+                            ]),
+                      ),
                     ),
                   ),
                 ));
@@ -335,7 +494,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                       MediaQuery.of(context).size.height - 100,
                                   child: Center(
                                     child: Text(
-                                      "No Notification Scheduled",
+                                      "No Remainder",
                                       style: TextStyle(fontSize: 25),
                                     ),
                                   ),
@@ -361,7 +520,9 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                           showDetailsPopUp(
                                               data[index]["name"],
                                               data[index]["dates"],
-                                              data[index]["id"]);
+                                              data[index]["id"],
+                                              index,
+                                              data[index]["notID"]);
                                         },
                                         child: Card(
                                             elevation: 1.0,
@@ -387,7 +548,10 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(data[index]["name"],
+                                                    Text(
+                                                        crypto.decrypt(
+                                                            data[index]
+                                                                ["name"]),
                                                         style: TextStyle(
                                                             fontSize: 18)),
                                                     SizedBox(
@@ -395,8 +559,9 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                                     ),
                                                     Text(
                                                         "On Every " +
-                                                            data[index]
-                                                                ["dates"] +
+                                                            crypto.decrypt(
+                                                                data[index]
+                                                                    ["dates"]) +
                                                             " of Month",
                                                         style: TextStyle(
                                                             fontSize: 16))
