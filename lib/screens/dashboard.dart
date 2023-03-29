@@ -218,7 +218,7 @@ class _DashBoardState extends State<DashBoard> {
                       payload: null),
                   schedule: NotificationCalendar(
                       day: int.parse(crypto.decrypt(data[i]["dates"])),
-                      hour: 7 + (i * 4),
+                      hour: 7 + (j * 4),
                       allowWhileIdle: true,
                       timeZone: "Asia/Kolkata"));
             }
