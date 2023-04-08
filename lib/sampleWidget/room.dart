@@ -278,7 +278,8 @@ Widget sampleRoomGraph(BuildContext context) {
       spend: 8000,
       date: "",
       roomLink: "",
-      done: false));
+      done: false,
+      membersData: []));
 
   data.add(RoomEach(
       roomName: "February 2022",
@@ -289,7 +290,8 @@ Widget sampleRoomGraph(BuildContext context) {
       spend: 9000,
       date: "",
       roomLink: "",
-      done: false));
+      done: false,
+      membersData: []));
 
   data.add(RoomEach(
       roomName: "March 2022",
@@ -300,7 +302,8 @@ Widget sampleRoomGraph(BuildContext context) {
       spend: 7000,
       date: "",
       roomLink: "",
-      done: false));
+      done: false,
+      membersData: []));
 
   data.add(RoomEach(
       roomName: "April 2022",
@@ -311,7 +314,8 @@ Widget sampleRoomGraph(BuildContext context) {
       spend: 6000,
       date: "",
       roomLink: "",
-      done: false));
+      done: false,
+      membersData: []));
 
   data.add(RoomEach(
       roomName: "May 2022",
@@ -322,7 +326,8 @@ Widget sampleRoomGraph(BuildContext context) {
       spend: 12222,
       date: "",
       roomLink: "",
-      done: false));
+      done: false,
+      membersData: []));
 
   return SizedBox(
     height: 300,

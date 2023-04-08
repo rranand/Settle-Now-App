@@ -12,6 +12,7 @@ class RoomEach {
   final String date;
   final String roomLink;
   final bool done;
+  final List<dynamic> membersData;
 
   RoomEach(
       {required this.roomName,
@@ -22,7 +23,8 @@ class RoomEach {
       required this.spend,
       required this.date,
       required this.roomLink,
-      required this.done});
+      required this.done,
+      required this.membersData});
 
   factory RoomEach.fromJson(Map<String, dynamic> json) {
     return RoomEach(
@@ -35,6 +37,7 @@ class RoomEach {
       spend: double.parse(crypto.decrypt(json['spend'])),
       date: formatDateTime(crypto.decrypt(json['date'])),
       roomLink: crypto.decrypt(json['joinLink']),
+      membersData: json['memberData'],
     );
   }
 }

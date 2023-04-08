@@ -3989,30 +3989,8 @@ class _RoomWidgetState extends State<RoomWidget> {
     }
   }
 
-  Future<List<dynamic>> getMembers(BuildContext context, String roomkey) async {
-    List<dynamic> membersData = [];
-    try {
-      final response = await http.post(
-          Uri.parse(global.url + 'room/roomSplitMembers'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'roomKey': crypto.encrypt(roomkey)
-          }));
-
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        membersData = data['data'];
-      }
-    } on Exception catch (_) {
-      if (this.mounted) {
-        await onException(context);
-      }
-    }
-    return membersData;
+  Future<List<dynamic>> getMembers(int index) async {
+    return widget.RoomData.value[index].membersData;
   }
 
   Widget roomSectors(BuildContext context, int index) {
@@ -4391,8 +4369,7 @@ class _RoomWidgetState extends State<RoomWidget> {
                                   children: allImages,
                                 );
                               },
-                              future: getMembers(context,
-                                  widget.RoomData.value[index].roomKey),
+                              future: getMembers(index),
                             ),
                           ),
                         ),
