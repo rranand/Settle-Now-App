@@ -117,6 +117,8 @@ class _DashBoardState extends State<DashBoard> {
   List<dynamic> roomExpenseCategory = [];
   late ShareMessage shareMessage;
   bool roomDataFetched = false;
+  final ValueNotifier<Map<String, List<dynamic>>> membersData =
+      ValueNotifier(new Map());
   List<String> Month = [
     'January',
     'February',
@@ -248,6 +250,35 @@ class _DashBoardState extends State<DashBoard> {
       }).catchError((e) {});
 
       await InAppUpdate.completeFlexibleUpdate();
+    }
+  }
+
+  Future<void> getMembersData() async {
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + 'room/allRoomMembers'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': _token
+          },
+          body: jsonEncode({
+            "email": crypto.encrypt(_email.text),
+          }));
+
+      if (response.statusCode == 200) {
+        var tempData = jsonDecode(response.body)["data"];
+
+        for (int i = 0; i < tempData.length; i++) {
+          membersData.value[tempData[i][0]] = tempData[i][1];
+        }
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -493,6 +524,10 @@ class _DashBoardState extends State<DashBoard> {
     if (this.mounted) {
       setState(() {});
     }
+  }
+
+  Future _executeParallelRefresh() async {
+    await Future.wait([_extractEmail(), getMembersData()]);
   }
 
   Future<void> _extractEmail() async {
@@ -858,7 +893,8 @@ class _DashBoardState extends State<DashBoard> {
       _updateCheck(),
       getRoomRequest(),
       fetchSentRequest(),
-      _getImageID()
+      _getImageID(),
+      getMembersData()
     ]);
   }
 
@@ -1668,7 +1704,8 @@ class _DashBoardState extends State<DashBoard> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
       if (flag == "1") {
-        await Future.wait([_extractEmail(), getRoomRequest()]);
+        await Future.wait(
+            [_extractEmail(), getRoomRequest(), getMembersData()]);
       } else {
         await _requestIndicatorKey.currentState?.show();
       }
@@ -2467,7 +2504,7 @@ class _DashBoardState extends State<DashBoard> {
   Widget homeWidget(BuildContext context) {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
-        onRefresh: _extractEmail,
+        onRefresh: _executeParallelRefresh,
         child: (RoomDataO.value.isEmpty && RoomDataC.value.isEmpty)
             ? (roomDataFetched
                 ? ListView(
@@ -2818,13 +2855,15 @@ class _DashBoardState extends State<DashBoard> {
                                   height:
                                       MediaQuery.of(context).size.height - 180,
                                   child: RoomWidget(
-                                      totalSpent: amtSpend,
-                                      spent: due,
-                                      RoomData: SearchRoomData,
-                                      ClosedRoomData: RoomDataC,
-                                      email: _email.text,
-                                      flag: true,
-                                      token: _token),
+                                    totalSpent: amtSpend,
+                                    spent: due,
+                                    RoomData: SearchRoomData,
+                                    ClosedRoomData: RoomDataC,
+                                    email: _email.text,
+                                    flag: true,
+                                    token: _token,
+                                    membersData: membersData,
+                                  ),
                                 ),
                               ],
                             ),
@@ -2971,13 +3010,15 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                          totalSpent: amtSpend,
-                                          spent: due,
-                                          RoomData: RoomDataO,
-                                          ClosedRoomData: RoomDataC,
-                                          email: _email.text,
-                                          flag: false,
-                                          token: _token))
+                                        totalSpent: amtSpend,
+                                        spent: due,
+                                        RoomData: RoomDataO,
+                                        ClosedRoomData: RoomDataC,
+                                        email: _email.text,
+                                        flag: false,
+                                        token: _token,
+                                        membersData: membersData,
+                                      ))
                               : (RoomDataC.value.isEmpty
                                   ? Scrollbar(
                                       radius: Radius.circular(10.0),
@@ -3002,13 +3043,15 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                          totalSpent: amtSpend,
-                                          spent: due,
-                                          RoomData: RoomDataC,
-                                          ClosedRoomData: RoomDataC,
-                                          email: _email.text,
-                                          flag: false,
-                                          token: _token))),
+                                        totalSpent: amtSpend,
+                                        spent: due,
+                                        RoomData: RoomDataC,
+                                        ClosedRoomData: RoomDataC,
+                                        email: _email.text,
+                                        flag: false,
+                                        token: _token,
+                                        membersData: membersData,
+                                      ))),
                         ),
                       ),
                     ],
@@ -3892,6 +3935,7 @@ class RoomWidget extends StatefulWidget {
   final String email;
   final bool flag;
   final String token;
+  final ValueNotifier<Map<String, List<dynamic>>> membersData;
 
   RoomWidget(
       {Key? key,
@@ -3901,7 +3945,8 @@ class RoomWidget extends StatefulWidget {
       required this.ClosedRoomData,
       required this.email,
       required this.flag,
-      required this.token})
+      required this.token,
+      required this.membersData})
       : super(key: key);
 
   @override
@@ -3990,7 +4035,29 @@ class _RoomWidgetState extends State<RoomWidget> {
   }
 
   Future<List<dynamic>> getMembers(int index) async {
-    return widget.RoomData.value[index].membersData;
+    if (widget.membersData.value
+        .containsKey(widget.RoomData.value[index].roomID)) {
+      return widget.membersData.value[widget.RoomData.value[index].roomID]!;
+    }
+
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + 'room/roomSplitMembers'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'roomKey': crypto.encrypt(widget.RoomData.value[index].roomKey)
+          }));
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        return data['data'];
+      }
+    } on Exception catch (_) {}
+    return [];
   }
 
   Widget roomSectors(BuildContext context, int index) {

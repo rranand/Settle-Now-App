@@ -171,7 +171,7 @@ class _BankTransactionsState extends State<BankTransactions> {
             'Auth': widget.token
           },
           body: jsonEncode(
-              {'email': crypto.encrypt(widget.email), 'roomKey': roomkey}));
+              {'email': crypto.encrypt(widget.email), 'roomKey': [crypto.decrypt(roomkey)].toString()}));
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
