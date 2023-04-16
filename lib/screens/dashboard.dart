@@ -4035,6 +4035,10 @@ class _RoomWidgetState extends State<RoomWidget> {
   }
 
   Future<List<dynamic>> getMembers(int index) async {
+    if (widget.membersData.value.isEmpty) {
+      return [];
+    }
+
     if (widget.membersData.value
         .containsKey(widget.RoomData.value[index].roomID)) {
       return widget.membersData.value[widget.RoomData.value[index].roomID]!;
