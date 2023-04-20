@@ -1,4 +1,4 @@
-# settlenow
+# Settle Now
 
 Need a way to split bills equally among friends/flatmates?
 Then don't worry, we have a solution for you. Let's make it possible using "Settle Now".
