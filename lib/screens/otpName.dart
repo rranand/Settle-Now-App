@@ -29,9 +29,9 @@ class OtpName extends StatefulWidget {
 
 class _OtpNameState extends State<OtpName> {
   bool error = false;
-  String errorText = "Invalid OTP!!!";
+  String errorText = "Invalid OTP!";
   bool errorN = false;
-  final String errorTextN = "Invalid Name!!!";
+  final String errorTextN = "Invalid Name!";
   late var data = null;
   bool verified = false;
   var JsonData = null;

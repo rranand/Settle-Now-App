@@ -18,27 +18,28 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  AwesomeNotifications().initialize(null, [
+  AwesomeNotifications()
+      .initialize('resource://drawable/ic_notification_icon', [
     NotificationChannel(
         channelKey: "roomID",
         channelName: "Room",
         channelDescription: 'Notification channel for Room',
-        defaultColor: Colors.deepPurple),
+          defaultColor: Colors.white),
     NotificationChannel(
         channelKey: "lendenID",
         channelName: "Len-Den",
         channelDescription: 'Notification channel for Len-Den',
-        defaultColor: Colors.deepPurple),
+          defaultColor: Colors.white),
     NotificationChannel(
         channelKey: "requestID",
         channelName: "Room Request",
         channelDescription: 'Notification channel for Room Request',
-        defaultColor: Colors.deepPurple),
+          defaultColor: Colors.white),
     NotificationChannel(
         channelKey: "remainderID",
         channelName: "Remainder",
         channelDescription: 'Notification channel for Remainders',
-        defaultColor: Colors.deepPurple),
+          defaultColor: Colors.white),
   ]);
 
   runApp(MyApp());

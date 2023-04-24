@@ -902,28 +902,29 @@ class _DashBoardState extends State<DashBoard> {
   void initState() {
     super.initState();
     executeParallel();
-    AwesomeNotifications().initialize(null, [
+    AwesomeNotifications()
+        .initialize('resource://drawable/ic_notification_icon', [
       NotificationChannel(
         channelKey: "roomID",
         channelName: "Room",
         channelDescription: 'Notification channel for Room',
-        defaultColor: Colors.deepPurple,
+        defaultColor: Colors.white,
       ),
       NotificationChannel(
           channelKey: "lendenID",
           channelName: "Len-Den",
           channelDescription: 'Notification channel for Len-Den',
-          defaultColor: Colors.deepPurple),
+          defaultColor: Colors.white),
       NotificationChannel(
           channelKey: "requestID",
           channelName: "Room Request",
           channelDescription: 'Notification channel for Room Request',
-          defaultColor: Colors.deepPurple),
+          defaultColor: Colors.white),
       NotificationChannel(
           channelKey: "remainderID",
           channelName: "Remainder",
           channelDescription: 'Notification channel for Remainders',
-          defaultColor: Colors.deepPurple),
+          defaultColor: Colors.white),
     ]);
 
     FirebaseMessaging.instance.getInitialMessage().then(
@@ -2515,7 +2516,7 @@ class _DashBoardState extends State<DashBoard> {
                         width: MediaQuery.of(context).size.width,
                         child: Center(
                           child: Text(
-                            "No Room Joined, Create One!!!",
+                            "No Room Joined, Create One!",
                             style: TextStyle(
                               fontSize: 22,
                             ),
@@ -2998,7 +2999,7 @@ class _DashBoardState extends State<DashBoard> {
                                             MediaQuery.of(context).size.width,
                                         child: Center(
                                           child: Text(
-                                            "No Live Room Found!!!",
+                                            "No Live Room Found!",
                                             style: TextStyle(
                                               fontSize: 25,
                                             ),
@@ -3031,7 +3032,7 @@ class _DashBoardState extends State<DashBoard> {
                                             MediaQuery.of(context).size.width,
                                         child: Center(
                                           child: Text(
-                                            "No Closed Room Found!!!",
+                                            "No Closed Room Found!",
                                             style: TextStyle(
                                               fontSize: 25,
                                             ),

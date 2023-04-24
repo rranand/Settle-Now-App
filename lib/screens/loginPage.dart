@@ -179,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                               RegExp validateEmail = RegExp(
                                   r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b');
                               if (!validateEmail.hasMatch(_emailId.text)) {
-                                return "Invalid Email!!!";
+                                return "Invalid Email!";
                               }
                               return null;
                             },
