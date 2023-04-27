@@ -500,16 +500,15 @@ class _DashBoardState extends State<DashBoard> {
         _token = prefs.getString("token")!;
         initalDataLoaded = true;
       } else {
-        await prefs.remove("email");
-        await prefs.remove("name");
-        await prefs.remove("token");
-        await prefs.remove("pushToken");
-        await AwesomeNotifications().cancelAllSchedules();
-        await deleteToken();
-
-        if (isGoogle) {
-          await GoogleSignIN.logout();
-        }
+        await Future.wait([
+          prefs.remove('name'),
+          prefs.remove('email'),
+          prefs.remove('token'),
+          prefs.remove('pushToken'),
+          AwesomeNotifications().cancelAllSchedules(),
+          deleteToken(),
+          logOutFromGoogle()
+        ]);
 
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
@@ -604,16 +603,16 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
-          await prefs.remove("email");
-          await AwesomeNotifications().cancelAllSchedules();
-          await prefs.remove("name");
-          await prefs.remove("token");
-          await prefs.remove("pushToken");
-          await deleteToken();
+          await Future.wait([
+            prefs.remove('name'),
+            prefs.remove('email'),
+            prefs.remove('token'),
+            prefs.remove('pushToken'),
+            AwesomeNotifications().cancelAllSchedules(),
+            deleteToken(),
+            logOutFromGoogle()
+          ]);
 
-          if (isGoogle) {
-            await GoogleSignIN.logout();
-          }
           if (this.mounted) {
             Navigator.pushAndRemoveUntil(
               context,
@@ -660,16 +659,16 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
-          await prefs.remove("email");
-          await prefs.remove("name");
-          await AwesomeNotifications().cancelAllSchedules();
-          await prefs.remove("token");
-          await prefs.remove("pushToken");
-          await deleteToken();
+          await Future.wait([
+            prefs.remove('name'),
+            prefs.remove('email'),
+            prefs.remove('token'),
+            prefs.remove('pushToken'),
+            AwesomeNotifications().cancelAllSchedules(),
+            deleteToken(),
+            logOutFromGoogle()
+          ]);
 
-          if (isGoogle) {
-            await GoogleSignIN.logout();
-          }
           if (this.mounted) {
             Navigator.pushAndRemoveUntil(
               context,
@@ -777,16 +776,16 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
-          await prefs.remove("email");
-          await prefs.remove("name");
-          await AwesomeNotifications().cancelAllSchedules();
-          await prefs.remove("token");
-          await prefs.remove("pushToken");
-          await deleteToken();
+          await Future.wait([
+            prefs.remove('name'),
+            prefs.remove('email'),
+            prefs.remove('token'),
+            prefs.remove('pushToken'),
+            AwesomeNotifications().cancelAllSchedules(),
+            deleteToken(),
+            logOutFromGoogle()
+          ]);
 
-          if (isGoogle) {
-            await GoogleSignIN.logout();
-          }
           if (this.mounted) {
             Navigator.pushAndRemoveUntil(
               context,
@@ -972,7 +971,13 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
-  deleteToken() async {
+  Future<void> logOutFromGoogle() async {
+    if (isGoogle) {
+      await GoogleSignIN.logout();
+    }
+  }
+
+  Future<void> deleteToken() async {
     buildShowDialog(context);
 
     try {
@@ -983,6 +988,7 @@ class _DashBoardState extends State<DashBoard> {
           },
           body: jsonEncode({
             'email': crypto.encrypt(_email.text),
+            'from': crypto.encrypt('android')
           }));
     } on Exception catch (_) {}
 
@@ -3590,15 +3596,16 @@ class _DashBoardState extends State<DashBoard> {
                   ),
                   ListTile(
                     onTap: () async {
-                      await prefs.remove('name');
-                      await prefs.remove('email');
-                      await prefs.remove('token');
-                      await prefs.remove('pushToken');
-                      await deleteToken();
+                      await Future.wait([
+                        prefs.remove('name'),
+                        prefs.remove('email'),
+                        prefs.remove('token'),
+                        prefs.remove('pushToken'),
+                        AwesomeNotifications().cancelAllSchedules(),
+                        deleteToken(),
+                        logOutFromGoogle()
+                      ]);
 
-                      if (isGoogle) {
-                        await GoogleSignIN.logout();
-                      }
                       if (this.mounted) {
                         Navigator.pushAndRemoveUntil(
                           context,
