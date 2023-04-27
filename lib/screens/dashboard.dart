@@ -500,6 +500,7 @@ class _DashBoardState extends State<DashBoard> {
         _token = prefs.getString("token")!;
         initalDataLoaded = true;
       } else {
+        buildShowDialog(context);
         await Future.wait([
           prefs.remove('name'),
           prefs.remove('email'),
@@ -509,6 +510,9 @@ class _DashBoardState extends State<DashBoard> {
           deleteToken(),
           logOutFromGoogle()
         ]);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
 
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
@@ -603,6 +607,7 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
+          buildShowDialog(context);
           await Future.wait([
             prefs.remove('name'),
             prefs.remove('email'),
@@ -612,6 +617,9 @@ class _DashBoardState extends State<DashBoard> {
             deleteToken(),
             logOutFromGoogle()
           ]);
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
 
           if (this.mounted) {
             Navigator.pushAndRemoveUntil(
@@ -659,6 +667,7 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
+          buildShowDialog(context);
           await Future.wait([
             prefs.remove('name'),
             prefs.remove('email'),
@@ -668,6 +677,9 @@ class _DashBoardState extends State<DashBoard> {
             deleteToken(),
             logOutFromGoogle()
           ]);
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
 
           if (this.mounted) {
             Navigator.pushAndRemoveUntil(
@@ -776,6 +788,7 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
+          buildShowDialog(context);
           await Future.wait([
             prefs.remove('name'),
             prefs.remove('email'),
@@ -785,6 +798,9 @@ class _DashBoardState extends State<DashBoard> {
             deleteToken(),
             logOutFromGoogle()
           ]);
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
 
           if (this.mounted) {
             Navigator.pushAndRemoveUntil(
@@ -978,8 +994,6 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> deleteToken() async {
-    buildShowDialog(context);
-
     try {
       await http.delete(Uri.parse(global.url + 'verify'),
           headers: <String, String>{
@@ -991,10 +1005,6 @@ class _DashBoardState extends State<DashBoard> {
             'from': crypto.encrypt('android')
           }));
     } on Exception catch (_) {}
-
-    if (this.mounted) {
-      Navigator.pop(context);
-    }
   }
 
   buildFilterDialog(BuildContext context) {
@@ -3596,6 +3606,7 @@ class _DashBoardState extends State<DashBoard> {
                   ),
                   ListTile(
                     onTap: () async {
+                      buildShowDialog(context);
                       await Future.wait([
                         prefs.remove('name'),
                         prefs.remove('email'),
@@ -3605,6 +3616,9 @@ class _DashBoardState extends State<DashBoard> {
                         deleteToken(),
                         logOutFromGoogle()
                       ]);
+                      if (this.mounted) {
+                        Navigator.pop(context);
+                      }
 
                       if (this.mounted) {
                         Navigator.pushAndRemoveUntil(
