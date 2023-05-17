@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,17 +18,9 @@ import '../contents.dart' as global;
 import '../models/ChartData.dart';
 import 'expenses.dart';
 
-class Entry {
-  final String title;
-  final List<Entry> children;
-  Entry(this.title, [this.children = const <Entry>[]]);
-}
-
 class Profile extends StatefulWidget {
   final String email;
   final String token;
-  final double closeRoomSpend;
-  final double openRoomSpend;
   final List<dynamic> expenseCategory;
   final List<dynamic> investmentCategory;
 
@@ -35,8 +28,6 @@ class Profile extends StatefulWidget {
       {Key? key,
       required this.email,
       required this.token,
-      required this.closeRoomSpend,
-      required this.openRoomSpend,
       required this.expenseCategory,
       required this.investmentCategory})
       : super(key: key);
@@ -50,11 +41,14 @@ class _ProfileState extends State<Profile> {
   bool personalLoaded = false;
   bool roomLoaded = false;
   double totalPersonalExpense = 0;
-  Entry ExpenseData = Entry("Total: ₹ 0");
   bool showfilterResult = false;
+  bool hasMore = true;
   Set<int> monthIndex = Set();
   Set<int> yearIndex = Set();
   List<dynamic> category = [];
+  final scrollController = ScrollController();
+  bool fetchingData = false;
+  bool loadFirstTime = true;
   List<String> Month = [
     'January',
     'February',
@@ -75,27 +69,14 @@ class _ProfileState extends State<Profile> {
   Map<String, double> yearwiseSpend = {};
   List<PersonalExpenseEach> filterResult = [];
 
-  Widget buildExpenseTile(Entry root) {
-    if (root.children.isEmpty) {
-      return ListTile(
-        title: Text(
-          root.title,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-        ),
-      );
-    } else {
-      return ExpansionTile(
-        title: Text(
-          root.title,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-        ),
-        children: root.children.map(buildExpenseTile).toList(),
-      );
-    }
+  Future _executeParallelRefresh() async {
+    await Future.wait([_initialisation(), updatePieChart("all")]);
   }
 
-  Future _initialisation() async {
-    personalLoaded = false;
+  Future<void> _initialisation() async {
+    if (loadFirstTime) {
+      personalLoaded = false;
+    }
     category = widget.expenseCategory;
 
     if (this.mounted) {
@@ -110,55 +91,19 @@ class _ProfileState extends State<Profile> {
           },
           body: jsonEncode({
             'email': crypto.encrypt(widget.email),
+            'alreadyHave': crypto.encrypt(personalExpense.length.toString())
           }));
 
       if (response_1.statusCode == 200) {
-        personalLoaded = true;
+        if (loadFirstTime) {
+          personalLoaded = true;
+        }
+        hasMore = jsonDecode(response_1.body)['hasMore'];
         List<dynamic> tempData = jsonDecode(response_1.body)['data'];
         tempData.forEach((element) {
           personalExpense.add(PersonalExpenseEach.fromJson(element));
         });
 
-        for (int i = 0; i < personalExpense.length; i++) {
-          totalPersonalExpense += personalExpense[i].Total;
-          String year = personalExpense[i].Year;
-          yearwiseSpend[year] =
-              ((yearwiseSpend[year] == null ? 0 : yearwiseSpend[year])! +
-                  personalExpense[i].Total);
-        }
-
-        Year = yearwiseSpend.keys.toList();
-        List<Entry> yearWiseExpenseEntry = [];
-        yearwiseSpend.forEach((key, value) {
-          yearWiseExpenseEntry.add(
-              Entry(key + ": ₹ " + commaSeperator(value.toStringAsFixed(2))));
-        });
-
-        ExpenseData = Entry(
-            'Total Expense: ₹ ' +
-                commaSeperator((widget.closeRoomSpend +
-                        widget.openRoomSpend +
-                        totalPersonalExpense)
-                    .toStringAsFixed(2)),
-            <Entry>[
-              Entry(
-                  'Room: ₹ ' +
-                      commaSeperator(
-                          (widget.closeRoomSpend + widget.openRoomSpend)
-                              .toStringAsFixed(2)),
-                  <Entry>[
-                    Entry('Open Room: ₹ ' +
-                        commaSeperator(
-                            widget.openRoomSpend.toStringAsFixed(2))),
-                    Entry('Close Room: ₹ ' +
-                        commaSeperator(
-                            widget.closeRoomSpend.toStringAsFixed(2)))
-                  ]),
-              Entry(
-                  'Personal Expense : ₹ ' +
-                      commaSeperator((totalPersonalExpense).toStringAsFixed(2)),
-                  yearWiseExpenseEntry)
-            ]);
         if (this.mounted) {
           setState(() {});
         }
@@ -177,20 +122,18 @@ class _ProfileState extends State<Profile> {
             crypto.decrypt(jsonDecode(response_1.body)["Message"]),
             Icons.close);
       }
-
-      updatePieChart("all");
     } on Exception catch (_) {
       if (this.mounted) {
         await onException(context);
       }
     }
-
+    loadFirstTime = false;
     if (this.mounted) {
       setState(() {});
     }
   }
 
-  updatePieChart(String date) async {
+  Future<void> updatePieChart(String date) async {
     if (this.mounted) {
       setState(() {
         dataMap.clear();
@@ -276,7 +219,25 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    _initialisation();
+    scrollController.addListener(_scrollListener);
+    _executeParallelRefresh();
+  }
+
+  void _scrollListener() async {
+    if (!loadFirstTime) {
+      if (hasMore) {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
+          fetchingData = true;
+          await _initialisation();
+          fetchingData = false;
+        }
+      }
+
+      if (this.mounted) {
+        setState(() {});
+      }
+    }
   }
 
   @override
@@ -291,10 +252,6 @@ class _ProfileState extends State<Profile> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 10,
-            ),
-            buildExpenseTile(ExpenseData),
             SizedBox(
               height: 10,
             ),
@@ -733,10 +690,20 @@ class _ProfileState extends State<Profile> {
                               ),
                             ))
                       : ListView.builder(
+                          controller: scrollController,
                           scrollDirection: Axis.horizontal,
                           shrinkWrap: true,
-                          itemCount: personalExpense.length,
+                          itemCount: personalExpense.length + 1,
                           itemBuilder: (BuildContext context, int index) {
+                            if (index == personalExpense.length) {
+                              if (fetchingData) {
+                                return CupertinoActivityIndicator(
+                                  color: Theme.of(context).primaryColor,
+                                );
+                              } else {
+                                return SizedBox();
+                              }
+                            }
                             return ConstrainedBox(
                               constraints: new BoxConstraints(
                                 minWidth: 150.0,

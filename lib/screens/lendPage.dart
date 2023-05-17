@@ -137,7 +137,9 @@ class _LendPageState extends State<LendPage> {
           friendData.add(FriendEach.fromJson(tempData[i]));
         }
       } else {
-        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+        if (this.mounted) {
+          showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+        }
       }
     } on Exception catch (_) {
       if (this.mounted) {

@@ -2001,6 +2001,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           locked: locked,
                           isPreviousPageNeedToBeUpdated:
                               isPreviousPageNeedToBeUpdated,
+                          roomExpenseCategory: roomExpenseCategory,
                         )
                       : ExpenseData(
                           TransList: TransList,
@@ -2011,6 +2012,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           locked: locked,
                           isPreviousPageNeedToBeUpdated:
                               isPreviousPageNeedToBeUpdated,
+                          roomExpenseCategory: roomExpenseCategory,
                         )),
             ),
           );
@@ -3493,6 +3495,7 @@ class ExpenseData extends StatefulWidget {
   final String Email;
   final String Token;
   final bool locked;
+  final List<dynamic> roomExpenseCategory;
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
   final ValueNotifier isPreviousPageNeedToBeUpdated;
   ExpenseData(
@@ -3503,7 +3506,8 @@ class ExpenseData extends StatefulWidget {
       required this.Token,
       required this.refreshIndicatorKey,
       required this.locked,
-      required this.isPreviousPageNeedToBeUpdated})
+      required this.isPreviousPageNeedToBeUpdated,
+      required this.roomExpenseCategory})
       : super(key: key);
 
   @override
@@ -3513,10 +3517,17 @@ class ExpenseData extends StatefulWidget {
 class _ExpenseDataState extends State<ExpenseData> {
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
+  int roomExpenseCategoryIndex = -1;
   final _updateExpense = GlobalKey<FormState>();
 
-  _updateTransaction(BuildContext context, String purpose, String id,
-      String amount, String flag, String split) async {
+  _updateTransaction(
+      BuildContext context,
+      String purpose,
+      String id,
+      String amount,
+      String flag,
+      String split,
+      int roomExpenseTypeIndex) async {
     try {
       final response = await http.patch(Uri.parse(global.url + 'transaction'),
           headers: <String, String>{
@@ -3530,7 +3541,9 @@ class _ExpenseDataState extends State<ExpenseData> {
             'amount': crypto.encrypt(amount),
             'id': crypto.encrypt(id),
             'flag': crypto.encrypt(flag),
-            'split': crypto.encrypt(split)
+            'split': crypto.encrypt(split),
+            'type':
+                crypto.encrypt(widget.roomExpenseCategory[roomExpenseTypeIndex])
           }));
 
       var updateMessage = jsonDecode(response.body);
@@ -3545,7 +3558,8 @@ class _ExpenseDataState extends State<ExpenseData> {
   }
 
   Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
-      String amount, String split) {
+      String amount, String split, String category) {
+    roomExpenseCategoryIndex = widget.roomExpenseCategory.indexOf(category);
     return StatefulBuilder(builder: (context, setState) {
       _purpose.text = purpose;
       _amount.text = amount;
@@ -3614,6 +3628,62 @@ class _ExpenseDataState extends State<ExpenseData> {
                             ),
                           ),
                           SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            height: 70,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.roomExpenseCategory.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: InkWell(
+                                      child: Card(
+                                        color: Theme.of(context)
+                                            .dialogBackgroundColor,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: roomExpenseCategoryIndex ==
+                                                      index
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : Theme.of(context)
+                                                      .cardColor),
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: Center(
+                                            child: Text(
+                                              widget.roomExpenseCategory[index],
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      onTap: () {
+                                        if (this.mounted) {
+                                          setState(
+                                            () {
+                                              roomExpenseCategoryIndex = index;
+                                            },
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(
                             height: 15,
                           ),
                           SizedBox(
@@ -3644,7 +3714,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         id,
                                         _amount.text,
                                         "0",
-                                        split);
+                                        split,
+                                        roomExpenseCategoryIndex);
                                     if (this.mounted) {
                                       Navigator.pop(context);
                                     }
@@ -3712,7 +3783,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       String amount,
       bool locked,
       List<dynamic> partialExpense,
-      String type) {
+      String type,
+      String category) {
     return StatefulBuilder(builder: (context, setState) {
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -3745,7 +3817,9 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         id,
                                         _amount.text,
                                         "1",
-                                        partialExpense.isEmpty ? "0" : "1");
+                                        partialExpense.isEmpty ? "0" : "1",
+                                        widget.roomExpenseCategory
+                                            .indexOf(category));
                                     if (this.mounted) {
                                       Navigator.pop(context);
                                     }
@@ -3766,7 +3840,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                               amount,
                                               partialExpense.isEmpty
                                                   ? "0"
-                                                  : "1"),
+                                                  : "1",
+                                              category),
                                     );
                                   },
                                   icon: Icon(Icons.edit)),
@@ -4011,6 +4086,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                       crypto.decrypt(widget.TransList[index]["Amount"]),
                       widget.locked,
                       partialExpense,
+                      crypto.decrypt(widget.TransList[index]["Type"]),
                       crypto.decrypt(widget.TransList[index]["Type"])),
                 );
               },

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -91,11 +92,11 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _search = TextEditingController();
   String _token = "";
   late SharedPreferences prefs;
+  final ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
+  final ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
   final TextEditingController _NRoom = TextEditingController();
   final ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
   final ValueNotifier<List<RoomEach>> RoomDataC = ValueNotifier([]);
-  final ValueNotifier<double> amtSpend = ValueNotifier(0);
-  final ValueNotifier<double> due = ValueNotifier(0);
   final ValueNotifier<List<RoomEach>> SearchRoomData = ValueNotifier([]);
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
@@ -116,7 +117,8 @@ class _DashBoardState extends State<DashBoard> {
   List<dynamic> investmentCategory = [];
   List<dynamic> roomExpenseCategory = [];
   late ShareMessage shareMessage;
-  bool roomDataFetched = false;
+  bool activeRoomDataFetched = false;
+  bool inActiveRoomDataFetched = false;
   final ValueNotifier<Map<String, List<dynamic>>> membersData =
       ValueNotifier(new Map());
   List<String> Month = [
@@ -180,8 +182,6 @@ class _DashBoardState extends State<DashBoard> {
   int roomStatusIndex = 0;
   bool imageUploading = false;
   bool open = true;
-  double amtSpendOpen = 0;
-  double amtSpendClose = 0;
   String _profilePicID = "";
   List<dynamic> RoomRequest = [];
   List<dynamic> sentRoomRequest = [];
@@ -253,7 +253,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future<void> getMembersData() async {
+  Future<void> getMembersData(bool roomType) async {
     try {
       final response = await http.post(
           Uri.parse(global.url + 'room/allRoomMembers'),
@@ -263,6 +263,8 @@ class _DashBoardState extends State<DashBoard> {
           },
           body: jsonEncode({
             "email": crypto.encrypt(_email.text),
+            "roomType": roomType,
+            'hasAlready': crypto.encrypt("0")
           }));
 
       if (response.statusCode == 200) {
@@ -530,15 +532,18 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future _executeParallelRefresh() async {
-    await Future.wait([_extractEmail(), getMembersData()]);
+    await Future.wait([_extractEmail(open), getMembersData(open)]);
   }
 
-  Future<void> _extractEmail() async {
-    roomDataFetched = false;
-    RoomDataO.value.clear();
-    RoomDataC.value.clear();
-    amtSpendClose = 0;
-    amtSpendOpen = 0;
+  Future<void> _extractEmail(bool roomType) async {
+    if (roomType) {
+      activeRoomDataFetched = false;
+      RoomDataO.value.clear();
+    } else {
+      inActiveRoomDataFetched = false;
+      RoomDataC.value.clear();
+    }
+
     String appVersion = await getAppVersion();
 
     if (this.mounted) {
@@ -553,41 +558,33 @@ class _DashBoardState extends State<DashBoard> {
           },
           body: jsonEncode({
             'email': crypto.encrypt(_email.text),
-            'version': crypto.encrypt(appVersion)
+            'version': crypto.encrypt(appVersion),
+            'roomType': roomType,
+            'hasAlready': crypto.encrypt("0")
           }));
       if (response.statusCode == 200) {
-        amtSpend.value =
-            double.parse(crypto.decrypt(jsonDecode(response.body)['amtSpend']));
-        due.value =
-            double.parse(crypto.decrypt(jsonDecode(response.body)['due']));
+        if (roomType) {
+          activeRoomHasMore.value = jsonDecode(response.body)['hasMore'];
+        } else {
+          inActiveRoomHasMore.value = jsonDecode(response.body)['hasMore'];
+        }
+
         List<dynamic> list = jsonDecode(response.body)['data'];
 
         for (int i = 0; i < list.length; i++) {
-          if (list[i]['active']) {
+          if (roomType) {
             RoomDataO.value.add(RoomEach.fromJson(list[i]));
-            amtSpendOpen += RoomDataO.value.last.spend;
           } else {
             RoomDataC.value.add(RoomEach.fromJson(list[i]));
-            amtSpendClose += RoomDataC.value.last.spend;
           }
         }
 
-        RoomDataO.value.sort((b, a) {
-          DateTime tempDate_1 =
-              new DateFormat(global.dateTimeFormat_new).parse(a.date);
-          DateTime tempDate_2 =
-              new DateFormat(global.dateTimeFormat_new).parse(b.date);
-          return tempDate_1.compareTo(tempDate_2);
-        });
+        if (roomType) {
+          activeRoomDataFetched = true;
+        } else {
+          inActiveRoomDataFetched = true;
+        }
 
-        RoomDataC.value.sort((b, a) {
-          DateTime tempDate_1 =
-              new DateFormat(global.dateTimeFormat_new).parse(a.date);
-          DateTime tempDate_2 =
-              new DateFormat(global.dateTimeFormat_new).parse(b.date);
-          return tempDate_1.compareTo(tempDate_2);
-        });
-        roomDataFetched = true;
         if (this.mounted) {
           setState(() {});
         }
@@ -903,13 +900,15 @@ class _DashBoardState extends State<DashBoard> {
     await Future.wait([
       getInitialData(),
       manualUpdateCheck(),
-      checkforScheduledNotifications(),
-      _extractEmail(),
+      /*checkforScheduledNotifications(),*/
+      _extractEmail(true),
+      _extractEmail(false),
       _updateCheck(),
       getRoomRequest(),
       fetchSentRequest(),
       _getImageID(),
-      getMembersData()
+      getMembersData(true),
+      getMembersData(false)
     ]);
   }
 
@@ -935,11 +934,11 @@ class _DashBoardState extends State<DashBoard> {
           channelName: "Room Request",
           channelDescription: 'Notification channel for Room Request',
           defaultColor: Colors.white),
-      NotificationChannel(
+      /*NotificationChannel(
           channelKey: "remainderID",
           channelName: "Remainder",
           channelDescription: 'Notification channel for Remainders',
-          defaultColor: Colors.white),
+          defaultColor: Colors.white),*/
     ]);
 
     FirebaseMessaging.instance.getInitialMessage().then(
@@ -1722,7 +1721,7 @@ class _DashBoardState extends State<DashBoard> {
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
       if (flag == "1") {
         await Future.wait(
-            [_extractEmail(), getRoomRequest(), getMembersData()]);
+            [_extractEmail(true), getRoomRequest(), getMembersData(true)]);
       } else {
         await _requestIndicatorKey.currentState?.show();
       }
@@ -2523,7 +2522,7 @@ class _DashBoardState extends State<DashBoard> {
         key: _refreshIndicatorKey,
         onRefresh: _executeParallelRefresh,
         child: (RoomDataO.value.isEmpty && RoomDataC.value.isEmpty)
-            ? (roomDataFetched
+            ? ((activeRoomDataFetched && inActiveRoomDataFetched)
                 ? ListView(
                     physics: AlwaysScrollableScrollPhysics(),
                     children: [
@@ -2604,52 +2603,6 @@ class _DashBoardState extends State<DashBoard> {
                                 ),
                               ),
                             ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Total : ",
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                    Container(
-                                      width: 60,
-                                      height: 20.0,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                    )
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Gain : ",
-                                      style: TextStyle(fontSize: 18),
-                                    ),
-                                    Container(
-                                      width: 60,
-                                      height: 20.0,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
                           ),
                           SizedBox(
                             height: MediaQuery.of(context).size.height - 250,
@@ -2872,13 +2825,13 @@ class _DashBoardState extends State<DashBoard> {
                                   height:
                                       MediaQuery.of(context).size.height - 180,
                                   child: RoomWidget(
-                                    totalSpent: amtSpend,
-                                    spent: due,
                                     RoomData: SearchRoomData,
                                     ClosedRoomData: RoomDataC,
                                     email: _email.text,
                                     flag: true,
                                     token: _token,
+                                    hasMore: activeRoomHasMore,
+                                    roomType: 2,
                                     membersData: membersData,
                                   ),
                                 ),
@@ -2957,33 +2910,6 @@ class _DashBoardState extends State<DashBoard> {
                           ],
                         ),
                       ),
-                      open
-                          ? Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "Total : ₹ " +
-                                        commaSeperator(
-                                            amtSpend.value.toStringAsFixed(2)),
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  due.value == 0
-                                      ? Text("")
-                                      : Text(
-                                          (due.value > 0
-                                                  ? "Gain : ₹ "
-                                                  : "Owe : ₹ ") +
-                                              commaSeperator(
-                                                  due.value.toStringAsFixed(2)),
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                ],
-                              ),
-                            )
-                          : SizedBox(),
                       GestureDetector(
                         onPanUpdate: (details) {
                           if (details.delta.dx > 0) {
@@ -3000,7 +2926,7 @@ class _DashBoardState extends State<DashBoard> {
                         },
                         child: SizedBox(
                           height: open
-                              ? (MediaQuery.of(context).size.height - 250)
+                              ? (MediaQuery.of(context).size.height - 220)
                               : (MediaQuery.of(context).size.height - 220),
                           child: open
                               ? RoomDataO.value.isEmpty
@@ -3027,12 +2953,12 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                        totalSpent: amtSpend,
-                                        spent: due,
                                         RoomData: RoomDataO,
                                         ClosedRoomData: RoomDataC,
                                         email: _email.text,
                                         flag: false,
+                                        hasMore: activeRoomHasMore,
+                                        roomType: 1,
                                         token: _token,
                                         membersData: membersData,
                                       ))
@@ -3060,12 +2986,12 @@ class _DashBoardState extends State<DashBoard> {
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
                                       child: RoomWidget(
-                                        totalSpent: amtSpend,
-                                        spent: due,
                                         RoomData: RoomDataC,
                                         ClosedRoomData: RoomDataC,
                                         email: _email.text,
                                         flag: false,
+                                        hasMore: inActiveRoomHasMore,
+                                        roomType: 0,
                                         token: _token,
                                         membersData: membersData,
                                       ))),
@@ -3105,8 +3031,6 @@ class _DashBoardState extends State<DashBoard> {
       return Profile(
         email: _email.text,
         token: _token,
-        closeRoomSpend: amtSpendClose,
-        openRoomSpend: amtSpendOpen,
         expenseCategory: expenseCategory,
         investmentCategory: investmentCategory,
       );
@@ -3482,7 +3406,7 @@ class _DashBoardState extends State<DashBoard> {
                                   TextStyle(fontSize: 13, color: Colors.white)),
                         )),
                   ),
-                  ListTile(
+                  /*ListTile(
                     onTap: () {
                       if (this.mounted) {
                         Navigator.push(
@@ -3504,7 +3428,7 @@ class _DashBoardState extends State<DashBoard> {
                       "Remainder",
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
-                  ),
+                  ),*/
                   ListTile(
                     leading: Icon(
                       Icons.border_color,
@@ -3950,25 +3874,26 @@ class _DashBoardState extends State<DashBoard> {
 }
 
 class RoomWidget extends StatefulWidget {
-  final ValueNotifier<double> totalSpent;
-  final ValueNotifier<double> spent;
   final ValueNotifier<List<RoomEach>> RoomData;
   final ValueNotifier<List<RoomEach>> ClosedRoomData;
   final String email;
   final bool flag;
   final String token;
   final ValueNotifier<Map<String, List<dynamic>>> membersData;
+  final int fetchSize = 10;
+  final int roomType;
+  final ValueNotifier<bool> hasMore;
 
   RoomWidget(
       {Key? key,
-      required this.totalSpent,
-      required this.spent,
       required this.RoomData,
       required this.ClosedRoomData,
       required this.email,
       required this.flag,
       required this.token,
-      required this.membersData})
+      required this.membersData,
+      required this.roomType,
+      required this.hasMore})
       : super(key: key);
 
   @override
@@ -3976,6 +3901,7 @@ class RoomWidget extends StatefulWidget {
 }
 
 class _RoomWidgetState extends State<RoomWidget> {
+  final scrollController = ScrollController();
   final Shader linearGradient = LinearGradient(
     colors: <Color>[
       Color.fromARGB(255, 243, 33, 112),
@@ -3992,6 +3918,121 @@ class _RoomWidgetState extends State<RoomWidget> {
     ],
   ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
   int indexLoading = -1;
+  bool fetchingData = false;
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController.addListener(_scrollListener);
+  }
+
+  Future _executeParallelRefresh(bool roomType) async {
+    await Future.wait([_extractEmail(roomType), getMembersData(roomType)]);
+  }
+
+  Future<void> getMembersData(bool roomType) async {
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + 'room/allRoomMembers'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            "email": crypto.encrypt(widget.email),
+            "roomType": roomType,
+            'hasAlready':
+                crypto.encrypt(widget.RoomData.value.length.toString())
+          }));
+
+      if (response.statusCode == 200) {
+        var tempData = jsonDecode(response.body)["data"];
+
+        for (int i = 0; i < tempData.length; i++) {
+          widget.membersData.value[tempData[i][0]] = tempData[i][1];
+        }
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _extractEmail(bool roomType) async {
+    try {
+      final response = await http.post(Uri.parse(global.url + 'data'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'roomType': roomType,
+            'hasAlready':
+                crypto.encrypt(widget.RoomData.value.length.toString())
+          }));
+      if (response.statusCode == 200) {
+        List<dynamic> list = jsonDecode(response.body)['data'];
+        widget.hasMore.value = jsonDecode(response.body)['hasMore'];
+
+        for (int i = 0; i < list.length; i++) {
+          widget.RoomData.value.add(RoomEach.fromJson(list[i]));
+        }
+
+        fetchingData = false;
+
+        if (this.mounted) {
+          setState(() {});
+        }
+      } else if (jsonDecode(response.body)['maintenance'] != null &&
+          jsonDecode(response.body)['maintenance']) {
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => Maintenance()),
+            (Route<dynamic> route) => false,
+          );
+        }
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  void fetchMore() {
+    if (widget.roomType == 0) {
+    } else if (widget.roomType == 1) {}
+  }
+
+  void _scrollListener() async {
+    if (widget.roomType <= 1) {
+      if (widget.hasMore.value) {
+        if (scrollController.position.pixels ==
+            scrollController.position.maxScrollExtent) {
+          fetchingData = true;
+          if (widget.roomType == 0) {
+            await _executeParallelRefresh(false);
+          } else if (widget.roomType == 1) {
+            await _executeParallelRefresh(true);
+          }
+        }
+      }
+
+      if (this.mounted) {
+        setState(() {});
+      }
+    }
+  }
 
   Future updateRoom(BuildContext context, int index, String roomID) async {
     if (this.mounted) {
@@ -4013,12 +4054,8 @@ class _RoomWidgetState extends State<RoomWidget> {
       if (response.statusCode == 200) {
         RoomEach tempData =
             RoomEach.fromJson(jsonDecode(response.body)["data"]);
-        widget.totalSpent.value -= widget.RoomData.value[index].total;
-        widget.spent.value -= widget.RoomData.value[index].spend;
         if (tempData.active) {
           widget.RoomData.value[index] = tempData;
-          widget.totalSpent.value += widget.RoomData.value[index].total;
-          widget.spent.value += widget.RoomData.value[index].spend;
         } else {
           widget.RoomData.value.removeAt(index);
           widget.ClosedRoomData.value.insert(0, tempData);
@@ -4558,13 +4595,23 @@ class _RoomWidgetState extends State<RoomWidget> {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
+      controller: scrollController,
       physics: widget.flag ? ScrollPhysics() : null,
       padding: EdgeInsets.all(8.0),
-      itemCount: widget.RoomData.value.length,
+      itemCount: widget.RoomData.value.length + 1,
       separatorBuilder: (context, index) => SizedBox(
         height: 5,
       ),
       itemBuilder: (BuildContext context, int index) {
+        if (index == widget.RoomData.value.length) {
+          if (fetchingData) {
+            return CupertinoActivityIndicator(
+              color: Theme.of(context).primaryColor,
+            );
+          } else {
+            return SizedBox();
+          }
+        }
         return roomSectors(context, index);
       },
     );
