@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/ChartData.dart';
@@ -46,10 +49,30 @@ class _AnalysisState extends State<Analysis> {
   List<RoomEach> RoomDataSearched = [];
   List<BarSeries<ChartData, String>> graphData = [];
 
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
   @override
   void dispose() {
+    subscription.cancel();
     super.dispose();
   }
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
 
   Future _initialisation() async {
     if (this.mounted) {
@@ -205,6 +228,7 @@ class _AnalysisState extends State<Analysis> {
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     _initialisation();
   }
 

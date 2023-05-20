@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -44,8 +47,13 @@ class _OtpNameState extends State<OtpName> {
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   bool isOnBoardingCompleted = false;
 
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
   @override
   void dispose() {
+    subscription.cancel();
     super.dispose();
   }
 
@@ -206,9 +214,25 @@ class _OtpNameState extends State<OtpName> {
     }
   }
 
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
+
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     _initialisation();
   }
 
@@ -332,39 +356,60 @@ class _OtpNameState extends State<OtpName> {
                     )),
             )),
       ),
-      bottomNavigationBar: BottomAppBar(
-        elevation: 0,
-        color: Colors.transparent,
-        child: ListView(shrinkWrap: true, children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-                text: 'By Signing In, You Agree To The ',
-                style: TextStyle(
-                    fontSize: 16,
-                    color: themeProvider.isDarkTheme
-                        ? Colors.white
-                        : Colors.black),
-                children: [
-                  TextSpan(
-                    text: 'Privacy Policy',
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () async {
-                        launchUrl(
-                          Uri.parse("https://settlenow.in/privacy-policy"),
-                          mode: LaunchMode.inAppWebView,
-                          webViewConfiguration: const WebViewConfiguration(
-                              enableJavaScript: true),
-                        );
-                      },
-                  ),
-                ]),
-          ),
-          SizedBox(
-            height: 25,
-          )
-        ]),
-      ),
+      bottomNavigationBar: isAlertSet
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+                color: isDeviceConnected ? Colors.green : Colors.red,
+              ),
+              height: 40,
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Center(
+                    child: Text(
+                  isDeviceConnected
+                      ? "You are connected to Internet"
+                      : "You aren't connected to Internet",
+                  style: TextStyle(fontSize: 17, color: Colors.white),
+                )),
+              ),
+            )
+          : BottomAppBar(
+              elevation: 0,
+              color: Colors.transparent,
+              child: ListView(shrinkWrap: true, children: [
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                      text: 'By Signing In, You Agree To The ',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black),
+                      children: [
+                        TextSpan(
+                          text: 'Privacy Policy',
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              launchUrl(
+                                Uri.parse(
+                                    "https://settlenow.in/privacy-policy"),
+                                mode: LaunchMode.inAppWebView,
+                                webViewConfiguration:
+                                    const WebViewConfiguration(
+                                        enableJavaScript: true),
+                              );
+                            },
+                        ),
+                      ]),
+                ),
+                SizedBox(
+                  height: 25,
+                )
+              ]),
+            ),
     );
   }
 }

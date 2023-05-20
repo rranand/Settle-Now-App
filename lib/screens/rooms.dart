@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:provider/provider.dart';
@@ -93,10 +96,30 @@ class _RoomExpenseState extends State<RoomExpense>
   double totalAmount = 0;
   bool isClosedany = false;
 
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
   @override
   void dispose() {
+    subscription.cancel();
     super.dispose();
   }
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
 
   Future<void> initChart() async {
     Map<String, double> tempMap = {};
@@ -630,6 +653,7 @@ class _RoomExpenseState extends State<RoomExpense>
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     executeParallel();
   }
 
@@ -2827,66 +2851,85 @@ class _RoomExpenseState extends State<RoomExpense>
               return new Future(() => false);
             },
             child: chooseFromBottomNavigator(dash)),
-        bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            currentIndex: dash,
-            onTap: (index) => setState(() {
-                  dash = index;
-                }),
-            items: widget.isRoomActive
-                ? [
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.home,
-                        size: 27,
-                      ),
-                      label: "",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.person_add,
-                        size: 27,
-                      ),
-                      label: "",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.analytics_outlined,
-                        size: 27,
-                      ),
-                      label: "",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.transfer_within_a_station_rounded,
-                        size: 27,
-                      ),
-                      label: "",
-                    )
-                  ]
-                : [
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.home,
-                        size: 27,
-                      ),
-                      label: "",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.analytics_outlined,
-                        size: 27,
-                      ),
-                      label: "",
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Icon(
-                        Icons.transfer_within_a_station_rounded,
-                        size: 27,
-                      ),
-                      label: "",
-                    )
-                  ]),
+        bottomNavigationBar: isAlertSet
+            ? Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  color: isDeviceConnected ? Colors.green : Colors.red,
+                ),
+                height: 40,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                      child: Text(
+                    isDeviceConnected
+                        ? "You are connected to Internet"
+                        : "You aren't connected to Internet",
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  )),
+                ),
+              )
+            : BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                currentIndex: dash,
+                onTap: (index) => setState(() {
+                      dash = index;
+                    }),
+                items: (widget.isRoomActive
+                    ? [
+                        BottomNavigationBarItem(
+                          icon: Icon(
+                            Icons.home,
+                            size: 27,
+                          ),
+                          label: "",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(
+                            Icons.person_add,
+                            size: 27,
+                          ),
+                          label: "",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(
+                            Icons.analytics_outlined,
+                            size: 27,
+                          ),
+                          label: "",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(
+                            Icons.transfer_within_a_station_rounded,
+                            size: 27,
+                          ),
+                          label: "",
+                        )
+                      ]
+                    : [
+                        BottomNavigationBarItem(
+                          icon: Icon(
+                            Icons.home,
+                            size: 27,
+                          ),
+                          label: "",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(
+                            Icons.analytics_outlined,
+                            size: 27,
+                          ),
+                          label: "",
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(
+                            Icons.transfer_within_a_station_rounded,
+                            size: 27,
+                          ),
+                          label: "",
+                        )
+                      ])),
         floatingActionButton: dash == 0
             ? (widget.isRoomActive
                 ? FloatingActionButton(

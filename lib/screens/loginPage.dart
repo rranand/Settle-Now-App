@@ -359,43 +359,62 @@ class _LoginPageState extends State<LoginPage> {
                 ),
         ),
       ),
-      bottomNavigationBar: canLoad
-          ? BottomAppBar(
-              elevation: 0,
-              color: Colors.transparent,
-              child: ListView(shrinkWrap: true, children: [
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                      text: 'By Signing In, You Agree To The ',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black),
-                      children: [
-                        TextSpan(
-                          text: 'Privacy Policy',
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () async {
-                              launchUrl(
-                                Uri.parse(
-                                    "https://settlenow.in/privacy-policy"),
-                                mode: LaunchMode.inAppWebView,
-                                webViewConfiguration:
-                                    const WebViewConfiguration(
-                                        enableJavaScript: true),
-                              );
-                            },
-                        ),
-                      ]),
-                ),
-                SizedBox(
-                  height: 25,
-                )
-              ]),
+      bottomNavigationBar: isAlertSet
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+                color: isDeviceConnected ? Colors.green : Colors.red,
+              ),
+              height: 40,
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Center(
+                    child: Text(
+                  isDeviceConnected
+                      ? "You are connected to Internet"
+                      : "You aren't connected to Internet",
+                  style: TextStyle(fontSize: 17, color: Colors.white),
+                )),
+              ),
             )
-          : null,
+          : (canLoad
+              ? BottomAppBar(
+                  elevation: 0,
+                  color: Colors.transparent,
+                  child: ListView(shrinkWrap: true, children: [
+                    RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(
+                          text: 'By Signing In, You Agree To The ',
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: themeProvider.isDarkTheme
+                                  ? Colors.white
+                                  : Colors.black),
+                          children: [
+                            TextSpan(
+                              text: 'Privacy Policy',
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  launchUrl(
+                                    Uri.parse(
+                                        "https://settlenow.in/privacy-policy"),
+                                    mode: LaunchMode.inAppWebView,
+                                    webViewConfiguration:
+                                        const WebViewConfiguration(
+                                            enableJavaScript: true),
+                                  );
+                                },
+                            ),
+                          ]),
+                    ),
+                    SizedBox(
+                      height: 25,
+                    )
+                  ]),
+                )
+              : null),
     );
   }
 }

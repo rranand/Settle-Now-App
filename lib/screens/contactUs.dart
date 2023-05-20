@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
@@ -25,9 +28,28 @@ class _ContactUsState extends State<ContactUs> {
   final TextEditingController _message = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final ScrollController _controller = ScrollController();
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
 
   @override
   void dispose() {
+    subscription.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -101,6 +123,7 @@ class _ContactUsState extends State<ContactUs> {
   @override
   void initState() {
     super.initState();
+    getConnectivity();
   }
 
   Widget contactData() {
