@@ -3918,6 +3918,7 @@ class _RoomWidgetState extends State<RoomWidget> {
     ],
   ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
   int indexLoading = -1;
+  bool isDataLoading = false;
   bool fetchingData = false;
 
   @override
@@ -3963,6 +3964,7 @@ class _RoomWidgetState extends State<RoomWidget> {
   }
 
   Future<void> _extractEmail(bool roomType) async {
+    isDataLoading = true;
     try {
       final response = await http.post(Uri.parse(global.url + 'data'),
           headers: <String, String>{
@@ -3983,8 +3985,6 @@ class _RoomWidgetState extends State<RoomWidget> {
           widget.RoomData.value.add(RoomEach.fromJson(list[i]));
         }
 
-        fetchingData = false;
-
         if (this.mounted) {
           setState(() {});
         }
@@ -4004,6 +4004,9 @@ class _RoomWidgetState extends State<RoomWidget> {
       }
     }
 
+    fetchingData = false;
+    isDataLoading = false;
+
     if (this.mounted) {
       setState(() {});
     }
@@ -4020,10 +4023,12 @@ class _RoomWidgetState extends State<RoomWidget> {
         if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent) {
           fetchingData = true;
-          if (widget.roomType == 0) {
-            await _executeParallelRefresh(false);
-          } else if (widget.roomType == 1) {
-            await _executeParallelRefresh(true);
+          if (!isDataLoading) {
+            if (widget.roomType == 0) {
+              await _executeParallelRefresh(false);
+            } else if (widget.roomType == 1) {
+              await _executeParallelRefresh(true);
+            }
           }
         }
       }

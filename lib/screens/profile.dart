@@ -48,6 +48,7 @@ class _ProfileState extends State<Profile> {
   List<dynamic> category = [];
   final scrollController = ScrollController();
   bool fetchingData = false;
+  bool isLoadingData = false;
   bool loadFirstTime = true;
   List<String> Month = [
     'January',
@@ -74,6 +75,7 @@ class _ProfileState extends State<Profile> {
   }
 
   Future<void> _initialisation() async {
+    isLoadingData = true;
     if (loadFirstTime) {
       personalLoaded = false;
     }
@@ -127,6 +129,8 @@ class _ProfileState extends State<Profile> {
         await onException(context);
       }
     }
+    isLoadingData = false;
+    fetchingData = false;
     loadFirstTime = false;
     if (this.mounted) {
       setState(() {});
@@ -229,8 +233,9 @@ class _ProfileState extends State<Profile> {
         if (scrollController.position.pixels ==
             scrollController.position.maxScrollExtent) {
           fetchingData = true;
-          await _initialisation();
-          fetchingData = false;
+          if (!isLoadingData) {
+            await _initialisation();
+          }
         }
       }
 
