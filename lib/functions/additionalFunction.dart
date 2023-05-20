@@ -6,7 +6,6 @@ import '../contents.dart' as global;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -169,13 +168,7 @@ Future<Map<String, String>> getDataFromNotification(String? payload) async {
 }
 
 onException(BuildContext context) async {
-  bool result = await InternetConnectionChecker().hasConnection;
-
-  if (result) {
-    showToast(context, "Server Error Try Again", Icons.close);
-  } else {
-    showToast(context, "No Internet Connection", Icons.check);
-  }
+  showToast(context, "Server Error Try Again", Icons.warning_rounded);
 }
 
 commaSeperator(String amount) {

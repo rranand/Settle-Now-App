@@ -63,6 +63,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
   }
@@ -214,7 +215,9 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                     payload: null),
                 schedule: NotificationCalendar(
                     day: int.parse(dates[currentDateIndex]),
-                    hour: 7 + (i * 4),
+                    hour: 7+(i*4),
+                    minute: 0,
+                    second: 0,
                     allowWhileIdle: true,
                     timeZone: "Asia/Kolkata"));
           }

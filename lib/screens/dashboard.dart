@@ -248,7 +248,9 @@ class _DashBoardState extends State<DashBoard> {
                       payload: null),
                   schedule: NotificationCalendar(
                       day: int.parse(crypto.decrypt(data[i]["dates"])),
-                      hour: 7 + (j * 4),
+                      hour: 7 + (i * 4),
+                      minute: 0,
+                      second: 0,
                       allowWhileIdle: true,
                       timeZone: "Asia/Kolkata"));
             }
@@ -928,7 +930,7 @@ class _DashBoardState extends State<DashBoard> {
     await Future.wait([
       getInitialData(),
       manualUpdateCheck(),
-      /*checkforScheduledNotifications(),*/
+      checkforScheduledNotifications(),
       _extractEmail(true),
       _extractEmail(false),
       _updateCheck(),
@@ -963,11 +965,11 @@ class _DashBoardState extends State<DashBoard> {
           channelName: "Room Request",
           channelDescription: 'Notification channel for Room Request',
           defaultColor: Colors.white),
-      /*NotificationChannel(
+      NotificationChannel(
           channelKey: "remainderID",
           channelName: "Remainder",
           channelDescription: 'Notification channel for Remainders',
-          defaultColor: Colors.white),*/
+          defaultColor: Colors.white),
     ]);
 
     FirebaseMessaging.instance.getInitialMessage().then(
@@ -3452,7 +3454,7 @@ class _DashBoardState extends State<DashBoard> {
                                   TextStyle(fontSize: 13, color: Colors.white)),
                         )),
                   ),
-                  /*ListTile(
+                  ListTile(
                     onTap: () {
                       if (this.mounted) {
                         Navigator.push(
@@ -3474,7 +3476,7 @@ class _DashBoardState extends State<DashBoard> {
                       "Remainder",
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
-                  ),*/
+                  ),
                   ListTile(
                     leading: Icon(
                       Icons.border_color,

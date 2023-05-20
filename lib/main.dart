@@ -35,11 +35,11 @@ Future<void> main() async {
         channelName: "Room Request",
         channelDescription: 'Notification channel for Room Request',
         defaultColor: Colors.white),
-    /*NotificationChannel(
+    NotificationChannel(
         channelKey: "remainderID",
         channelName: "Remainder",
         channelDescription: 'Notification channel for Remainders',
-          defaultColor: Colors.white),*/
+        defaultColor: Colors.white),
   ]);
 
   runApp(MyApp());
