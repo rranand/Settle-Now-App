@@ -40,6 +40,11 @@ class _LendPageState extends State<LendPage> {
   bool load = false;
   bool isPreviousPageNeedToBeUpdated = false;
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
   final TextEditingController _Epurpose = TextEditingController();
@@ -59,15 +64,6 @@ class _LendPageState extends State<LendPage> {
   bool isFriendDataLoaded = false;
   bool gaveMoney = false;
   bool EgaveMoney = false;
-
-  keepAlive() async {
-    await http.get(
-      Uri.parse(global.url + 'login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-  }
 
   Future<void> addLoan(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
@@ -422,7 +418,6 @@ class _LendPageState extends State<LendPage> {
                                           data[index].email, widget.roomkey);
                                       data[index].status = "NJ";
                                     }
-                                    await keepAlive();
                                     if (this.mounted) {
                                       setState(() {});
                                     }

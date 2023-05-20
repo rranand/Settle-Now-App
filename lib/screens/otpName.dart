@@ -44,6 +44,11 @@ class _OtpNameState extends State<OtpName> {
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   bool isOnBoardingCompleted = false;
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future _initialisation() async {
     prefs = await SharedPreferences.getInstance();
     _deviceData = await initPlatformState();

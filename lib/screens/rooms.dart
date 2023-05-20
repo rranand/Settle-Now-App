@@ -93,6 +93,11 @@ class _RoomExpenseState extends State<RoomExpense>
   double totalAmount = 0;
   bool isClosedany = false;
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> initChart() async {
     Map<String, double> tempMap = {};
     for (int i = 0; i < roomExpenseCategory.length; i++) {
@@ -883,15 +888,6 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
-  keepAlive() async {
-    await http.get(
-      Uri.parse(global.url + 'login'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-  }
-
   cancelJoinRequest(String email) async {
     buildShowDialog(context);
     try {
@@ -1027,7 +1023,6 @@ class _RoomExpenseState extends State<RoomExpense>
                                       data[index].status = "NJ";
                                     }
 
-                                    await keepAlive();
                                     if (this.mounted) {
                                       setState(() {});
                                     }
@@ -3519,6 +3514,11 @@ class _ExpenseDataState extends State<ExpenseData> {
   final TextEditingController _amount = TextEditingController();
   int roomExpenseCategoryIndex = -1;
   final _updateExpense = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   _updateTransaction(
       BuildContext context,

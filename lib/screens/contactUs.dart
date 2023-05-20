@@ -26,6 +26,12 @@ class _ContactUsState extends State<ContactUs> {
   final _formKey = GlobalKey<FormState>();
   final ScrollController _controller = ScrollController();
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   sendContactData(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       var Tdata = null;

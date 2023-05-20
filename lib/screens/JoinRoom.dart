@@ -24,6 +24,11 @@ class _RoomJoinState extends State<RoomJoin> {
   late SharedPreferences prefs;
   String message = "Joining Room";
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future _roomJoin() async {
     version = await getAppVersion();
     prefs = await SharedPreferences.getInstance();
@@ -75,7 +80,7 @@ class _RoomJoinState extends State<RoomJoin> {
             MaterialPageRoute(
               builder: (context) => DashBoard(
                 version: version,
-                  firstTime: false,
+                firstTime: false,
               ),
             ),
             (Route<dynamic> route) => false,

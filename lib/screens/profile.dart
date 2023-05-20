@@ -70,6 +70,12 @@ class _ProfileState extends State<Profile> {
   Map<String, double> yearwiseSpend = {};
   List<PersonalExpenseEach> filterResult = [];
 
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
   Future _executeParallelRefresh() async {
     await Future.wait([_initialisation(), updatePieChart("all")]);
   }

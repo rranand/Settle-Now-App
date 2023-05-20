@@ -46,6 +46,11 @@ class _AnalysisState extends State<Analysis> {
   List<RoomEach> RoomDataSearched = [];
   List<BarSeries<ChartData, String>> graphData = [];
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future _initialisation() async {
     if (this.mounted) {
       setState(() {

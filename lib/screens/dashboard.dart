@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -189,6 +192,31 @@ class _DashBoardState extends State<DashBoard> {
   GoogleSignInAccount? _currentUser;
   bool _flexibleUpdateAvailable = false;
   bool importantUpdate = false;
+
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
 
   Future<void> checkforScheduledNotifications() async {
     if (widget.firstTime && !notificationSetupComplete) {
@@ -915,6 +943,7 @@ class _DashBoardState extends State<DashBoard> {
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     executeParallel();
     AwesomeNotifications()
         .initialize('resource://drawable/ic_notification_icon', [
@@ -2925,9 +2954,7 @@ class _DashBoardState extends State<DashBoard> {
                           }
                         },
                         child: SizedBox(
-                          height: open
-                              ? (MediaQuery.of(context).size.height - 220)
-                              : (MediaQuery.of(context).size.height - 220),
+                          height: (MediaQuery.of(context).size.height - 200),
                           child: open
                               ? RoomDataO.value.isEmpty
                                   ? Scrollbar(
@@ -3115,83 +3142,102 @@ class _DashBoardState extends State<DashBoard> {
                                     ),
                                   ))))),
             body: chooseFromBottomNavigator(dash),
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              currentIndex: dash,
-              onTap: (index) => setState(() {
-                dash = index;
-              }),
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.home,
-                    size: 27,
-                  ),
-                  label: "",
-                ),
-                BottomNavigationBarItem(
-                  icon: Stack(children: [
-                    Icon(
-                      Icons.person_add_outlined,
-                      size: 27,
+            bottomNavigationBar: isAlertSet
+                ? Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(6)),
+                      color: isDeviceConnected ? Colors.green : Colors.red,
                     ),
-                    RoomRequest.isNotEmpty
-                        ? Positioned(
-                            right: 0,
-                            child: new Container(
-                              padding: EdgeInsets.all(1),
-                              decoration: new BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              constraints: BoxConstraints(
-                                minWidth: 12,
-                                minHeight: 12,
-                              ),
-                              child: new Text(
-                                RoomRequest.length.toString(),
-                                style: new TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          )
-                        : SizedBox()
-                  ]),
-                  label: "",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.wallet,
-                    size: 27,
+                    height: 40,
+                    width: MediaQuery.of(context).size.width,
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Center(
+                          child: Text(
+                        isDeviceConnected
+                            ? "You are connected to Internet"
+                            : "You aren't connected to Internet",
+                        style: TextStyle(fontSize: 17, color: Colors.white),
+                      )),
+                    ),
+                  )
+                : BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    currentIndex: dash,
+                    onTap: (index) => setState(() {
+                      dash = index;
+                    }),
+                    items: [
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.home,
+                          size: 27,
+                        ),
+                        label: "",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Stack(children: [
+                          Icon(
+                            Icons.person_add_outlined,
+                            size: 27,
+                          ),
+                          RoomRequest.isNotEmpty
+                              ? Positioned(
+                                  right: 0,
+                                  child: new Container(
+                                    padding: EdgeInsets.all(1),
+                                    decoration: new BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    constraints: BoxConstraints(
+                                      minWidth: 12,
+                                      minHeight: 12,
+                                    ),
+                                    child: new Text(
+                                      RoomRequest.length.toString(),
+                                      style: new TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 8,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                )
+                              : SizedBox()
+                        ]),
+                        label: "",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.wallet,
+                          size: 27,
+                        ),
+                        label: "",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.account_balance_outlined,
+                          size: 27,
+                        ),
+                        label: "",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.analytics_outlined,
+                          size: 27,
+                        ),
+                        label: "",
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Icon(
+                          Icons.person,
+                          size: 27,
+                        ),
+                        label: "",
+                      ),
+                    ],
                   ),
-                  label: "",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.account_balance_outlined,
-                    size: 27,
-                  ),
-                  label: "",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.analytics_outlined,
-                    size: 27,
-                  ),
-                  label: "",
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.person,
-                    size: 27,
-                  ),
-                  label: "",
-                ),
-              ],
-            ),
             drawer: Drawer(
               child: ListView(
                 children: [
@@ -3922,6 +3968,12 @@ class _RoomWidgetState extends State<RoomWidget> {
   bool fetchingData = false;
 
   @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     scrollController.addListener(_scrollListener);
@@ -4610,8 +4662,23 @@ class _RoomWidgetState extends State<RoomWidget> {
       itemBuilder: (BuildContext context, int index) {
         if (index == widget.RoomData.value.length) {
           if (fetchingData) {
-            return CupertinoActivityIndicator(
-              color: Theme.of(context).primaryColor,
+            return Card(
+              child: SizedBox(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CupertinoActivityIndicator(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      SizedBox(
+                        height: 40,
+                      )
+                    ],
+                  ),
+                ),
+              ),
             );
           } else {
             return SizedBox();

@@ -33,6 +33,11 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   List<String> dates = [];
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     WidgetsBinding.instance

@@ -32,6 +32,11 @@ class _LendCreditState extends State<LendCredit> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future createRoom(BuildContext context) async {
     try {
       final response = await http.post(Uri.parse(global.url + 'lend'),

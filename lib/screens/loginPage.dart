@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -38,6 +41,31 @@ class _LoginPageState extends State<LoginPage> {
   double textScale = 1.0;
   String version = "";
   bool isOnBoardingCompleted = false;
+
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
 
   Future<void> keepAlive() async {
     try {
@@ -127,6 +155,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     _extractEmail();
     keepAlive();
   }

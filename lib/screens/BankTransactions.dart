@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -94,6 +97,31 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   List<TransactionEach> filteredResult = [];
   bool isClosedany = false;
+
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
 
   Future<void> getLenDenData() async {
     try {
@@ -1558,6 +1586,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     checkForBankMessageStatus();
     executeParallel();
   }
@@ -1591,6 +1620,26 @@ class _BankTransactionsState extends State<BankTransactions> {
               icon: Icon(Icons.filter_alt_outlined))
         ],
       ),
+      bottomNavigationBar: isAlertSet
+          ? Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+                color: isDeviceConnected ? Colors.green : Colors.red,
+              ),
+              height: 40,
+              width: MediaQuery.of(context).size.width,
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Center(
+                    child: Text(
+                  isDeviceConnected
+                      ? "You are connected to Internet"
+                      : "You aren't connected to Internet",
+                  style: TextStyle(fontSize: 17, color: Colors.white),
+                )),
+              ),
+            )
+          : null,
       body: Scaffold(
         key: _scaffoldKey,
         endDrawer: Drawer(
