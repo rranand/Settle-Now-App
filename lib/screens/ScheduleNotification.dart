@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
@@ -32,8 +35,28 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   List<dynamic> data = [];
   List<String> dates = [];
 
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
+
   @override
   void dispose() {
+    subscription.cancel();
     super.dispose();
   }
 
@@ -478,6 +501,26 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         appBar: AppBar(
           title: Text("Remainder"),
         ),
+        bottomNavigationBar: isAlertSet
+            ? Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  color: isDeviceConnected ? Colors.green : Colors.red,
+                ),
+                height: 40,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                      child: Text(
+                    isDeviceConnected
+                        ? "You are connected to Internet"
+                        : "You aren't connected to Internet",
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  )),
+                ),
+              )
+            : null,
         body: WillPopScope(
             onWillPop: () {
               Navigator.pop(context, false);

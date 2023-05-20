@@ -325,6 +325,10 @@ class _AnalysisState extends State<Analysis> {
   }
 
   Future<List<dynamic>> getRoomData(List<String> roomKeys) async {
+    if (!isDeviceConnected) {
+      return [];
+    }
+
     List<dynamic> RoomData = [];
     try {
       final response = await http.post(

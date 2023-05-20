@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -70,8 +73,28 @@ class _ProfileState extends State<Profile> {
   Map<String, double> yearwiseSpend = {};
   List<PersonalExpenseEach> filterResult = [];
 
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
+
   @override
   void dispose() {
+    subscription.cancel();
     scrollController.dispose();
     super.dispose();
   }
@@ -229,6 +252,7 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
+    getConnectivity();
     scrollController.addListener(_scrollListener);
     _executeParallelRefresh();
   }

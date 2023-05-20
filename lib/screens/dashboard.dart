@@ -3967,14 +3967,35 @@ class _RoomWidgetState extends State<RoomWidget> {
   bool isDataLoading = false;
   bool fetchingData = false;
 
+  late StreamSubscription subscription;
+  bool isDeviceConnected = false;
+  bool isAlertSet = false;
+
+  getConnectivity() =>
+      subscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async {
+          isDeviceConnected = await InternetConnectionChecker().hasConnection;
+          setState(() {});
+          if (!isDeviceConnected && isAlertSet == false) {
+            setState(() => isAlertSet = true);
+          } else if (isDeviceConnected && isAlertSet == true) {
+            Future.delayed(Duration(seconds: 1), () {
+              setState(() => isAlertSet = false);
+            });
+          }
+        },
+      );
+
   @override
   void dispose() {
+    subscription.cancel();
     scrollController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
+    getConnectivity();
     super.initState();
     scrollController.addListener(_scrollListener);
   }

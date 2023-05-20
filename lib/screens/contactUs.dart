@@ -55,6 +55,12 @@ class _ContactUsState extends State<ContactUs> {
   }
 
   sendContactData(BuildContext context) async {
+    if (!isDeviceConnected) {
+      if (this.mounted) {
+          Navigator.pop(context);
+        }
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       var Tdata = null;
       buildShowDialog(context);
@@ -95,6 +101,9 @@ class _ContactUsState extends State<ContactUs> {
   }
 
   Future<List<ContactEach>> fetchContactData() async {
+    if (!isDeviceConnected) {
+      return [];
+    }
     List<ContactEach> contactData = [];
     try {
       final response = await http.patch(Uri.parse(global.url + 'contact'),

@@ -258,9 +258,7 @@ class _RoomExpenseState extends State<RoomExpense>
       }
     } on Exception catch (_) {
       if (this.mounted) {
-        if (this.mounted) {
-          await onException(context);
-        }
+        await onException(context);
       }
     }
   }

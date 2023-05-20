@@ -221,6 +221,7 @@ class _LendPageState extends State<LendPage> {
 
   cancelJoinRequest(String email, String id) async {
     buildShowDialog(context);
+
     try {
       final response = await http.put(Uri.parse(global.url + 'friend/lend'),
           headers: <String, String>{
@@ -916,701 +917,733 @@ class _LendPageState extends State<LendPage> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.name),
-        actions: [
-          otherUserData.isNotEmpty
-              ? SizedBox()
-              : IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) =>
-                          addFriendWidget(context),
-                    );
-                  },
-                  icon: Icon(Icons.person_add)),
-          IconButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => closeRoomWidget(context),
-                );
-              },
-              icon: Icon(Icons.delete))
-        ],
-      ),
-      body: WillPopScope(
-        onWillPop: () {
-          Navigator.pop(context, isPreviousPageNeedToBeUpdated);
-          return new Future(() => false);
-        },
-        child: RefreshIndicator(
-            key: _refreshIndicatorKey,
-            onRefresh: _initialization,
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: load
-                  ? (data.isEmpty
-                      ? ListView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height - 100,
-                              child: Center(
-                                child: Text(
-                                  "No Record Found",
-                                  style: TextStyle(fontSize: 25),
-                                ),
-                              ),
-                            )
-                          ],
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height - 100,
-                            width: MediaQuery.of(context).size.width * 0.95,
-                            child: ListView.separated(
-                              separatorBuilder: (context, index) => SizedBox(
-                                height: 6,
-                              ),
-                              itemCount: data.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return Card(
-                                  elevation: 1.0,
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  shadowColor: Theme.of(context).primaryColor,
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                        color: Theme.of(context)
-                                            .cardColor
-                                            .withAlpha(95)),
-                                    borderRadius: BorderRadius.circular(15.0),
+        appBar: AppBar(
+          title: Text(widget.name),
+          actions: [
+            otherUserData.isNotEmpty
+                ? SizedBox()
+                : IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) =>
+                            addFriendWidget(context),
+                      );
+                    },
+                    icon: Icon(Icons.person_add)),
+            IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => closeRoomWidget(context),
+                  );
+                },
+                icon: Icon(Icons.delete))
+          ],
+        ),
+        body: WillPopScope(
+          onWillPop: () {
+            Navigator.pop(context, isPreviousPageNeedToBeUpdated);
+            return new Future(() => false);
+          },
+          child: RefreshIndicator(
+              key: _refreshIndicatorKey,
+              onRefresh: _initialization,
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: load
+                    ? (data.isEmpty
+                        ? ListView(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height - 100,
+                                child: Center(
+                                  child: Text(
+                                    "No Record Found",
+                                    style: TextStyle(fontSize: 25),
                                   ),
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: (crypto.decrypt(
-                                                    data[index]["by"]) ==
-                                                widget.email
-                                            ? 5.0
-                                            : 18.0),
-                                        horizontal: (crypto.decrypt(
-                                                    data[index]["by"]) ==
-                                                widget.email
-                                            ? 8.0
-                                            : 12.0)),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                (crypto.decrypt(data[index]
-                                                            ["by"]) ==
-                                                        widget.email
-                                                    ? CachedNetworkImage(
-                                                        imageUrl: crypto
-                                                                    .decrypt(
-                                                                        userData[
-                                                                            'pic'])
-                                                                    .length ==
-                                                                0
-                                                            ? global.driveUrl +
-                                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                            : crypto.decrypt(
-                                                                userData[
-                                                                    'pic']),
-                                                        progressIndicatorBuilder: (context,
-                                                                url,
-                                                                downloadProgress) =>
-                                                            CircularProgressIndicator(
-                                                                value: downloadProgress
-                                                                    .progress),
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            Container(
-                                                          width: 28,
-                                                          height: 28,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            image: DecorationImage(
-                                                                image: AssetImage(
-                                                                    'assets/Images/unknown.jpeg'),
-                                                                fit: BoxFit
-                                                                    .cover),
-                                                          ),
-                                                        ),
-                                                        imageBuilder: (context,
-                                                                imageProvider) =>
-                                                            Container(
-                                                          width: 28,
-                                                          height: 28,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            image: DecorationImage(
-                                                                image:
-                                                                    imageProvider,
-                                                                fit: BoxFit
-                                                                    .cover),
-                                                          ),
-                                                        ),
-                                                      )
-                                                    : CachedNetworkImage(
-                                                        imageUrl: crypto
-                                                                    .decrypt(
-                                                                        otherUserData[
-                                                                            'pic'])
-                                                                    .length ==
-                                                                0
-                                                            ? global.driveUrl +
-                                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                            : crypto.decrypt(
-                                                                otherUserData[
-                                                                    'pic']),
-                                                        progressIndicatorBuilder: (context,
-                                                                url,
-                                                                downloadProgress) =>
-                                                            CircularProgressIndicator(
-                                                                value: downloadProgress
-                                                                    .progress),
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            Container(
-                                                          width: 28,
-                                                          height: 28,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            image: DecorationImage(
-                                                                image: AssetImage(
-                                                                    'assets/Images/unknown.jpeg'),
-                                                                fit: BoxFit
-                                                                    .cover),
-                                                          ),
-                                                        ),
-                                                        imageBuilder: (context,
-                                                                imageProvider) =>
-                                                            Container(
-                                                          width: 28,
-                                                          height: 28,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            shape:
-                                                                BoxShape.circle,
-                                                            image: DecorationImage(
-                                                                image:
-                                                                    imageProvider,
-                                                                fit: BoxFit
-                                                                    .cover),
-                                                          ),
-                                                        ),
-                                                      )),
-                                                SizedBox(
-                                                  width: 6,
-                                                ),
-                                                Text(
+                                ),
+                              )
+                            ],
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              height: MediaQuery.of(context).size.height - 100,
+                              width: MediaQuery.of(context).size.width * 0.95,
+                              child: ListView.separated(
+                                separatorBuilder: (context, index) => SizedBox(
+                                  height: 6,
+                                ),
+                                itemCount: data.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Card(
+                                    elevation: 1.0,
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    shadowColor: Theme.of(context).primaryColor,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          color: Theme.of(context)
+                                              .cardColor
+                                              .withAlpha(95)),
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          vertical: (crypto.decrypt(
+                                                      data[index]["by"]) ==
+                                                  widget.email
+                                              ? 5.0
+                                              : 18.0),
+                                          horizontal: (crypto.decrypt(
+                                                      data[index]["by"]) ==
+                                                  widget.email
+                                              ? 8.0
+                                              : 12.0)),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
                                                   (crypto.decrypt(data[index]
                                                               ["by"]) ==
                                                           widget.email
-                                                      ? crypto.decrypt(
-                                                          userData['name'])
-                                                      : crypto.decrypt(
-                                                          otherUserData[
-                                                              'name'])),
-                                                  style:
-                                                      TextStyle(fontSize: 18),
-                                                ),
-                                              ],
-                                            ),
-                                            crypto.decrypt(data[index]["by"]) ==
-                                                    widget.email
-                                                ? IconButton(
-                                                    onPressed: () async {
-                                                      showDialog(
-                                                        context: context,
-                                                        builder: (BuildContext
-                                                                context) =>
-                                                            _buildUpdateDialog(
-                                                                context,
-                                                                crypto.decrypt(
-                                                                    data[index][
-                                                                        "_id"]),
-                                                                crypto.decrypt(
-                                                                    data[index][
-                                                                        "purpose"]),
-                                                                crypto.decrypt(
-                                                                    data[index][
-                                                                        "amount"])),
-                                                      );
-                                                    },
-                                                    icon: Icon(Icons.edit))
-                                                : SizedBox()
-                                          ],
-                                        ),
-                                        (crypto.decrypt(data[index]["by"]) ==
-                                                widget.email
-                                            ? SizedBox()
-                                            : SizedBox(height: 8.0)),
-                                        Text.rich(TextSpan(children: [
-                                          TextSpan(
-                                            text: (crypto.decrypt(data[index]
-                                                        ["amount"])[0] ==
-                                                    "-")
-                                                ? "You owe "
-                                                : "You gave ",
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                          TextSpan(
-                                            text: ("₹ " +
-                                                commaSeperator(crypto
-                                                    .decrypt(
-                                                        data[index]["amount"])
-                                                    .replaceFirst("-", " "))),
-                                            style: TextStyle(
-                                                fontSize: 18,
-                                                color: (crypto.decrypt(data[
-                                                                index]
-                                                            ["amount"])[0] ==
-                                                        "-"
-                                                    ? Colors.red
-                                                    : Colors.green)),
-                                          ),
-                                          TextSpan(
-                                              text: " for ",
-                                              style: TextStyle(fontSize: 18)),
-                                          TextSpan(
-                                            text: (crypto.decrypt(
-                                                data[index]["purpose"])),
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                          TextSpan(
-                                            text: " on ",
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                          TextSpan(
-                                            text: formatDateTime(crypto
-                                                .decrypt(data[index]["date"])),
-                                            style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500),
-                                          ),
-                                        ])),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ))
-                  : SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: Shimmer.fromColors(
-                        baseColor: Theme.of(context).cardColor,
-                        highlightColor: Theme.of(context).primaryColor,
-                        child: ListView.builder(
-                            itemCount: 16,
-                            itemBuilder: (_, __) => Padding(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 12),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.white,
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Container(
-                                                    width: 28,
-                                                    height: 28,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: AssetImage(
-                                                              'assets/Images/unknown.jpeg'),
-                                                          fit: BoxFit.cover),
-                                                    )),
-                                                SizedBox(
-                                                  width: 6,
-                                                ),
-                                                Column(
-                                                  children: [
-                                                    Container(
-                                                      width: 200,
-                                                      height: 15.0,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.white,
-                                                          border: Border.all(
-                                                            color: Colors.white,
+                                                      ? CachedNetworkImage(
+                                                          imageUrl: crypto
+                                                                      .decrypt(
+                                                                          userData[
+                                                                              'pic'])
+                                                                      .length ==
+                                                                  0
+                                                              ? global.driveUrl +
+                                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                              : crypto.decrypt(
+                                                                  userData[
+                                                                      'pic']),
+                                                          progressIndicatorBuilder: (context,
+                                                                  url,
+                                                                  downloadProgress) =>
+                                                              CircularProgressIndicator(
+                                                                  value: downloadProgress
+                                                                      .progress),
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              Container(
+                                                            width: 28,
+                                                            height: 28,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              image: DecorationImage(
+                                                                  image: AssetImage(
+                                                                      'assets/Images/unknown.jpeg'),
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
                                                           ),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          20))),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 6,
-                                            ),
-                                            Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  50,
-                                              height: 15.0,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  border: Border.all(
-                                                    color: Colors.white,
+                                                          imageBuilder: (context,
+                                                                  imageProvider) =>
+                                                              Container(
+                                                            width: 28,
+                                                            height: 28,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              image: DecorationImage(
+                                                                  image:
+                                                                      imageProvider,
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
+                                                          ),
+                                                        )
+                                                      : CachedNetworkImage(
+                                                          imageUrl: crypto
+                                                                      .decrypt(
+                                                                          otherUserData[
+                                                                              'pic'])
+                                                                      .length ==
+                                                                  0
+                                                              ? global.driveUrl +
+                                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                              : crypto.decrypt(
+                                                                  otherUserData[
+                                                                      'pic']),
+                                                          progressIndicatorBuilder: (context,
+                                                                  url,
+                                                                  downloadProgress) =>
+                                                              CircularProgressIndicator(
+                                                                  value: downloadProgress
+                                                                      .progress),
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              Container(
+                                                            width: 28,
+                                                            height: 28,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              image: DecorationImage(
+                                                                  image: AssetImage(
+                                                                      'assets/Images/unknown.jpeg'),
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
+                                                          ),
+                                                          imageBuilder: (context,
+                                                                  imageProvider) =>
+                                                              Container(
+                                                            width: 28,
+                                                            height: 28,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              shape: BoxShape
+                                                                  .circle,
+                                                              image: DecorationImage(
+                                                                  image:
+                                                                      imageProvider,
+                                                                  fit: BoxFit
+                                                                      .cover),
+                                                            ),
+                                                          ),
+                                                        )),
+                                                  SizedBox(
+                                                    width: 6,
                                                   ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            ),
-                                            SizedBox(
-                                              height: 4,
-                                            ),
-                                            Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  50,
-                                              height: 15.0,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  border: Border.all(
-                                                    color: Colors.white,
+                                                  Text(
+                                                    (crypto.decrypt(data[index]
+                                                                ["by"]) ==
+                                                            widget.email
+                                                        ? crypto.decrypt(
+                                                            userData['name'])
+                                                        : crypto.decrypt(
+                                                            otherUserData[
+                                                                'name'])),
+                                                    style:
+                                                        TextStyle(fontSize: 18),
                                                   ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ))),
-                      ),
-                    ),
-            )),
-      ),
-      floatingActionButton: closed
-          ? null
-          : FloatingActionButton(
-              onPressed: () {
-                expenseDate = DateTime.now();
-                showModalBottomSheet<void>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
-                      return StatefulBuilder(builder: (context, setState) {
-                        return Padding(
-                          padding: MediaQuery.of(context).viewInsets,
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "Add Credit/Debit",
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Form(
-                                  key: _formKey,
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          InkWell(
-                                            onTap: () {
-                                              if (this.mounted) {
-                                                setState(() {
-                                                  gaveMoney = true;
-                                                });
-                                              }
-                                            },
-                                            child: Card(
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: gaveMoney
-                                                        ? Theme.of(context)
-                                                            .primaryColor
-                                                        : Theme.of(context)
-                                                            .cardColor),
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
+                                                ],
                                               ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(12.0),
-                                                child: Text(
-                                                  "You gave",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                              ),
-                                            ),
+                                              crypto.decrypt(
+                                                          data[index]["by"]) ==
+                                                      widget.email
+                                                  ? IconButton(
+                                                      onPressed: () async {
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (BuildContext
+                                                                  context) =>
+                                                              _buildUpdateDialog(
+                                                                  context,
+                                                                  crypto.decrypt(
+                                                                      data[index][
+                                                                          "_id"]),
+                                                                  crypto.decrypt(
+                                                                      data[index]
+                                                                          [
+                                                                          "purpose"]),
+                                                                  crypto.decrypt(
+                                                                      data[index]
+                                                                          [
+                                                                          "amount"])),
+                                                        );
+                                                      },
+                                                      icon: Icon(Icons.edit))
+                                                  : SizedBox()
+                                            ],
                                           ),
-                                          InkWell(
-                                            onTap: () {
-                                              if (this.mounted) {
-                                                setState(() {
-                                                  gaveMoney = false;
-                                                });
-                                              }
-                                            },
-                                            child: Card(
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: gaveMoney
-                                                        ? Theme.of(context)
-                                                            .cardColor
-                                                        : Theme.of(context)
-                                                            .primaryColor),
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(12.0),
-                                                child: Text(
-                                                  "You owe",
-                                                  style: TextStyle(
-                                                      fontSize: 15,
-                                                      fontWeight:
-                                                          FontWeight.w500),
-                                                ),
-                                              ),
+                                          (crypto.decrypt(data[index]["by"]) ==
+                                                  widget.email
+                                              ? SizedBox()
+                                              : SizedBox(height: 8.0)),
+                                          Text.rich(TextSpan(children: [
+                                            TextSpan(
+                                              text: (crypto.decrypt(data[index]
+                                                          ["amount"])[0] ==
+                                                      "-")
+                                                  ? "You owe "
+                                                  : "You gave ",
+                                              style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500),
                                             ),
-                                          ),
+                                            TextSpan(
+                                              text: ("₹ " +
+                                                  commaSeperator(crypto
+                                                      .decrypt(
+                                                          data[index]["amount"])
+                                                      .replaceFirst("-", " "))),
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: (crypto.decrypt(data[
+                                                                  index]
+                                                              ["amount"])[0] ==
+                                                          "-"
+                                                      ? Colors.red
+                                                      : Colors.green)),
+                                            ),
+                                            TextSpan(
+                                                text: " for ",
+                                                style: TextStyle(fontSize: 18)),
+                                            TextSpan(
+                                              text: (crypto.decrypt(
+                                                  data[index]["purpose"])),
+                                              style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                            TextSpan(
+                                              text: " on ",
+                                              style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                            TextSpan(
+                                              text: formatDateTime(
+                                                  crypto.decrypt(
+                                                      data[index]["date"])),
+                                              style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
+                                          ])),
                                         ],
                                       ),
-                                      TextFormField(
-                                        controller: _amount,
-                                        keyboardType: TextInputType.number,
-                                        maxLength: 20,
-                                        maxLines: 1,
-                                        style: const TextStyle(fontSize: 18),
-                                        validator: (value) {
-                                          RegExp validateNumber =
-                                              RegExp(r'\b[1-9]{1}[\d]*\b');
-                                          if (!validateNumber
-                                              .hasMatch(_amount.text)) {
-                                            return "Enter Valid Amount";
-                                          }
-                                          return null;
-                                        },
-                                        decoration: const InputDecoration(
-                                          counterText: "",
-                                          contentPadding: EdgeInsets.all(8.0),
-                                          hintText: "Enter Amount",
-                                          labelText: "Amount",
-                                          errorStyle: TextStyle(fontSize: 15),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ))
+                    : SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        child: Shimmer.fromColors(
+                          baseColor: Theme.of(context).cardColor,
+                          highlightColor: Theme.of(context).primaryColor,
+                          child: ListView.builder(
+                              itemCount: 16,
+                              itemBuilder: (_, __) => Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 12),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color: Colors.white,
                                         ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(20))),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Container(
+                                                      width: 28,
+                                                      height: 28,
+                                                      decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        image: DecorationImage(
+                                                            image: AssetImage(
+                                                                'assets/Images/unknown.jpeg'),
+                                                            fit: BoxFit.cover),
+                                                      )),
+                                                  SizedBox(
+                                                    width: 6,
+                                                  ),
+                                                  Column(
+                                                    children: [
+                                                      Container(
+                                                        width: 200,
+                                                        height: 15.0,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                color: Colors
+                                                                    .white,
+                                                                border:
+                                                                    Border.all(
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            20))),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height: 6,
+                                              ),
+                                              Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width -
+                                                    50,
+                                                height: 15.0,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                      color: Colors.white,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
+                                              ),
+                                              SizedBox(
+                                                height: 4,
+                                              ),
+                                              Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width -
+                                                    50,
+                                                height: 15.0,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                      color: Colors.white,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
+                                              ),
+                                            ],
+                                          )
+                                        ],
                                       ),
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextFormField(
-                                        controller: _purpose,
-                                        keyboardType: TextInputType.text,
-                                        maxLength: 1000,
-                                        maxLines: 1,
-                                        style: const TextStyle(fontSize: 18),
-                                        validator: (value) {
-                                          RegExp validateText =
-                                              RegExp(r'\b[\w]+\b');
-                                          if (!validateText
-                                              .hasMatch(_purpose.text)) {
-                                            return "Enter Valid Purpose";
-                                          }
-                                          return null;
-                                        },
-                                        decoration: const InputDecoration(
-                                          counterText: "",
-                                          contentPadding: EdgeInsets.all(8.0),
-                                          hintText: "Enter Purpose",
-                                          labelText: "Purpose",
-                                          errorStyle: TextStyle(fontSize: 15),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
+                                  ))),
+                        ),
+                      ),
+              )),
+        ),
+        floatingActionButton: closed
+            ? null
+            : FloatingActionButton(
+                onPressed: () {
+                  expenseDate = DateTime.now();
+                  showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (BuildContext context) {
+                        return StatefulBuilder(builder: (context, setState) {
+                          return Padding(
+                            padding: MediaQuery.of(context).viewInsets,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Add Credit/Debit",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.9,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Form(
+                                    key: _formKey,
+                                    child: Column(
                                       children: [
-                                        Text(
-                                          DateFormat(global.dateTimeFormat_new)
-                                              .format(expenseDate),
-                                          style: TextStyle(fontSize: 18),
+                                        Row(
+                                          children: [
+                                            InkWell(
+                                              onTap: () {
+                                                if (this.mounted) {
+                                                  setState(() {
+                                                    gaveMoney = true;
+                                                  });
+                                                }
+                                              },
+                                              child: Card(
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: gaveMoney
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Text(
+                                                    "You gave",
+                                                    style: TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            InkWell(
+                                              onTap: () {
+                                                if (this.mounted) {
+                                                  setState(() {
+                                                    gaveMoney = false;
+                                                  });
+                                                }
+                                              },
+                                              child: Card(
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: gaveMoney
+                                                          ? Theme.of(context)
+                                                              .cardColor
+                                                          : Theme.of(context)
+                                                              .primaryColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Text(
+                                                    "You owe",
+                                                    style: TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight:
+                                                            FontWeight.w500),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        InkWell(
-                                          onTap: () async {
-                                            DateTime? dateTime =
-                                                await showOmniDateTimePicker(
-                                              context: context,
-                                              primaryColor: Theme.of(context)
-                                                  .primaryColor,
-                                              backgroundColor:
-                                                  themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              calendarTextColor:
-                                                  !themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              tabTextColor:
-                                                  !themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              unselectedTabBackgroundColor:
-                                                  Colors.grey[700],
-                                              buttonTextColor:
-                                                  !themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              timeSpinnerTextStyle: TextStyle(
-                                                  color:
-                                                      !themeProvider.isDarkTheme
-                                                          ? Colors.grey[900]
-                                                          : Colors.white70,
-                                                  fontSize: 18),
-                                              timeSpinnerHighlightedTextStyle:
-                                                  TextStyle(
-                                                      color: !themeProvider
-                                                              .isDarkTheme
-                                                          ? Colors.grey[900]
-                                                          : Colors.white,
-                                                      fontSize: 24),
-                                              is24HourMode: false,
-                                              isShowSeconds: false,
-                                              startInitialDate: expenseDate,
-                                              startFirstDate: DateTime(2018),
-                                              startLastDate: DateTime.now(),
-                                              borderRadius:
-                                                  const Radius.circular(16),
-                                            );
-
-                                            if (dateTime != null) {
-                                              if (this.mounted) {
-                                                setState(() {
-                                                  expenseDate = dateTime;
-                                                });
-                                              }
+                                        TextFormField(
+                                          controller: _amount,
+                                          keyboardType: TextInputType.number,
+                                          maxLength: 20,
+                                          maxLines: 1,
+                                          style: const TextStyle(fontSize: 18),
+                                          validator: (value) {
+                                            RegExp validateNumber =
+                                                RegExp(r'\b[1-9]{1}[\d]*\b');
+                                            if (!validateNumber
+                                                .hasMatch(_amount.text)) {
+                                              return "Enter Valid Amount";
                                             }
+                                            return null;
                                           },
-                                          child: Icon(
-                                            Icons.edit_calendar,
-                                            size: 22,
+                                          decoration: const InputDecoration(
+                                            counterText: "",
+                                            contentPadding: EdgeInsets.all(8.0),
+                                            hintText: "Enter Amount",
+                                            labelText: "Amount",
+                                            errorStyle: TextStyle(fontSize: 15),
                                           ),
-                                        )
+                                        ),
+                                        SizedBox(
+                                          height: 10,
+                                        ),
+                                        TextFormField(
+                                          controller: _purpose,
+                                          keyboardType: TextInputType.text,
+                                          maxLength: 1000,
+                                          maxLines: 1,
+                                          style: const TextStyle(fontSize: 18),
+                                          validator: (value) {
+                                            RegExp validateText =
+                                                RegExp(r'\b[\w]+\b');
+                                            if (!validateText
+                                                .hasMatch(_purpose.text)) {
+                                              return "Enter Valid Purpose";
+                                            }
+                                            return null;
+                                          },
+                                          decoration: const InputDecoration(
+                                            counterText: "",
+                                            contentPadding: EdgeInsets.all(8.0),
+                                            hintText: "Enter Purpose",
+                                            labelText: "Purpose",
+                                            errorStyle: TextStyle(fontSize: 15),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                SizedBox(
-                                  height: 45,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.95,
-                                  child: OutlinedButton(
-                                    child: Text(
-                                      "Add",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          color: themeProvider.isDarkTheme
-                                              ? Colors.white
-                                              : Colors.black),
-                                    ),
-                                    onPressed: () async {
-                                      buildShowDialog(context);
-                                      await addLoan(context);
-                                      if (this.mounted) {
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                    style: OutlinedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(13.0),
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.9,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            DateFormat(
+                                                    global.dateTimeFormat_new)
+                                                .format(expenseDate),
+                                            style: TextStyle(fontSize: 18),
+                                          ),
+                                          InkWell(
+                                            onTap: () async {
+                                              DateTime? dateTime =
+                                                  await showOmniDateTimePicker(
+                                                context: context,
+                                                primaryColor: Theme.of(context)
+                                                    .primaryColor,
+                                                backgroundColor:
+                                                    themeProvider.isDarkTheme
+                                                        ? Colors.grey[900]
+                                                        : Colors.white,
+                                                calendarTextColor:
+                                                    !themeProvider.isDarkTheme
+                                                        ? Colors.grey[900]
+                                                        : Colors.white,
+                                                tabTextColor:
+                                                    !themeProvider.isDarkTheme
+                                                        ? Colors.grey[900]
+                                                        : Colors.white,
+                                                unselectedTabBackgroundColor:
+                                                    Colors.grey[700],
+                                                buttonTextColor:
+                                                    !themeProvider.isDarkTheme
+                                                        ? Colors.grey[900]
+                                                        : Colors.white,
+                                                timeSpinnerTextStyle: TextStyle(
+                                                    color: !themeProvider
+                                                            .isDarkTheme
+                                                        ? Colors.grey[900]
+                                                        : Colors.white70,
+                                                    fontSize: 18),
+                                                timeSpinnerHighlightedTextStyle:
+                                                    TextStyle(
+                                                        color: !themeProvider
+                                                                .isDarkTheme
+                                                            ? Colors.grey[900]
+                                                            : Colors.white,
+                                                        fontSize: 24),
+                                                is24HourMode: false,
+                                                isShowSeconds: false,
+                                                startInitialDate: expenseDate,
+                                                startFirstDate: DateTime(2018),
+                                                startLastDate: DateTime.now(),
+                                                borderRadius:
+                                                    const Radius.circular(16),
+                                              );
+
+                                              if (dateTime != null) {
+                                                if (this.mounted) {
+                                                  setState(() {
+                                                    expenseDate = dateTime;
+                                                  });
+                                                }
+                                              }
+                                            },
+                                            child: Icon(
+                                              Icons.edit_calendar,
+                                              size: 22,
+                                            ),
+                                          )
+                                        ],
                                       ),
-                                      side: BorderSide(
-                                          color:
-                                              Theme.of(context).primaryColor),
                                     ),
                                   ),
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                )
-                              ],
+                                  SizedBox(
+                                    height: 15,
+                                  ),
+                                  SizedBox(
+                                    height: 45,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.95,
+                                    child: OutlinedButton(
+                                      child: Text(
+                                        "Add",
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
+                                      onPressed: () async {
+                                        buildShowDialog(context);
+                                        await addLoan(context);
+                                        if (this.mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(13.0),
+                                        ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 15,
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        });
                       });
-                    });
-              },
-              child: Icon(
-                Icons.add,
-                color: Colors.white,
+                },
+                child: Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
               ),
-            ),
-    );
+        bottomNavigationBar: isAlertSet
+            ? Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  color: isDeviceConnected ? Colors.green : Colors.red,
+                ),
+                height: 40,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                      child: Text(
+                    isDeviceConnected
+                        ? "You are connected to Internet"
+                        : "You aren't connected to Internet",
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  )),
+                ),
+              )
+            : null);
   }
 }
