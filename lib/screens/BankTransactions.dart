@@ -351,7 +351,9 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   AddExpense(BuildContext context, String amount, String date) async {
     var Tdata = null;
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
 
     try {
       final response = await http.patch(Uri.parse(global.url + 'ptransaction'),
@@ -600,7 +602,9 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   Future createLenDenRoom(BuildContext context) async {
     try {
-      buildShowDialog(context);
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
       final response = await http.post(Uri.parse(global.url + 'lend'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
@@ -635,7 +639,9 @@ class _BankTransactionsState extends State<BankTransactions> {
   AddLenDen(BuildContext context, String amount, String date, String id) async {
     if (_formKeyLenDen.currentState!.validate()) {
       var Tdata = null;
-      buildShowDialog(context);
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
 
       try {
         final response = await http.delete(Uri.parse(global.url + 'lend'),
@@ -683,7 +689,9 @@ class _BankTransactionsState extends State<BankTransactions> {
   AddRoomExpense(BuildContext context, String amount, String date) async {
     if (_formKeyRoom.currentState!.validate()) {
       var Tdata = null;
-      buildShowDialog(context);
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
 
       try {
         final response = await http.delete(Uri.parse(global.url + 'data'),

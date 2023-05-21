@@ -253,7 +253,9 @@ class _LoginPageState extends State<LoginPage> {
                         try {
                           final user = await GoogleSignIN.login();
 
-                          buildShowDialog(context);
+                          if (this.mounted) {
+                            buildShowDialog(context);
+                          }
                           String token = crypto.encrypt(
                               (user?.email).toString() +
                                   "#" +

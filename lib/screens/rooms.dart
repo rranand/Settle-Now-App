@@ -366,7 +366,9 @@ class _RoomExpenseState extends State<RoomExpense>
   AddExpense(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       var Tdata = null;
-      buildShowDialog(context);
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
 
       try {
         final response = await http.delete(Uri.parse(global.url + 'data'),
@@ -425,7 +427,9 @@ class _RoomExpenseState extends State<RoomExpense>
   PayToMember(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       var Tdata = null;
-      buildShowDialog(context);
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
 
       try {
         final response = await http.put(Uri.parse(global.url + 'data'),
@@ -524,7 +528,9 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   CloseRoom(BuildContext context) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       var CloseData = null;
       final response = await http.delete(Uri.parse(global.url + 'room'),
@@ -885,7 +891,9 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   sendJoinRequest(String email) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       final response = await http.post(Uri.parse(global.url + 'friend'),
           headers: <String, String>{
@@ -911,7 +919,9 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   cancelJoinRequest(String email) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       final response = await http.put(Uri.parse(global.url + 'friend'),
           headers: <String, String>{
@@ -2964,7 +2974,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                                 title: const Text(
                                                     "Close Room Request"),
                                                 onTap: () async {
-                                                  buildShowDialog(context);
+                                                  if (this.mounted) {
+                                                    buildShowDialog(context);
+                                                  }
                                                   await closeRoomRequest();
                                                   if (this.mounted) {
                                                     Navigator.pop(context);
@@ -3748,7 +3760,9 @@ class _ExpenseDataState extends State<ExpenseData> {
                                 ),
                                 onPressed: () async {
                                   if (_updateExpense.currentState!.validate()) {
-                                    buildShowDialog(context);
+                                    if (this.mounted) {
+                                      buildShowDialog(context);
+                                    }
                                     await _updateTransaction(
                                         context,
                                         _purpose.text,
@@ -3777,7 +3791,9 @@ class _ExpenseDataState extends State<ExpenseData> {
   }
 
   addToPersonalExpense(String objId, String split) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       final response = await http.post(
           Uri.parse(global.url + 'transaction/personalExpense'),
@@ -3851,7 +3867,9 @@ class _ExpenseDataState extends State<ExpenseData> {
                             children: [
                               IconButton(
                                   onPressed: () async {
-                                    buildShowDialog(context);
+                                    if (this.mounted) {
+                                      buildShowDialog(context);
+                                    }
                                     await _updateTransaction(
                                         context,
                                         _purpose.text,
@@ -4027,7 +4045,9 @@ class _ExpenseDataState extends State<ExpenseData> {
                         width: MediaQuery.of(context).size.width * 0.95 - 25,
                         child: OutlinedButton(
                           onPressed: () async {
-                            buildShowDialog(context);
+                            if (this.mounted) {
+                              buildShowDialog(context);
+                            }
                             await addToPersonalExpense(
                                 id, partialExpense.isEmpty ? "0" : "1");
                             if (this.mounted) {

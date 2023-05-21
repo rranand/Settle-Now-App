@@ -124,7 +124,9 @@ class _OtpNameState extends State<OtpName> {
   }
 
   verifyStatus(String name, String otp, BuildContext context) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
 
     try {
       final response = await http.post(Uri.parse(global.url + 'verify'),

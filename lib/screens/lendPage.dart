@@ -194,7 +194,9 @@ class _LendPageState extends State<LendPage> {
   }
 
   sendJoinRequest(String email) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       final response = await http.post(Uri.parse(global.url + 'friend/lend'),
           headers: <String, String>{
@@ -220,7 +222,9 @@ class _LendPageState extends State<LendPage> {
   }
 
   cancelJoinRequest(String email, String id) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
 
     try {
       final response = await http.put(Uri.parse(global.url + 'friend/lend'),
@@ -648,7 +652,9 @@ class _LendPageState extends State<LendPage> {
                                     onPressed: () async {
                                       if (_updateExpense.currentState!
                                           .validate()) {
-                                        buildShowDialog(context);
+                                        if (this.mounted) {
+                                          buildShowDialog(context);
+                                        }
                                         await _updateTransaction(
                                             context,
                                             _Epurpose.text,
@@ -689,7 +695,9 @@ class _LendPageState extends State<LendPage> {
                                     onPressed: () async {
                                       if (_updateExpense.currentState!
                                           .validate()) {
-                                        buildShowDialog(context);
+                                        if (this.mounted) {
+                                          buildShowDialog(context);
+                                        }
                                         await _updateTransaction(
                                             context,
                                             _Epurpose.text,
@@ -794,7 +802,9 @@ class _LendPageState extends State<LendPage> {
   }
 
   CloseRoom(BuildContext context) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       var CloseData = null;
       final response = await http.post(Uri.parse(global.url + 'lend/delete'),
@@ -1593,7 +1603,9 @@ class _LendPageState extends State<LendPage> {
                                                 : Colors.black),
                                       ),
                                       onPressed: () async {
-                                        buildShowDialog(context);
+                                        if (this.mounted) {
+                                          buildShowDialog(context);
+                                        }
                                         await addLoan(context);
                                         if (this.mounted) {
                                           Navigator.pop(context);

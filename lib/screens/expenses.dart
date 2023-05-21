@@ -319,7 +319,9 @@ class _ExpensesState extends State<Expenses> {
                                 ),
                                 onPressed: () async {
                                   if (_updateExpense.currentState!.validate()) {
-                                    buildShowDialog(context);
+                                    if (this.mounted) {
+                                      buildShowDialog(context);
+                                    }
                                     await updatePersonalTransaction(
                                         _updatePurpose.text,
                                         _updateAmount.text,
@@ -382,7 +384,9 @@ class _ExpensesState extends State<Expenses> {
                       ? (room
                           ? IconButton(
                               onPressed: () async {
-                                buildShowDialog(context);
+                                if (this.mounted) {
+                                  buildShowDialog(context);
+                                }
                                 await removeRoomTransaction(id, index);
                                 if (this.mounted) {
                                   Navigator.pop(context);
@@ -396,7 +400,9 @@ class _ExpensesState extends State<Expenses> {
                               children: [
                                 IconButton(
                                     onPressed: () async {
-                                      buildShowDialog(context);
+                                      if (this.mounted) {
+                                        buildShowDialog(context);
+                                      }
                                       await updatePersonalTransaction(
                                           purpose, amount, "1", id, index);
                                       if (this.mounted) {
@@ -501,7 +507,9 @@ class _ExpensesState extends State<Expenses> {
 
   AddExpense(BuildContext context) async {
     var Tdata = null;
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
 
     try {
       final response = await http.patch(Uri.parse(global.url + 'ptransaction'),

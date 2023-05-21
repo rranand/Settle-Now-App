@@ -532,7 +532,9 @@ class _DashBoardState extends State<DashBoard> {
         _token = prefs.getString("token")!;
         initalDataLoaded = true;
       } else {
-        buildShowDialog(context);
+        if (this.mounted) {
+          buildShowDialog(context);
+        }
         await Future.wait([
           prefs.remove('name'),
           prefs.remove('email'),
@@ -634,7 +636,9 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
-          buildShowDialog(context);
+          if (this.mounted) {
+            buildShowDialog(context);
+          }
           await Future.wait([
             prefs.remove('name'),
             prefs.remove('email'),
@@ -694,7 +698,9 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
-          buildShowDialog(context);
+          if (this.mounted) {
+            buildShowDialog(context);
+          }
           await Future.wait([
             prefs.remove('name'),
             prefs.remove('email'),
@@ -731,7 +737,9 @@ class _DashBoardState extends State<DashBoard> {
 
   SendingData(bool flag, BuildContext context) async {
     var response;
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
 
     try {
       if (flag) {
@@ -815,7 +823,9 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
         if (errorMessage == 'Login Expired') {
-          buildShowDialog(context);
+          if (this.mounted) {
+            buildShowDialog(context);
+          }
           await Future.wait([
             prefs.remove('name'),
             prefs.remove('email'),
@@ -1735,7 +1745,9 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> JoinRequest(String flag, String roomKey) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       final response = await http.put(Uri.parse(global.url + 'friend'),
           headers: <String, String>{
@@ -1770,7 +1782,9 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> JoinRequestLend(String flag, String id) async {
-    buildShowDialog(context);
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       final response = await http.put(Uri.parse(global.url + 'friend/lend'),
           headers: <String, String>{
@@ -3578,7 +3592,9 @@ class _DashBoardState extends State<DashBoard> {
                   ),
                   ListTile(
                     onTap: () async {
-                      buildShowDialog(context);
+                      if (this.mounted) {
+                        buildShowDialog(context);
+                      }
                       await Future.wait([
                         prefs.remove('name'),
                         prefs.remove('email'),

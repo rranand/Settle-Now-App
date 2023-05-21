@@ -127,7 +127,9 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
     notID = crypto.decrypt(notID);
     List<String> IDs = notID.substring(1, notID.length - 1).split(', ');
     if (this.mounted) {
-      buildShowDialog(context);
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
     }
 
     try {
@@ -171,7 +173,9 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   Future _addRemainder() async {
     if (_formKey.currentState!.validate()) {
       if (this.mounted) {
-        buildShowDialog(context);
+        if (this.mounted) {
+          buildShowDialog(context);
+        }
       }
 
       List<int> IDs = [];
@@ -215,7 +219,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                     payload: null),
                 schedule: NotificationCalendar(
                     day: int.parse(dates[currentDateIndex]),
-                    hour: 7+(i*4),
+                    hour: 7 + (i * 4),
                     minute: 0,
                     second: 0,
                     allowWhileIdle: true,

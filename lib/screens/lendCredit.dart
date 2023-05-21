@@ -511,7 +511,9 @@ class _LendCreditState extends State<LendCredit> {
                               onPressed: () async {
                                 if (_name.text.isNotEmpty) {
                                   validateText = false;
-                                  buildShowDialog(context);
+                                  if (this.mounted) {
+                                    buildShowDialog(context);
+                                  }
                                   await createRoom(context);
                                   if (this.mounted) {
                                     Navigator.pop(context);

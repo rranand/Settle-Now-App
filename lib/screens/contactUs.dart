@@ -57,13 +57,15 @@ class _ContactUsState extends State<ContactUs> {
   sendContactData(BuildContext context) async {
     if (!isDeviceConnected) {
       if (this.mounted) {
-          Navigator.pop(context);
-        }
+        Navigator.pop(context);
+      }
       return;
     }
     if (_formKey.currentState!.validate()) {
       var Tdata = null;
-      buildShowDialog(context);
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
 
       try {
         final response = await http.post(Uri.parse(global.url + 'contact'),
