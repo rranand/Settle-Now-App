@@ -48,6 +48,7 @@ class _AnalysisState extends State<Analysis> {
   Set<RoomEach> compareBetween = {};
   List<RoomEach> RoomDataSearched = [];
   List<BarSeries<ChartData, String>> graphData = [];
+  bool isDataLoading = false;
 
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
@@ -77,6 +78,7 @@ class _AnalysisState extends State<Analysis> {
   Future _initialisation() async {
     if (this.mounted) {
       setState(() {
+        isDataLoading = true;
         years.clear();
         yearwiseSpend.clear();
         personalExpense.clear();
@@ -97,6 +99,7 @@ class _AnalysisState extends State<Analysis> {
           },
           body: jsonEncode({
             'email': crypto.encrypt(widget.email),
+            'alreadyHave': crypto.encrypt("-1")
           }));
 
       if (response.statusCode == 200) {
@@ -130,6 +133,7 @@ class _AnalysisState extends State<Analysis> {
       }
     }
 
+    isDataLoading = false;
     if (this.mounted) {
       setState(() {});
     }
@@ -420,246 +424,293 @@ class _AnalysisState extends State<Analysis> {
           child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: !isRoom
-                  ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Personal Expense By Year",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                  ? (yearwiseSpend.isEmpty
+                      ? SizedBox(
+                          height: MediaQuery.of(context).size.height - 200,
+                          child: Center(
+                            child: Text("No Personal Expense Found",
+                                style: TextStyle(fontSize: 20)),
                           ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        SizedBox(
-                          height: 400,
-                          child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: yearwiseSpend.isNotEmpty
-                                  ? SfCartesianChart(
-                                      primaryXAxis: CategoryAxis(
-                                        isVisible: true,
-                                      ),
-                                      primaryYAxis: NumericAxis(
-                                          labelFormat: "₹ {value}",
-                                          isVisible: false),
-                                      tooltipBehavior: TooltipBehavior(
-                                          enable: true,
-                                          header: "",
-                                          format: "point.x : ₹ point.y"),
-                                      plotAreaBorderWidth: 0,
-                                      series: <ChartSeries>[
-                                          LineSeries<dynamic, String>(
-                                              color: Theme.of(context)
-                                                  .primaryColor,
-                                              dataSource: yearwiseSpend,
-                                              yValueMapper: (dynamic data, _) =>
-                                                  data["amount"],
-                                              xValueMapper: (dynamic data, _) =>
-                                                  data["text"].toString(),
-                                              dataLabelSettings:
-                                                  DataLabelSettings(
-                                                      isVisible: true),
-                                              dataLabelMapper: (datum, index) =>
-                                                  "Year : " +
-                                                  datum["text"].toString() +
-                                                  "\n₹ " +
-                                                  datum["amount"]
-                                                      .toStringAsFixed(2),
-                                              markerSettings: MarkerSettings(
-                                                  isVisible: true))
-                                        ])
-                                  : Center(
-                                      child: CircularProgressIndicator(),
-                                    )),
-                        ),
-                        Divider(),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "Personal Expense By Month-Year",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: 65,
-                          child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: years.length + 1,
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                if (0 == index) {
-                                  return SizedBox(
-                                    width: 100,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: InkWell(
-                                          onTap: () {
-                                            yearIndex = index;
-                                            personalExpenseByYear.clear();
-                                            personalExpenseByYear
-                                                .addAll(personalExpense);
-                                            if (this.mounted) {
-                                              setState(() {});
-                                            }
-                                          },
-                                          child: Card(
-                                            elevation: 2.0,
-                                            shadowColor:
-                                                Theme.of(context).primaryColor,
-                                            color: yearIndex == index
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .scaffoldBackgroundColor,
-                                            shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                  color: yearIndex == index
-                                                      ? Theme.of(context)
-                                                          .primaryColor
-                                                      : Theme.of(context)
-                                                          .cardColor),
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                "All",
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: yearIndex == index
-                                                      ? Colors.white
-                                                      : Theme.of(context)
-                                                          .textTheme
-                                                          .bodySmall!
-                                                          .color,
-                                                ),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Personal Expense By Year",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            SizedBox(
+                              height: 400,
+                              child: Padding(
+                                  padding: const EdgeInsets.all(6),
+                                  child: isDataLoading
+                                      ? Center(
+                                          child: CircularProgressIndicator(),
+                                        )
+                                      : (yearwiseSpend.isNotEmpty
+                                          ? SfCartesianChart(
+                                              primaryXAxis: CategoryAxis(
+                                                isVisible: true,
                                               ),
-                                            ),
-                                          )),
-                                    ),
-                                  );
-                                } else {
-                                  return SizedBox(
-                                    width: 100,
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: InkWell(
-                                          onTap: () {
-                                            yearIndex = index;
-                                            personalExpenseByYear.clear();
-                                            personalExpense.forEach((element) {
-                                              if (element.Year ==
-                                                  years[index - 1]) {
+                                              primaryYAxis: NumericAxis(
+                                                  labelFormat: "₹ {value}",
+                                                  isVisible: false),
+                                              tooltipBehavior: TooltipBehavior(
+                                                  enable: true,
+                                                  header: "",
+                                                  format:
+                                                      "point.x : ₹ point.y"),
+                                              plotAreaBorderWidth: 0,
+                                              series: <ChartSeries>[
+                                                  LineSeries<dynamic, String>(
+                                                      color: Theme.of(context)
+                                                          .primaryColor,
+                                                      dataSource: yearwiseSpend,
+                                                      yValueMapper:
+                                                          (dynamic data, _) =>
+                                                              data["amount"],
+                                                      xValueMapper:
+                                                          (dynamic data, _) =>
+                                                              data["text"]
+                                                                  .toString(),
+                                                      dataLabelSettings:
+                                                          DataLabelSettings(
+                                                              isVisible: true),
+                                                      dataLabelMapper: (datum,
+                                                              index) =>
+                                                          "Year : " +
+                                                          datum["text"]
+                                                              .toString() +
+                                                          "\n₹ " +
+                                                          datum["amount"]
+                                                              .toStringAsFixed(
+                                                                  2),
+                                                      markerSettings:
+                                                          MarkerSettings(
+                                                              isVisible: true))
+                                                ])
+                                          : Center(
+                                              child: Text(
+                                                "No Personal Expense Found",
+                                                style: TextStyle(fontSize: 20),
+                                              ),
+                                            ))),
+                            ),
+                            Divider(),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              "Personal Expense By Month-Year",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: 65,
+                              child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: years.length + 1,
+                                  shrinkWrap: true,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    if (0 == index) {
+                                      return SizedBox(
+                                        width: 100,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: InkWell(
+                                              onTap: () {
+                                                yearIndex = index;
+                                                personalExpenseByYear.clear();
                                                 personalExpenseByYear
-                                                    .add(element);
-                                              }
-                                            });
-                                            if (this.mounted) {
-                                              setState(() {});
-                                            }
-                                          },
-                                          child: Card(
-                                            elevation: 2.0,
-                                            shadowColor:
-                                                Theme.of(context).primaryColor,
-                                            color: yearIndex == index
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .scaffoldBackgroundColor,
-                                            shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                  color: yearIndex == index
-                                                      ? Theme.of(context)
-                                                          .primaryColor
-                                                      : Theme.of(context)
-                                                          .cardColor),
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                years[index - 1],
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: yearIndex == index
-                                                      ? Colors.white
-                                                      : Theme.of(context)
-                                                          .textTheme
-                                                          .bodySmall!
-                                                          .color,
+                                                    .addAll(personalExpense);
+                                                if (this.mounted) {
+                                                  setState(() {});
+                                                }
+                                              },
+                                              child: Card(
+                                                elevation: 2.0,
+                                                shadowColor: Theme.of(context)
+                                                    .primaryColor,
+                                                color: yearIndex == index
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Theme.of(context)
+                                                        .scaffoldBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: yearIndex == index
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
                                                 ),
-                                              ),
-                                            ),
-                                          )),
-                                    ),
-                                  );
-                                }
-                              }),
-                        ),
-                        SizedBox(
-                          height: 300,
-                          child: personalExpenseByYear.isNotEmpty
-                              ? SfCartesianChart(
-                                  primaryXAxis: CategoryAxis(
-                                    visibleMinimum: 0,
-                                    visibleMaximum: 5,
-                                    isVisible: true,
-                                  ),
-                                  primaryYAxis: NumericAxis(
-                                    labelFormat: "₹ {value}",
-                                    isVisible: false,
-                                  ),
-                                  tooltipBehavior: TooltipBehavior(
-                                      enable: true,
-                                      header: "",
-                                      format: "point.x : point.y"),
-                                  zoomPanBehavior: ZoomPanBehavior(
-                                    enablePanning: true,
-                                  ),
-                                  plotAreaBorderWidth: 0,
-                                  series: <ChartSeries>[
-                                      LineSeries<PersonalExpenseEach, String>(
-                                          color: Theme.of(context).primaryColor,
-                                          dataSource: personalExpenseByYear,
-                                          yValueMapper:
-                                              (PersonalExpenseEach data, _) =>
-                                                  data.Total,
-                                          xValueMapper:
-                                              (PersonalExpenseEach data, _) =>
-                                                  data.Month +
-                                                  ",\n" +
-                                                  data.Year,
-                                          dataLabelSettings: DataLabelSettings(
+                                                child: Center(
+                                                  child: Text(
+                                                    "All",
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: yearIndex == index
+                                                          ? Colors.white
+                                                          : Theme.of(context)
+                                                              .textTheme
+                                                              .bodySmall!
+                                                              .color,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )),
+                                        ),
+                                      );
+                                    } else {
+                                      return SizedBox(
+                                        width: 100,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: InkWell(
+                                              onTap: () {
+                                                yearIndex = index;
+                                                personalExpenseByYear.clear();
+                                                personalExpense
+                                                    .forEach((element) {
+                                                  if (element.Year ==
+                                                      years[index - 1]) {
+                                                    personalExpenseByYear
+                                                        .add(element);
+                                                  }
+                                                });
+                                                if (this.mounted) {
+                                                  setState(() {});
+                                                }
+                                              },
+                                              child: Card(
+                                                elevation: 2.0,
+                                                shadowColor: Theme.of(context)
+                                                    .primaryColor,
+                                                color: yearIndex == index
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Theme.of(context)
+                                                        .scaffoldBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: yearIndex == index
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
+                                                ),
+                                                child: Center(
+                                                  child: Text(
+                                                    years[index - 1],
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: yearIndex == index
+                                                          ? Colors.white
+                                                          : Theme.of(context)
+                                                              .textTheme
+                                                              .bodySmall!
+                                                              .color,
+                                                    ),
+                                                  ),
+                                                ),
+                                              )),
+                                        ),
+                                      );
+                                    }
+                                  }),
+                            ),
+                            SizedBox(
+                              height: 300,
+                              child: isDataLoading
+                                  ? Center(
+                                      child: CircularProgressIndicator(),
+                                    )
+                                  : (personalExpenseByYear.isNotEmpty
+                                      ? SfCartesianChart(
+                                          primaryXAxis: CategoryAxis(
+                                            visibleMinimum: 0,
+                                            visibleMaximum: 5,
                                             isVisible: true,
                                           ),
-                                          dataLabelMapper: (datum, index) =>
-                                              "₹ " +
-                                              datum.Total.toStringAsFixed(2),
-                                          markerSettings:
-                                              MarkerSettings(isVisible: true))
-                                    ])
-                              : Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                        ),
-                      ],
-                    )
+                                          primaryYAxis: NumericAxis(
+                                            labelFormat: "₹ {value}",
+                                            isVisible: false,
+                                          ),
+                                          tooltipBehavior: TooltipBehavior(
+                                              enable: true,
+                                              header: "",
+                                              format: "point.x : point.y"),
+                                          zoomPanBehavior: ZoomPanBehavior(
+                                            enablePanning: true,
+                                          ),
+                                          plotAreaBorderWidth: 0,
+                                          series: <ChartSeries>[
+                                              LineSeries<PersonalExpenseEach,
+                                                      String>(
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                  dataSource:
+                                                      personalExpenseByYear,
+                                                  yValueMapper:
+                                                      (PersonalExpenseEach data,
+                                                              _) =>
+                                                          data.Total,
+                                                  xValueMapper:
+                                                      (PersonalExpenseEach data,
+                                                              _) =>
+                                                          data.Month +
+                                                          ",\n" +
+                                                          data.Year,
+                                                  dataLabelSettings:
+                                                      DataLabelSettings(
+                                                    isVisible: true,
+                                                  ),
+                                                  dataLabelMapper: (datum,
+                                                          index) =>
+                                                      "₹ " +
+                                                      datum.Total.toStringAsFixed(
+                                                          2),
+                                                  markerSettings:
+                                                      MarkerSettings(
+                                                          isVisible: true))
+                                            ])
+                                      : Center(
+                                          child: Text(
+                                            "No Personal Expense Found",
+                                            style: TextStyle(fontSize: 20),
+                                          ),
+                                        )),
+                            ),
+                          ],
+                        ))
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Live Room Comparison",
+                          "Active Room Comparison",
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -668,40 +719,58 @@ class _AnalysisState extends State<Analysis> {
                         SizedBox(
                           height: 5,
                         ),
-                        SizedBox(
-                          height: 45 * widget.RoomDataO.length * 1.0,
-                          child: Padding(
-                              padding: const EdgeInsets.all(6),
-                              child: SfCartesianChart(
-                                  primaryXAxis: CategoryAxis(isVisible: false),
-                                  primaryYAxis: NumericAxis(isVisible: false),
-                                  tooltipBehavior: TooltipBehavior(
-                                      enable: true,
-                                      header: "",
-                                      format: "You spent ₹ point.y"),
-                                  plotAreaBorderWidth: 0,
-                                  series: <BarSeries<RoomEach, String>>[
-                                    BarSeries<RoomEach, String>(
-                                        dataSource: widget.RoomDataO,
-                                        borderRadius: BorderRadius.circular(20),
-                                        xValueMapper: (RoomEach data, _) =>
-                                            data.roomName,
-                                        yValueMapper: (RoomEach data, _) =>
-                                            data.spend,
-                                        isVisibleInLegend: true,
-                                        width: 0.8,
-                                        pointColorMapper: (RoomEach data, _) =>
-                                            global.colorsList[_],
-                                        dataLabelMapper: (datum, index) =>
-                                            datum.roomName +
-                                            "\n₹ " +
-                                            datum.spend.toStringAsFixed(2),
-                                        dataLabelSettings:
-                                            DataLabelSettings(isVisible: true),
-                                        xAxisName: "Category",
-                                        yAxisName: "Amount")
-                                  ])),
-                        ),
+                        widget.RoomDataO.isEmpty
+                            ? SizedBox(
+                                height: 200,
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text("No Active Room Found",
+                                        style: TextStyle(fontSize: 20)),
+                                  ),
+                                ))
+                            : SizedBox(
+                                height: 45 * widget.RoomDataO.length * 1.0,
+                                child: Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: SfCartesianChart(
+                                        primaryXAxis:
+                                            CategoryAxis(isVisible: false),
+                                        primaryYAxis:
+                                            NumericAxis(isVisible: false),
+                                        tooltipBehavior: TooltipBehavior(
+                                            enable: true,
+                                            header: "",
+                                            format: "You spent ₹ point.y"),
+                                        plotAreaBorderWidth: 0,
+                                        series: <BarSeries<RoomEach, String>>[
+                                          BarSeries<RoomEach, String>(
+                                              dataSource: widget.RoomDataO,
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              xValueMapper:
+                                                  (RoomEach data, _) =>
+                                                      data.roomName,
+                                              yValueMapper:
+                                                  (RoomEach data, _) =>
+                                                      data.spend,
+                                              isVisibleInLegend: true,
+                                              width: 0.8,
+                                              pointColorMapper:
+                                                  (RoomEach data, _) =>
+                                                      global.colorsList[_],
+                                              dataLabelMapper: (datum, index) =>
+                                                  datum.roomName +
+                                                  "\n₹ " +
+                                                  datum.spend
+                                                      .toStringAsFixed(2),
+                                              dataLabelSettings:
+                                                  DataLabelSettings(
+                                                      isVisible: true),
+                                              xAxisName: "Category",
+                                              yAxisName: "Amount")
+                                        ])),
+                              ),
                         Divider(),
                         SizedBox(
                           height: 5,
