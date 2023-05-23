@@ -3841,7 +3841,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       bool locked,
       List<dynamic> partialExpense,
       String type,
-      String category) {
+      bool isEdited,
+      String lastModDate) {
     return StatefulBuilder(builder: (context, setState) {
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -3878,7 +3879,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         "1",
                                         partialExpense.isEmpty ? "0" : "1",
                                         widget.roomExpenseCategory
-                                            .indexOf(category));
+                                            .indexOf(type));
                                     if (this.mounted) {
                                       Navigator.pop(context);
                                     }
@@ -3900,7 +3901,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                               partialExpense.isEmpty
                                                   ? "0"
                                                   : "1",
-                                              category),
+                                              type),
                                     );
                                   },
                                   icon: Icon(Icons.edit)),
@@ -3937,13 +3938,6 @@ class _ExpenseDataState extends State<ExpenseData> {
                               )
                             : SizedBox(),
                         Text(
-                          date,
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
                           type,
                           style: TextStyle(fontSize: 20),
                         ),
@@ -3954,6 +3948,27 @@ class _ExpenseDataState extends State<ExpenseData> {
                       style: TextStyle(fontSize: 20),
                     )
                   ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  "Created: " + date,
+                  style: TextStyle(fontSize: 19),
+                ),
+                isEdited
+                    ? SizedBox(
+                        height: 10,
+                      )
+                    : SizedBox(),
+                isEdited
+                    ? Text(
+                        "Modified: " + formatDateTime(lastModDate),
+                        style: TextStyle(fontSize: 19),
+                      )
+                    : SizedBox(),
+                SizedBox(
+                  height: 10,
                 ),
                 partialExpense.isEmpty
                     ? SizedBox()
@@ -4116,6 +4131,7 @@ class _ExpenseDataState extends State<ExpenseData> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Padding(
       padding: const EdgeInsets.all(12.0),
       child: ListView.separated(
@@ -4148,7 +4164,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                       widget.locked,
                       partialExpense,
                       crypto.decrypt(widget.TransList[index]["Type"]),
-                      crypto.decrypt(widget.TransList[index]["Type"])),
+                      widget.TransList[index]["isEdited"],
+                      crypto.decrypt(widget.TransList[index]["lastModDate"])),
                 );
               },
               child: SizedBox(
@@ -4170,7 +4187,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                             Expanded(
                               flex: 1,
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.80,
+                                width: MediaQuery.of(context).size.width * 0.95,
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -4241,19 +4258,56 @@ class _ExpenseDataState extends State<ExpenseData> {
                                     ]),
                               ),
                             ),
-                            Expanded(
-                              flex: 0,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.25,
-                                child: Text(
-                                  "₹ " +
-                                      commaSeperator(crypto.decrypt(
-                                          widget.TransList[index]["Amount"])),
-                                  style: const TextStyle(
-                                    fontSize: 19,
+                            Column(
+                              mainAxisAlignment: widget.TransList[index]
+                                      ["isEdited"]
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.center,
+                              children: [
+                                widget.TransList[index]["isEdited"]
+                                    ? Container(
+                                        width: 55,
+                                        height: 30,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            border: Border.all(
+                                              color: themeProvider.isDarkTheme
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : Colors.white,
+                                            ),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(12))),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(4.0),
+                                          child: Text("Edited",
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.white)),
+                                        ))
+                                    : SizedBox(),
+                                widget.TransList[index]["isEdited"]
+                                    ? SizedBox(
+                                        height: 30,
+                                      )
+                                    : SizedBox(),
+                                Expanded(
+                                  flex: 0,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.25,
+                                    child: Text(
+                                      "₹ " +
+                                          commaSeperator(crypto.decrypt(widget
+                                              .TransList[index]["Amount"])),
+                                      style: const TextStyle(
+                                        fontSize: 19,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ]),
                     ),

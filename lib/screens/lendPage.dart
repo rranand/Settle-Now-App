@@ -1146,19 +1146,55 @@ class _LendPageState extends State<LendPage> {
                                                   ),
                                                 ],
                                               ),
-                                              crypto.decrypt(
-                                                          data[index]["by"]) ==
-                                                      widget.email
-                                                  ? IconButton(
-                                                      onPressed: () async {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                                  context) =>
-                                                              _buildUpdateDialog(
+                                              Row(
+                                                children: [
+                                                  data[index]["isEdited"]
+                                                      ? Container(
+                                                          width: 55,
+                                                          height: 30,
+                                                          alignment:
+                                                              Alignment.center,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .transparent,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: themeProvider.isDarkTheme
+                                                                        ? Theme.of(context)
+                                                                            .primaryColor
+                                                                        : Colors
+                                                                            .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              12))),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .all(4.0),
+                                                            child: Text(
+                                                                "Edited",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        13,
+                                                                    color: Colors
+                                                                        .white)),
+                                                          ))
+                                                      : SizedBox(),
+                                                  crypto.decrypt(data[index]
+                                                              ["by"]) ==
+                                                          widget.email
+                                                      ? IconButton(
+                                                          onPressed: () async {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (BuildContext context) => _buildUpdateDialog(
                                                                   context,
                                                                   crypto.decrypt(
-                                                                      data[index][
+                                                                      data[index]
+                                                                          [
                                                                           "_id"]),
                                                                   crypto.decrypt(
                                                                       data[index]
@@ -1168,10 +1204,13 @@ class _LendPageState extends State<LendPage> {
                                                                       data[index]
                                                                           [
                                                                           "amount"])),
-                                                        );
-                                                      },
-                                                      icon: Icon(Icons.edit))
-                                                  : SizedBox()
+                                                            );
+                                                          },
+                                                          icon:
+                                                              Icon(Icons.edit))
+                                                      : SizedBox(),
+                                                ],
+                                              )
                                             ],
                                           ),
                                           (crypto.decrypt(data[index]["by"]) ==
