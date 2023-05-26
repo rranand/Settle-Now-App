@@ -95,7 +95,7 @@ class _RoomExpenseState extends State<RoomExpense>
   List<dynamic> filterResult = [];
   double totalAmount = 0;
   bool isClosedany = false;
-
+  final TextEditingController _paytoMemberAmt = TextEditingController();
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
@@ -120,6 +120,35 @@ class _RoomExpenseState extends State<RoomExpense>
           }
         },
       );
+
+  _updatePayToMember(
+      BuildContext context, String objID, String deleteFlag, int index) async {
+    try {
+      final response = await http.put(
+          Uri.parse(global.url + 'data/updatePayMember'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'roomKey': crypto.encrypt(widget.roomKey),
+            'amt': crypto.encrypt(_paytoMemberAmt.text),
+            'objID': objID,
+            'deleteFlag': crypto.encrypt(deleteFlag),
+          }));
+
+      if (response.statusCode == 200) {
+        await _getPaymentData();
+      }
+      var updateMessage = jsonDecode(response.body);
+      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+  }
 
   Future<void> initChart() async {
     Map<String, double> tempMap = {};
@@ -2045,6 +2074,133 @@ class _RoomExpenseState extends State<RoomExpense>
           );
   }
 
+  Widget _buildUpdateDialog(BuildContext context, dynamic data, int index) {
+    return StatefulBuilder(builder: (context, setState) {
+      _paytoMemberAmt.text = crypto.decrypt(data["Amount"]);
+      final themeProvider = Provider.of<ThemeProvider>(context);
+      return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          child: SingleChildScrollView(
+            child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.fromLTRB(8.0, 0, 0, 0),
+                          child: Text(
+                            "Change Amount Paid",
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w500),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        TextFormField(
+                          controller: _paytoMemberAmt,
+                          keyboardType: TextInputType.number,
+                          maxLength: 10,
+                          maxLines: 1,
+                          style: const TextStyle(fontSize: 18),
+                          autocorrect: false,
+                          validator: (value) {
+                            RegExp validateNumber =
+                                RegExp(r'\b[1-9]{1}[\d]*\b');
+                            if (!validateNumber
+                                .hasMatch(_paytoMemberAmt.text)) {
+                              return "Enter Valid Amount";
+                            }
+                            return null;
+                          },
+                          decoration: const InputDecoration(
+                            contentPadding: EdgeInsets.all(8.0),
+                            hintText: "Enter Amount",
+                            counterText: "",
+                            labelText: "Amount",
+                            errorStyle: TextStyle(fontSize: 15),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              height: 43,
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              child: OutlinedButton(
+                                  child: Text(
+                                    "Update",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    side: BorderSide(
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                  onPressed: () async {
+                                    buildShowDialog(context);
+                                    await _updatePayToMember(
+                                        context, data["objID"], "0", index);
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  }),
+                            ),
+                            SizedBox(
+                              height: 43,
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              child: OutlinedButton(
+                                  child: Text(
+                                    "Delete",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    side: BorderSide(
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                  onPressed: () async {
+                                    buildShowDialog(context);
+                                    await _updatePayToMember(
+                                        context, data["objID"], "1", index);
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ))),
+          ));
+    });
+  }
+
   Widget paymentDataWidget() {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
@@ -2307,72 +2463,138 @@ class _RoomExpenseState extends State<RoomExpense>
                                         itemCount: allTransactionData.length,
                                         itemBuilder:
                                             (BuildContext context, int index) {
-                                          return Card(
-                                            elevation: 1.0,
-                                            shadowColor:
-                                                Theme.of(context).primaryColor,
-                                            color: Theme.of(context)
-                                                .scaffoldBackgroundColor,
-                                            shape: RoundedRectangleBorder(
-                                              side: BorderSide(
-                                                  color: Theme.of(context)
-                                                      .primaryColor
-                                                      .withAlpha(80)),
-                                              borderRadius:
-                                                  BorderRadius.circular(15.0),
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  SizedBox(
-                                                    width:
-                                                        MediaQuery.of(context)
-                                                            .size
-                                                            .width,
-                                                    child: Text(
-                                                      crypto.decrypt(
-                                                              allTransactionData[
-                                                                      index]
-                                                                  ["sender"]) +
-                                                          " -> " +
-                                                          crypto.decrypt(
-                                                              allTransactionData[
-                                                                      index]
-                                                                  ["receiver"]),
-                                                      style: const TextStyle(
-                                                        overflow:
-                                                            TextOverflow.clip,
-                                                        fontSize: 21,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                  Row(
+                                          return InkWell(
+                                            onTap: () async {
+                                              if (!isClear &&
+                                                  crypto.decrypt(
+                                                          allTransactionData[
+                                                                  index]
+                                                              ['sEmail']) ==
+                                                      widget.email) {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext
+                                                          context) =>
+                                                      _buildUpdateDialog(
+                                                          context,
+                                                          allTransactionData[
+                                                              index],
+                                                          index),
+                                                );
+                                              }
+                                            },
+                                            child: Card(
+                                              elevation: 1.0,
+                                              shadowColor: Theme.of(context)
+                                                  .primaryColor,
+                                              color: Theme.of(context)
+                                                  .scaffoldBackgroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .primaryColor
+                                                        .withAlpha(80)),
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
                                                       mainAxisAlignment:
                                                           MainAxisAlignment
                                                               .spaceBetween,
                                                       children: [
-                                                        Expanded(
-                                                          child: SizedBox(
-                                                            width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.90,
-                                                            child: Opacity(
-                                                              opacity: 0.8,
-                                                              child: Text(
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width *
+                                                              0.80,
+                                                          child: Text(
+                                                            crypto.decrypt(
+                                                                    allTransactionData[
+                                                                            index]
+                                                                        [
+                                                                        "sender"]) +
+                                                                " -> " +
                                                                 crypto.decrypt(
                                                                     allTransactionData[
                                                                             index]
                                                                         [
-                                                                        "Date"]),
+                                                                        "receiver"]),
+                                                            style:
+                                                                const TextStyle(
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .clip,
+                                                              fontSize: 21,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        !isClear &&
+                                                                crypto.decrypt(allTransactionData[
+                                                                            index]
+                                                                        [
+                                                                        "sEmail"]) ==
+                                                                    widget.email
+                                                            ? Icon(
+                                                                Icons.edit,
+                                                                size: 20,
+                                                              )
+                                                            : SizedBox(),
+                                                      ],
+                                                    ),
+                                                    SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Expanded(
+                                                            child: SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.90,
+                                                              child: Opacity(
+                                                                opacity: 0.8,
+                                                                child: Text(
+                                                                  crypto.decrypt(
+                                                                      allTransactionData[
+                                                                              index]
+                                                                          [
+                                                                          "Date"]),
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          Expanded(
+                                                            flex: 0,
+                                                            child: SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.20,
+                                                              child: Text(
+                                                                "₹ " +
+                                                                    commaSeperator(crypto.decrypt(
+                                                                        allTransactionData[index]
+                                                                            [
+                                                                            "Amount"])),
                                                                 style:
                                                                     const TextStyle(
                                                                   fontSize: 16,
@@ -2380,31 +2602,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                                               ),
                                                             ),
                                                           ),
-                                                        ),
-                                                        Expanded(
-                                                          flex: 0,
-                                                          child: SizedBox(
-                                                            width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.20,
-                                                            child: Text(
-                                                              "₹ " +
-                                                                  commaSeperator(
-                                                                      crypto.decrypt(
-                                                                          allTransactionData[index]
-                                                                              [
-                                                                              "Amount"])),
-                                                              style:
-                                                                  const TextStyle(
-                                                                fontSize: 16,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ]),
-                                                ],
+                                                        ]),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           );
@@ -2596,58 +2796,108 @@ class _RoomExpenseState extends State<RoomExpense>
                                       itemBuilder:
                                           (BuildContext context, int index) {
                                         return SizedBox(
-                                            height: 70,
+                                            height: 75,
                                             width: MediaQuery.of(context)
                                                 .size
                                                 .width,
-                                            child: Card(
-                                              elevation: 1.0,
-                                              color: Theme.of(context)
-                                                  .scaffoldBackgroundColor,
-                                              shadowColor: Theme.of(context)
-                                                  .primaryColor,
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: Theme.of(context)
-                                                        .primaryColor
-                                                        .withAlpha(80)),
-                                                borderRadius:
-                                                    BorderRadius.circular(15.0),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(12.0),
-                                                child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Opacity(
-                                                        opacity: 0.8,
-                                                        child: Text(
-                                                          formatDateTime(
-                                                              crypto.decrypt(
-                                                                  paymentData[
-                                                                          index]
-                                                                      [
-                                                                      "Date"])),
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 18,
+                                            child: InkWell(
+                                              onTap: () async {
+                                                if (!isClear &&
+                                                    crypto.decrypt(
+                                                            allTransactionData[
+                                                                    index]
+                                                                ['sEmail']) ==
+                                                        widget.email) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        _buildUpdateDialog(
+                                                            context,
+                                                            allTransactionData[
+                                                                index],
+                                                            index),
+                                                  );
+                                                }
+                                              },
+                                              child: Card(
+                                                elevation: 1.0,
+                                                color: Theme.of(context)
+                                                    .scaffoldBackgroundColor,
+                                                shadowColor: Theme.of(context)
+                                                    .primaryColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: Theme.of(context)
+                                                          .primaryColor
+                                                          .withAlpha(80)),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Opacity(
+                                                          opacity: 0.8,
+                                                          child: Text(
+                                                            formatDateTime(
+                                                                crypto.decrypt(
+                                                                    paymentData[
+                                                                            index]
+                                                                        [
+                                                                        "Date"])),
+                                                            style:
+                                                                const TextStyle(
+                                                              fontSize: 18,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                      Text(
-                                                        "₹ " +
-                                                            commaSeperator(crypto
-                                                                .decrypt(paymentData[
-                                                                        index][
-                                                                    "Amount"])),
-                                                        style: const TextStyle(
-                                                          fontSize: 18,
+                                                        Column(
+                                                          mainAxisAlignment: (!isClear &&
+                                                                  (crypto.decrypt(
+                                                                          allTransactionData[index]
+                                                                              [
+                                                                              'sEmail']) ==
+                                                                      widget
+                                                                          .email))
+                                                              ? MainAxisAlignment
+                                                                  .spaceBetween
+                                                              : MainAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            (!isClear &&
+                                                                    (crypto.decrypt(allTransactionData[index]
+                                                                            [
+                                                                            'sEmail']) ==
+                                                                        widget
+                                                                            .email))
+                                                                ? Icon(
+                                                                    Icons.edit,
+                                                                    size: 17,
+                                                                  )
+                                                                : SizedBox(),
+                                                            Text(
+                                                              "₹ " +
+                                                                  commaSeperator(
+                                                                      crypto.decrypt(
+                                                                          paymentData[index]
+                                                                              [
+                                                                              "Amount"])),
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 18,
+                                                              ),
+                                                            ),
+                                                          ],
                                                         ),
-                                                      ),
-                                                    ]),
+                                                      ]),
+                                                ),
                                               ),
                                             ));
                                       }),
