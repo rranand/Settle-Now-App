@@ -11,6 +11,7 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/models/FriendEach.dart';
@@ -30,6 +31,7 @@ class RoomExpense extends StatefulWidget {
   final String token;
   final String roomLink;
   final bool isRoomActive;
+  final String objID;
 
   const RoomExpense(
       {Key? key,
@@ -38,7 +40,8 @@ class RoomExpense extends StatefulWidget {
       required this.roomName,
       required this.token,
       required this.roomLink,
-      required this.isRoomActive})
+      required this.isRoomActive,
+      required this.objID})
       : super(key: key);
 
   @override
@@ -99,6 +102,8 @@ class _RoomExpenseState extends State<RoomExpense>
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
+  int scrollToExpense = -1;
+  bool firstTimeLoad = true;
 
   @override
   void dispose() {
@@ -357,6 +362,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> _extractExpenseData() async {
+    scrollToExpense = -1;
     try {
       final response = await http.post(Uri.parse(global.url + 'transaction'),
           headers: <String, String>{
@@ -374,6 +380,10 @@ class _RoomExpenseState extends State<RoomExpense>
         if (TransData != null) {
           allExpenseList = jsonDecode(response.body)['data'];
           TransList = jsonDecode(response.body)['data'];
+          if (firstTimeLoad) {
+            scrollToExpense = TransList.indexWhere(
+                (element) => crypto.decrypt(element['id']) == widget.objID);
+          }
         }
       } else {
         showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
@@ -383,7 +393,7 @@ class _RoomExpenseState extends State<RoomExpense>
         await onException(context);
       }
     }
-
+    firstTimeLoad = false;
     heightExpense =
         30 + allExpenseList.length * 125 + (allExpenseList.length - 1) * 5;
 
@@ -2058,6 +2068,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           isPreviousPageNeedToBeUpdated:
                               isPreviousPageNeedToBeUpdated,
                           roomExpenseCategory: roomExpenseCategory,
+                          index: -1,
                         )
                       : ExpenseData(
                           TransList: TransList,
@@ -2069,7 +2080,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           isPreviousPageNeedToBeUpdated:
                               isPreviousPageNeedToBeUpdated,
                           roomExpenseCategory: roomExpenseCategory,
-                        )),
+                          index: scrollToExpense)),
             ),
           );
   }
@@ -3796,6 +3807,7 @@ class ExpenseData extends StatefulWidget {
   final List<dynamic> roomExpenseCategory;
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
   final ValueNotifier isPreviousPageNeedToBeUpdated;
+  final int index;
   ExpenseData(
       {Key? key,
       required this.TransList,
@@ -3805,7 +3817,8 @@ class ExpenseData extends StatefulWidget {
       required this.refreshIndicatorKey,
       required this.locked,
       required this.isPreviousPageNeedToBeUpdated,
-      required this.roomExpenseCategory})
+      required this.roomExpenseCategory,
+      required this.index})
       : super(key: key);
 
   @override
@@ -3817,6 +3830,20 @@ class _ExpenseDataState extends State<ExpenseData> {
   final TextEditingController _amount = TextEditingController();
   int roomExpenseCategoryIndex = -1;
   final _updateExpense = GlobalKey<FormState>();
+  AutoScrollController controller = AutoScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    
+
+    if (widget.index != -1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        controller.scrollToIndex(widget.index,
+            preferPosition: AutoScrollPosition.begin);
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -4389,179 +4416,187 @@ class _ExpenseDataState extends State<ExpenseData> {
                 height: 5,
               ),
           shrinkWrap: true,
+          controller: controller,
           physics: ScrollPhysics(),
           itemCount: widget.TransList.length,
           itemBuilder: (BuildContext context, int index) {
             List<dynamic> partialExpense = widget.TransList[index]["members"];
 
-            return InkWell(
-              onTap: () {
-                _purpose.text =
-                    crypto.decrypt(widget.TransList[index]["Purpose"]);
-                _amount.text =
-                    crypto.decrypt(widget.TransList[index]["Amount"]);
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) => _buildPopupDialog(
-                      context,
-                      crypto.decrypt(widget.TransList[index]["Name"]),
-                      formatDateTime(
-                          crypto.decrypt(widget.TransList[index]["Date"])),
-                      crypto.decrypt(widget.TransList[index]["Email"]),
-                      crypto.decrypt(widget.TransList[index]["id"]),
-                      crypto.decrypt(widget.TransList[index]["Purpose"]),
-                      crypto.decrypt(widget.TransList[index]["Amount"]),
-                      widget.locked,
-                      partialExpense,
-                      crypto.decrypt(widget.TransList[index]["Type"]),
-                      widget.TransList[index]["isEdited"],
-                      crypto.decrypt(widget.TransList[index]["lastModDate"])),
-                );
-              },
-              child: SizedBox(
-                  height: 165,
-                  child: Card(
-                    elevation: 1.0,
-                    shadowColor: Theme.of(context).primaryColor,
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          color: Theme.of(context).primaryColor.withAlpha(80)),
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              flex: 1,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.95,
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        crypto.decrypt(
-                                            widget.TransList[index]["Purpose"]),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.w500),
-                                      ),
-                                      SizedBox(
-                                        height: 6,
-                                      ),
-                                      Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          crypto.decrypt(
-                                              widget.TransList[index]["Name"]),
+            return AutoScrollTag(
+              controller: controller,
+              index: index,
+              key: ValueKey(index),
+              child: InkWell(
+                onTap: () {
+                  _purpose.text =
+                      crypto.decrypt(widget.TransList[index]["Purpose"]);
+                  _amount.text =
+                      crypto.decrypt(widget.TransList[index]["Amount"]);
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => _buildPopupDialog(
+                        context,
+                        crypto.decrypt(widget.TransList[index]["Name"]),
+                        formatDateTime(
+                            crypto.decrypt(widget.TransList[index]["Date"])),
+                        crypto.decrypt(widget.TransList[index]["Email"]),
+                        crypto.decrypt(widget.TransList[index]["id"]),
+                        crypto.decrypt(widget.TransList[index]["Purpose"]),
+                        crypto.decrypt(widget.TransList[index]["Amount"]),
+                        widget.locked,
+                        partialExpense,
+                        crypto.decrypt(widget.TransList[index]["Type"]),
+                        widget.TransList[index]["isEdited"],
+                        crypto.decrypt(widget.TransList[index]["lastModDate"])),
+                  );
+                },
+                child: SizedBox(
+                    height: 165,
+                    child: Card(
+                      elevation: 1.0,
+                      shadowColor: Theme.of(context).primaryColor,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color:
+                                Theme.of(context).primaryColor.withAlpha(80)),
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                flex: 1,
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.95,
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          crypto.decrypt(widget.TransList[index]
+                                              ["Purpose"]),
+                                          overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
-                                            fontSize: 17,
-                                          ),
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w500),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 6,
-                                      ),
-                                      Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          "Split In: " +
-                                              (partialExpense.isEmpty
-                                                  ? "All"
-                                                  : "Partial"),
-                                          style: const TextStyle(
-                                            fontSize: 17,
-                                          ),
+                                        SizedBox(
+                                          height: 6,
                                         ),
-                                      ),
-                                      SizedBox(
-                                        height: 6,
-                                      ),
-                                      Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          "Category: " +
-                                              crypto.decrypt(widget
-                                                  .TransList[index]["Type"]),
-                                          style: const TextStyle(
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 6,
-                                      ),
-                                      Opacity(
-                                        opacity: 0.8,
-                                        child: Text(
-                                          formatDateTime(crypto.decrypt(
-                                              widget.TransList[index]["Date"])),
-                                          style: const TextStyle(
-                                            fontSize: 17,
-                                          ),
-                                        ),
-                                      ),
-                                    ]),
-                              ),
-                            ),
-                            Column(
-                              mainAxisAlignment: widget.TransList[index]
-                                      ["isEdited"]
-                                  ? MainAxisAlignment.start
-                                  : MainAxisAlignment.center,
-                              children: [
-                                widget.TransList[index]["isEdited"]
-                                    ? Container(
-                                        width: 55,
-                                        height: 30,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                            color: Colors.transparent,
-                                            border: Border.all(
-                                              color: themeProvider.isDarkTheme
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Colors.white,
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            crypto.decrypt(widget
+                                                .TransList[index]["Name"]),
+                                            style: const TextStyle(
+                                              fontSize: 17,
                                             ),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(12))),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(4.0),
-                                          child: Text("Edited",
-                                              style: TextStyle(
-                                                  fontSize: 13,
-                                                  color: Colors.white)),
-                                        ))
-                                    : SizedBox(),
-                                widget.TransList[index]["isEdited"]
-                                    ? SizedBox(
-                                        height: 30,
-                                      )
-                                    : SizedBox(),
-                                Expanded(
-                                  flex: 0,
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.25,
-                                    child: Text(
-                                      "₹ " +
-                                          commaSeperator(crypto.decrypt(widget
-                                              .TransList[index]["Amount"])),
-                                      style: const TextStyle(
-                                        fontSize: 19,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 6,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            "Split In: " +
+                                                (partialExpense.isEmpty
+                                                    ? "All"
+                                                    : "Partial"),
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 6,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            "Category: " +
+                                                crypto.decrypt(widget
+                                                    .TransList[index]["Type"]),
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 6,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            formatDateTime(crypto.decrypt(widget
+                                                .TransList[index]["Date"])),
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                      ]),
+                                ),
+                              ),
+                              Column(
+                                mainAxisAlignment: widget.TransList[index]
+                                        ["isEdited"]
+                                    ? MainAxisAlignment.start
+                                    : MainAxisAlignment.center,
+                                children: [
+                                  widget.TransList[index]["isEdited"]
+                                      ? Container(
+                                          width: 55,
+                                          height: 30,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              border: Border.all(
+                                                color: themeProvider.isDarkTheme
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Colors.white,
+                                              ),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(12))),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(4.0),
+                                            child: Text("Edited",
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.white)),
+                                          ))
+                                      : SizedBox(),
+                                  widget.TransList[index]["isEdited"]
+                                      ? SizedBox(
+                                          height: 30,
+                                        )
+                                      : SizedBox(),
+                                  Expanded(
+                                    flex: 0,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.25,
+                                      child: Text(
+                                        "₹ " +
+                                            commaSeperator(crypto.decrypt(widget
+                                                .TransList[index]["Amount"])),
+                                        style: const TextStyle(
+                                          fontSize: 19,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ]),
-                    ),
-                  )),
+                                ],
+                              ),
+                            ]),
+                      ),
+                    )),
+              ),
             );
           }),
     );

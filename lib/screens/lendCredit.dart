@@ -235,6 +235,7 @@ class _LendCreditState extends State<LendCredit> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) => LendPage(
+                                                  objID: "",
                                                   email: widget.email,
                                                   token: widget.token,
                                                   name: crypto.decrypt(

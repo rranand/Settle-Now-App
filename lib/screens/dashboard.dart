@@ -4177,12 +4177,14 @@ class _RoomWidgetState extends State<RoomWidget> {
       context,
       MaterialPageRoute(
           builder: (context) => RoomExpense(
-              roomKey: widget.RoomData.value[index].roomKey,
-              email: widget.email,
-              roomName: widget.RoomData.value[index].roomName,
-              token: widget.token,
-              roomLink: widget.RoomData.value[index].roomLink,
-              isRoomActive: widget.RoomData.value[index].active)),
+                roomKey: widget.RoomData.value[index].roomKey,
+                email: widget.email,
+                roomName: widget.RoomData.value[index].roomName,
+                token: widget.token,
+                roomLink: widget.RoomData.value[index].roomLink,
+                isRoomActive: widget.RoomData.value[index].active,
+                objID: "",
+              )),
     );
     if (dataFrom) {
       await updateRoom(context, index, widget.RoomData.value[index].roomKey);
