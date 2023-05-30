@@ -46,7 +46,7 @@ class _LendPageState extends State<LendPage> {
   List<dynamic> data = [];
   bool load = false;
   bool isPreviousPageNeedToBeUpdated = false;
-  int index = -1;
+  int expenseIndex = -1;
   bool firstTimeLoad = true;
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
@@ -732,7 +732,7 @@ class _LendPageState extends State<LendPage> {
     try {
       if (this.mounted) {
         setState(() {
-          index = -1;
+          expenseIndex = -1;
           load = false;
           data.clear();
         });
@@ -758,8 +758,14 @@ class _LendPageState extends State<LendPage> {
           return tempDate_1.compareTo(tempDate_2);
         });
         if (firstTimeLoad) {
-          index = data.indexWhere(
+          expenseIndex = data.indexWhere(
               (element) => crypto.decrypt(element['_id']) == widget.objID);
+          if (expenseIndex != -1) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              controller.scrollToIndex(expenseIndex,
+                  preferPosition: AutoScrollPosition.begin);
+            });
+          }
         }
         firstTimeLoad = false;
         userData = jsonDecode(response.body)['user'];
@@ -813,13 +819,6 @@ class _LendPageState extends State<LendPage> {
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
         axis: Axis.vertical,
         suggestedRowHeight: 200);
-
-    if (index != -1) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        controller.scrollToIndex(index,
-            preferPosition: AutoScrollPosition.begin);
-      });
-    }
   }
 
   CloseRoom(BuildContext context) async {
@@ -1024,9 +1023,11 @@ class _LendPageState extends State<LendPage> {
                                           Theme.of(context).primaryColor,
                                       shape: RoundedRectangleBorder(
                                         side: BorderSide(
-                                            color: Theme.of(context)
-                                                .cardColor
-                                                .withAlpha(95)),
+                                            color: index == expenseIndex
+                                                ? Colors.redAccent
+                                                : Theme.of(context)
+                                                    .cardColor
+                                                    .withAlpha(95)),
                                         borderRadius:
                                             BorderRadius.circular(15.0),
                                       ),
@@ -1191,11 +1192,12 @@ class _LendPageState extends State<LendPage> {
                                                                     border:
                                                                         Border
                                                                             .all(
-                                                                      color: themeProvider.isDarkTheme
-                                                                          ? Theme.of(context)
-                                                                              .primaryColor
-                                                                          : Colors
-                                                                              .white,
+                                                                      color: themeProvider
+                                                                              .isDarkTheme
+                                                                          ? (index == expenseIndex
+                                                                              ? Colors.redAccent
+                                                                              : Theme.of(context).primaryColor)
+                                                                          : Colors.white,
                                                                     ),
                                                                     borderRadius:
                                                                         BorderRadius.all(

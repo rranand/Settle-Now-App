@@ -3835,7 +3835,6 @@ class _ExpenseDataState extends State<ExpenseData> {
   @override
   void initState() {
     super.initState();
-    
 
     if (widget.index != -1) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -4458,8 +4457,9 @@ class _ExpenseDataState extends State<ExpenseData> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
-                            color:
-                                Theme.of(context).primaryColor.withAlpha(80)),
+                            color: index == widget.index
+                                ? Colors.redAccent
+                                : Theme.of(context).primaryColor.withAlpha(80)),
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Padding(
@@ -4557,8 +4557,10 @@ class _ExpenseDataState extends State<ExpenseData> {
                                               color: Colors.transparent,
                                               border: Border.all(
                                                 color: themeProvider.isDarkTheme
-                                                    ? Theme.of(context)
-                                                        .primaryColor
+                                                    ? (index == widget.index
+                                                        ? Colors.redAccent
+                                                        : Theme.of(context)
+                                                            .primaryColor)
                                                     : Colors.white,
                                               ),
                                               borderRadius: BorderRadius.all(
