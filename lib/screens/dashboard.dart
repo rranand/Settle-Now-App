@@ -192,7 +192,8 @@ class _DashBoardState extends State<DashBoard> {
   GoogleSignInAccount? _currentUser;
   bool _flexibleUpdateAvailable = false;
   bool importantUpdate = false;
-
+  List<String> liveRoomCategory = ["Settled", "Not Settled"];
+  Set<int> filterliveRoomCategoryIndex = Set();
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
@@ -955,6 +956,7 @@ class _DashBoardState extends State<DashBoard> {
   @override
   void initState() {
     super.initState();
+    filterliveRoomCategoryIndex.add(1);
     getConnectivity();
     executeParallel();
     AwesomeNotifications()
@@ -1045,6 +1047,150 @@ class _DashBoardState extends State<DashBoard> {
             'from': crypto.encrypt('android')
           }));
     } on Exception catch (_) {}
+  }
+
+  buildLiveFilterDialog(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
+    showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, setStat) {
+            return Dialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0)),
+                child: SingleChildScrollView(
+                    child: Container(
+                        width: MediaQuery.of(context).size.width * 0.95,
+                        child: Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text(
+                                      "Live Room Filter",
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  SizedBox(
+                                    height: 110,
+                                    child: ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: liveRoomCategory.length,
+                                        itemBuilder: ((context, index) {
+                                          return CheckboxListTile(
+                                            title:
+                                                Text(liveRoomCategory[index]),
+                                            value: filterliveRoomCategoryIndex
+                                                .contains(index),
+                                            onChanged: (_) {
+                                              if (filterliveRoomCategoryIndex
+                                                  .contains(index)) {
+                                                filterliveRoomCategoryIndex
+                                                    .remove(index);
+                                              } else {
+                                                filterliveRoomCategoryIndex
+                                                    .add(index);
+                                              }
+
+                                              if (this.mounted) {
+                                                setStat(() {});
+                                              }
+                                            },
+                                            controlAffinity:
+                                                ListTileControlAffinity.leading,
+                                          );
+                                        })),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      SizedBox(
+                                        height: 34,
+                                        width: 90,
+                                        child: OutlinedButton(
+                                          child: Text(
+                                            "Close",
+                                            style: TextStyle(
+                                                color: themeProvider.isDarkTheme
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                fontSize: 16),
+                                          ),
+                                          onPressed: () {
+                                            if (this.mounted) {
+                                              Navigator.pop(context);
+                                            }
+                                          },
+                                          style: OutlinedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .primaryColor),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 20,
+                                      ),
+                                      SizedBox(
+                                        height: 34,
+                                        width: 90,
+                                        child: OutlinedButton(
+                                            child: Text(
+                                              "Apply",
+                                              style: TextStyle(
+                                                  color:
+                                                      themeProvider.isDarkTheme
+                                                          ? Colors.white
+                                                          : Colors.black,
+                                                  fontSize: 16),
+                                            ),
+                                            style: OutlinedButton.styleFrom(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              side: BorderSide(
+                                                  color: Theme.of(context)
+                                                      .primaryColor),
+                                            ),
+                                            onPressed: () {
+                                              if (filterliveRoomCategoryIndex
+                                                  .isEmpty) {
+                                                showToast(
+                                                    context,
+                                                    "Choose anyone",
+                                                    Icons.warning);
+                                              } else {
+                                                if (this.mounted) {
+                                                  Navigator.pop(context);
+                                                }
+                                                setStat(() {});
+                                                setState(() {});
+                                              }
+                                            }),
+                                      )
+                                    ],
+                                  )
+                                ])))));
+          });
+        });
   }
 
   buildFilterDialog(BuildContext context) {
@@ -2878,6 +3024,7 @@ class _DashBoardState extends State<DashBoard> {
                                     hasMore: activeRoomHasMore,
                                     roomType: 2,
                                     membersData: membersData,
+                                    liveRoomType: 0,
                                   ),
                                 ),
                               ],
@@ -3003,6 +3150,15 @@ class _DashBoardState extends State<DashBoard> {
                                         hasMore: activeRoomHasMore,
                                         roomType: 1,
                                         token: _token,
+                                        liveRoomType:
+                                            filterliveRoomCategoryIndex
+                                                        .length ==
+                                                    2
+                                                ? 3
+                                                : (filterliveRoomCategoryIndex
+                                                        .contains(0)
+                                                    ? 1
+                                                    : 2),
                                         membersData: membersData,
                                       ))
                               : (RoomDataC.value.isEmpty
@@ -3036,6 +3192,7 @@ class _DashBoardState extends State<DashBoard> {
                                         hasMore: inActiveRoomHasMore,
                                         roomType: 0,
                                         token: _token,
+                                        liveRoomType: 0,
                                         membersData: membersData,
                                       ))),
                         ),
@@ -3123,7 +3280,23 @@ class _DashBoardState extends State<DashBoard> {
                             color: themeProvider.darkTheme
                                 ? Colors.white
                                 : Colors.black,
-                          ))
+                          )),
+                      (open || searchTrigger)
+                          ? IconButton(
+                              onPressed: () {
+                                if (searchTrigger) {
+                                  buildFilterDialog(context);
+                                } else {
+                                  buildLiveFilterDialog(context);
+                                }
+                              },
+                              icon: Icon(
+                                Icons.filter_alt_outlined,
+                                color: themeProvider.darkTheme
+                                    ? Colors.white
+                                    : Colors.black,
+                              ))
+                          : SizedBox()
                     ],
                   )
                 : (dash == 1
@@ -3658,15 +3831,7 @@ class _DashBoardState extends State<DashBoard> {
             ),
             floatingActionButton: dash == 0
                 ? (searchTrigger
-                    ? FloatingActionButton(
-                        onPressed: () {
-                          buildFilterDialog(context);
-                        },
-                        child: Icon(
-                          Icons.filter_alt_outlined,
-                          color: Colors.white,
-                        ),
-                      )
+                    ? null
                     : FloatingActionButton(
                         onPressed: () {
                           showModalBottomSheet<void>(
@@ -3947,6 +4112,7 @@ class RoomWidget extends StatefulWidget {
   final int fetchSize = 10;
   final int roomType;
   final ValueNotifier<bool> hasMore;
+  final int liveRoomType;
 
   RoomWidget(
       {Key? key,
@@ -3957,7 +4123,8 @@ class RoomWidget extends StatefulWidget {
       required this.token,
       required this.membersData,
       required this.roomType,
-      required this.hasMore})
+      required this.hasMore,
+      required this.liveRoomType})
       : super(key: key);
 
   @override
@@ -4013,8 +4180,8 @@ class _RoomWidgetState extends State<RoomWidget> {
 
   @override
   void initState() {
-    getConnectivity();
     super.initState();
+    getConnectivity();
     scrollController.addListener(_scrollListener);
   }
 
@@ -4697,9 +4864,35 @@ class _RoomWidgetState extends State<RoomWidget> {
       physics: widget.flag ? ScrollPhysics() : null,
       padding: EdgeInsets.all(8.0),
       itemCount: widget.RoomData.value.length + 1,
-      separatorBuilder: (context, index) => SizedBox(
-        height: 5,
-      ),
+      separatorBuilder: (context, index) {
+        if (widget.roomType == 1) {
+          if (widget.liveRoomType == 3) {
+            return SizedBox(
+              height: 5,
+            );
+          } else if (widget.liveRoomType == 2) {
+            if (!widget.RoomData.value[index].done) {
+              return SizedBox(
+                height: 5,
+              );
+            } else {
+              return SizedBox();
+            }
+          } else {
+            if (widget.RoomData.value[index].done) {
+              return SizedBox(
+                height: 5,
+              );
+            } else {
+              return SizedBox();
+            }
+          }
+        } else {
+          return SizedBox(
+            height: 5,
+          );
+        }
+      },
       itemBuilder: (BuildContext context, int index) {
         if (index == widget.RoomData.value.length) {
           if (fetchingData) {
@@ -4725,7 +4918,25 @@ class _RoomWidgetState extends State<RoomWidget> {
             return SizedBox();
           }
         }
-        return roomSectors(context, index);
+        if (widget.roomType == 1) {
+          if (widget.liveRoomType == 3) {
+            return roomSectors(context, index);
+          } else if (widget.liveRoomType == 2) {
+            if (!widget.RoomData.value[index].done) {
+              return roomSectors(context, index);
+            } else {
+              return SizedBox();
+            }
+          } else {
+            if (widget.RoomData.value[index].done) {
+              return roomSectors(context, index);
+            } else {
+              return SizedBox();
+            }
+          }
+        } else {
+          return roomSectors(context, index);
+        }
       },
     );
   }
