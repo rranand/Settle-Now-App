@@ -1885,169 +1885,169 @@ class _RoomExpenseState extends State<RoomExpense>
               )
             ],
           )
-        : NestedScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
-            controller: _scrollController,
-            headerSliverBuilder: (context, value) {
-              return [
-                SliverToBoxAdapter(
-                  child: InkWell(
-                    onTap: () async {
-                      await Share.share("Join " +
-                          widget.roomName +
-                          "\nRoom Key: " +
-                          widget.roomKey +
-                          "\n" +
-                          widget.roomLink);
-                    },
-                    onLongPress: () async {
-                      Clipboard.setData(ClipboardData(text: widget.roomKey));
-                      showToast(context, "Join Key Copied", Icons.check);
-                    },
-                    child: ListTile(
-                      title: Text("Room Key   "),
-                      trailing: Text(widget.roomKey),
+        : RefreshIndicator(
+            key: _refreshIndicatorKey,
+            onRefresh: executeParallel,
+            child: NestedScrollView(
+              floatHeaderSlivers: true,
+              controller: _scrollController,
+              headerSliverBuilder: (context, value) {
+                return [
+                  SliverToBoxAdapter(
+                    child: InkWell(
+                      onTap: () async {
+                        await Share.share("Join " +
+                            widget.roomName +
+                            "\nRoom Key: " +
+                            widget.roomKey +
+                            "\n" +
+                            widget.roomLink);
+                      },
+                      onLongPress: () async {
+                        Clipboard.setData(ClipboardData(text: widget.roomKey));
+                        showToast(context, "Join Key Copied", Icons.check);
+                      },
+                      child: ListTile(
+                        title: Text("Room Key   "),
+                        trailing: Text(widget.roomKey),
+                      ),
                     ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: ListTile(
-                    title: const Text("Total Spent"),
-                    trailing: Text(
-                        "₹ " + commaSeperator(totalExpense.toStringAsFixed(2))),
+                  SliverToBoxAdapter(
+                    child: ListTile(
+                      title: const Text("Total Spent"),
+                      trailing: Text("₹ " +
+                          commaSeperator(totalExpense.toStringAsFixed(2))),
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: ListTile(
-                    title: const Text("You Spent"),
-                    trailing: Text("₹ " + commaSeperator(yourExpense)),
+                  SliverToBoxAdapter(
+                    child: ListTile(
+                      title: const Text("You Spent"),
+                      trailing: Text("₹ " + commaSeperator(yourExpense)),
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: ListTile(
-                    title: const Text("Members"),
-                    trailing: Text(crypto.decrypt(list[0]["cnt"])),
+                  SliverToBoxAdapter(
+                    child: ListTile(
+                      title: const Text("Members"),
+                      trailing: Text(crypto.decrypt(list[0]["cnt"])),
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: ListTile(
-                    title: const Text("Created On"),
-                    trailing:
-                        Text(formatDateTime(crypto.decrypt(list[0]["date"]))),
+                  SliverToBoxAdapter(
+                    child: ListTile(
+                      title: const Text("Created On"),
+                      trailing:
+                          Text(formatDateTime(crypto.decrypt(list[0]["date"]))),
+                    ),
                   ),
-                ),
-                SliverToBoxAdapter(
-                  child: !isClear
-                      ? Padding(
-                          padding: EdgeInsets.all(15.0),
-                          child: SizedBox(
-                            height: 45,
-                            child: OutlinedButton(
-                              child: Text(
-                                "Close Room",
-                                style: TextStyle(
-                                    fontSize: 16,
-                                    color: themeProvider.isDarkTheme
-                                        ? Colors.white
-                                        : Colors.black),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(13.0),
+                  SliverToBoxAdapter(
+                    child: !isClear
+                        ? Padding(
+                            padding: EdgeInsets.all(15.0),
+                            child: SizedBox(
+                              height: 45,
+                              child: OutlinedButton(
+                                child: Text(
+                                  "Close Room",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black),
                                 ),
-                                side: BorderSide(
-                                    color: Theme.of(context).primaryColor),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(13.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        closeRoomWidget(context),
+                                  );
+                                },
                               ),
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      closeRoomWidget(context),
-                                );
+                            ),
+                          )
+                        : SizedBox(),
+                  ),
+                  SliverToBoxAdapter(child: const Divider()),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(15.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Member",
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: 140,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              itemCount: list.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                if (index == 0) {
+                                  return memberAll(context);
+                                } else {
+                                  return memberCard(context, index);
+                                }
                               },
                             ),
                           ),
-                        )
-                      : SizedBox(),
-                ),
-                SliverToBoxAdapter(child: const Divider()),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(15.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Member",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: 140,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            shrinkWrap: true,
-                            itemCount: list.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              if (index == 0) {
-                                return memberAll(context);
-                              } else {
-                                return memberCard(context, index);
-                              }
-                            },
-                          ),
-                        ),
-                        Divider(),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Show Expenses You Are In",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                          Divider(),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Show Expenses You Are In",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                            IconButton(
-                                onPressed: () {
-                                  showExpenseYouAreIn = !showExpenseYouAreIn;
-                                  getFilterData();
-                                },
-                                icon: Icon(
-                                  showExpenseYouAreIn
-                                      ? Icons.toggle_on
-                                      : Icons.toggle_off,
-                                  size: 40,
-                                  color: showExpenseYouAreIn
-                                      ? Theme.of(context).primaryColor
-                                      : null,
-                                ))
-                          ],
-                        ),
-                        Divider(),
-                        Text(
-                          expenseTitle,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                              IconButton(
+                                  onPressed: () {
+                                    showExpenseYouAreIn = !showExpenseYouAreIn;
+                                    getFilterData();
+                                  },
+                                  icon: Icon(
+                                    showExpenseYouAreIn
+                                        ? Icons.toggle_on
+                                        : Icons.toggle_off,
+                                    size: 40,
+                                    color: showExpenseYouAreIn
+                                        ? Theme.of(context).primaryColor
+                                        : null,
+                                  ))
+                            ],
                           ),
-                        ),
-                      ],
+                          Divider(),
+                          Text(
+                            expenseTitle,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                )
-              ];
-            },
-            body: RefreshIndicator(
-              key: _refreshIndicatorKey,
-              onRefresh: executeParallel,
-              child: allExpenseList.isEmpty
+                  )
+                ];
+              },
+              body: allExpenseList.isEmpty
                   ? Center(
                       child: loaded
                           ? Text(
@@ -2058,29 +2058,48 @@ class _RoomExpenseState extends State<RoomExpense>
                             )
                           : CircularProgressIndicator())
                   : (showExpenseYouAreIn
-                      ? ExpenseData(
-                          TransList: filterResult,
-                          RoomKey: widget.roomKey,
-                          Email: widget.email,
-                          Token: widget.token,
-                          refreshIndicatorKey: _refreshIndicatorKey,
-                          locked: locked,
-                          isPreviousPageNeedToBeUpdated:
-                              isPreviousPageNeedToBeUpdated,
-                          roomExpenseCategory: roomExpenseCategory,
-                          index: -1,
-                        )
-                      : ExpenseData(
-                          TransList: TransList,
-                          RoomKey: widget.roomKey,
-                          Email: widget.email,
-                          Token: widget.token,
-                          refreshIndicatorKey: _refreshIndicatorKey,
-                          locked: locked,
-                          isPreviousPageNeedToBeUpdated:
-                              isPreviousPageNeedToBeUpdated,
-                          roomExpenseCategory: roomExpenseCategory,
-                          index: scrollToExpense)),
+                      ? (filterResult.isEmpty
+                          ? Center(
+                              child: Text(
+                              "No Expense Found",
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ))
+                          : ExpenseData(
+                              TransList: filterResult,
+                              RoomKey: widget.roomKey,
+                              Email: widget.email,
+                              Token: widget.token,
+                              refreshIndicatorKey: _refreshIndicatorKey,
+                              locked: locked,
+                              isPreviousPageNeedToBeUpdated:
+                                  isPreviousPageNeedToBeUpdated,
+                              roomExpenseCategory: roomExpenseCategory,
+                              index: -1,
+                              scrollController: _scrollController,
+                            ))
+                      : (TransList.isEmpty
+                          ? Center(
+                              child: Text(
+                              "No Expense Found",
+                              style: TextStyle(
+                                fontSize: 18,
+                              ),
+                            ))
+                          : ExpenseData(
+                              TransList: TransList,
+                              RoomKey: widget.roomKey,
+                              Email: widget.email,
+                              Token: widget.token,
+                              refreshIndicatorKey: _refreshIndicatorKey,
+                              locked: locked,
+                              isPreviousPageNeedToBeUpdated:
+                                  isPreviousPageNeedToBeUpdated,
+                              roomExpenseCategory: roomExpenseCategory,
+                              index: scrollToExpense,
+                              scrollController: _scrollController,
+                            ))),
             ),
           );
   }
@@ -3119,7 +3138,9 @@ class _RoomExpenseState extends State<RoomExpense>
               Navigator.pop(context, isPreviousPageNeedToBeUpdated.value);
               return new Future(() => false);
             },
-            child: chooseFromBottomNavigator(dash)),
+            child: SizedBox(
+                height: MediaQuery.of(context).size.height,
+                child: chooseFromBottomNavigator(dash))),
         bottomNavigationBar: isAlertSet
             ? Container(
                 decoration: BoxDecoration(
@@ -3808,6 +3829,7 @@ class ExpenseData extends StatefulWidget {
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
   final ValueNotifier isPreviousPageNeedToBeUpdated;
   final int index;
+  final ScrollController scrollController;
   ExpenseData(
       {Key? key,
       required this.TransList,
@@ -3818,7 +3840,8 @@ class ExpenseData extends StatefulWidget {
       required this.locked,
       required this.isPreviousPageNeedToBeUpdated,
       required this.roomExpenseCategory,
-      required this.index})
+      required this.index,
+      required this.scrollController})
       : super(key: key);
 
   @override
@@ -3835,6 +3858,14 @@ class _ExpenseDataState extends State<ExpenseData> {
   @override
   void initState() {
     super.initState();
+    controller.addListener(() {
+      if (controller.position.minScrollExtent == controller.position.pixels) {
+        widget.scrollController.animateTo(
+            MediaQuery.of(context).size.height * 0.2,
+            duration: Duration(seconds: 1),
+            curve: Curves.fastOutSlowIn);
+      }
+    });
 
     if (widget.index != -1) {
       WidgetsBinding.instance.addPostFrameCallback((_) {

@@ -249,7 +249,7 @@ class _DashBoardState extends State<DashBoard> {
                       payload: null),
                   schedule: NotificationCalendar(
                       day: int.parse(crypto.decrypt(data[i]["dates"])),
-                      hour: 7 + (i * 4),
+                      hour: 7 + (j * 4),
                       minute: 0,
                       second: 0,
                       allowWhileIdle: true,
@@ -512,6 +512,20 @@ class _DashBoardState extends State<DashBoard> {
 
       if (await prefs.getBool("isGoogle") != null) {
         isGoogle = await prefs.getBool("isGoogle")!;
+      }
+
+      if (await prefs.getInt("liveCategoryIndex") != null) {
+        int indexes = await prefs.getInt("liveCategoryIndex")!;
+        if (indexes == 2) {
+          filterliveRoomCategoryIndex.add(1);
+          filterliveRoomCategoryIndex.add(0);
+        } else {
+          filterliveRoomCategoryIndex.add(indexes);
+        }
+      } else {
+        await prefs.setInt("liveCategoryIndex", 2);
+        filterliveRoomCategoryIndex.add(1);
+        filterliveRoomCategoryIndex.add(0);
       }
 
       if (isGoogle) {
@@ -956,7 +970,6 @@ class _DashBoardState extends State<DashBoard> {
   @override
   void initState() {
     super.initState();
-    filterliveRoomCategoryIndex.add(1);
     getConnectivity();
     executeParallel();
     AwesomeNotifications()
@@ -1170,7 +1183,7 @@ class _DashBoardState extends State<DashBoard> {
                                                   color: Theme.of(context)
                                                       .primaryColor),
                                             ),
-                                            onPressed: () {
+                                            onPressed: () async {
                                               if (filterliveRoomCategoryIndex
                                                   .isEmpty) {
                                                 showToast(
@@ -1178,6 +1191,17 @@ class _DashBoardState extends State<DashBoard> {
                                                     "Choose anyone",
                                                     Icons.warning);
                                               } else {
+                                                if (filterliveRoomCategoryIndex
+                                                        .length ==
+                                                    2) {
+                                                  await prefs.setInt(
+                                                      "liveCategoryIndex", 2);
+                                                } else {
+                                                  await prefs.setInt(
+                                                      "liveCategoryIndex",
+                                                      filterliveRoomCategoryIndex
+                                                          .first);
+                                                }
                                                 if (this.mounted) {
                                                   Navigator.pop(context);
                                                 }
@@ -3103,14 +3127,14 @@ class _DashBoardState extends State<DashBoard> {
                         ),
                       ),
                       GestureDetector(
-                        onPanUpdate: (details) {
-                          if (details.delta.dx > 0) {
+                        onPanUpdate: (details) async {
+                          if (details.delta.dx > 2) {
                             setState(() {
                               open = true;
                             });
                           }
 
-                          if (details.delta.dx < 0) {
+                          if (details.delta.dx < -2) {
                             setState(() {
                               open = false;
                             });
@@ -4861,7 +4885,7 @@ class _RoomWidgetState extends State<RoomWidget> {
   Widget build(BuildContext context) {
     return ListView.separated(
       controller: scrollController,
-      physics: widget.flag ? ScrollPhysics() : null,
+      physics: widget.flag ? ScrollPhysics() : AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.all(8.0),
       itemCount: widget.RoomData.value.length + 1,
       separatorBuilder: (context, index) {
