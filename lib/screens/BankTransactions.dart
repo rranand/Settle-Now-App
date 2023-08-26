@@ -71,7 +71,6 @@ class _BankTransactionsState extends State<BankTransactions> {
     "Credit Card"
   ];
   int lenDenIndex = 0;
-  late SharedPreferences prefs;
   Set<int> transactionTypeIndex = Set();
   Set<int> transactionModeIndex = Set();
   List<dynamic> investmentCat = [];
@@ -223,8 +222,8 @@ class _BankTransactionsState extends State<BankTransactions> {
   }
 
   checkForBankMessageStatus() async {
-    prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("isBankMessageLoadedOnce", true);
+    pref = await SharedPreferences.getInstance();
+    await pref.setBool("isBankMessageLoadedOnce", true);
   }
 
   Future<void> executeParallel() async {
@@ -2193,7 +2192,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                               BorderRadius.all(Radius.circular(12))),
                                                                   child: Padding(
                                                                     padding: const EdgeInsets
-                                                                            .symmetric(
+                                                                        .symmetric(
                                                                         vertical:
                                                                             4.0,
                                                                         horizontal:
@@ -2229,7 +2228,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                               BorderRadius.all(Radius.circular(12))),
                                                                   child: Padding(
                                                                     padding: const EdgeInsets
-                                                                            .symmetric(
+                                                                        .symmetric(
                                                                         vertical:
                                                                             4.0,
                                                                         horizontal:
@@ -2265,7 +2264,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                           ),
                                                                           borderRadius: BorderRadius.all(Radius.circular(12))),
                                                                       child: Padding(
-                                                                        padding: const EdgeInsets.symmetric(
+                                                                        padding: const EdgeInsets
+                                                                            .symmetric(
                                                                             vertical:
                                                                                 4.0,
                                                                             horizontal:
@@ -2424,7 +2424,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                               Radius.circular(12))),
                                                               child: Padding(
                                                                 padding: const EdgeInsets
-                                                                        .symmetric(
+                                                                    .symmetric(
                                                                     vertical:
                                                                         4.0,
                                                                     horizontal:
@@ -2464,7 +2464,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                               Radius.circular(12))),
                                                               child: Padding(
                                                                 padding: const EdgeInsets
-                                                                        .symmetric(
+                                                                    .symmetric(
                                                                     vertical:
                                                                         4.0,
                                                                     horizontal:
@@ -2505,7 +2505,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                               BorderRadius.all(Radius.circular(12))),
                                                                   child: Padding(
                                                                     padding: const EdgeInsets
-                                                                            .symmetric(
+                                                                        .symmetric(
                                                                         vertical:
                                                                             4.0,
                                                                         horizontal:

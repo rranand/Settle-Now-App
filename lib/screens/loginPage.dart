@@ -111,10 +111,8 @@ class _LoginPageState extends State<LoginPage> {
       await prefs.setBool("isOnBoardingCompleted", false);
     }
 
-    if (prefs.getString("email") != null &&
-        prefs.getString("name") != null &&
-        prefs.getString("token") != null &&
-        prefs.getString("pushToken") != null) {
+    if (prefs.getString("token") != null &&
+        parseJWT(prefs.getString("token")!) != null) {
       if (this.mounted) {
         isOnBoardingCompleted
             ? Navigator.pushAndRemoveUntil(
@@ -270,11 +268,19 @@ class _LoginPageState extends State<LoginPage> {
 
                           final JD = jsonDecode(ipAdd.body);
                           prefs.setBool("isGoogle", true);
-                          prefs.setString("email", (user?.email).toString());
-                          prefs.setString(
-                              "name", (user?.displayName).toString());
-                          prefs.setString("token", token);
-                          prefs.setString("pushToken", deviceToken);
+
+                          Map<String, String> jsonInputData = {
+                            "email": (user?.email).toString(),
+                            "name": (user?.displayName).toString(),
+                            "token": token,
+                            "pushToken": deviceToken
+                          };
+
+                          String jwToken = await createJWT(
+                              (user?.email).toString(),
+                              jsonEncode(jsonInputData));
+
+                          prefs.setString("token", jwToken);
 
                           await http.post(
                               Uri.parse(global.url + 'login/google'),

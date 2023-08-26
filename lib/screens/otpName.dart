@@ -143,15 +143,23 @@ class _OtpNameState extends State<OtpName> {
       JsonData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        Map<String, String> jsonInputData = {
+          "email": widget.email,
+          "name": "",
+          "token": token,
+          "pushToken": deviceToken
+        };
+
         if (crypto.decrypt(data['Name']) == 'Unknown') {
-          prefs.setString("name", name);
+          jsonInputData.update("name", (value) => name);
         } else {
-          prefs.setString("name", crypto.decrypt(data['Name']));
+          jsonInputData.update("name", (value) => crypto.decrypt(data['Name']));
         }
 
-        prefs.setString("email", widget.email);
-        prefs.setString("token", token);
-        prefs.setString("pushToken", deviceToken);
+        String jwToken =
+            await createJWT(widget.email, jsonEncode(jsonInputData));
+
+        prefs.setString("token", jwToken);
         prefs.setBool("isGoogle", false);
 
         await http.patch(Uri.parse(global.url + 'verify'),

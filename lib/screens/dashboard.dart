@@ -538,23 +538,21 @@ class _DashBoardState extends State<DashBoard> {
         _googleSignIn.signInSilently();
       }
 
-      if (prefs.getString("email") != null &&
-          prefs.getString("name") != null &&
-          prefs.getString("token") != null &&
-          prefs.getString("pushToken") != null) {
-        _email.text = prefs.getString("email")!;
-        _name.text = prefs.getString("name")!;
-        _token = prefs.getString("token")!;
+      if (prefs.getString("token") != null &&
+          parseJWT(prefs.getString("token")!) != null) {
+        Map<String, dynamic> jsonOutData =
+            parseJWT(prefs.getString("token")!);
+
+        _email.text = jsonOutData["email"]!;
+        _name.text = jsonOutData["name"]!;
+        _token = jsonOutData["token"]!;
         initalDataLoaded = true;
       } else {
         if (this.mounted) {
           buildShowDialog(context);
         }
         await Future.wait([
-          prefs.remove('name'),
-          prefs.remove('email'),
           prefs.remove('token'),
-          prefs.remove('pushToken'),
           AwesomeNotifications().cancelAllSchedules(),
           deleteToken(),
           logOutFromGoogle()
@@ -655,10 +653,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
-            prefs.remove('name'),
-            prefs.remove('email'),
             prefs.remove('token'),
-            prefs.remove('pushToken'),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
             logOutFromGoogle()
@@ -717,10 +712,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
-            prefs.remove('name'),
-            prefs.remove('email'),
             prefs.remove('token'),
-            prefs.remove('pushToken'),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
             logOutFromGoogle()
@@ -842,10 +834,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
-            prefs.remove('name'),
-            prefs.remove('email'),
             prefs.remove('token'),
-            prefs.remove('pushToken'),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
             logOutFromGoogle()
@@ -2531,7 +2520,7 @@ class _DashBoardState extends State<DashBoard> {
                                                                 child: Padding(
                                                                   padding:
                                                                       const EdgeInsets
-                                                                              .all(
+                                                                          .all(
                                                                           12.0),
                                                                   child: Text(
                                                                     "Cancel",
@@ -2704,7 +2693,7 @@ class _DashBoardState extends State<DashBoard> {
                                                             child: Padding(
                                                               padding:
                                                                   const EdgeInsets
-                                                                          .all(
+                                                                      .all(
                                                                       12.0),
                                                               child: Text(
                                                                 "Cancel",
@@ -3793,10 +3782,7 @@ class _DashBoardState extends State<DashBoard> {
                         buildShowDialog(context);
                       }
                       await Future.wait([
-                        prefs.remove('name'),
-                        prefs.remove('email'),
                         prefs.remove('token'),
-                        prefs.remove('pushToken'),
                         AwesomeNotifications().cancelAllSchedules(),
                         deleteToken(),
                         logOutFromGoogle()

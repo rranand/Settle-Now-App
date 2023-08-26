@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import '../contents.dart' as global;
@@ -181,4 +183,32 @@ formatDateTime(String dateTime) {
   DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
   DateTime olddateTime = dateFormat.parse(dateTime);
   return dateFormat_new.format(olddateTime);
+}
+
+createJWT(String email, String input) async {
+  final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  String key = '';
+  final jwt = JWT(jsonDecode(input));
+
+  if (kIsWeb) {
+    WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
+    key = data.browserName.name + '###' + data.platform! + '###' + email;
+  } else {
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
+      key = build.id +
+          '###' +
+          build.serialNumber +
+          '###' +
+          build.fingerprint +
+          '###' +
+          email;
+    }
+  }
+  return crypto.encrypt(jwt.sign(SecretKey(key)));
+}
+
+parseJWT(String token) {
+  String jwToken = crypto.decrypt(token);
+  return JWT.tryDecode(jwToken)!.payload;
 }

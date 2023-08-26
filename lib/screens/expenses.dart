@@ -2063,46 +2063,12 @@ class _ExpensesState extends State<Expenses> {
                                             DateTime? dateTime =
                                                 await showOmniDateTimePicker(
                                               context: context,
-                                              primaryColor: Theme.of(context)
-                                                  .primaryColor,
-                                              backgroundColor:
-                                                  themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              calendarTextColor:
-                                                  !themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              tabTextColor:
-                                                  !themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              unselectedTabBackgroundColor:
-                                                  Colors.grey[700],
-                                              buttonTextColor:
-                                                  !themeProvider.isDarkTheme
-                                                      ? Colors.grey[900]
-                                                      : Colors.white,
-                                              timeSpinnerTextStyle: TextStyle(
-                                                  color:
-                                                      !themeProvider.isDarkTheme
-                                                          ? Colors.grey[900]
-                                                          : Colors.white70,
-                                                  fontSize: 18),
-                                              timeSpinnerHighlightedTextStyle:
-                                                  TextStyle(
-                                                      color: !themeProvider
-                                                              .isDarkTheme
-                                                          ? Colors.grey[900]
-                                                          : Colors.white,
-                                                      fontSize: 24),
                                               is24HourMode: false,
                                               isShowSeconds: false,
-                                              startInitialDate: expenseDate,
-                                              startFirstDate: DateTime(2018),
-                                              startLastDate: DateTime.now(),
-                                              borderRadius:
-                                                  const Radius.circular(16),
+                                              initialDate: expenseDate,
+                                              firstDate: DateTime(2018),
+                                              lastDate: DateTime.now(),
+                                              borderRadius: BorderRadius.circular(16.0),
                                             );
 
                                             if (dateTime != null) {

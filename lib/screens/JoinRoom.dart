@@ -34,10 +34,13 @@ class _RoomJoinState extends State<RoomJoin> {
     prefs = await SharedPreferences.getInstance();
 
     try {
-      if (prefs.getString("email") != null &&
-          prefs.getString("token") != null) {
-        String email = prefs.getString("email")!;
-        String _token = prefs.getString("token")!;
+      if (prefs.getString("token") != null &&
+          parseJWT(prefs.getString("token")!) != null) {
+        Map<String, dynamic> jsonOutData =
+            parseJWT(prefs.getString("token")!);
+
+        String email = jsonOutData["email"]!;
+        String _token = jsonOutData["token"]!;
 
         if (widget.roomKey.length == 7) {
           final response = await http.put(Uri.parse(global.url + 'room'),
