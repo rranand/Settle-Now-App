@@ -66,6 +66,9 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
 
       if (messageBody.contains("debited")) {
         String amount = getAmount(messageBody, "rs");
+        if (amount.isEmpty) {
+          amount = getAmount(messageBody, "debited by");
+        }
         String transactionID = "Unknown";
         int refNo = -1;
         String receiver = "";
@@ -93,10 +96,49 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
               j++) {
             transactionID += messageBody[j];
           }
+        } else if (messageBody.contains("refno")) {
+          refNo = messageBody.indexOf("refno");
+          int index = refNo + 3;
+
+          if (messageBody[index] == " ") {
+            index++;
+          }
+          index += 3;
+          transactionID = "";
+
+          for (int j = index;
+              j < messageBody.length &&
+                  messageBody[j] != "." &&
+                  messageBody[j] != " ";
+              j++) {
+            transactionID += messageBody[j];
+          }
+        } else if (messageBody.contains("ref no")) {
+          refNo = messageBody.indexOf("ref no");
+          int index = refNo + 3;
+
+          if (messageBody[index] == " ") {
+            index++;
+          }
+          index += 3;
+          transactionID = "";
+
+          for (int j = index;
+              j < messageBody.length &&
+                  messageBody[j] != "." &&
+                  messageBody[j] != " ";
+              j++) {
+            transactionID += messageBody[j];
+          }
         }
 
         if (messageBody.contains("transfer to")) {
           int index = messageBody.indexOf("transfer to") + "transfer to".length;
+          for (int i = index; i < refNo; i++) {
+            receiver += messageBody[i];
+          }
+        } else if (messageBody.contains("trf to")) {
+          int index = messageBody.indexOf("trf to") + "trf to".length;
           for (int i = index; i < refNo; i++) {
             receiver += messageBody[i];
           }
