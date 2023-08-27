@@ -454,8 +454,7 @@ class _RoomExpenseState extends State<RoomExpense>
           Navigator.pop(context);
         }
         if (this.mounted) {
-          print("###" + _.toString());
-        await onException(context);
+          await onException(context);
         }
       }
       if (this.mounted) {
@@ -506,8 +505,7 @@ class _RoomExpenseState extends State<RoomExpense>
           Navigator.pop(context);
         }
         if (this.mounted) {
-          print("###" + _.toString());
-        await onException(context);
+          await onException(context);
         }
       }
       if (this.mounted) {

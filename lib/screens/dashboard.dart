@@ -23,9 +23,11 @@ import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/BankTransactions.dart';
 import 'package:settlenow/screens/aboutus.dart';
+import 'package:settlenow/screens/accountData.dart';
 import 'package:settlenow/screens/analysis.dart';
 import 'package:settlenow/screens/contactUs.dart';
 import 'package:settlenow/screens/expenses.dart';
+import 'package:settlenow/screens/inviteFriends.dart';
 import 'package:settlenow/screens/lendCredit.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:settlenow/screens/profile.dart';
@@ -172,6 +174,7 @@ class _DashBoardState extends State<DashBoard> {
     '31'
   ];
   bool initalDataLoaded = false;
+  bool isInvitePremissionProvided = false;
   bool bankMessageShowedOnce = false;
   bool isSentRoomRequestLoaded = false;
   List<int> from = [];
@@ -505,6 +508,21 @@ class _DashBoardState extends State<DashBoard> {
 
     if (_email.text == "") {
       prefs = await SharedPreferences.getInstance();
+      
+      if (prefs.getBool("isInvitePremissionProvided") != null) {
+        isInvitePremissionProvided =
+            await prefs.getBool("isInvitePremissionProvided")!;
+      } else {
+        await prefs.setBool("isInvitePremissionProvided", false);
+      }
+
+      if (!isInvitePremissionProvided) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    InviteFriends(email: _email.text, token: _token)));
+      }
 
       if (prefs.getBool("isBankMessageLoadedOnce") != null) {
         bankMessageShowedOnce = await prefs.getBool("isBankMessageLoadedOnce")!;
@@ -540,8 +558,7 @@ class _DashBoardState extends State<DashBoard> {
 
       if (prefs.getString("token") != null &&
           parseJWT(prefs.getString("token")!) != null) {
-        Map<String, dynamic> jsonOutData =
-            parseJWT(prefs.getString("token")!);
+        Map<String, dynamic> jsonOutData = parseJWT(prefs.getString("token")!);
 
         _email.text = jsonOutData["email"]!;
         _name.text = jsonOutData["name"]!;
@@ -552,7 +569,7 @@ class _DashBoardState extends State<DashBoard> {
           buildShowDialog(context);
         }
         await Future.wait([
-          prefs.remove('token'),
+          prefs.clear(),
           AwesomeNotifications().cancelAllSchedules(),
           deleteToken(),
           logOutFromGoogle()
@@ -653,7 +670,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
-            prefs.remove('token'),
+            prefs.clear(),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
             logOutFromGoogle()
@@ -712,7 +729,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
-            prefs.remove('token'),
+            prefs.clear(),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
             logOutFromGoogle()
@@ -834,7 +851,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
-            prefs.remove('token'),
+            prefs.clear(),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
             logOutFromGoogle()
@@ -2006,7 +2023,8 @@ class _DashBoardState extends State<DashBoard> {
             padding: EdgeInsets.all(12),
             margin: EdgeInsets.symmetric(horizontal: 110, vertical: 16),
             decoration: BoxDecoration(
-                color: Theme.of(context).backgroundColor.withOpacity(0.5),
+                color:
+                    Theme.of(context).colorScheme.background.withOpacity(0.5),
                 borderRadius: BorderRadius.all(Radius.circular(24))),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -3380,7 +3398,7 @@ class _DashBoardState extends State<DashBoard> {
                       BottomNavigationBarItem(
                         icon: Stack(children: [
                           Icon(
-                            Icons.person_add_outlined,
+                            Icons.notification_add_outlined,
                             size: 27,
                           ),
                           RoomRequest.isNotEmpty
@@ -3601,6 +3619,39 @@ class _DashBoardState extends State<DashBoard> {
                                   TextStyle(fontSize: 15, color: Colors.white)),
                         ),
                   ListTile(
+                    onTap: () {
+                      if (this.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AccountData(
+                                    email: _email.text,
+                                    name: _name.text,
+                                    token: _token,
+                                    picUrl: isGoogle
+                                        ? (_currentUser != null
+                                            ? _currentUser!.photoUrl.toString()
+                                            : global.driveUrl +
+                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                        : (global.driveUrl +
+                                            (_profilePicID.length == 0
+                                                ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                : _profilePicID)),
+                                  )),
+                        );
+                      }
+                    },
+                    leading: Icon(
+                      Icons.person_2_outlined,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                    title: Text(
+                      "Profile",
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    ),
+                  ),
+                  ListTile(
                     onTap: () async {
                       if (this.mounted) {
                         final dataFrom = await Navigator.push(
@@ -3782,7 +3833,7 @@ class _DashBoardState extends State<DashBoard> {
                         buildShowDialog(context);
                       }
                       await Future.wait([
-                        prefs.remove('token'),
+                        prefs.clear(),
                         AwesomeNotifications().cancelAllSchedules(),
                         deleteToken(),
                         logOutFromGoogle()
