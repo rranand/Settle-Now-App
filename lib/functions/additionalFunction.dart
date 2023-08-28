@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:contacts_service/contacts_service.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:settlenow/models/FriendEach.dart';
 import '../contents.dart' as global;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -211,4 +214,31 @@ createJWT(String email, String input) async {
 parseJWT(String token) {
   String jwToken = crypto.decrypt(token);
   return JWT.tryDecode(jwToken)!.payload;
+}
+
+String fixPhoneNumber(String phone) {
+  if (phone.startsWith("+91")) {
+    phone = phone.substring(3);
+  }
+  if (phone.startsWith("0")) {
+    phone = phone.substring(1);
+  }
+  return phone.replaceAll(" ", "");
+}
+
+Future<List<FriendEach>> fromContacts() async {
+  List<FriendEach> contactData = [];
+  bool isGranted = await Permission.contacts.isGranted;
+
+  if (isGranted) {
+    List<Contact> contacts =
+        await ContactsService.getContacts(withThumbnails: false);
+
+    for (int i = 0; i < contacts.length; i++) {
+      contactData
+          .add(FriendEach.fromLocal(contacts[i].toMap(), fixPhoneNumber));
+    }
+  }
+
+  return contactData;
 }

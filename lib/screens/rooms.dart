@@ -333,6 +333,7 @@ class _RoomExpenseState extends State<RoomExpense>
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         loadFriendData = true;
+        fromContacts();
         List<dynamic> tempData = data['data'];
         for (int i = 0; i < tempData.length; i++) {
           friendData.add(FriendEach.fromJson(tempData[i]));
