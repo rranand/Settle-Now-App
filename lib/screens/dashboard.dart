@@ -23,14 +23,14 @@ import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/BankTransactions.dart';
 import 'package:settlenow/screens/aboutus.dart';
-import 'package:settlenow/screens/accountData.dart';
+import 'package:settlenow/screens/profile.dart';
 import 'package:settlenow/screens/analysis.dart';
 import 'package:settlenow/screens/contactUs.dart';
 import 'package:settlenow/screens/expenses.dart';
 import 'package:settlenow/screens/inviteFriends.dart';
 import 'package:settlenow/screens/lendCredit.dart';
 import 'package:settlenow/screens/loginPage.dart';
-import 'package:settlenow/screens/profile.dart';
+import 'package:settlenow/screens/summary.dart';
 import 'package:settlenow/screens/rooms.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
@@ -3260,7 +3260,7 @@ class _DashBoardState extends State<DashBoard> {
         RoomExpenseCategory: roomExpenseCategory,
       );
     } else {
-      return Profile(
+      return Summary(
         email: _email.text,
         token: _token,
         expenseCategory: expenseCategory,
@@ -3357,7 +3357,7 @@ class _DashBoardState extends State<DashBoard> {
                                   )
                                 : AppBar(
                                     title: Text(
-                                      "Profile",
+                                      "Summary",
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -3445,14 +3445,14 @@ class _DashBoardState extends State<DashBoard> {
                       ),
                       BottomNavigationBarItem(
                         icon: Icon(
-                          Icons.analytics_outlined,
+                          Icons.assessment_outlined,
                           size: 27,
                         ),
                         label: "",
                       ),
                       BottomNavigationBarItem(
                         icon: Icon(
-                          Icons.person,
+                          Icons.assignment_outlined,
                           size: 27,
                         ),
                         label: "",
@@ -3625,7 +3625,7 @@ class _DashBoardState extends State<DashBoard> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => AccountData(
+                              builder: (context) => Profile(
                                     email: _email.text,
                                     name: _name.text,
                                     token: _token,

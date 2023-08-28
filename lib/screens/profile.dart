@@ -1,81 +1,95 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:settlenow/screens/loginPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../contents.dart' as global;
+import 'package:settlenow/others/crypto.dart';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
-import 'package:settlenow/functions/gradient.dart';
-import 'package:settlenow/models/PersonalExpenseEach.dart';
-import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
-import 'package:settlenow/screens/maintain.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
-import '../contents.dart' as global;
-
-import '../models/ChartData.dart';
-import 'expenses.dart';
 
 class Profile extends StatefulWidget {
+  final String picUrl;
   final String email;
+  final String name;
   final String token;
-  final List<dynamic> expenseCategory;
-  final List<dynamic> investmentCategory;
 
   const Profile(
       {Key? key,
+      required this.picUrl,
       required this.email,
-      required this.token,
-      required this.expenseCategory,
-      required this.investmentCategory})
+      required this.name,
+      required this.token})
       : super(key: key);
 
   @override
-  _ProfileState createState() => _ProfileState();
+  State<Profile> createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
-  List<PersonalExpenseEach> personalExpense = [];
-  bool personalLoaded = false;
-  bool roomLoaded = false;
-  double totalPersonalExpense = 0;
-  bool showfilterResult = false;
-  bool hasMore = true;
-  Set<int> monthIndex = Set();
-  Set<int> yearIndex = Set();
-  List<dynamic> category = [];
-  final scrollController = ScrollController();
-  bool fetchingData = false;
-  bool isLoadingData = false;
-  bool loadFirstTime = true;
-  List<String> Month = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
-
-  List<String> Year = [];
-  List<ChartData> dataMap = [];
-  Map<String, double> yearwiseSpend = {};
-  List<PersonalExpenseEach> filterResult = [];
-
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
+  final _verifyOTPFormKey = GlobalKey<FormState>();
   bool isAlertSet = false;
+  final _deleteConfirmationText = new TextEditingController();
+  final _deleteConfirmationForm = GlobalKey<FormState>();
+  final _phoneNo = new TextEditingController();
+  final _otp = new TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String verificationOTP = "";
+  String OTPverificationError = "";
+  bool isVerificationSuccessful = false;
+  bool havePhoneNo = false;
+  FirebaseAuth auth = FirebaseAuth.instance;
+  String createdOn = "";
+  bool isDataLoading = false;
+  late SharedPreferences prefs;
+
+  deleteAccount() async {
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + '/profile/deleteAccount'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+          }));
+
+      if (response.statusCode == 200) {
+        prefs = await SharedPreferences.getInstance();
+        await prefs.clear();
+
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+            (Route<dynamic> route) => false,
+          );
+
+          showToast(context, "Account Deleted Successfully", Icons.done);
+        }
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        Navigator.pop(context);
+        await onException(context);
+      }
+    }
+  }
 
   getConnectivity() =>
       subscription = Connectivity().onConnectivityChanged.listen(
@@ -92,160 +106,24 @@ class _ProfileState extends State<Profile> {
         },
       );
 
-  @override
-  void dispose() {
-    subscription.cancel();
-    scrollController.dispose();
-    super.dispose();
-  }
-
-  Future _executeParallelRefresh() async {
-    await Future.wait([_initialisation(), updatePieChart("all")]);
-  }
-
-  Future<void> _initialisation() async {
-    isLoadingData = true;
-    if (loadFirstTime) {
-      personalLoaded = false;
-    }
-    category = widget.expenseCategory;
-
-    if (this.mounted) {
-      setState(() {});
-    }
-
-    try {
-      final response_1 = await http.post(Uri.parse(global.url + 'profile'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'alreadyHave': crypto.encrypt(personalExpense.length.toString())
-          }));
-
-      if (response_1.statusCode == 200) {
-        if (loadFirstTime) {
-          personalLoaded = true;
-        }
-        hasMore = jsonDecode(response_1.body)['hasMore'];
-        List<dynamic> tempData = jsonDecode(response_1.body)['data'];
-        tempData.forEach((element) {
-          personalExpense.add(PersonalExpenseEach.fromJson(element));
-        });
-
-        if (this.mounted) {
-          setState(() {});
-        }
-      } else if (jsonDecode(response_1.body)['maintenance'] != null &&
-          jsonDecode(response_1.body)['maintenance']) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
-        }
-      } else {
-        showToast(
-            context,
-            crypto.decrypt(jsonDecode(response_1.body)["Message"]),
-            Icons.close);
-      }
-    } on Exception catch (_) {
-      if (this.mounted) {
-        await onException(context);
-      }
-    }
-    isLoadingData = false;
-    fetchingData = false;
-    loadFirstTime = false;
-    if (this.mounted) {
-      setState(() {});
-    }
-  }
-
-  Future<void> updatePieChart(String date) async {
+  initialization() async {
     if (this.mounted) {
       setState(() {
-        dataMap.clear();
-      });
-    }
-    try {
-      final response = await http.delete(Uri.parse(global.url + 'ptransaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'date': crypto.encrypt(date),
-          }));
-
-      if (response.statusCode == 200) {
-        var tempData = jsonDecode(response.body)['data'];
-
-        for (int i = 0; i < category.length; i++) {
-          dataMap.add(ChartData.byType(category[i],
-              double.parse(crypto.decrypt(tempData[category[i]]))));
-        }
-      } else {
-        showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
-            Icons.close);
-      }
-    } on Exception catch (_) {
-      if (this.mounted) {
-        await onException(context);
-      }
-    }
-
-    if (this.mounted) {
-      setState(() {});
-    }
-  }
-
-  getFilterResult() {
-    if (this.mounted) {
-      filterResult.clear();
-      setState(() {});
-    }
-
-    if (monthIndex.isEmpty && yearIndex.isEmpty) {
-      showfilterResult = false;
-    } else {
-      if (monthIndex.isNotEmpty) {
-        personalExpense.forEach((element) {
-          if (monthIndex.contains(Month.indexOf(element.Month))) {
-            filterResult.add(element);
-          }
-        });
-      }
-
-      if (yearIndex.isNotEmpty) {
-        if (filterResult.isEmpty) {
-          personalExpense.forEach((element) {
-            if (yearIndex.contains(Year.indexOf(element.Year))) {
-              filterResult.add(element);
-            }
-          });
-        } else {
-          filterResult.removeWhere(
-              (element) => !yearIndex.contains(Year.indexOf(element.Year)));
-        }
-      }
-
-      filterResult.sort((b, a) {
-        DateTime tempDate_1 = new DateFormat("MMM-yyyy")
-            .parse(a.Month.substring(0, 3) + "-" + a.Year);
-        DateTime tempDate_2 = new DateFormat("MMM-yyyy")
-            .parse(b.Month.substring(0, 3) + "-" + b.Year);
-        return tempDate_1.compareTo(tempDate_2);
+        isDataLoading = true;
       });
     }
 
+    prefs = await SharedPreferences.getInstance();
+    _phoneNo.text = crypto.decrypt(prefs.getString("__token")!);
+    createdOn = crypto.decrypt(prefs.getString("___token")!);
+    if (_phoneNo.text.isNotEmpty) {
+      havePhoneNo = true;
+    }
+
     if (this.mounted) {
-      setState(() {});
+      setState(() {
+        isDataLoading = false;
+      });
     }
   }
 
@@ -253,575 +131,514 @@ class _ProfileState extends State<Profile> {
   void initState() {
     super.initState();
     getConnectivity();
-    scrollController.addListener(_scrollListener);
-    _executeParallelRefresh();
+    initialization();
   }
 
-  void _scrollListener() async {
-    if (!loadFirstTime) {
-      if (hasMore) {
-        if (scrollController.position.pixels ==
-            scrollController.position.maxScrollExtent) {
-          fetchingData = true;
-          if (!isLoadingData) {
-            await _initialisation();
-          }
-        }
-      }
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
+  }
 
+  pushPhoneToDB(String phoneNo) async {
+    try {
+      final response = await http.post(
+          Uri.parse(global.url + '/profile/phoneNo'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'phoneNo': crypto.encrypt(phoneNo)
+          }));
+
+      if (response.statusCode == 200) {
+        havePhoneNo = true;
+        prefs = await SharedPreferences.getInstance();
+        await prefs.setString("__token", crypto.encrypt(_phoneNo.text));
+      }
+    } on Exception catch (_) {
       if (this.mounted) {
-        setState(() {});
+        await onException(context);
       }
     }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  void verifyOTPDialog(BuildContext context, ThemeProvider themeProvider) {
+    Navigator.pop(context);
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setStates) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0)),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Verify Phone Number",
+                            style: TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                          IconButton(
+                              onPressed: () async {
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              icon: Icon(
+                                Icons.close,
+                                size: 16,
+                              ))
+                        ],
+                      ),
+                      Form(
+                        key: _verifyOTPFormKey,
+                        child: AutofillGroup(
+                          child: TextFormField(
+                            style: TextStyle(fontSize: 16),
+                            controller: _otp,
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelText: "Enter OTP",
+                              counterText: "",
+                            ),
+                            maxLength: 6,
+                            autofillHints: [AutofillHints.telephoneNumber],
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              RegExp validateEmail = RegExp(r'^[\d]{6}$');
+                              if (!validateEmail.hasMatch(_otp.text)) {
+                                return "Invalid OTP";
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 15,
+                      ),
+                      OTPverificationError.isNotEmpty
+                          ? Text(
+                              OTPverificationError,
+                              style: TextStyle(color: Colors.red, fontSize: 13),
+                            )
+                          : SizedBox(),
+                      OTPverificationError.isNotEmpty
+                          ? SizedBox(
+                              height: 8,
+                            )
+                          : SizedBox(),
+                      Center(
+                        child: SizedBox(
+                          width: 110,
+                          height: 40,
+                          child: OutlinedButton(
+                            child: Text(
+                              "Verify",
+                              style: TextStyle(
+                                  color: themeProvider.isDarkTheme
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontSize: 14),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              side: BorderSide(
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            onPressed: () async {
+                              if (_verifyOTPFormKey.currentState!.validate()) {
+                                if (this.mounted) {
+                                  buildShowDialog(context);
+                                }
+                                try {
+                                  PhoneAuthCredential credential =
+                                      PhoneAuthProvider.credential(
+                                          verificationId: verificationOTP,
+                                          smsCode: _otp.text);
+
+                                  await auth.signInWithCredential(credential);
+                                  isVerificationSuccessful = true;
+                                  await pushPhoneToDB(_phoneNo.text);
+                                  if (this.mounted) {
+                                    Navigator.pop(context);
+                                  }
+                                  showToast(
+                                      context,
+                                      "OTP Verification Successful",
+                                      Icons.done);
+                                } catch (e) {
+                                  OTPverificationError = "Invalid OTP";
+                                }
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                  setState((() {}));
+                                  setStates((() {}));
+                                }
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          });
+        });
+  }
+
+  void deleteDialog(BuildContext context, ThemeProvider themeProvider) {
+    if (this.mounted) {
+      setState(() {
+        _deleteConfirmationText.text = "";
+      });
+    }
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return StatefulBuilder(builder: (context, setStates) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0)),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("Delete Account Form"),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Form(
+                        key: _deleteConfirmationForm,
+                        child: TextFormField(
+                          style: TextStyle(fontSize: 16),
+                          controller: _deleteConfirmationText,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            labelText: "Type delete to Confirm",
+                            counterText: "",
+                          ),
+                          maxLines: 1,
+                          keyboardType: TextInputType.text,
+                          validator: (value) {
+                            if (value != "delete") {
+                              return "Wrong Word";
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: 120,
+                            height: 45,
+                            child: OutlinedButton(
+                              child: Text(
+                                "Cancel",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 19),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              onPressed: () async {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            width: 120,
+                            height: 45,
+                            child: OutlinedButton(
+                              child: Text(
+                                "Confirm",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 19),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(color: Colors.redAccent),
+                              ),
+                              onPressed: () async {
+                                if (_deleteConfirmationForm.currentState!
+                                    .validate()) {
+                                  await deleteAccount();
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            );
+          });
+        });
+  }
+
+  sendOTP(String phoneNo, ThemeProvider themeProvider) async {
+    if (this.mounted) {
+      setState(() {
+        _otp.text = "";
+        OTPverificationError = "";
+      });
+    }
+    buildShowDialog(context);
+    await auth.verifyPhoneNumber(
+      phoneNumber: "+91" + phoneNo,
+      verificationCompleted: (PhoneAuthCredential credential) {},
+      verificationFailed: (FirebaseAuthException e) {},
+      codeSent: (String verificationId, int? resendToken) {
+        verificationOTP = verificationId;
+        verifyOTPDialog(context, themeProvider);
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
     return Scaffold(
-        body: SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 10,
-            ),
-            dataMap.isEmpty
-                ? Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3.3,
-                    ),
-                  )
-                : SizedBox(
-                    height: 50 * category.length * 1.0,
-                    child: Padding(
-                        padding: const EdgeInsets.all(6),
-                        child: SfCartesianChart(
-                            primaryXAxis: CategoryAxis(isVisible: false),
-                            primaryYAxis:
-                                NumericAxis(minimum: 0, isVisible: false),
-                            tooltipBehavior: TooltipBehavior(
-                                enable: true,
-                                header: "",
-                                format: "point.x : ₹ point.y"),
-                            plotAreaBorderWidth: 0,
-                            series: <BarSeries<ChartData, String>>[
-                              BarSeries<ChartData, String>(
-                                  dataSource: dataMap,
-                                  borderRadius: BorderRadius.circular(20),
-                                  xValueMapper: (ChartData data, _) =>
-                                      data.type,
-                                  yValueMapper: (ChartData data, _) =>
-                                      data.amount,
-                                  isVisibleInLegend: true,
-                                  width: 0.8,
-                                  pointColorMapper: (ChartData data, _) =>
-                                      global.colorsList[_],
-                                  dataLabelMapper: (datum, index) =>
-                                      datum.type +
-                                      "\n₹ " +
-                                      datum.amount.toStringAsFixed(2),
-                                  dataLabelSettings:
-                                      DataLabelSettings(isVisible: true),
-                                  xAxisName: "Category",
-                                  yAxisName: "Amount")
-                            ])),
-                  ),
-            SizedBox(
-              height: 10,
-            ),
-            ExpansionTile(
-              title: Text(
-                "Personal Expense",
-                style: TextStyle(
-                  color:
-                      themeProvider.isDarkTheme ? Colors.white : Colors.black,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              trailing: Icon(
-                Icons.filter_alt_outlined,
-                color: themeProvider.isDarkTheme ? Colors.white : Colors.black,
-              ),
-              children: [
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: 65,
-                  child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: Month.length,
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        return SizedBox(
-                          height: 65,
-                          width: 110,
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {
-                                if (monthIndex.contains(index)) {
-                                  monthIndex.remove(index);
-                                } else {
-                                  monthIndex.add(index);
-                                }
-                                if (this.mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              child: Card(
-                                elevation: 1.0,
-                                shadowColor: Theme.of(context).primaryColor,
-                                color: monthIndex.contains(index)
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context).scaffoldBackgroundColor,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      color: Theme.of(context).cardColor),
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Center(
-                                  child: InkWell(
-                                    child: Text(
-                                      Month[index],
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: monthIndex.contains(index)
-                                            ? Colors.white
-                                            : Theme.of(context)
-                                                .textTheme
-                                                .bodySmall!
-                                                .color,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: 65,
-                  child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: Year.length,
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        return SizedBox(
-                          height: 65,
-                          width: 100,
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: InkWell(
-                              onTap: () {
-                                if (yearIndex.contains(index)) {
-                                  yearIndex.remove(index);
-                                } else {
-                                  yearIndex.add(index);
-                                }
-                                if (this.mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              child: Card(
-                                elevation: 1.0,
-                                shadowColor: Theme.of(context).primaryColor,
-                                color: yearIndex.contains(index)
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context).scaffoldBackgroundColor,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      color: Theme.of(context).cardColor),
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Center(
-                                  child: InkWell(
-                                    child: Text(
-                                      Year[index],
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: yearIndex.contains(index)
-                                            ? Colors.white
-                                            : Theme.of(context)
-                                                .textTheme
-                                                .bodySmall!
-                                                .color,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        appBar: AppBar(
+          title: Text("Profile"),
+        ),
+        body: Center(
+          child: isDataLoading
+              ? SizedBox(
+                  child: CircularProgressIndicator(),
+                )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: 45,
-                      width: 90,
-                      child: OutlinedButton(
-                        child: Text(
-                          "Apply",
-                          style: TextStyle(
-                            color: themeProvider.isDarkTheme
-                                ? Colors.white
-                                : Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      height: 40,
+                    ),
+                    CachedNetworkImage(
+                      imageUrl: widget.picUrl,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) =>
+                              CircularProgressIndicator(
+                                  value: downloadProgress.progress),
+                      errorWidget: (context, url, error) => Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: AssetImage('assets/Images/unknown.jpeg'),
+                              fit: BoxFit.cover),
                         ),
-                        onPressed: () {
-                          showfilterResult = true;
-                          getFilterResult();
-                          if (this.mounted) {
-                            setState(() {});
-                          }
-                        },
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(13.0),
-                          ),
-                          side:
-                              BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                      imageBuilder: (context, imageProvider) => Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                              image: imageProvider, fit: BoxFit.cover),
                         ),
                       ),
                     ),
                     SizedBox(
-                      height: 45,
-                      child: OutlinedButton(
-                        child: Text(
-                          "Clear Filter",
-                          style: TextStyle(
-                            color: themeProvider.isDarkTheme
-                                ? Colors.white
-                                : Colors.black,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        onPressed: () {
-                          monthIndex.clear();
-                          yearIndex.clear();
-                          showfilterResult = false;
-                          if (this.mounted) {
-                            setState(() {});
-                          }
-                        },
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(13.0),
-                          ),
-                          side:
-                              BorderSide(color: Theme.of(context).primaryColor),
-                        ),
-                      ),
+                      height: 18,
                     ),
-                  ],
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width,
-              height: 150,
-              child: personalExpense.isEmpty
-                  ? Center(
-                      child: personalLoaded
-                          ? Text(
-                              "No Personal Expense Found",
-                              style: TextStyle(fontSize: 20),
-                            )
-                          : Shimmer.fromColors(
-                              baseColor: Theme.of(context).cardColor,
-                              highlightColor: Theme.of(context).primaryColor,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                shrinkWrap: true,
-                                itemCount: 5,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Container(
-                                      height: 150,
-                                      width: 150,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: Colors.white,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Column(
-                                          children: [
-                                            SizedBox(
-                                              height: 10,
-                                            ),
-                                            Container(
-                                              width: 170,
-                                              height: 20.0,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            ),
-                                            SizedBox(
-                                              height: 8,
-                                            ),
-                                            Container(
-                                              width: 100,
-                                              height: 20.0,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            ),
-                                            SizedBox(
-                                              height: 20,
-                                            ),
-                                            Container(
-                                              width: 170,
-                                              height: 25,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  );
+                    Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            style: TextStyle(fontSize: 16),
+                            readOnly: true,
+                            controller:
+                                TextEditingController(text: widget.name),
+                            decoration: InputDecoration(
+                                border: InputBorder.none,
+                                labelText: "Name",
+                                counterText: ""),
+                          ),
+                          TextField(
+                            style: TextStyle(fontSize: 16),
+                            readOnly: true,
+                            controller:
+                                TextEditingController(text: widget.email),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              labelText: "Email",
+                              counterText: "",
+                            ),
+                          ),
+                          Form(
+                            key: _formKey,
+                            child: AutofillGroup(
+                              child: TextFormField(
+                                readOnly:
+                                    (havePhoneNo || isVerificationSuccessful),
+                                style: TextStyle(fontSize: 16),
+                                controller: _phoneNo,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  labelText:
+                                      (havePhoneNo || isVerificationSuccessful)
+                                          ? "Phone No"
+                                          : "Enter Phone No",
+                                  counterText: "",
+                                ),
+                                maxLength: 10,
+                                autofillHints: [AutofillHints.telephoneNumber],
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  RegExp validateEmail = RegExp(r'^[\d]{10}$');
+                                  if (!validateEmail.hasMatch(_phoneNo.text)) {
+                                    return "Invalid Phone No";
+                                  }
+                                  return null;
                                 },
                               ),
                             ),
-                    )
-                  : (showfilterResult
-                      ? (filterResult.isNotEmpty
-                          ? ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              shrinkWrap: true,
-                              itemCount: filterResult.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return ConstrainedBox(
-                                  constraints: new BoxConstraints(
-                                    minWidth: 150.0,
-                                  ),
-                                  child: SizedBox(
-                                    height: 150,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: InkWell(
-                                        onTap: () {
-                                          if (this.mounted) {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      Expenses(
-                                                        email: widget.email,
-                                                        date:
-                                                            filterResult[index]
-                                                                .Date,
-                                                        token: widget.token,
-                                                        expenseCategory: widget
-                                                            .expenseCategory,
-                                                        investmentCategory: widget
-                                                            .investmentCategory,
-                                                      )),
-                                            );
-                                          }
-                                        },
-                                        onLongPress: () async {
-                                          updatePieChart(
-                                              filterResult[index].Date);
-                                        },
-                                        child: Card(
-                                          elevation: 1.0,
-                                          shadowColor:
-                                              Theme.of(context).primaryColor,
-                                          color: Theme.of(context)
-                                              .scaffoldBackgroundColor,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                                color: Theme.of(context)
-                                                    .cardColor),
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              SizedBox(
-                                                height: 10,
-                                              ),
-                                              textWidget(
-                                                filterResult[index].Month + ",",
-                                                linearGradient_1,
-                                              ),
-                                              textWidget(
-                                                filterResult[index].Year,
-                                                linearGradient_1,
-                                              ),
-                                              SizedBox(
-                                                height: 20,
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: textWidget(
-                                                    "₹ " +
-                                                        commaSeperator(
-                                                            filterResult[index]
-                                                                .Total
-                                                                .toStringAsFixed(
-                                                                    2)),
-                                                    linearGradient_2),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          !(havePhoneNo || isVerificationSuccessful)
+                              ? SizedBox(
+                                  width: 120,
+                                  height: 45,
+                                  child: OutlinedButton(
+                                    child: Text(
+                                      "Verify",
+                                      style: TextStyle(
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontSize: 16),
                                     ),
-                                  ),
-                                );
-                              },
-                            )
-                          : Center(
-                              child: Text(
-                                "No Personal Expense Found",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                            ))
-                      : ListView.builder(
-                          controller: scrollController,
-                          scrollDirection: Axis.horizontal,
-                          shrinkWrap: true,
-                          itemCount: personalExpense.length + 1,
-                          itemBuilder: (BuildContext context, int index) {
-                            if (index == personalExpense.length) {
-                              if (fetchingData) {
-                                return CupertinoActivityIndicator(
-                                  color: Theme.of(context).primaryColor,
-                                );
-                              } else {
-                                return SizedBox();
-                              }
-                            }
-                            return ConstrainedBox(
-                              constraints: new BoxConstraints(
-                                minWidth: 150.0,
-                              ),
-                              child: SizedBox(
-                                height: 150,
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: InkWell(
-                                    onTap: () {
-                                      if (this.mounted) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Expenses(
-                                                    email: widget.email,
-                                                    date: personalExpense[index]
-                                                        .Date,
-                                                    token: widget.token,
-                                                    expenseCategory:
-                                                        widget.expenseCategory,
-                                                    investmentCategory: widget
-                                                        .investmentCategory,
-                                                  )),
-                                        );
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                    onPressed: () async {
+                                      if (_formKey.currentState!.validate()) {
+                                        await sendOTP(
+                                            _phoneNo.text, themeProvider);
                                       }
                                     },
-                                    onLongPress: () async {
-                                      updatePieChart(
-                                          personalExpense[index].Date);
-                                    },
-                                    child: Card(
-                                      elevation: 1.0,
-                                      shadowColor:
-                                          Theme.of(context).primaryColor,
-                                      color: Theme.of(context)
-                                          .scaffoldBackgroundColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: Theme.of(context).cardColor),
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: Column(
-                                        children: [
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          textWidget(
-                                            personalExpense[index].Month + ",",
-                                            linearGradient_1,
-                                          ),
-                                          textWidget(
-                                            personalExpense[index].Year,
-                                            linearGradient_1,
-                                          ),
-                                          SizedBox(
-                                            height: 20,
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: textWidget(
-                                                "₹ " +
-                                                    commaSeperator(
-                                                        personalExpense[index]
-                                                            .Total
-                                                            .toStringAsFixed(
-                                                                2)),
-                                                linearGradient_2),
-                                          )
-                                        ],
-                                      ),
-                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          },
-                        )),
-            ),
-          ],
+                                )
+                              : SizedBox(),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          createdOn.length >= 12
+                              ? Text(
+                                  "Member Since " + createdOn.substring(0, 11),
+                                  style: TextStyle(fontSize: 16),
+                                )
+                              : SizedBox()
+                        ],
+                      ),
+                    ),
+                    Expanded(flex: 1, child: SizedBox()),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      height: 55,
+                      child: OutlinedButton(
+                        child: Text(
+                          "Delete Account",
+                          style: TextStyle(
+                              color: themeProvider.isDarkTheme
+                                  ? Colors.white
+                                  : Colors.black,
+                              fontSize: 19),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          side: BorderSide(color: Colors.redAccent),
+                        ),
+                        onPressed: () async {
+                          deleteDialog(context, themeProvider);
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 25,
+                    )
+                  ],
+                ),
         ),
-      ),
-    ));
+        bottomNavigationBar: isAlertSet
+            ? Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  color: isDeviceConnected ? Colors.green : Colors.red,
+                ),
+                height: 40,
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: Center(
+                      child: Text(
+                    isDeviceConnected
+                        ? "You are connected to Internet"
+                        : "You aren't connected to Internet",
+                    style: TextStyle(fontSize: 17, color: Colors.white),
+                  )),
+                ),
+              )
+            : null);
   }
 }
