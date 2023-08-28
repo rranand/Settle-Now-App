@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:pinput/pinput.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../contents.dart' as global;
@@ -37,7 +38,6 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
-  final _verifyOTPFormKey = GlobalKey<FormState>();
   bool isAlertSet = false;
   final _deleteConfirmationText = new TextEditingController();
   final _deleteConfirmationForm = GlobalKey<FormState>();
@@ -170,12 +170,25 @@ class _ProfileState extends State<Profile> {
   }
 
   void verifyOTPDialog(BuildContext context, ThemeProvider themeProvider) {
-    Navigator.pop(context);
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) {
           return StatefulBuilder(builder: (context, setStates) {
+            final defaultPinTheme = PinTheme(
+              width: 45,
+              height: 45,
+              textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white),
+                borderRadius: BorderRadius.circular(13),
+              ),
+            );
+
+            final focusedPinTheme = defaultPinTheme.copyDecorationWith(
+              border: Border.all(color: Theme.of(context).primaryColor),
+              borderRadius: BorderRadius.circular(13),
+            );
             return Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0)),
@@ -193,7 +206,7 @@ class _ProfileState extends State<Profile> {
                           Text(
                             "Verify Phone Number",
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 19,
                             ),
                           ),
                           IconButton(
@@ -204,52 +217,55 @@ class _ProfileState extends State<Profile> {
                               },
                               icon: Icon(
                                 Icons.close,
-                                size: 16,
+                                size: 19,
                               ))
                         ],
                       ),
-                      Form(
-                        key: _verifyOTPFormKey,
-                        child: AutofillGroup(
-                          child: TextFormField(
-                            style: TextStyle(fontSize: 16),
-                            controller: _otp,
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              labelText: "Enter OTP",
-                              counterText: "",
-                            ),
-                            maxLength: 6,
-                            autofillHints: [AutofillHints.telephoneNumber],
-                            keyboardType: TextInputType.number,
-                            validator: (value) {
-                              RegExp validateEmail = RegExp(r'^[\d]{6}$');
-                              if (!validateEmail.hasMatch(_otp.text)) {
-                                return "Invalid OTP";
-                              }
-                              return null;
-                            },
-                          ),
+                      SizedBox(
+                        height: 25,
+                      ),
+                      Pinput(
+                        length: 6,
+                        androidSmsAutofillMethod:
+                            AndroidSmsAutofillMethod.smsUserConsentApi,
+                        defaultPinTheme: defaultPinTheme,
+                        focusedPinTheme: focusedPinTheme,
+                        errorPinTheme: defaultPinTheme.copyDecorationWith(
+                          border: Border.all(color: Colors.redAccent),
+                          borderRadius: BorderRadius.circular(13),
                         ),
+                        showCursor: true,
+                        controller: _otp,
+                        forceErrorState: OTPverificationError.isNotEmpty,
+                        errorText: OTPverificationError,
                       ),
                       SizedBox(
-                        height: 15,
+                        height: 26,
                       ),
-                      OTPverificationError.isNotEmpty
-                          ? Text(
-                              OTPverificationError,
-                              style: TextStyle(color: Colors.red, fontSize: 13),
-                            )
-                          : SizedBox(),
-                      OTPverificationError.isNotEmpty
-                          ? SizedBox(
-                              height: 8,
-                            )
-                          : SizedBox(),
+                      Center(child: Text("Didn't Received Code?")),
+                      SizedBox(
+                        height: 4,
+                      ),
+                      Center(
+                        child: InkWell(
+                            onTap: () async {
+                              await sendOTP(_phoneNo.text, themeProvider,
+                                  isVerificationPageOpened: true);
+                            },
+                            child: Text(
+                              "Resend",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                              ),
+                            )),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
                       Center(
                         child: SizedBox(
-                          width: 110,
-                          height: 40,
+                          width: 130,
+                          height: 45,
                           child: OutlinedButton(
                             child: Text(
                               "Verify",
@@ -257,7 +273,7 @@ class _ProfileState extends State<Profile> {
                                   color: themeProvider.isDarkTheme
                                       ? Colors.white
                                       : Colors.black,
-                                  fontSize: 14),
+                                  fontSize: 16),
                             ),
                             style: OutlinedButton.styleFrom(
                               shape: RoundedRectangleBorder(
@@ -267,34 +283,30 @@ class _ProfileState extends State<Profile> {
                                   color: Theme.of(context).primaryColor),
                             ),
                             onPressed: () async {
-                              if (_verifyOTPFormKey.currentState!.validate()) {
-                                if (this.mounted) {
-                                  buildShowDialog(context);
-                                }
-                                try {
-                                  PhoneAuthCredential credential =
-                                      PhoneAuthProvider.credential(
-                                          verificationId: verificationOTP,
-                                          smsCode: _otp.text);
+                              if (this.mounted) {
+                                buildShowDialog(context);
+                              }
+                              try {
+                                PhoneAuthCredential credential =
+                                    PhoneAuthProvider.credential(
+                                        verificationId: verificationOTP,
+                                        smsCode: _otp.text);
 
-                                  await auth.signInWithCredential(credential);
-                                  isVerificationSuccessful = true;
-                                  await pushPhoneToDB(_phoneNo.text);
-                                  if (this.mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                  showToast(
-                                      context,
-                                      "OTP Verification Successful",
-                                      Icons.done);
-                                } catch (e) {
-                                  OTPverificationError = "Invalid OTP";
-                                }
+                                await auth.signInWithCredential(credential);
+                                isVerificationSuccessful = true;
+                                await pushPhoneToDB(_phoneNo.text);
                                 if (this.mounted) {
                                   Navigator.pop(context);
-                                  setState((() {}));
-                                  setStates((() {}));
                                 }
+                                showToast(context,
+                                    "OTP Verification Successful", Icons.done);
+                              } catch (e) {
+                                OTPverificationError = "Invalid OTP";
+                              }
+                              if (this.mounted) {
+                                Navigator.pop(context);
+                                setState((() {}));
+                                setStates((() {}));
                               }
                             },
                           ),
@@ -422,7 +434,8 @@ class _ProfileState extends State<Profile> {
         });
   }
 
-  sendOTP(String phoneNo, ThemeProvider themeProvider) async {
+  sendOTP(String phoneNo, ThemeProvider themeProvider,
+      {bool isVerificationPageOpened: false}) async {
     if (this.mounted) {
       setState(() {
         _otp.text = "";
@@ -430,16 +443,23 @@ class _ProfileState extends State<Profile> {
       });
     }
     buildShowDialog(context);
+
     await auth.verifyPhoneNumber(
       phoneNumber: "+91" + phoneNo,
       verificationCompleted: (PhoneAuthCredential credential) {},
       verificationFailed: (FirebaseAuthException e) {},
       codeSent: (String verificationId, int? resendToken) {
         verificationOTP = verificationId;
-        verifyOTPDialog(context, themeProvider);
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
+
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
+    if (!isVerificationPageOpened) {
+      verifyOTPDialog(context, themeProvider);
+    }
   }
 
   @override

@@ -54,6 +54,7 @@ dependencies:
   dart_jsonwebtoken: ^2.11.0
   firebase_auth: ^4.8.0
   contacts_service: ^0.6.3
+  pinput: ^3.0.1
 
 dev_dependencies:
   flutter_test:

@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -55,6 +56,30 @@ class _OtpNameState extends State<OtpName> {
   void dispose() {
     subscription.cancel();
     super.dispose();
+  }
+
+  Future<void> resendOTP() async {
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+    try {
+      await http.post(Uri.parse(global.url + 'login'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8'
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+          }));
+    } on Exception catch (_) {
+      setState(() {
+        error = true;
+        errorText = "Unable To Sent OTP";
+      });
+    }
+
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
   }
 
   Future _initialisation() async {
@@ -214,13 +239,11 @@ class _OtpNameState extends State<OtpName> {
                 );
         }
       } else {
-        error = true;
         if (this.mounted) {
           setState(() {
+            error = true;
             errorText = crypto.decrypt(JsonData['Message']);
           });
-        }
-        if (this.mounted) {
           Navigator.pop(context);
         }
       }
@@ -260,6 +283,21 @@ class _OtpNameState extends State<OtpName> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final height = MediaQuery.of(context).size.height;
+
+    final defaultPinTheme = PinTheme(
+      width: 45,
+      height: 45,
+      textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.white),
+        borderRadius: BorderRadius.circular(13),
+      ),
+    );
+
+    final focusedPinTheme = defaultPinTheme.copyDecorationWith(
+      border: Border.all(color: Theme.of(context).primaryColor),
+      borderRadius: BorderRadius.circular(13),
+    );
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -321,57 +359,96 @@ class _OtpNameState extends State<OtpName> {
                                 width: 0,
                                 height: 0,
                               ),
-                        TextField(
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Pinput(
+                          length: 6,
+                          defaultPinTheme: defaultPinTheme,
+                          focusedPinTheme: focusedPinTheme,
+                          errorPinTheme: defaultPinTheme.copyDecorationWith(
+                            border: Border.all(color: Colors.redAccent),
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          showCursor: true,
                           controller: _otp,
-                          keyboardType: TextInputType.number,
-                          maxLength: 6,
-                          maxLines: 1,
-                          style: const TextStyle(fontSize: 18),
-                          autocorrect: false,
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.all(8.0),
-                            hintText: "000000",
-                            labelText: "Enter OTP",
-                            counterText: "",
-                            errorText: (error == true ? errorText : null),
-                            errorStyle: const TextStyle(fontSize: 15),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        SizedBox(
-                          width: 140,
-                          height: 45,
-                          child: ElevatedButton(
-                            child: Text(
-                              "Login",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  color: Colors.white),
-                            ),
-                            onPressed: () {
-                              RegExp validateName = RegExp(r'[A-Za-z]{3,}');
-                              RegExp validateOTP = RegExp(r'^[\d]{6}');
-                              errorN =
-                                  ((crypto.decrypt(data['Name']) != 'Unknown')
-                                      ? false
-                                      : !validateName.hasMatch(_name.text));
-                              error = !validateOTP.hasMatch(_otp.text);
-                              if (!(error || errorN)) {
-                                if (crypto.decrypt(data['Name']) == 'Unknown') {
-                                  verifyStatus(_name.text, _otp.text, context);
-                                } else {
-                                  verifyStatus("##", _otp.text, context);
-                                }
-                              }
+                          forceErrorState: error,
+                          errorText: errorText,
+                          onClipboardFound: (value) {
+                            RegExp validateOTP = RegExp(r'^[\d]{6}');
+                            if (validateOTP.hasMatch(value)) {
                               if (this.mounted) {
-                                setState(() {});
+                                setState(() {
+                                  error = false;
+                                  _otp.text = value;
+                                });
                               }
-                            },
-                          ),
+                            }
+                          },
                         ),
+                        SizedBox(
+                          height: 26,
+                        ),
+                        Text("Didn't Received Code?"),
+                        SizedBox(
+                          height: 4,
+                        ),
+                        InkWell(
+                            onTap: () async {
+                              await resendOTP();
+                            },
+                            child: Text(
+                              "Resend",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                              ),
+                            )),
+                        SizedBox(
+                          height: 30,
+                        ),
+                        SizedBox(
+                          height: 55,
+                          width: 150,
+                          child: OutlinedButton(
+                              child: Text(
+                                "Login",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 16),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              onPressed: () {
+                                error = false;
+                                errorN = false;
+                                RegExp validateName = RegExp(r'[A-Za-z]{3,}');
+                                RegExp validateOTP = RegExp(r'^[\d]{6}');
+                                errorN =
+                                    ((crypto.decrypt(data['Name']) != 'Unknown')
+                                        ? false
+                                        : !validateName.hasMatch(_name.text));
+                                error = !validateOTP.hasMatch(_otp.text);
+                                if (!(error || errorN)) {
+                                  if (crypto.decrypt(data['Name']) ==
+                                      'Unknown') {
+                                    verifyStatus(
+                                        _name.text, _otp.text, context);
+                                  } else {
+                                    verifyStatus("##", _otp.text, context);
+                                  }
+                                }
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              }),
+                        )
                       ],
                     )),
             )),
