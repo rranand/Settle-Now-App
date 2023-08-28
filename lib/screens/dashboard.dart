@@ -193,6 +193,7 @@ class _DashBoardState extends State<DashBoard> {
   List<dynamic> sentRoomRequest = [];
   GoogleSignIn _googleSignIn = GoogleSignIn();
   GoogleSignInAccount? _currentUser;
+  // ignore: unused_field
   bool _flexibleUpdateAvailable = false;
   bool importantUpdate = false;
   List<String> liveRoomCategory = ["Settled", "Not Settled"];
@@ -508,7 +509,7 @@ class _DashBoardState extends State<DashBoard> {
 
     if (_email.text == "") {
       prefs = await SharedPreferences.getInstance();
-      
+
       if (prefs.getBool("isInvitePremissionProvided") != null) {
         isInvitePremissionProvided =
             await prefs.getBool("isInvitePremissionProvided")!;

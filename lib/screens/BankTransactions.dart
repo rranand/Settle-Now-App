@@ -56,6 +56,9 @@ class _BankTransactionsState extends State<BankTransactions> {
   int roomIndex = 0;
   int roomCategoryIndex = 0;
   List<dynamic> category = [];
+  int roomClosedCount = 0;
+  List<String> activeMembersEmail = [];
+  bool expenseSplitWithExistingMembers = false;
   List<TextEditingController> _amountRangeValues = [
     new TextEditingController(text: "0"),
     new TextEditingController(text: "10000")
@@ -186,6 +189,9 @@ class _BankTransactionsState extends State<BankTransactions> {
   Future<void> getMembers(String roomkey) async {
     if (this.mounted) {
       setState(() {
+        addExpenseTo.clear();
+        roomClosedCount = 0;
+        activeMembersEmail.clear();
         isClosedany = false;
         isSplitMemberLoading = true;
       });
@@ -205,7 +211,11 @@ class _BankTransactionsState extends State<BankTransactions> {
         roomMembers = data['data'];
         roomMembers.forEach((element) {
           if (element['done']) {
+            expenseSplitWithExistingMembers = true;
+            roomClosedCount++;
             isClosedany = true;
+          } else if (crypto.decrypt(element['email']) != widget.email) {
+            activeMembersEmail.add(crypto.decrypt(element['email']));
           }
         });
       }
@@ -338,7 +348,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 3,
                       ),
                       Text(
-                          "* Currently this feature in beta phase, may be transaction will not list properly.")
+                          "* Currently this feature in beta phase, may be transaction will not list properly. We do not store any messages.")
                     ],
                   ),
                 ),
@@ -705,7 +715,11 @@ class _BankTransactionsState extends State<BankTransactions> {
               'amt': crypto.encrypt(amount),
               'type':
                   crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
-              "members": crypto.encrypt(addExpenseTo.toString()),
+              "members": crypto.encrypt(((addExpenseTo.isEmpty &&
+                      (isClosedany ||
+                      expenseSplitWithExistingMembers))
+                  ? activeMembersEmail.toString()
+                  : addExpenseTo.toString())),
               "date": crypto.encrypt(date)
             }));
 
@@ -1108,51 +1122,46 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 itemCount: roomMembers.length + 1,
                                 itemBuilder: (BuildContext context, int index) {
                                   if (index == 0) {
-                                    return isClosedany
-                                        ? SizedBox()
-                                        : InkWell(
-                                            child: SizedBox(
-                                              width: 85,
-                                              child: Padding(
-                                                  padding: EdgeInsets.all(8.0),
-                                                  child: Card(
-                                                      color: Theme.of(context)
-                                                          .dialogBackgroundColor,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        side: BorderSide(
-                                                            color: addExpenseTo
-                                                                    .isEmpty
-                                                                ? Theme.of(
-                                                                        context)
-                                                                    .primaryColor
-                                                                : Theme.of(
-                                                                        context)
-                                                                    .cardColor),
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(15.0),
+                                    return InkWell(
+                                      child: SizedBox(
+                                        width: 85,
+                                        child: Padding(
+                                            padding: EdgeInsets.all(8.0),
+                                            child: Card(
+                                                color: Theme.of(context)
+                                                    .dialogBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: addExpenseTo
+                                                              .isEmpty
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
+                                                ),
+                                                child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "ALL",
+                                                        style: TextStyle(
+                                                          fontSize: 14,
+                                                        ),
                                                       ),
-                                                      child: Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .all(8.0),
-                                                          child: Center(
-                                                            child: Text(
-                                                              "ALL",
-                                                              style: TextStyle(
-                                                                fontSize: 14,
-                                                              ),
-                                                            ),
-                                                          )))),
-                                            ),
-                                            onTap: () {
-                                              addExpenseTo.clear();
-                                              if (this.mounted) {
-                                                setState(() {});
-                                              }
-                                            },
-                                          );
+                                                    )))),
+                                      ),
+                                      onTap: () {
+                                        addExpenseTo.clear();
+                                        if (this.mounted) {
+                                          setState(() {});
+                                        }
+                                      },
+                                    );
                                   } else if (roomMembers[index - 1]['done'] ||
                                       crypto.decrypt(roomMembers[index - 1]
                                               ['email']) ==
@@ -1261,7 +1270,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                                               roomMembers[index - 1]['email']));
 
                                           if (addExpenseTo.length ==
-                                              roomMembers.length - 1) {
+                                              roomMembers.length -
+                                                  roomClosedCount -
+                                                  1) {
                                             addExpenseTo.clear();
                                           }
                                         }
@@ -1275,6 +1286,48 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 },
                               ),
                             ),
+                      (addExpenseTo.isEmpty && !isClosedany)
+                          ? SizedBox(
+                              height: 7,
+                            )
+                          : SizedBox(),
+                      (addExpenseTo.isEmpty && !isClosedany)
+                          ? Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "For New Members",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      if (this.mounted) {
+                                        setState(() {
+                                          expenseSplitWithExistingMembers =
+                                              !expenseSplitWithExistingMembers;
+                                        });
+                                      }
+                                    },
+                                    child: Icon(
+                                      expenseSplitWithExistingMembers
+                                          ? Icons.toggle_off
+                                          : Icons.toggle_on,
+                                      size: 40,
+                                      color: expenseSplitWithExistingMembers
+                                          ? null
+                                          : Theme.of(context).primaryColor,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          : SizedBox(),
                       SizedBox(
                         height: 45,
                         width: 90,
