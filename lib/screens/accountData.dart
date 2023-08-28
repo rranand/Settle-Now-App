@@ -91,45 +91,6 @@ class _AccountDataState extends State<AccountData> {
     }
   }
 
-  fetchRemainingData() async {
-    if (this.mounted) {
-      setState(() {
-        isDataLoading = true;
-      });
-    }
-    try {
-      final response = await http.post(
-          Uri.parse(global.url + '/profile/getRemainingData'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-          }));
-
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body)['data'];
-        _phoneNo.text = crypto.decrypt(data['phoneNo']);
-        createdOn = crypto.decrypt(data['createdOn']);
-
-        if (_phoneNo.text.isNotEmpty) {
-          havePhoneNo = true;
-        }
-      }
-    } on Exception catch (_) {
-      if (this.mounted) {
-        await onException(context);
-      }
-    }
-
-    if (this.mounted) {
-      setState(() {
-        isDataLoading = false;
-      });
-    }
-  }
-
   getConnectivity() =>
       subscription = Connectivity().onConnectivityChanged.listen(
         (ConnectivityResult result) async {
@@ -145,11 +106,38 @@ class _AccountDataState extends State<AccountData> {
         },
       );
 
+  initialization() async {
+    if (this.mounted) {
+      setState(() {
+        isDataLoading = true;
+      });
+    }
+
+    prefs = await SharedPreferences.getInstance();
+    _phoneNo.text = crypto.decrypt(prefs.getString("__token")!);
+    createdOn = crypto.decrypt(prefs.getString("___token")!);
+    if (_phoneNo.text.isNotEmpty) {
+      havePhoneNo = true;
+    }
+
+    if (this.mounted) {
+      setState(() {
+        isDataLoading = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     getConnectivity();
-    fetchRemainingData();
+    initialization();
+  }
+
+  @override
+  void dispose() {
+    subscription.cancel();
+    super.dispose();
   }
 
   pushPhoneToDB(String phoneNo) async {
@@ -167,6 +155,8 @@ class _AccountDataState extends State<AccountData> {
 
       if (response.statusCode == 200) {
         havePhoneNo = true;
+        prefs = await SharedPreferences.getInstance();
+        await prefs.setString("__token", crypto.encrypt(_phoneNo.text));
       }
     } on Exception catch (_) {
       if (this.mounted) {

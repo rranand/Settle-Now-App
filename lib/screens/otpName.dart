@@ -162,7 +162,7 @@ class _OtpNameState extends State<OtpName> {
         prefs.setString("token", jwToken);
         prefs.setBool("isGoogle", false);
 
-        await http.patch(Uri.parse(global.url + 'verify'),
+        final resp = await http.patch(Uri.parse(global.url + 'verify'),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
             },
@@ -177,6 +177,16 @@ class _OtpNameState extends State<OtpName> {
               'deviceID': crypto.encrypt(_deviceData['id']),
               'deviceToken': crypto.encrypt(deviceToken)
             }));
+
+        var remainingData = jsonDecode(resp.body)['data'];
+
+        if (resp.statusCode == 200) {
+          await prefs.setString("___token", remainingData['createdOn']);
+          await prefs.setString("__token", remainingData['phoneNo']);
+        } else {
+          await prefs.setString("___token", crypto.encrypt(""));
+          await prefs.setString("__token", crypto.encrypt(""));
+        }
 
         if (this.mounted) {
           Navigator.pop(context);

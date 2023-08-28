@@ -282,7 +282,7 @@ class _LoginPageState extends State<LoginPage> {
 
                           prefs.setString("token", jwToken);
 
-                          await http.post(
+                          final resp = await http.post(
                               Uri.parse(global.url + 'login/google'),
                               headers: <String, String>{
                                 'Content-Type':
@@ -305,6 +305,20 @@ class _LoginPageState extends State<LoginPage> {
                                 'deviceToken': crypto.encrypt(deviceToken),
                                 "token": crypto.encrypt(token)
                               }));
+
+                          var remainingData = jsonDecode(resp.body)['data'];
+
+                          if (resp.statusCode == 200) {
+                            await prefs.setString(
+                                "___token", remainingData['createdOn']);
+                            await prefs.setString(
+                                "__token", remainingData['phoneNo']);
+                          } else {
+                            await prefs.setString(
+                                "___token", crypto.encrypt(""));
+                            await prefs.setString(
+                                "__token", crypto.encrypt(""));
+                          }
 
                           if (this.mounted) {
                             Navigator.pop(context);

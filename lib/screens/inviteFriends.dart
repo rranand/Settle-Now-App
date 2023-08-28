@@ -48,10 +48,11 @@ class _InviteFriendsState extends State<InviteFriends> {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text(
-        "Invite Your Friends",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      )),
+            "Invite Your Friends",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          )),
       body: Container(
         width: MediaQuery.of(context).size.width,
         child: Padding(
