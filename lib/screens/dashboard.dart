@@ -558,7 +558,7 @@ class _DashBoardState extends State<DashBoard> {
         _token = jsonOutData["token"]!;
         initalDataLoaded = true;
 
-        if (true || !isInvitePremissionProvided) {
+        if (!isInvitePremissionProvided) {
           Navigator.push(
               context,
               MaterialPageRoute(
