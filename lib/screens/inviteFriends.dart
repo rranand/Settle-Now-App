@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -11,6 +12,7 @@ import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:sqflite/sqflite.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
@@ -32,7 +34,39 @@ class _InviteFriendsState extends State<InviteFriends> {
     prefs.setBool("isInvitePremissionProvided", true);
   }
 
-  getContacts() async {
+  pushToDB(List<dynamic> allContacts, List<FriendEach> allContactsData) async {
+    var databasesPath = await getDatabasesPath();
+    String path = join(databasesPath, 'contact_data.db');
+
+    Database database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      await db.execute(
+          'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
+      await db.execute(
+          'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
+    });
+
+    await database.transaction((txn) async {
+      for (int i = 0; i < allContactsData.length; i++) {
+        await txn.rawInsert(
+            'INSERT INTO ContactHasAccountOnSN(phoneNo, name, email) VALUES(?, ?, ?)',
+            [
+              allContactsData[i].phoneNo,
+              allContactsData[i].name,
+              allContactsData[i].email
+            ]);
+      }
+      for (int i = 0; i < allContacts.length; i++) {
+        await txn.rawInsert(
+            'INSERT INTO ContactHasNoAccountOnSN(phoneNo) VALUES(?)',
+            [allContacts[i]]);
+      }
+    });
+
+    await database.close();
+  }
+
+  getContacts(BuildContext context) async {
     buildShowDialog(context);
     try {
       List<Contact> contacts = await ContactsService.getContacts(
@@ -64,8 +98,13 @@ class _InviteFriendsState extends State<InviteFriends> {
       if (response.statusCode == 200) {
         List<FriendEach> allContactsData = [];
         for (int i = 0; i < resData.length; i++) {
+          allContacts
+              .removeWhere((element) => element == resData[i]['phoneNo']);
           allContactsData.add(FriendEach.fromLocal(resData[i]));
         }
+
+        pushToDB(Set.from(allContacts).toList(), allContactsData);
+        showToast(context, "Contacts Sync Successfully", Icons.done);
       }
     } on Exception catch (_) {}
 
@@ -368,7 +407,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                     onPressed: () async {
                       bool isGranted = await getContactPermission();
                       if (isGranted) {
-                        await getContacts();
+                        await getContacts(context);
                       }
                     },
                   ),

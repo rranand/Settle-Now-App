@@ -570,6 +570,7 @@ class _DashBoardState extends State<DashBoard> {
           buildShowDialog(context);
         }
         await Future.wait([
+          deleteDB(),
           prefs.clear(),
           AwesomeNotifications().cancelAllSchedules(),
           deleteToken(),
@@ -671,6 +672,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
+            deleteDB(),
             prefs.clear(),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
@@ -730,6 +732,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
+            deleteDB(),
             prefs.clear(),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
@@ -852,6 +855,7 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           await Future.wait([
+            deleteDB(),
             prefs.clear(),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
@@ -3834,6 +3838,7 @@ class _DashBoardState extends State<DashBoard> {
                         buildShowDialog(context);
                       }
                       await Future.wait([
+                        deleteDB(),
                         prefs.clear(),
                         AwesomeNotifications().cancelAllSchedules(),
                         deleteToken(),

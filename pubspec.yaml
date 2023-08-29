@@ -55,6 +55,8 @@ dependencies:
   firebase_auth: ^4.8.0
   contacts_service: ^0.6.3
   pinput: ^3.0.1
+  sqflite: ^2.3.0
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:

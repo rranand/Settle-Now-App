@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:contacts_service/contacts_service.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:settlenow/models/FriendEach.dart';
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
 import '../contents.dart' as global;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -226,24 +225,9 @@ String fixPhoneNumber(String phone) {
   return phone.replaceAll(" ", "");
 }
 
-List<FriendEach> unionOfContacts(
-    List<FriendEach> fromPhone, List<FriendEach> fromDB) {
-  /*
-  Map<String, FriendEach> fromPhoneMap = {};
+Future<void> deleteDB() async {
+  var databasesPath = await getDatabasesPath();
+  String path = join(databasesPath, 'contact_data.db');
 
-  for (int i = 0; i < fromPhone.length; i++) {
-    for (int j = 0; j < fromPhone[i].phoneNo.length; j++) {
-      fromPhoneMap[fromPhone[i].phoneNo[j]] = fromPhone[i];
-      fromPhoneMap[fromPhone[i].phoneNo[j]]!
-          .phoneNo
-          .removeWhere((element) => element != fromPhone[i].phoneNo[j]);
-    }
-  }
-  for (int i = 0; i < fromDB.length; i++) {
-    if (fromPhoneMap.containsKey(fromDB[i].phoneNo[0])) {}
-  }
-
-  fromPhone.addAll(fromDB.where((element) => !element.isFoundInContact));*/
-
-  return fromDB;
+  await deleteDatabase(path);
 }
