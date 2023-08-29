@@ -435,7 +435,7 @@ class _ProfileState extends State<Profile> {
   }
 
   sendOTP(String phoneNo, ThemeProvider themeProvider,
-      {bool isVerificationPageOpened: false}) async {
+      {bool isVerificationPageOpened = false}) async {
     if (this.mounted) {
       setState(() {
         _otp.text = "";

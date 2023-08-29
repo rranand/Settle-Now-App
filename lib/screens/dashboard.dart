@@ -517,14 +517,6 @@ class _DashBoardState extends State<DashBoard> {
         await prefs.setBool("isInvitePremissionProvided", false);
       }
 
-      if (!isInvitePremissionProvided) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    InviteFriends(email: _email.text, token: _token)));
-      }
-
       if (prefs.getBool("isBankMessageLoadedOnce") != null) {
         bankMessageShowedOnce = await prefs.getBool("isBankMessageLoadedOnce")!;
       }
@@ -565,6 +557,14 @@ class _DashBoardState extends State<DashBoard> {
         _name.text = jsonOutData["name"]!;
         _token = jsonOutData["token"]!;
         initalDataLoaded = true;
+
+        if (true || !isInvitePremissionProvided) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      InviteFriends(email: _email.text, token: _token)));
+        }
       } else {
         if (this.mounted) {
           buildShowDialog(context);

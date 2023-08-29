@@ -1,10 +1,18 @@
+import 'dart:convert';
+
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
 
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import '../contents.dart' as global;
+import 'package:settlenow/others/crypto.dart';
 
 class InviteFriends extends StatefulWidget {
   final String email;
@@ -19,9 +27,60 @@ class InviteFriends extends StatefulWidget {
 class _InviteFriendsState extends State<InviteFriends> {
   late SharedPreferences prefs;
 
+  initialization() async {
+    prefs = await SharedPreferences.getInstance();
+    prefs.setBool("isInvitePremissionProvided", true);
+  }
+
+  getContacts() async {
+    buildShowDialog(context);
+    try {
+      List<Contact> contacts = await ContactsService.getContacts(
+          withThumbnails: false,
+          androidLocalizedLabels: false,
+          photoHighResolution: false);
+      List<String> allContacts = [];
+
+      for (int i = 0; i < contacts.length; i++) {
+        Map<dynamic, dynamic> tempMap = contacts[i].toMap();
+        for (int j = 0; j < contacts[i].phones!.length; j++) {
+          allContacts.add(fixPhoneNumber(tempMap['phones'][j]['value']));
+        }
+      }
+
+      final response = await http.post(
+          Uri.parse(global.url + 'profile/localContact'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+            'Auth': widget.token
+          },
+          body: jsonEncode({
+            'email': crypto.encrypt(widget.email),
+            'contacts': crypto.encrypt(allContacts.toString())
+          }));
+
+      var resData = jsonDecode(response.body)['data'];
+
+      if (response.statusCode == 200) {
+        List<FriendEach> allContactsData = [];
+        for (int i = 0; i < resData.length; i++) {
+          allContactsData.add(FriendEach.fromLocal(resData[i]));
+        }
+      }
+    } on Exception catch (_) {}
+
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    initialization();
   }
 
   Future<bool> getContactPermission() async {
@@ -307,10 +366,10 @@ class _InviteFriendsState extends State<InviteFriends> {
                       side: BorderSide(color: Theme.of(context).primaryColor),
                     ),
                     onPressed: () async {
-                      await getContactPermission();
-                      prefs = await SharedPreferences.getInstance();
-                      prefs.setBool("isInvitePremissionProvided", true);
-                      Navigator.pop(context);
+                      bool isGranted = await getContactPermission();
+                      if (isGranted) {
+                        await getContacts();
+                      }
                     },
                   ),
                 ),

@@ -226,19 +226,24 @@ String fixPhoneNumber(String phone) {
   return phone.replaceAll(" ", "");
 }
 
-Future<List<FriendEach>> fromContacts() async {
-  List<FriendEach> contactData = [];
-  bool isGranted = await Permission.contacts.isGranted;
+List<FriendEach> unionOfContacts(
+    List<FriendEach> fromPhone, List<FriendEach> fromDB) {
+  /*
+  Map<String, FriendEach> fromPhoneMap = {};
 
-  if (isGranted) {
-    List<Contact> contacts =
-        await ContactsService.getContacts(withThumbnails: false);
-
-    for (int i = 0; i < contacts.length; i++) {
-      contactData
-          .add(FriendEach.fromLocal(contacts[i].toMap(), fixPhoneNumber));
+  for (int i = 0; i < fromPhone.length; i++) {
+    for (int j = 0; j < fromPhone[i].phoneNo.length; j++) {
+      fromPhoneMap[fromPhone[i].phoneNo[j]] = fromPhone[i];
+      fromPhoneMap[fromPhone[i].phoneNo[j]]!
+          .phoneNo
+          .removeWhere((element) => element != fromPhone[i].phoneNo[j]);
     }
   }
+  for (int i = 0; i < fromDB.length; i++) {
+    if (fromPhoneMap.containsKey(fromDB[i].phoneNo[0])) {}
+  }
 
-  return contactData;
+  fromPhone.addAll(fromDB.where((element) => !element.isFoundInContact));*/
+
+  return fromDB;
 }

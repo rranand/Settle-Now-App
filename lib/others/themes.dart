@@ -22,16 +22,16 @@ class MyTheme {
         color: Colors.white,
         elevation: 0.0,
         iconTheme: IconThemeData(color: Colors.black),
-        toolbarTextStyle: Theme.of(context).textTheme.bodyText2,
-        titleTextStyle: Theme.of(context).textTheme.headline6,
+        toolbarTextStyle: Theme.of(context).textTheme.bodyMedium,
+        titleTextStyle: Theme.of(context).textTheme.titleLarge,
       ),
       drawerTheme: DrawerThemeData(
         backgroundColor: Colors.deepPurple,
       ),
       textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.black),
       textTheme: TextTheme(
-        bodyText1: TextStyle(),
-        bodyText2: TextStyle(),
+        bodyLarge: TextStyle(),
+        bodyMedium: TextStyle(),
       ).apply(bodyColor: Colors.black, displayColor: Colors.white),
       scaffoldBackgroundColor: Colors.white,
       scrollbarTheme: ScrollbarThemeData(
@@ -63,8 +63,8 @@ class MyTheme {
               MaterialStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
         ),
         textTheme: TextTheme(
-          bodyText1: TextStyle(),
-          bodyText2: TextStyle(),
+          bodyLarge: TextStyle(),
+          bodyMedium: TextStyle(),
         ).apply(bodyColor: Colors.white, displayColor: Colors.black),
       );
 }
