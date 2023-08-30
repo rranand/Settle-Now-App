@@ -5,6 +5,7 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'package:settlenow/models/FriendEach.dart';
 import 'package:sqflite/sqflite.dart';
 import '../contents.dart' as global;
 import 'package:flutter/material.dart';
@@ -230,4 +231,26 @@ Future<void> deleteDB() async {
   String path = join(databasesPath, 'contact_data.db');
 
   await deleteDatabase(path);
+}
+
+Future<String> getDBFilePath(String dbName) async {
+  var databasesPath = await getDatabasesPath();
+  return join(databasesPath, dbName);
+}
+
+List<FriendEach> getUnionOfContacts(
+    List<Map> fromPhone, List<FriendEach> fromDB) {
+  Set<String> st = new Set();
+
+  for (int i = 0; i < fromDB.length; i++) {
+    st.add(fromDB[i].email);
+  }
+
+  for (int i = 0; i < fromPhone.length; i++) {
+    if (!st.contains(fromPhone[i]['email'])) {
+      fromDB.add(FriendEach.fromLocal(fromPhone[i]));
+    }
+  }
+
+  return fromDB;
 }

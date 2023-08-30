@@ -1,5 +1,5 @@
 import 'package:settlenow/others/crypto.dart';
-//import '../contents.dart' as global;
+import '../contents.dart' as global;
 
 class FriendEach {
   String name;
@@ -32,23 +32,15 @@ class FriendEach {
     );
   }
 
-  factory FriendEach.fromLocal(Map<String, dynamic> contactEach) {
+  factory FriendEach.fromLocal(Map<dynamic, dynamic> contactEach) {
     return FriendEach(
-      name: contactEach.containsKey('name')
-          ? crypto.decrypt(contactEach['name'])
-          : '',
+      name: contactEach.containsKey('name') ? contactEach['name'] : '',
       fromContact: true,
-      email: contactEach.containsKey('email')
-          ? crypto.decrypt(contactEach['email'])
-          : '',
+      email: contactEach.containsKey('email') ? contactEach['email'] : '',
       status: 'NJ',
-      pic: contactEach.containsKey('pic')
-          ? crypto.decrypt(contactEach['pic'])
-          : '',
-      isGoogle: contactEach['isGoogle'],
-      phoneNo: contactEach.containsKey('phoneNo')
-          ? crypto.decrypt(contactEach['phoneNo'])
-          : '',
+      pic: global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8",
+      isGoogle: false,
+      phoneNo: contactEach.containsKey('phoneNo') ? contactEach['phoneNo'] : '',
     );
   }
 }

@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
-
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -19,7 +17,12 @@ import 'package:settlenow/others/crypto.dart';
 class InviteFriends extends StatefulWidget {
   final String email;
   final String token;
-  const InviteFriends({Key? key, required this.email, required this.token})
+  final bool firstTime;
+  const InviteFriends(
+      {Key? key,
+      required this.email,
+      required this.token,
+      required this.firstTime})
       : super(key: key);
 
   @override
@@ -28,6 +31,7 @@ class InviteFriends extends StatefulWidget {
 
 class _InviteFriendsState extends State<InviteFriends> {
   late SharedPreferences prefs;
+  bool contactPermissionGranted = false;
 
   initialization() async {
     prefs = await SharedPreferences.getInstance();
@@ -35,8 +39,7 @@ class _InviteFriendsState extends State<InviteFriends> {
   }
 
   pushToDB(List<dynamic> allContacts, List<FriendEach> allContactsData) async {
-    var databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, 'contact_data.db');
+    String path = await getDBFilePath('contact_data.db');
 
     Database database = await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
@@ -48,25 +51,29 @@ class _InviteFriendsState extends State<InviteFriends> {
 
     await database.transaction((txn) async {
       for (int i = 0; i < allContactsData.length; i++) {
-        await txn.rawInsert(
-            'INSERT INTO ContactHasAccountOnSN(phoneNo, name, email) VALUES(?, ?, ?)',
-            [
-              allContactsData[i].phoneNo,
-              allContactsData[i].name,
-              allContactsData[i].email
-            ]);
+        try {
+          await txn.rawInsert(
+              'INSERT INTO ContactHasAccountOnSN(phoneNo, name, email) VALUES(?, ?, ?)',
+              [
+                allContactsData[i].phoneNo,
+                allContactsData[i].name,
+                allContactsData[i].email
+              ]);
+        } on Exception catch (_) {}
       }
       for (int i = 0; i < allContacts.length; i++) {
-        await txn.rawInsert(
-            'INSERT INTO ContactHasNoAccountOnSN(phoneNo) VALUES(?)',
-            [allContacts[i]]);
+        try {
+          await txn.rawInsert(
+              'INSERT INTO ContactHasNoAccountOnSN(phoneNo) VALUES(?)',
+              [allContacts[i]]);
+        } on Exception catch (_) {}
       }
     });
 
     await database.close();
   }
 
-  getContacts(BuildContext context) async {
+  getContacts() async {
     buildShowDialog(context);
     try {
       List<Contact> contacts = await ContactsService.getContacts(
@@ -104,15 +111,15 @@ class _InviteFriendsState extends State<InviteFriends> {
         }
 
         pushToDB(Set.from(allContacts).toList(), allContactsData);
-        showToast(context, "Contacts Sync Successfully", Icons.done);
+        showToast(context, "Contacts Imported Successfully", Icons.done);
       }
     } on Exception catch (_) {}
 
     if (this.mounted) {
-      Navigator.pop(context);
+      Navigator.pop(context, contactPermissionGranted);
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      Navigator.pop(context, contactPermissionGranted);
     }
   }
 
@@ -122,23 +129,34 @@ class _InviteFriendsState extends State<InviteFriends> {
     initialization();
   }
 
-  Future<bool> getContactPermission() async {
-    bool permissionGranted = false;
+  Future<void> getContactPermission() async {
+    bool permissionGranted = await Permission.contacts.isGranted;
 
     var permission = await Permission.contacts.status;
-    if (permission.isGranted) {
-      return true;
-    } else {
+
+    var flags = await Future.wait([
+      Permission.contacts.isDenied,
+      Permission.contacts.isPermanentlyDenied
+    ]);
+
+    permissionGranted = flags[0] || flags[1];
+    permissionGranted = !permissionGranted;
+
+    if (!permission.isGranted) {
       permission = await Permission.contacts.request();
-      var flags = await Future.wait([
+      flags = await Future.wait([
         Permission.contacts.isDenied,
         Permission.contacts.isPermanentlyDenied
       ]);
 
-      permissionGranted = flags[0] && flags[1];
+      permissionGranted = flags[0] || flags[1];
+      permissionGranted = !permissionGranted;
     }
 
-    return permissionGranted;
+    if (permissionGranted) {
+      contactPermissionGranted = true;
+      await getContacts();
+    }
   }
 
   @override
@@ -146,302 +164,309 @@ class _InviteFriendsState extends State<InviteFriends> {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
-          automaticallyImplyLeading: false,
+          automaticallyImplyLeading: !widget.firstTime,
           title: Text(
-            "Invite Your Friends",
+            "Import Contacts",
             style: TextStyle(fontWeight: FontWeight.bold),
           )),
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        child: Padding(
-          padding: const EdgeInsets.all(15.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 30,
-              ),
-              Text(
-                "Use your contacts to find friends on Settle Now. So that, you can invite them in rooms easily. We don't store your contacts.",
-                style: TextStyle(fontSize: 20),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              Center(
-                child: Opacity(
-                  opacity: 0.8,
-                  child: SizedBox(
-                    height: 70,
-                    child: Card(
-                      elevation: 1.0,
-                      shadowColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/Images/unknown.jpeg'),
-                                      fit: BoxFit.cover),
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width - 250,
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: AutoSizeText(
-                                    "Adah",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 17),
-                                    maxFontSize: 21,
-                                    minFontSize: 17,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+      body: WillPopScope(
+        onWillPop: () {
+          Navigator.pop(context, contactPermissionGranted);
+          return new Future(() => false);
+        },
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 24,
+                ),
+                Text(
+                  "Use your contacts to find friends on Settle Now. So that, you can invite them in rooms easily. We don't store your contacts.",
+                  style: TextStyle(fontSize: 20),
+                ),
+                SizedBox(
+                  height: 29,
+                ),
+                Center(
+                  child: Opacity(
+                    opacity: 0.8,
+                    child: SizedBox(
+                      height: 70,
+                      child: Card(
+                        elevation: 1.0,
+                        shadowColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 45.0,
+                                  height: 45.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
                                   ),
                                 ),
-                              ),
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.person_add_alt))
-                            ]),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Center(
-                child: Opacity(
-                  opacity: 0.6,
-                  child: SizedBox(
-                    height: 70,
-                    child: Card(
-                      elevation: 1.0,
-                      shadowColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/Images/unknown.jpeg'),
-                                      fit: BoxFit.cover),
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width - 250,
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: AutoSizeText(
-                                    "Asmee",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 17),
-                                    maxFontSize: 21,
-                                    minFontSize: 17,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width - 250,
+                                  child: InkWell(
+                                    onTap: () {},
+                                    child: AutoSizeText(
+                                      "Aashi",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 17),
+                                      maxFontSize: 21,
+                                      minFontSize: 17,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.person_add_alt))
-                            ]),
+                                IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.person_add_alt))
+                              ]),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Center(
-                child: Opacity(
-                  opacity: 0.4,
-                  child: SizedBox(
-                    height: 70,
-                    child: Card(
-                      elevation: 1.0,
-                      shadowColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/Images/unknown.jpeg'),
-                                      fit: BoxFit.cover),
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width - 250,
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: AutoSizeText(
-                                    "Kashvi",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 17),
-                                    maxFontSize: 21,
-                                    minFontSize: 17,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                SizedBox(
+                  height: 10,
+                ),
+                Center(
+                  child: Opacity(
+                    opacity: 0.6,
+                    child: SizedBox(
+                      height: 70,
+                      child: Card(
+                        elevation: 1.0,
+                        shadowColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 45.0,
+                                  height: 45.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
                                   ),
                                 ),
-                              ),
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.person_add_alt))
-                            ]),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Center(
-                child: Opacity(
-                  opacity: 0.2,
-                  child: SizedBox(
-                    height: 70,
-                    child: Card(
-                      elevation: 1.0,
-                      shadowColor: Theme.of(context).primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10.0),
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: 45.0,
-                                height: 45.0,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/Images/unknown.jpeg'),
-                                      fit: BoxFit.cover),
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width - 250,
-                                child: InkWell(
-                                  onTap: () {},
-                                  child: AutoSizeText(
-                                    "Anala",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(fontSize: 17),
-                                    maxFontSize: 21,
-                                    minFontSize: 17,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width - 250,
+                                  child: InkWell(
+                                    onTap: () {},
+                                    child: AutoSizeText(
+                                      "Asmee",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 17),
+                                      maxFontSize: 21,
+                                      minFontSize: 17,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              IconButton(
-                                  onPressed: () {},
-                                  icon: Icon(Icons.person_add_alt))
-                            ]),
+                                IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.person_add_alt))
+                              ]),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 80,
-              ),
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  height: 46,
-                  child: OutlinedButton(
-                    child: Text(
-                      "Give Permission",
-                      style: TextStyle(
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: 16),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                SizedBox(
+                  height: 10,
+                ),
+                Center(
+                  child: Opacity(
+                    opacity: 0.4,
+                    child: SizedBox(
+                      height: 70,
+                      child: Card(
+                        elevation: 1.0,
+                        shadowColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 45.0,
+                                  height: 45.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width - 250,
+                                  child: InkWell(
+                                    onTap: () {},
+                                    child: AutoSizeText(
+                                      "Raveena",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 17),
+                                      maxFontSize: 21,
+                                      minFontSize: 17,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.person_add_alt))
+                              ]),
+                        ),
                       ),
-                      side: BorderSide(color: Theme.of(context).primaryColor),
                     ),
-                    onPressed: () async {
-                      bool isGranted = await getContactPermission();
-                      if (isGranted) {
-                        await getContacts(context);
-                      }
-                    },
                   ),
                 ),
-              ),
-              SizedBox(
-                height: 15,
-              ),
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  height: 46,
-                  child: OutlinedButton(
-                    child: Text(
-                      "Cancel",
-                      style: TextStyle(
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: 16),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
+                SizedBox(
+                  height: 10,
+                ),
+                Center(
+                  child: Opacity(
+                    opacity: 0.2,
+                    child: SizedBox(
+                      height: 70,
+                      child: Card(
+                        elevation: 1.0,
+                        shadowColor: Theme.of(context).primaryColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 45.0,
+                                  height: 45.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width - 250,
+                                  child: InkWell(
+                                    onTap: () {},
+                                    child: AutoSizeText(
+                                      "Anala",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(fontSize: 17),
+                                      maxFontSize: 21,
+                                      minFontSize: 17,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.person_add_alt))
+                              ]),
+                        ),
                       ),
-                      side: BorderSide(color: Colors.redAccent),
                     ),
-                    onPressed: () async {
-                      Navigator.pop(context);
-                    },
                   ),
                 ),
-              ),
-            ],
+                SizedBox(
+                  height: 80,
+                ),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: 46,
+                    child: OutlinedButton(
+                      child: Text(
+                        "Give Permission",
+                        style: TextStyle(
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 16),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        side: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                      onPressed: () async {
+                        await getContactPermission();
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: 46,
+                    child: OutlinedButton(
+                      child: Text(
+                        "Cancel",
+                        style: TextStyle(
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 16),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        side: BorderSide(color: Colors.redAccent),
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(context, false);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

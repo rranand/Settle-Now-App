@@ -18,6 +18,7 @@ import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/screens/maintain.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
 import '../models/ChartData.dart';
@@ -78,6 +79,7 @@ class _RoomExpenseState extends State<RoomExpense>
   double totalExpense = 0;
   List<ChartData> dataMap = [];
   List<ChartData> dataMapByUser = [];
+  List<Map> getContactsFromDB = [];
 
   String expenseTitle = "All Expense";
   List<String> membersListName = [];
@@ -345,6 +347,8 @@ class _RoomExpenseState extends State<RoomExpense>
         await onException(context);
       }
     }
+
+    friendData = getUnionOfContacts(getContactsFromDB, friendData);
     if (this.mounted) {
       setState(() {});
     }
@@ -697,6 +701,14 @@ class _RoomExpenseState extends State<RoomExpense>
                 ))));
   }
 
+  Future<void> getContactsFromLocal() async {
+    String path = await getDBFilePath('contact_data.db');
+
+    Database database = await openDatabase(path);
+    getContactsFromDB =
+        await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
+  }
+
   Future<void> executeParallel() async {
     await Future.wait([
       _initialisation(),
@@ -710,6 +722,7 @@ class _RoomExpenseState extends State<RoomExpense>
   void initState() {
     super.initState();
     getConnectivity();
+    getContactsFromLocal();
     executeParallel();
   }
 

@@ -18,6 +18,7 @@ import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/screens/maintain.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sqflite/sqflite.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
@@ -49,6 +50,7 @@ class _LendPageState extends State<LendPage> {
   int expenseIndex = -1;
   bool firstTimeLoad = true;
   late StreamSubscription subscription;
+  List<Map> getContactsFromDB = [];
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
@@ -56,6 +58,14 @@ class _LendPageState extends State<LendPage> {
   void dispose() {
     subscription.cancel();
     super.dispose();
+  }
+
+  Future<void> getContactsFromLocal() async {
+    String path = await getDBFilePath('contact_data.db');
+
+    Database database = await openDatabase(path);
+    getContactsFromDB =
+        await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
   }
 
   getConnectivity() =>
@@ -171,6 +181,8 @@ class _LendPageState extends State<LendPage> {
         await onException(context);
       }
     }
+
+    friendData = getUnionOfContacts(getContactsFromDB, friendData);
     if (this.mounted) {
       setState(() {});
     }
@@ -813,6 +825,7 @@ class _LendPageState extends State<LendPage> {
   void initState() {
     super.initState();
     getConnectivity();
+    getContactsFromLocal();
     _initialization();
     controller = AutoScrollController(
         viewportBoundaryGetter: () =>

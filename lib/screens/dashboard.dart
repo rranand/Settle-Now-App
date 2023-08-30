@@ -17,6 +17,7 @@ import 'package:in_app_update/in_app_update.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -111,6 +112,7 @@ class _DashBoardState extends State<DashBoard> {
       new GlobalKey<RefreshIndicatorState>();
   final _CformKey = GlobalKey<FormState>();
   final _JformKey = GlobalKey<FormState>();
+  bool isContactPermissionGranted = false;
   bool searchTrigger = false;
   bool searching = false;
   bool dateIndex = true;
@@ -285,6 +287,14 @@ class _DashBoardState extends State<DashBoard> {
       }).catchError((e) {});
 
       await InAppUpdate.completeFlexibleUpdate();
+    }
+  }
+
+  void ContactPermissionGranted() async {
+    isContactPermissionGranted = await Permission.contacts.isGranted;
+
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -559,11 +569,14 @@ class _DashBoardState extends State<DashBoard> {
         initalDataLoaded = true;
 
         if (!isInvitePremissionProvided) {
-          Navigator.push(
+          isContactPermissionGranted = await Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      InviteFriends(email: _email.text, token: _token)));
+                  builder: (context) => InviteFriends(
+                        email: _email.text,
+                        token: _token,
+                        firstTime: true,
+                      )));
         }
       } else {
         if (this.mounted) {
@@ -3733,6 +3746,33 @@ class _DashBoardState extends State<DashBoard> {
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
                   ),
+                  isContactPermissionGranted
+                      ? SizedBox()
+                      : ListTile(
+                          onTap: () async {
+                            isContactPermissionGranted = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => InviteFriends(
+                                        email: _email.text,
+                                        token: _token,
+                                        firstTime: false,
+                                      )),
+                            );
+                            if (this.mounted) {
+                              setState(() {});
+                            }
+                          },
+                          leading: Icon(
+                            Icons.import_contacts_outlined,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          title: Text(
+                            "Import Contacts",
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                        ),
                   ListTile(
                     leading: Icon(
                       Icons.border_color,
