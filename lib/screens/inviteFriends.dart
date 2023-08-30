@@ -107,7 +107,7 @@ class _InviteFriendsState extends State<InviteFriends> {
         for (int i = 0; i < resData.length; i++) {
           allContacts
               .removeWhere((element) => element == resData[i]['phoneNo']);
-          allContactsData.add(FriendEach.fromLocal(resData[i]));
+          allContactsData.add(FriendEach.forLocal(resData[i]));
         }
 
         pushToDB(Set.from(allContacts).toList(), allContactsData);

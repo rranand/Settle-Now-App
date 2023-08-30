@@ -43,6 +43,24 @@ class FriendEach {
       phoneNo: contactEach.containsKey('phoneNo') ? contactEach['phoneNo'] : '',
     );
   }
+
+  factory FriendEach.forLocal(Map<dynamic, dynamic> contactEach) {
+    return FriendEach(
+      name: contactEach.containsKey('name')
+          ? crypto.decrypt(contactEach['name'])
+          : '',
+      fromContact: true,
+      email: contactEach.containsKey('email')
+          ? crypto.decrypt(contactEach['email'])
+          : '',
+      status: 'NJ',
+      pic: global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8",
+      isGoogle: false,
+      phoneNo: contactEach.containsKey('phoneNo')
+          ? crypto.decrypt(contactEach['phoneNo'])
+          : '',
+    );
+  }
 }
 
 class TransactionEach {

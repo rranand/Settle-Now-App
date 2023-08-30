@@ -210,7 +210,7 @@ class _LendPageState extends State<LendPage> {
     }
   }
 
-  sendJoinRequest(String email) async {
+  sendJoinRequest(String email, bool isFromContact, int index) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
@@ -223,10 +223,12 @@ class _LendPageState extends State<LendPage> {
           body: jsonEncode({
             'key': crypto.encrypt(widget.roomkey),
             'email': crypto.encrypt(widget.email),
-            'fEmail': crypto.encrypt(email)
+            'fEmail': crypto.encrypt(email),
+            'isFromContact': crypto.encrypt(isFromContact.toString())
           }));
 
       var data = jsonDecode(response.body);
+      friendData[index].fromContact = false;
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
       if (this.mounted) {
@@ -457,7 +459,8 @@ class _LendPageState extends State<LendPage> {
                               IconButton(
                                   onPressed: () async {
                                     if (data[index].status == "NJ") {
-                                      await sendJoinRequest(data[index].email);
+                                      await sendJoinRequest(data[index].email,
+                                          data[index].fromContact, index);
                                       data[index].status = "S";
                                     } else {
                                       await cancelJoinRequest(

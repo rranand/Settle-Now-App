@@ -955,7 +955,7 @@ class _RoomExpenseState extends State<RoomExpense>
             )));
   }
 
-  sendJoinRequest(String email) async {
+  sendJoinRequest(String email, bool isFromContact, int index) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
@@ -968,10 +968,12 @@ class _RoomExpenseState extends State<RoomExpense>
           body: jsonEncode({
             'roomKey': crypto.encrypt(widget.roomKey),
             'email': crypto.encrypt(widget.email),
-            'fEmail': crypto.encrypt(email)
+            'fEmail': crypto.encrypt(email),
+            'isFromContact': crypto.encrypt(isFromContact.toString())
           }));
 
       var data = jsonDecode(response.body);
+      friendData[index].fromContact = false;
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
       if (this.mounted) {
@@ -1112,7 +1114,8 @@ class _RoomExpenseState extends State<RoomExpense>
                               IconButton(
                                   onPressed: () async {
                                     if (data[index].status == "NJ") {
-                                      await sendJoinRequest(data[index].email);
+                                      await sendJoinRequest(data[index].email,
+                                          data[index].fromContact, index);
                                       data[index].status = "S";
                                     } else {
                                       await cancelJoinRequest(
