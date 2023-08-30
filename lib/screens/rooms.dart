@@ -3131,7 +3131,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Widget chooseFromBottomNavigator(int dash) {
-    if (widget.isRoomActive) {
+    if (widget.isRoomActive && !isClosedany) {
       if (dash == 0) {
         return homeWidget();
       } else if (dash == 1) {
@@ -3195,7 +3195,7 @@ class _RoomExpenseState extends State<RoomExpense>
                 onTap: (index) => setState(() {
                       dash = index;
                     }),
-                items: (widget.isRoomActive
+                items: (widget.isRoomActive && !isClosedany
                     ? [
                         BottomNavigationBarItem(
                           icon: Icon(
