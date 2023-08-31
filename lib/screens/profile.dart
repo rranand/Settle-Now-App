@@ -65,7 +65,7 @@ class _ProfileState extends State<Profile> {
 
     try {
       final response = await http.post(
-          Uri.parse(global.url + '/profile/deleteAccount'),
+          Uri.parse(global.url + 'profile/deleteAccount'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'Auth': widget.token
@@ -75,17 +75,24 @@ class _ProfileState extends State<Profile> {
           }));
 
       if (response.statusCode == 200) {
-        prefs = await SharedPreferences.getInstance();
-        await prefs.clear();
+        String responseMessage =
+            crypto.decrypt(jsonDecode(response.body)['Message']);
 
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => LoginPage()),
-            (Route<dynamic> route) => false,
-          );
+        if (responseMessage.toLowerCase().contains("soon")) {
+          showToast(context, responseMessage, Icons.warning);
+        } else {
+          prefs = await SharedPreferences.getInstance();
+          await prefs.clear();
 
-          showToast(context, "Account Deleted Successfully", Icons.done);
+          if (this.mounted) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+              (Route<dynamic> route) => false,
+            );
+
+            showToast(context, "Account Deleted Successfully", Icons.done);
+          }
         }
       }
     } on Exception catch (_) {
