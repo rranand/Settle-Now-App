@@ -289,7 +289,8 @@ class _OtpNameState extends State<OtpName> {
       height: 45,
       textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.white),
+        border: Border.all(
+            color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
         borderRadius: BorderRadius.circular(13),
       ),
     );
