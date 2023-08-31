@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:pinput/pinput.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timer_count_down/timer_controller.dart';
+import 'package:timer_count_down/timer_count_down.dart';
 import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
@@ -38,6 +40,9 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
+  bool canResendOTP = false;
+  final CountdownController _OTPCountdownController =
+      new CountdownController(autoStart: true);
   bool isAlertSet = false;
   final _deleteConfirmationText = new TextEditingController();
   final _deleteConfirmationForm = GlobalKey<FormState>();
@@ -252,19 +257,41 @@ class _ProfileState extends State<Profile> {
                       SizedBox(
                         height: 4,
                       ),
-                      Center(
-                        child: InkWell(
-                            onTap: () async {
-                              await sendOTP(_phoneNo.text, themeProvider,
-                                  isVerificationPageOpened: true);
-                            },
-                            child: Text(
-                              "Resend",
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                            )),
-                      ),
+                      canResendOTP
+                          ? Center(
+                              child: InkWell(
+                                  onTap: () async {
+                                    await sendOTP(_phoneNo.text, themeProvider,
+                                        isVerificationPageOpened: true);
+                                    if (this.mounted) {
+                                      setState(() {
+                                        canResendOTP = false;
+                                      });
+                                    }
+                                    _OTPCountdownController.restart();
+                                  },
+                                  child: Text(
+                                    "Resend",
+                                    style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  )),
+                            )
+                          : Countdown(
+                              seconds: 60,
+                              build: (BuildContext context, double time) =>
+                                  Text("Wait " +
+                                      time.round().toString() +
+                                      " Seconds"),
+                              interval: Duration(seconds: 1),
+                              onFinished: () {
+                                if (this.mounted) {
+                                  setState(() {
+                                    canResendOTP = true;
+                                  });
+                                }
+                              },
+                            ),
                       SizedBox(
                         height: 20,
                       ),

@@ -15,6 +15,8 @@ import 'package:settlenow/screens/loginPage.dart';
 import 'package:settlenow/screens/maintain.dart';
 import 'package:settlenow/screens/onBoarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timer_count_down/timer_controller.dart';
+import 'package:timer_count_down/timer_count_down.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
 
@@ -47,7 +49,9 @@ class _OtpNameState extends State<OtpName> {
   late SharedPreferences prefs;
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   bool isOnBoardingCompleted = false;
-
+  bool canResendOTP = false;
+  final CountdownController _OTPCountdownController =
+      new CountdownController(autoStart: true);
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
@@ -396,16 +400,38 @@ class _OtpNameState extends State<OtpName> {
                         SizedBox(
                           height: 4,
                         ),
-                        InkWell(
-                            onTap: () async {
-                              await resendOTP();
-                            },
-                            child: Text(
-                              "Resend",
-                              style: TextStyle(
-                                decoration: TextDecoration.underline,
+                        canResendOTP
+                            ? InkWell(
+                                onTap: () async {
+                                  await resendOTP();
+                                  if (this.mounted) {
+                                    setState(() {
+                                      canResendOTP = false;
+                                    });
+                                  }
+                                  _OTPCountdownController.restart();
+                                },
+                                child: Text(
+                                  "Resend",
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ))
+                            : Countdown(
+                                seconds: 60,
+                                build: (BuildContext context, double time) =>
+                                    Text("Wait " +
+                                        time.round().toString() +
+                                        " Seconds"),
+                                interval: Duration(seconds: 1),
+                                onFinished: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      canResendOTP = true;
+                                    });
+                                  }
+                                },
                               ),
-                            )),
                         SizedBox(
                           height: 30,
                         ),

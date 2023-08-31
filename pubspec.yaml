@@ -57,6 +57,7 @@ dependencies:
   pinput: ^3.0.1
   sqflite: ^2.3.0
   path: ^1.8.3
+  timer_count_down: ^2.2.2
 
 dev_dependencies:
   flutter_test:

@@ -4,8 +4,15 @@ import 'package:intl/intl.dart';
 import '../models/FriendEach.dart';
 
 String getAmount(String message, String pattern) {
+  if (!message.contains(pattern)) {
+    return "";
+  }
   int index = message.indexOf(pattern) + pattern.length;
   String amount = "";
+
+  if (message[index] == " ") {
+    index++;
+  }
 
   for (int i = index; i < message.length && message[i] != " "; i++) {
     if (message[i] == ",") {
@@ -56,19 +63,23 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
       continue;
     }
 
-    if (_messages[i].sender.toString().contains(bankName)) {
+    if (_messages[i]
+        .sender
+        .toString()
+        .toLowerCase()
+        .contains(bankName.toLowerCase())) {
       bool isUPI = _messages[i].sender.toString().contains("UPI") ||
           messageBody.contains("upi");
       bool isIMPS = _messages[i].sender.toString().contains("IMPS") ||
           messageBody.contains("imps");
       bool isNEFT = _messages[i].sender.toString().contains("NEFT") ||
           messageBody.contains("neft");
-
       if (messageBody.contains("debited")) {
         String amount = getAmount(messageBody, "rs");
         if (amount.isEmpty) {
           amount = getAmount(messageBody, "debited by");
         }
+
         String transactionID = "Unknown";
         int refNo = -1;
         String receiver = "";
