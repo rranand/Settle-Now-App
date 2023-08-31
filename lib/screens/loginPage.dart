@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
     version = await getAppVersion();
     prefs = await SharedPreferences.getInstance();
     _deviceData = await initPlatformState();
-/*
+
     if (prefs.getBool('darkTheme') != null) {
       darkTheme = prefs.getBool('darkTheme')!;
     } else {
@@ -103,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     final provider = Provider.of<ThemeProvider>(context, listen: false);
-    provider.toggleTheme(darkTheme);*/
+    provider.toggleTheme(darkTheme);
 
     if (prefs.getBool("isOnBoardingCompleted") != null) {
       isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;

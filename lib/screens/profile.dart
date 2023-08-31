@@ -228,20 +228,22 @@ class _ProfileState extends State<Profile> {
                       SizedBox(
                         height: 25,
                       ),
-                      Pinput(
-                        length: 6,
-                        androidSmsAutofillMethod:
-                            AndroidSmsAutofillMethod.smsUserConsentApi,
-                        defaultPinTheme: defaultPinTheme,
-                        focusedPinTheme: focusedPinTheme,
-                        errorPinTheme: defaultPinTheme.copyDecorationWith(
-                          border: Border.all(color: Colors.redAccent),
-                          borderRadius: BorderRadius.circular(13),
+                      Center(
+                        child: Pinput(
+                          length: 6,
+                          androidSmsAutofillMethod:
+                              AndroidSmsAutofillMethod.smsUserConsentApi,
+                          defaultPinTheme: defaultPinTheme,
+                          focusedPinTheme: focusedPinTheme,
+                          errorPinTheme: defaultPinTheme.copyDecorationWith(
+                            border: Border.all(color: Colors.redAccent),
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          showCursor: true,
+                          controller: _otp,
+                          forceErrorState: OTPverificationError.isNotEmpty,
+                          errorText: OTPverificationError,
                         ),
-                        showCursor: true,
-                        controller: _otp,
-                        forceErrorState: OTPverificationError.isNotEmpty,
-                        errorText: OTPverificationError,
                       ),
                       SizedBox(
                         height: 26,
@@ -455,6 +457,7 @@ class _ProfileState extends State<Profile> {
       codeSent: (String verificationId, int? resendToken) {
         verificationOTP = verificationId;
       },
+      timeout: Duration(seconds: 0),
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
 

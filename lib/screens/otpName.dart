@@ -363,29 +363,31 @@ class _OtpNameState extends State<OtpName> {
                         SizedBox(
                           height: 10,
                         ),
-                        Pinput(
-                          length: 6,
-                          defaultPinTheme: defaultPinTheme,
-                          focusedPinTheme: focusedPinTheme,
-                          errorPinTheme: defaultPinTheme.copyDecorationWith(
-                            border: Border.all(color: Colors.redAccent),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
-                          showCursor: true,
-                          controller: _otp,
-                          forceErrorState: error,
-                          errorText: errorText,
-                          onClipboardFound: (value) {
-                            RegExp validateOTP = RegExp(r'^[\d]{6}');
-                            if (validateOTP.hasMatch(value)) {
-                              if (this.mounted) {
-                                setState(() {
-                                  error = false;
-                                  _otp.text = value;
-                                });
+                        Center(
+                          child: Pinput(
+                            length: 6,
+                            defaultPinTheme: defaultPinTheme,
+                            focusedPinTheme: focusedPinTheme,
+                            errorPinTheme: defaultPinTheme.copyDecorationWith(
+                              border: Border.all(color: Colors.redAccent),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            showCursor: true,
+                            controller: _otp,
+                            forceErrorState: error,
+                            errorText: errorText,
+                            onClipboardFound: (value) {
+                              RegExp validateOTP = RegExp(r'^[\d]{6}');
+                              if (validateOTP.hasMatch(value)) {
+                                if (this.mounted) {
+                                  setState(() {
+                                    error = false;
+                                    _otp.text = value;
+                                  });
+                                }
                               }
-                            }
-                          },
+                            },
+                          ),
                         ),
                         SizedBox(
                           height: 26,
