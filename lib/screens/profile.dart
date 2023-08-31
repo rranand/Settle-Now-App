@@ -277,20 +277,22 @@ class _ProfileState extends State<Profile> {
                                     ),
                                   )),
                             )
-                          : Countdown(
-                              seconds: 60,
-                              build: (BuildContext context, double time) =>
-                                  Text("Wait " +
-                                      time.round().toString() +
-                                      " Seconds"),
-                              interval: Duration(seconds: 1),
-                              onFinished: () {
-                                if (this.mounted) {
-                                  setState(() {
-                                    canResendOTP = true;
-                                  });
-                                }
-                              },
+                          : Center(
+                              child: Countdown(
+                                seconds: 60,
+                                build: (BuildContext context, double time) =>
+                                    Text("Wait " +
+                                        time.round().toString() +
+                                        " Seconds"),
+                                interval: Duration(seconds: 1),
+                                onFinished: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      canResendOTP = true;
+                                    });
+                                  }
+                                },
+                              ),
                             ),
                       SizedBox(
                         height: 20,
