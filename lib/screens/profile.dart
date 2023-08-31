@@ -91,7 +91,7 @@ class _ProfileState extends State<Profile> {
               (Route<dynamic> route) => false,
             );
 
-            showToast(context, "Account Deleted Successfully", Icons.done);
+            showToast(context, responseMessage, Icons.done);
           }
         }
       }
