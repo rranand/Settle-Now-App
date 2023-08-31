@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rohit.settlenow">
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />  
+    <uses-permission android:name="android.permission.INTERNET" android:required="false"/>
+    <uses-permission android:name="android.permission.READ_SMS" android:required="false"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:required="false"/>
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" android:required="false"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS" android:required="false"/>  
    <application
         android:label="Settle Now"
         android:name="${applicationName}"

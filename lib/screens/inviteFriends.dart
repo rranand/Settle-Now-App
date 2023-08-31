@@ -438,7 +438,13 @@ class _InviteFriendsState extends State<InviteFriends> {
                               BorderSide(color: Theme.of(context).primaryColor),
                         ),
                         onPressed: () async {
-                          await getContactPermission();
+                          bool isPermanent =
+                              await Permission.contacts.isPermanentlyDenied;
+                          if (isPermanent) {
+                            openAppSettings();
+                          } else {
+                            await getContactPermission();
+                          }
                         },
                       ),
                     ),
