@@ -90,56 +90,63 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _extractEmail() async {
-    version = await getAppVersion();
-    prefs = await SharedPreferences.getInstance();
-    _deviceData = await initPlatformState();
+    try {
+      version = await getAppVersion();
+      prefs = await SharedPreferences.getInstance();
+      _deviceData = await initPlatformState();
 
-    if (prefs.getBool('darkTheme') != null) {
-      darkTheme = prefs.getBool('darkTheme')!;
-    } else {
-      darkTheme =
-          (Brightness.dark == MediaQuery.of(context).platformBrightness);
-      prefs.setBool('darkTheme', darkTheme);
-    }
-
-    final provider = Provider.of<ThemeProvider>(context, listen: false);
-    provider.toggleTheme(darkTheme);
-
-    if (prefs.getBool("isOnBoardingCompleted") != null) {
-      isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
-    } else {
-      await prefs.setBool("isOnBoardingCompleted", false);
-    }
-
-    if (prefs.getString("token") != null &&
-        parseJWT(prefs.getString("token")!) != null) {
-      if (this.mounted) {
-        isOnBoardingCompleted
-            ? Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DashBoard(
-                    version: version,
-                    firstTime: false,
-                  ),
-                ),
-                (Route<dynamic> route) => false,
-              )
-            : Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => onBoarding(
-                    version: version,
-                  ),
-                ),
-                (Route<dynamic> route) => false,
-              );
+      if (prefs.getBool('darkTheme') != null) {
+        darkTheme = prefs.getBool('darkTheme')!;
+      } else {
+        darkTheme =
+            (Brightness.dark == MediaQuery.of(context).platformBrightness);
+        prefs.setBool('darkTheme', darkTheme);
       }
-    } else {
+
+      final provider = Provider.of<ThemeProvider>(context, listen: false);
+      provider.toggleTheme(darkTheme);
+
+      if (prefs.getBool("isOnBoardingCompleted") != null) {
+        isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
+      } else {
+        await prefs.setBool("isOnBoardingCompleted", false);
+      }
+
+      if (prefs.getString("token") != null &&
+          parseJWT(prefs.getString("token")!) != null) {
+        if (this.mounted) {
+          isOnBoardingCompleted
+              ? Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DashBoard(
+                      version: version,
+                      firstTime: false,
+                    ),
+                  ),
+                  (Route<dynamic> route) => false,
+                )
+              : Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => onBoarding(
+                      version: version,
+                    ),
+                  ),
+                  (Route<dynamic> route) => false,
+                );
+        }
+      } else {
+        prefs.clear();
+        await AwesomeNotifications().cancelAllSchedules();
+        canLoad = true;
+      }
+    } on Exception catch (_) {
       prefs.clear();
       await AwesomeNotifications().cancelAllSchedules();
       canLoad = true;
     }
+
     if (this.mounted) {
       setState(() {});
     }

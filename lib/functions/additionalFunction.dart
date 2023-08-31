@@ -212,8 +212,12 @@ createJWT(String email, String input) async {
 }
 
 parseJWT(String token) {
-  String jwToken = crypto.decrypt(token);
-  return JWT.tryDecode(jwToken)!.payload;
+  try {
+    String jwToken = crypto.decrypt(token);
+    return JWT.tryDecode(jwToken)!.payload;
+  } on Exception catch (_) {
+    return null;
+  }
 }
 
 String fixPhoneNumber(String phone) {
