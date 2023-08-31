@@ -155,7 +155,7 @@ class _ProfileState extends State<Profile> {
   pushPhoneToDB(String phoneNo) async {
     try {
       final response = await http.post(
-          Uri.parse(global.url + '/profile/phoneNo'),
+          Uri.parse(global.url + 'profile/phoneNo'),
           headers: <String, String>{
             'Content-Type': 'application/json; charset=UTF-8',
             'Auth': widget.token
