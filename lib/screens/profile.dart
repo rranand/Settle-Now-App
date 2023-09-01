@@ -79,6 +79,12 @@ class _ProfileState extends State<Profile> {
             crypto.decrypt(jsonDecode(response.body)['Message']);
 
         if (responseMessage.toLowerCase().contains("soon")) {
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
           showToast(context, responseMessage, Icons.warning);
         } else {
           prefs = await SharedPreferences.getInstance();

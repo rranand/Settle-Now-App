@@ -310,6 +310,14 @@ class _LoginPageState extends State<LoginPage> {
                                 'isp': crypto.encrypt(JD['isp']),
                                 'device': crypto.encrypt(_deviceData['device']),
                                 'deviceID': crypto.encrypt(_deviceData['id']),
+                                'model': crypto.encrypt(_deviceData['model']),
+                                'product':
+                                    crypto.encrypt(_deviceData['product']),
+                                'sdkInt': crypto.encrypt(_deviceData['serial']),
+                                'android':
+                                    crypto.encrypt(_deviceData['sdkInt']),
+                                'release':
+                                    crypto.encrypt(_deviceData['release']),
                                 'deviceToken': crypto.encrypt(deviceToken),
                                 "token": crypto.encrypt(token)
                               }));

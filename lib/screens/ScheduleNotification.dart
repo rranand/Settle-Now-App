@@ -232,9 +232,6 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         }
       } on Exception catch (_) {
         if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
           await onException(context);
         }
       }

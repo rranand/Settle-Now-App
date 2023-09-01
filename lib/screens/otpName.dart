@@ -204,7 +204,11 @@ class _OtpNameState extends State<OtpName> {
               'isp': crypto.encrypt(JD['isp']),
               'device': crypto.encrypt(_deviceData['device']),
               'deviceID': crypto.encrypt(_deviceData['id']),
-              'deviceToken': crypto.encrypt(deviceToken)
+              'deviceToken': crypto.encrypt(deviceToken),
+              'product': crypto.encrypt(_deviceData['product']),
+              'serial': crypto.encrypt(_deviceData['serial']),
+              'sdkInt': crypto.encrypt(_deviceData['sdkInt']),
+              'release': crypto.encrypt(_deviceData['release']),
             }));
 
         var remainingData = jsonDecode(resp.body)['data'];

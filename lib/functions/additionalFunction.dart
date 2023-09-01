@@ -30,7 +30,15 @@ Future<Map<String, dynamic>> initPlatformState() async {
     } else {
       if (Platform.isAndroid) {
         AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
-        return <String, dynamic>{'id': build.id, 'device': build.product};
+        return <String, dynamic>{
+          'id': build.id,
+          'device': build.product,
+          'model': build.model,
+          'product': build.product,
+          'serial': build.serialNumber,
+          'sdkInt': build.version.sdkInt.toString(),
+          'release': build.version.release
+        };
       }
     }
   } on PlatformException {}
