@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rohit.settlenow">
-    <uses-permission android:name="android.permission.INTERNET" android:required="true"/>
-    <uses-permission android:name="android.permission.READ_SMS" android:required="false"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" android:required="false"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" android:required="false"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS" android:required="false"/>  
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />  
    <application
         android:label="Settle Now"
         android:name="${applicationName}"
@@ -48,6 +48,11 @@
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-2748051594366591~5715829404"
+        />
             
         <meta-data
             android:name="flutterEmbedding"
