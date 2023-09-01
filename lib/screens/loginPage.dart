@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -90,31 +91,69 @@ class _LoginPageState extends State<LoginPage> {
     } on Exception catch (_) {}
   }
 
+  Future<void> deleteTempData() async {
+    prefs.clear();
+    await AwesomeNotifications().cancelAllSchedules();
+    String path = await getDBFilePath('contact_data.db');
+
+    await deleteDatabase(path);
+
+    Database database = await openDatabase(path, version: 1,
+        onCreate: (Database db, int version) async {
+      await db.execute(
+          'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
+      await db.execute(
+          'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
+    });
+
+    await database.close();
+  }
+
   Future<void> _extractEmail() async {
-    try {
-      version = await getAppVersion();
-      prefs = await SharedPreferences.getInstance();
-      _deviceData = await initPlatformState();
+    version = await getAppVersion();
+    prefs = await SharedPreferences.getInstance();
+    _deviceData = await initPlatformState();
 
-      if (prefs.getBool('darkTheme') != null) {
-        darkTheme = prefs.getBool('darkTheme')!;
-      } else {
-        darkTheme =
-            (Brightness.dark == MediaQuery.of(context).platformBrightness);
-        prefs.setBool('darkTheme', darkTheme);
+    if (prefs.getBool('darkTheme') != null) {
+      darkTheme = prefs.getBool('darkTheme')!;
+    } else {
+      darkTheme =
+          (Brightness.dark == MediaQuery.of(context).platformBrightness);
+      prefs.setBool('darkTheme', darkTheme);
+    }
+
+    final provider = Provider.of<ThemeProvider>(context, listen: false);
+    provider.toggleTheme(darkTheme);
+
+    if (prefs.getBool("isOnBoardingCompleted") != null) {
+      isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
+    } else {
+      await prefs.setBool("isOnBoardingCompleted", false);
+    }
+
+    var tempData = prefs.getString("token");
+    if (tempData == null) {
+      await deleteTempData();
+      if (this.mounted) {
+        setState(() {
+          canLoad = true;
+        });
       }
 
-      final provider = Provider.of<ThemeProvider>(context, listen: false);
-      provider.toggleTheme(darkTheme);
+      return;
+    } else {
+      var checkJWTToken =
+          await JWT.tryDecode(crypto.decrypt(tempData.toString()));
 
-      if (prefs.getBool("isOnBoardingCompleted") != null) {
-        isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
+      if (checkJWTToken == null) {
+        await deleteTempData();
+        if (this.mounted) {
+          setState(() {
+            canLoad = true;
+          });
+        }
+        return;
       } else {
-        await prefs.setBool("isOnBoardingCompleted", false);
-      }
-
-      if (prefs.getString("token") != null &&
-          parseJWT(prefs.getString("token")!) != null) {
         if (this.mounted) {
           isOnBoardingCompleted
               ? Navigator.pushAndRemoveUntil(
@@ -137,29 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                   (Route<dynamic> route) => false,
                 );
         }
-      } else {
-        canLoad = true;
       }
-    } on Exception catch (_) {
-      canLoad = true;
-    }
-
-    if (canLoad) {
-      prefs.clear();
-      await AwesomeNotifications().cancelAllSchedules();
-      String path = await getDBFilePath('contact_data.db');
-
-      await deleteDatabase(path);
-
-      Database database = await openDatabase(path, version: 1,
-          onCreate: (Database db, int version) async {
-        await db.execute(
-            'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
-        await db.execute(
-            'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
-      });
-
-      database.close();
     }
 
     if (this.mounted) {
@@ -408,7 +425,17 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 )
               : Center(
-                  child: CircularProgressIndicator(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(
+                        height: 8,
+                      ),
+                      Text("Checking Log-In Status...")
+                    ],
+                  ),
                 ),
         ),
       ),
