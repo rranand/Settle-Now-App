@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:settlenow/screens/otpName.dart';
 import 'package:http/http.dart' as http;
+import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
 
@@ -137,14 +138,28 @@ class _LoginPageState extends State<LoginPage> {
                 );
         }
       } else {
-        prefs.clear();
-        await AwesomeNotifications().cancelAllSchedules();
         canLoad = true;
       }
     } on Exception catch (_) {
+      canLoad = true;
+    }
+
+    if (canLoad) {
       prefs.clear();
       await AwesomeNotifications().cancelAllSchedules();
-      canLoad = true;
+      String path = await getDBFilePath('contact_data.db');
+
+      await deleteDatabase(path);
+
+      Database database = await openDatabase(path, version: 1,
+          onCreate: (Database db, int version) async {
+        await db.execute(
+            'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
+        await db.execute(
+            'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
+      });
+
+      database.close();
     }
 
     if (this.mounted) {
@@ -313,7 +328,7 @@ class _LoginPageState extends State<LoginPage> {
                                 'model': crypto.encrypt(_deviceData['model']),
                                 'product':
                                     crypto.encrypt(_deviceData['product']),
-                                'sdkInt': crypto.encrypt(_deviceData['serial']),
+                                'serial': crypto.encrypt(_deviceData['serial']),
                                 'android':
                                     crypto.encrypt(_deviceData['sdkInt']),
                                 'release':

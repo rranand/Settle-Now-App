@@ -61,11 +61,13 @@ class _LendPageState extends State<LendPage> {
   }
 
   Future<void> getContactsFromLocal() async {
-    String path = await getDBFilePath('contact_data.db');
+    try {
+      String path = await getDBFilePath('contact_data.db');
 
-    Database database = await openDatabase(path);
-    getContactsFromDB =
-        await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
+      Database database = await openDatabase(path);
+      getContactsFromDB =
+          await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
+    } on Exception catch (_) {}
   }
 
   getConnectivity() =>

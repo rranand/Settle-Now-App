@@ -205,9 +205,10 @@ class _OtpNameState extends State<OtpName> {
               'device': crypto.encrypt(_deviceData['device']),
               'deviceID': crypto.encrypt(_deviceData['id']),
               'deviceToken': crypto.encrypt(deviceToken),
+              'model': crypto.encrypt(_deviceData['model']),
               'product': crypto.encrypt(_deviceData['product']),
               'serial': crypto.encrypt(_deviceData['serial']),
-              'sdkInt': crypto.encrypt(_deviceData['sdkInt']),
+              'android': crypto.encrypt(_deviceData['sdkInt']),
               'release': crypto.encrypt(_deviceData['release']),
             }));
 

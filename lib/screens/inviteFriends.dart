@@ -41,13 +41,7 @@ class _InviteFriendsState extends State<InviteFriends> {
   pushToDB(List<dynamic> allContacts, List<FriendEach> allContactsData) async {
     String path = await getDBFilePath('contact_data.db');
 
-    Database database = await openDatabase(path, version: 1,
-        onCreate: (Database db, int version) async {
-      await db.execute(
-          'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
-      await db.execute(
-          'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
-    });
+    Database database = await openDatabase(path, version: 1);
 
     await database.transaction((txn) async {
       for (int i = 0; i < allContactsData.length; i++) {
