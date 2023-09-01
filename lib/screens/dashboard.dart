@@ -1019,6 +1019,11 @@ class _DashBoardState extends State<DashBoard> {
           channelName: "Remainder",
           channelDescription: 'Notification channel for Remainders',
           defaultColor: Colors.white),
+      NotificationChannel(
+          channelKey: "miscellaneousID",
+          channelName: "Miscellaneous",
+          channelDescription: 'Notification channel for Miscellaneous',
+          defaultColor: Colors.white),
     ]);
 
     FirebaseMessaging.instance.getInitialMessage().then(

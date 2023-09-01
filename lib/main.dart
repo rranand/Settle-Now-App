@@ -1,6 +1,7 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'firebase_options.dart';
@@ -15,6 +16,13 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Permission.notification.isDenied.then((value) {
+    if (value) {
+      Permission.notification.request();
+    }
+  });
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -39,6 +47,11 @@ Future<void> main() async {
         channelKey: "remainderID",
         channelName: "Remainder",
         channelDescription: 'Notification channel for Remainders',
+        defaultColor: Colors.white),
+    NotificationChannel(
+        channelKey: "miscellaneousID",
+        channelName: "Miscellaneous",
+        channelDescription: 'Notification channel for Miscellaneous',
         defaultColor: Colors.white),
   ]);
 
