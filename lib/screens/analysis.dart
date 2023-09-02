@@ -329,10 +329,6 @@ class _AnalysisState extends State<Analysis> {
   }
 
   Future<List<dynamic>> getRoomData(List<String> roomKeys) async {
-    if (!isDeviceConnected) {
-      return [];
-    }
-
     List<dynamic> RoomData = [];
     try {
       final response = await http.post(
@@ -366,7 +362,8 @@ class _AnalysisState extends State<Analysis> {
             padding: EdgeInsets.all(12),
             margin: EdgeInsets.symmetric(horizontal: 70, vertical: 16),
             decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.background.withOpacity(0.5),
+                color:
+                    Theme.of(context).colorScheme.background.withOpacity(0.5),
                 borderRadius: BorderRadius.all(Radius.circular(24))),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -981,10 +978,8 @@ class _AnalysisState extends State<Analysis> {
                                                 header: "",
                                                 format: "point.x : ₹ point.y"),
                                             plotAreaBorderWidth: 0,
-                                            series: <
-                                                BarSeries<ChartData, String>>[
-                                              ...graphData
-                                            ])),
+                                            series: <BarSeries<ChartData,
+                                                String>>[...graphData])),
                                   )
                                 : SizedBox(
                                     height: 200,
