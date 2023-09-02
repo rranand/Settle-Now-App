@@ -3750,7 +3750,7 @@ class _DashBoardState extends State<DashBoard> {
                                         )),
                               );
 
-                              if (dataFrom) {
+                              if (dataFrom != null) {
                                 bankMessageShowedOnce = dataFrom;
                               }
 

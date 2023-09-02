@@ -1387,7 +1387,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                     colorScheme: ColorScheme.dark(
                       primary: Theme.of(context).primaryColor,
                       onPrimary: Colors.white,
-                      surface: Theme.of(context).primaryColor,
                       onSurface: Colors.white,
                     ),
                     dialogBackgroundColor: Colors.white,
@@ -1396,7 +1395,6 @@ class _BankTransactionsState extends State<BankTransactions> {
                     colorScheme: ColorScheme.light(
                       primary: Theme.of(context).primaryColor,
                       onPrimary: Colors.white,
-                      surface: Theme.of(context).primaryColor,
                       onSurface: Colors.black,
                     ),
                     dialogBackgroundColor: Colors.white,
@@ -1906,30 +1904,70 @@ class _BankTransactionsState extends State<BankTransactions> {
                               icon: Icon(Icons.date_range)),
                         ],
                       ),
+                      SizedBox(
+                        height: 10,
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           SizedBox(
-                            height: 35,
-                            child: ElevatedButton(
-                              onPressed: pickDateRange,
-                              child: Text(
-                                DateFormat('dd/MMM/yyyy')
-                                    .format(dateRange.start),
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white),
+                            height: 45,
+                            width: 120,
+                            child: InkWell(
+                              onTap: pickDateRange,
+                              child: Card(
+                                elevation: 0,
+                                color: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: Theme.of(context)
+                                          .primaryColor
+                                          .withAlpha(95)),
+                                  borderRadius: BorderRadius.circular(7.0),
+                                ),
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(6.0),
+                                    child: Text(
+                                      DateFormat('dd/MMM/yyyy')
+                                          .format(dateRange.start),
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                           SizedBox(
                             height: 35,
-                            child: ElevatedButton(
-                                onPressed: pickDateRange,
-                                child: Text(
-                                    DateFormat('dd/MMM/yyyy')
-                                        .format(dateRange.end),
-                                    style: TextStyle(
-                                        fontSize: 16, color: Colors.white))),
+                            child: Text("-", style: TextStyle(fontSize: 16)),
+                          ),
+                          SizedBox(
+                            height: 45,
+                            width: 120,
+                            child: Card(
+                              color: Colors.transparent,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: Theme.of(context)
+                                        .primaryColor
+                                        .withAlpha(95)),
+                                borderRadius: BorderRadius.circular(7.0),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: InkWell(
+                                    onTap: pickDateRange,
+                                    child: Text(
+                                        DateFormat('dd/MMM/yyyy')
+                                            .format(dateRange.end),
+                                        style: TextStyle(fontSize: 16)),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
