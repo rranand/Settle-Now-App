@@ -1618,108 +1618,40 @@ class _BankTransactionsState extends State<BankTransactions> {
               : Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: ListView(
-              children: [
-                SizedBox(
-                  height: 10,
-                ),
-                Scrollbar(
-                  radius: Radius.circular(0),
-                  thickness: 0,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Bank",
-                        style: TextStyle(
-                            fontSize: 21, fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(
-                        height: 100,
-                        width: 250,
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: global.allBanks.length,
-                            itemBuilder: ((context, index) {
-                              return CheckboxListTile(
-                                title: Text(global.allBanks[index]),
-                                value: allBanksIndex.contains(index),
-                                onChanged: (_) {
-                                  if (allBanksIndex.contains(index)) {
-                                    allBanksIndex.remove(index);
-                                  } else {
-                                    allBanksIndex.add(index);
-                                  }
-
-                                  if (this.mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                              );
-                            })),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        "Type",
-                        style: TextStyle(
-                            fontSize: 21, fontWeight: FontWeight.w600),
-                      ),
-                      SizedBox(
-                        height: 100,
-                        width: 250,
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: transactionType.length,
-                            itemBuilder: ((context, index) {
-                              return CheckboxListTile(
-                                title: Text(transactionType[index]),
-                                value: transactionTypeIndex.contains(index),
-                                onChanged: (_) {
-                                  if (transactionTypeIndex.contains(index)) {
-                                    transactionTypeIndex.remove(index);
-                                  } else {
-                                    transactionTypeIndex.add(index);
-                                  }
-
-                                  if (this.mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                              );
-                            })),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        "Mode",
-                        style: TextStyle(
-                            fontSize: 21, fontWeight: FontWeight.w600),
-                      ),
-                      Scrollbar(
-                        radius: Radius.circular(0),
-                        thickness: 0,
-                        child: SizedBox(
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: ListView(
+                scrollDirection: Axis.vertical,
+                children: [
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Scrollbar(
+                    radius: Radius.circular(0),
+                    thickness: 0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Bank",
+                          style: TextStyle(
+                              fontSize: 21, fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(
                           width: 250,
-                          height: 300,
+                          height: 200,
                           child: ListView.builder(
                               shrinkWrap: true,
-                              itemCount: transactionMode.length,
+                              itemCount: global.allBanks.length - 1,
                               itemBuilder: ((context, index) {
                                 return CheckboxListTile(
-                                  title: Text(transactionMode[index]),
-                                  value: transactionModeIndex.contains(index),
+                                  title: Text(global.allBanks[index]),
+                                  value: allBanksIndex.contains(index),
                                   onChanged: (_) {
-                                    if (transactionModeIndex.contains(index)) {
-                                      transactionModeIndex.remove(index);
+                                    if (allBanksIndex.contains(index)) {
+                                      allBanksIndex.remove(index);
                                     } else {
-                                      transactionModeIndex.add(index);
+                                      allBanksIndex.add(index);
                                     }
 
                                     if (this.mounted) {
@@ -1731,102 +1663,204 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 );
                               })),
                         ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        "Amount",
-                        style: TextStyle(
-                            fontSize: 21, fontWeight: FontWeight.w600),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            child: TextFormField(
-                              controller: _amountRangeValues[0],
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.done,
-                              maxLines: 1,
-                              decoration: InputDecoration(
-                                counterText: "",
-                                contentPadding: EdgeInsets.all(8.0),
-                                prefixText: "₹ ",
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "Type",
+                          style: TextStyle(
+                              fontSize: 21, fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(
+                          height: 100,
+                          width: 250,
+                          child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: transactionType.length,
+                              itemBuilder: ((context, index) {
+                                return CheckboxListTile(
+                                  title: Text(transactionType[index]),
+                                  value: transactionTypeIndex.contains(index),
+                                  onChanged: (_) {
+                                    if (transactionTypeIndex.contains(index)) {
+                                      transactionTypeIndex.remove(index);
+                                    } else {
+                                      transactionTypeIndex.add(index);
+                                    }
+
+                                    if (this.mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                );
+                              })),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "Mode",
+                          style: TextStyle(
+                              fontSize: 21, fontWeight: FontWeight.w600),
+                        ),
+                        Scrollbar(
+                          radius: Radius.circular(0),
+                          thickness: 0,
+                          child: SizedBox(
+                            width: 250,
+                            height: 300,
+                            child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: transactionMode.length,
+                                itemBuilder: ((context, index) {
+                                  return CheckboxListTile(
+                                    title: Text(transactionMode[index]),
+                                    value: transactionModeIndex.contains(index),
+                                    onChanged: (_) {
+                                      if (transactionModeIndex
+                                          .contains(index)) {
+                                        transactionModeIndex.remove(index);
+                                      } else {
+                                        transactionModeIndex.add(index);
+                                      }
+
+                                      if (this.mounted) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    controlAffinity:
+                                        ListTileControlAffinity.leading,
+                                  );
+                                })),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(
+                          "Amount",
+                          style: TextStyle(
+                              fontSize: 21, fontWeight: FontWeight.w600),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              child: TextFormField(
+                                controller: _amountRangeValues[0],
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.done,
+                                maxLines: 1,
+                                decoration: InputDecoration(
+                                  counterText: "",
+                                  contentPadding: EdgeInsets.all(8.0),
+                                  prefixText: "₹ ",
+                                ),
+                                onChanged: (String s) {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      _amountRangeValues[0].text = s;
+                                      _amountRangeValues[0].selection =
+                                          TextSelection.collapsed(
+                                              offset: _amountRangeValues[0]
+                                                  .text
+                                                  .length);
+                                    });
+                                  }
+                                },
                               ),
-                              onChanged: (String s) {
-                                if (this.mounted) {
-                                  setState(() {
-                                    _amountRangeValues[0].text = s;
-                                    _amountRangeValues[0].selection =
-                                        TextSelection.collapsed(
-                                            offset: _amountRangeValues[0]
-                                                .text
-                                                .length);
-                                  });
-                                }
-                              },
                             ),
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.3,
-                            child: TextFormField(
-                              controller: _amountRangeValues[1],
-                              keyboardType: TextInputType.number,
-                              textInputAction: TextInputAction.done,
-                              maxLines: 1,
-                              decoration: InputDecoration(
-                                counterText: "",
-                                contentPadding: EdgeInsets.all(8.0),
-                                prefixText: "₹ ",
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.3,
+                              child: TextFormField(
+                                controller: _amountRangeValues[1],
+                                keyboardType: TextInputType.number,
+                                textInputAction: TextInputAction.done,
+                                maxLines: 1,
+                                decoration: InputDecoration(
+                                  counterText: "",
+                                  contentPadding: EdgeInsets.all(8.0),
+                                  prefixText: "₹ ",
+                                ),
+                                onChanged: (String s) {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      _amountRangeValues[1].text = s;
+                                      _amountRangeValues[1].selection =
+                                          TextSelection.collapsed(
+                                              offset: _amountRangeValues[1]
+                                                  .text
+                                                  .length);
+                                    });
+                                  }
+                                },
                               ),
-                              onChanged: (String s) {
-                                if (this.mounted) {
-                                  setState(() {
-                                    _amountRangeValues[1].text = s;
-                                    _amountRangeValues[1].selection =
-                                        TextSelection.collapsed(
-                                            offset: _amountRangeValues[1]
-                                                .text
-                                                .length);
-                                  });
-                                }
-                              },
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Date",
-                            style: TextStyle(
-                                fontSize: 21, fontWeight: FontWeight.w600),
-                          ),
-                          IconButton(
-                              onPressed: pickDateRange,
-                              icon: Icon(Icons.date_range)),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            height: 45,
-                            width: 120,
-                            child: InkWell(
-                              onTap: pickDateRange,
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Date",
+                              style: TextStyle(
+                                  fontSize: 21, fontWeight: FontWeight.w600),
+                            ),
+                            IconButton(
+                                onPressed: pickDateRange,
+                                icon: Icon(Icons.date_range)),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              height: 45,
+                              width: 120,
+                              child: InkWell(
+                                onTap: pickDateRange,
+                                child: Card(
+                                  elevation: 0,
+                                  color: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withAlpha(95)),
+                                    borderRadius: BorderRadius.circular(7.0),
+                                  ),
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(6.0),
+                                      child: Text(
+                                        DateFormat('dd/MMM/yyyy')
+                                            .format(dateRange.start),
+                                        style: TextStyle(fontSize: 16),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 35,
+                              child: Text("-", style: TextStyle(fontSize: 16)),
+                            ),
+                            SizedBox(
+                              height: 45,
+                              width: 120,
                               child: Card(
-                                elevation: 0,
                                 color: Colors.transparent,
+                                elevation: 0,
                                 shape: RoundedRectangleBorder(
                                   side: BorderSide(
                                       color: Theme.of(context)
@@ -1837,126 +1871,97 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 child: Center(
                                   child: Padding(
                                     padding: const EdgeInsets.all(6.0),
-                                    child: Text(
-                                      DateFormat('dd/MMM/yyyy')
-                                          .format(dateRange.start),
-                                      style: TextStyle(fontSize: 16),
+                                    child: InkWell(
+                                      onTap: pickDateRange,
+                                      child: Text(
+                                          DateFormat('dd/MMM/yyyy')
+                                              .format(dateRange.end),
+                                          style: TextStyle(fontSize: 16)),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            height: 35,
-                            child: Text("-", style: TextStyle(fontSize: 16)),
-                          ),
-                          SizedBox(
-                            height: 45,
-                            width: 120,
-                            child: Card(
-                              color: Colors.transparent,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withAlpha(95)),
-                                borderRadius: BorderRadius.circular(7.0),
-                              ),
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(6.0),
-                                  child: InkWell(
-                                    onTap: pickDateRange,
-                                    child: Text(
-                                        DateFormat('dd/MMM/yyyy')
-                                            .format(dateRange.end),
-                                        style: TextStyle(fontSize: 16)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 18,
-                ),
-                SizedBox(
-                  height: 45,
-                  child: OutlinedButton(
-                    child: Text(
-                      "Apply",
-                      style: TextStyle(
-                        color: themeProvider.isDarkTheme
-                            ? Colors.white
-                            : Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    onPressed: () async {
-                      showFilterResult = true;
-                      _scaffoldKey.currentState!.closeEndDrawer();
-                      await getFilterResult();
-                      if (this.mounted) {
-                        setState(() {});
-                      }
-                    },
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(13.0),
-                      ),
-                      side: BorderSide(color: Theme.of(context).primaryColor),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 10,
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                SizedBox(
-                  height: 45,
-                  child: OutlinedButton(
-                    child: Text(
-                      "Clear Filter",
-                      style: TextStyle(
-                        color: themeProvider.isDarkTheme
-                            ? Colors.white
-                            : Colors.black,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(13.0),
-                      ),
-                      side: BorderSide(color: Theme.of(context).primaryColor),
-                    ),
-                    onPressed: () {
-                      showFilterResult = false;
-                      transactionModeIndex.clear();
-                      transactionTypeIndex.clear();
-                      _amountRangeValues[0].text = "0";
-                      _amountRangeValues[1].text = "10000";
-                      dateRange = DateTimeRange(
-                          start: new DateTime(
-                              DateTime.now().year, DateTime.now().month),
-                          end: DateTime.now());
-                      if (this.mounted) {
-                        setState(() {});
-                      }
-                    },
+                  SizedBox(
+                    height: 18,
                   ),
-                ),
-              ],
+                  SizedBox(
+                    height: 45,
+                    child: OutlinedButton(
+                      child: Text(
+                        "Apply",
+                        style: TextStyle(
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      onPressed: () async {
+                        showFilterResult = true;
+                        _scaffoldKey.currentState!.closeEndDrawer();
+                        await getFilterResult();
+                        if (this.mounted) {
+                          setState(() {});
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13.0),
+                        ),
+                        side: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  SizedBox(
+                    height: 45,
+                    child: OutlinedButton(
+                      child: Text(
+                        "Clear Filter",
+                        style: TextStyle(
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13.0),
+                        ),
+                        side: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                      onPressed: () {
+                        showFilterResult = false;
+                        transactionModeIndex.clear();
+                        transactionTypeIndex.clear();
+                        _amountRangeValues[0].text = "0";
+                        _amountRangeValues[1].text = "10000";
+                        dateRange = DateTimeRange(
+                            start: new DateTime(
+                                DateTime.now().year, DateTime.now().month),
+                            end: DateTime.now());
+                        if (this.mounted) {
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

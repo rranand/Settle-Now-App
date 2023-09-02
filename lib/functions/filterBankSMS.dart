@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:intl/intl.dart';
 
@@ -52,23 +54,9 @@ String getAmount(String message) {
 }
 
 String getReferenceNo(String message) {
-  List<String> patternList = [
-    "utr no",
-    "utrno",
-    "utr. no.",
-    "ref. no.",
-    "refno",
-    "ref no",
-    "ref",
-    "utr",
-    "upi:",
-    "imps:",
-    "info:",
-    "transaction number"
-  ];
   int patternIndex = -1;
-  for (int i = 0; i < patternList.length; i++) {
-    if (message.contains(patternList[i])) {
+  for (int i = 0; i < global.refNoPattern.length; i++) {
+    if (message.contains(global.refNoPattern[i])) {
       patternIndex = i;
       break;
     }
@@ -78,11 +66,11 @@ String getReferenceNo(String message) {
     return "Unknown";
   }
 
-  int index = message.indexOf(patternList[patternIndex]) +
-      patternList[patternIndex].length;
+  int index = message.indexOf(global.refNoPattern[patternIndex]) +
+      global.refNoPattern[patternIndex].length;
 
   if (index < message.length) {
-    if (message[index] == " ") {
+    if (!message[index].contains(RegExp(r'[\w\d]{1}'))) {
       index++;
     }
   } else {
@@ -96,36 +84,10 @@ String getReferenceNo(String message) {
     refNo += message[i];
   }
 
-  return refNo;
+  return refNo == "" ? "Unknown" : refNo;
 }
 
 String getTransferTo(String message) {
-  List<String> refNoPattern = [
-    "utr no",
-    "utrno",
-    "utr. no.",
-    "ref. no.",
-    "refno",
-    "ref no",
-    "ref",
-    "utr",
-    "upi:",
-    "imps:",
-    "info:",
-    "transaction number"
-  ];
-
-  List<String> patternList = [
-    " transfer to ",
-    " trf to ",
-    " vpa ",
-    " linked to ",
-    " linked ",
-    " done at ",
-    " at ",
-    " from ",
-    " debit by "
-  ];
   bool fromReg = false;
   List<RegExp> regexPatternList = [
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2} & '),
@@ -136,8 +98,8 @@ String getTransferTo(String message) {
   ];
 
   int patternIndex = -1;
-  for (int i = 0; i < patternList.length; i++) {
-    if (message.contains(patternList[i])) {
+  for (int i = 0; i < global.transferTo.length; i++) {
+    if (message.contains(global.transferTo[i])) {
       patternIndex = i;
       break;
     }
@@ -160,35 +122,34 @@ String getTransferTo(String message) {
   int index = fromReg
       ? (message.indexOf(regexPatternList[patternIndex]) +
           (patternIndex == 0 ? 12 : (patternIndex < 4 ? 10 : 9)))
-      : (message.indexOf(patternList[patternIndex]) +
-          patternList[patternIndex].length);
+      : (message.indexOf(global.transferTo[patternIndex]) +
+          global.transferTo[patternIndex].length);
 
   if (index < message.length) {
-    if (message[index].contains(" ")) {
+    if (!message[index].contains(RegExp(r'[\w\d]{1}'))) {
       index++;
     }
   } else {
     return "Unknown";
   }
 
-  int uptoIndex = -1;
+  int uptoIndex = 99999999999;
   if (message.contains("debited")) {
     if (message.contains("credited.")) {
       uptoIndex = message.indexOf("credited.");
     }
   }
 
-  if (uptoIndex == -1) {
-    for (int i = 0; i < refNoPattern.length; i++) {
-      if (message.contains(refNoPattern[i], index + 1)) {
-        uptoIndex = message.indexOf(refNoPattern[i], index + 1);
-        break;
+  if (uptoIndex == 99999999999) {
+    for (int i = 0; i < global.refNoPattern.length; i++) {
+      if (message.contains(global.refNoPattern[i], index + 1)) {
+        uptoIndex =
+            min(message.indexOf(global.refNoPattern[i], index + 1), uptoIndex);
       }
     }
   }
-
   String transferTo = "";
-  if (uptoIndex == -1) {
+  if (uptoIndex == 99999999999) {
     for (int i = index;
         i < message.length &&
             !message[i].contains(" ") &&
@@ -199,14 +160,14 @@ String getTransferTo(String message) {
   } else {
     for (int i = index;
         i < message.length &&
-            (uptoIndex != -1 && i < uptoIndex) &&
-            !message[i].contains(RegExp(r'[\(\)\.]'));
+            (uptoIndex != 99999999999 && i < uptoIndex) &&
+            !message[i].contains(RegExp(r'[\(\)\.\,]'));
         i++) {
       transferTo += message[i];
     }
   }
 
-  return transferTo;
+  return transferTo == "" ? "Unknown" : transferTo;
 }
 
 String getBankName(String message) {
@@ -289,7 +250,8 @@ Future<List<TransactionEach>> filterSMS(List<SmsMessage> _messages) async {
     if (bankName == "Unknown") {
       continue;
     }
-    bool isDebited = messageBody.contains("debited");
+    bool isDebited =
+        messageBody.contains("debited") || messageBody.contains("withdrawn");
     bool isCredited = messageBody.contains("credited");
 
     if (!(isDebited || isCredited)) {
