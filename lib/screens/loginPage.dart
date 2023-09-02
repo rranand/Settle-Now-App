@@ -526,8 +526,7 @@ class _LoginPageState extends State<LoginPage> {
                       height: kIsWeb ? 10 : 25,
                     ),
                     isItAndroidDevice
-                        ? SizedBox()
-                        : InkWell(
+                        ? InkWell(
                             onTap: () async {
                               launchUrl(
                                 Uri.parse(
@@ -540,6 +539,7 @@ class _LoginPageState extends State<LoginPage> {
                               height: 80,
                               image: AssetImage('assets/Images/play_store.png'),
                             ))
+                        : SizedBox()
                   ]),
                 )
               : null),

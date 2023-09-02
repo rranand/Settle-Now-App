@@ -3813,7 +3813,7 @@ class _DashBoardState extends State<DashBoard> {
                             style: TextStyle(fontSize: 14, color: Colors.white),
                           ),
                         ),
-                  !kIsWeb && isContactPermissionGranted
+                  kIsWeb || isContactPermissionGranted
                       ? SizedBox()
                       : ListTile(
                           onTap: () async {

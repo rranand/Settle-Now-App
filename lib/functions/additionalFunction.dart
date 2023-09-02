@@ -48,6 +48,13 @@ Future<Map<String, dynamic>> initPlatformState() async {
 
 addCorsinImage(String picUrl) {
   if (kIsWeb) {
+    if (picUrl.contains("https://drive.google.com/uc?export=view&id=")) {
+      return picUrl.replaceAll("https://drive.google.com/uc?export=view&id=",
+              global.drivewebUrl) +
+          '?key=' +
+          global.googleApiKey +
+          '&alt=media&source=downloadUrl';
+    }
     return picUrl.replaceAll(
             "https://drive.google.com/uc?id=", global.drivewebUrl) +
         '?key=' +
@@ -251,7 +258,7 @@ parseJWT(String token) {
     if (jwtData == null) {
       return null;
     }
-    return JWT.tryDecode(jwtData.toString())!.payload;
+    return jwtData.payload;
   } on Exception catch (_) {
     return null;
   }
