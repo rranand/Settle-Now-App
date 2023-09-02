@@ -5,6 +5,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -43,6 +44,7 @@ class _LoginPageState extends State<LoginPage> {
   double textScale = 1.0;
   String version = "";
   bool isOnBoardingCompleted = false;
+  bool isItAndroidDevice = false;
 
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
@@ -93,26 +95,29 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> deleteTempData() async {
     prefs.clear();
-    await AwesomeNotifications().cancelAllSchedules();
-    String path = await getDBFilePath('contact_data.db');
+    if (!kIsWeb) {
+      await AwesomeNotifications().cancelAllSchedules();
+      String path = await getDBFilePath('contact_data.db');
 
-    await deleteDatabase(path);
+      await deleteDatabase(path);
 
-    Database database = await openDatabase(path, version: 1,
-        onCreate: (Database db, int version) async {
-      await db.execute(
-          'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
-      await db.execute(
-          'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
-    });
+      Database database = await openDatabase(path, version: 1,
+          onCreate: (Database db, int version) async {
+        await db.execute(
+            'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
+        await db.execute(
+            'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
+      });
 
-    await database.close();
+      await database.close();
+    }
   }
 
   Future<void> _extractEmail() async {
     version = await getAppVersion();
     prefs = await SharedPreferences.getInstance();
     _deviceData = await initPlatformState();
+    isItAndroidDevice = await checkAndroidInsideWeb();
 
     if (prefs.getBool('darkTheme') != null) {
       darkTheme = prefs.getBool('darkTheme')!;
@@ -300,59 +305,86 @@ class _LoginPageState extends State<LoginPage> {
                                   _deviceData['id'] +
                                   "#" +
                                   DateTime.now().toString());
-                          await getDeviceTokenToSendNotification();
-
-                          final ipAdd = await http.get(
-                            Uri.parse('http://ip-api.com/json'),
-                          );
-
-                          final JD = jsonDecode(ipAdd.body);
                           prefs.setBool("isGoogle", true);
-
                           Map<String, String> jsonInputData = {
                             "email": (user?.email).toString(),
                             "name": (user?.displayName).toString(),
-                            "token": token,
-                            "pushToken": deviceToken
+                            "token": token
                           };
-
                           String jwToken = await createJWT(
                               (user?.email).toString(),
                               jsonEncode(jsonInputData));
-
                           prefs.setString("token", jwToken);
 
-                          final resp = await http.post(
-                              Uri.parse(global.url + 'login/google'),
-                              headers: <String, String>{
-                                'Content-Type':
-                                    'application/json; charset=UTF-8',
-                              },
-                              body: jsonEncode({
-                                'email':
-                                    crypto.encrypt((user?.email).toString()),
-                                'name': crypto
-                                    .encrypt((user?.displayName).toString()),
-                                'profilePic':
-                                    crypto.encrypt((user?.photoUrl).toString()),
-                                'country': crypto.encrypt(JD['country']),
-                                'ip': crypto.encrypt(JD['query']),
-                                'state': crypto.encrypt(JD['regionName']),
-                                'city': crypto.encrypt(JD['city']),
-                                'isp': crypto.encrypt(JD['isp']),
-                                'device': crypto.encrypt(_deviceData['device']),
-                                'deviceID': crypto.encrypt(_deviceData['id']),
-                                'model': crypto.encrypt(_deviceData['model']),
-                                'product':
-                                    crypto.encrypt(_deviceData['product']),
-                                'serial': crypto.encrypt(_deviceData['serial']),
-                                'android':
-                                    crypto.encrypt(_deviceData['sdkInt']),
-                                'release':
-                                    crypto.encrypt(_deviceData['release']),
-                                'deviceToken': crypto.encrypt(deviceToken),
-                                "token": crypto.encrypt(token)
-                              }));
+                          var resp = null;
+                          if (kIsWeb) {
+                            resp = await http.post(
+                                Uri.parse(global.url + 'login/google'),
+                                headers: <String, String>{
+                                  'Content-Type':
+                                      'application/json; charset=UTF-8'
+                                },
+                                body: jsonEncode({
+                                  'email':
+                                      crypto.encrypt((user?.email).toString()),
+                                  'name': crypto
+                                      .encrypt((user?.displayName).toString()),
+                                  'profilePic': crypto
+                                      .encrypt((user?.photoUrl).toString()),
+                                  'country': crypto.encrypt("Unknown"),
+                                  'ip': crypto.encrypt("Unknown"),
+                                  'state': crypto.encrypt("Unknown"),
+                                  'city': crypto.encrypt("Unknown"),
+                                  'isp': crypto.encrypt("Unknown"),
+                                  'device':
+                                      crypto.encrypt(_deviceData['device']),
+                                  'deviceID': crypto.encrypt(_deviceData['id']),
+                                  'deviceToken': crypto.encrypt("web"),
+                                  "token": crypto.encrypt(token)
+                                }));
+                          } else {
+                            await getDeviceTokenToSendNotification();
+
+                            final ipAdd = await http.get(
+                              Uri.parse('http://ip-api.com/json'),
+                            );
+
+                            final JD = jsonDecode(ipAdd.body);
+
+                            resp = await http.post(
+                                Uri.parse(global.url + 'login/google'),
+                                headers: <String, String>{
+                                  'Content-Type':
+                                      'application/json; charset=UTF-8',
+                                },
+                                body: jsonEncode({
+                                  'email':
+                                      crypto.encrypt((user?.email).toString()),
+                                  'name': crypto
+                                      .encrypt((user?.displayName).toString()),
+                                  'profilePic': crypto
+                                      .encrypt((user?.photoUrl).toString()),
+                                  'country': crypto.encrypt(JD['country']),
+                                  'ip': crypto.encrypt(JD['query']),
+                                  'state': crypto.encrypt(JD['regionName']),
+                                  'city': crypto.encrypt(JD['city']),
+                                  'isp': crypto.encrypt(JD['isp']),
+                                  'device':
+                                      crypto.encrypt(_deviceData['device']),
+                                  'deviceID': crypto.encrypt(_deviceData['id']),
+                                  'model': crypto.encrypt(_deviceData['model']),
+                                  'product':
+                                      crypto.encrypt(_deviceData['product']),
+                                  'serial':
+                                      crypto.encrypt(_deviceData['serial']),
+                                  'android':
+                                      crypto.encrypt(_deviceData['sdkInt']),
+                                  'release':
+                                      crypto.encrypt(_deviceData['release']),
+                                  'deviceToken': crypto.encrypt(deviceToken),
+                                  "token": crypto.encrypt(token)
+                                }));
+                          }
 
                           var remainingData = jsonDecode(resp.body)['data'];
 
@@ -371,6 +403,7 @@ class _LoginPageState extends State<LoginPage> {
                           if (this.mounted) {
                             Navigator.pop(context);
                           }
+
                           if (this.mounted) {
                             isOnBoardingCompleted
                                 ? Navigator.pushAndRemoveUntil(
@@ -490,8 +523,23 @@ class _LoginPageState extends State<LoginPage> {
                           ]),
                     ),
                     SizedBox(
-                      height: 25,
-                    )
+                      height: kIsWeb ? 10 : 25,
+                    ),
+                    isItAndroidDevice
+                        ? SizedBox()
+                        : InkWell(
+                            onTap: () async {
+                              launchUrl(
+                                Uri.parse(
+                                    "https://play.google.com/store/apps/details?id=com.rohit.settlenow"),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            },
+                            child: Image(
+                              width: 250,
+                              height: 80,
+                              image: AssetImage('assets/Images/play_store.png'),
+                            ))
                   ]),
                 )
               : null),

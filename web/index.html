@@ -4,32 +4,55 @@
   <base href="/">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="Settle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about &apos;who owes who.&apos;
+By using the Settle Now, we can efficiently manage all costs per individual, track &apos;who paid how much&apos; and &apos;who should pay to whom&apos;">
 
-  <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Settle Now">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" href="https://settlenow.in/icons/Icon-192.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/png" href="https://settlenow.in/icons/favicon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="https://settlenow.in/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://settlenow.in/icons/favicon-16x16.png">
+  <link rel="shortcut icon" href="https://settlenow.in/icons/favicon.ico" />
+
 
   <title>Settle Now</title>
   <link rel="manifest" href="manifest.json">
 
   <script>
-    // The value below is injected by flutter build, do not touch.
     var serviceWorkerVersion = '2432010939';
   </script>
-  <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
   <meta name="google-signin-client_id" content="950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com">
 </head>
 <body>
   <script>
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
+      var seconds = new Date().getTime()
+         xmlhttp = new XMLHttpRequest();
+         xmlhttp.responseType = 'json';
+         xmlhttp.open("GET", '/version.json?v=' + seconds, true);
+         xmlhttp.onload = function () {
+             if (xmlhttp.status == 200) {
+                 var buildNumber = xmlhttp.response.build_number;
+                 var currentBuildNumber = window.localStorage.getItem('buildNumber');
+
+                 if (currentBuildNumber && currentBuildNumber != buildNumber) {
+                     caches.delete('flutter-app-manifest');
+                     caches.delete('flutter-temp-cache');
+                     caches.delete('flutter-app-cache');
+                 }
+
+                 window.localStorage.setItem('buildNumber', buildNumber);
+             }
+             navigator.serviceWorker.register('flutter_service_worker.js');
+         }
+         xmlhttp.error = function () {navigator.serviceWorker.register('flutter_service_worker.js');}
+         xmlhttp.abort = function () {navigator.serviceWorker.register('flutter_service_worker.js');}
+         xmlhttp.timeout = function () {navigator.serviceWorker.register('flutter_service_worker.js');}
+         xmlhttp.send();
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
@@ -41,15 +64,10 @@
       });
     });
   </script>
+  
   <script type="module">
-    // Import the functions you need from the SDKs you need
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
-  
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
       apiKey: "AIzaSyApNchuFZfvl0tDGIFv89xonkbwzLfXDz4",
       authDomain: "settle-now-340017.firebaseapp.com",
@@ -61,7 +79,6 @@
       measurementId: "G-DF7HQKPVDS"
     };
   
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
   </script>

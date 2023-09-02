@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -111,14 +112,16 @@ class _OtpNameState extends State<OtpName> {
         });
       }
 
-      final ipAdd = await http.get(
-        Uri.parse('http://ip-api.com/json'),
-      );
+      if (!kIsWeb) {
+        final ipAdd = await http.get(
+          Uri.parse('http://ip-api.com/json'),
+        );
 
-      if (this.mounted) {
-        setState(() {
-          JD = jsonDecode(ipAdd.body);
-        });
+        if (this.mounted) {
+          setState(() {
+            JD = jsonDecode(ipAdd.body);
+          });
+        }
       }
     } else if (jsonDecode(response.body)['maintenance'] != null &&
         jsonDecode(response.body)['maintenance']) {
@@ -166,7 +169,8 @@ class _OtpNameState extends State<OtpName> {
             'email': crypto.encrypt(widget.email),
             'otp': crypto.encrypt(otp),
             'name': crypto.encrypt(name),
-            'token': crypto.encrypt(token)
+            'token': crypto.encrypt(token),
+            'deviceToken': crypto.encrypt(kIsWeb ? "web" : "android")
           }));
 
       JsonData = jsonDecode(response.body);
@@ -175,8 +179,7 @@ class _OtpNameState extends State<OtpName> {
         Map<String, String> jsonInputData = {
           "email": widget.email,
           "name": "",
-          "token": token,
-          "pushToken": deviceToken
+          "token": token
         };
 
         if (crypto.decrypt(data['Name']) == 'Unknown') {
@@ -191,26 +194,45 @@ class _OtpNameState extends State<OtpName> {
         prefs.setString("token", jwToken);
         prefs.setBool("isGoogle", false);
 
-        final resp = await http.patch(Uri.parse(global.url + 'verify'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(widget.email),
-              'country': crypto.encrypt(JD['country']),
-              'ip': crypto.encrypt(JD['query']),
-              'state': crypto.encrypt(JD['regionName']),
-              'city': crypto.encrypt(JD['city']),
-              'isp': crypto.encrypt(JD['isp']),
-              'device': crypto.encrypt(_deviceData['device']),
-              'deviceID': crypto.encrypt(_deviceData['id']),
-              'deviceToken': crypto.encrypt(deviceToken),
-              'model': crypto.encrypt(_deviceData['model']),
-              'product': crypto.encrypt(_deviceData['product']),
-              'serial': crypto.encrypt(_deviceData['serial']),
-              'android': crypto.encrypt(_deviceData['sdkInt']),
-              'release': crypto.encrypt(_deviceData['release']),
-            }));
+        var resp = null;
+        if (kIsWeb) {
+          resp = await http.patch(Uri.parse(global.url + 'verify'),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8'
+              },
+              body: jsonEncode({
+                'email': crypto.encrypt(widget.email),
+                'country': crypto.encrypt("Unknown"),
+                'ip': crypto.encrypt("Unknown"),
+                'state': crypto.encrypt("Unknown"),
+                'city': crypto.encrypt("Unknown"),
+                'isp': crypto.encrypt("Unknown"),
+                'device': crypto.encrypt(_deviceData['device']),
+                'deviceID': crypto.encrypt(_deviceData['id']),
+                'deviceToken': crypto.encrypt("web")
+              }));
+        } else {
+          resp = await http.patch(Uri.parse(global.url + 'verify'),
+              headers: <String, String>{
+                'Content-Type': 'application/json; charset=UTF-8',
+              },
+              body: jsonEncode({
+                'email': crypto.encrypt(widget.email),
+                'country': crypto.encrypt(JD['country']),
+                'ip': crypto.encrypt(JD['query']),
+                'state': crypto.encrypt(JD['regionName']),
+                'city': crypto.encrypt(JD['city']),
+                'isp': crypto.encrypt(JD['isp']),
+                'device': crypto.encrypt(_deviceData['device']),
+                'deviceID': crypto.encrypt(_deviceData['id']),
+                'deviceToken': crypto.encrypt(deviceToken),
+                'model': crypto.encrypt(_deviceData['model']),
+                'product': crypto.encrypt(_deviceData['product']),
+                'serial': crypto.encrypt(_deviceData['serial']),
+                'android': crypto.encrypt(_deviceData['sdkInt']),
+                'release': crypto.encrypt(_deviceData['release']),
+              }));
+        }
 
         var remainingData = jsonDecode(resp.body)['data'];
 

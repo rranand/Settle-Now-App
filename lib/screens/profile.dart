@@ -531,7 +531,8 @@ class _ProfileState extends State<Profile> {
                       height: 40,
                     ),
                     CachedNetworkImage(
-                      imageUrl: widget.picUrl,
+                      httpHeaders: {'Access-Control-Allow-Origin': '*'},
+                      imageUrl: addCorsinImage(widget.picUrl),
                       progressIndicatorBuilder:
                           (context, url, downloadProgress) =>
                               CircularProgressIndicator(

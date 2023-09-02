@@ -62,8 +62,7 @@ class AboutUs extends StatelessWidget {
                 IconButton(
                     onPressed: () {
                       launchUrl(
-                        Uri.parse(
-                            "https://www.linkedin.com/in/rohit-anand-86a869184/"),
+                        Uri.parse("https://www.linkedin.com/in/rohitanand99/"),
                         mode: LaunchMode.externalApplication,
                       );
                     },

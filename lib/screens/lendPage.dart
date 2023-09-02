@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
@@ -183,8 +184,9 @@ class _LendPageState extends State<LendPage> {
         await onException(context);
       }
     }
-
-    friendData = getUnionOfContacts(getContactsFromDB, friendData);
+    if (!kIsWeb) {
+      friendData = getUnionOfContacts(getContactsFromDB, friendData);
+    }
     if (this.mounted) {
       setState(() {});
     }
@@ -290,18 +292,20 @@ class _LendPageState extends State<LendPage> {
                         "Invite Member",
                         style: TextStyle(fontSize: 22),
                       ),
-                      IconButton(
-                          onPressed: () async {
-                            await Share.share("Join " +
-                                widget.name +
-                                " (Len-Den) " +
-                                "\n" +
-                                widget.roomLink);
-                          },
-                          icon: Icon(
-                            Icons.send,
-                            size: 26,
-                          ))
+                      kIsWeb
+                          ? SizedBox()
+                          : IconButton(
+                              onPressed: () async {
+                                await Share.share("Join " +
+                                    widget.name +
+                                    " (Len-Den) " +
+                                    "\n" +
+                                    widget.roomLink);
+                              },
+                              icon: Icon(
+                                Icons.send,
+                                size: 26,
+                              ))
                     ],
                   ),
                   SizedBox(
@@ -407,10 +411,13 @@ class _LendPageState extends State<LendPage> {
                               SizedBox(
                                 height: 51,
                                 child: CachedNetworkImage(
+                                  httpHeaders: {
+                                    'Access-Control-Allow-Origin': '*'
+                                  },
                                   imageUrl: data[index].pic.length == 0
-                                      ? global.driveUrl +
-                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                      : data[index].pic,
+                                      ? addCorsinImage(global.driveUrl +
+                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                      : addCorsinImage(data[index].pic),
                                   progressIndicatorBuilder:
                                       (context, url, downloadProgress) =>
                                           CircularProgressIndicator(
@@ -1076,16 +1083,22 @@ class _LendPageState extends State<LendPage> {
                                                                 ["by"]) ==
                                                             widget.email
                                                         ? CachedNetworkImage(
+                                                            httpHeaders: {
+                                                              'Access-Control-Allow-Origin':
+                                                                  '*'
+                                                            },
                                                             imageUrl: crypto
                                                                         .decrypt(userData[
                                                                             'pic'])
                                                                         .length ==
                                                                     0
-                                                                ? global.driveUrl +
-                                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                                : crypto.decrypt(
-                                                                    userData[
-                                                                        'pic']),
+                                                                ? addCorsinImage(
+                                                                    global.driveUrl +
+                                                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                                                : addCorsinImage(
+                                                                    crypto.decrypt(
+                                                                        userData[
+                                                                            'pic'])),
                                                             progressIndicatorBuilder: (context,
                                                                     url,
                                                                     downloadProgress) =>
@@ -1127,16 +1140,22 @@ class _LendPageState extends State<LendPage> {
                                                             ),
                                                           )
                                                         : CachedNetworkImage(
+                                                            httpHeaders: {
+                                                              'Access-Control-Allow-Origin':
+                                                                  '*'
+                                                            },
                                                             imageUrl: crypto
                                                                         .decrypt(otherUserData[
                                                                             'pic'])
                                                                         .length ==
                                                                     0
-                                                                ? global.driveUrl +
-                                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                                : crypto.decrypt(
-                                                                    otherUserData[
-                                                                        'pic']),
+                                                                ? addCorsinImage(
+                                                                    global.driveUrl +
+                                                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                                                : addCorsinImage(
+                                                                    crypto.decrypt(
+                                                                        otherUserData[
+                                                                            'pic'])),
                                                             progressIndicatorBuilder: (context,
                                                                     url,
                                                                     downloadProgress) =>

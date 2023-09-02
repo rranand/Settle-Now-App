@@ -21,13 +21,13 @@ import '../contents.dart' as global;
 import '../models/ChartData.dart';
 import 'expenses.dart';
 
-class Summary extends StatefulWidget {
+class SummaryPage extends StatefulWidget {
   final String email;
   final String token;
   final List<dynamic> expenseCategory;
   final List<dynamic> investmentCategory;
 
-  const Summary(
+  const SummaryPage(
       {Key? key,
       required this.email,
       required this.token,
@@ -36,10 +36,10 @@ class Summary extends StatefulWidget {
       : super(key: key);
 
   @override
-  _SummaryState createState() => _SummaryState();
+  _SummaryPageState createState() => _SummaryPageState();
 }
 
-class _SummaryState extends State<Summary> {
+class _SummaryPageState extends State<SummaryPage> {
   List<PersonalExpenseEach> personalExpense = [];
   bool personalLoaded = false;
   bool roomLoaded = false;

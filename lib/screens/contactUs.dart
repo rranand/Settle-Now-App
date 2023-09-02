@@ -200,12 +200,17 @@ class _ContactUsState extends State<ContactUs> {
                                       Row(
                                         children: [
                                           CachedNetworkImage(
+                                            httpHeaders: {
+                                              'Access-Control-Allow-Origin': '*'
+                                            },
                                             imageUrl: snapshot.data![index].pic
                                                         .length ==
                                                     0
-                                                ? global.driveUrl +
-                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                : snapshot.data![index].pic,
+                                                ? addCorsinImage(global
+                                                        .driveUrl +
+                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                                : addCorsinImage(
+                                                    snapshot.data![index].pic),
                                             progressIndicatorBuilder: (context,
                                                     url, downloadProgress) =>
                                                 CircularProgressIndicator(
@@ -426,13 +431,9 @@ class _ContactUsState extends State<ContactUs> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.email == "rrohitanand3336@gmail.com"
-            ? "Contact Data"
-            : "Contact Us"),
+        title: Text("Contact Us"),
       ),
-      body: widget.email == "rrohitanand3336@gmail.com"
-          ? contactData()
-          : contactForm(),
+      body: contactForm(),
     );
   }
 }

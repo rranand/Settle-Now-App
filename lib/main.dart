@@ -1,14 +1,26 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/screens/loginPage.dart';
+import 'package:url_strategy/url_strategy.dart';
 import 'firebase_options.dart';
 import 'others/route_service.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  // Override behavior methods and getters like dragDevices
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+      };
+}
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   AwesomeNotifications().createNotificationFromJsonData(message.data);
@@ -17,43 +29,50 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Permission.notification.isDenied.then((value) {
-    if (value) {
-      Permission.notification.request();
-    }
-  });
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+    setPathUrlStrategy();
+  } else {
+    await Permission.notification.isDenied.then((value) {
+      if (value) {
+        Permission.notification.request();
+      }
+    });
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  AwesomeNotifications()
-      .initialize('resource://drawable/ic_notification_icon', [
-    NotificationChannel(
-        channelKey: "roomID",
-        channelName: "Room",
-        channelDescription: 'Notification channel for Room',
-        defaultColor: Colors.white),
-    NotificationChannel(
-        channelKey: "lendenID",
-        channelName: "Len-Den",
-        channelDescription: 'Notification channel for Len-Den',
-        defaultColor: Colors.white),
-    NotificationChannel(
-        channelKey: "requestID",
-        channelName: "Room Request",
-        channelDescription: 'Notification channel for Room Request',
-        defaultColor: Colors.white),
-    NotificationChannel(
-        channelKey: "remainderID",
-        channelName: "Remainder",
-        channelDescription: 'Notification channel for Remainders',
-        defaultColor: Colors.white),
-    NotificationChannel(
-        channelKey: "miscellaneousID",
-        channelName: "Miscellaneous",
-        channelDescription: 'Notification channel for Miscellaneous',
-        defaultColor: Colors.white),
-  ]);
+    AwesomeNotifications()
+        .initialize('resource://drawable/ic_notification_icon', [
+      NotificationChannel(
+          channelKey: "roomID",
+          channelName: "Room",
+          channelDescription: 'Notification channel for Room',
+          defaultColor: Colors.white),
+      NotificationChannel(
+          channelKey: "lendenID",
+          channelName: "Len-Den",
+          channelDescription: 'Notification channel for Len-Den',
+          defaultColor: Colors.white),
+      NotificationChannel(
+          channelKey: "requestID",
+          channelName: "Room Request",
+          channelDescription: 'Notification channel for Room Request',
+          defaultColor: Colors.white),
+      NotificationChannel(
+          channelKey: "remainderID",
+          channelName: "Remainder",
+          channelDescription: 'Notification channel for Remainders',
+          defaultColor: Colors.white),
+      NotificationChannel(
+          channelKey: "miscellaneousID",
+          channelName: "Miscellaneous",
+          channelDescription: 'Notification channel for Miscellaneous',
+          defaultColor: Colors.white),
+    ]);
+  }
 
   runApp(MyApp());
 }
@@ -108,7 +127,8 @@ class _MyAppState extends State<MyApp> {
             home: SafeArea(
               child: LoginPage(),
             ),
-            onGenerateRoute: RouteServices.generateRoute,
+            onGenerateRoute: kIsWeb ? null : RouteServices.generateRoute,
+            scrollBehavior: kIsWeb ? MyCustomScrollBehavior() : null,
           );
         });
   }

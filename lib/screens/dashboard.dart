@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -126,6 +127,7 @@ class _DashBoardState extends State<DashBoard> {
   late ShareMessage shareMessage;
   bool activeRoomDataFetched = false;
   bool inActiveRoomDataFetched = false;
+  bool isItAndroidDevice = false;
   final ValueNotifier<Map<String, List<dynamic>>> membersData =
       ValueNotifier(new Map());
   List<String> Month = [
@@ -517,18 +519,23 @@ class _DashBoardState extends State<DashBoard> {
       Year.add(i.toString());
     }
 
+    isItAndroidDevice = await checkAndroidInsideWeb();
+
     if (_email.text == "") {
       prefs = await SharedPreferences.getInstance();
 
-      if (prefs.getBool("isInvitePremissionProvided") != null) {
-        isInvitePremissionProvided =
-            await prefs.getBool("isInvitePremissionProvided")!;
-      } else {
-        await prefs.setBool("isInvitePremissionProvided", false);
-      }
+      if (!kIsWeb) {
+        if (prefs.getBool("isInvitePremissionProvided") != null) {
+          isInvitePremissionProvided =
+              await prefs.getBool("isInvitePremissionProvided")!;
+        } else {
+          await prefs.setBool("isInvitePremissionProvided", false);
+        }
 
-      if (prefs.getBool("isBankMessageLoadedOnce") != null) {
-        bankMessageShowedOnce = await prefs.getBool("isBankMessageLoadedOnce")!;
+        if (prefs.getBool("isBankMessageLoadedOnce") != null) {
+          bankMessageShowedOnce =
+              await prefs.getBool("isBankMessageLoadedOnce")!;
+        }
       }
 
       if (await prefs.getBool("isGoogle") != null) {
@@ -568,7 +575,7 @@ class _DashBoardState extends State<DashBoard> {
         _token = jsonOutData["token"]!;
         initalDataLoaded = true;
 
-        if (!isInvitePremissionProvided) {
+        if (!kIsWeb && !isInvitePremissionProvided) {
           isContactPermissionGranted = await Navigator.push(
               context,
               MaterialPageRoute(
@@ -582,13 +589,17 @@ class _DashBoardState extends State<DashBoard> {
         if (this.mounted) {
           buildShowDialog(context);
         }
-        await Future.wait([
-          deleteDB(),
-          prefs.clear(),
-          AwesomeNotifications().cancelAllSchedules(),
-          deleteToken(),
-          logOutFromGoogle()
-        ]);
+        if (kIsWeb) {
+          await Future.wait([prefs.clear(), deleteToken(), logOutFromGoogle()]);
+        } else {
+          await Future.wait([
+            deleteDB(),
+            prefs.clear(),
+            AwesomeNotifications().cancelAllSchedules(),
+            deleteToken(),
+            logOutFromGoogle()
+          ]);
+        }
         if (this.mounted) {
           Navigator.pop(context);
         }
@@ -684,13 +695,18 @@ class _DashBoardState extends State<DashBoard> {
           if (this.mounted) {
             buildShowDialog(context);
           }
-          await Future.wait([
-            deleteDB(),
-            prefs.clear(),
-            AwesomeNotifications().cancelAllSchedules(),
-            deleteToken(),
-            logOutFromGoogle()
-          ]);
+          if (kIsWeb) {
+            await Future.wait(
+                [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+          } else {
+            await Future.wait([
+              deleteDB(),
+              prefs.clear(),
+              AwesomeNotifications().cancelAllSchedules(),
+              deleteToken(),
+              logOutFromGoogle()
+            ]);
+          }
           if (this.mounted) {
             Navigator.pop(context);
           }
@@ -744,13 +760,18 @@ class _DashBoardState extends State<DashBoard> {
           if (this.mounted) {
             buildShowDialog(context);
           }
-          await Future.wait([
-            deleteDB(),
-            prefs.clear(),
-            AwesomeNotifications().cancelAllSchedules(),
-            deleteToken(),
-            logOutFromGoogle()
-          ]);
+          if (kIsWeb) {
+            await Future.wait(
+                [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+          } else {
+            await Future.wait([
+              deleteDB(),
+              prefs.clear(),
+              AwesomeNotifications().cancelAllSchedules(),
+              deleteToken(),
+              logOutFromGoogle()
+            ]);
+          }
           if (this.mounted) {
             Navigator.pop(context);
           }
@@ -867,13 +888,18 @@ class _DashBoardState extends State<DashBoard> {
           if (this.mounted) {
             buildShowDialog(context);
           }
-          await Future.wait([
-            deleteDB(),
-            prefs.clear(),
-            AwesomeNotifications().cancelAllSchedules(),
-            deleteToken(),
-            logOutFromGoogle()
-          ]);
+          if (kIsWeb) {
+            await Future.wait(
+                [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+          } else {
+            await Future.wait([
+              deleteDB(),
+              prefs.clear(),
+              AwesomeNotifications().cancelAllSchedules(),
+              deleteToken(),
+              logOutFromGoogle()
+            ]);
+          }
           if (this.mounted) {
             Navigator.pop(context);
           }
@@ -976,19 +1002,32 @@ class _DashBoardState extends State<DashBoard> {
       await initalDataLoad();
     } while (!initalDataLoaded);
 
-    await Future.wait([
-      getInitialData(),
-      manualUpdateCheck(),
-      checkforScheduledNotifications(),
-      _extractEmail(true),
-      _extractEmail(false),
-      _updateCheck(),
-      getRoomRequest(),
-      fetchSentRequest(),
-      _getImageID(),
-      getMembersData(true),
-      getMembersData(false)
-    ]);
+    if (kIsWeb) {
+      await Future.wait([
+        getInitialData(),
+        _extractEmail(true),
+        _extractEmail(false),
+        getRoomRequest(),
+        fetchSentRequest(),
+        _getImageID(),
+        getMembersData(true),
+        getMembersData(false)
+      ]);
+    } else {
+      await Future.wait([
+        getInitialData(),
+        manualUpdateCheck(),
+        checkforScheduledNotifications(),
+        _extractEmail(true),
+        _extractEmail(false),
+        _updateCheck(),
+        getRoomRequest(),
+        fetchSentRequest(),
+        _getImageID(),
+        getMembersData(true),
+        getMembersData(false)
+      ]);
+    }
   }
 
   @override
@@ -996,79 +1035,83 @@ class _DashBoardState extends State<DashBoard> {
     super.initState();
     getConnectivity();
     executeParallel();
-    AwesomeNotifications()
-        .initialize('resource://drawable/ic_notification_icon', [
-      NotificationChannel(
-        channelKey: "roomID",
-        channelName: "Room",
-        channelDescription: 'Notification channel for Room',
-        defaultColor: Colors.white,
-      ),
-      NotificationChannel(
-          channelKey: "lendenID",
-          channelName: "Len-Den",
-          channelDescription: 'Notification channel for Len-Den',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "requestID",
-          channelName: "Room Request",
-          channelDescription: 'Notification channel for Room Request',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "remainderID",
-          channelName: "Remainder",
-          channelDescription: 'Notification channel for Remainders',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "miscellaneousID",
-          channelName: "Miscellaneous",
-          channelDescription: 'Notification channel for Miscellaneous',
-          defaultColor: Colors.white),
-    ]);
 
-    FirebaseMessaging.instance.getInitialMessage().then(
-      (message) async {
-        if (message != null) {
-          await notificationProcessor(message);
-        }
-      },
-    );
+    if (!kIsWeb) {
+      AwesomeNotifications()
+          .initialize('resource://drawable/ic_notification_icon', [
+        NotificationChannel(
+          channelKey: "roomID",
+          channelName: "Room",
+          channelDescription: 'Notification channel for Room',
+          defaultColor: Colors.white,
+        ),
+        NotificationChannel(
+            channelKey: "lendenID",
+            channelName: "Len-Den",
+            channelDescription: 'Notification channel for Len-Den',
+            defaultColor: Colors.white),
+        NotificationChannel(
+            channelKey: "requestID",
+            channelName: "Room Request",
+            channelDescription: 'Notification channel for Room Request',
+            defaultColor: Colors.white),
+        NotificationChannel(
+            channelKey: "remainderID",
+            channelName: "Remainder",
+            channelDescription: 'Notification channel for Remainders',
+            defaultColor: Colors.white),
+        NotificationChannel(
+            channelKey: "miscellaneousID",
+            channelName: "Miscellaneous",
+            channelDescription: 'Notification channel for Miscellaneous',
+            defaultColor: Colors.white),
+      ]);
 
-    FirebaseMessaging.onMessage.listen(
-      (message) async {
-        if (message.notification != null) {
-          await notificationProcessor(message);
-        }
-      },
-    );
+      FirebaseMessaging.instance.getInitialMessage().then(
+        (message) async {
+          if (message != null) {
+            await notificationProcessor(message);
+          }
+        },
+      );
 
-    FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) async {
-        if (message.notification != null) {
-          await notificationProcessor(message);
-        }
-      },
-    );
+      FirebaseMessaging.onMessage.listen(
+        (message) async {
+          if (message.notification != null) {
+            await notificationProcessor(message);
+          }
+        },
+      );
 
-    AwesomeNotifications().setListeners(
-      onActionReceivedMethod: (ReceivedAction receivedAction) async {
-        NotificationController.onActionReceivedMethod(context, receivedAction);
-      },
-      onNotificationCreatedMethod:
-          (ReceivedNotification receivedNotification) async {
-        NotificationController.onNotificationCreatedMethod(
-            context, receivedNotification);
-      },
-      onNotificationDisplayedMethod:
-          (ReceivedNotification receivedNotification) async {
-        NotificationController.onNotificationDisplayedMethod(
-            context, receivedNotification);
-      },
-      onDismissActionReceivedMethod: (ReceivedAction receivedAction) async {
-        NotificationController.onDismissActionReceivedMethod(
-            context, receivedAction);
-      },
-    );
+      FirebaseMessaging.onMessageOpenedApp.listen(
+        (message) async {
+          if (message.notification != null) {
+            await notificationProcessor(message);
+          }
+        },
+      );
+
+      AwesomeNotifications().setListeners(
+        onActionReceivedMethod: (ReceivedAction receivedAction) async {
+          NotificationController.onActionReceivedMethod(
+              context, receivedAction);
+        },
+        onNotificationCreatedMethod:
+            (ReceivedNotification receivedNotification) async {
+          NotificationController.onNotificationCreatedMethod(
+              context, receivedNotification);
+        },
+        onNotificationDisplayedMethod:
+            (ReceivedNotification receivedNotification) async {
+          NotificationController.onNotificationDisplayedMethod(
+              context, receivedNotification);
+        },
+        onDismissActionReceivedMethod: (ReceivedAction receivedAction) async {
+          NotificationController.onDismissActionReceivedMethod(
+              context, receivedAction);
+        },
+      );
+    }
   }
 
   Future<void> logOutFromGoogle() async {
@@ -1086,7 +1129,7 @@ class _DashBoardState extends State<DashBoard> {
           },
           body: jsonEncode({
             'email': crypto.encrypt(_email.text),
-            'from': crypto.encrypt('android')
+            'from': crypto.encrypt(kIsWeb ? 'web' : 'android')
           }));
     } on Exception catch (_) {}
   }
@@ -2274,16 +2317,19 @@ class _DashBoardState extends State<DashBoard> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: CachedNetworkImage(
+                                          httpHeaders: {
+                                            'Access-Control-Allow-Origin': '*'
+                                          },
                                           imageUrl: crypto
                                                       .decrypt(
                                                           RoomRequest[index]
                                                               ["pic"])
                                                       .length ==
                                                   0
-                                              ? global.driveUrl +
-                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                              : crypto.decrypt(
-                                                  RoomRequest[index]["pic"]),
+                                              ? addCorsinImage(global.driveUrl +
+                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                              : addCorsinImage(crypto.decrypt(
+                                                  RoomRequest[index]["pic"])),
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>
                                               CircularProgressIndicator(
@@ -2617,17 +2663,20 @@ class _DashBoardState extends State<DashBoard> {
                                       Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: CachedNetworkImage(
+                                          httpHeaders: {
+                                            'Access-Control-Allow-Origin': '*'
+                                          },
                                           imageUrl: crypto
                                                       .decrypt(
                                                           sentRoomRequest[index]
                                                               ["pic"])
                                                       .length ==
                                                   0
-                                              ? global.driveUrl +
-                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                              : crypto.decrypt(
+                                              ? addCorsinImage(global.driveUrl +
+                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                              : addCorsinImage(crypto.decrypt(
                                                   sentRoomRequest[index]
-                                                      ["pic"]),
+                                                      ["pic"])),
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>
                                               CircularProgressIndicator(
@@ -3282,7 +3331,7 @@ class _DashBoardState extends State<DashBoard> {
         RoomExpenseCategory: roomExpenseCategory,
       );
     } else {
-      return Summary(
+      return SummaryPage(
         email: _email.text,
         token: _token,
         expenseCategory: expenseCategory,
@@ -3498,10 +3547,13 @@ class _DashBoardState extends State<DashBoard> {
                             children: [
                               isGoogle
                                   ? CachedNetworkImage(
+                                      httpHeaders: {
+                                        'Access-Control-Allow-Origin': '*'
+                                      },
                                       imageUrl: (_currentUser != null
                                           ? _currentUser!.photoUrl.toString()
-                                          : global.driveUrl +
-                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"),
+                                          : addCorsinImage(global.driveUrl +
+                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")),
                                       progressIndicatorBuilder: (context, url,
                                               downloadProgress) =>
                                           CircularProgressIndicator(
@@ -3535,7 +3587,11 @@ class _DashBoardState extends State<DashBoard> {
                                           child: CircularProgressIndicator(),
                                         )
                                       : CachedNetworkImage(
-                                          imageUrl: (global.driveUrl +
+                                          httpHeaders: {
+                                            'Access-Control-Allow-Origin': '*'
+                                          },
+                                          imageUrl: addCorsinImage(global
+                                                  .driveUrl +
                                               (_profilePicID.length == 0
                                                   ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
                                                   : _profilePicID)),
@@ -3654,9 +3710,9 @@ class _DashBoardState extends State<DashBoard> {
                                     picUrl: isGoogle
                                         ? (_currentUser != null
                                             ? _currentUser!.photoUrl.toString()
-                                            : global.driveUrl +
-                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
-                                        : (global.driveUrl +
+                                            : addCorsinImage(global.driveUrl +
+                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"))
+                                        : addCorsinImage(global.driveUrl +
                                             (_profilePicID.length == 0
                                                 ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
                                                 : _profilePicID)),
@@ -3674,84 +3730,90 @@ class _DashBoardState extends State<DashBoard> {
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
                   ),
-                  ListTile(
-                    onTap: () async {
-                      if (this.mounted) {
-                        final dataFrom = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BankTransactions(
-                                    email: _email.text,
-                                    token: _token,
-                                    fromDashboard: bankMessageShowedOnce,
-                                    expenseCategory: expenseCategory,
-                                    investmentCategory: investmentCategory,
-                                    roomExpenseCategory: roomExpenseCategory,
-                                  )),
-                        );
+                  kIsWeb
+                      ? SizedBox()
+                      : ListTile(
+                          onTap: () async {
+                            if (this.mounted) {
+                              final dataFrom = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => BankTransactions(
+                                          email: _email.text,
+                                          token: _token,
+                                          fromDashboard: bankMessageShowedOnce,
+                                          expenseCategory: expenseCategory,
+                                          investmentCategory:
+                                              investmentCategory,
+                                          roomExpenseCategory:
+                                              roomExpenseCategory,
+                                        )),
+                              );
 
-                        if (dataFrom) {
-                          bankMessageShowedOnce = dataFrom;
-                        }
+                              if (dataFrom) {
+                                bankMessageShowedOnce = dataFrom;
+                              }
 
-                        if (this.mounted) {
-                          setState(() {});
-                        }
-                      }
-                    },
-                    leading: Icon(
-                      Icons.payments,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Bank Transactions",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                    trailing: Container(
-                        width: 55,
-                        height: 30,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            border: Border.all(
-                              color: themeProvider.isDarkTheme
-                                  ? Theme.of(context).primaryColor
-                                  : Colors.white,
-                            ),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(12))),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text("Beta",
-                              style:
-                                  TextStyle(fontSize: 13, color: Colors.white)),
-                        )),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      if (this.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ScheduleNotification(
-                                    email: _email.text,
-                                    token: _token,
-                                  )),
-                        );
-                      }
-                    },
-                    leading: Icon(
-                      Icons.notifications_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Remainder",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
-                  isContactPermissionGranted
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            }
+                          },
+                          leading: Icon(
+                            Icons.payments,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          title: Text(
+                            "Bank Transactions",
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                          trailing: Container(
+                              width: 55,
+                              height: 30,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  border: Border.all(
+                                    color: themeProvider.isDarkTheme
+                                        ? Theme.of(context).primaryColor
+                                        : Colors.white,
+                                  ),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(12))),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4.0),
+                                child: Text("Beta",
+                                    style: TextStyle(
+                                        fontSize: 13, color: Colors.white)),
+                              )),
+                        ),
+                  kIsWeb
+                      ? SizedBox()
+                      : ListTile(
+                          onTap: () {
+                            if (this.mounted) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ScheduleNotification(
+                                          email: _email.text,
+                                          token: _token,
+                                        )),
+                              );
+                            }
+                          },
+                          leading: Icon(
+                            Icons.notifications_outlined,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          title: Text(
+                            "Remainder",
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                        ),
+                  !kIsWeb && isContactPermissionGranted
                       ? SizedBox()
                       : ListTile(
                           onTap: () async {
@@ -3803,24 +3865,26 @@ class _DashBoardState extends State<DashBoard> {
                           size: 22,
                         )),
                   ),
-                  ListTile(
-                    onTap: () async {
-                      await Share.share(shareMessage.title +
-                          "\n\n" +
-                          shareMessage.subject +
-                          "\n\n" +
-                          shareMessage.playstore);
-                    },
-                    leading: Icon(
-                      Icons.share,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Share",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
+                  kIsWeb
+                      ? SizedBox()
+                      : ListTile(
+                          onTap: () async {
+                            await Share.share(shareMessage.title +
+                                "\n\n" +
+                                shareMessage.subject +
+                                "\n\n" +
+                                shareMessage.playstore);
+                          },
+                          leading: Icon(
+                            Icons.share,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          title: Text(
+                            "Share",
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                        ),
                   ListTile(
                     onTap: () {
                       if (this.mounted) {
@@ -3859,36 +3923,41 @@ class _DashBoardState extends State<DashBoard> {
                       size: 22,
                     ),
                     title: Text(
-                      _email.text == "rrohitanand3336@gmail.com"
-                          ? "Contact Data"
-                          : "Contact Us",
+                      "Contact Us",
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
                   ),
-                  ListTile(
-                    onTap: rateUs,
-                    leading: Icon(
-                      Icons.star_border_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Rate Us",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
+                  kIsWeb
+                      ? SizedBox()
+                      : ListTile(
+                          onTap: rateUs,
+                          leading: Icon(
+                            Icons.star_border_outlined,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                          title: Text(
+                            "Rate Us",
+                            style: TextStyle(fontSize: 14, color: Colors.white),
+                          ),
+                        ),
                   ListTile(
                     onTap: () async {
                       if (this.mounted) {
                         buildShowDialog(context);
                       }
-                      await Future.wait([
-                        deleteDB(),
-                        prefs.clear(),
-                        AwesomeNotifications().cancelAllSchedules(),
-                        deleteToken(),
-                        logOutFromGoogle()
-                      ]);
+                      if (kIsWeb) {
+                        await Future.wait(
+                            [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+                      } else {
+                        await Future.wait([
+                          deleteDB(),
+                          prefs.clear(),
+                          AwesomeNotifications().cancelAllSchedules(),
+                          deleteToken(),
+                          logOutFromGoogle()
+                        ]);
+                      }
                       if (this.mounted) {
                         Navigator.pop(context);
                       }
@@ -3938,6 +4007,21 @@ class _DashBoardState extends State<DashBoard> {
                       ],
                     ),
                   ),
+                  isItAndroidDevice
+                      ? InkWell(
+                          onTap: () async {
+                            launchUrl(
+                              Uri.parse(
+                                  "https://play.google.com/store/apps/details?id=com.rohit.settlenow"),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                          child: Image(
+                            width: 250,
+                            height: 80,
+                            image: AssetImage('assets/Images/play_store.png'),
+                          ))
+                      : SizedBox()
                 ],
               ),
             ),
@@ -4711,15 +4795,18 @@ class _RoomWidgetState extends State<RoomWidget> {
                                   for (int i = 0; i < length; i++) {
                                     if (i == 0) {
                                       allImages.add(CachedNetworkImage(
+                                        httpHeaders: {
+                                          'Access-Control-Allow-Origin': '*'
+                                        },
                                         imageUrl: crypto
                                                     .decrypt(snapshot.data![i]
                                                         ['pic'])
                                                     .length ==
                                                 0
-                                            ? global.driveUrl +
-                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                            : crypto.decrypt(
-                                                snapshot.data![i]['pic']),
+                                            ? addCorsinImage(global.driveUrl +
+                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                            : addCorsinImage(crypto.decrypt(
+                                                snapshot.data![i]['pic'])),
                                         progressIndicatorBuilder: (context, url,
                                                 downloadProgress) =>
                                             CircularProgressIndicator(
@@ -4754,15 +4841,19 @@ class _RoomWidgetState extends State<RoomWidget> {
                                       allImages.add(Positioned(
                                           left: i * 20,
                                           child: CachedNetworkImage(
+                                            httpHeaders: {
+                                              'Access-Control-Allow-Origin': '*'
+                                            },
                                             imageUrl: crypto
                                                         .decrypt(snapshot
                                                             .data![i]['pic'])
                                                         .length ==
                                                     0
-                                                ? global.driveUrl +
-                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                : crypto.decrypt(
-                                                    snapshot.data![i]['pic']),
+                                                ? addCorsinImage(global
+                                                        .driveUrl +
+                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                                : addCorsinImage(crypto.decrypt(
+                                                    snapshot.data![i]['pic'])),
                                             progressIndicatorBuilder: (context,
                                                     url, downloadProgress) =>
                                                 CircularProgressIndicator(
@@ -4902,14 +4993,17 @@ class _RoomWidgetState extends State<RoomWidget> {
                                   ),
                                   InkWell(
                                     onTap: () async {
-                                      await Share.share("Join " +
-                                          widget
-                                              .RoomData.value[index].roomName +
-                                          "\nRoom Key: " +
-                                          widget.RoomData.value[index].roomKey +
-                                          "\n" +
-                                          widget
-                                              .RoomData.value[index].roomLink);
+                                      if (!kIsWeb) {
+                                        await Share.share("Join " +
+                                            widget.RoomData.value[index]
+                                                .roomName +
+                                            "\nRoom Key: " +
+                                            widget
+                                                .RoomData.value[index].roomKey +
+                                            "\n" +
+                                            widget.RoomData.value[index]
+                                                .roomLink);
+                                      }
                                     },
                                     onLongPress: () async {
                                       Clipboard.setData(ClipboardData(

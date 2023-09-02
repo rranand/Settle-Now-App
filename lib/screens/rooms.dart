@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -724,7 +725,9 @@ class _RoomExpenseState extends State<RoomExpense>
   void initState() {
     super.initState();
     getConnectivity();
-    getContactsFromLocal();
+    if (!kIsWeb) {
+      getContactsFromLocal();
+    }
     executeParallel();
   }
 
@@ -763,19 +766,21 @@ class _RoomExpenseState extends State<RoomExpense>
                               Icons.refresh_outlined,
                               size: 26,
                             )),
-                        IconButton(
-                            onPressed: () async {
-                              await Share.share("Join " +
-                                  widget.roomName +
-                                  "\nRoom Key: " +
-                                  widget.roomKey +
-                                  "\n" +
-                                  widget.roomLink);
-                            },
-                            icon: Icon(
-                              Icons.send,
-                              size: 26,
-                            )),
+                        kIsWeb
+                            ? SizedBox()
+                            : IconButton(
+                                onPressed: () async {
+                                  await Share.share("Join " +
+                                      widget.roomName +
+                                      "\nRoom Key: " +
+                                      widget.roomKey +
+                                      "\n" +
+                                      widget.roomLink);
+                                },
+                                icon: Icon(
+                                  Icons.send,
+                                  size: 26,
+                                )),
                       ],
                     )
                   ],
@@ -1064,10 +1069,13 @@ class _RoomExpenseState extends State<RoomExpense>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               CachedNetworkImage(
+                                httpHeaders: {
+                                  'Access-Control-Allow-Origin': '*'
+                                },
                                 imageUrl: data[index].pic.length == 0
-                                    ? global.driveUrl +
-                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                    : data[index].pic,
+                                    ? addCorsinImage(global.driveUrl +
+                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                    : addCorsinImage(data[index].pic),
                                 progressIndicatorBuilder:
                                     (context, url, downloadProgress) =>
                                         CircularProgressIndicator(
@@ -1186,10 +1194,11 @@ class _RoomExpenseState extends State<RoomExpense>
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CachedNetworkImage(
+                      httpHeaders: {'Access-Control-Allow-Origin': '*'},
                       imageUrl: crypto.decrypt(list[index]['pic']).length == 0
-                          ? global.driveUrl +
-                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                          : crypto.decrypt(list[index]['pic']),
+                          ? addCorsinImage(global.driveUrl +
+                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                          : addCorsinImage(crypto.decrypt(list[index]['pic'])),
                       progressIndicatorBuilder:
                           (context, url, downloadProgress) =>
                               CircularProgressIndicator(
@@ -1342,9 +1351,11 @@ class _RoomExpenseState extends State<RoomExpense>
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               CachedNetworkImage(
+                httpHeaders: {'Access-Control-Allow-Origin': '*'},
                 imageUrl: crypto.decrypt(list[index]['pic']).length == 0
-                    ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                    : crypto.decrypt(list[index]['pic']),
+                    ? addCorsinImage(
+                        global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                    : addCorsinImage(crypto.decrypt(list[index]['pic'])),
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
                 errorWidget: (context, url, error) => Container(
@@ -1927,12 +1938,18 @@ class _RoomExpenseState extends State<RoomExpense>
                   SliverToBoxAdapter(
                     child: InkWell(
                       onTap: () async {
-                        await Share.share("Join " +
-                            widget.roomName +
-                            "\nRoom Key: " +
-                            widget.roomKey +
-                            "\n" +
-                            widget.roomLink);
+                        if (kIsWeb) {
+                          Clipboard.setData(
+                              ClipboardData(text: widget.roomKey));
+                          showToast(context, "Join Key Copied", Icons.check);
+                        } else {
+                          await Share.share("Join " +
+                              widget.roomName +
+                              "\nRoom Key: " +
+                              widget.roomKey +
+                              "\n" +
+                              widget.roomLink);
+                        }
                       },
                       onLongPress: () async {
                         Clipboard.setData(ClipboardData(text: widget.roomKey));
@@ -2306,13 +2323,17 @@ class _RoomExpenseState extends State<RoomExpense>
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               CachedNetworkImage(
+                                httpHeaders: {
+                                  'Access-Control-Allow-Origin': '*'
+                                },
                                 imageUrl: crypto
                                             .decrypt(list[index + 1]['pic'])
                                             .length ==
                                         0
-                                    ? global.driveUrl +
-                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                    : crypto.decrypt(list[index + 1]['pic']),
+                                    ? addCorsinImage(global.driveUrl +
+                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                    : addCorsinImage(
+                                        crypto.decrypt(list[index + 1]['pic'])),
                                 progressIndicatorBuilder:
                                     (context, url, downloadProgress) =>
                                         CircularProgressIndicator(
@@ -2399,14 +2420,17 @@ class _RoomExpenseState extends State<RoomExpense>
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   CachedNetworkImage(
+                                    httpHeaders: {
+                                      'Access-Control-Allow-Origin': '*'
+                                    },
                                     imageUrl: crypto
                                                 .decrypt(list[index + 1]['pic'])
                                                 .length ==
                                             0
-                                        ? global.driveUrl +
-                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                        : crypto
-                                            .decrypt(list[index + 1]['pic']),
+                                        ? addCorsinImage(global.driveUrl +
+                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                        : addCorsinImage(crypto
+                                            .decrypt(list[index + 1]['pic'])),
                                     progressIndicatorBuilder: (context, url,
                                             downloadProgress) =>
                                         CircularProgressIndicator(
@@ -3667,7 +3691,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                     mainAxisAlignment: MainAxisAlignment.start,
                                                                                                     children: [
                                                                                                       CachedNetworkImage(
-                                                                                                        imageUrl: crypto.decrypt(list[index]['pic']).length == 0 ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8" : crypto.decrypt(list[index]['pic']),
+                                                                                                        httpHeaders: {
+                                                                                                          'Access-Control-Allow-Origin': '*'
+                                                                                                        },
+                                                                                                        imageUrl: addCorsinImage(crypto.decrypt(list[index]['pic']).length == 0 ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8" : crypto.decrypt(list[index]['pic'])),
                                                                                                         progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
                                                                                                         errorWidget: (context, url, error) => Container(
                                                                                                           width: 50.0,
@@ -4364,7 +4391,10 @@ class _ExpenseDataState extends State<ExpenseData> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     CachedNetworkImage(
-                                      imageUrl: crypto
+                                      httpHeaders: {
+                                        'Access-Control-Allow-Origin': '*'
+                                      },
+                                      imageUrl: addCorsinImage(crypto
                                                   .decrypt(partialExpense[index]
                                                       ['pic'])
                                                   .length ==
@@ -4372,7 +4402,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           ? global.driveUrl +
                                               "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
                                           : crypto.decrypt(
-                                              partialExpense[index]['pic']),
+                                              partialExpense[index]['pic'])),
                                       progressIndicatorBuilder: (context, url,
                                               downloadProgress) =>
                                           CircularProgressIndicator(

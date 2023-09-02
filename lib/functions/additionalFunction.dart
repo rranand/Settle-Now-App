@@ -46,6 +46,18 @@ Future<Map<String, dynamic>> initPlatformState() async {
   return <String, dynamic>{'id': 'Not Found', 'device': 'Not Found'};
 }
 
+addCorsinImage(String picUrl) {
+  if (kIsWeb) {
+    return picUrl.replaceAll(
+            "https://drive.google.com/uc?id=", global.drivewebUrl) +
+        '?key=' +
+        global.googleApiKey +
+        '&alt=media&source=downloadUrl';
+  } else {
+    return picUrl;
+  }
+}
+
 Future<String> getAppVersion() async {
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
   return await packageInfo.version.toString();
@@ -167,17 +179,30 @@ Future<Map<String, String>> getDataFromNotification(String? payload) async {
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  if (prefs.getString("email") != null &&
-      prefs.getString("name") != null &&
-      prefs.getString("token") != null &&
-      prefs.getString("pushToken") != null) {
-    data["email"] = prefs.getString("email")!;
-    data["token"] = prefs.getString("token")!;
-    data["version"] = await getAppVersion();
-    return data;
+  if (prefs.getString("token") != null) {
+    if (parseJWT(prefs.getString("token")!) != null) {
+      Map<String, dynamic> ma = parseJWT(prefs.getString("token")!);
+      data["email"] = ma["email"];
+      data["token"] = ma["token"];
+      data["version"] = await getAppVersion();
+      return data;
+    } else {
+      return {};
+    }
   } else {
     return {};
   }
+}
+
+Future<bool> checkAndroidInsideWeb() async {
+  if (kIsWeb) {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    WebBrowserInfo webBrowserInfo = await deviceInfo.webBrowserInfo;
+    final userAgent = webBrowserInfo.userAgent.toString().toLowerCase();
+    if (userAgent.contains("android")) return true;
+  }
+
+  return false;
 }
 
 onException(BuildContext context) async {
@@ -222,7 +247,11 @@ createJWT(String email, String input) async {
 parseJWT(String token) {
   try {
     String jwToken = crypto.decrypt(token);
-    return JWT.tryDecode(jwToken)!.payload;
+    var jwtData = JWT.tryDecode(jwToken);
+    if (jwtData == null) {
+      return null;
+    }
+    return JWT.tryDecode(jwtData.toString())!.payload;
   } on Exception catch (_) {
     return null;
   }

@@ -716,8 +716,7 @@ class _BankTransactionsState extends State<BankTransactions> {
               'type':
                   crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
               "members": crypto.encrypt(((addExpenseTo.isEmpty &&
-                      (isClosedany ||
-                      expenseSplitWithExistingMembers))
+                      (isClosedany || expenseSplitWithExistingMembers))
                   ? activeMembersEmail.toString()
                   : addExpenseTo.toString())),
               "date": crypto.encrypt(date)
@@ -1195,6 +1194,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                   MainAxisAlignment.start,
                                               children: [
                                                 CachedNetworkImage(
+                                                  httpHeaders: {
+                                                    'Access-Control-Allow-Origin':
+                                                        '*'
+                                                  },
                                                   imageUrl: crypto
                                                               .decrypt(
                                                                   roomMembers[
