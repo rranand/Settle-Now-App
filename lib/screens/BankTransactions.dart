@@ -26,7 +26,6 @@ class BankTransactions extends StatefulWidget {
   final List<dynamic> expenseCategory;
   final List<dynamic> investmentCategory;
   final List<dynamic> roomExpenseCategory;
-  final bool fromDashboard;
 
   const BankTransactions(
       {Key? key,
@@ -34,8 +33,7 @@ class BankTransactions extends StatefulWidget {
       required this.token,
       required this.expenseCategory,
       required this.investmentCategory,
-      required this.roomExpenseCategory,
-      required this.fromDashboard})
+      required this.roomExpenseCategory})
       : super(key: key);
 
   @override
@@ -64,7 +62,6 @@ class _BankTransactionsState extends State<BankTransactions> {
     new TextEditingController(text: "10000")
   ];
   List<String> transactionType = ["Credit", "Debit"];
-  List<String> allBanks = ["SBI", "ICICI"];
   Set<int> allBanksIndex = Set();
   List<String> transactionMode = [
     "UPI",
@@ -89,7 +86,6 @@ class _BankTransactionsState extends State<BankTransactions> {
   List<dynamic> roomMembers = [];
   List<String> addExpenseTo = [];
   bool isSplitMemberLoading = false;
-  bool openedOnce = false;
   bool filterDialog = false;
   Set<int> filtercategoryIndex = Set();
   bool dataFetched = false;
@@ -231,11 +227,6 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
   }
 
-  checkForBankMessageStatus() async {
-    pref = await SharedPreferences.getInstance();
-    await pref.setBool("isBankMessageLoadedOnce", true);
-  }
-
   Future<void> executeParallel() async {
     dataFetched = false;
     if (this.mounted) {
@@ -263,9 +254,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         kinds: [SmsQueryKind.inbox],
       );
       _messages = messages;
-      allTransactions = await filterSBISMS(_messages);
-      allTransactions.addAll(await filterICICISMS(_messages));
-
+      allTransactions = await filterSMS(_messages);
       allTransactions.sort((b, a) {
         DateTime tempDate_1 =
             new DateFormat("MMM dd yyyy h:mm a").parse(a.date);
@@ -285,77 +274,6 @@ class _BankTransactionsState extends State<BankTransactions> {
     if (this.mounted) {
       setState(() {});
     }
-  }
-
-  void showBankAlert(BuildContext context) {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return StatefulBuilder(builder: (context, setState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.0)),
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
-                child: Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Bank Supported",
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          ),
-                          IconButton(
-                              onPressed: () async {
-                                if (this.mounted) {
-                                  Navigator.pop(context);
-                                }
-                              },
-                              icon: Icon(Icons.close))
-                        ],
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Text(
-                        "State Bank of India",
-                        style: TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Text(
-                        "ICICI",
-                        style: TextStyle(
-                          fontSize: 18,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 12,
-                      ),
-                      Divider(),
-                      SizedBox(
-                        height: 3,
-                      ),
-                      Text(
-                          "* Currently this feature in beta phase, may be transaction will not list properly. We do not store any messages.")
-                    ],
-                  ),
-                ),
-              ),
-            );
-          });
-        });
   }
 
   AddExpense(BuildContext context, String amount, String date) async {
@@ -1589,7 +1507,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         }
       } else {
         allBanksIndex.forEach((abElement) {
-          String bankName = allBanks[abElement];
+          String bankName = global.allBanks[abElement];
 
           if (bankName == element.bank) {
             if ((dateRange.start
@@ -1648,20 +1566,11 @@ class _BankTransactionsState extends State<BankTransactions> {
   void initState() {
     super.initState();
     getConnectivity();
-    checkForBankMessageStatus();
     executeParallel();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.fromDashboard && !openedOnce) {
-      openedOnce = true;
-      if (this.mounted) {
-        setState(() {});
-      }
-      Future.delayed(Duration.zero, () => showBankAlert(context));
-    }
-
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
@@ -1730,10 +1639,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                         width: 250,
                         child: ListView.builder(
                             shrinkWrap: true,
-                            itemCount: allBanks.length,
+                            itemCount: global.allBanks.length,
                             itemBuilder: ((context, index) {
                               return CheckboxListTile(
-                                title: Text(allBanks[index]),
+                                title: Text(global.allBanks[index]),
                                 value: allBanksIndex.contains(index),
                                 onChanged: (_) {
                                   if (allBanksIndex.contains(index)) {

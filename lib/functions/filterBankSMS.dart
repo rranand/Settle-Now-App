@@ -2,16 +2,32 @@ import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:intl/intl.dart';
 
 import '../models/FriendEach.dart';
+import '../contents.dart' as global;
 
-String getAmount(String message, String pattern) {
-  if (!message.contains(pattern)) {
+String getAmount(String message) {
+  List<String> patternList = ["rs.", "rs", "inr", "debited by"];
+  int patternIndex = -1;
+  for (int i = 0; i < patternList.length; i++) {
+    if (message.contains(patternList[i])) {
+      patternIndex = i;
+      break;
+    }
+  }
+
+  if (patternIndex == -1) {
     return "";
   }
-  int index = message.indexOf(pattern) + pattern.length;
+
+  int index = message.indexOf(patternList[patternIndex]) +
+      patternList[patternIndex].length;
   String amount = "";
 
-  if (message[index] == " ") {
-    index++;
+  if (index < message.length) {
+    if (message[index] == " ") {
+      index++;
+    }
+  } else {
+    return "";
   }
 
   for (int i = index; i < message.length && message[i] != " "; i++) {
@@ -19,6 +35,10 @@ String getAmount(String message, String pattern) {
       continue;
     }
     amount += message[i];
+  }
+
+  if (amount.isEmpty) {
+    return "";
   }
 
   if (amount[0] == ".") {
@@ -31,8 +51,203 @@ String getAmount(String message, String pattern) {
   return amount;
 }
 
+String getReferenceNo(String message) {
+  List<String> patternList = [
+    "utr no",
+    "utrno",
+    "utr. no.",
+    "ref. no.",
+    "refno",
+    "ref no",
+    "ref",
+    "utr",
+    "upi:",
+    "imps:",
+    "info:",
+    "transaction number"
+  ];
+  int patternIndex = -1;
+  for (int i = 0; i < patternList.length; i++) {
+    if (message.contains(patternList[i])) {
+      patternIndex = i;
+      break;
+    }
+  }
+
+  if (patternIndex == -1) {
+    return "Unknown";
+  }
+
+  int index = message.indexOf(patternList[patternIndex]) +
+      patternList[patternIndex].length;
+
+  if (index < message.length) {
+    if (message[index] == " ") {
+      index++;
+    }
+  } else {
+    return "Unknown";
+  }
+
+  String refNo = "";
+  for (int i = index;
+      i < message.length && message[i].contains(RegExp(r'[\w\d\*]{1}'));
+      i++) {
+    refNo += message[i];
+  }
+
+  return refNo;
+}
+
+String getTransferTo(String message) {
+  List<String> refNoPattern = [
+    "utr no",
+    "utrno",
+    "utr. no.",
+    "ref. no.",
+    "refno",
+    "ref no",
+    "ref",
+    "utr",
+    "upi:",
+    "imps:",
+    "info:",
+    "transaction number"
+  ];
+
+  List<String> patternList = [
+    " transfer to ",
+    " trf to ",
+    " vpa ",
+    " linked to ",
+    " linked ",
+    " done at ",
+    " at ",
+    " from ",
+    " debit by "
+  ];
+  bool fromReg = false;
+  List<RegExp> regexPatternList = [
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2} & '),
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2};'),
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}.'),
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2},'),
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}')
+  ];
+
+  int patternIndex = -1;
+  for (int i = 0; i < patternList.length; i++) {
+    if (message.contains(patternList[i])) {
+      patternIndex = i;
+      break;
+    }
+  }
+
+  if (patternIndex == -1) {
+    for (int i = 0; i < regexPatternList.length; i++) {
+      if (message.contains(regexPatternList[i])) {
+        patternIndex = i;
+        break;
+      }
+    }
+
+    if (patternIndex == -1) {
+      return "Unknown";
+    }
+    fromReg = true;
+  }
+
+  int index = fromReg
+      ? (message.indexOf(regexPatternList[patternIndex]) +
+          (patternIndex == 0 ? 12 : (patternIndex < 4 ? 10 : 9)))
+      : (message.indexOf(patternList[patternIndex]) +
+          patternList[patternIndex].length);
+
+  if (index < message.length) {
+    if (message[index].contains(" ")) {
+      index++;
+    }
+  } else {
+    return "Unknown";
+  }
+
+  int uptoIndex = -1;
+  if (message.contains("debited")) {
+    if (message.contains("credited.")) {
+      uptoIndex = message.indexOf("credited.");
+    }
+  }
+
+  if (uptoIndex == -1) {
+    for (int i = 0; i < refNoPattern.length; i++) {
+      if (message.contains(refNoPattern[i], index + 1)) {
+        uptoIndex = message.indexOf(refNoPattern[i], index + 1);
+        break;
+      }
+    }
+  }
+
+  String transferTo = "";
+  if (uptoIndex == -1) {
+    for (int i = index;
+        i < message.length &&
+            !message[i].contains(" ") &&
+            !message[i].contains(".");
+        i++) {
+      transferTo += message[i];
+    }
+  } else {
+    for (int i = index;
+        i < message.length &&
+            (uptoIndex != -1 && i < uptoIndex) &&
+            !message[i].contains(RegExp(r'[\(\)\.]'));
+        i++) {
+      transferTo += message[i];
+    }
+  }
+
+  return transferTo;
+}
+
+String getBankName(String message) {
+  for (int i = 0; i < global.allBanks.length; i++) {
+    if (message.contains(global.allBanks[i].toLowerCase())) {
+      return global.allBanks[i];
+    }
+  }
+
+  return "Unknown";
+}
+
+String getPaymentMode(String message, String messageBody) {
+  List<String> patternList = ["UPI", "IMPS", "NEFT", "ATM"];
+
+  for (int i = 0; i < patternList.length; i++) {
+    if (patternList[i] == "ATM") {
+      if (messageBody.contains("withdrawn")) {
+        return patternList[i];
+      }
+    } else if (message.contains(patternList[i].toLowerCase())) {
+      return patternList[i];
+    } else if (messageBody.contains(patternList[i].toLowerCase())) {
+      return patternList[i];
+    }
+  }
+
+  if (messageBody.contains('credit card')) {
+    return "Credit Card";
+  } else if (messageBody.contains('debit card')) {
+    return "Debit Card";
+  }
+
+  return "Unknown";
+}
+
 String capitalizeFirstLetter(String text) {
   text = text.trim();
+  if (text.isEmpty) {
+    return "";
+  }
   String result = text[0].toUpperCase();
 
   for (int i = 1; i < text.length; i++) {
@@ -48,8 +263,7 @@ String capitalizeFirstLetter(String text) {
   return result;
 }
 
-Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
-  String bankName = "SBI";
+Future<List<TransactionEach>> filterSMS(List<SmsMessage> _messages) async {
   List<TransactionEach> Transactions = [];
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
   DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
@@ -59,463 +273,49 @@ Future<List<TransactionEach>> filterSBISMS(List<SmsMessage> _messages) async {
     DateTime dateTime = dateFormat.parse(_messages[i].date.toString());
     String timeStrap = dateFormat_new.format(dateTime);
 
-    if (messageBody.contains("requested") || messageBody.contains("due on")) {
+    if (messageBody.contains("dishonored") ||
+        messageBody.contains("created") ||
+        messageBody.contains("received on") ||
+        messageBody.contains("due of") ||
+        messageBody.contains("rasied by") ||
+        messageBody.contains("mandate") ||
+        messageBody.contains("requested") ||
+        messageBody.contains("due on")) {
       continue;
     }
 
-    if (_messages[i]
-        .sender
-        .toString()
-        .toLowerCase()
-        .contains(bankName.toLowerCase())) {
-      bool isUPI = _messages[i].sender.toString().contains("UPI") ||
-          messageBody.contains("upi");
-      bool isIMPS = _messages[i].sender.toString().contains("IMPS") ||
-          messageBody.contains("imps");
-      bool isNEFT = _messages[i].sender.toString().contains("NEFT") ||
-          messageBody.contains("neft");
-      if (messageBody.contains("debited")) {
-        String amount = getAmount(messageBody, "rs");
-        if (amount.isEmpty) {
-          amount = getAmount(messageBody, "debited by");
-        }
+    String bankName = getBankName(_messages[i].sender.toString().toLowerCase());
 
-        String transactionID = "Unknown";
-        int refNo = -1;
-        String receiver = "";
-
-        try {
-          double.parse(amount);
-        } on FormatException {
-          continue;
-        }
-
-        if (messageBody.contains("ref")) {
-          refNo = messageBody.indexOf("ref");
-          int index = refNo + 3;
-
-          if (messageBody[index] == " ") {
-            index++;
-          }
-          index += 3;
-          transactionID = "";
-
-          for (int j = index;
-              j < messageBody.length &&
-                  messageBody[j] != "." &&
-                  messageBody[j] != " ";
-              j++) {
-            transactionID += messageBody[j];
-          }
-        } else if (messageBody.contains("refno")) {
-          refNo = messageBody.indexOf("refno");
-          int index = refNo + 3;
-
-          if (messageBody[index] == " ") {
-            index++;
-          }
-          index += 3;
-          transactionID = "";
-
-          for (int j = index;
-              j < messageBody.length &&
-                  messageBody[j] != "." &&
-                  messageBody[j] != " ";
-              j++) {
-            transactionID += messageBody[j];
-          }
-        } else if (messageBody.contains("ref no")) {
-          refNo = messageBody.indexOf("ref no");
-          int index = refNo + 3;
-
-          if (messageBody[index] == " ") {
-            index++;
-          }
-          index += 3;
-          transactionID = "";
-
-          for (int j = index;
-              j < messageBody.length &&
-                  messageBody[j] != "." &&
-                  messageBody[j] != " ";
-              j++) {
-            transactionID += messageBody[j];
-          }
-        }
-
-        if (messageBody.contains("transfer to")) {
-          int index = messageBody.indexOf("transfer to") + "transfer to".length;
-          for (int i = index; i < refNo; i++) {
-            receiver += messageBody[i];
-          }
-        } else if (messageBody.contains("trf to")) {
-          int index = messageBody.indexOf("trf to") + "trf to".length;
-          for (int i = index; i < refNo; i++) {
-            receiver += messageBody[i];
-          }
-        } else {
-          receiver = "Unknown";
-        }
-
-        Transactions.add(TransactionEach(
-            amount: amount,
-            date: timeStrap,
-            transactionID: transactionID,
-            receiver: capitalizeFirstLetter(receiver),
-            type: "Debit",
-            bank: bankName,
-            mode: isUPI
-                ? "UPI"
-                : (isIMPS ? "IMPS" : (isNEFT ? "NEFT" : "Unknown"))));
-      } else if (messageBody.contains(RegExp('sbi ([A-Za-z]){3}it card'))) {
-        if (messageBody.contains("transaction number")) {
-          String amount = getAmount(messageBody, "rs");
-          String transactionID = getAmount(messageBody, "transaction number ");
-          String receiver = getAmount(messageBody, "done at ");
-          try {
-            double.parse(amount);
-          } on FormatException {
-            continue;
-          }
-
-          Transactions.add(TransactionEach(
-              amount: amount,
-              date: timeStrap,
-              transactionID: transactionID,
-              receiver: capitalizeFirstLetter(receiver),
-              type: "Debit",
-              bank: bankName,
-              mode: "Debit Card"));
-        }
-      } else if (messageBody.contains("credited")) {
-        String amount = "";
-        if (messageBody.contains("inr ")) {
-          amount = getAmount(messageBody, "inr ");
-        } else {
-          amount = getAmount(messageBody, "rs");
-        }
-        try {
-          double.parse(amount);
-        } on FormatException {
-          continue;
-        }
-        String transactionID = "Unknown";
-
-        if (messageBody.contains("ref no")) {
-          int index = messageBody.indexOf("ref no") + "ref no".length;
-          if (messageBody[index] == " ") {
-            index++;
-          }
-          transactionID = "";
-
-          for (int j = index;
-              j < messageBody.length && messageBody[j] != ")";
-              j++) {
-            transactionID += messageBody[j];
-          }
-        }
-
-        Transactions.add(TransactionEach(
-            amount: amount,
-            date: timeStrap,
-            transactionID: transactionID,
-            receiver: "Self",
-            type: "Credit",
-            bank: bankName,
-            mode: isUPI
-                ? "UPI"
-                : (isIMPS ? "IMPS" : (isNEFT ? "NEFT" : "Unknown"))));
-      } else if (messageBody.contains("withdrawn")) {
-        String amount = getAmount(messageBody, "rs");
-        try {
-          double.parse(amount);
-        } on FormatException {
-          continue;
-        }
-        String transactionID = getAmount(messageBody, "transaction number ");
-        Transactions.add(TransactionEach(
-            amount: amount,
-            date: timeStrap,
-            transactionID: transactionID,
-            receiver: "Self",
-            type: "Debit",
-            bank: bankName,
-            mode: "ATM"));
-      }
-    }
-  }
-  return Transactions;
-}
-
-Future<List<TransactionEach>> filterICICISMS(List<SmsMessage> _messages) async {
-  String bankName = "ICICI";
-  List<TransactionEach> Transactions = [];
-  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
-  DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
-
-  for (int i = 0; i < _messages.length; i++) {
-    String messageBody = _messages[i].body.toString().toLowerCase();
-    DateTime dateTime = dateFormat.parse(_messages[i].date.toString());
-    String timeStrap = dateFormat_new.format(dateTime);
-
-    if (messageBody.contains("requested") || messageBody.contains("due on")) {
+    if (bankName == "Unknown") {
       continue;
     }
+    bool isDebited = messageBody.contains("debited");
+    bool isCredited = messageBody.contains("credited");
 
-    if (_messages[i].sender.toString().contains(bankName)) {
-      bool isUPI = _messages[i].sender.toString().contains("UPI") ||
-          messageBody.contains("upi");
-      bool isIMPS = _messages[i].sender.toString().contains("IMPS") ||
-          messageBody.contains("imps");
-      bool isNEFT = _messages[i].sender.toString().contains("NEFT") ||
-          messageBody.contains("neft");
-
-      if (messageBody.contains("debited")) {
-        String amount = "";
-        if (messageBody.contains("rs ")) {
-          amount = getAmount(messageBody, "rs ");
-        } else if (messageBody.contains("inr ")) {
-          amount = getAmount(messageBody, "inr ");
-        } else if (messageBody.contains("rs")) {
-          amount = getAmount(messageBody, "rs");
-        } else if (messageBody.contains("inr")) {
-          amount = getAmount(messageBody, "inr");
-        }
-
-        try {
-          double.parse(amount);
-        } on FormatException {
-          continue;
-        }
-
-        String transactionID = "Unknown";
-        int refNo = -1;
-        String receiver = "";
-
-        if (messageBody.contains("ref. no.")) {
-          refNo = messageBody.indexOf("ref. no.");
-          int index = refNo + "ref. no.".length;
-
-          if (messageBody[index] == " ") {
-            index++;
-          }
-          index += 3;
-          transactionID = "";
-
-          for (int j = index;
-              j < messageBody.length && messageBody[j] != "-";
-              j++) {
-            transactionID += messageBody[j];
-          }
-
-          if (messageBody.contains("linked")) {
-            int index = messageBody.indexOf("linked") + "linked".length;
-            for (int ind = index;
-                ind < messageBody.length && messageBody[ind] != ".";
-                ind++) {
-              receiver += messageBody[ind];
-            }
-          } else {
-            receiver = "Unknown";
-          }
-        } else if (messageBody.contains("upi:")) {
-          refNo = messageBody.indexOf("upi:");
-          int index = refNo + "upi:".length;
-          transactionID = "";
-
-          for (int j = index;
-              j < messageBody.length && messageBody[j] != ".";
-              j++) {
-            transactionID += messageBody[j];
-          }
-
-          if (messageBody.contains(RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}'))) {
-            int index =
-                messageBody.indexOf(RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}')) + 11;
-            for (int ind = index;
-                ind < messageBody.length && messageBody[ind] != ".";
-                ind++) {
-              receiver += messageBody[ind];
-            }
-            List<String> temp = receiver.split(" ");
-            if (temp.isNotEmpty && temp[temp.length - 1] == "credited") {
-              receiver = "";
-              temp.forEach((element) {
-                if (element != "credited") {
-                  receiver += element + " ";
-                }
-              });
-            }
-          } else {
-            receiver = "Unknown";
-          }
-        } else if (messageBody.contains("imps:")) {
-          refNo = messageBody.indexOf("imps:");
-          int index = refNo + "imps:".length;
-          transactionID = "";
-
-          for (int j = index;
-              j < messageBody.length && messageBody[j] != ".";
-              j++) {
-            transactionID += messageBody[j];
-          }
-
-          receiver = "Unknown";
-        } else {
-          receiver = "Unknown";
-        }
-
-        if (receiver == "Unknown") {
-          if (messageBody.contains("info: ")) {
-            int index = messageBody.indexOf("info: ") + "info: ".length;
-            receiver = "";
-
-            for (int j = index;
-                j < messageBody.length && messageBody[j] != ".";
-                j++) {
-              receiver += messageBody[j];
-            }
-          } else if (messageBody.contains(RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}'))) {
-            receiver = "";
-            int index =
-                messageBody.indexOf(RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}')) + 11;
-            for (int ind = index;
-                ind < messageBody.length && messageBody[ind] != ".";
-                ind++) {
-              receiver += messageBody[ind];
-            }
-            List<String> temp = receiver.split(" ");
-            if (temp.isNotEmpty && temp[temp.length - 1] == "credited") {
-              receiver = "";
-              temp.forEach((element) {
-                if (element != "credited") {
-                  receiver += element + " ";
-                }
-              });
-            }
-          } else {
-            receiver = "Unknown";
-          }
-        }
-
-        Transactions.add(TransactionEach(
-            amount: amount,
-            date: timeStrap,
-            transactionID: transactionID,
-            receiver: capitalizeFirstLetter(receiver),
-            type: "Debit",
-            bank: bankName,
-            mode: isUPI
-                ? "UPI"
-                : (isIMPS ? "IMPS" : (isNEFT ? "NEFT" : "Unknown"))));
-      } else if (messageBody.contains(RegExp('spent on icici bank card'))) {
-        String amount = getAmount(messageBody, "inr ");
-        String transactionID = "Unknown";
-        String receiver = "";
-
-        for (int ind = messageBody.indexOf("at") + 3;
-            ind < messageBody.length && messageBody[ind] != ".";
-            ind++) {
-          receiver += messageBody[ind];
-        }
-
-        try {
-          double.parse(amount);
-        } on FormatException {
-          continue;
-        }
-
-        Transactions.add(TransactionEach(
-            amount: amount,
-            date: timeStrap,
-            transactionID: transactionID,
-            receiver: capitalizeFirstLetter(receiver),
-            type: "Debit",
-            bank: bankName,
-            mode: "Credit Card"));
-      } else if (messageBody.contains("credited")) {
-        String amount = "";
-        if (messageBody.contains("inr ")) {
-          amount = getAmount(messageBody, "inr ");
-        } else {
-          amount = getAmount(messageBody, "rs ");
-        }
-
-        String receiver = "";
-
-        if (messageBody.contains("from ")) {
-          for (int ind = messageBody.indexOf("from ") + 5;
-              ind < messageBody.length && messageBody[ind] != ".";
-              ind++) {
-            receiver += messageBody[ind];
-            if (receiver.length > 2 &&
-                receiver[receiver.length - 1] == "s" &&
-                receiver[receiver.length - 2] == "a" &&
-                receiver[receiver.length - 3] == "h") {
-              receiver = receiver.substring(0, receiver.length - 4);
-              break;
-            }
-          }
-        } else if (messageBody.contains("info:")) {
-          int index = messageBody.indexOf("info:") + "info:".length;
-          if (messageBody[index] == " ") {
-            index++;
-          }
-          for (int j = index;
-              j < messageBody.length &&
-                  messageBody[j] != "." &&
-                  messageBody[j] != " ";
-              j++) {
-            receiver += messageBody[j];
-          }
-        } else {
-          receiver = "Unknown";
-        }
-
-        try {
-          double.parse(amount);
-        } on FormatException {
-          continue;
-        }
-
-        String transactionID = "Unknown";
-        if (isUPI) {
-          transactionID = "";
-          int index = messageBody.indexOf("upi:") + "upi:".length;
-          for (int j = index;
-              j < messageBody.length && messageBody[j] != "-";
-              j++) {
-            transactionID += messageBody[j];
-          }
-        }
-        Transactions.add(TransactionEach(
-            amount: amount,
-            date: timeStrap,
-            transactionID: transactionID,
-            receiver: capitalizeFirstLetter(receiver),
-            type: "Credit",
-            bank: bankName,
-            mode: isUPI
-                ? "UPI"
-                : (isIMPS ? "IMPS" : (isNEFT ? "NEFT" : "Unknown"))));
-      } else if (messageBody.contains("withdrawn")) {
-        String amount = getAmount(messageBody, "rs");
-        try {
-          double.parse(amount);
-        } on FormatException {
-          continue;
-        }
-        String transactionID = getAmount(messageBody, "transaction number ");
-        Transactions.add(TransactionEach(
-            amount: amount,
-            date: timeStrap,
-            transactionID: transactionID,
-            receiver: "Self",
-            type: "Debit",
-            bank: bankName,
-            mode: "ATM"));
-      }
+    if (!(isDebited || isCredited)) {
+      continue;
     }
+    String paymentMode = getPaymentMode(
+        _messages[i].sender.toString().toLowerCase(), messageBody);
+
+    String amount = getAmount(messageBody);
+    try {
+      double.parse(amount);
+    } on FormatException {
+      continue;
+    }
+    String transactionID = getReferenceNo(messageBody);
+    String receiver = getTransferTo(messageBody);
+
+    Transactions.add(TransactionEach(
+        amount: amount,
+        date: timeStrap,
+        transactionID: transactionID,
+        receiver:
+            paymentMode == "ATM" ? "Self" : capitalizeFirstLetter(receiver),
+        type: isDebited ? "Debit" : (isCredited ? "Credit" : "Debit"),
+        bank: bankName,
+        mode: paymentMode));
   }
   return Transactions;
 }

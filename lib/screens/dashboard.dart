@@ -179,7 +179,6 @@ class _DashBoardState extends State<DashBoard> {
   ];
   bool initalDataLoaded = false;
   bool isInvitePremissionProvided = false;
-  bool bankMessageShowedOnce = false;
   bool isSentRoomRequestLoaded = false;
   List<int> from = [];
   List<int> to = [];
@@ -530,11 +529,6 @@ class _DashBoardState extends State<DashBoard> {
               await prefs.getBool("isInvitePremissionProvided")!;
         } else {
           await prefs.setBool("isInvitePremissionProvided", false);
-        }
-
-        if (prefs.getBool("isBankMessageLoadedOnce") != null) {
-          bankMessageShowedOnce =
-              await prefs.getBool("isBankMessageLoadedOnce")!;
         }
       }
 
@@ -3735,13 +3729,12 @@ class _DashBoardState extends State<DashBoard> {
                       : ListTile(
                           onTap: () async {
                             if (this.mounted) {
-                              final dataFrom = await Navigator.push(
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => BankTransactions(
                                           email: _email.text,
                                           token: _token,
-                                          fromDashboard: bankMessageShowedOnce,
                                           expenseCategory: expenseCategory,
                                           investmentCategory:
                                               investmentCategory,
@@ -3749,10 +3742,6 @@ class _DashBoardState extends State<DashBoard> {
                                               roomExpenseCategory,
                                         )),
                               );
-
-                              if (dataFrom != null) {
-                                bankMessageShowedOnce = dataFrom;
-                              }
 
                               if (this.mounted) {
                                 setState(() {});
