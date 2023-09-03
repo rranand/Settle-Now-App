@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -59,17 +60,12 @@ class _BankTransactionsState extends State<BankTransactions> {
   bool expenseSplitWithExistingMembers = false;
   List<TextEditingController> _amountRangeValues = [
     new TextEditingController(text: "0"),
-    new TextEditingController(text: "10000")
+    new TextEditingController(text: "100000")
   ];
   List<String> transactionType = ["Credit", "Debit"];
+  List<String> bankNameFound = [];
+  List<String> transactionMode = [];
   Set<int> allBanksIndex = Set();
-  List<String> transactionMode = [
-    "UPI",
-    "NEFT",
-    "IMPS",
-    "Debit Card",
-    "Credit Card"
-  ];
   int lenDenIndex = 0;
   Set<int> transactionTypeIndex = Set();
   Set<int> transactionModeIndex = Set();
@@ -254,7 +250,10 @@ class _BankTransactionsState extends State<BankTransactions> {
         kinds: [SmsQueryKind.inbox],
       );
       _messages = messages;
-      allTransactions = await filterSMS(_messages);
+      List<dynamic> temp = await filterSMS(_messages);
+      allTransactions = temp[0];
+      bankNameFound = temp[1];
+      transactionMode = temp[2];
       allTransactions.sort((b, a) {
         DateTime tempDate_1 =
             new DateFormat("MMM dd yyyy h:mm a").parse(a.date);
@@ -1507,7 +1506,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         }
       } else {
         allBanksIndex.forEach((abElement) {
-          String bankName = global.allBanks[abElement];
+          String bankName = bankNameFound[abElement];
 
           if (bankName == element.bank) {
             if ((dateRange.start
@@ -1571,24 +1570,28 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   @override
   Widget build(BuildContext context) {
+    double drawerWidth = MediaQuery.of(context).size.width * 0.75;
+    int crossAxisCountFilter = (drawerWidth / 110).round();
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text("Bank Transactions"),
-        actions: [
-          IconButton(
-              onPressed: () {
-                filterDialog = _scaffoldKey.currentState!.isEndDrawerOpen;
-                filterDialog = !filterDialog;
+        actions: bankNameFound.isEmpty
+            ? []
+            : [
+                IconButton(
+                    onPressed: () {
+                      filterDialog = _scaffoldKey.currentState!.isEndDrawerOpen;
+                      filterDialog = !filterDialog;
 
-                if (filterDialog) {
-                  _scaffoldKey.currentState!.openEndDrawer();
-                } else {
-                  _scaffoldKey.currentState!.closeEndDrawer();
-                }
-              },
-              icon: Icon(Icons.filter_alt_outlined))
-        ],
+                      if (filterDialog) {
+                        _scaffoldKey.currentState!.openEndDrawer();
+                      } else {
+                        _scaffoldKey.currentState!.closeEndDrawer();
+                      }
+                    },
+                    icon: Icon(Icons.filter_alt_outlined))
+              ],
       ),
       bottomNavigationBar: isAlertSet
           ? Container(
@@ -1612,359 +1615,451 @@ class _BankTransactionsState extends State<BankTransactions> {
           : null,
       body: Scaffold(
         key: _scaffoldKey,
-        endDrawer: Drawer(
-          backgroundColor: themeProvider.isDarkTheme
-              ? Theme.of(context).scaffoldBackgroundColor
-              : Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height,
-              child: ListView(
-                scrollDirection: Axis.vertical,
-                children: [
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Scrollbar(
-                    radius: Radius.circular(0),
-                    thickness: 0,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+        endDrawer: bankNameFound.isEmpty
+            ? null
+            : Drawer(
+                width: MediaQuery.of(context).size.width * 0.75,
+                backgroundColor: themeProvider.isDarkTheme
+                    ? Theme.of(context).scaffoldBackgroundColor
+                    : Colors.white,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    child: ListView(
+                      scrollDirection: Axis.vertical,
                       children: [
-                        Text(
-                          "Bank",
-                          style: TextStyle(
-                              fontSize: 21, fontWeight: FontWeight.w600),
-                        ),
-                        SizedBox(
-                          width: 250,
-                          height: 200,
-                          child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: global.allBanks.length - 1,
-                              itemBuilder: ((context, index) {
-                                return CheckboxListTile(
-                                  title: Text(global.allBanks[index]),
-                                  value: allBanksIndex.contains(index),
-                                  onChanged: (_) {
-                                    if (allBanksIndex.contains(index)) {
-                                      allBanksIndex.remove(index);
-                                    } else {
-                                      allBanksIndex.add(index);
-                                    }
-
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                );
-                              })),
-                        ),
                         SizedBox(
                           height: 10,
-                        ),
-                        Text(
-                          "Type",
-                          style: TextStyle(
-                              fontSize: 21, fontWeight: FontWeight.w600),
-                        ),
-                        SizedBox(
-                          height: 100,
-                          width: 250,
-                          child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: transactionType.length,
-                              itemBuilder: ((context, index) {
-                                return CheckboxListTile(
-                                  title: Text(transactionType[index]),
-                                  value: transactionTypeIndex.contains(index),
-                                  onChanged: (_) {
-                                    if (transactionTypeIndex.contains(index)) {
-                                      transactionTypeIndex.remove(index);
-                                    } else {
-                                      transactionTypeIndex.add(index);
-                                    }
-
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  controlAffinity:
-                                      ListTileControlAffinity.leading,
-                                );
-                              })),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Mode",
-                          style: TextStyle(
-                              fontSize: 21, fontWeight: FontWeight.w600),
                         ),
                         Scrollbar(
                           radius: Radius.circular(0),
                           thickness: 0,
-                          child: SizedBox(
-                            width: 250,
-                            height: 300,
-                            child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: transactionMode.length,
-                                itemBuilder: ((context, index) {
-                                  return CheckboxListTile(
-                                    title: Text(transactionMode[index]),
-                                    value: transactionModeIndex.contains(index),
-                                    onChanged: (_) {
-                                      if (transactionModeIndex
-                                          .contains(index)) {
-                                        transactionModeIndex.remove(index);
-                                      } else {
-                                        transactionModeIndex.add(index);
-                                      }
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Bank",
+                                style: TextStyle(
+                                    fontSize: 21, fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              SizedBox(
+                                height: 51.5 *
+                                    (bankNameFound.length /
+                                            crossAxisCountFilter)
+                                        .round(),
+                                child: MasonryGridView.count(
+                                    crossAxisCount: crossAxisCountFilter,
+                                    itemCount: bankNameFound.length,
+                                    itemBuilder: ((context, index) {
+                                      return InkWell(
+                                        onTap: () {
+                                          if (allBanksIndex.contains(index)) {
+                                            allBanksIndex.remove(index);
+                                          } else {
+                                            allBanksIndex.add(index);
+                                          }
 
-                                      if (this.mounted) {
-                                        setState(() {});
-                                      }
-                                    },
-                                    controlAffinity:
-                                        ListTileControlAffinity.leading,
-                                  );
-                                })),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(
-                          "Amount",
-                          style: TextStyle(
-                              fontSize: 21, fontWeight: FontWeight.w600),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              child: TextFormField(
-                                controller: _amountRangeValues[0],
-                                keyboardType: TextInputType.number,
-                                textInputAction: TextInputAction.done,
-                                maxLines: 1,
-                                decoration: InputDecoration(
-                                  counterText: "",
-                                  contentPadding: EdgeInsets.all(8.0),
-                                  prefixText: "₹ ",
-                                ),
-                                onChanged: (String s) {
-                                  if (this.mounted) {
-                                    setState(() {
-                                      _amountRangeValues[0].text = s;
-                                      _amountRangeValues[0].selection =
-                                          TextSelection.collapsed(
-                                              offset: _amountRangeValues[0]
-                                                  .text
-                                                  .length);
-                                    });
-                                  }
-                                },
+                                          if (this.mounted) {
+                                            setState(() {});
+                                          }
+                                        },
+                                        child: Card(
+                                            elevation: 1.0,
+                                            color: themeProvider.isDarkTheme
+                                                ? Theme.of(context)
+                                                    .scaffoldBackgroundColor
+                                                : Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  color: allBanksIndex
+                                                          .contains(index)
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : Theme.of(context)
+                                                          .cardColor),
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: Center(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
+                                                child:
+                                                    Text(bankNameFound[index]),
+                                              ),
+                                            )),
+                                      );
+                                    })),
                               ),
-                            ),
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.3,
-                              child: TextFormField(
-                                controller: _amountRangeValues[1],
-                                keyboardType: TextInputType.number,
-                                textInputAction: TextInputAction.done,
-                                maxLines: 1,
-                                decoration: InputDecoration(
-                                  counterText: "",
-                                  contentPadding: EdgeInsets.all(8.0),
-                                  prefixText: "₹ ",
-                                ),
-                                onChanged: (String s) {
-                                  if (this.mounted) {
-                                    setState(() {
-                                      _amountRangeValues[1].text = s;
-                                      _amountRangeValues[1].selection =
-                                          TextSelection.collapsed(
-                                              offset: _amountRangeValues[1]
-                                                  .text
-                                                  .length);
-                                    });
-                                  }
-                                },
+                              SizedBox(
+                                height: 3,
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Date",
-                              style: TextStyle(
-                                  fontSize: 21, fontWeight: FontWeight.w600),
-                            ),
-                            IconButton(
-                                onPressed: pickDateRange,
-                                icon: Icon(Icons.date_range)),
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            SizedBox(
-                              height: 45,
-                              width: 120,
-                              child: InkWell(
-                                onTap: pickDateRange,
-                                child: Card(
-                                  elevation: 0,
-                                  color: Colors.transparent,
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                        color: Theme.of(context)
-                                            .primaryColor
-                                            .withAlpha(95)),
-                                    borderRadius: BorderRadius.circular(7.0),
+                              Divider(),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                "Type",
+                                style: TextStyle(
+                                    fontSize: 21, fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              SizedBox(
+                                height: 50,
+                                child: MasonryGridView.count(
+                                    crossAxisCount: 2,
+                                    itemCount: transactionType.length,
+                                    itemBuilder: ((context, index) {
+                                      return InkWell(
+                                        onTap: () {
+                                          if (transactionTypeIndex
+                                              .contains(index)) {
+                                            transactionTypeIndex.remove(index);
+                                          } else {
+                                            transactionTypeIndex.add(index);
+                                          }
+
+                                          if (this.mounted) {
+                                            setState(() {});
+                                          }
+                                        },
+                                        child: SizedBox(
+                                          width: 90,
+                                          child: Card(
+                                              elevation: 1.0,
+                                              color: themeProvider.isDarkTheme
+                                                  ? Theme.of(context)
+                                                      .scaffoldBackgroundColor
+                                                  : Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: transactionTypeIndex
+                                                            .contains(index)
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor),
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Text(
+                                                      transactionType[index]),
+                                                ),
+                                              )),
+                                        ),
+                                      );
+                                    })),
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Divider(),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                "Mode",
+                                style: TextStyle(
+                                    fontSize: 21, fontWeight: FontWeight.w600),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              SizedBox(
+                                height: 51.5 *
+                                    (transactionMode.length /
+                                            crossAxisCountFilter)
+                                        .round(),
+                                child: MasonryGridView.count(
+                                    crossAxisCount: crossAxisCountFilter,
+                                    itemCount: transactionMode.length,
+                                    itemBuilder: ((context, index) {
+                                      return InkWell(
+                                        onTap: () {
+                                          if (transactionModeIndex
+                                              .contains(index)) {
+                                            transactionModeIndex.remove(index);
+                                          } else {
+                                            transactionModeIndex.add(index);
+                                          }
+
+                                          if (this.mounted) {
+                                            setState(() {});
+                                          }
+                                        },
+                                        child: Card(
+                                            elevation: 1.0,
+                                            color: themeProvider.isDarkTheme
+                                                ? Theme.of(context)
+                                                    .scaffoldBackgroundColor
+                                                : Colors.white,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  color: transactionModeIndex
+                                                          .contains(index)
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : Theme.of(context)
+                                                          .cardColor),
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: Center(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
+                                                child: Text(
+                                                    transactionMode[index]),
+                                              ),
+                                            )),
+                                      );
+                                    })),
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Divider(),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                "Amount",
+                                style: TextStyle(
+                                    fontSize: 21, fontWeight: FontWeight.w600),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: TextFormField(
+                                      controller: _amountRangeValues[0],
+                                      keyboardType: TextInputType.number,
+                                      textInputAction: TextInputAction.done,
+                                      maxLines: 1,
+                                      decoration: InputDecoration(
+                                        counterText: "",
+                                        contentPadding: EdgeInsets.all(8.0),
+                                        prefixText: "₹ ",
+                                      ),
+                                      onChanged: (String s) {
+                                        if (this.mounted) {
+                                          setState(() {
+                                            _amountRangeValues[0].text = s;
+                                            _amountRangeValues[0].selection =
+                                                TextSelection.collapsed(
+                                                    offset:
+                                                        _amountRangeValues[0]
+                                                            .text
+                                                            .length);
+                                          });
+                                        }
+                                      },
+                                    ),
                                   ),
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(6.0),
-                                      child: Text(
-                                        DateFormat('dd/MMM/yyyy')
-                                            .format(dateRange.start),
-                                        style: TextStyle(fontSize: 16),
+                                  SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: TextFormField(
+                                      controller: _amountRangeValues[1],
+                                      keyboardType: TextInputType.number,
+                                      textInputAction: TextInputAction.done,
+                                      maxLines: 1,
+                                      decoration: InputDecoration(
+                                        counterText: "",
+                                        contentPadding: EdgeInsets.all(8.0),
+                                        prefixText: "₹ ",
+                                      ),
+                                      onChanged: (String s) {
+                                        if (this.mounted) {
+                                          setState(() {
+                                            _amountRangeValues[1].text = s;
+                                            _amountRangeValues[1].selection =
+                                                TextSelection.collapsed(
+                                                    offset:
+                                                        _amountRangeValues[1]
+                                                            .text
+                                                            .length);
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Divider(),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Date",
+                                    style: TextStyle(
+                                        fontSize: 21,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  IconButton(
+                                      onPressed: pickDateRange,
+                                      icon: Icon(Icons.date_range)),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  InkWell(
+                                    onTap: pickDateRange,
+                                    child: Card(
+                                      elevation: 1,
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: Theme.of(context).cardColor),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: Text(
+                                            DateFormat('dd MMM, yyyy')
+                                                .format(dateRange.start),
+                                            style: TextStyle(fontSize: 18),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: 35,
-                              child: Text("-", style: TextStyle(fontSize: 16)),
-                            ),
-                            SizedBox(
-                              height: 45,
-                              width: 120,
-                              child: Card(
-                                color: Colors.transparent,
-                                elevation: 0,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      color: Theme.of(context)
-                                          .primaryColor
-                                          .withAlpha(95)),
-                                  borderRadius: BorderRadius.circular(7.0),
-                                ),
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(6.0),
-                                    child: InkWell(
-                                      onTap: pickDateRange,
-                                      child: Text(
-                                          DateFormat('dd/MMM/yyyy')
-                                              .format(dateRange.end),
-                                          style: TextStyle(fontSize: 16)),
+                                  SizedBox(
+                                    height: 35,
+                                    child: Text("-",
+                                        style: TextStyle(fontSize: 18)),
+                                  ),
+                                  Card(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    elevation: 1,
+                                    shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          color: Theme.of(context).cardColor),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(12.0),
+                                        child: InkWell(
+                                          onTap: pickDateRange,
+                                          child: Text(
+                                              DateFormat('dd MMM, yyyy')
+                                                  .format(dateRange.end),
+                                              style: TextStyle(fontSize: 18)),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ),
-                          ],
+                              SizedBox(
+                                height: 10,
+                              ),
+                            ],
+                          ),
                         ),
                         SizedBox(
-                          height: 10,
+                          height: 18,
+                        ),
+                        SizedBox(
+                          height: 45,
+                          child: OutlinedButton(
+                            child: Text(
+                              "Apply",
+                              style: TextStyle(
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            onPressed: () async {
+                              showFilterResult = true;
+                              _scaffoldKey.currentState!.closeEndDrawer();
+                              await getFilterResult();
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(13.0),
+                              ),
+                              side: BorderSide(
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15,
+                        ),
+                        SizedBox(
+                          height: 45,
+                          child: OutlinedButton(
+                            child: Text(
+                              "Clear Filter",
+                              style: TextStyle(
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(13.0),
+                              ),
+                              side: BorderSide(
+                                  color: Theme.of(context).primaryColor),
+                            ),
+                            onPressed: () {
+                              showFilterResult = false;
+                              transactionModeIndex.clear();
+                              transactionTypeIndex.clear();
+                              _amountRangeValues[0].text = "0";
+                              _amountRangeValues[1].text = "10000";
+                              dateRange = DateTimeRange(
+                                  start: new DateTime(DateTime.now().year,
+                                      DateTime.now().month),
+                                  end: DateTime.now());
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(
-                    height: 18,
-                  ),
-                  SizedBox(
-                    height: 45,
-                    child: OutlinedButton(
-                      child: Text(
-                        "Apply",
-                        style: TextStyle(
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      onPressed: () async {
-                        showFilterResult = true;
-                        _scaffoldKey.currentState!.closeEndDrawer();
-                        await getFilterResult();
-                        if (this.mounted) {
-                          setState(() {});
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13.0),
-                        ),
-                        side: BorderSide(color: Theme.of(context).primaryColor),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  SizedBox(
-                    height: 45,
-                    child: OutlinedButton(
-                      child: Text(
-                        "Clear Filter",
-                        style: TextStyle(
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13.0),
-                        ),
-                        side: BorderSide(color: Theme.of(context).primaryColor),
-                      ),
-                      onPressed: () {
-                        showFilterResult = false;
-                        transactionModeIndex.clear();
-                        transactionTypeIndex.clear();
-                        _amountRangeValues[0].text = "0";
-                        _amountRangeValues[1].text = "10000";
-                        dateRange = DateTimeRange(
-                            start: new DateTime(
-                                DateTime.now().year, DateTime.now().month),
-                            end: DateTime.now());
-                        if (this.mounted) {
-                          setState(() {});
-                        }
-                      },
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
         body: WillPopScope(
           onWillPop: () {
             Navigator.pop(context, true);

@@ -3774,7 +3774,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                 child: Icon(
                                                                                                   expenseSplitWithExistingMembers ? Icons.toggle_off : Icons.toggle_on,
                                                                                                   size: 40,
-                                                                                                  color: !expenseSplitWithExistingMembers ? null : Theme.of(context).primaryColor,
+                                                                                                  color: expenseSplitWithExistingMembers ? null : Theme.of(context).primaryColor,
                                                                                                 ),
                                                                                               )
                                                                                             ],

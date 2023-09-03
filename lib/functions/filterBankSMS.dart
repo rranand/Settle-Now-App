@@ -181,26 +181,17 @@ String getBankName(String message) {
 }
 
 String getPaymentMode(String message, String messageBody) {
-  List<String> patternList = ["UPI", "IMPS", "NEFT", "ATM"];
-
-  for (int i = 0; i < patternList.length; i++) {
-    if (patternList[i] == "ATM") {
+  for (int i = 0; i < global.paymentMode.length; i++) {
+    if (global.paymentMode[i] == "ATM") {
       if (messageBody.contains("withdrawn")) {
-        return patternList[i];
+        return global.paymentMode[i];
       }
-    } else if (message.contains(patternList[i].toLowerCase())) {
-      return patternList[i];
-    } else if (messageBody.contains(patternList[i].toLowerCase())) {
-      return patternList[i];
+    } else if (message.contains(global.paymentMode[i].toLowerCase())) {
+      return global.paymentMode[i];
+    } else if (messageBody.contains(global.paymentMode[i].toLowerCase())) {
+      return global.paymentMode[i];
     }
   }
-
-  if (messageBody.contains('credit card')) {
-    return "Credit Card";
-  } else if (messageBody.contains('debit card')) {
-    return "Debit Card";
-  }
-
   return "Unknown";
 }
 
@@ -224,8 +215,10 @@ String capitalizeFirstLetter(String text) {
   return result;
 }
 
-Future<List<TransactionEach>> filterSMS(List<SmsMessage> _messages) async {
+Future<List<dynamic>> filterSMS(List<SmsMessage> _messages) async {
   List<TransactionEach> Transactions = [];
+  Set<String> bankNameFound = new Set();
+  Set<String> paymentModeFound = new Set();
   DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
   DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
 
@@ -266,6 +259,8 @@ Future<List<TransactionEach>> filterSMS(List<SmsMessage> _messages) async {
     } on FormatException {
       continue;
     }
+    paymentModeFound.add(paymentMode);
+    bankNameFound.add(bankName);
     String transactionID = getReferenceNo(messageBody);
     String receiver = getTransferTo(messageBody);
 
@@ -279,5 +274,6 @@ Future<List<TransactionEach>> filterSMS(List<SmsMessage> _messages) async {
         bank: bankName,
         mode: paymentMode));
   }
-  return Transactions;
+
+  return [Transactions, bankNameFound.toList(), paymentModeFound.toList()];
 }

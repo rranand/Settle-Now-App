@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -437,7 +438,9 @@ class _ExpensesState extends State<Expenses> {
                   ? SizedBox(
                       height: 6,
                     )
-                  : SizedBox(height: 25,),
+                  : SizedBox(
+                      height: 25,
+                    ),
               isEdited
                   ? Container(
                       width: 55,
@@ -684,43 +687,72 @@ class _ExpensesState extends State<Expenses> {
                     thickness: 5.5,
                     child: SizedBox(
                       height: 570,
-                      child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: category.length + 1,
-                          itemBuilder: ((context, index) {
-                            if (category.length == index) {
-                              return CheckboxListTile(
-                                title: Text("Room"),
-                                value: isRoomFilter,
-                                onChanged: (_) {
-                                  isRoomFilter = !isRoomFilter;
-                                  if (this.mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                              );
-                            } else {
-                              return CheckboxListTile(
-                                title: Text(category[index]),
-                                value: filtercategoryIndex.contains(index),
-                                onChanged: (_) {
-                                  if (filtercategoryIndex.contains(index)) {
-                                    filtercategoryIndex.remove(index);
-                                  } else {
-                                    filtercategoryIndex.add(index);
-                                  }
+                      child: MasonryGridView.count(
+                        crossAxisCount: 2,
+                        itemCount: category.length + 1,
+                        itemBuilder: (context, index) {
+                          if (category.length == index) {
+                            return InkWell(
+                              onTap: () {
+                                isRoomFilter = !isRoomFilter;
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              child: Card(
+                                elevation: 1.0,
+                                color: themeProvider.isDarkTheme
+                                    ? Theme.of(context).scaffoldBackgroundColor
+                                    : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: isRoomFilter
+                                          ? Theme.of(context).primaryColor
+                                          : Theme.of(context).cardColor),
+                                  borderRadius: BorderRadius.circular(15.0),
+                                ),
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text("Room"),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          return InkWell(
+                            onTap: () {
+                              if (filtercategoryIndex.contains(index)) {
+                                filtercategoryIndex.remove(index);
+                              } else {
+                                filtercategoryIndex.add(index);
+                              }
 
-                                  if (this.mounted) {
-                                    setState(() {});
-                                  }
-                                },
-                                controlAffinity:
-                                    ListTileControlAffinity.leading,
-                              );
-                            }
-                          })),
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            child: Card(
+                              color: themeProvider.isDarkTheme
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: filtercategoryIndex.contains(index)
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).cardColor),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Text(category[index]),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   SizedBox(
@@ -1129,9 +1161,9 @@ class _ExpensesState extends State<Expenses> {
                                                                         ),
                                                                         borderRadius: BorderRadius.all(Radius.circular(12))),
                                                                     child: Padding(
-                                                                      padding:
-                                                                          const EdgeInsets.all(
-                                                                              4.0),
+                                                                      padding: const EdgeInsets
+                                                                          .all(
+                                                                          4.0),
                                                                       child: Text(
                                                                           "Edited",
                                                                           style: TextStyle(
@@ -1341,8 +1373,9 @@ class _ExpensesState extends State<Expenses> {
                                                                           ),
                                                                           borderRadius: BorderRadius.all(Radius.circular(12))),
                                                                       child: Padding(
-                                                                        padding:
-                                                                            const EdgeInsets.all(4.0),
+                                                                        padding: const EdgeInsets
+                                                                            .all(
+                                                                            4.0),
                                                                         child: Text(
                                                                             "Edited",
                                                                             style:
@@ -1582,7 +1615,7 @@ class _ExpensesState extends State<Expenses> {
                                                                 child: Padding(
                                                                   padding:
                                                                       const EdgeInsets
-                                                                              .all(
+                                                                          .all(
                                                                           4.0),
                                                                   child: Text(
                                                                       "Edited",
@@ -1796,7 +1829,7 @@ class _ExpensesState extends State<Expenses> {
                                                                 child: Padding(
                                                                   padding:
                                                                       const EdgeInsets
-                                                                              .all(
+                                                                          .all(
                                                                           4.0),
                                                                   child: Text(
                                                                       "Edited",
@@ -2068,7 +2101,8 @@ class _ExpensesState extends State<Expenses> {
                                               initialDate: expenseDate,
                                               firstDate: DateTime(2018),
                                               lastDate: DateTime.now(),
-                                              borderRadius: BorderRadius.circular(16.0),
+                                              borderRadius:
+                                                  BorderRadius.circular(16.0),
                                             );
 
                                             if (dateTime != null) {

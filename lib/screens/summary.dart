@@ -249,10 +249,21 @@ class _SummaryPageState extends State<SummaryPage> {
     }
   }
 
+  fillYear() {
+    DateTime dt = new DateTime.now();
+    for (int i = dt.year; i >= 2022; i--) {
+      Year.add(i.toString());
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     getConnectivity();
+    fillYear();
     scrollController.addListener(_scrollListener);
     _executeParallelRefresh();
   }
@@ -375,13 +386,14 @@ class _SummaryPageState extends State<SummaryPage> {
                               },
                               child: Card(
                                 elevation: 1.0,
-                                shadowColor: Theme.of(context).primaryColor,
-                                color: monthIndex.contains(index)
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context).scaffoldBackgroundColor,
+                                color: themeProvider.isDarkTheme
+                                    ? Theme.of(context).scaffoldBackgroundColor
+                                    : Colors.white,
                                 shape: RoundedRectangleBorder(
                                   side: BorderSide(
-                                      color: Theme.of(context).cardColor),
+                                      color: monthIndex.contains(index)
+                                          ? Theme.of(context).primaryColor
+                                          : Theme.of(context).cardColor),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 child: Center(
@@ -391,12 +403,9 @@ class _SummaryPageState extends State<SummaryPage> {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
-                                        color: monthIndex.contains(index)
+                                        color: themeProvider.isDarkTheme
                                             ? Colors.white
-                                            : Theme.of(context)
-                                                .textTheme
-                                                .bodySmall!
-                                                .color,
+                                            : Colors.black,
                                       ),
                                     ),
                                   ),
@@ -433,13 +442,14 @@ class _SummaryPageState extends State<SummaryPage> {
                               },
                               child: Card(
                                 elevation: 1.0,
-                                shadowColor: Theme.of(context).primaryColor,
-                                color: yearIndex.contains(index)
-                                    ? Theme.of(context).primaryColor
-                                    : Theme.of(context).scaffoldBackgroundColor,
+                                color: themeProvider.isDarkTheme
+                                    ? Theme.of(context).scaffoldBackgroundColor
+                                    : Colors.white,
                                 shape: RoundedRectangleBorder(
                                   side: BorderSide(
-                                      color: Theme.of(context).cardColor),
+                                      color: yearIndex.contains(index)
+                                          ? Theme.of(context).primaryColor
+                                          : Theme.of(context).cardColor),
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 child: Center(
@@ -449,12 +459,9 @@ class _SummaryPageState extends State<SummaryPage> {
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
-                                        color: yearIndex.contains(index)
+                                        color: themeProvider.isDarkTheme
                                             ? Colors.white
-                                            : Theme.of(context)
-                                                .textTheme
-                                                .bodySmall!
-                                                .color,
+                                            : Colors.black,
                                       ),
                                     ),
                                   ),

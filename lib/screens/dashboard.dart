@@ -3464,7 +3464,7 @@ class _DashBoardState extends State<DashBoard> {
                       BottomNavigationBarItem(
                         icon: Stack(children: [
                           Icon(
-                            Icons.notification_add_outlined,
+                            Icons.notifications_outlined,
                             size: 27,
                           ),
                           RoomRequest.isNotEmpty
