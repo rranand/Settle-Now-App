@@ -291,7 +291,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  void ContactPermissionGranted() async {
+  Future<void> ContactPermissionGranted() async {
     isContactPermissionGranted = await Permission.contacts.isGranted;
 
     if (this.mounted) {
@@ -584,11 +584,19 @@ class _DashBoardState extends State<DashBoard> {
           buildShowDialog(context);
         }
         if (kIsWeb) {
-          await Future.wait([prefs.clear(), deleteToken(), logOutFromGoogle()]);
+          await Future.wait([
+            prefs.remove("token"),
+            prefs.remove("__token"),
+            prefs.remove("___token"),
+            deleteToken(),
+            logOutFromGoogle()
+          ]);
         } else {
           await Future.wait([
             deleteDB(),
-            prefs.clear(),
+            prefs.remove("token"),
+            prefs.remove("__token"),
+            prefs.remove("___token"),
             AwesomeNotifications().cancelAllSchedules(),
             deleteToken(),
             logOutFromGoogle()
@@ -690,12 +698,19 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           if (kIsWeb) {
-            await Future.wait(
-                [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+            await Future.wait([
+              prefs.remove("token"),
+              prefs.remove("__token"),
+              prefs.remove("___token"),
+              deleteToken(),
+              logOutFromGoogle()
+            ]);
           } else {
             await Future.wait([
               deleteDB(),
-              prefs.clear(),
+              prefs.remove("token"),
+              prefs.remove("__token"),
+              prefs.remove("___token"),
               AwesomeNotifications().cancelAllSchedules(),
               deleteToken(),
               logOutFromGoogle()
@@ -755,12 +770,19 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           if (kIsWeb) {
-            await Future.wait(
-                [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+            await Future.wait([
+              prefs.remove("token"),
+              prefs.remove("__token"),
+              prefs.remove("___token"),
+              deleteToken(),
+              logOutFromGoogle()
+            ]);
           } else {
             await Future.wait([
               deleteDB(),
-              prefs.clear(),
+              prefs.remove("token"),
+              prefs.remove("__token"),
+              prefs.remove("___token"),
               AwesomeNotifications().cancelAllSchedules(),
               deleteToken(),
               logOutFromGoogle()
@@ -883,12 +905,19 @@ class _DashBoardState extends State<DashBoard> {
             buildShowDialog(context);
           }
           if (kIsWeb) {
-            await Future.wait(
-                [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+            await Future.wait([
+              prefs.remove("token"),
+              prefs.remove("__token"),
+              prefs.remove("___token"),
+              deleteToken(),
+              logOutFromGoogle()
+            ]);
           } else {
             await Future.wait([
               deleteDB(),
-              prefs.clear(),
+              prefs.remove("token"),
+              prefs.remove("__token"),
+              prefs.remove("___token"),
               AwesomeNotifications().cancelAllSchedules(),
               deleteToken(),
               logOutFromGoogle()
@@ -1014,6 +1043,7 @@ class _DashBoardState extends State<DashBoard> {
         checkforScheduledNotifications(),
         _extractEmail(true),
         _extractEmail(false),
+        ContactPermissionGranted(),
         _updateCheck(),
         getRoomRequest(),
         fetchSentRequest(),
@@ -3936,12 +3966,19 @@ class _DashBoardState extends State<DashBoard> {
                         buildShowDialog(context);
                       }
                       if (kIsWeb) {
-                        await Future.wait(
-                            [prefs.clear(), deleteToken(), logOutFromGoogle()]);
+                        await Future.wait([
+                          prefs.remove("token"),
+                          prefs.remove("__token"),
+                          prefs.remove("___token"),
+                          deleteToken(),
+                          logOutFromGoogle()
+                        ]);
                       } else {
                         await Future.wait([
                           deleteDB(),
-                          prefs.clear(),
+                          prefs.remove("token"),
+                          prefs.remove("__token"),
+                          prefs.remove("___token"),
                           AwesomeNotifications().cancelAllSchedules(),
                           deleteToken(),
                           logOutFromGoogle()

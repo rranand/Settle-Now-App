@@ -94,7 +94,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> deleteTempData() async {
-    prefs.clear();
+    await Future.wait([
+      prefs.remove("token"),
+      prefs.remove("__token"),
+      prefs.remove("___token")
+    ]);
     if (!kIsWeb) {
       await AwesomeNotifications().cancelAllSchedules();
       String path = await getDBFilePath('contact_data.db');

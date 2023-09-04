@@ -1,14 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
-import 'package:settlenow/models/ContactEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
 import '../others/themes.dart';
@@ -102,188 +100,10 @@ class _ContactUsState extends State<ContactUs> {
     }
   }
 
-  Future<List<ContactEach>> fetchContactData() async {
-    if (!isDeviceConnected) {
-      return [];
-    }
-    List<ContactEach> contactData = [];
-    try {
-      final response = await http.patch(Uri.parse(global.url + 'contact'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-          }));
-
-      if (response.statusCode == 200) {
-        List<dynamic> tempData = jsonDecode(response.body)['data'];
-        for (int i = 0; i < tempData.length; i++) {
-          contactData.add(ContactEach.fromJson(tempData[i]));
-        }
-      }
-    } on Exception catch (_) {
-      if (this.mounted) {
-        await onException(context);
-      }
-    }
-    return contactData;
-  }
-
   @override
   void initState() {
     super.initState();
     getConnectivity();
-  }
-
-  Widget contactData() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      child: FutureBuilder<List<ContactEach>>(
-        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-          if (snapshot.hasData) {
-            return SingleChildScrollView(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height - 100,
-                child: snapshot.data!.isEmpty
-                    ? ListView(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        children: [
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height - 100,
-                            child: Center(
-                              child: Text(
-                                "No Data Found",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      )
-                    : ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return Card(
-                            elevation: 1.0,
-                            clipBehavior: Clip.antiAlias,
-                            shadowColor: Theme.of(context).primaryColor,
-                            color: Theme.of(context).scaffoldBackgroundColor,
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                  color: Theme.of(context)
-                                      .primaryColor
-                                      .withAlpha(95)),
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    snapshot.data![index].subject,
-                                    style: TextStyle(
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  SizedBox(
-                                    height: 8,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          CachedNetworkImage(
-                                            httpHeaders: {
-                                              'Access-Control-Allow-Origin': '*'
-                                            },
-                                            imageUrl: snapshot.data![index].pic
-                                                        .length ==
-                                                    0
-                                                ? addCorsinImage(global
-                                                        .driveUrl +
-                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
-                                                : addCorsinImage(
-                                                    snapshot.data![index].pic),
-                                            progressIndicatorBuilder: (context,
-                                                    url, downloadProgress) =>
-                                                CircularProgressIndicator(
-                                                    value: downloadProgress
-                                                        .progress),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    Container(
-                                              width: 28.0,
-                                              height: 28.0,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                    image: AssetImage(
-                                                        'assets/Images/unknown.jpeg'),
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    Container(
-                                              width: 28.0,
-                                              height: 28.0,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text(snapshot.data![index].name,
-                                              style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w600)),
-                                        ],
-                                      ),
-                                      Text(snapshot.data![index].date,
-                                          style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w600)),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 8,
-                                  ),
-                                  Text(
-                                    snapshot.data![index].message,
-                                    style: TextStyle(
-                                        fontSize: 19,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
-              ),
-            );
-          } else if (snapshot.hasError) {
-            return SizedBox();
-          } else {
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-        future: fetchContactData(),
-      ),
-    );
   }
 
   Widget contactForm() {

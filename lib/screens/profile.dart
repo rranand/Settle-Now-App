@@ -88,7 +88,11 @@ class _ProfileState extends State<Profile> {
           showToast(context, responseMessage, Icons.warning);
         } else {
           prefs = await SharedPreferences.getInstance();
-          await prefs.clear();
+          await Future.wait([
+            prefs.remove("token"),
+            prefs.remove("__token"),
+            prefs.remove("___token")
+          ]);
 
           if (this.mounted) {
             Navigator.pushAndRemoveUntil(
