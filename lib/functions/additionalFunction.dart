@@ -185,10 +185,11 @@ Future<Map<String, String>> getDataFromNotification(String? payload) async {
   }
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  if (prefs.getString("token") != null) {
-    if (parseJWT(prefs.getString("token")!) != null) {
-      Map<String, dynamic> ma = parseJWT(prefs.getString("token")!);
+  var tokenData = await prefs.getString("token");
+  if (tokenData != null) {
+    var parseTokenData = parseJWT(tokenData.toString());
+    if (parseTokenData != null) {
+      Map<String, dynamic> ma = parseTokenData;
       data["email"] = ma["email"];
       data["token"] = ma["token"];
       data["version"] = await getAppVersion();

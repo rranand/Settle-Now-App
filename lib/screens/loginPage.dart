@@ -123,24 +123,24 @@ class _LoginPageState extends State<LoginPage> {
     _deviceData = await initPlatformState();
     isItAndroidDevice = await checkAndroidInsideWeb();
 
-    if (prefs.getBool('darkTheme') != null) {
-      darkTheme = prefs.getBool('darkTheme')!;
+    if (await prefs.getBool('darkTheme') != null) {
+      darkTheme = await prefs.getBool('darkTheme')!;
     } else {
       darkTheme =
           (Brightness.dark == MediaQuery.of(context).platformBrightness);
-      prefs.setBool('darkTheme', darkTheme);
+      await prefs.setBool('darkTheme', darkTheme);
     }
 
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
 
-    if (prefs.getBool("isOnBoardingCompleted") != null) {
+    if (await prefs.getBool("isOnBoardingCompleted") != null) {
       isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
     } else {
       await prefs.setBool("isOnBoardingCompleted", false);
     }
 
-    var tempData = prefs.getString("token");
+    var tempData = await prefs.getString("token");
     if (tempData == null) {
       await deleteTempData();
       if (this.mounted) {
@@ -309,7 +309,7 @@ class _LoginPageState extends State<LoginPage> {
                                   _deviceData['id'] +
                                   "#" +
                                   DateTime.now().toString());
-                          prefs.setBool("isGoogle", true);
+                          await prefs.setBool("isGoogle", true);
                           Map<String, String> jsonInputData = {
                             "email": (user?.email).toString(),
                             "name": (user?.displayName).toString(),
@@ -318,7 +318,7 @@ class _LoginPageState extends State<LoginPage> {
                           String jwToken = await createJWT(
                               (user?.email).toString(),
                               jsonEncode(jsonInputData));
-                          prefs.setString("token", jwToken);
+                          await prefs.setString("token", jwToken);
 
                           var resp = null;
                           if (kIsWeb) {

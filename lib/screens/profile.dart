@@ -136,8 +136,8 @@ class _ProfileState extends State<Profile> {
     }
 
     prefs = await SharedPreferences.getInstance();
-    _phoneNo.text = crypto.decrypt(prefs.getString("__token")!);
-    createdOn = crypto.decrypt(prefs.getString("___token")!);
+    _phoneNo.text = crypto.decrypt(await prefs.getString("__token")!);
+    createdOn = crypto.decrypt(await prefs.getString("___token")!);
     if (_phoneNo.text.isNotEmpty) {
       havePhoneNo = true;
     }

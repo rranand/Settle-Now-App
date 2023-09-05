@@ -142,7 +142,7 @@ class _OtpNameState extends State<OtpName> {
       );
     }
 
-    if (prefs.getBool("isOnBoardingCompleted") != null) {
+    if (await prefs.getBool("isOnBoardingCompleted") != null) {
       isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
     } else {
       await prefs.setBool("isOnBoardingCompleted", false);
@@ -191,8 +191,8 @@ class _OtpNameState extends State<OtpName> {
         String jwToken =
             await createJWT(widget.email, jsonEncode(jsonInputData));
 
-        prefs.setString("token", jwToken);
-        prefs.setBool("isGoogle", false);
+        await prefs.setString("token", jwToken);
+        await prefs.setBool("isGoogle", false);
 
         var resp = null;
         if (kIsWeb) {

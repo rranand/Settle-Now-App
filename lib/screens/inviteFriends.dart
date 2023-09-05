@@ -35,7 +35,7 @@ class _InviteFriendsState extends State<InviteFriends> {
 
   initialization() async {
     prefs = await SharedPreferences.getInstance();
-    prefs.setBool("isInvitePremissionProvided", true);
+    await prefs.setBool("isInvitePremissionProvided", true);
   }
 
   pushToDB(List<dynamic> allContacts, List<FriendEach> allContactsData) async {

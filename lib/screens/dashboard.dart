@@ -524,7 +524,7 @@ class _DashBoardState extends State<DashBoard> {
       prefs = await SharedPreferences.getInstance();
 
       if (!kIsWeb) {
-        if (prefs.getBool("isInvitePremissionProvided") != null) {
+        if (await prefs.getBool("isInvitePremissionProvided") != null) {
           isInvitePremissionProvided =
               await prefs.getBool("isInvitePremissionProvided")!;
         } else {
@@ -559,9 +559,8 @@ class _DashBoardState extends State<DashBoard> {
         });
         _googleSignIn.signInSilently();
       }
-
-      if (prefs.getString("token") != null &&
-          parseJWT(prefs.getString("token")!) != null) {
+      var tokenData = await prefs.getString("token");
+      if (tokenData != null && parseJWT(tokenData.toString()) != null) {
         Map<String, dynamic> jsonOutData = parseJWT(prefs.getString("token")!);
 
         _email.text = jsonOutData["email"]!;
@@ -2090,11 +2089,11 @@ class _DashBoardState extends State<DashBoard> {
         ),
         actions: [
           IconButton(
-              onPressed: () {
+              onPressed: () async {
                 final provider =
                     Provider.of<ThemeProvider>(context, listen: false);
                 provider.toggleTheme(!themeProvider.darkTheme);
-                prefs.setBool('darkTheme', themeProvider.darkTheme);
+                await prefs.setBool('darkTheme', themeProvider.darkTheme);
               },
               icon: Icon(
                 Icons.brightness_2,
@@ -3870,11 +3869,12 @@ class _DashBoardState extends State<DashBoard> {
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
                     trailing: IconButton(
-                        onPressed: () {
+                        onPressed: () async {
                           final provider = Provider.of<ThemeProvider>(context,
                               listen: false);
                           provider.toggleTheme(!themeProvider.darkTheme);
-                          prefs.setBool('darkTheme', themeProvider.darkTheme);
+                          await prefs.setBool(
+                              'darkTheme', themeProvider.darkTheme);
                         },
                         icon: Icon(
                           Icons.brightness_2,
