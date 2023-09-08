@@ -9,19 +9,17 @@
     /*--
         Menu Sticky
     -----------------------------------*/
-    function buttonTextUpdate() {
-        if (window.localStorage.getItem('flutter.token') == null) {
-            document.querySelector("#login_dashboard_id").textContent = "Login";
-        } else {
-            document.querySelector("#login_dashboard_id").textContent = "Dashboard";
+    function redirectToLogin() {
+        if (window.localStorage.getItem('flutter.token') != null) {
+            window.location.href = "https://settlenow.in/login";
         }
     }
     
     var windows = $(window);
     var sticky = $('.header-sticky');
 
-    $(windows).load(function(){
-        buttonTextUpdate();
+    $(windows).ready(function(){
+        redirectToLogin();
     });
     
     windows.on('scroll', function() {
