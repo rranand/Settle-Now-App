@@ -9,8 +9,20 @@
     /*--
         Menu Sticky
     -----------------------------------*/
+    function buttonTextUpdate() {
+        if (window.localStorage.getItem('flutter.token') == null) {
+            document.querySelector("#main-menu > div > div > div.col > div > div > nav > ul > li.mean-last > button").textContent = "Login";
+        } else {
+            document.querySelector("#main-menu > div > div > div.col > div > div > nav > ul > li.mean-last > button").textContent = "Dashboard";
+        }
+    }
+    
     var windows = $(window);
     var sticky = $('.header-sticky');
+
+    $(windows).load(function(){
+        buttonTextUpdate();
+    });
     
     windows.on('scroll', function() {
         var scroll = windows.scrollTop();
@@ -192,18 +204,6 @@
 		delay: 10,
 		time: 1000
 	});
-
-    /*--
-       You tube video active
-    -------------------------*/
-    $(".youtube-bg").YTPlayer({
-        videoURL:"https://www.youtube.com/watch?v=1U3dbM4leKI&index=78&list=PLGmxyVGSCDKvmLInHxJ9VdiwEb82Lxd2E",
-        containment:'.youtube-bg',
-        mute:true,
-        loop:true,
-        showControls: false
-        
-    });
     
     /*--
         ScrollUp Active
