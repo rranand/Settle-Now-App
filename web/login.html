@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Settle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about &apos;who owes who.&apos;
+By using the Settle Now, we can efficiently manage all costs per individual, track &apos;who paid how much&apos; and &apos;who should pay to whom&apos;">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Settle Now">
+  <link rel="apple-touch-icon" href="https://settlenow.in/icons/Icon-192.png">
+
+  <link rel="icon" type="image/png" href="https://settlenow.in/icons/favicon.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="https://settlenow.in/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://settlenow.in/icons/favicon-16x16.png">
+  <link rel="shortcut icon" href="https://settlenow.in/icons/favicon.ico" />
+
+
+  <title>Settle Now</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    var serviceWorkerVersion = '2432010939';
+  </script>
+  <script src="flutter.js" defer></script>
+  <meta name="google-signin-client_id" content="950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com">
+</head>
+<body>
+  <script>
+    window.addEventListener('load', function(ev) {
+      var seconds = new Date().getTime()
+         xmlhttp = new XMLHttpRequest();
+         xmlhttp.responseType = 'json';
+         xmlhttp.open("GET", '/version.json?v=' + seconds, true);
+         xmlhttp.onload = function () {
+             if (xmlhttp.status == 200) {
+                 var buildNumber = xmlhttp.response.build_number;
+                 var currentBuildNumber = window.localStorage.getItem('buildNumber');
+
+                 if (currentBuildNumber && currentBuildNumber != buildNumber) {
+                     caches.delete('flutter-app-manifest');
+                     caches.delete('flutter-temp-cache');
+                     caches.delete('flutter-app-cache');
+                 }
+
+                 window.localStorage.setItem('buildNumber', buildNumber);
+             }
+             navigator.serviceWorker.register('flutter_service_worker.js');
+         }
+         xmlhttp.error = function () {navigator.serviceWorker.register('flutter_service_worker.js');}
+         xmlhttp.abort = function () {navigator.serviceWorker.register('flutter_service_worker.js');}
+         xmlhttp.timeout = function () {navigator.serviceWorker.register('flutter_service_worker.js');}
+         xmlhttp.send();
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        }
+      }).then(function(engineInitializer) {
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        return appRunner.runApp();
+      });
+    });
+  </script>
+  
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.10.0/firebase-analytics.js";
+    const firebaseConfig = {
+      apiKey: "AIzaSyApNchuFZfvl0tDGIFv89xonkbwzLfXDz4",
+      authDomain: "settle-now-340017.firebaseapp.com",
+      databaseURL: "https://settle-now-340017-default-rtdb.firebaseio.com",
+      projectId: "settle-now-340017",
+      storageBucket: "settle-now-340017.appspot.com",
+      messagingSenderId: "950526449356",
+      appId: "1:950526449356:web:e9234a8e96ab3296305469",
+      measurementId: "G-DF7HQKPVDS"
+    };
+  
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
+</body>
+</html>
