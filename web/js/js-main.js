@@ -11,9 +11,9 @@
     -----------------------------------*/
     function buttonTextUpdate() {
         if (window.localStorage.getItem('flutter.token') == null) {
-            document.querySelector("#main-menu > div > div > div.col > div > div > nav > ul > li.mean-last > button").textContent = "Login";
+            document.querySelector("#login_dashboard_id").textContent = "Login";
         } else {
-            document.querySelector("#main-menu > div > div > div.col > div > div > nav > ul > li.mean-last > button").textContent = "Dashboard";
+            document.querySelector("#login_dashboard_id").textContent = "Dashboard";
         }
     }
     
