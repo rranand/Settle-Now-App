@@ -230,14 +230,12 @@ class _DashBoardState extends State<DashBoard> {
     if (widget.firstTime && !notificationSetupComplete) {
       List<dynamic> data = [];
       try {
-        final response = await http.post(Uri.parse(global.url + 'remainder'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': _token
-            },
-            body: jsonEncode({
-              "email": crypto.encrypt(_email.text),
-            }));
+        Map<String, String> jsonInputData = {
+          "email": crypto.encrypt(_email.text),
+        };
+
+        final response =
+            await createHTTPreq('remainder', http.post, _token, jsonInputData);
 
         if (response.statusCode == 200) {
           var tempData = jsonDecode(response.body);
@@ -301,17 +299,14 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> getMembersData(bool roomType) async {
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'room/allRoomMembers'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            "email": crypto.encrypt(_email.text),
-            "roomType": roomType,
-            'hasAlready': crypto.encrypt("0")
-          }));
+      Map<String, dynamic> jsonInputData = {
+        "email": crypto.encrypt(_email.text),
+        "roomType": roomType,
+        'hasAlready': crypto.encrypt("0")
+      };
+
+      final response = await createHTTPreq(
+          'room/allRoomMembers', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)["data"];
@@ -336,14 +331,12 @@ class _DashBoardState extends State<DashBoard> {
     }
 
     try {
-      final response = await http.put(Uri.parse(global.url + 'login'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(_email.text),
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+      };
+
+      final response =
+          await createHTTPreq('login', http.put, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         var imgData = jsonDecode(response.body);
@@ -369,14 +362,12 @@ class _DashBoardState extends State<DashBoard> {
     now = DateTime.now();
     date = (now.month - 1).toString() + now.year.toString();
     try {
-      final response = await http.patch(Uri.parse(global.url + 'profile'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(_email.text),
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+      };
+
+      final response =
+          await createHTTPreq('profile', http.patch, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         gotInitialData = true;
@@ -404,12 +395,10 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> manualUpdateCheck() async {
     try {
-      final response = await http.patch(
-        Uri.parse(global.url + 'login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8'
-        },
-      );
+      Map<String, dynamic> jsonInputData = {};
+
+      final response =
+          await createHTTPreq('login', http.patch, "", jsonInputData);
 
       if (response.statusCode == 200) {
         updateData = jsonDecode(response.body);
@@ -640,17 +629,16 @@ class _DashBoardState extends State<DashBoard> {
     }
 
     try {
-      final response = await http.post(Uri.parse(global.url + 'data'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(_email.text),
-            'version': crypto.encrypt(appVersion),
-            'roomType': roomType,
-            'hasAlready': crypto.encrypt("0")
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+        'version': crypto.encrypt(appVersion),
+        'roomType': roomType,
+        'hasAlready': crypto.encrypt("0")
+      };
+
+      final response =
+          await createHTTPreq('data', http.post, _token, jsonInputData);
+
       if (response.statusCode == 200) {
         if (roomType) {
           activeRoomHasMore.value = jsonDecode(response.body)['hasMore'];
@@ -747,14 +735,13 @@ class _DashBoardState extends State<DashBoard> {
           RoomRequest.clear();
         });
       }
-      final response = await http.delete(Uri.parse(global.url + 'friend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(_email.text),
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+      };
+
+      final response =
+          await createHTTPreq('friend', http.delete, _token, jsonInputData);
+
       var data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
@@ -820,25 +807,20 @@ class _DashBoardState extends State<DashBoard> {
 
     try {
       if (flag) {
-        response = await http.post(Uri.parse(global.url + 'room'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': _token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(_email.text),
-              'roomName': crypto.encrypt(_NRoom.text),
-            }));
+        Map<String, dynamic> jsonInputData = {
+          'email': crypto.encrypt(_email.text),
+          'roomName': crypto.encrypt(_NRoom.text),
+        };
+
+        response =
+            await createHTTPreq('room', http.post, _token, jsonInputData);
       } else {
-        response = await http.put(Uri.parse(global.url + 'room'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': _token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(_email.text),
-              'roomKey': crypto.encrypt(_NRoom.text),
-            }));
+        Map<String, dynamic> jsonInputData = {
+          'email': crypto.encrypt(_email.text),
+          'roomKey': crypto.encrypt(_NRoom.text),
+        };
+
+        response = await createHTTPreq('room', http.put, _token, jsonInputData);
       }
 
       _NRoom.text = "";
@@ -882,14 +864,13 @@ class _DashBoardState extends State<DashBoard> {
           sentRoomRequest.clear();
         });
       }
-      final response = await http.post(Uri.parse(global.url + 'friend/sender'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(_email.text),
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+      };
+
+      final response = await createHTTPreq(
+          'friend/sender', http.post, _token, jsonInputData);
+
       var data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
@@ -949,13 +930,14 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> cancelSentRequest(String id, String type) async {
     try {
-      final response = await http.put(Uri.parse(global.url + 'friend/sender'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode(
-              {'email': crypto.encrypt(_email.text), 'id': id, 'type': type}));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+        'id': id,
+        'type': type
+      };
+
+      final response =
+          await createHTTPreq('friend/sender', http.put, _token, jsonInputData);
       var data = jsonDecode(response.body);
 
       if (response.statusCode != 200) {
@@ -1145,15 +1127,12 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> deleteToken() async {
     try {
-      await http.delete(Uri.parse(global.url + 'verify'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(_email.text),
-            'from': crypto.encrypt(kIsWeb ? 'web' : 'android')
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+        'from': crypto.encrypt(kIsWeb ? 'web' : 'android')
+      };
+
+      await createHTTPreq('verify', http.delete, _token, jsonInputData);
     } on Exception catch (_) {}
   }
 
@@ -2014,16 +1993,14 @@ class _DashBoardState extends State<DashBoard> {
       buildShowDialog(context);
     }
     try {
-      final response = await http.put(Uri.parse(global.url + 'friend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'roomKey': roomKey,
-            'email': crypto.encrypt(_email.text),
-            'confirm': crypto.encrypt(flag)
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'roomKey': roomKey,
+        'email': crypto.encrypt(_email.text),
+        'confirm': crypto.encrypt(flag)
+      };
+
+      final response =
+          await createHTTPreq('friend', http.put, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -2051,16 +2028,14 @@ class _DashBoardState extends State<DashBoard> {
       buildShowDialog(context);
     }
     try {
-      final response = await http.put(Uri.parse(global.url + 'friend/lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': _token
-          },
-          body: jsonEncode({
-            'id': id,
-            'email': crypto.encrypt(_email.text),
-            'confirm': crypto.encrypt(flag)
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'id': id,
+        'email': crypto.encrypt(_email.text),
+        'confirm': crypto.encrypt(flag)
+      };
+
+      final response =
+          await createHTTPreq('friend/lend', http.put, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -4413,18 +4388,14 @@ class _RoomWidgetState extends State<RoomWidget> {
 
   Future<void> getMembersData(bool roomType) async {
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'room/allRoomMembers'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            "email": crypto.encrypt(widget.email),
-            "roomType": roomType,
-            'hasAlready':
-                crypto.encrypt(widget.RoomData.value.length.toString())
-          }));
+      Map<String, dynamic> jsonInputData = {
+        "email": crypto.encrypt(widget.email),
+        "roomType": roomType,
+        'hasAlready': crypto.encrypt(widget.RoomData.value.length.toString())
+      };
+
+      final response = await createHTTPreq(
+          'room/allRoomMembers', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)["data"];
@@ -4446,17 +4417,15 @@ class _RoomWidgetState extends State<RoomWidget> {
   Future<void> _extractEmail(bool roomType) async {
     isDataLoading = true;
     try {
-      final response = await http.post(Uri.parse(global.url + 'data'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'roomType': roomType,
-            'hasAlready':
-                crypto.encrypt(widget.RoomData.value.length.toString())
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomType': roomType,
+        'hasAlready': crypto.encrypt(widget.RoomData.value.length.toString())
+      };
+
+      final response =
+          await createHTTPreq('data', http.post, widget.token, jsonInputData);
+
       if (response.statusCode == 200) {
         List<dynamic> list = jsonDecode(response.body)['data'];
         widget.hasMore.value = jsonDecode(response.body)['hasMore'];
@@ -4526,15 +4495,13 @@ class _RoomWidgetState extends State<RoomWidget> {
       });
     }
     try {
-      final response = await http.post(Uri.parse(global.url + 'update/room'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            "email": crypto.encrypt(widget.email),
-            "roomKey": crypto.encrypt(roomID)
-          }));
+      Map<String, dynamic> jsonInputData = {
+        "email": crypto.encrypt(widget.email),
+        "roomKey": crypto.encrypt(roomID)
+      };
+
+      final response = await createHTTPreq(
+          'update/room', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         RoomEach tempData =
@@ -4591,16 +4558,13 @@ class _RoomWidgetState extends State<RoomWidget> {
     }
 
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'room/roomSplitMembers'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'roomKey': crypto.encrypt(widget.RoomData.value[index].roomKey)
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomKey': crypto.encrypt(widget.RoomData.value[index].roomKey)
+      };
+
+      final response = await createHTTPreq(
+          'room/roomSplitMembers', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);

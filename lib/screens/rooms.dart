@@ -135,19 +135,16 @@ class _RoomExpenseState extends State<RoomExpense>
   _updatePayToMember(
       BuildContext context, String objID, String deleteFlag, int index) async {
     try {
-      final response = await http.put(
-          Uri.parse(global.url + 'data/updatePayMember'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'roomKey': crypto.encrypt(widget.roomKey),
-            'amt': crypto.encrypt(_paytoMemberAmt.text),
-            'objID': objID,
-            'deleteFlag': crypto.encrypt(deleteFlag),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomKey': crypto.encrypt(widget.roomKey),
+        'amt': crypto.encrypt(_paytoMemberAmt.text),
+        'objID': objID,
+        'deleteFlag': crypto.encrypt(deleteFlag),
+      };
+
+      final response = await createHTTPreq(
+          'data/updatePayMember', http.put, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         await _getPaymentData();
@@ -187,16 +184,13 @@ class _RoomExpenseState extends State<RoomExpense>
       setState(() {});
     }
     try {
-      final response = await http.delete(
-          Uri.parse(global.url + 'transaction/all'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'roomKey': crypto.encrypt(widget.roomKey),
-            'email': crypto.encrypt(widget.email),
-          }));
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(widget.roomKey),
+        'email': crypto.encrypt(widget.email),
+      };
+
+      final response = await createHTTPreq(
+          'transaction/all', http.delete, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -239,15 +233,13 @@ class _RoomExpenseState extends State<RoomExpense>
     }
 
     try {
-      final response = await http.patch(Uri.parse(global.url + 'data'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'roomKey': crypto.encrypt(widget.roomKey),
-            'email': crypto.encrypt(widget.email),
-          }));
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(widget.roomKey),
+        'email': crypto.encrypt(widget.email),
+      };
+
+      final response =
+          await createHTTPreq('data', http.patch, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -323,15 +315,13 @@ class _RoomExpenseState extends State<RoomExpense>
           friendData.clear();
         });
       }
-      final response = await http.patch(Uri.parse(global.url + 'friend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'roomKey': crypto.encrypt(widget.roomKey),
-            'email': crypto.encrypt(widget.email),
-          }));
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(widget.roomKey),
+        'email': crypto.encrypt(widget.email),
+      };
+
+      final response = await createHTTPreq(
+          'friend', http.patch, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -380,15 +370,13 @@ class _RoomExpenseState extends State<RoomExpense>
   Future<void> _extractExpenseData() async {
     scrollToExpense = -1;
     try {
-      final response = await http.post(Uri.parse(global.url + 'transaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'roomKey': crypto.encrypt(widget.roomKey),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomKey': crypto.encrypt(widget.roomKey),
+      };
+
+      final response = await createHTTPreq(
+          'transaction', http.post, widget.token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -425,25 +413,22 @@ class _RoomExpenseState extends State<RoomExpense>
         buildShowDialog(context);
       }
       try {
-        final response = await http.delete(Uri.parse(global.url + 'data'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(widget.email),
-              'roomKey': crypto.encrypt(widget.roomKey),
-              'purpose': crypto.encrypt(_purpose.text),
-              'date': crypto.encrypt(
-                  DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
-              'amt': crypto.encrypt(_amt.text),
-              'type':
-                  crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
-              "members": crypto.encrypt(((addExpenseTo.isEmpty &&
-                      (isClosedany || expenseSplitWithExistingMembers))
-                  ? activeMembersEmail.toString()
-                  : addExpenseTo.toString()))
-            }));
+        Map<String, String> jsonInputData = {
+          'email': crypto.encrypt(widget.email),
+          'roomKey': crypto.encrypt(widget.roomKey),
+          'purpose': crypto.encrypt(_purpose.text),
+          'date': crypto
+              .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
+          'amt': crypto.encrypt(_amt.text),
+          'type': crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
+          "members": crypto.encrypt(((addExpenseTo.isEmpty &&
+                  (isClosedany || expenseSplitWithExistingMembers))
+              ? activeMembersEmail.toString()
+              : addExpenseTo.toString()))
+        };
+
+        final response = await createHTTPreq(
+            'data', http.delete, widget.token, jsonInputData);
 
         _amt.text = "";
         _purpose.text = "";
@@ -489,17 +474,15 @@ class _RoomExpenseState extends State<RoomExpense>
       }
 
       try {
-        final response = await http.put(Uri.parse(global.url + 'data'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              'emailS': crypto.encrypt(widget.email),
-              'emailR': crypto.encrypt(membersListEmail[membersListIndex]),
-              'roomKey': crypto.encrypt(widget.roomKey),
-              'amt': crypto.encrypt(_amt.text),
-            }));
+        Map<String, String> jsonInputData = {
+          'emailS': crypto.encrypt(widget.email),
+          'emailR': crypto.encrypt(membersListEmail[membersListIndex]),
+          'roomKey': crypto.encrypt(widget.roomKey),
+          'amt': crypto.encrypt(_amt.text),
+        };
+
+        final response =
+            await createHTTPreq('data', http.put, widget.token, jsonInputData);
 
         _amt.text = "";
         Tdata = jsonDecode(response.body);
@@ -544,17 +527,14 @@ class _RoomExpenseState extends State<RoomExpense>
             payment = true;
           });
         }
-        final response = await http.delete(
-            Uri.parse(global.url + 'transaction'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              'emailS': crypto.encrypt(membersListEmail[membersListIndexS]),
-              'emailR': crypto.encrypt(membersListEmail[membersListIndexR]),
-              'roomKey': crypto.encrypt(widget.roomKey),
-            }));
+        Map<String, String> jsonInputData = {
+          'emailS': crypto.encrypt(membersListEmail[membersListIndexS]),
+          'emailR': crypto.encrypt(membersListEmail[membersListIndexR]),
+          'roomKey': crypto.encrypt(widget.roomKey),
+        };
+
+        final response = await createHTTPreq(
+            'transaction', http.delete, widget.token, jsonInputData);
 
         if (response.statusCode == 200) {
           paymentData = jsonDecode(response.body)["data"];
@@ -590,15 +570,14 @@ class _RoomExpenseState extends State<RoomExpense>
     }
     try {
       var CloseData = null;
-      final response = await http.delete(Uri.parse(global.url + 'room'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'roomKey': crypto.encrypt(widget.roomKey),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomKey': crypto.encrypt(widget.roomKey),
+      };
+
+      final response =
+          await createHTTPreq('room', http.delete, widget.token, jsonInputData);
+
       isClear = true;
       CloseData = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated.value = true;
@@ -967,17 +946,15 @@ class _RoomExpenseState extends State<RoomExpense>
       buildShowDialog(context);
     }
     try {
-      final response = await http.post(Uri.parse(global.url + 'friend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'roomKey': crypto.encrypt(widget.roomKey),
-            'email': crypto.encrypt(widget.email),
-            'fEmail': crypto.encrypt(email),
-            'isFromContact': crypto.encrypt(isFromContact.toString())
-          }));
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(widget.roomKey),
+        'email': crypto.encrypt(widget.email),
+        'fEmail': crypto.encrypt(email),
+        'isFromContact': crypto.encrypt(isFromContact.toString())
+      };
+
+      final response =
+          await createHTTPreq('friend', http.post, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -997,16 +974,14 @@ class _RoomExpenseState extends State<RoomExpense>
       buildShowDialog(context);
     }
     try {
-      final response = await http.put(Uri.parse(global.url + 'friend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'roomKey': crypto.encrypt(widget.roomKey),
-            'email': crypto.encrypt(email),
-            'confirm': crypto.encrypt("0")
-          }));
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(widget.roomKey),
+        'email': crypto.encrypt(email),
+        'confirm': crypto.encrypt("0")
+      };
+
+      final response =
+          await createHTTPreq('friend', http.put, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -1022,15 +997,13 @@ class _RoomExpenseState extends State<RoomExpense>
 
   closeRoomRequest() async {
     try {
-      final response = await http.put(Uri.parse(global.url + 'transaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'roomKey': crypto.encrypt(widget.roomKey),
-            'email': crypto.encrypt(widget.email)
-          }));
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(widget.roomKey),
+        'email': crypto.encrypt(widget.email)
+      };
+
+      final response = await createHTTPreq(
+          'transaction', http.put, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -3976,22 +3949,19 @@ class _ExpenseDataState extends State<ExpenseData> {
       String split,
       int roomExpenseTypeIndex) async {
     try {
-      final response = await http.patch(Uri.parse(global.url + 'transaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.Token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.Email),
-            'roomKey': crypto.encrypt(widget.RoomKey),
-            'purpose': crypto.encrypt(purpose),
-            'amount': crypto.encrypt(amount),
-            'id': crypto.encrypt(id),
-            'flag': crypto.encrypt(flag),
-            'split': crypto.encrypt(split),
-            'type':
-                crypto.encrypt(widget.roomExpenseCategory[roomExpenseTypeIndex])
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.Email),
+        'roomKey': crypto.encrypt(widget.RoomKey),
+        'purpose': crypto.encrypt(purpose),
+        'amount': crypto.encrypt(amount),
+        'id': crypto.encrypt(id),
+        'flag': crypto.encrypt(flag),
+        'split': crypto.encrypt(split),
+        'type': crypto.encrypt(widget.roomExpenseCategory[roomExpenseTypeIndex])
+      };
+
+      final response = await createHTTPreq(
+          'transaction', http.patch, widget.Token, jsonInputData);
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
@@ -4189,18 +4159,15 @@ class _ExpenseDataState extends State<ExpenseData> {
       buildShowDialog(context);
     }
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'transaction/personalExpense'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.Token
-          },
-          body: jsonEncode({
-            'roomKey': crypto.encrypt(widget.RoomKey),
-            'email': crypto.encrypt(widget.Email),
-            'id': crypto.encrypt(objId),
-            'split': crypto.encrypt(split)
-          }));
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(widget.RoomKey),
+        'email': crypto.encrypt(widget.Email),
+        'id': crypto.encrypt(objId),
+        'split': crypto.encrypt(split)
+      };
+
+      final response = await createHTTPreq('transaction/personalExpense',
+          http.post, widget.Token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);

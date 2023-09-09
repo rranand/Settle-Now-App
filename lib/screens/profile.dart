@@ -9,7 +9,6 @@ import 'package:settlenow/screens/loginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
-import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -64,15 +63,12 @@ class _ProfileState extends State<Profile> {
     }
 
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'profile/deleteAccount'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+      };
+
+      final response = await createHTTPreq(
+          'profile/deleteAccount', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         String responseMessage =
@@ -136,8 +132,12 @@ class _ProfileState extends State<Profile> {
     }
 
     prefs = await SharedPreferences.getInstance();
-    _phoneNo.text = crypto.decrypt(await prefs.getString("__token")!);
-    createdOn = crypto.decrypt(await prefs.getString("___token")!);
+    if ((await prefs.getString("__token")) != null) {
+      _phoneNo.text = crypto.decrypt(await prefs.getString("__token")!);
+    }
+    if ((await prefs.getString("___token")) != null) {
+      createdOn = crypto.decrypt(await prefs.getString("___token")!);
+    }
     if (_phoneNo.text.isNotEmpty) {
       havePhoneNo = true;
     }
@@ -164,16 +164,13 @@ class _ProfileState extends State<Profile> {
 
   pushPhoneToDB(String phoneNo) async {
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'profile/phoneNo'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'phoneNo': crypto.encrypt(phoneNo)
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'phoneNo': crypto.encrypt(phoneNo)
+      };
+
+      final response = await createHTTPreq(
+          'profile/phoneNo', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         havePhoneNo = true;

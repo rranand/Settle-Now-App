@@ -13,7 +13,6 @@ import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/screens/lendPage.dart';
 import 'package:settlenow/screens/maintain.dart';
 import 'package:shimmer/shimmer.dart';
-import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
 class LendCredit extends StatefulWidget {
@@ -63,15 +62,13 @@ class _LendCreditState extends State<LendCredit> {
 
   Future createRoom(BuildContext context) async {
     try {
-      final response = await http.post(Uri.parse(global.url + 'lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            "email": crypto.encrypt(widget.email),
-            "name": crypto.encrypt(_name.text)
-          }));
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email),
+        "name": crypto.encrypt(_name.text)
+      };
+
+      final response =
+          await createHTTPreq('lend', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         if (this.mounted) {
@@ -101,13 +98,13 @@ class _LendCreditState extends State<LendCredit> {
       });
     }
     try {
-      final response = await http.post(Uri.parse(global.url + 'update/lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode(
-              {"email": crypto.encrypt(widget.email), "roomKey": roomID}));
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email),
+        "roomKey": roomID
+      };
+
+      final response = await createHTTPreq(
+          'update/lend', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         bool isDeleted = jsonDecode(response.body)["isDeleted"];
@@ -141,12 +138,12 @@ class _LendCreditState extends State<LendCredit> {
         });
       }
 
-      final response = await http.patch(Uri.parse(global.url + 'lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({"email": crypto.encrypt(widget.email)}));
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email)
+      };
+
+      final response =
+          await createHTTPreq('lend', http.patch, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];

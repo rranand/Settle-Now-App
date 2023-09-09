@@ -124,15 +124,13 @@ class _ExpensesState extends State<Expenses> {
     }
 
     try {
-      final response = await http.post(Uri.parse(global.url + 'ptransaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'date': crypto.encrypt(widget.date),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'date': crypto.encrypt(widget.date),
+      };
+
+      final response = await createHTTPreq(
+          'ptransaction', http.post, widget.token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -162,16 +160,13 @@ class _ExpensesState extends State<Expenses> {
 
   removeRoomTransaction(String id, int index) async {
     try {
-      final response = await http.delete(
-          Uri.parse(global.url + 'transaction/personalExpense'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'id': crypto.encrypt(id)
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'id': crypto.encrypt(id)
+      };
+
+      final response = await createHTTPreq('transaction/personalExpense',
+          http.delete, widget.token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -191,18 +186,16 @@ class _ExpensesState extends State<Expenses> {
   updatePersonalTransaction(
       String purpose, String amount, String flag, String id, int index) async {
     try {
-      final response = await http.put(Uri.parse(global.url + 'ptransaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'purpose': crypto.encrypt(purpose),
-            'amount': crypto.encrypt(amount),
-            'flag': crypto.encrypt(flag),
-            'id': crypto.encrypt(id)
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'purpose': crypto.encrypt(purpose),
+        'amount': crypto.encrypt(amount),
+        'flag': crypto.encrypt(flag),
+        'id': crypto.encrypt(id)
+      };
+
+      final response = await createHTTPreq(
+          'ptransaction', http.put, widget.token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -556,20 +549,18 @@ class _ExpensesState extends State<Expenses> {
     }
 
     try {
-      final response = await http.patch(Uri.parse(global.url + 'ptransaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'purpose': crypto.encrypt(_purpose.text),
-            'amt': crypto.encrypt(_amt.text),
-            'type': crypto.encrypt(categoryIndex.toString()),
-            'investType': crypto.encrypt(investIndex.toString()),
-            'date': crypto
-                .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'purpose': crypto.encrypt(_purpose.text),
+        'amt': crypto.encrypt(_amt.text),
+        'type': crypto.encrypt(categoryIndex.toString()),
+        'investType': crypto.encrypt(investIndex.toString()),
+        'date': crypto
+            .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
+      };
+
+      final response = await createHTTPreq(
+          'ptransaction', http.patch, widget.token, jsonInputData);
 
       Tdata = jsonDecode(response.body);
       if (this.mounted) {

@@ -110,19 +110,17 @@ class _LendPageState extends State<LendPage> {
   Future<void> addLoan(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       try {
-        final response = await http.delete(Uri.parse(global.url + 'lend'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              "email": crypto.encrypt(widget.email),
-              "key": crypto.encrypt(widget.roomkey),
-              "amount": crypto.encrypt((gaveMoney ? "" : "-") + _amount.text),
-              "purpose": crypto.encrypt(_purpose.text),
-              'date': crypto
-                  .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate))
-            }));
+        Map<String, String> jsonInputData = {
+          "email": crypto.encrypt(widget.email),
+          "key": crypto.encrypt(widget.roomkey),
+          "amount": crypto.encrypt((gaveMoney ? "" : "-") + _amount.text),
+          "purpose": crypto.encrypt(_purpose.text),
+          'date': crypto
+              .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate))
+        };
+
+        final response = await createHTTPreq(
+            'lend', http.delete, widget.token, jsonInputData);
 
         if (response.statusCode == 200) {
           isPreviousPageNeedToBeUpdated = true;
@@ -157,15 +155,13 @@ class _LendPageState extends State<LendPage> {
           friendData.clear();
         });
       }
-      final response = await http.patch(Uri.parse(global.url + 'friend/lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'key': crypto.encrypt(widget.roomkey),
-            'email': crypto.encrypt(widget.email),
-          }));
+      Map<String, String> jsonInputData = {
+        'key': crypto.encrypt(widget.roomkey),
+        'email': crypto.encrypt(widget.email),
+      };
+
+      final response = await createHTTPreq(
+          'friend/lend', http.patch, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -219,17 +215,15 @@ class _LendPageState extends State<LendPage> {
       buildShowDialog(context);
     }
     try {
-      final response = await http.post(Uri.parse(global.url + 'friend/lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'key': crypto.encrypt(widget.roomkey),
-            'email': crypto.encrypt(widget.email),
-            'fEmail': crypto.encrypt(email),
-            'isFromContact': crypto.encrypt(isFromContact.toString())
-          }));
+      Map<String, String> jsonInputData = {
+        'key': crypto.encrypt(widget.roomkey),
+        'email': crypto.encrypt(widget.email),
+        'fEmail': crypto.encrypt(email),
+        'isFromContact': crypto.encrypt(isFromContact.toString())
+      };
+
+      final response = await createHTTPreq(
+          'friend/lend', http.post, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -250,16 +244,14 @@ class _LendPageState extends State<LendPage> {
     }
 
     try {
-      final response = await http.put(Uri.parse(global.url + 'friend/lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'id': crypto.encrypt(id),
-            'email': crypto.encrypt(email),
-            'confirm': crypto.encrypt("0")
-          }));
+      Map<String, String> jsonInputData = {
+        'id': crypto.encrypt(id),
+        'email': crypto.encrypt(email),
+        'confirm': crypto.encrypt("0")
+      };
+
+      final response = await createHTTPreq(
+          'friend/lend', http.put, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -495,20 +487,17 @@ class _LendPageState extends State<LendPage> {
   _updateTransaction(BuildContext context, String purpose, String id,
       String amount, String flag) async {
     try {
-      final response = await http.delete(
-          Uri.parse(global.url + 'lend/transaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            "roomID": crypto.encrypt(widget.roomkey),
-            'email': crypto.encrypt(widget.email),
-            'purpose': crypto.encrypt(purpose),
-            'amount': crypto.encrypt(amount),
-            'id': crypto.encrypt(id),
-            'flag': crypto.encrypt(flag)
-          }));
+      Map<String, String> jsonInputData = {
+        "roomID": crypto.encrypt(widget.roomkey),
+        'email': crypto.encrypt(widget.email),
+        'purpose': crypto.encrypt(purpose),
+        'amount': crypto.encrypt(amount),
+        'id': crypto.encrypt(id),
+        'flag': crypto.encrypt(flag)
+      };
+
+      final response = await createHTTPreq(
+          'lend/transaction', http.delete, widget.token, jsonInputData);
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
@@ -761,16 +750,13 @@ class _LendPageState extends State<LendPage> {
           data.clear();
         });
       }
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email),
+        "key": crypto.encrypt(widget.roomkey)
+      };
 
-      final response = await http.put(Uri.parse(global.url + 'lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            "email": crypto.encrypt(widget.email),
-            "key": crypto.encrypt(widget.roomkey)
-          }));
+      final response =
+          await createHTTPreq('lend', http.put, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
@@ -852,15 +838,13 @@ class _LendPageState extends State<LendPage> {
     }
     try {
       var CloseData = null;
-      final response = await http.post(Uri.parse(global.url + 'lend/delete'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'name': crypto.encrypt(widget.name),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'name': crypto.encrypt(widget.name),
+      };
+
+      final response = await createHTTPreq(
+          'lend/delete', http.post, widget.token, jsonInputData);
 
       CloseData = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated = true;

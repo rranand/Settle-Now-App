@@ -33,7 +33,7 @@ class AboutUs extends StatelessWidget {
                 IconButton(
                   onPressed: () {
                     launchUrl(
-                      Uri.parse("mailto:rrohitanand3336@gmail.com"),
+                      Uri.parse("mailto:info@settlenow.in"),
                       mode: LaunchMode.externalApplication,
                     );
                   },

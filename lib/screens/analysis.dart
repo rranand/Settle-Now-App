@@ -92,15 +92,13 @@ class _AnalysisState extends State<Analysis> {
     }
 
     try {
-      final response = await http.post(Uri.parse(global.url + 'profile'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'alreadyHave': crypto.encrypt("-1")
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'alreadyHave': crypto.encrypt("-1")
+      };
+
+      final response = await createHTTPreq(
+          'profile', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         List<dynamic> tempData = jsonDecode(response.body)['data'];
@@ -331,16 +329,13 @@ class _AnalysisState extends State<Analysis> {
   Future<List<dynamic>> getRoomData(List<String> roomKeys) async {
     List<dynamic> RoomData = [];
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'transaction/analysis'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'roomKey': crypto.encrypt(roomKeys.toString())
-          }));
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomKey': crypto.encrypt(roomKeys.toString())
+      };
+
+      final response = await createHTTPreq(
+          'transaction/analysis', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         RoomData = jsonDecode(response.body)['data'];

@@ -11,7 +11,6 @@ import 'package:settlenow/others/themes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
-import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
 class InviteFriends extends StatefulWidget {
@@ -83,16 +82,13 @@ class _InviteFriendsState extends State<InviteFriends> {
         }
       }
 
-      final response = await http.post(
-          Uri.parse(global.url + 'profile/localContact'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'contacts': crypto.encrypt(allContacts.toString())
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'contacts': crypto.encrypt(allContacts.toString())
+      };
+
+      final response = await createHTTPreq(
+          'profile/localContact', http.post, widget.token, jsonInputData);
 
       var resData = jsonDecode(response.body)['data'];
 

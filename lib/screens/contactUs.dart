@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
-import '../contents.dart' as global;
 import '../others/themes.dart';
 
 class ContactUs extends StatefulWidget {
@@ -66,16 +65,14 @@ class _ContactUsState extends State<ContactUs> {
       }
 
       try {
-        final response = await http.post(Uri.parse(global.url + 'contact'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(widget.email),
-              'subject': crypto.encrypt(_subject.text),
-              'message': crypto.encrypt(_message.text),
-            }));
+        Map<String, String> jsonInputData = {
+          'email': crypto.encrypt(widget.email),
+          'subject': crypto.encrypt(_subject.text),
+          'message': crypto.encrypt(_message.text),
+        };
+
+        final response = await createHTTPreq(
+            'contact', http.post, widget.token, jsonInputData);
 
         _subject.text = "";
         _message.text = "";

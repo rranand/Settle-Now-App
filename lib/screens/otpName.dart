@@ -19,7 +19,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../contents.dart' as global;
 
 import '../others/themes.dart';
 
@@ -68,13 +67,11 @@ class _OtpNameState extends State<OtpName> {
       buildShowDialog(context);
     }
     try {
-      await http.post(Uri.parse(global.url + 'login'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8'
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+      };
+
+      await createHTTPreq('login', http.post, "", jsonInputData);
     } on Exception catch (_) {
       setState(() {
         error = true;
@@ -88,17 +85,21 @@ class _OtpNameState extends State<OtpName> {
   }
 
   Future _initialisation() async {
-    prefs = await SharedPreferences.getInstance();
-    _deviceData = await initPlatformState();
-    getDeviceTokenToSendNotification();
+    Map<String, String> jsonInputData = {
+      'email': crypto.encrypt(widget.email),
+    };
 
-    final response = await http.post(Uri.parse(global.url + 'login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8'
-        },
-        body: jsonEncode({
-          'email': crypto.encrypt(widget.email),
-        }));
+    List<dynamic> fwaitTemp = await Future.wait([
+      SharedPreferences.getInstance(),
+      initPlatformState(),
+      getDeviceTokenToSendNotification(),
+      createHTTPreq('login', http.post, token, jsonInputData)
+    ]);
+
+    prefs = fwaitTemp[0];
+    _deviceData = fwaitTemp[1];
+    final response = fwaitTemp[3];
+
     token = crypto.encrypt(widget.email +
         "#" +
         _deviceData['id'] +
@@ -161,17 +162,16 @@ class _OtpNameState extends State<OtpName> {
     }
 
     try {
-      final response = await http.post(Uri.parse(global.url + 'verify'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'otp': crypto.encrypt(otp),
-            'name': crypto.encrypt(name),
-            'token': crypto.encrypt(token),
-            'deviceToken': crypto.encrypt(kIsWeb ? "web" : "android")
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'otp': crypto.encrypt(otp),
+        'name': crypto.encrypt(name),
+        'token': crypto.encrypt(token),
+        'deviceToken': crypto.encrypt(kIsWeb ? "web" : "android")
+      };
+
+      final response =
+          await createHTTPreq('verify', http.post, "", jsonInputData);
 
       JsonData = jsonDecode(response.body);
 
@@ -191,57 +191,57 @@ class _OtpNameState extends State<OtpName> {
         String jwToken =
             await createJWT(widget.email, jsonEncode(jsonInputData));
 
-        await prefs.setString("token", jwToken);
-        await prefs.setBool("isGoogle", false);
+        await Future.wait([
+          prefs.setString("token", jwToken),
+          prefs.setBool("isGoogle", false)
+        ]);
 
         var resp = null;
+        Map<String, String> jsonInputDataReq = {};
         if (kIsWeb) {
-          resp = await http.patch(Uri.parse(global.url + 'verify'),
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8'
-              },
-              body: jsonEncode({
-                'email': crypto.encrypt(widget.email),
-                'country': crypto.encrypt("Unknown"),
-                'ip': crypto.encrypt("Unknown"),
-                'state': crypto.encrypt("Unknown"),
-                'city': crypto.encrypt("Unknown"),
-                'isp': crypto.encrypt("Unknown"),
-                'device': crypto.encrypt(_deviceData['device']),
-                'deviceID': crypto.encrypt(_deviceData['id']),
-                'deviceToken': crypto.encrypt("web")
-              }));
+          jsonInputDataReq = {
+            'email': crypto.encrypt(widget.email),
+            'country': crypto.encrypt("Unknown"),
+            'ip': crypto.encrypt("Unknown"),
+            'state': crypto.encrypt("Unknown"),
+            'city': crypto.encrypt("Unknown"),
+            'isp': crypto.encrypt("Unknown"),
+            'device': crypto.encrypt(_deviceData['device']),
+            'deviceID': crypto.encrypt(_deviceData['id']),
+            'deviceToken': crypto.encrypt("web")
+          };
         } else {
-          resp = await http.patch(Uri.parse(global.url + 'verify'),
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8',
-              },
-              body: jsonEncode({
-                'email': crypto.encrypt(widget.email),
-                'country': crypto.encrypt(JD['country']),
-                'ip': crypto.encrypt(JD['query']),
-                'state': crypto.encrypt(JD['regionName']),
-                'city': crypto.encrypt(JD['city']),
-                'isp': crypto.encrypt(JD['isp']),
-                'device': crypto.encrypt(_deviceData['device']),
-                'deviceID': crypto.encrypt(_deviceData['id']),
-                'deviceToken': crypto.encrypt(deviceToken),
-                'model': crypto.encrypt(_deviceData['model']),
-                'product': crypto.encrypt(_deviceData['product']),
-                'serial': crypto.encrypt(_deviceData['serial']),
-                'android': crypto.encrypt(_deviceData['sdkInt']),
-                'release': crypto.encrypt(_deviceData['release']),
-              }));
+          jsonInputDataReq = {
+            'email': crypto.encrypt(widget.email),
+            'country': crypto.encrypt(JD['country']),
+            'ip': crypto.encrypt(JD['query']),
+            'state': crypto.encrypt(JD['regionName']),
+            'city': crypto.encrypt(JD['city']),
+            'isp': crypto.encrypt(JD['isp']),
+            'device': crypto.encrypt(_deviceData['device']),
+            'deviceID': crypto.encrypt(_deviceData['id']),
+            'deviceToken': crypto.encrypt(deviceToken),
+            'model': crypto.encrypt(_deviceData['model']),
+            'product': crypto.encrypt(_deviceData['product']),
+            'serial': crypto.encrypt(_deviceData['serial']),
+            'android': crypto.encrypt(_deviceData['sdkInt']),
+            'release': crypto.encrypt(_deviceData['release']),
+          };
         }
+        resp = await createHTTPreq('verify', http.patch, "", jsonInputDataReq);
 
         var remainingData = jsonDecode(resp.body)['data'];
 
         if (resp.statusCode == 200) {
-          await prefs.setString("___token", remainingData['createdOn']);
-          await prefs.setString("__token", remainingData['phoneNo']);
+          await Future.wait([
+            prefs.setString("___token", remainingData['createdOn']),
+            prefs.setString("__token", remainingData['phoneNo'])
+          ]);
         } else {
-          await prefs.setString("___token", crypto.encrypt(""));
-          await prefs.setString("__token", crypto.encrypt(""));
+          await Future.wait([
+            prefs.setString("___token", crypto.encrypt("")),
+            prefs.setString("__token", crypto.encrypt(""))
+          ]);
         }
 
         if (this.mounted) {

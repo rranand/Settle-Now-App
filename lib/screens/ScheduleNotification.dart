@@ -10,7 +10,6 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
 import 'package:shimmer/shimmer.dart';
-import '../contents.dart' as global;
 import '../others/themes.dart';
 import 'maintain.dart';
 
@@ -83,14 +82,12 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         dates.add((i + 1).toString());
       }
 
-      final response = await http.post(Uri.parse(global.url + 'remainder'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            "email": crypto.encrypt(widget.email),
-          }));
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email),
+      };
+
+      final response = await createHTTPreq(
+          'remainder', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body);
@@ -133,15 +130,13 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
     }
 
     try {
-      final response = await http.delete(Uri.parse(global.url + 'remainder'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'id': crypto.encrypt(id)
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'id': crypto.encrypt(id)
+      };
+
+      final response = await createHTTPreq(
+          'remainder', http.delete, widget.token, jsonInputData);
 
       if (this.mounted) {
         Navigator.pop(context);
@@ -186,17 +181,15 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       }
 
       try {
-        final response = await http.patch(Uri.parse(global.url + 'remainder'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(widget.email),
-              'name': crypto.encrypt(_name.text),
-              'date': crypto.encrypt(dates[currentDateIndex]),
-              'notID': crypto.encrypt(IDs.toString())
-            }));
+        Map<String, String> jsonInputData = {
+          'email': crypto.encrypt(widget.email),
+          'name': crypto.encrypt(_name.text),
+          'date': crypto.encrypt(dates[currentDateIndex]),
+          'notID': crypto.encrypt(IDs.toString())
+        };
+
+        final response = await createHTTPreq(
+            'remainder', http.patch, widget.token, jsonInputData);
 
         _name.text = "";
         if (this.mounted) {

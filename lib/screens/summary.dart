@@ -115,15 +115,13 @@ class _SummaryPageState extends State<SummaryPage> {
     }
 
     try {
-      final response_1 = await http.post(Uri.parse(global.url + 'profile'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'alreadyHave': crypto.encrypt(personalExpense.length.toString())
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'alreadyHave': crypto.encrypt(personalExpense.length.toString())
+      };
+
+      final response_1 = await createHTTPreq(
+          'profile', http.post, widget.token, jsonInputData);
 
       if (response_1.statusCode == 200) {
         if (loadFirstTime) {
@@ -173,15 +171,13 @@ class _SummaryPageState extends State<SummaryPage> {
       });
     }
     try {
-      final response = await http.delete(Uri.parse(global.url + 'ptransaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'date': crypto.encrypt(date),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'date': crypto.encrypt(date),
+      };
+
+      final response = await createHTTPreq(
+          'ptransaction', http.delete, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)['data'];

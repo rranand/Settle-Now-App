@@ -1,13 +1,11 @@
-import 'dart:convert';
-
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/route_service.dart';
 import 'package:settlenow/screens/dashboard.dart';
 import 'package:settlenow/screens/lendPage.dart';
 import 'package:settlenow/screens/rooms.dart';
-import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
 class NotificationController {
@@ -28,31 +26,23 @@ class NotificationController {
       BuildContext context, ReceivedAction receivedAction) async {
     if (receivedAction.payload!["type"] == "RoomRequest") {
       if (receivedAction.buttonKeyPressed == "JOIN") {
-        await http.put(Uri.parse(global.url + 'friend'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': receivedAction.payload!["token"].toString()
-            },
-            body: jsonEncode({
-              'roomKey':
-                  crypto.encrypt(receivedAction.payload!["key"].toString()),
-              'email':
-                  crypto.encrypt(receivedAction.payload!["email"].toString()),
-              'confirm': crypto.encrypt("1")
-            }));
+        Map<String, dynamic> jsonInputData = {
+          'roomKey': crypto.encrypt(receivedAction.payload!["key"].toString()),
+          'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
+          'confirm': crypto.encrypt("1")
+        };
+
+        await createHTTPreq('friend', http.put,
+            receivedAction.payload!["token"].toString(), jsonInputData);
       } else if (receivedAction.buttonKeyPressed == "CANCEL") {
-        await http.put(Uri.parse(global.url + 'friend'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': receivedAction.payload!["token"].toString()
-            },
-            body: jsonEncode({
-              'roomKey':
-                  crypto.encrypt(receivedAction.payload!["key"].toString()),
-              'email':
-                  crypto.encrypt(receivedAction.payload!["email"].toString()),
-              'confirm': crypto.encrypt("0")
-            }));
+        Map<String, dynamic> jsonInputData = {
+          'roomKey': crypto.encrypt(receivedAction.payload!["key"].toString()),
+          'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
+          'confirm': crypto.encrypt("0")
+        };
+
+        await createHTTPreq('friend', http.put,
+            receivedAction.payload!["token"].toString(), jsonInputData);
       } else {
         NavKey.navKey.currentState!.push(MaterialPageRoute(
             builder: (_) => DashBoard(
@@ -63,29 +53,23 @@ class NotificationController {
       }
     } else if (receivedAction.payload!["type"] == "LenDenRequest") {
       if (receivedAction.buttonKeyPressed == "JOIN") {
-        await http.put(Uri.parse(global.url + 'friend/lend'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': receivedAction.payload!["token"].toString()
-            },
-            body: jsonEncode({
-              'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
-              'email':
-                  crypto.encrypt(receivedAction.payload!["email"].toString()),
-              'confirm': crypto.encrypt("1")
-            }));
+        Map<String, dynamic> jsonInputData = {
+          'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
+          'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
+          'confirm': crypto.encrypt("1")
+        };
+
+        await createHTTPreq('friend/lend', http.put,
+            receivedAction.payload!["token"].toString(), jsonInputData);
       } else if (receivedAction.buttonKeyPressed == "CANCEL") {
-        await http.put(Uri.parse(global.url + 'friend/lend'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': receivedAction.payload!["token"].toString()
-            },
-            body: jsonEncode({
-              'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
-              'email':
-                  crypto.encrypt(receivedAction.payload!["email"].toString()),
-              'confirm': crypto.encrypt("0")
-            }));
+        Map<String, dynamic> jsonInputData = {
+          'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
+          'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
+          'confirm': crypto.encrypt("0")
+        };
+
+        await createHTTPreq('friend/lend', http.put,
+            receivedAction.payload!["token"].toString(), jsonInputData);
       } else {
         NavKey.navKey.currentState!.push(MaterialPageRoute(
             builder: (_) => DashBoard(

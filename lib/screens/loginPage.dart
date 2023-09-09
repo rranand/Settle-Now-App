@@ -14,7 +14,6 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
-import 'package:settlenow/screens/maintain.dart';
 import 'package:settlenow/screens/onBoarding.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:settlenow/screens/dashboard.dart';
@@ -22,7 +21,6 @@ import 'package:settlenow/screens/otpName.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../contents.dart' as global;
 
 import '../others/themes.dart';
 
@@ -70,28 +68,6 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
       );
-
-  Future<void> keepAlive() async {
-    try {
-      final response = await http.get(
-        Uri.parse(global.url + 'login'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-      );
-
-      if (jsonDecode(response.body)['maintenance'] != null &&
-          jsonDecode(response.body)['maintenance']) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
-        }
-      }
-    } on Exception catch (_) {}
-  }
 
   Future<void> deleteTempData() async {
     await Future.wait([
@@ -204,7 +180,6 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     getConnectivity();
     _extractEmail();
-    keepAlive();
   }
 
   @override
@@ -309,7 +284,6 @@ class _LoginPageState extends State<LoginPage> {
                                   _deviceData['id'] +
                                   "#" +
                                   DateTime.now().toString());
-                          await prefs.setBool("isGoogle", true);
                           Map<String, String> jsonInputData = {
                             "email": (user?.email).toString(),
                             "name": (user?.displayName).toString(),
@@ -318,90 +292,84 @@ class _LoginPageState extends State<LoginPage> {
                           String jwToken = await createJWT(
                               (user?.email).toString(),
                               jsonEncode(jsonInputData));
-                          await prefs.setString("token", jwToken);
+
+                          await Future.wait([
+                            prefs.setString("token", jwToken),
+                            prefs.setBool("isGoogle", true)
+                          ]);
 
                           var resp = null;
                           if (kIsWeb) {
-                            resp = await http.post(
-                                Uri.parse(global.url + 'login/google'),
-                                headers: <String, String>{
-                                  'Content-Type':
-                                      'application/json; charset=UTF-8'
-                                },
-                                body: jsonEncode({
-                                  'email':
-                                      crypto.encrypt((user?.email).toString()),
-                                  'name': crypto
-                                      .encrypt((user?.displayName).toString()),
-                                  'profilePic': crypto
-                                      .encrypt((user?.photoUrl).toString()),
-                                  'country': crypto.encrypt("Unknown"),
-                                  'ip': crypto.encrypt("Unknown"),
-                                  'state': crypto.encrypt("Unknown"),
-                                  'city': crypto.encrypt("Unknown"),
-                                  'isp': crypto.encrypt("Unknown"),
-                                  'device':
-                                      crypto.encrypt(_deviceData['device']),
-                                  'deviceID': crypto.encrypt(_deviceData['id']),
-                                  'deviceToken': crypto.encrypt("web"),
-                                  "token": crypto.encrypt(token)
-                                }));
+                            Map<String, String> jsonInputData = {
+                              'email': crypto.encrypt((user?.email).toString()),
+                              'name': crypto
+                                  .encrypt((user?.displayName).toString()),
+                              'profilePic':
+                                  crypto.encrypt((user?.photoUrl).toString()),
+                              'country': crypto.encrypt("Unknown"),
+                              'ip': crypto.encrypt("Unknown"),
+                              'state': crypto.encrypt("Unknown"),
+                              'city': crypto.encrypt("Unknown"),
+                              'isp': crypto.encrypt("Unknown"),
+                              'device': crypto.encrypt(_deviceData['device']),
+                              'deviceID': crypto.encrypt(_deviceData['id']),
+                              'deviceToken': crypto.encrypt("web"),
+                              "token": crypto.encrypt(token)
+                            };
+
+                            resp = await createHTTPreq(
+                                'login/google', http.post, "", jsonInputData);
                           } else {
-                            await getDeviceTokenToSendNotification();
+                            List<dynamic> fwaitTemp = await Future.wait([
+                              getDeviceTokenToSendNotification(),
+                              http.get(
+                                Uri.parse('http://ip-api.com/json'),
+                              )
+                            ]);
 
-                            final ipAdd = await http.get(
-                              Uri.parse('http://ip-api.com/json'),
-                            );
-
+                            final ipAdd = fwaitTemp[1];
                             final JD = jsonDecode(ipAdd.body);
 
-                            resp = await http.post(
-                                Uri.parse(global.url + 'login/google'),
-                                headers: <String, String>{
-                                  'Content-Type':
-                                      'application/json; charset=UTF-8',
-                                },
-                                body: jsonEncode({
-                                  'email':
-                                      crypto.encrypt((user?.email).toString()),
-                                  'name': crypto
-                                      .encrypt((user?.displayName).toString()),
-                                  'profilePic': crypto
-                                      .encrypt((user?.photoUrl).toString()),
-                                  'country': crypto.encrypt(JD['country']),
-                                  'ip': crypto.encrypt(JD['query']),
-                                  'state': crypto.encrypt(JD['regionName']),
-                                  'city': crypto.encrypt(JD['city']),
-                                  'isp': crypto.encrypt(JD['isp']),
-                                  'device':
-                                      crypto.encrypt(_deviceData['device']),
-                                  'deviceID': crypto.encrypt(_deviceData['id']),
-                                  'model': crypto.encrypt(_deviceData['model']),
-                                  'product':
-                                      crypto.encrypt(_deviceData['product']),
-                                  'serial':
-                                      crypto.encrypt(_deviceData['serial']),
-                                  'android':
-                                      crypto.encrypt(_deviceData['sdkInt']),
-                                  'release':
-                                      crypto.encrypt(_deviceData['release']),
-                                  'deviceToken': crypto.encrypt(deviceToken),
-                                  "token": crypto.encrypt(token)
-                                }));
+                            Map<String, String> jsonInputData = {
+                              'email': crypto.encrypt((user?.email).toString()),
+                              'name': crypto
+                                  .encrypt((user?.displayName).toString()),
+                              'profilePic':
+                                  crypto.encrypt((user?.photoUrl).toString()),
+                              'country': crypto.encrypt(JD['country']),
+                              'ip': crypto.encrypt(JD['query']),
+                              'state': crypto.encrypt(JD['regionName']),
+                              'city': crypto.encrypt(JD['city']),
+                              'isp': crypto.encrypt(JD['isp']),
+                              'device': crypto.encrypt(_deviceData['device']),
+                              'deviceID': crypto.encrypt(_deviceData['id']),
+                              'model': crypto.encrypt(_deviceData['model']),
+                              'product': crypto.encrypt(_deviceData['product']),
+                              'serial': crypto.encrypt(_deviceData['serial']),
+                              'android': crypto.encrypt(_deviceData['sdkInt']),
+                              'release': crypto.encrypt(_deviceData['release']),
+                              'deviceToken': crypto.encrypt(deviceToken),
+                              "token": crypto.encrypt(token)
+                            };
+
+                            resp = await createHTTPreq(
+                                'login/google', http.post, "", jsonInputData);
                           }
 
                           var remainingData = jsonDecode(resp.body)['data'];
 
                           if (resp.statusCode == 200) {
-                            await prefs.setString(
-                                "___token", remainingData['createdOn']);
-                            await prefs.setString(
-                                "__token", remainingData['phoneNo']);
+                            await Future.wait([
+                              prefs.setString(
+                                  "___token", remainingData['createdOn']),
+                              prefs.setString(
+                                  "__token", remainingData['phoneNo'])
+                            ]);
                           } else {
-                            await prefs.setString(
-                                "___token", crypto.encrypt(""));
-                            await prefs.setString(
-                                "__token", crypto.encrypt(""));
+                            await Future.wait([
+                              prefs.setString("___token", crypto.encrypt("")),
+                              prefs.setString("__token", crypto.encrypt(""))
+                            ]);
                           }
 
                           if (this.mounted) {

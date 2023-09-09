@@ -303,3 +303,30 @@ List<FriendEach> getUnionOfContacts(
 
   return fromDB;
 }
+
+createJSONDataTOJWT(dynamic data) {
+  String key =
+      'BY#uu4qQiLb^SYcOCsxS@lQxu7TZKRozctbbCwGtN93LccoKVU3f6F0IjiDH#J2GH2N!2t^*UTwQtZmD4S#Fy8w#Y3b6d1gN#SHVYgcKX%s4pxQ@vq4vS%Emd#KRKqkF31EQjuB34x!3IMn@TfSTt7';
+  final jwt = JWT(data);
+
+  return crypto
+      .encrypt(jwt.sign(SecretKey(key), expiresIn: Duration(seconds: 30)));
+}
+
+Future<dynamic> createHTTPreq(
+    String url, Function httpType, String token, dynamic JSONData) async {
+  try {
+    String tokenization = createJSONDataTOJWT(JSONData);
+
+    final res = await httpType(Uri.parse(global.url + url),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Auth': token
+        },
+        body: jsonEncode({"data": tokenization}));
+
+    return res;
+  } on Exception catch (_) {}
+
+  return null;
+}

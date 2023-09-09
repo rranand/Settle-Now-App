@@ -119,12 +119,11 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   Future<void> getLenDenData() async {
     try {
-      final response = await http.patch(Uri.parse(global.url + 'lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({"email": crypto.encrypt(widget.email)}));
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email)
+      };
+      final response =
+          await createHTTPreq('lend', http.patch, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         List<dynamic> temp = jsonDecode(response.body)['data'];
@@ -150,16 +149,11 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   Future<void> getActiveRooms() async {
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'room/fullActiveRoom'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-          }));
-
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email)
+      };
+      final response = await createHTTPreq(
+          'room/fullActiveRoom', http.post, widget.token, jsonInputData);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         roomData = data['data'];
@@ -189,14 +183,12 @@ class _BankTransactionsState extends State<BankTransactions> {
       });
     }
     try {
-      final response = await http.post(
-          Uri.parse(global.url + 'room/roomSplitMembers'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode(
-              {'email': crypto.encrypt(widget.email), 'roomKey': roomkey}));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomKey': roomkey
+      };
+      final response = await createHTTPreq(
+          'room/roomSplitMembers', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -282,19 +274,16 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
 
     try {
-      final response = await http.patch(Uri.parse(global.url + 'ptransaction'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            'email': crypto.encrypt(widget.email),
-            'purpose': crypto.encrypt(_purpose.text),
-            'amt': crypto.encrypt(amount),
-            'date': crypto.encrypt(date),
-            'type': crypto.encrypt(categoryIndex.toString()),
-            'investType': crypto.encrypt(investIndex.toString()),
-          }));
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'purpose': crypto.encrypt(_purpose.text),
+        'amt': crypto.encrypt(amount),
+        'date': crypto.encrypt(date),
+        'type': crypto.encrypt(categoryIndex.toString()),
+        'investType': crypto.encrypt(investIndex.toString()),
+      };
+      final response = await createHTTPreq(
+          'ptransaction', http.patch, widget.token, jsonInputData);
 
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
@@ -531,15 +520,14 @@ class _BankTransactionsState extends State<BankTransactions> {
       if (this.mounted) {
         buildShowDialog(context);
       }
-      final response = await http.post(Uri.parse(global.url + 'lend'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-            'Auth': widget.token
-          },
-          body: jsonEncode({
-            "email": crypto.encrypt(widget.email),
-            "name": crypto.encrypt(_lenDenRoom.text)
-          }));
+
+      Map<String, String> jsonInputData = {
+        "email": crypto.encrypt(widget.email),
+        "name": crypto.encrypt(_lenDenRoom.text)
+      };
+
+      final response =
+          await createHTTPreq('lend', http.post, widget.token, jsonInputData);
 
       if (response.statusCode == 200) {
         LenDenRoomID = jsonDecode(response.body)["id"];
@@ -570,18 +558,16 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
 
       try {
-        final response = await http.delete(Uri.parse(global.url + 'lend'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(widget.email),
-              'key': id,
-              'purpose': crypto.encrypt(_purpose.text),
-              'amount': crypto.encrypt(amount),
-              "date": crypto.encrypt(date)
-            }));
+        Map<String, String> jsonInputData = {
+          'email': crypto.encrypt(widget.email),
+          'key': id,
+          'purpose': crypto.encrypt(_purpose.text),
+          'amount': crypto.encrypt(amount),
+          "date": crypto.encrypt(date)
+        };
+
+        final response = await createHTTPreq(
+            'lend', http.delete, widget.token, jsonInputData);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
@@ -620,24 +606,21 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
 
       try {
-        final response = await http.delete(Uri.parse(global.url + 'data'),
-            headers: <String, String>{
-              'Content-Type': 'application/json; charset=UTF-8',
-              'Auth': widget.token
-            },
-            body: jsonEncode({
-              'email': crypto.encrypt(widget.email),
-              'roomKey': roomData[roomIndex]["Key"],
-              'purpose': crypto.encrypt(_purpose.text),
-              'amt': crypto.encrypt(amount),
-              'type':
-                  crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
-              "members": crypto.encrypt(((addExpenseTo.isEmpty &&
-                      (isClosedany || expenseSplitWithExistingMembers))
-                  ? activeMembersEmail.toString()
-                  : addExpenseTo.toString())),
-              "date": crypto.encrypt(date)
-            }));
+        Map<String, String> jsonInputData = {
+          'email': crypto.encrypt(widget.email),
+          'roomKey': roomData[roomIndex]["Key"],
+          'purpose': crypto.encrypt(_purpose.text),
+          'amt': crypto.encrypt(amount),
+          'type': crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
+          "members": crypto.encrypt(((addExpenseTo.isEmpty &&
+                  (isClosedany || expenseSplitWithExistingMembers))
+              ? activeMembersEmail.toString()
+              : addExpenseTo.toString())),
+          "date": crypto.encrypt(date)
+        };
+
+        final response = await createHTTPreq(
+            'data', http.delete, widget.token, jsonInputData);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);

@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/screens/dashboard.dart';
 
-import '../contents.dart' as global;
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
 
@@ -43,15 +42,13 @@ class _RoomJoinState extends State<RoomJoin> {
         String _token = jsonOutData["token"]!;
 
         if (widget.roomKey.length == 7) {
-          final response = await http.put(Uri.parse(global.url + 'room'),
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8',
-                'Auth': _token
-              },
-              body: jsonEncode({
-                'email': crypto.encrypt(email),
-                'roomKey': crypto.encrypt(widget.roomKey),
-              }));
+          Map<String, String> jsonInputData = {
+            'email': crypto.encrypt(email),
+            'roomKey': crypto.encrypt(widget.roomKey),
+          };
+
+          final response =
+              await createHTTPreq('room', http.put, _token, jsonInputData);
 
           if (this.mounted) {
             setState(() {
@@ -59,16 +56,13 @@ class _RoomJoinState extends State<RoomJoin> {
             });
           }
         } else {
-          final response = await http.post(
-              Uri.parse(global.url + 'lend/addPerson'),
-              headers: <String, String>{
-                'Content-Type': 'application/json; charset=UTF-8',
-                'Auth': _token
-              },
-              body: jsonEncode({
-                'email': crypto.encrypt(email),
-                'id': crypto.encrypt(widget.roomKey),
-              }));
+          Map<String, String> jsonInputData = {
+            'email': crypto.encrypt(email),
+            'id': crypto.encrypt(widget.roomKey),
+          };
+
+          final response = await createHTTPreq(
+              'lend/addPerson', http.post, _token, jsonInputData);
 
           if (this.mounted) {
             setState(() {
