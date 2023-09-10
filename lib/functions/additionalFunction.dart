@@ -348,7 +348,8 @@ Future<dynamic> createHTTPreq(
     Response res = await httpType(Uri.parse(global.url + url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Auth': token
+          'Auth': token,
+          'Access-Control-Allow-Origin': 'https://api.settlenow.in'
         },
         body: jsonEncode({"data": tokenization}));
 

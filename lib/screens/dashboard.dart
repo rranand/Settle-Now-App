@@ -1018,7 +1018,7 @@ class _DashBoardState extends State<DashBoard> {
         getMembersData(true),
         getMembersData(false)
       ]);
-    } else {
+    } else if (Platform.isAndroid) {
       await Future.wait([
         getInitialData(),
         manualUpdateCheck(),
@@ -1027,6 +1027,20 @@ class _DashBoardState extends State<DashBoard> {
         _extractEmail(false),
         ContactPermissionGranted(),
         _updateCheck(),
+        getRoomRequest(),
+        fetchSentRequest(),
+        _getImageID(),
+        getMembersData(true),
+        getMembersData(false)
+      ]);
+    } else if (Platform.isIOS) {
+      await Future.wait([
+        getInitialData(),
+        manualUpdateCheck(),
+        checkforScheduledNotifications(),
+        _extractEmail(true),
+        _extractEmail(false),
+        ContactPermissionGranted(),
         getRoomRequest(),
         fetchSentRequest(),
         _getImageID(),
