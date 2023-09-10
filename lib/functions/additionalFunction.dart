@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart';
 import 'package:path/path.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:sqflite/sqflite.dart';
@@ -305,12 +306,20 @@ List<FriendEach> getUnionOfContacts(
 }
 
 createJSONDataTOJWT(dynamic data) {
-  String key =
-      'BY#uu4qQiLb^SYcOCsxS@lQxu7TZKRozctbbCwGtN93LccoKVU3f6F0IjiDH#J2GH2N!2t^*UTwQtZmD4S#Fy8w#Y3b6d1gN#SHVYgcKX%s4pxQ@vq4vS%Emd#KRKqkF31EQjuB34x!3IMn@TfSTt7';
   final jwt = JWT(data);
 
-  return crypto
-      .encrypt(jwt.sign(SecretKey(key), expiresIn: Duration(seconds: 30)));
+  return crypto.encrypt(
+      jwt.sign(SecretKey(global.jwtToken), expiresIn: Duration(seconds: 30)));
+}
+
+extractJSONfromJWT(String data) async {
+  try {
+    data = crypto.decrypt(data);
+    final reqData = await JWT.decode(data);
+    return jsonEncode(reqData.payload);
+  } on Exception catch (_) {}
+
+  return {};
 }
 
 Future<dynamic> createHTTPreq(
@@ -318,15 +327,26 @@ Future<dynamic> createHTTPreq(
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
 
-    final res = await httpType(Uri.parse(global.url + url),
+    Response res = await httpType(Uri.parse(global.url + url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Auth': token
         },
         body: jsonEncode({"data": tokenization}));
 
-    return res;
+    var resData = jsonDecode(res.body);
+    if (resData['data'] != null) {
+      String jsonJWTData = jsonDecode(res.body)['data'];
+      final newRes =
+          new Response(await extractJSONfromJWT(jsonJWTData), res.statusCode);
+      return newRes;
+    }
   } on Exception catch (_) {}
 
-  return null;
+  return new Response(
+      jsonEncode({
+        "status": false,
+        "Message": "Some Unknown Error Occurred",
+      }),
+      422);
 }
