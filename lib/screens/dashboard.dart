@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -3728,7 +3729,7 @@ class _DashBoardState extends State<DashBoard> {
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
                   ),
-                  kIsWeb
+                  kIsWeb || Platform.isIOS
                       ? SizedBox()
                       : ListTile(
                           onTap: () async {
@@ -3921,7 +3922,7 @@ class _DashBoardState extends State<DashBoard> {
                       style: TextStyle(fontSize: 14, color: Colors.white),
                     ),
                   ),
-                  kIsWeb
+                  kIsWeb || Platform.isIOS
                       ? SizedBox()
                       : ListTile(
                           onTap: rateUs,
