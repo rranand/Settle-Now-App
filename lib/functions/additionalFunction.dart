@@ -28,19 +28,28 @@ Future<Map<String, dynamic>> initPlatformState() async {
         'id': describeEnum(data.browserName),
         'device': describeEnum(data.browserName) + " (" + data.platform! + ")"
       };
-    } else {
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
-        return <String, dynamic>{
-          'id': build.id,
-          'device': build.product,
-          'model': build.model,
-          'product': build.product,
-          'serial': build.serialNumber,
-          'sdkInt': build.version.sdkInt.toString(),
-          'release': build.version.release
-        };
-      }
+    } else if (Platform.isAndroid) {
+      AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
+      return <String, dynamic>{
+        'id': build.id,
+        'device': build.product,
+        'model': build.model,
+        'product': build.product,
+        'serial': build.serialNumber,
+        'sdkInt': build.version.sdkInt.toString(),
+        'release': build.version.release
+      };
+    } else if (Platform.isIOS) {
+      IosDeviceInfo build = await deviceInfoPlugin.iosInfo;
+      return <String, dynamic>{
+        'id': build.identifierForVendor,
+        'device': build.name,
+        'model': build.model,
+        'product': build.systemName,
+        'serial': build.identifierForVendor,
+        'sdkInt': build.utsname.version.toString(),
+        'release': build.utsname.release
+      };
     }
   } on PlatformException {}
 
@@ -238,17 +247,26 @@ createJWT(String email, String input) async {
   if (kIsWeb) {
     WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
     key = data.browserName.name + '###' + data.platform! + '###' + email;
+  } else if (Platform.isAndroid) {
+    AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
+    key = build.id +
+        '###' +
+        build.serialNumber +
+        '###' +
+        build.fingerprint +
+        '###' +
+        email;
+  } else if (Platform.isIOS) {
+    IosDeviceInfo build = await deviceInfoPlugin.iosInfo;
+    key = build.systemVersion +
+        '###' +
+        build.model +
+        '###' +
+        build.identifierForVendor.toString() +
+        '###' +
+        email;
   } else {
-    if (Platform.isAndroid) {
-      AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
-      key = build.id +
-          '###' +
-          build.serialNumber +
-          '###' +
-          build.fingerprint +
-          '###' +
-          email;
-    }
+    key = DateTime.now().toString() + '###PLATFORM_NO_DEVICE_FOUND###' + email;
   }
   return crypto.encrypt(jwt.sign(SecretKey(key)));
 }
@@ -315,7 +333,7 @@ createJSONDataTOJWT(dynamic data) {
 extractJSONfromJWT(String data) async {
   try {
     data = crypto.decrypt(data);
-    final reqData = await JWT.decode(data);
+    final reqData = await JWT.verify(data, SecretKey(global.jwtToken));
     return jsonEncode(reqData.payload);
   } on Exception catch (_) {}
 
