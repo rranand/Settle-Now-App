@@ -47,6 +47,6 @@ post_install do |installer|
         PERMISSION_REMINDERS=1,
         PERMISSION_CONTACTS=1,
         PERMISSION_NOTIFICATIONS=1
-
+    ]
   end
 end
