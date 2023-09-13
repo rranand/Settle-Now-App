@@ -138,6 +138,9 @@ String getTransferTo(String message) {
     if (message.contains("credited.")) {
       uptoIndex = message.indexOf("credited.");
     }
+    if (message.contains("and credited")) {
+      uptoIndex = min(uptoIndex, message.indexOf("and credited"));
+    }
   }
 
   if (uptoIndex == 99999999999) {
@@ -160,13 +163,15 @@ String getTransferTo(String message) {
   } else {
     for (int i = index;
         i < message.length &&
-            (uptoIndex != 99999999999 && i < uptoIndex) &&
+            i < uptoIndex &&
             !message[i].contains(RegExp(r'[\(\)\.\,]'));
         i++) {
       transferTo += message[i];
     }
   }
-
+  if (transferTo.contains("on")) {
+    transferTo = transferTo.split("on")[0];
+  }
   return transferTo == "" ? "Unknown" : transferTo;
 }
 

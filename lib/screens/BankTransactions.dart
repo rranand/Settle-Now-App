@@ -2219,13 +2219,39 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                 MainAxisAlignment
                                                                     .spaceBetween,
                                                             children: [
-                                                              Text(
-                                                                filteredResult[
-                                                                        index]
-                                                                    .receiver,
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        24),
+                                                              InkWell(
+                                                                onTap:
+                                                                    () async {
+                                                                  showToast(
+                                                                      context,
+                                                                      filteredResult[
+                                                                              index]
+                                                                          .receiver,
+                                                                      Icons
+                                                                          .done_outlined);
+                                                                },
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.7,
+                                                                  child: Text(
+                                                                    filteredResult[
+                                                                            index]
+                                                                        .receiver,
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .left,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            24),
+                                                                    maxLines: 1,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                  ),
+                                                                ),
                                                               ),
                                                               filteredResult[index]
                                                                           .type ==
@@ -2446,12 +2472,38 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                             MainAxisAlignment
                                                                 .spaceBetween,
                                                         children: [
-                                                          Text(
-                                                            allTransactions[
-                                                                    index]
-                                                                .receiver,
-                                                            style: TextStyle(
-                                                                fontSize: 24),
+                                                          InkWell(
+                                                            onTap: () async {
+                                                              showToast(
+                                                                  context,
+                                                                  allTransactions[
+                                                                          index]
+                                                                      .receiver,
+                                                                  Icons
+                                                                      .done_outlined);
+                                                            },
+                                                            child: SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.7,
+                                                              child: Text(
+                                                                allTransactions[
+                                                                        index]
+                                                                    .receiver,
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .left,
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        24),
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                              ),
+                                                            ),
                                                           ),
                                                           allTransactions[index]
                                                                       .type ==

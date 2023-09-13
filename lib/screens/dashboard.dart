@@ -204,6 +204,7 @@ class _DashBoardState extends State<DashBoard> {
   Set<int> filterliveRoomCategoryIndex = Set();
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
+  bool isLogoutTriggered = false;
   bool isAlertSet = false;
 
   @override
@@ -226,6 +227,48 @@ class _DashBoardState extends State<DashBoard> {
           }
         },
       );
+
+  Future<void> logout() async {
+    if (this.mounted && Overlay.of(context).mounted) {
+      if (!isLogoutTriggered) {
+        setState(() {
+          isLogoutTriggered = true;
+        });
+        showToast(context, "Login Expired", Icons.warning_outlined);
+        buildShowDialog(context);
+        if (kIsWeb) {
+          await Future.wait([
+            prefs.remove("token"),
+            prefs.remove("__token"),
+            prefs.remove("___token"),
+            deleteToken(),
+            logOutFromGoogle()
+          ]);
+        } else {
+          await Future.wait([
+            deleteDB(),
+            prefs.remove("token"),
+            prefs.remove("__token"),
+            prefs.remove("___token"),
+            AwesomeNotifications().cancelAllSchedules(),
+            deleteToken(),
+            logOutFromGoogle()
+          ]);
+        }
+        Navigator.pop(context);
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Overlay(initialEntries: [
+                    OverlayEntry(
+                        builder: (context) => SafeArea(child: LoginPage()))
+                  ])),
+          (Route<dynamic> route) => false,
+        );
+      }
+    }
+  }
 
   Future<void> checkforScheduledNotifications() async {
     if (widget.firstTime && !notificationSetupComplete) {
@@ -572,25 +615,7 @@ class _DashBoardState extends State<DashBoard> {
         if (this.mounted) {
           buildShowDialog(context);
         }
-        if (kIsWeb) {
-          await Future.wait([
-            prefs.remove("token"),
-            prefs.remove("__token"),
-            prefs.remove("___token"),
-            deleteToken(),
-            logOutFromGoogle()
-          ]);
-        } else {
-          await Future.wait([
-            deleteDB(),
-            prefs.remove("token"),
-            prefs.remove("__token"),
-            prefs.remove("___token"),
-            AwesomeNotifications().cancelAllSchedules(),
-            deleteToken(),
-            logOutFromGoogle()
-          ]);
-        }
+
         if (this.mounted) {
           Navigator.pop(context);
         }
@@ -678,43 +703,11 @@ class _DashBoardState extends State<DashBoard> {
       } else {
         String errorMessage =
             crypto.decrypt(jsonDecode(response.body)['Message']);
-        if (this.mounted) {
-          showToast(context, errorMessage, Icons.close);
-        }
-        if (errorMessage == 'Login Expired') {
-          if (this.mounted) {
-            buildShowDialog(context);
-          }
-          if (kIsWeb) {
-            await Future.wait([
-              prefs.remove("token"),
-              prefs.remove("__token"),
-              prefs.remove("___token"),
-              deleteToken(),
-              logOutFromGoogle()
-            ]);
-          } else {
-            await Future.wait([
-              deleteDB(),
-              prefs.remove("token"),
-              prefs.remove("__token"),
-              prefs.remove("___token"),
-              AwesomeNotifications().cancelAllSchedules(),
-              deleteToken(),
-              logOutFromGoogle()
-            ]);
-          }
-          if (this.mounted) {
-            Navigator.pop(context);
-          }
 
-          if (this.mounted) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-              (Route<dynamic> route) => false,
-            );
-          }
+        if (errorMessage == 'Login Expired') {
+          await logout();
+        } else if (this.mounted) {
+          showToast(context, errorMessage, Icons.close);
         }
       }
     } on Exception catch (_) {
@@ -749,43 +742,11 @@ class _DashBoardState extends State<DashBoard> {
         RoomRequest = data["data"];
       } else {
         String errorMessage = crypto.decrypt(data["Message"]);
-        if (this.mounted) {
-          showToast(context, errorMessage, Icons.close);
-        }
-        if (errorMessage == 'Login Expired') {
-          if (this.mounted) {
-            buildShowDialog(context);
-          }
-          if (kIsWeb) {
-            await Future.wait([
-              prefs.remove("token"),
-              prefs.remove("__token"),
-              prefs.remove("___token"),
-              deleteToken(),
-              logOutFromGoogle()
-            ]);
-          } else {
-            await Future.wait([
-              deleteDB(),
-              prefs.remove("token"),
-              prefs.remove("__token"),
-              prefs.remove("___token"),
-              AwesomeNotifications().cancelAllSchedules(),
-              deleteToken(),
-              logOutFromGoogle()
-            ]);
-          }
-          if (this.mounted) {
-            Navigator.pop(context);
-          }
 
-          if (this.mounted) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-              (Route<dynamic> route) => false,
-            );
-          }
+        if (errorMessage == 'Login Expired') {
+          await logout();
+        } else if (this.mounted) {
+          showToast(context, errorMessage, Icons.close);
         }
       }
     } on Exception catch (_) {
@@ -878,43 +839,10 @@ class _DashBoardState extends State<DashBoard> {
         sentRoomRequest = data["data"];
       } else {
         String errorMessage = crypto.decrypt(data["Message"]);
-        if (this.mounted) {
-          showToast(context, errorMessage, Icons.close);
-        }
         if (errorMessage == 'Login Expired') {
-          if (this.mounted) {
-            buildShowDialog(context);
-          }
-          if (kIsWeb) {
-            await Future.wait([
-              prefs.remove("token"),
-              prefs.remove("__token"),
-              prefs.remove("___token"),
-              deleteToken(),
-              logOutFromGoogle()
-            ]);
-          } else {
-            await Future.wait([
-              deleteDB(),
-              prefs.remove("token"),
-              prefs.remove("__token"),
-              prefs.remove("___token"),
-              AwesomeNotifications().cancelAllSchedules(),
-              deleteToken(),
-              logOutFromGoogle()
-            ]);
-          }
-          if (this.mounted) {
-            Navigator.pop(context);
-          }
-
-          if (this.mounted) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-              (Route<dynamic> route) => false,
-            );
-          }
+          await logout();
+        } else if (this.mounted) {
+          showToast(context, errorMessage, Icons.close);
         }
       }
     } on Exception catch (_) {
@@ -3953,37 +3881,7 @@ class _DashBoardState extends State<DashBoard> {
                   ListTile(
                     onTap: () async {
                       if (this.mounted) {
-                        buildShowDialog(context);
-                      }
-                      if (kIsWeb) {
-                        await Future.wait([
-                          prefs.remove("token"),
-                          prefs.remove("__token"),
-                          prefs.remove("___token"),
-                          deleteToken(),
-                          logOutFromGoogle()
-                        ]);
-                      } else {
-                        await Future.wait([
-                          deleteDB(),
-                          prefs.remove("token"),
-                          prefs.remove("__token"),
-                          prefs.remove("___token"),
-                          AwesomeNotifications().cancelAllSchedules(),
-                          deleteToken(),
-                          logOutFromGoogle()
-                        ]);
-                      }
-                      if (this.mounted) {
-                        Navigator.pop(context);
-                      }
-
-                      if (this.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginPage()),
-                          (Route<dynamic> route) => false,
-                        );
+                        await logout();
                       }
                     },
                     leading: Icon(
