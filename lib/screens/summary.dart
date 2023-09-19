@@ -136,8 +136,7 @@ class _SummaryPageState extends State<SummaryPage> {
         if (this.mounted) {
           setState(() {});
         }
-      } else if (jsonDecode(response_1.body)['maintenance'] != null &&
-          jsonDecode(response_1.body)['maintenance']) {
+      } else if (response_1.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
             context,

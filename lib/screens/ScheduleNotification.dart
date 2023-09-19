@@ -92,8 +92,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body);
         data = tempData['data'];
-      } else if (jsonDecode(response.body)['maintenance'] != null &&
-          jsonDecode(response.body)['maintenance']) {
+      } else if (response.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
             context,

@@ -124,8 +124,7 @@ class _OtpNameState extends State<OtpName> {
           });
         }
       }
-    } else if (jsonDecode(response.body)['maintenance'] != null &&
-        jsonDecode(response.body)['maintenance']) {
+    } else if (response.statusCode == 503) {
       if (this.mounted) {
         Navigator.pushAndRemoveUntil(
           context,

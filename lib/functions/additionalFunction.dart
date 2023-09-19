@@ -352,6 +352,10 @@ Future<dynamic> createHTTPreq(
           'Access-Control-Allow-Origin': 'https://api.settlenow.in'
         },
         body: jsonEncode({"data": tokenization}));
+    
+    if (res.statusCode == 503) {
+      return res;
+    }
 
     var resData = jsonDecode(res.body);
     if (resData['data'] != null) {

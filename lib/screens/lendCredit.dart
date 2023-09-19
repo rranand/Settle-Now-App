@@ -147,8 +147,7 @@ class _LendCreditState extends State<LendCredit> {
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
-      } else if (jsonDecode(response.body)['maintenance'] != null &&
-          jsonDecode(response.body)['maintenance']) {
+      } else if (response.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
             context,

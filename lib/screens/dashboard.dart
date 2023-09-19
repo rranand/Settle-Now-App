@@ -691,8 +691,7 @@ class _DashBoardState extends State<DashBoard> {
         if (this.mounted) {
           setState(() {});
         }
-      } else if (jsonDecode(response.body)['maintenance'] != null &&
-          jsonDecode(response.body)['maintenance']) {
+      } else if (response.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
             context,
@@ -4350,8 +4349,7 @@ class _RoomWidgetState extends State<RoomWidget> {
         if (this.mounted) {
           setState(() {});
         }
-      } else if (jsonDecode(response.body)['maintenance'] != null &&
-          jsonDecode(response.body)['maintenance']) {
+      } else if (response.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
             context,

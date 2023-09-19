@@ -782,8 +782,7 @@ class _LendPageState extends State<LendPage> {
         otherUserData = jsonDecode(response.body)['otherUser'];
         closed = jsonDecode(response.body)['closed'] ||
             jsonDecode(response.body)['closedOther'];
-      } else if (jsonDecode(response.body)['maintenance'] != null &&
-          jsonDecode(response.body)['maintenance']) {
+      } else if (response.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
             context,

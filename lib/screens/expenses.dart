@@ -136,8 +136,7 @@ class _ExpensesState extends State<Expenses> {
       if (response.statusCode == 200) {
         loaded = true;
         TransList = jsonDecode(response.body)['data'];
-      } else if (jsonDecode(response.body)['maintenance'] != null &&
-          jsonDecode(response.body)['maintenance']) {
+      } else if (response.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
             context,
