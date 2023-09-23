@@ -4396,7 +4396,8 @@ class _ExpenseDataState extends State<ExpenseData> {
     super.dispose();
   }
 
-  updateExpenseManual(List<dynamic> memberExpense, String id) async {
+  updateExpenseManual(
+      List<dynamic> memberExpense, String id, String type) async {
     try {
       Map<String, String> splitMember = {};
       for (int i = 0; i < memberExpense.length; i++) {
@@ -4409,7 +4410,8 @@ class _ExpenseDataState extends State<ExpenseData> {
         'roomKey': crypto.encrypt(widget.RoomKey),
         'purpose': crypto.encrypt(_purpose.text),
         'id': crypto.encrypt(id),
-        'split': crypto.encrypt(splitMember.toString())
+        'split': crypto.encrypt(splitMember.toString()),
+        'type': crypto.encrypt(type)
       };
 
       final response = await createHTTPreq(
@@ -4709,7 +4711,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         buildShowDialog(context);
                                       }
                                       await updateExpenseManual(
-                                          memberExpense, id);
+                                          memberExpense, id, "0");
                                       if (this.mounted) {
                                         Navigator.pop(context);
                                       }
@@ -5029,15 +5031,21 @@ class _ExpenseDataState extends State<ExpenseData> {
                                     if (this.mounted) {
                                       buildShowDialog(context);
                                     }
-                                    await _updateTransaction(
-                                        context,
-                                        _purpose.text,
-                                        id,
-                                        _amount.text,
-                                        "1",
-                                        partialExpense.isEmpty ? "0" : "1",
-                                        widget.roomExpenseCategory
-                                            .indexOf(type));
+                                    if (manualSplit) {
+                                      await updateExpenseManual(
+                                          partialExpense, id, "1");
+                                    } else {
+                                      await _updateTransaction(
+                                          context,
+                                          _purpose.text,
+                                          id,
+                                          _amount.text,
+                                          "1",
+                                          partialExpense.isEmpty ? "0" : "1",
+                                          widget.roomExpenseCategory
+                                              .indexOf(type));
+                                    }
+
                                     if (this.mounted) {
                                       Navigator.pop(context);
                                     }
