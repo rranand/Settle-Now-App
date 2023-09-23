@@ -79,7 +79,6 @@ class _RoomExpenseState extends State<RoomExpense>
   final _formKey = GlobalKey<FormState>();
   bool showExpenseYouAreIn = false;
   String yourExpense = "";
-  double totalExpense = 0;
   List<ChartData> dataMap = [];
   List<ChartData> dataMapByUser = [];
   List<Map> getContactsFromDB = [];
@@ -228,7 +227,6 @@ class _RoomExpenseState extends State<RoomExpense>
         loaded = false;
         allExpenseList.clear();
         TransList.clear();
-        totalExpense = 0;
         list.clear();
         roomExpenseCategory.clear();
         membersListName.clear();
@@ -281,8 +279,6 @@ class _RoomExpenseState extends State<RoomExpense>
               crypto.decrypt(list[i]["email"]),
               crypto.decrypt(list[i]["pic"]),
               double.parse(crypto.decrypt(list[i]["yourExpense"]))));
-          totalExpense += double.parse(crypto.decrypt(list[i]["Expense"])) +
-              double.parse(crypto.decrypt(list[i]["TotalSplitExpense"]));
           if (crypto.decrypt(list[i]["email"]) == widget.email) {
             yourExpense = crypto.decrypt(list[i]["yourExpense"]);
             if (list[i]["done"]) {
@@ -1565,20 +1561,6 @@ class _RoomExpenseState extends State<RoomExpense>
                             ),
                           ),
                           ListTile(
-                            title: Text("Total Spent"),
-                            trailing: Container(
-                              width: 150,
-                              height: 15.0,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(
-                                    color: Colors.white,
-                                  ),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(20))),
-                            ),
-                          ),
-                          ListTile(
                             title: Text("You Spent"),
                             trailing: Container(
                               width: 150,
@@ -1983,34 +1965,14 @@ class _RoomExpenseState extends State<RoomExpense>
                   SliverToBoxAdapter(
                     child: InkWell(
                       onTap: () async {
-                        if (kIsWeb) {
-                          Clipboard.setData(
-                              ClipboardData(text: widget.roomKey));
-                          showToast(context, "Join Key Copied", Icons.check);
-                        } else {
-                          await Share.share("Join " +
-                              widget.roomName +
-                              "\nRoom Key: " +
-                              widget.roomKey +
-                              "\n" +
-                              widget.roomLink);
-                        }
-                      },
-                      onLongPress: () async {
                         Clipboard.setData(ClipboardData(text: widget.roomKey));
-                        showToast(context, "Join Key Copied", Icons.check);
+                        showToast(
+                            context, "Join Key Copied", Icons.copy_outlined);
                       },
                       child: ListTile(
                         title: Text("Room Key   "),
                         trailing: Text(widget.roomKey),
                       ),
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: ListTile(
-                      title: const Text("Total Spent"),
-                      trailing: Text("₹ " +
-                          commaSeperator(totalExpense.toStringAsFixed(2))),
                     ),
                   ),
                   SliverToBoxAdapter(
@@ -3511,6 +3473,19 @@ class _RoomExpenseState extends State<RoomExpense>
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.roomName),
+          actions: [
+            InkWell(
+              onTap: () async {
+                await Share.share("Join " +
+                    widget.roomName +
+                    "\nRoom Key: " +
+                    widget.roomKey +
+                    "\n" +
+                    widget.roomLink);
+              },
+              child: Icon(Icons.share_outlined),
+            )
+          ],
         ),
         body: WillPopScope(
             onWillPop: () {
