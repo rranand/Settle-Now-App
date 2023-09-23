@@ -5193,16 +5193,18 @@ class _ExpenseDataState extends State<ExpenseData> {
                                       ),
                                     ],
                                   ),
-                                  Text(
-                                    "₹ " +
-                                        crypto.decrypt(
-                                            partialExpense[index]['amt']),
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
+                                  manualSplit
+                                      ? Text(
+                                          "₹ " +
+                                              crypto.decrypt(
+                                                  partialExpense[index]['amt']),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        )
+                                      : SizedBox(),
                                 ],
                               ),
                             );
@@ -5223,7 +5225,10 @@ class _ExpenseDataState extends State<ExpenseData> {
                               buildShowDialog(context);
                             }
                             await addToPersonalExpense(
-                                id, partialExpense.isEmpty ? "0" : "1");
+                                id,
+                                partialExpense.isEmpty
+                                    ? "0"
+                                    : (manualSplit ? "2" : "1"));
                             if (this.mounted) {
                               Navigator.pop(context);
                             }

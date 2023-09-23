@@ -1005,7 +1005,7 @@ class _ExpensesState extends State<Expenses> {
                                               );
                                             },
                                             child: SizedBox(
-                                              height: 165,
+                                              height: 135,
                                               child: Card(
                                                 elevation: 2.0,
                                                 shadowColor: Theme.of(context)
@@ -1043,7 +1043,7 @@ class _ExpensesState extends State<Expenses> {
                                                                         .start,
                                                                 children: [
                                                                   SizedBox(
-                                                                    height: 10,
+                                                                    height: 4,
                                                                   ),
                                                                   Text(
                                                                     crypto.decrypt(
@@ -1061,7 +1061,7 @@ class _ExpensesState extends State<Expenses> {
                                                                             FontWeight.w500),
                                                                   ),
                                                                   SizedBox(
-                                                                    height: 10,
+                                                                    height: 4,
                                                                   ),
                                                                   Opacity(
                                                                     opacity:
@@ -1079,7 +1079,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     ),
                                                                   ),
                                                                   SizedBox(
-                                                                    height: 10,
+                                                                    height: 4,
                                                                   ),
                                                                   Opacity(
                                                                     opacity:
@@ -1097,7 +1097,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     ),
                                                                   ),
                                                                   SizedBox(
-                                                                    height: 10,
+                                                                    height: 4,
                                                                   ),
                                                                   Opacity(
                                                                     opacity:
@@ -1229,7 +1229,7 @@ class _ExpensesState extends State<Expenses> {
                                             },
                                             child: SizedBox(
                                               child: Card(
-                                                elevation: 2.0,
+                                                elevation: 1.0,
                                                 shadowColor: Theme.of(context)
                                                     .primaryColor,
                                                 color: Theme.of(context)
@@ -1286,8 +1286,7 @@ class _ExpensesState extends State<Expenses> {
                                                                               FontWeight.w500),
                                                                     ),
                                                                     SizedBox(
-                                                                      height:
-                                                                          15,
+                                                                      height: 4,
                                                                     ),
                                                                     Opacity(
                                                                       opacity:
@@ -1306,8 +1305,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       ),
                                                                     ),
                                                                     SizedBox(
-                                                                      height:
-                                                                          15,
+                                                                      height: 4,
                                                                     ),
                                                                     Opacity(
                                                                       opacity:
@@ -1454,9 +1452,9 @@ class _ExpensesState extends State<Expenses> {
                                           );
                                         },
                                         child: SizedBox(
-                                          height: 165,
+                                          height: 135,
                                           child: Card(
-                                            elevation: 2.0,
+                                            elevation: 1.0,
                                             shadowColor:
                                                 Theme.of(context).primaryColor,
                                             color: Theme.of(context)
@@ -1491,7 +1489,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     .start,
                                                             children: [
                                                               SizedBox(
-                                                                height: 10,
+                                                                height: 4,
                                                               ),
                                                               Text(
                                                                 crypto.decrypt(
@@ -1511,7 +1509,7 @@ class _ExpensesState extends State<Expenses> {
                                                                             .w500),
                                                               ),
                                                               SizedBox(
-                                                                height: 10,
+                                                                height: 4,
                                                               ),
                                                               Opacity(
                                                                 opacity: 0.8,
@@ -1529,7 +1527,7 @@ class _ExpensesState extends State<Expenses> {
                                                                 ),
                                                               ),
                                                               SizedBox(
-                                                                height: 10,
+                                                                height: 4,
                                                               ),
                                                               Opacity(
                                                                 opacity: 0.8,
@@ -1547,7 +1545,7 @@ class _ExpensesState extends State<Expenses> {
                                                                 ),
                                                               ),
                                                               SizedBox(
-                                                                height: 10,
+                                                                height: 4,
                                                               ),
                                                               Opacity(
                                                                 opacity: 0.8,
@@ -1718,7 +1716,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     .start,
                                                             children: [
                                                               SizedBox(
-                                                                height: 10,
+                                                                height: 4,
                                                               ),
                                                               Text(
                                                                 crypto.decrypt(
@@ -1738,7 +1736,7 @@ class _ExpensesState extends State<Expenses> {
                                                                             .w500),
                                                               ),
                                                               SizedBox(
-                                                                height: 8,
+                                                                height: 4,
                                                               ),
                                                               Opacity(
                                                                 opacity: 0.8,
@@ -1761,7 +1759,7 @@ class _ExpensesState extends State<Expenses> {
                                                                 ),
                                                               ),
                                                               SizedBox(
-                                                                height: 8,
+                                                                height: 4,
                                                               ),
                                                               Opacity(
                                                                 opacity: 0.8,
