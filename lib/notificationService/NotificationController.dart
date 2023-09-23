@@ -78,7 +78,8 @@ class NotificationController {
                   firstTime: false,
                 )));
       }
-    } else {
+    } else if (receivedAction.payload!["type"] == "room" ||
+        receivedAction.payload!["type"] == "lend") {
       NavKey.navKey.currentState!.push(MaterialPageRoute(
           builder: (_) => ((receivedAction.payload!["type"]!) == "room"
               ? RoomExpense(

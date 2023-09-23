@@ -481,7 +481,7 @@ class _ExpensesState extends State<Expenses> {
                     height: 10,
                   ),
                   Text(
-                    "Created: " + formatDateTime(date),
+                    "Spent On: " + formatDateTime(date),
                     style: TextStyle(fontSize: 18),
                   ),
                   isEdited

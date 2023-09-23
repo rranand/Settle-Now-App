@@ -228,45 +228,45 @@ class _DashBoardState extends State<DashBoard> {
         },
       );
 
-  Future<void> logout() async {
-    if (this.mounted && Overlay.of(context).mounted) {
-      if (!isLogoutTriggered) {
-        setState(() {
-          isLogoutTriggered = true;
-        });
+  Future<void> logout(bool manually) async {
+    if (this.mounted && Overlay.of(context).mounted && !isLogoutTriggered) {
+      setState(() {
+        isLogoutTriggered = true;
+      });
+      if (!manually) {
         showToast(context, "Login Expired", Icons.warning_outlined);
-        buildShowDialog(context);
-        if (kIsWeb) {
-          await Future.wait([
-            prefs.remove("token"),
-            prefs.remove("__token"),
-            prefs.remove("___token"),
-            deleteToken(),
-            logOutFromGoogle()
-          ]);
-        } else {
-          await Future.wait([
-            deleteDB(),
-            prefs.remove("token"),
-            prefs.remove("__token"),
-            prefs.remove("___token"),
-            AwesomeNotifications().cancelAllSchedules(),
-            deleteToken(),
-            logOutFromGoogle()
-          ]);
-        }
-        Navigator.pop(context);
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Overlay(initialEntries: [
-                    OverlayEntry(
-                        builder: (context) => SafeArea(child: LoginPage()))
-                  ])),
-          (Route<dynamic> route) => false,
-        );
       }
+      buildShowDialog(context);
+      if (kIsWeb) {
+        await Future.wait([
+          prefs.remove("token"),
+          prefs.remove("__token"),
+          prefs.remove("___token"),
+          deleteToken(),
+          logOutFromGoogle()
+        ]);
+      } else {
+        await Future.wait([
+          deleteDB(),
+          prefs.remove("token"),
+          prefs.remove("__token"),
+          prefs.remove("___token"),
+          AwesomeNotifications().cancelAllSchedules(),
+          deleteToken(),
+          logOutFromGoogle()
+        ]);
+      }
+      Navigator.pop(context);
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (context) => Overlay(initialEntries: [
+                  OverlayEntry(
+                      builder: (context) => SafeArea(child: LoginPage()))
+                ])),
+        (Route<dynamic> route) => false,
+      );
     }
   }
 
@@ -704,7 +704,7 @@ class _DashBoardState extends State<DashBoard> {
             crypto.decrypt(jsonDecode(response.body)['Message']);
 
         if (errorMessage == 'Login Expired') {
-          await logout();
+          await logout(false);
         } else if (this.mounted) {
           showToast(context, errorMessage, Icons.close);
         }
@@ -743,7 +743,7 @@ class _DashBoardState extends State<DashBoard> {
         String errorMessage = crypto.decrypt(data["Message"]);
 
         if (errorMessage == 'Login Expired') {
-          await logout();
+          await logout(false);
         } else if (this.mounted) {
           showToast(context, errorMessage, Icons.close);
         }
@@ -839,7 +839,7 @@ class _DashBoardState extends State<DashBoard> {
       } else {
         String errorMessage = crypto.decrypt(data["Message"]);
         if (errorMessage == 'Login Expired') {
-          await logout();
+          await logout(false);
         } else if (this.mounted) {
           showToast(context, errorMessage, Icons.close);
         }
@@ -2027,7 +2027,7 @@ class _DashBoardState extends State<DashBoard> {
       bottomNavigationBar: SafeArea(
         child: Container(
             padding: EdgeInsets.all(12),
-            margin: EdgeInsets.symmetric(horizontal: 110, vertical: 16),
+            margin: EdgeInsets.symmetric(horizontal: 90, vertical: 16),
             decoration: BoxDecoration(
                 color:
                     Theme.of(context).colorScheme.background.withOpacity(0.5),
@@ -3880,7 +3880,7 @@ class _DashBoardState extends State<DashBoard> {
                   ListTile(
                     onTap: () async {
                       if (this.mounted) {
-                        await logout();
+                        await logout(true);
                       }
                     },
                     leading: Icon(

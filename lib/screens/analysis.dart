@@ -355,7 +355,7 @@ class _AnalysisState extends State<Analysis> {
       bottomNavigationBar: SafeArea(
         child: Container(
             padding: EdgeInsets.all(12),
-            margin: EdgeInsets.symmetric(horizontal: 70, vertical: 16),
+            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
             decoration: BoxDecoration(
                 color:
                     Theme.of(context).colorScheme.background.withOpacity(0.5),
