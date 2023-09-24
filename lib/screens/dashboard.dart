@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -18,8 +19,10 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
+import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -37,8 +40,10 @@ import 'package:settlenow/screens/summary.dart';
 import 'package:settlenow/screens/rooms.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
+import '../models/FriendEach.dart';
 import '../notificationService/NotificationController.dart';
 import '../others/themes.dart';
 import 'package:provider/provider.dart';
@@ -93,6 +98,8 @@ class _DashBoardState extends State<DashBoard> {
   int dash = 0;
   bool isGoogle = false;
   var now;
+  final TextEditingController _amt = TextEditingController();
+  final TextEditingController _purpose = TextEditingController();
   String date = "";
   bool notificationSetupComplete = false;
   final TextEditingController _email = TextEditingController();
@@ -102,7 +109,9 @@ class _DashBoardState extends State<DashBoard> {
   late SharedPreferences prefs;
   final ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
   final ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
+  final ValueNotifier<bool> quickSplitDataHasMore = ValueNotifier(true);
   final TextEditingController _NRoom = TextEditingController();
+  final ValueNotifier<List<QuickSplitEach>> quickSplitData = ValueNotifier([]);
   final ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
   final ValueNotifier<List<RoomEach>> RoomDataC = ValueNotifier([]);
   final ValueNotifier<List<RoomEach>> SearchRoomData = ValueNotifier([]);
@@ -128,6 +137,8 @@ class _DashBoardState extends State<DashBoard> {
   late ShareMessage shareMessage;
   bool activeRoomDataFetched = false;
   bool inActiveRoomDataFetched = false;
+  bool quickSplitDataFetched = false;
+  int roomExpenseCategoryIndex = 0;
   bool isItAndroidDevice = false;
   final ValueNotifier<Map<String, List<dynamic>>> membersData =
       ValueNotifier(new Map());
@@ -181,6 +192,9 @@ class _DashBoardState extends State<DashBoard> {
   bool initalDataLoaded = false;
   bool isInvitePremissionProvided = false;
   bool isSentRoomRequestLoaded = false;
+  List<FriendEach> friendDataSearched = [];
+  List<FriendEach> friendData = [];
+  bool loadFriendData = false;
   List<int> from = [];
   List<int> to = [];
   bool error = false;
@@ -191,7 +205,7 @@ class _DashBoardState extends State<DashBoard> {
   List<String> roomStatus = ['All', 'Active', 'Closed'];
   int roomStatusIndex = 0;
   bool imageUploading = false;
-  bool open = true;
+  int open = 1;
   String _profilePicID = "";
   List<dynamic> RoomRequest = [];
   List<dynamic> sentRoomRequest = [];
@@ -206,6 +220,25 @@ class _DashBoardState extends State<DashBoard> {
   bool isDeviceConnected = false;
   bool isLogoutTriggered = false;
   bool isAlertSet = false;
+  final _formKey = GlobalKey<FormState>();
+  bool splitManually = false;
+  DateTime expenseDate = DateTime.now();
+  Map<String, double> manualSplitAmount = {};
+  Map<String, double> customManualSplitAmount = {};
+  List<FriendEach> addExpenseTo = [];
+  List<Map> getContactsFromDB = [];
+  final TextEditingController _searchFriend = TextEditingController();
+  List<FriendEach> aditionalMembers = [];
+
+  Future<void> getContactsFromLocal() async {
+    try {
+      String path = await getDBFilePath('contact_data.db');
+
+      Database database = await openDatabase(path);
+      getContactsFromDB =
+          await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
+    } on Exception catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -341,11 +374,11 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future<void> getMembersData(bool roomType) async {
+  Future<void> getMembersData(int roomType) async {
     try {
       Map<String, dynamic> jsonInputData = {
         "email": crypto.encrypt(_email.text),
-        "roomType": roomType,
+        "roomType": roomType == 1,
         'hasAlready': crypto.encrypt("0")
       };
 
@@ -639,8 +672,8 @@ class _DashBoardState extends State<DashBoard> {
     await Future.wait([_extractEmail(open), getMembersData(open)]);
   }
 
-  Future<void> _extractEmail(bool roomType) async {
-    if (roomType) {
+  Future<void> _extractEmail(int roomType) async {
+    if (roomType == 1) {
       activeRoomDataFetched = false;
       RoomDataO.value.clear();
     } else {
@@ -658,7 +691,7 @@ class _DashBoardState extends State<DashBoard> {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email.text),
         'version': crypto.encrypt(appVersion),
-        'roomType': roomType,
+        'roomType': roomType == 1,
         'hasAlready': crypto.encrypt("0")
       };
 
@@ -666,7 +699,7 @@ class _DashBoardState extends State<DashBoard> {
           await createHTTPreq('data', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
-        if (roomType) {
+        if (roomType == 1) {
           activeRoomHasMore.value = jsonDecode(response.body)['hasMore'];
         } else {
           inActiveRoomHasMore.value = jsonDecode(response.body)['hasMore'];
@@ -675,14 +708,14 @@ class _DashBoardState extends State<DashBoard> {
         List<dynamic> list = jsonDecode(response.body)['data'];
 
         for (int i = 0; i < list.length; i++) {
-          if (roomType) {
+          if (roomType == 1) {
             RoomDataO.value.add(RoomEach.fromJson(list[i]));
           } else {
             RoomDataC.value.add(RoomEach.fromJson(list[i]));
           }
         }
 
-        if (roomType) {
+        if (roomType == 1) {
           activeRoomDataFetched = true;
         } else {
           inActiveRoomDataFetched = true;
@@ -767,41 +800,75 @@ class _DashBoardState extends State<DashBoard> {
     }
 
     try {
-      if (flag) {
-        Map<String, dynamic> jsonInputData = {
-          'email': crypto.encrypt(_email.text),
-          'roomName': crypto.encrypt(_NRoom.text),
-        };
+      if (open == 0) {
+        if (!flag) {
+          Map<String, dynamic> jsonInputData = {
+            'email': crypto.encrypt(_email.text),
+            'roomKey': crypto.encrypt(_NRoom.text),
+          };
 
-        response =
-            await createHTTPreq('room', http.post, _token, jsonInputData);
+          response = await createHTTPreq(
+              'quickSplit/join', http.post, _token, jsonInputData);
+
+          _NRoom.text = "";
+          var JsonData = jsonDecode(response.body);
+
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
+          if (this.mounted) {
+            Navigator.pop(context);
+          }
+
+          if (response.statusCode == 200) {
+            quickSplitData.value.insert(
+                0, QuickSplitEach.fromJson(jsonDecode(response.body)['data']));
+          } else {
+            showToast(
+                context, crypto.decrypt(JsonData["Message"]), Icons.close);
+          }
+        }
       } else {
-        Map<String, dynamic> jsonInputData = {
-          'email': crypto.encrypt(_email.text),
-          'roomKey': crypto.encrypt(_NRoom.text),
-        };
+        if (flag) {
+          Map<String, dynamic> jsonInputData = {
+            'email': crypto.encrypt(_email.text),
+            'roomName': crypto.encrypt(_NRoom.text),
+          };
 
-        response = await createHTTPreq('room', http.put, _token, jsonInputData);
-      }
+          response =
+              await createHTTPreq('room', http.post, _token, jsonInputData);
+        } else {
+          Map<String, dynamic> jsonInputData = {
+            'email': crypto.encrypt(_email.text),
+            'roomKey': crypto.encrypt(_NRoom.text),
+          };
 
-      _NRoom.text = "";
-      var JsonData = jsonDecode(response.body);
+          response =
+              await createHTTPreq('room', http.put, _token, jsonInputData);
+        }
 
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
+        _NRoom.text = "";
+        var JsonData = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
-        RoomDataO.value
-            .insert(0, RoomEach.fromJson(jsonDecode(response.body)['data']));
-      } else {
-        showToast(context, crypto.decrypt(JsonData["Message"]), Icons.close);
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+
+        if (response.statusCode == 200) {
+          RoomDataO.value
+              .insert(0, RoomEach.fromJson(jsonDecode(response.body)['data']));
+        } else {
+          showToast(context, crypto.decrypt(JsonData["Message"]), Icons.close);
+        }
       }
     } on Exception catch (_) {
       if (this.mounted) {
@@ -929,6 +996,31 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  Future<void> getQuickSplitExpenses() async {
+    try {
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+      };
+
+      final response = await createHTTPreq(
+          'quickSplit/get', http.post, _token, jsonInputData);
+      var data = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+      } else {
+        var tempArr = data["data"];
+        for (int i = 0; i < tempArr.length; i++) {
+          quickSplitData.value.add(QuickSplitEach.fromJson(tempArr[i]));
+        }
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+  }
+
   executeParallel() async {
     do {
       await initalDataLoad();
@@ -937,42 +1029,48 @@ class _DashBoardState extends State<DashBoard> {
     if (kIsWeb) {
       await Future.wait([
         getInitialData(),
-        _extractEmail(true),
-        _extractEmail(false),
+        _extractEmail(1),
+        _extractEmail(2),
         getRoomRequest(),
         fetchSentRequest(),
         _getImageID(),
-        getMembersData(true),
-        getMembersData(false)
+        getMembersData(1),
+        getMembersData(2),
+        getFriendData(),
+        getQuickSplitExpenses()
       ]);
     } else if (Platform.isAndroid) {
       await Future.wait([
         getInitialData(),
         manualUpdateCheck(),
         checkforScheduledNotifications(),
-        _extractEmail(true),
-        _extractEmail(false),
+        _extractEmail(1),
+        _extractEmail(2),
         ContactPermissionGranted(),
         _updateCheck(),
         getRoomRequest(),
         fetchSentRequest(),
         _getImageID(),
-        getMembersData(true),
-        getMembersData(false)
+        getMembersData(1),
+        getMembersData(2),
+        getFriendData(),
+        getQuickSplitExpenses()
       ]);
     } else if (Platform.isIOS) {
       await Future.wait([
         getInitialData(),
         manualUpdateCheck(),
         checkforScheduledNotifications(),
-        _extractEmail(true),
-        _extractEmail(false),
+        _extractEmail(1),
+        _extractEmail(2),
         ContactPermissionGranted(),
         getRoomRequest(),
         fetchSentRequest(),
         _getImageID(),
-        getMembersData(true),
-        getMembersData(false)
+        getMembersData(1),
+        getMembersData(2),
+        getFriendData(),
+        getQuickSplitExpenses()
       ]);
     }
   }
@@ -1229,6 +1327,1125 @@ class _DashBoardState extends State<DashBoard> {
                                     ],
                                   )
                                 ])))));
+          });
+        });
+  }
+
+  Widget memberCard(List<FriendEach> data, int index, Function ss) {
+    return SizedBox(
+        height: 80,
+        child: Center(
+          child: Card(
+            elevation: 1.0,
+            shadowColor: Theme.of(context).primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      height: 51,
+                      child: CachedNetworkImage(
+                        httpHeaders: {'Access-Control-Allow-Origin': '*'},
+                        imageUrl: data[index].pic.length == 0
+                            ? addCorsinImage(global.driveUrl +
+                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                            : addCorsinImage(data[index].pic),
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) =>
+                                CircularProgressIndicator(
+                                    value: downloadProgress.progress),
+                        errorWidget: (context, url, error) => Container(
+                          width: 45.0,
+                          height: 45.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                image: AssetImage('assets/Images/unknown.jpeg'),
+                                fit: BoxFit.cover),
+                          ),
+                        ),
+                        imageBuilder: (context, imageProvider) => Container(
+                          width: 45.0,
+                          height: 45.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                image: imageProvider, fit: BoxFit.cover),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 250,
+                      child: InkWell(
+                        onTap: () {
+                          showToast(context, data[index].name, Icons.person);
+                        },
+                        child: AutoSizeText(
+                          data[index].name,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 17),
+                          maxFontSize: 21,
+                          minFontSize: 17,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                        onPressed: () async {
+                          if (data[index].email.isEmpty) {
+                            aditionalMembers.removeAt(index);
+                          } else {
+                            if (addExpenseTo.contains(data[index])) {
+                              addExpenseTo.remove(data[index]);
+                            } else {
+                              addExpenseTo.add(data[index]);
+                            }
+                          }
+                          if (this.mounted) {
+                            ss(() {});
+                          }
+                        },
+                        icon: data[index].email.isEmpty
+                            ? Icon(Icons.cancel_outlined)
+                            : Icon(!addExpenseTo.contains(data[index])
+                                ? Icons.person_add_alt
+                                : Icons.cancel_outlined))
+                  ]),
+            ),
+          ),
+        ));
+  }
+
+  Widget friendListWidget(BuildContext context, List<FriendEach> data) {
+    return StatefulBuilder(builder: (context, setState) {
+      return Scrollbar(
+        radius: Radius.circular(10.0),
+        thickness: 5.5,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.65,
+              child: ListView.separated(
+                  separatorBuilder: (context, index) => SizedBox(
+                        height: 5,
+                      ),
+                  shrinkWrap: true,
+                  physics: ScrollPhysics(),
+                  itemCount: data.length + aditionalMembers.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index < aditionalMembers.length) {
+                      return memberCard(aditionalMembers, index, setState);
+                    } else {
+                      return memberCard(
+                          data, index - aditionalMembers.length, setState);
+                    }
+                  }),
+            ),
+            InkWell(
+              onTap: () {
+                final name = new TextEditingController();
+                final nameForm = GlobalKey<FormState>();
+                final themeProvider =
+                    Provider.of<ThemeProvider>(context, listen: false);
+                showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return StatefulBuilder(builder: (context, setState) {
+                        return Dialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0)),
+                            child: SizedBox(
+                              height: 165,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Form(
+                                      key: nameForm,
+                                      child: TextFormField(
+                                        controller: name,
+                                        keyboardType: TextInputType.text,
+                                        maxLength: 100,
+                                        maxLines: 1,
+                                        style: const TextStyle(fontSize: 18),
+                                        autocorrect: false,
+                                        validator: (value) {
+                                          RegExp validateName =
+                                              RegExp(r'^[\w\s]{2,}$');
+                                          if (!validateName
+                                              .hasMatch(name.text)) {
+                                            return "Enter Valid Name";
+                                          }
+                                          return null;
+                                        },
+                                        decoration: const InputDecoration(
+                                          contentPadding: EdgeInsets.all(8.0),
+                                          hintText: "Enter Name",
+                                          counterText: "",
+                                          labelText: "Name",
+                                          errorStyle: TextStyle(fontSize: 15),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        SizedBox(
+                                          height: 43,
+                                          width: 100,
+                                          child: OutlinedButton(
+                                              style: OutlinedButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .primaryColor),
+                                              ),
+                                              child: Text(
+                                                "Close",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: themeProvider
+                                                            .isDarkTheme
+                                                        ? Colors.white
+                                                        : Colors.black),
+                                              ),
+                                              onPressed: () {
+                                                if (this.mounted) {
+                                                  Navigator.pop(context);
+                                                }
+                                              }),
+                                        ),
+                                        SizedBox(
+                                          height: 43,
+                                          width: 100,
+                                          child: OutlinedButton(
+                                              style: OutlinedButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                side: BorderSide(
+                                                    color: Theme.of(context)
+                                                        .primaryColor),
+                                              ),
+                                              child: Text(
+                                                "Add",
+                                                style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: themeProvider
+                                                            .isDarkTheme
+                                                        ? Colors.white
+                                                        : Colors.black),
+                                              ),
+                                              onPressed: () {
+                                                if (nameForm.currentState!
+                                                    .validate()) {
+                                                  aditionalMembers.add(
+                                                      FriendEach(
+                                                          name: name.text,
+                                                          email: "",
+                                                          status: "",
+                                                          pic: "",
+                                                          isGoogle: false,
+                                                          phoneNo: "",
+                                                          fromContact: false));
+                                                  if (this.mounted) {
+                                                    setState(() {});
+                                                    Navigator.pop(context);
+                                                  }
+                                                }
+                                              }),
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ));
+                      });
+                    });
+              },
+              child: Text(
+                'Add Member Manually',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
+          ],
+        ),
+      );
+    });
+  }
+
+  SearchFriend() {
+    if (this.mounted) {
+      setState(() {
+        friendDataSearched.clear();
+      });
+    }
+
+    for (int i = 0; i < friendData.length; i++) {
+      if (friendData[i]
+          .name
+          .toString()
+          .toLowerCase()
+          .contains(_searchFriend.text.toLowerCase())) {
+        friendDataSearched.add(friendData[i]);
+      }
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  Widget addFriendWidget(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      child: Container(
+          width: MediaQuery.of(context).size.width,
+          child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Invite Member",
+                        style: TextStyle(fontSize: 22),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Icon(Icons.cancel_outlined),
+                      )
+                    ],
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  loadFriendData
+                      ? friendData.isEmpty
+                          ? SizedBox(
+                              height: MediaQuery.of(context).size.height - 310,
+                              child: Center(
+                                child: Text(
+                                  "No User Found",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            )
+                          : Column(
+                              children: [
+                                TextField(
+                                  controller: _searchFriend,
+                                  keyboardType: TextInputType.text,
+                                  maxLines: 1,
+                                  style: const TextStyle(fontSize: 15),
+                                  autocorrect: false,
+                                  decoration: InputDecoration(
+                                    contentPadding: const EdgeInsets.all(8.0),
+                                    labelText: "Enter Name",
+                                    counterText: "",
+                                    errorStyle: const TextStyle(fontSize: 15),
+                                  ),
+                                  onChanged: (String s) {
+                                    _searchFriend.text = s;
+                                    _searchFriend.selection =
+                                        TextSelection.collapsed(
+                                            offset: _searchFriend.text.length);
+                                    SearchFriend();
+                                    if (this.mounted) {
+                                      setState(() {});
+                                    }
+                                  },
+                                ),
+                                SizedBox(
+                                  height: 13,
+                                ),
+                                SingleChildScrollView(
+                                  child: SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.7,
+                                    child: _searchFriend.text.isEmpty
+                                        ? friendListWidget(context, friendData)
+                                        : (friendDataSearched.isEmpty
+                                            ? Center(
+                                                child: Text(
+                                                  "No User Found",
+                                                  style:
+                                                      TextStyle(fontSize: 18),
+                                                ),
+                                              )
+                                            : friendListWidget(
+                                                context, friendDataSearched)),
+                                  ),
+                                ),
+                              ],
+                            )
+                      : SizedBox(
+                          height: MediaQuery.of(context).size.height - 310,
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                ],
+              ))),
+    );
+  }
+
+  Future<void> getFriendData() async {
+    try {
+      if (this.mounted) {
+        setState(() {
+          loadFriendData = false;
+          friendData.clear();
+        });
+      }
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+      };
+
+      final response =
+          await createHTTPreq('friend/all', http.post, _token, jsonInputData);
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        loadFriendData = true;
+        List<dynamic> tempData = data['data'];
+        for (int i = 0; i < tempData.length; i++) {
+          friendData.add(FriendEach.fromJson(tempData[i]));
+        }
+      } else {
+        if (this.mounted) {
+          showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+        }
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (!kIsWeb) {
+      friendData = getUnionOfContacts(getContactsFromDB, friendData);
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
+  addQuickSplitExpenseToSN(bool manualSplit) async {
+    try {
+      if (this.mounted) {
+        buildShowDialog(context);
+      }
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(_email.text),
+        'purpose': crypto.encrypt(_purpose.text),
+        'type': crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
+        'SNsplit': crypto.encrypt(manualSplitAmount.toString()),
+        '_split': crypto.encrypt(customManualSplitAmount.toString()),
+        'date': crypto
+            .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
+      };
+
+      final response =
+          await createHTTPreq('quickSplit', http.post, _token, jsonInputData);
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        aditionalMembers.clear();
+        addExpenseTo.clear();
+        quickSplitData.value.add(QuickSplitEach.fromJson(data["data"]));
+      } else {
+        if (this.mounted) {
+          showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+        }
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (manualSplit) {
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (manualSplit) {
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+  }
+
+  Widget eachMemberManualSplitCard(List<FriendEach> data, index, bool SNUser) {
+    final amountController = new TextEditingController(text: "0");
+    return Padding(
+      padding: const EdgeInsets.all(11.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              CachedNetworkImage(
+                httpHeaders: {'Access-Control-Allow-Origin': '*'},
+                imageUrl: addCorsinImage(data[index].pic.length == 0
+                    ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                    : data[index].pic),
+                progressIndicatorBuilder: (context, url, downloadProgress) =>
+                    CircularProgressIndicator(value: downloadProgress.progress),
+                errorWidget: (context, url, error) => Container(
+                  width: 40.0,
+                  height: 40.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: AssetImage('assets/Images/unknown.jpeg'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+                imageBuilder: (context, imageProvider) => Container(
+                  width: 40.0,
+                  height: 40.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                        image: imageProvider, fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 6,
+              ),
+              InkWell(
+                onTap: () =>
+                    showToast(context, data[index].name, Icons.person_outlined),
+                child: SizedBox(
+                  width: 130,
+                  child: Text(
+                    data[index].name,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Text(
+                "Rs",
+                style: TextStyle(fontSize: 16),
+              ),
+              SizedBox(
+                width: 4,
+              ),
+              SizedBox(
+                width: 50,
+                child: TextFormField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  maxLines: 1,
+                  style: const TextStyle(fontSize: 15),
+                  autocorrect: false,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.all(8.0),
+                    counterText: "",
+                    errorStyle: const TextStyle(fontSize: 16),
+                  ),
+                  validator: (value) {
+                    if (data[index].email == _email.text) {
+                      if (amountController.text == "0") {
+                        if (SNUser) {
+                          manualSplitAmount[data[index].email] =
+                              double.parse(amountController.text) * 100 / 100;
+                        } else {
+                          customManualSplitAmount[data[index].name] =
+                              double.parse(amountController.text) * 100 / 100;
+                        }
+
+                        return null;
+                      }
+                    }
+                    RegExp validateText = RegExp(r"^[1-9]\d*(\.\d+)?$");
+                    if (!validateText.hasMatch(amountController.text)) {
+                      return "";
+                    } else {
+                      if (SNUser) {
+                        manualSplitAmount[data[index].email] =
+                            double.parse(amountController.text) * 100 / 100;
+                      } else {
+                        customManualSplitAmount[data[index].name] =
+                            double.parse(amountController.text) * 100 / 100;
+                      }
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  splitManuallyWidget(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final _manualSplitKey = GlobalKey<FormState>();
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return Dialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0)),
+                child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.95,
+                    child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Form(
+                              key: _manualSplitKey,
+                              child: SizedBox(
+                                height: min(
+                                    75.0 *
+                                        (addExpenseTo.length +
+                                            aditionalMembers.length +
+                                            1),
+                                    MediaQuery.of(context).size.height * 0.8),
+                                child: ListView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: addExpenseTo.length +
+                                      aditionalMembers.length +
+                                      1,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    if (index < addExpenseTo.length) {
+                                      return eachMemberManualSplitCard(
+                                          addExpenseTo, index, true);
+                                    } else if (index - addExpenseTo.length <
+                                        aditionalMembers.length) {
+                                      return eachMemberManualSplitCard(
+                                          aditionalMembers,
+                                          index - addExpenseTo.length,
+                                          false);
+                                    } else {
+                                      return eachMemberManualSplitCard([
+                                        FriendEach(
+                                            name: _name.text,
+                                            email: _email.text,
+                                            status: "",
+                                            pic: isGoogle
+                                                ? _currentUser!.photoUrl
+                                                    .toString()
+                                                : _profilePicID,
+                                            isGoogle: isGoogle,
+                                            phoneNo: "",
+                                            fromContact: false)
+                                      ], 0, true);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    height: 43,
+                                    width: 100,
+                                    child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        child: Text(
+                                          "Close",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeProvider.isDarkTheme
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                        onPressed: () {
+                                          if (this.mounted) {
+                                            Navigator.pop(context);
+                                          }
+                                        }),
+                                  ),
+                                  SizedBox(
+                                    height: 43,
+                                    width: 100,
+                                    child: OutlinedButton(
+                                        child: Text(
+                                          "Add",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeProvider.isDarkTheme
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        onPressed: () async {
+                                          if (_manualSplitKey.currentState!
+                                              .validate()) {
+                                            addQuickSplitExpenseToSN(true);
+                                          } else {
+                                            showToast(context, "Invalid Amount",
+                                                Icons.warning_outlined);
+                                          }
+                                        }),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            )
+                          ],
+                        ))));
+          });
+        });
+  }
+
+  AddQuickSplitExpense() {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.0)),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Column(mainAxisSize: MainAxisSize.min, children: [
+                      Text(
+                        "Add Expense",
+                        style: TextStyle(fontSize: 22),
+                      ),
+                      SizedBox(
+                        height: 5,
+                      ),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            splitManually
+                                ? SizedBox()
+                                : TextFormField(
+                                    controller: _amt,
+                                    keyboardType: TextInputType.number,
+                                    maxLength: 10,
+                                    maxLines: 1,
+                                    style: const TextStyle(fontSize: 18),
+                                    autocorrect: false,
+                                    validator: (value) {
+                                      RegExp validateNumber =
+                                          RegExp(r'\b[1-9]{1}[\d]*\b');
+                                      if (!validateNumber.hasMatch(_amt.text)) {
+                                        return "Enter Valid Amount";
+                                      }
+                                      return null;
+                                    },
+                                    decoration: const InputDecoration(
+                                      contentPadding: EdgeInsets.all(8.0),
+                                      hintText: "Enter Amount",
+                                      counterText: "",
+                                      labelText: "Amount",
+                                      errorStyle: TextStyle(fontSize: 15),
+                                    ),
+                                  ),
+                            TextFormField(
+                              controller: _purpose,
+                              keyboardType: TextInputType.text,
+                              maxLength: 1000,
+                              maxLines: 1,
+                              style: const TextStyle(fontSize: 18),
+                              autocorrect: false,
+                              validator: (value) {
+                                RegExp validateText = RegExp(r'\b[\w]+\b');
+                                if (!validateText.hasMatch(_purpose.text)) {
+                                  return "Enter Valid Purpose";
+                                }
+                                return null;
+                              },
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(8.0),
+                                hintText: "Enter Purpose",
+                                labelText: "Purpose",
+                                counterText: "",
+                                errorStyle: TextStyle(fontSize: 15),
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              height: 70,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: roomExpenseCategory.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        child: Card(
+                                          color: Theme.of(context)
+                                              .dialogBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color:
+                                                    roomExpenseCategoryIndex ==
+                                                            index
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Center(
+                                              child: Text(
+                                                roomExpenseCategory[index],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          if (this.mounted) {
+                                            setState(
+                                              () {
+                                                roomExpenseCategoryIndex =
+                                                    index;
+                                              },
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Add Member",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      if (this.mounted) {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              addFriendWidget(context),
+                                        );
+                                      }
+                                    },
+                                    child: Icon(
+                                      Icons.person_add_outlined,
+                                      size: 20,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Split Manually",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      if (this.mounted) {
+                                        setState(() {
+                                          splitManually = !splitManually;
+                                        });
+                                      }
+                                    },
+                                    child: Icon(
+                                      splitManually
+                                          ? Icons.toggle_on
+                                          : Icons.toggle_off,
+                                      size: 40,
+                                      color: splitManually
+                                          ? Theme.of(context).primaryColor
+                                          : null,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.8,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      DateFormat(global.dateTimeFormat_new)
+                                          .format(expenseDate),
+                                      style: TextStyle(fontSize: 18),
+                                    ),
+                                    InkWell(
+                                      onTap: () async {
+                                        DateTime? dateTime =
+                                            await showOmniDateTimePicker(
+                                          context: context,
+                                          is24HourMode: false,
+                                          isShowSeconds: false,
+                                          initialDate: expenseDate,
+                                          firstDate: DateTime(2018),
+                                          lastDate: DateTime.now(),
+                                          borderRadius:
+                                              BorderRadius.circular(16.0),
+                                        );
+
+                                        if (dateTime != null) {
+                                          if (this.mounted) {
+                                            setState(() {
+                                              expenseDate = dateTime;
+                                            });
+                                          }
+                                        }
+                                      },
+                                      child: Icon(
+                                        Icons.edit_calendar,
+                                        size: 22,
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    height: 43,
+                                    width: 100,
+                                    child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        child: Text(
+                                          "Close",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeProvider.isDarkTheme
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                        onPressed: () {
+                                          if (this.mounted) {
+                                            Navigator.pop(context);
+                                          }
+                                        }),
+                                  ),
+                                  SizedBox(
+                                    height: 43,
+                                    width: 100,
+                                    child: OutlinedButton(
+                                        child: Text(
+                                          splitManually ? "Next" : "Add",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeProvider.isDarkTheme
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        onPressed: () async {
+                                          if (addExpenseTo.isEmpty &&
+                                              aditionalMembers.isEmpty) {
+                                            showToast(context, "Choose Members",
+                                                Icons.warning_outlined);
+                                          } else {
+                                            manualSplitAmount.clear();
+                                            customManualSplitAmount.clear();
+                                            if (splitManually) {
+                                              RegExp validateText =
+                                                  RegExp(r'\b[\w]+\b');
+                                              if (!validateText
+                                                  .hasMatch(_purpose.text)) {
+                                                showToast(
+                                                    context,
+                                                    "Enter Valid Purpose",
+                                                    Icons.warning_outlined);
+                                              } else {
+                                                splitManuallyWidget(context);
+                                              }
+                                            } else {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                int membersCnt = 1 +
+                                                    addExpenseTo.length +
+                                                    aditionalMembers.length;
+                                                double avgAmt =
+                                                    (double.parse(_amt.text) *
+                                                            100 /
+                                                            membersCnt) /
+                                                        100;
+                                                addExpenseTo.forEach((element) {
+                                                  manualSplitAmount[
+                                                      element.email] = avgAmt;
+                                                });
+                                                aditionalMembers
+                                                    .forEach((element) {
+                                                  customManualSplitAmount[
+                                                      element.name] = avgAmt;
+                                                });
+
+                                                manualSplitAmount[_email.text] =
+                                                    avgAmt;
+
+                                                await addQuickSplitExpenseToSN(
+                                                    false);
+                                              }
+                                            }
+                                          }
+                                        }),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            )
+                          ],
+                        ),
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
+            );
           });
         });
   }
@@ -1948,7 +3165,7 @@ class _DashBoardState extends State<DashBoard> {
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
       if (flag == "1") {
         await Future.wait(
-            [_extractEmail(true), getRoomRequest(), getMembersData(true)]);
+            [_extractEmail(1), getRoomRequest(), getMembersData(1)]);
       } else {
         await _requestIndicatorKey.currentState?.show();
       }
@@ -2788,9 +4005,36 @@ class _DashBoardState extends State<DashBoard> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
+                                width: 100,
+                                height: 40,
+                                decoration: open == 0
+                                    ? BoxDecoration(
+                                        border: Border.all(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            width: 2),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(13)))
+                                    : null,
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text(
+                                      "Quick Split",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10,
+                              ),
+                              Container(
                                 width: 80,
                                 height: 40,
-                                decoration: open
+                                decoration: open == 1
                                     ? BoxDecoration(
                                         border: Border.all(
                                             color:
@@ -2817,13 +4061,13 @@ class _DashBoardState extends State<DashBoard> {
                               Container(
                                 height: 40,
                                 width: 80,
-                                decoration: open
-                                    ? null
-                                    : BoxDecoration(
+                                decoration: open == 2
+                                    ? BoxDecoration(
                                         border: Border.all(
                                             color: Colors.red, width: 2),
                                         borderRadius: BorderRadius.all(
-                                            Radius.circular(13))),
+                                            Radius.circular(13)))
+                                    : null,
                                 child: Center(
                                   child: Padding(
                                     padding: const EdgeInsets.all(4.0),
@@ -3081,9 +4325,42 @@ class _DashBoardState extends State<DashBoard> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
+                              width: 100,
+                              height: 40,
+                              decoration: open == 0
+                                  ? BoxDecoration(
+                                      border: Border.all(
+                                          color: Theme.of(context).primaryColor,
+                                          width: 2),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(13)))
+                                  : null,
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        open = 0;
+                                      });
+                                    },
+                                    child: Text(
+                                      "Quick Split",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Container(
                               width: 80,
                               height: 40,
-                              decoration: open
+                              decoration: open == 1
                                   ? BoxDecoration(
                                       border: Border.all(
                                           color: Theme.of(context).primaryColor,
@@ -3103,7 +4380,7 @@ class _DashBoardState extends State<DashBoard> {
                                     ),
                                     onTap: () {
                                       setState(() {
-                                        open = true;
+                                        open = 1;
                                       });
                                     },
                                   ),
@@ -3116,13 +4393,13 @@ class _DashBoardState extends State<DashBoard> {
                             Container(
                               height: 40,
                               width: 80,
-                              decoration: open
-                                  ? null
-                                  : BoxDecoration(
+                              decoration: open == 2
+                                  ? BoxDecoration(
                                       border: Border.all(
                                           color: Colors.red, width: 2),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(13))),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(13)))
+                                  : null,
                               child: Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(4.0),
@@ -3135,7 +4412,7 @@ class _DashBoardState extends State<DashBoard> {
                                     ),
                                     onTap: () {
                                       setState(() {
-                                        open = false;
+                                        open = 2;
                                       });
                                     },
                                   ),
@@ -3146,23 +4423,23 @@ class _DashBoardState extends State<DashBoard> {
                         ),
                       ),
                       GestureDetector(
-                        onPanUpdate: (details) async {
-                          if (details.delta.dx > 2) {
+                        onHorizontalDragEnd: (details) async {
+                          if (details.primaryVelocity! > 0) {
                             setState(() {
-                              open = true;
+                              open = max(0, open - 1);
                             });
                           }
 
-                          if (details.delta.dx < -2) {
+                          if (details.primaryVelocity! < 0) {
                             setState(() {
-                              open = false;
+                              open = min(2, open + 1);
                             });
                           }
                         },
                         child: SizedBox(
                           height: (MediaQuery.of(context).size.height - 200),
-                          child: open
-                              ? RoomDataO.value.isEmpty
+                          child: open == 0
+                              ? quickSplitData.value.isEmpty
                                   ? Scrollbar(
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
@@ -3174,7 +4451,7 @@ class _DashBoardState extends State<DashBoard> {
                                             MediaQuery.of(context).size.width,
                                         child: Center(
                                           child: Text(
-                                            "No Live Room Found!",
+                                            "No Transaction Found!",
                                             style: TextStyle(
                                               fontSize: 25,
                                             ),
@@ -3185,59 +4462,95 @@ class _DashBoardState extends State<DashBoard> {
                                   : Scrollbar(
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
-                                      child: RoomWidget(
-                                        RoomData: RoomDataO,
-                                        ClosedRoomData: RoomDataC,
+                                      child: QuickSplit(
+                                        RoomData: quickSplitData,
                                         email: _email.text,
-                                        flag: false,
-                                        hasMore: activeRoomHasMore,
-                                        roomType: 1,
+                                        hasMore: quickSplitDataHasMore,
                                         token: _token,
-                                        liveRoomType:
-                                            filterliveRoomCategoryIndex
-                                                        .length ==
-                                                    2
-                                                ? 3
-                                                : (filterliveRoomCategoryIndex
-                                                        .contains(0)
-                                                    ? 1
-                                                    : 2),
-                                        membersData: membersData,
+                                        roomExpenseCategory:
+                                            roomExpenseCategory,
                                       ))
-                              : (RoomDataC.value.isEmpty
-                                  ? Scrollbar(
-                                      radius: Radius.circular(10.0),
-                                      thickness: 5.5,
-                                      child: SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
+                              : open == 1
+                                  ? RoomDataO.value.isEmpty
+                                      ? Scrollbar(
+                                          radius: Radius.circular(10.0),
+                                          thickness: 5.5,
+                                          child: SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
                                                 0.8,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        child: Center(
-                                          child: Text(
-                                            "No Closed Room Found!",
-                                            style: TextStyle(
-                                              fontSize: 25,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: Center(
+                                              child: Text(
+                                                "No Live Room Found!",
+                                                style: TextStyle(
+                                                  fontSize: 25,
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    )
-                                  : Scrollbar(
-                                      radius: Radius.circular(10.0),
-                                      thickness: 5.5,
-                                      child: RoomWidget(
-                                        RoomData: RoomDataC,
-                                        ClosedRoomData: RoomDataC,
-                                        email: _email.text,
-                                        flag: false,
-                                        hasMore: inActiveRoomHasMore,
-                                        roomType: 0,
-                                        token: _token,
-                                        liveRoomType: 0,
-                                        membersData: membersData,
-                                      ))),
+                                        )
+                                      : Scrollbar(
+                                          radius: Radius.circular(10.0),
+                                          thickness: 5.5,
+                                          child: RoomWidget(
+                                            RoomData: RoomDataO,
+                                            ClosedRoomData: RoomDataC,
+                                            email: _email.text,
+                                            flag: false,
+                                            hasMore: activeRoomHasMore,
+                                            roomType: 1,
+                                            token: _token,
+                                            liveRoomType:
+                                                filterliveRoomCategoryIndex
+                                                            .length ==
+                                                        2
+                                                    ? 3
+                                                    : (filterliveRoomCategoryIndex
+                                                            .contains(0)
+                                                        ? 1
+                                                        : 2),
+                                            membersData: membersData,
+                                          ))
+                                  : (RoomDataC.value.isEmpty
+                                      ? Scrollbar(
+                                          radius: Radius.circular(10.0),
+                                          thickness: 5.5,
+                                          child: SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
+                                                0.8,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: Center(
+                                              child: Text(
+                                                "No Closed Room Found!",
+                                                style: TextStyle(
+                                                  fontSize: 25,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      : Scrollbar(
+                                          radius: Radius.circular(10.0),
+                                          thickness: 5.5,
+                                          child: RoomWidget(
+                                            RoomData: RoomDataC,
+                                            ClosedRoomData: RoomDataC,
+                                            email: _email.text,
+                                            flag: false,
+                                            hasMore: inActiveRoomHasMore,
+                                            roomType: 0,
+                                            token: _token,
+                                            liveRoomType: 0,
+                                            membersData: membersData,
+                                          ))),
                         ),
                       ),
                     ],
@@ -3324,7 +4637,7 @@ class _DashBoardState extends State<DashBoard> {
                                 ? Colors.white
                                 : Colors.black,
                           )),
-                      (open || searchTrigger)
+                      (open == 1 || searchTrigger)
                           ? IconButton(
                               onPressed: () {
                                 if (searchTrigger) {
@@ -3963,115 +5276,131 @@ class _DashBoardState extends State<DashBoard> {
                                             color:
                                                 Theme.of(context).primaryColor,
                                           ),
-                                          title: const Text("Create Room"),
+                                          title: Text(open == 0
+                                              ? "Create Expense"
+                                              : "Create Room"),
                                           onTap: () {
-                                            showModalBottomSheet<void>(
-                                              context: context,
-                                              isScrollControlled: true,
-                                              builder: (BuildContext context) {
-                                                return Padding(
-                                                  padding:
-                                                      MediaQuery.of(context)
-                                                          .viewInsets,
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: <Widget>[
-                                                      Form(
-                                                        key: _CformKey,
-                                                        child: TextFormField(
-                                                          controller: _NRoom,
-                                                          keyboardType:
-                                                              TextInputType
-                                                                  .text,
-                                                          maxLength: 70,
-                                                          maxLines: 1,
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: 18),
-                                                          cursorColor:
-                                                              Colors.black,
-                                                          autocorrect: false,
-                                                          validator: (value) {
-                                                            RegExp
-                                                                validateText =
-                                                                RegExp(
-                                                                    r'\b[\w]{4,}\b');
-                                                            if (!validateText
-                                                                .hasMatch(_NRoom
-                                                                    .text)) {
-                                                              return "Enter Valid Room Name";
-                                                            }
-                                                            return null;
-                                                          },
-                                                          decoration:
-                                                              const InputDecoration(
-                                                            counterText: "",
-                                                            contentPadding:
-                                                                EdgeInsets.all(
-                                                                    8.0),
-                                                            hintText:
-                                                                "Enter Room Name",
-                                                            errorStyle:
-                                                                TextStyle(
+                                            if (open == 0) {
+                                              aditionalMembers.clear();
+                                              addExpenseTo.clear();
+                                              AddQuickSplitExpense();
+                                            } else {
+                                              showModalBottomSheet<void>(
+                                                context: context,
+                                                isScrollControlled: true,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Padding(
+                                                    padding:
+                                                        MediaQuery.of(context)
+                                                            .viewInsets,
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: <Widget>[
+                                                        Form(
+                                                          key: _CformKey,
+                                                          child: TextFormField(
+                                                            controller: _NRoom,
+                                                            keyboardType:
+                                                                TextInputType
+                                                                    .text,
+                                                            maxLength: 70,
+                                                            maxLines: 1,
+                                                            style:
+                                                                const TextStyle(
                                                                     fontSize:
-                                                                        15),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 15,
-                                                      ),
-                                                      SizedBox(
-                                                        height: 43,
-                                                        width: 100,
-                                                        child: OutlinedButton(
-                                                          child: Text(
-                                                            "Create",
-                                                            style: TextStyle(
-                                                                fontSize: 16,
-                                                                color: themeProvider
-                                                                        .isDarkTheme
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black),
-                                                          ),
-                                                          style: OutlinedButton
-                                                              .styleFrom(
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10.0),
+                                                                        18),
+                                                            cursorColor:
+                                                                Colors.black,
+                                                            autocorrect: false,
+                                                            validator: (value) {
+                                                              RegExp
+                                                                  validateText =
+                                                                  RegExp(
+                                                                      r'\b[\w]{4,}\b');
+                                                              if (!validateText
+                                                                  .hasMatch(_NRoom
+                                                                      .text)) {
+                                                                return open == 0
+                                                                    ? "Enter Valid Purpose"
+                                                                    : "Enter Valid Room Name";
+                                                              }
+                                                              return null;
+                                                            },
+                                                            decoration:
+                                                                InputDecoration(
+                                                              counterText: "",
+                                                              contentPadding:
+                                                                  EdgeInsets
+                                                                      .all(8.0),
+                                                              hintText: open ==
+                                                                      0
+                                                                  ? "Enter Valid Purpose"
+                                                                  : "Enter Room Name",
+                                                              errorStyle:
+                                                                  TextStyle(
+                                                                      fontSize:
+                                                                          15),
                                                             ),
-                                                            side: BorderSide(
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .primaryColor),
                                                           ),
-                                                          onPressed: () {
-                                                            if (_CformKey
-                                                                .currentState!
-                                                                .validate()) {
-                                                              SendingData(true,
-                                                                  context);
-                                                            }
-                                                          },
                                                         ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 10,
-                                                      )
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            );
+                                                        SizedBox(
+                                                          height: 15,
+                                                        ),
+                                                        SizedBox(
+                                                          height: 43,
+                                                          width: 100,
+                                                          child: OutlinedButton(
+                                                            child: Text(
+                                                              "Create",
+                                                              style: TextStyle(
+                                                                  fontSize: 16,
+                                                                  color: themeProvider
+                                                                          .isDarkTheme
+                                                                      ? Colors
+                                                                          .white
+                                                                      : Colors
+                                                                          .black),
+                                                            ),
+                                                            style:
+                                                                OutlinedButton
+                                                                    .styleFrom(
+                                                              shape:
+                                                                  RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10.0),
+                                                              ),
+                                                              side: BorderSide(
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .primaryColor),
+                                                            ),
+                                                            onPressed: () {
+                                                              if (_CformKey
+                                                                  .currentState!
+                                                                  .validate()) {
+                                                                SendingData(
+                                                                    true,
+                                                                    context);
+                                                              }
+                                                            },
+                                                          ),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 10,
+                                                        )
+                                                      ],
+                                                    ),
+                                                  );
+                                                },
+                                              );
+                                            }
                                           },
                                         ),
                                         ListTile(
@@ -4080,7 +5409,9 @@ class _DashBoardState extends State<DashBoard> {
                                             color:
                                                 Theme.of(context).primaryColor,
                                           ),
-                                          title: const Text("Join Room"),
+                                          title: Text(open == 0
+                                              ? "Join Transaction"
+                                              : "Join Room"),
                                           onTap: () {
                                             showModalBottomSheet<void>(
                                               context: context,
@@ -4120,20 +5451,24 @@ class _DashBoardState extends State<DashBoard> {
                                                             if (!validateText
                                                                 .hasMatch(_NRoom
                                                                     .text)) {
-                                                              return "Enter Valid Room Key";
+                                                              return open == 0
+                                                                  ? "Enter Valid Transcation Key"
+                                                                  : "Enter Valid Room Key";
                                                             }
                                                             return null;
                                                           },
                                                           decoration:
-                                                              const InputDecoration(
+                                                              InputDecoration(
                                                             counterText: "",
                                                             contentPadding:
                                                                 EdgeInsets.all(
                                                                     8.0),
-                                                            hintText:
-                                                                "Enter Room Key",
-                                                            labelText:
-                                                                "Room Key",
+                                                            hintText: open == 0
+                                                                ? "Enter Valid Transaction Key"
+                                                                : "Enter Room Key",
+                                                            labelText: open == 0
+                                                                ? "Transaction Key"
+                                                                : "Room Key",
                                                             errorStyle:
                                                                 TextStyle(
                                                                     fontSize:
@@ -4208,6 +5543,1115 @@ class _DashBoardState extends State<DashBoard> {
                         ),
                       ))
                 : null);
+  }
+}
+
+class QuickSplit extends StatefulWidget {
+  final ValueNotifier<List<QuickSplitEach>> RoomData;
+  final String email;
+  final String token;
+  final int fetchSize = 10;
+  final ValueNotifier<bool> hasMore;
+  final List<dynamic> roomExpenseCategory;
+
+  const QuickSplit(
+      {Key? key,
+      required this.RoomData,
+      required this.email,
+      required this.token,
+      required this.hasMore,
+      required this.roomExpenseCategory})
+      : super(key: key);
+
+  @override
+  State<QuickSplit> createState() => _QuickSplitState();
+}
+
+class _QuickSplitState extends State<QuickSplit> {
+  final _updateExpense = GlobalKey<FormState>();
+  final TextEditingController _purpose = TextEditingController();
+  final TextEditingController _amount = TextEditingController();
+  AutoScrollController controller = AutoScrollController();
+  int roomExpenseCategoryIndex = -1;
+
+  Widget splitManuallyWidget(BuildContext context,
+      List<dynamic> memberExpenseOG, String purpose, String id) {
+    List<dynamic> memberExpense = memberExpenseOG.toList();
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final _manualSplitKey = GlobalKey<FormState>();
+    _purpose.text = purpose;
+    List<TextEditingController> amountController = [];
+    for (int i = 0; i < memberExpense.length; i++) {
+      amountController.add(
+          TextEditingController(text: crypto.decrypt(memberExpense[i]['amt'])));
+    }
+    return StatefulBuilder(builder: (context, setState) {
+      return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.95,
+              child: Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Form(
+                        key: _manualSplitKey,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              controller: _purpose,
+                              keyboardType: TextInputType.text,
+                              maxLength: 1000,
+                              maxLines: 1,
+                              style: const TextStyle(fontSize: 18),
+                              autocorrect: false,
+                              validator: (value) {
+                                RegExp validateText = RegExp(r'\b[\w]+\b');
+                                if (!validateText.hasMatch(_purpose.text)) {
+                                  return "Enter Valid Purpose";
+                                }
+                                return null;
+                              },
+                              decoration: const InputDecoration(
+                                contentPadding: EdgeInsets.all(8.0),
+                                hintText: "Enter Purpose",
+                                labelText: "Purpose",
+                                counterText: "",
+                                errorStyle: TextStyle(fontSize: 15),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            SizedBox(
+                              height: min(75.0 * memberExpense.length,
+                                  MediaQuery.of(context).size.height * 0.8),
+                              child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                itemCount: memberExpense.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(11.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            CachedNetworkImage(
+                                              httpHeaders: {
+                                                'Access-Control-Allow-Origin':
+                                                    '*'
+                                              },
+                                              imageUrl: addCorsinImage(crypto
+                                                          .decrypt(
+                                                              memberExpense[
+                                                                      index]![
+                                                                  'pic'])
+                                                          .length ==
+                                                      0
+                                                  ? global.driveUrl +
+                                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  : crypto.decrypt(
+                                                      memberExpense[index]![
+                                                          'pic'])),
+                                              progressIndicatorBuilder:
+                                                  (context, url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Container(
+                                                width: 40.0,
+                                                height: 40.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: AssetImage(
+                                                          'assets/Images/unknown.jpeg'),
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                width: 40.0,
+                                                height: 40.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: 6,
+                                            ),
+                                            InkWell(
+                                              onTap: () => showToast(
+                                                  context,
+                                                  crypto.decrypt(memberExpense[
+                                                      index]!['Name']),
+                                                  Icons.person_outlined),
+                                              child: SizedBox(
+                                                width: 130,
+                                                child: Text(
+                                                  crypto.decrypt(memberExpense[
+                                                      index]!['Name']),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "Rs",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                            SizedBox(
+                                              width: 4,
+                                            ),
+                                            SizedBox(
+                                              width: 50,
+                                              child: TextFormField(
+                                                controller:
+                                                    amountController[index],
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                maxLines: 1,
+                                                style: const TextStyle(
+                                                    fontSize: 15),
+                                                autocorrect: false,
+                                                decoration: InputDecoration(
+                                                  contentPadding:
+                                                      const EdgeInsets.all(8.0),
+                                                  counterText: "",
+                                                  errorStyle: const TextStyle(
+                                                      fontSize: 16),
+                                                ),
+                                                validator: (value) {
+                                                  if (crypto.decrypt(
+                                                          memberExpense[index]
+                                                              ['Email']) ==
+                                                      widget.email) {
+                                                    if (amountController[index]
+                                                            .text ==
+                                                        "0") {
+                                                      memberExpense[index]
+                                                              ['amt'] =
+                                                          crypto.encrypt(
+                                                              (double.parse(amountController[
+                                                                              index]
+                                                                          .text) *
+                                                                      100 /
+                                                                      100)
+                                                                  .toString());
+                                                      return null;
+                                                    }
+                                                  }
+                                                  RegExp validateText = RegExp(
+                                                      r"^[1-9]\d*(\.\d+)?$");
+                                                  if (!validateText.hasMatch(
+                                                      amountController[index]
+                                                          .text)) {
+                                                    return "";
+                                                  } else {
+                                                    memberExpense[index]
+                                                            [
+                                                            'amt'] =
+                                                        crypto.encrypt((double.parse(
+                                                                    amountController[
+                                                                            index]
+                                                                        .text) *
+                                                                100 /
+                                                                100)
+                                                            .toString());
+                                                  }
+                                                  return null;
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 7,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              height: 43,
+                              width: 100,
+                              child: OutlinedButton(
+                                  style: OutlinedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    side: BorderSide(
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                  child: Text(
+                                    "Close",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black),
+                                  ),
+                                  onPressed: () {
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  }),
+                            ),
+                            SizedBox(
+                              height: 43,
+                              width: 100,
+                              child: OutlinedButton(
+                                  child: Text(
+                                    "Update",
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                    ),
+                                    side: BorderSide(
+                                        color: Theme.of(context).primaryColor),
+                                  ),
+                                  onPressed: () async {
+                                    if (_manualSplitKey.currentState!
+                                        .validate()) {
+                                      if (this.mounted) {
+                                        buildShowDialog(context);
+                                      }
+
+                                      if (this.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                      if (this.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                      if (this.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    } else {
+                                      showToast(context, "Invalid Amount",
+                                          Icons.warning_outlined);
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      )
+                    ],
+                  ))));
+    });
+  }
+
+  _updateTransaction(
+      BuildContext context,
+      String purpose,
+      String id,
+      String amount,
+      String flag,
+      String split,
+      int roomExpenseTypeIndex) async {
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'purpose': crypto.encrypt(purpose),
+        'amount': crypto.encrypt(amount),
+        'id': crypto.encrypt(id),
+        'flag': crypto.encrypt(flag),
+        'split': crypto.encrypt(split),
+        'type': crypto.encrypt(widget.roomExpenseCategory[roomExpenseTypeIndex])
+      };
+
+      final response = await createHTTPreq(
+          'transaction', http.patch, widget.token, jsonInputData);
+
+      var updateMessage = jsonDecode(response.body);
+      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+  }
+
+  Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
+      String amount, String split, String category) {
+    roomExpenseCategoryIndex = widget.roomExpenseCategory.indexOf(category);
+    return StatefulBuilder(builder: (context, setState) {
+      _purpose.text = purpose;
+      _amount.text = amount;
+
+      final themeProvider = Provider.of<ThemeProvider>(context);
+      return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+          child: SingleChildScrollView(
+            child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Form(
+                      key: _updateExpense,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          TextFormField(
+                            controller: _amount,
+                            keyboardType: TextInputType.number,
+                            maxLength: 10,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 18),
+                            autocorrect: false,
+                            validator: (value) {
+                              RegExp validateNumber =
+                                  RegExp(r'\b[1-9]{1}[\d]*\b');
+                              if (!validateNumber.hasMatch(_amount.text)) {
+                                return "Enter Valid Amount";
+                              }
+                              return null;
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: "Enter Amount",
+                              counterText: "",
+                              labelText: "Amount",
+                              errorStyle: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          TextFormField(
+                            controller: _purpose,
+                            keyboardType: TextInputType.text,
+                            maxLength: 1000,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 18),
+                            autocorrect: false,
+                            validator: (value) {
+                              RegExp validateText = RegExp(r'\b[\w]+\b');
+                              if (!validateText.hasMatch(_purpose.text)) {
+                                return "Enter Valid Purpose";
+                              }
+                              return null;
+                            },
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(8.0),
+                              hintText: "Enter Purpose",
+                              labelText: "Purpose",
+                              counterText: "",
+                              errorStyle: TextStyle(fontSize: 15),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            height: 70,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.roomExpenseCategory.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: InkWell(
+                                      child: Card(
+                                        color: Theme.of(context)
+                                            .dialogBackgroundColor,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: roomExpenseCategoryIndex ==
+                                                      index
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : Theme.of(context)
+                                                      .cardColor),
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12.0),
+                                          child: Center(
+                                            child: Text(
+                                              widget.roomExpenseCategory[index],
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      onTap: () {
+                                        if (this.mounted) {
+                                          setState(
+                                            () {
+                                              roomExpenseCategoryIndex = index;
+                                            },
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          SizedBox(
+                            height: 43,
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            child: OutlinedButton(
+                                child: Text(
+                                  "Update",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                                onPressed: () async {
+                                  if (_updateExpense.currentState!.validate()) {
+                                    if (this.mounted) {
+                                      buildShowDialog(context);
+                                    }
+                                    await _updateTransaction(
+                                        context,
+                                        _purpose.text,
+                                        id,
+                                        _amount.text,
+                                        "0",
+                                        split,
+                                        roomExpenseCategoryIndex);
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  }
+                                }),
+                          ),
+                        ],
+                      ),
+                    ))),
+          ));
+    });
+  }
+
+  addToPersonalExpense(String objId, String split, String roomKey) async {
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+    try {
+      Map<String, String> jsonInputData = {
+        'roomKey': crypto.encrypt(roomKey),
+        'email': crypto.encrypt(widget.email),
+        'id': crypto.encrypt(objId),
+        'split': crypto.encrypt(split)
+      };
+
+      final response = await createHTTPreq('transaction/personalExpense',
+          http.post, widget.token, jsonInputData);
+
+      var data = jsonDecode(response.body);
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  bool userInPartialExpense(List<dynamic> partialExpense, String email) {
+    for (int i = 0; i < partialExpense.length; i++) {
+      if (crypto.decrypt(partialExpense[i]['Email']) == email) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Widget _buildPopupDialog(
+    BuildContext context,
+    String name,
+    String date,
+    String email,
+    String id,
+    String purpose,
+    String amount,
+    bool locked,
+    List<dynamic> partialExpense,
+    String type,
+    bool isEdited,
+    String lastModDate,
+  ) {
+    return StatefulBuilder(builder: (context, setState) {
+      final themeProvider = Provider.of<ThemeProvider>(context);
+      return Dialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.95,
+          child: Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Expense Detail",
+                      style: TextStyle(fontSize: 23),
+                    ),
+                    widget.email == email && !locked
+                        ? Row(
+                            children: [
+                              IconButton(
+                                  onPressed: () async {
+                                    if (this.mounted) {
+                                      buildShowDialog(context);
+                                    }
+                                    /*if (manualSplit) {
+                                      await updateExpenseManual(
+                                          partialExpense, id, "1");
+                                    } else {
+                                      //await _updateTransaction(
+                                          context,
+                                          _purpose.text,
+                                          id,
+                                          _amount.text,
+                                          "1",
+                                          partialExpense.isEmpty ? "0" : "1",
+                                          widget.roomExpenseCategory
+                                              .indexOf(type));
+                                    }*/
+
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                    if (this.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                  icon: Icon(Icons.delete)),
+                              IconButton(
+                                  onPressed: () async {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) => true
+                                          ? splitManuallyWidget(context,
+                                              partialExpense, purpose, id)
+                                          : _buildUpdateDialog(
+                                              context,
+                                              id,
+                                              purpose,
+                                              amount,
+                                              partialExpense.isEmpty
+                                                  ? "0"
+                                                  : "1",
+                                              type),
+                                    );
+                                  },
+                                  icon: Icon(Icons.edit)),
+                            ],
+                          )
+                        : SizedBox()
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  _purpose.text,
+                  style: TextStyle(fontSize: 22),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        partialExpense.isEmpty
+                            ? Text(
+                                name,
+                                style: TextStyle(fontSize: 20),
+                              )
+                            : SizedBox(),
+                        partialExpense.isEmpty
+                            ? SizedBox(
+                                height: 10,
+                              )
+                            : SizedBox(),
+                        Text(
+                          type,
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      "₹ " + _amount.text,
+                      style: TextStyle(fontSize: 20),
+                    )
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Text(
+                  "Spent On: " + date,
+                  style: TextStyle(fontSize: 19),
+                ),
+                isEdited
+                    ? SizedBox(
+                        height: 10,
+                      )
+                    : SizedBox(),
+                isEdited
+                    ? Text(
+                        "Modified: " + formatDateTime(lastModDate),
+                        style: TextStyle(fontSize: 19),
+                      )
+                    : SizedBox(),
+                SizedBox(
+                  height: 10,
+                ),
+                partialExpense.isEmpty
+                    ? SizedBox()
+                    : SizedBox(
+                        height: 20,
+                      ),
+                partialExpense.isEmpty
+                    ? SizedBox()
+                    : SizedBox(
+                        width: MediaQuery.of(context).size.width - 65,
+                        height: 80,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: partialExpense.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      CachedNetworkImage(
+                                        httpHeaders: {
+                                          'Access-Control-Allow-Origin': '*'
+                                        },
+                                        imageUrl: addCorsinImage(crypto
+                                                    .decrypt(
+                                                        partialExpense[index]
+                                                            ['pic'])
+                                                    .length ==
+                                                0
+                                            ? global.driveUrl +
+                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                            : crypto.decrypt(
+                                                partialExpense[index]['pic'])),
+                                        progressIndicatorBuilder: (context, url,
+                                                downloadProgress) =>
+                                            CircularProgressIndicator(
+                                                value:
+                                                    downloadProgress.progress),
+                                        errorWidget: (context, url, error) =>
+                                            Container(
+                                          width: 35.0,
+                                          height: 35.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                                image: AssetImage(
+                                                    'assets/Images/unknown.jpeg'),
+                                                fit: BoxFit.cover),
+                                          ),
+                                        ),
+                                        imageBuilder:
+                                            (context, imageProvider) =>
+                                                Container(
+                                          width: 35.0,
+                                          height: 35.0,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            image: DecorationImage(
+                                                image: imageProvider,
+                                                fit: BoxFit.cover),
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 6,
+                                      ),
+                                      Text(
+                                        crypto.decrypt(
+                                            partialExpense[index]['name']),
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    "₹ " +
+                                        crypto.decrypt(
+                                            partialExpense[index]['amount']),
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                SizedBox(
+                  height: 25,
+                ),
+                partialExpense.isEmpty ||
+                        userInPartialExpense(partialExpense, widget.email)
+                    ? SizedBox(
+                        height: 45,
+                        width: MediaQuery.of(context).size.width * 0.95 - 25,
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            if (this.mounted) {
+                              buildShowDialog(context);
+                            }
+                            /* await addToPersonalExpense(
+                                id,
+                                partialExpense.isEmpty
+                                    ? "0"
+                                    : (manualSplit ? "2" : "1"));*/
+                            if (this.mounted) {
+                              Navigator.pop(context);
+                            }
+                            if (this.mounted) {
+                              Navigator.pop(context);
+                            }
+                          },
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            side: BorderSide(
+                                color: Theme.of(context).primaryColor),
+                          ),
+                          child: Text(
+                            "Add To Personal Expense",
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black),
+                          ),
+                        ),
+                      )
+                    : SizedBox(),
+                partialExpense.isEmpty ||
+                        userInPartialExpense(partialExpense, widget.email)
+                    ? SizedBox(
+                        height: 12,
+                      )
+                    : SizedBox(),
+                SizedBox(
+                  height: 45,
+                  width: MediaQuery.of(context).size.width * 0.95 - 25,
+                  child: OutlinedButton(
+                    child: Text(
+                      "Close",
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      side: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
+                    onPressed: () {
+                      if (this.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: ListView.separated(
+          separatorBuilder: (context, index) => SizedBox(
+                height: 5,
+              ),
+          controller: controller,
+          shrinkWrap: true,
+          physics: ScrollPhysics(),
+          itemCount: widget.RoomData.value.length,
+          itemBuilder: (BuildContext context, int index) {
+            List<dynamic> isInSplitAmount =
+                widget.RoomData.value[index].splitBetween.where((element) {
+              if (crypto.decrypt(element['name']).isEmpty) {
+                if (crypto.decrypt(element['userData']['email']) ==
+                    widget.email) {
+                  return true;
+                }
+              }
+              return false;
+            }).toList();
+            return AutoScrollTag(
+              controller: controller,
+              index: index,
+              key: ValueKey(index),
+              child: InkWell(
+                onTap: () {
+                  _purpose.text = widget.RoomData.value[index].purpose;
+                  _amount.text = widget.RoomData.value[index].amount.toString();
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) => _buildPopupDialog(
+                          context,
+                          widget.RoomData.value[index].owner,
+                          widget.RoomData.value[index].date,
+                          widget.RoomData.value[index].owner,
+                          widget.RoomData.value[index].roomID,
+                          widget.RoomData.value[index].purpose,
+                          widget.RoomData.value[index].amount.toString(),
+                          false,
+                          widget.RoomData.value[index].splitBetween,
+                          widget.RoomData.value[index].type,
+                          widget.RoomData.value[index].isEdited,
+                          widget.RoomData.value[index].lastModDate));
+                },
+                child: SizedBox(
+                    height: 140,
+                    child: Card(
+                      elevation: 1.0,
+                      shadowColor: Theme.of(context).primaryColor,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            color:
+                                Theme.of(context).primaryColor.withAlpha(80)),
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                flex: 1,
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.95,
+                                  child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          widget.RoomData.value[index].purpose,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        SizedBox(
+                                          height: 6,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            widget.RoomData.value[index].owner,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 6,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            "Category: " +
+                                                widget
+                                                    .RoomData.value[index].type,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 6,
+                                        ),
+                                        Opacity(
+                                          opacity: 0.8,
+                                          child: Text(
+                                            widget.RoomData.value[index].date,
+                                            style: const TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+                                        ),
+                                      ]),
+                                ),
+                              ),
+                              Column(
+                                mainAxisAlignment:
+                                    widget.RoomData.value[index].isEdited
+                                        ? MainAxisAlignment.start
+                                        : MainAxisAlignment.center,
+                                children: [
+                                  widget.RoomData.value[index].isEdited
+                                      ? Container(
+                                          width: 55,
+                                          height: 30,
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              border: Border.all(
+                                                color: themeProvider.isDarkTheme
+                                                    ? (Theme.of(context)
+                                                        .primaryColor)
+                                                    : Colors.white,
+                                              ),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(12))),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(4.0),
+                                            child: Text("Edited",
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    color: Colors.white)),
+                                          ))
+                                      : SizedBox(),
+                                  widget.RoomData.value[index].isEdited
+                                      ? SizedBox(
+                                          height: 30,
+                                        )
+                                      : SizedBox(),
+                                  Expanded(
+                                    flex: 0,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.25,
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            "₹ " +
+                                                commaSeperator(widget.RoomData
+                                                    .value[index].amount
+                                                    .toString()),
+                                            style: const TextStyle(
+                                              fontSize: 19,
+                                            ),
+                                          ),
+                                          Text(
+                                            "(₹ " +
+                                                crypto.decrypt(
+                                                    isInSplitAmount[0]
+                                                        ['amount']) +
+                                                ")",
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ]),
+                      ),
+                    )),
+              ),
+            );
+          }),
+    );
   }
 }
 
