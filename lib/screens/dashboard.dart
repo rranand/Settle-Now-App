@@ -669,7 +669,11 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future _executeParallelRefresh() async {
-    await Future.wait([_extractEmail(open), getMembersData(open)]);
+    if (open == 0) {
+      await getQuickSplitExpenses();
+    } else {
+      await Future.wait([_extractEmail(open), getMembersData(open)]);
+    }
   }
 
   Future<void> _extractEmail(int roomType) async {
@@ -998,6 +1002,13 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> getQuickSplitExpenses() async {
     try {
+      if (this.mounted) {
+        setState(() {
+          quickSplitData.value.clear();
+          quickSplitDataFetched = false;
+        });
+      }
+
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email.text),
       };
@@ -1006,6 +1017,7 @@ class _DashBoardState extends State<DashBoard> {
           'quickSplit/get', http.post, _token, jsonInputData);
       var data = jsonDecode(response.body);
 
+      quickSplitDataFetched = true;
       if (response.statusCode != 200) {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       } else {
@@ -1018,6 +1030,9 @@ class _DashBoardState extends State<DashBoard> {
       if (this.mounted) {
         await onException(context);
       }
+    }
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -1769,6 +1784,7 @@ class _DashBoardState extends State<DashBoard> {
         'type': crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
         'SNsplit': crypto.encrypt(manualSplitAmount.toString()),
         '_split': crypto.encrypt(customManualSplitAmount.toString()),
+        'amt': crypto.encrypt(manualSplit ? "-1" : _amt.text),
         'date': crypto
             .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
       };
@@ -1780,7 +1796,12 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode == 200) {
         aditionalMembers.clear();
         addExpenseTo.clear();
+        _amt.text = "";
+        _purpose.text = "";
         quickSplitData.value.add(QuickSplitEach.fromJson(data["data"]));
+        if (this.mounted) {
+          setState(() {});
+        }
       } else {
         if (this.mounted) {
           showToast(context, crypto.decrypt(data["Message"]), Icons.close);
@@ -3972,8 +3993,12 @@ class _DashBoardState extends State<DashBoard> {
     return RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _executeParallelRefresh,
-        child: (RoomDataO.value.isEmpty && RoomDataC.value.isEmpty)
-            ? ((activeRoomDataFetched && inActiveRoomDataFetched)
+        child: (RoomDataO.value.isEmpty &&
+                RoomDataC.value.isEmpty &&
+                quickSplitData.value.isEmpty)
+            ? ((activeRoomDataFetched &&
+                    inActiveRoomDataFetched &&
+                    quickSplitDataFetched)
                 ? ListView(
                     physics: AlwaysScrollableScrollPhysics(),
                     children: [
@@ -5574,16 +5599,55 @@ class _QuickSplitState extends State<QuickSplit> {
   AutoScrollController controller = AutoScrollController();
   int roomExpenseCategoryIndex = -1;
 
+  updateExpenseManual(List<dynamic> memberExpense, String id, int index) async {
+    try {
+      Map<String, String> splitMember = {};
+      for (int i = 0; i < memberExpense.length; i++) {
+        if (crypto.decrypt(memberExpense[i]['userData']['email']).isNotEmpty) {
+          splitMember[crypto.decrypt(memberExpense[i]['userData']['email'])] =
+              crypto.decrypt(memberExpense[i]['amount']);
+        } else {
+          splitMember[crypto.decrypt(memberExpense[i]['userData']['name'])] =
+              crypto.decrypt(memberExpense[i]['amount']);
+        }
+      }
+
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'purpose': crypto.encrypt(_purpose.text),
+        'id': crypto.encrypt(id),
+        'split': crypto.encrypt(splitMember.toString()),
+      };
+
+      final response = await createHTTPreq(
+          'quickSplit', http.put, widget.token, jsonInputData);
+
+      var updateMessage = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        widget.RoomData.value[index] =
+            QuickSplitEach.fromJson(updateMessage["data"]);
+        if (this.mounted) {
+          setState(() {});
+        }
+      }
+      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+  }
+
   Widget splitManuallyWidget(BuildContext context,
-      List<dynamic> memberExpenseOG, String purpose, String id) {
+      List<dynamic> memberExpenseOG, String purpose, String id, int index) {
     List<dynamic> memberExpense = memberExpenseOG.toList();
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final _manualSplitKey = GlobalKey<FormState>();
     _purpose.text = purpose;
     List<TextEditingController> amountController = [];
     for (int i = 0; i < memberExpense.length; i++) {
-      amountController.add(
-          TextEditingController(text: crypto.decrypt(memberExpense[i]['amt'])));
+      amountController.add(TextEditingController(
+          text: crypto.decrypt(memberExpense[i]['amount'])));
     }
     return StatefulBuilder(builder: (context, setState) {
       return Dialog(
@@ -5649,17 +5713,17 @@ class _QuickSplitState extends State<QuickSplit> {
                                                     '*'
                                               },
                                               imageUrl: addCorsinImage(crypto
-                                                          .decrypt(
-                                                              memberExpense[
-                                                                      index]![
-                                                                  'pic'])
+                                                          .decrypt(memberExpense[
+                                                                      index]
+                                                                  ['userData']
+                                                              ['pic'])
                                                           .length ==
                                                       0
                                                   ? global.driveUrl +
                                                       "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
                                                   : crypto.decrypt(
-                                                      memberExpense[index]![
-                                                          'pic'])),
+                                                      memberExpense[index]
+                                                          ['userData']['pic'])),
                                               progressIndicatorBuilder:
                                                   (context, url,
                                                           downloadProgress) =>
@@ -5699,14 +5763,16 @@ class _QuickSplitState extends State<QuickSplit> {
                                             InkWell(
                                               onTap: () => showToast(
                                                   context,
-                                                  crypto.decrypt(memberExpense[
-                                                      index]!['Name']),
+                                                  crypto.decrypt(
+                                                      memberExpense[index]
+                                                          ['userData']['name']),
                                                   Icons.person_outlined),
                                               child: SizedBox(
                                                 width: 130,
                                                 child: Text(
-                                                  crypto.decrypt(memberExpense[
-                                                      index]!['Name']),
+                                                  crypto.decrypt(
+                                                      memberExpense[index]
+                                                          ['userData']['name']),
                                                   overflow:
                                                       TextOverflow.ellipsis,
                                                   style: TextStyle(
@@ -5748,13 +5814,14 @@ class _QuickSplitState extends State<QuickSplit> {
                                                 validator: (value) {
                                                   if (crypto.decrypt(
                                                           memberExpense[index]
-                                                              ['Email']) ==
+                                                                  ['userData']
+                                                              ['email']) ==
                                                       widget.email) {
                                                     if (amountController[index]
                                                             .text ==
                                                         "0") {
                                                       memberExpense[index]
-                                                              ['amt'] =
+                                                              ['amount'] =
                                                           crypto.encrypt(
                                                               (double.parse(amountController[
                                                                               index]
@@ -5773,8 +5840,7 @@ class _QuickSplitState extends State<QuickSplit> {
                                                     return "";
                                                   } else {
                                                     memberExpense[index]
-                                                            [
-                                                            'amt'] =
+                                                            ['amount'] =
                                                         crypto.encrypt((double.parse(
                                                                     amountController[
                                                                             index]
@@ -5856,7 +5922,8 @@ class _QuickSplitState extends State<QuickSplit> {
                                       if (this.mounted) {
                                         buildShowDialog(context);
                                       }
-
+                                      await updateExpenseManual(
+                                          memberExpense, id, index);
                                       if (this.mounted) {
                                         Navigator.pop(context);
                                       }
@@ -6094,20 +6161,44 @@ class _QuickSplitState extends State<QuickSplit> {
     });
   }
 
-  addToPersonalExpense(String objId, String split, String roomKey) async {
+  settleThisTransaction(String objId, int index, String email) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
     try {
       Map<String, String> jsonInputData = {
-        'roomKey': crypto.encrypt(roomKey),
         'email': crypto.encrypt(widget.email),
-        'id': crypto.encrypt(objId),
-        'split': crypto.encrypt(split)
+        'id': crypto.encrypt(objId)
       };
 
-      final response = await createHTTPreq('transaction/personalExpense',
-          http.post, widget.token, jsonInputData);
+      final response = await createHTTPreq(
+          'quickSplit/settle', http.post, widget.token, jsonInputData);
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {}
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
+  addToPersonalExpense(String objId) async {
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'id': crypto.encrypt(objId)
+      };
+
+      final response = await createHTTPreq(
+          'quickSplit/personalExpense', http.post, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -6123,7 +6214,7 @@ class _QuickSplitState extends State<QuickSplit> {
 
   bool userInPartialExpense(List<dynamic> partialExpense, String email) {
     for (int i = 0; i < partialExpense.length; i++) {
-      if (crypto.decrypt(partialExpense[i]['Email']) == email) {
+      if (crypto.decrypt(partialExpense[i]['userData']['email']) == email) {
         return true;
       }
     }
@@ -6132,19 +6223,20 @@ class _QuickSplitState extends State<QuickSplit> {
   }
 
   Widget _buildPopupDialog(
-    BuildContext context,
-    String name,
-    String date,
-    String email,
-    String id,
-    String purpose,
-    String amount,
-    bool locked,
-    List<dynamic> partialExpense,
-    String type,
-    bool isEdited,
-    String lastModDate,
-  ) {
+      BuildContext context,
+      String name,
+      String date,
+      String email,
+      String id,
+      String purpose,
+      String amount,
+      bool locked,
+      List<dynamic> partialExpense,
+      String type,
+      bool isEdited,
+      String lastModDate,
+      int index,
+      bool isActive) {
     return StatefulBuilder(builder: (context, setState) {
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -6170,49 +6262,20 @@ class _QuickSplitState extends State<QuickSplit> {
                             children: [
                               IconButton(
                                   onPressed: () async {
-                                    if (this.mounted) {
-                                      buildShowDialog(context);
-                                    }
-                                    /*if (manualSplit) {
-                                      await updateExpenseManual(
-                                          partialExpense, id, "1");
-                                    } else {
-                                      //await _updateTransaction(
-                                          context,
-                                          _purpose.text,
-                                          id,
-                                          _amount.text,
-                                          "1",
-                                          partialExpense.isEmpty ? "0" : "1",
-                                          widget.roomExpenseCategory
-                                              .indexOf(type));
-                                    }*/
-
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
-                                    }
+                                    await deleteExpense(id, index);
                                   },
                                   icon: Icon(Icons.delete)),
                               IconButton(
                                   onPressed: () async {
                                     showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) => true
-                                          ? splitManuallyWidget(context,
-                                              partialExpense, purpose, id)
-                                          : _buildUpdateDialog(
-                                              context,
-                                              id,
-                                              purpose,
-                                              amount,
-                                              partialExpense.isEmpty
-                                                  ? "0"
-                                                  : "1",
-                                              type),
-                                    );
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            splitManuallyWidget(
+                                                context,
+                                                partialExpense,
+                                                purpose,
+                                                id,
+                                                index));
                                   },
                                   icon: Icon(Icons.edit)),
                             ],
@@ -6273,7 +6336,7 @@ class _QuickSplitState extends State<QuickSplit> {
                     : SizedBox(),
                 isEdited
                     ? Text(
-                        "Modified: " + formatDateTime(lastModDate),
+                        "Modified: " + lastModDate,
                         style: TextStyle(fontSize: 19),
                       )
                     : SizedBox(),
@@ -6289,87 +6352,124 @@ class _QuickSplitState extends State<QuickSplit> {
                     ? SizedBox()
                     : SizedBox(
                         width: MediaQuery.of(context).size.width - 65,
-                        height: 80,
+                        height: 85,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: partialExpense.length,
                           itemBuilder: (BuildContext context, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(10.0),
-                              child: Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      CachedNetworkImage(
-                                        httpHeaders: {
-                                          'Access-Control-Allow-Origin': '*'
-                                        },
-                                        imageUrl: addCorsinImage(crypto
-                                                    .decrypt(
-                                                        partialExpense[index]
-                                                            ['pic'])
-                                                    .length ==
-                                                0
-                                            ? global.driveUrl +
-                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                            : crypto.decrypt(
-                                                partialExpense[index]['pic'])),
-                                        progressIndicatorBuilder: (context, url,
-                                                downloadProgress) =>
-                                            CircularProgressIndicator(
-                                                value:
-                                                    downloadProgress.progress),
-                                        errorWidget: (context, url, error) =>
-                                            Container(
-                                          width: 35.0,
-                                          height: 35.0,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                                image: AssetImage(
-                                                    'assets/Images/unknown.jpeg'),
-                                                fit: BoxFit.cover),
+                            return Card(
+                              elevation: 1.0,
+                              shadowColor: Theme.of(context).primaryColor,
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: !partialExpense[index]['isSettled']
+                                        ? Theme.of(context)
+                                            .primaryColor
+                                            .withAlpha(80)
+                                        : Colors.redAccent),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        CachedNetworkImage(
+                                          httpHeaders: {
+                                            'Access-Control-Allow-Origin': '*'
+                                          },
+                                          imageUrl: addCorsinImage(crypto
+                                                      .decrypt(
+                                                          partialExpense[index]
+                                                                  ['userData']
+                                                              ['pic'])
+                                                      .length ==
+                                                  0
+                                              ? global.driveUrl +
+                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                              : crypto.decrypt(
+                                                  partialExpense[index]
+                                                      ['userData']['pic'])),
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(
+                                                  value: downloadProgress
+                                                      .progress),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            width: 35.0,
+                                            height: 35.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: AssetImage(
+                                                      'assets/Images/unknown.jpeg'),
+                                                  fit: BoxFit.cover),
+                                            ),
+                                          ),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            width: 35.0,
+                                            height: 35.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: imageProvider,
+                                                  fit: BoxFit.cover),
+                                            ),
                                           ),
                                         ),
-                                        imageBuilder:
-                                            (context, imageProvider) =>
-                                                Container(
-                                          width: 35.0,
-                                          height: 35.0,
-                                          decoration: BoxDecoration(
-                                            shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                                image: imageProvider,
-                                                fit: BoxFit.cover),
+                                        SizedBox(
+                                          width: 6,
+                                        ),
+                                        InkWell(
+                                          onTap: () => showToast(
+                                              context,
+                                              crypto.decrypt(
+                                                  partialExpense[index]
+                                                      ['userData']['name']),
+                                              Icons.person_outline_rounded),
+                                          child: SizedBox(
+                                            width: crypto
+                                                        .decrypt(partialExpense[
+                                                                    index]
+                                                                ['userData']
+                                                            ['name'])
+                                                        .length <
+                                                    12
+                                                ? null
+                                                : 100,
+                                            child: Text(
+                                              crypto.decrypt(
+                                                  partialExpense[index]
+                                                      ['userData']['name']),
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      SizedBox(
-                                        width: 6,
-                                      ),
-                                      Text(
-                                        crypto.decrypt(
-                                            partialExpense[index]['name']),
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Text(
-                                    "₹ " +
-                                        crypto.decrypt(
-                                            partialExpense[index]['amount']),
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500,
+                                      ],
                                     ),
-                                  )
-                                ],
+                                    Text(
+                                      "₹ " +
+                                          crypto.decrypt(
+                                              partialExpense[index]['amount']),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -6378,8 +6478,7 @@ class _QuickSplitState extends State<QuickSplit> {
                 SizedBox(
                   height: 25,
                 ),
-                partialExpense.isEmpty ||
-                        userInPartialExpense(partialExpense, widget.email)
+                isActive
                     ? SizedBox(
                         height: 45,
                         width: MediaQuery.of(context).size.width * 0.95 - 25,
@@ -6388,11 +6487,7 @@ class _QuickSplitState extends State<QuickSplit> {
                             if (this.mounted) {
                               buildShowDialog(context);
                             }
-                            /* await addToPersonalExpense(
-                                id,
-                                partialExpense.isEmpty
-                                    ? "0"
-                                    : (manualSplit ? "2" : "1"));*/
+                            await settleThisTransaction(id, index, email);
                             if (this.mounted) {
                               Navigator.pop(context);
                             }
@@ -6408,7 +6503,9 @@ class _QuickSplitState extends State<QuickSplit> {
                                 color: Theme.of(context).primaryColor),
                           ),
                           child: Text(
-                            "Add To Personal Expense",
+                            email == widget.email
+                                ? "Amount Settled?"
+                                : "Settle Amount",
                             style: TextStyle(
                                 fontSize: 16,
                                 color: themeProvider.isDarkTheme
@@ -6418,12 +6515,46 @@ class _QuickSplitState extends State<QuickSplit> {
                         ),
                       )
                     : SizedBox(),
-                partialExpense.isEmpty ||
-                        userInPartialExpense(partialExpense, widget.email)
+                isActive
                     ? SizedBox(
                         height: 12,
                       )
                     : SizedBox(),
+                SizedBox(
+                  height: 45,
+                  width: MediaQuery.of(context).size.width * 0.95 - 25,
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      if (this.mounted) {
+                        buildShowDialog(context);
+                      }
+                      await addToPersonalExpense(id);
+                      if (this.mounted) {
+                        Navigator.pop(context);
+                      }
+                      if (this.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      side: BorderSide(color: Theme.of(context).primaryColor),
+                    ),
+                    child: Text(
+                      "Add To Personal Expense",
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 12,
+                ),
                 SizedBox(
                   height: 45,
                   width: MediaQuery.of(context).size.width * 0.95 - 25,
@@ -6457,6 +6588,40 @@ class _QuickSplitState extends State<QuickSplit> {
     });
   }
 
+  deleteExpense(String id, int index) async {
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'id': crypto.encrypt(id),
+      };
+
+      final response = await createHTTPreq(
+          'quickSplit', http.delete, widget.token, jsonInputData);
+
+      var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        widget.RoomData.value.removeAt(index);
+        if (this.mounted) {
+          setState(() {});
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+      }
+      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
+    } on Exception catch (_) {
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
@@ -6471,13 +6636,13 @@ class _QuickSplitState extends State<QuickSplit> {
           physics: ScrollPhysics(),
           itemCount: widget.RoomData.value.length,
           itemBuilder: (BuildContext context, int index) {
+            bool isRoomOwnerClosed = false;
             List<dynamic> isInSplitAmount =
                 widget.RoomData.value[index].splitBetween.where((element) {
-              if (crypto.decrypt(element['name']).isEmpty) {
-                if (crypto.decrypt(element['userData']['email']) ==
-                    widget.email) {
-                  return true;
-                }
+              if (crypto.decrypt(element['userData']['email']) ==
+                  widget.email) {
+                isRoomOwnerClosed = element['isSettled'];
+                return true;
               }
               return false;
             }).toList();
@@ -6495,15 +6660,17 @@ class _QuickSplitState extends State<QuickSplit> {
                           context,
                           widget.RoomData.value[index].owner,
                           widget.RoomData.value[index].date,
-                          widget.RoomData.value[index].owner,
+                          widget.RoomData.value[index].email,
                           widget.RoomData.value[index].roomID,
                           widget.RoomData.value[index].purpose,
                           widget.RoomData.value[index].amount.toString(),
-                          false,
+                          widget.RoomData.value[index].isClosedAny,
                           widget.RoomData.value[index].splitBetween,
                           widget.RoomData.value[index].type,
                           widget.RoomData.value[index].isEdited,
-                          widget.RoomData.value[index].lastModDate));
+                          widget.RoomData.value[index].lastModDate,
+                          index,
+                          widget.RoomData.value[index].active));
                 },
                 child: SizedBox(
                     height: 140,
@@ -6513,8 +6680,10 @@ class _QuickSplitState extends State<QuickSplit> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
-                            color:
-                                Theme.of(context).primaryColor.withAlpha(80)),
+                            color: widget.RoomData.value[index].active &&
+                                    !isRoomOwnerClosed
+                                ? Theme.of(context).primaryColor.withAlpha(80)
+                                : Colors.redAccent),
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Padding(

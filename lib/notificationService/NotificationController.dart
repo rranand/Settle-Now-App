@@ -104,6 +104,6 @@ class NotificationController {
                   name: receivedAction.payload!["roomName"]!,
                   roomkey: receivedAction.payload!["key"]!,
                   roomLink: receivedAction.payload!["roomLink"]!))));
-    }
+    } else {}
   }
 }

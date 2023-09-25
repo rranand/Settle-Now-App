@@ -184,7 +184,7 @@ Widget textWidget(String text, Shader gradient) {
 
 Future<Map<String, String>> getDataFromNotification(String? payload) async {
   String text = payload!;
-  if (text.isEmpty) {
+  if (text.isEmpty || text == '{}') {
     return {};
   }
   List<String> cols = text.substring(1, text.length - 1).split(', ');
@@ -352,7 +352,7 @@ Future<dynamic> createHTTPreq(
           'Access-Control-Allow-Origin': 'https://api.settlenow.in'
         },
         body: jsonEncode({"data": tokenization}));
-    
+
     if (res.statusCode == 503) {
       return res;
     }
