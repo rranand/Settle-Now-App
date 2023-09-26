@@ -104,6 +104,13 @@ class NotificationController {
                   name: receivedAction.payload!["roomName"]!,
                   roomkey: receivedAction.payload!["key"]!,
                   roomLink: receivedAction.payload!["roomLink"]!))));
-    } else {}
+    } else {
+      NavKey.navKey.currentState!.push(MaterialPageRoute(
+          builder: (_) => DashBoard(
+                version: receivedAction.payload!["version"].toString(),
+                dash: 1,
+                firstTime: false,
+              )));
+    }
   }
 }

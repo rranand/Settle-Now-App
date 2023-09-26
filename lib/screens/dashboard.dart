@@ -1125,6 +1125,11 @@ class _DashBoardState extends State<DashBoard> {
             channelName: "Miscellaneous",
             channelDescription: 'Notification channel for Miscellaneous',
             defaultColor: Colors.white),
+        NotificationChannel(
+            channelKey: "quickSplitID",
+            channelName: "Quick Split",
+            channelDescription: 'Notification channel for Quick Split',
+            defaultColor: Colors.white),
       ]);
 
       FirebaseMessaging.instance.getInitialMessage().then(
@@ -1798,7 +1803,7 @@ class _DashBoardState extends State<DashBoard> {
         addExpenseTo.clear();
         _amt.text = "";
         _purpose.text = "";
-        quickSplitData.value.add(QuickSplitEach.fromJson(data["data"]));
+        quickSplitData.value.insert(0, QuickSplitEach.fromJson(data["data"]));
         if (this.mounted) {
           setState(() {});
         }
@@ -5593,7 +5598,6 @@ class QuickSplit extends StatefulWidget {
 }
 
 class _QuickSplitState extends State<QuickSplit> {
-  final _updateExpense = GlobalKey<FormState>();
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
   AutoScrollController controller = AutoScrollController();
@@ -5950,218 +5954,7 @@ class _QuickSplitState extends State<QuickSplit> {
     });
   }
 
-  _updateTransaction(
-      BuildContext context,
-      String purpose,
-      String id,
-      String amount,
-      String flag,
-      String split,
-      int roomExpenseTypeIndex) async {
-    try {
-      Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
-        'purpose': crypto.encrypt(purpose),
-        'amount': crypto.encrypt(amount),
-        'id': crypto.encrypt(id),
-        'flag': crypto.encrypt(flag),
-        'split': crypto.encrypt(split),
-        'type': crypto.encrypt(widget.roomExpenseCategory[roomExpenseTypeIndex])
-      };
-
-      final response = await createHTTPreq(
-          'transaction', http.patch, widget.token, jsonInputData);
-
-      var updateMessage = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
-    } on Exception catch (_) {
-      if (this.mounted) {
-        await onException(context);
-      }
-    }
-  }
-
-  Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
-      String amount, String split, String category) {
-    roomExpenseCategoryIndex = widget.roomExpenseCategory.indexOf(category);
-    return StatefulBuilder(builder: (context, setState) {
-      _purpose.text = purpose;
-      _amount.text = amount;
-
-      final themeProvider = Provider.of<ThemeProvider>(context);
-      return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-          child: SingleChildScrollView(
-            child: Container(
-                width: MediaQuery.of(context).size.width,
-                child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Form(
-                      key: _updateExpense,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextFormField(
-                            controller: _amount,
-                            keyboardType: TextInputType.number,
-                            maxLength: 10,
-                            maxLines: 1,
-                            style: const TextStyle(fontSize: 18),
-                            autocorrect: false,
-                            validator: (value) {
-                              RegExp validateNumber =
-                                  RegExp(r'\b[1-9]{1}[\d]*\b');
-                              if (!validateNumber.hasMatch(_amount.text)) {
-                                return "Enter Valid Amount";
-                              }
-                              return null;
-                            },
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Enter Amount",
-                              counterText: "",
-                              labelText: "Amount",
-                              errorStyle: TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          TextFormField(
-                            controller: _purpose,
-                            keyboardType: TextInputType.text,
-                            maxLength: 1000,
-                            maxLines: 1,
-                            style: const TextStyle(fontSize: 18),
-                            autocorrect: false,
-                            validator: (value) {
-                              RegExp validateText = RegExp(r'\b[\w]+\b');
-                              if (!validateText.hasMatch(_purpose.text)) {
-                                return "Enter Valid Purpose";
-                              }
-                              return null;
-                            },
-                            decoration: const InputDecoration(
-                              contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Enter Purpose",
-                              labelText: "Purpose",
-                              counterText: "",
-                              errorStyle: TextStyle(fontSize: 15),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            height: 70,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: widget.roomExpenseCategory.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: InkWell(
-                                      child: Card(
-                                        color: Theme.of(context)
-                                            .dialogBackgroundColor,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: roomExpenseCategoryIndex ==
-                                                      index
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Theme.of(context)
-                                                      .cardColor),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(12.0),
-                                          child: Center(
-                                            child: Text(
-                                              widget.roomExpenseCategory[index],
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      onTap: () {
-                                        if (this.mounted) {
-                                          setState(
-                                            () {
-                                              roomExpenseCategoryIndex = index;
-                                            },
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          SizedBox(
-                            height: 43,
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: OutlinedButton(
-                                child: Text(
-                                  "Update",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: themeProvider.isDarkTheme
-                                          ? Colors.white
-                                          : Colors.black),
-                                ),
-                                style: OutlinedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                  ),
-                                  side: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                ),
-                                onPressed: () async {
-                                  if (_updateExpense.currentState!.validate()) {
-                                    if (this.mounted) {
-                                      buildShowDialog(context);
-                                    }
-                                    await _updateTransaction(
-                                        context,
-                                        _purpose.text,
-                                        id,
-                                        _amount.text,
-                                        "0",
-                                        split,
-                                        roomExpenseCategoryIndex);
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                  }
-                                }),
-                          ),
-                        ],
-                      ),
-                    ))),
-          ));
-    });
-  }
-
-  settleThisTransaction(String objId, int index, String email) async {
+  settleThisTransaction(String objId, int index) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
@@ -6175,7 +5968,12 @@ class _QuickSplitState extends State<QuickSplit> {
           'quickSplit/settle', http.post, widget.token, jsonInputData);
 
       var data = jsonDecode(response.body);
-      if (response.statusCode == 200) {}
+      if (response.statusCode == 200) {
+        widget.RoomData.value[index] = QuickSplitEach.fromJson(data["data"]);
+        if (this.mounted) {
+          setState(() {});
+        }
+      }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (_) {
       if (this.mounted) {
@@ -6236,7 +6034,8 @@ class _QuickSplitState extends State<QuickSplit> {
       bool isEdited,
       String lastModDate,
       int index,
-      bool isActive) {
+      bool isActive,
+      bool isUserClosed) {
     return StatefulBuilder(builder: (context, setState) {
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -6478,7 +6277,7 @@ class _QuickSplitState extends State<QuickSplit> {
                 SizedBox(
                   height: 25,
                 ),
-                isActive
+                (isActive && !isUserClosed)
                     ? SizedBox(
                         height: 45,
                         width: MediaQuery.of(context).size.width * 0.95 - 25,
@@ -6487,7 +6286,7 @@ class _QuickSplitState extends State<QuickSplit> {
                             if (this.mounted) {
                               buildShowDialog(context);
                             }
-                            await settleThisTransaction(id, index, email);
+                            await settleThisTransaction(id, index);
                             if (this.mounted) {
                               Navigator.pop(context);
                             }
@@ -6515,7 +6314,7 @@ class _QuickSplitState extends State<QuickSplit> {
                         ),
                       )
                     : SizedBox(),
-                isActive
+                (isActive && !isUserClosed)
                     ? SizedBox(
                         height: 12,
                       )
@@ -6633,7 +6432,7 @@ class _QuickSplitState extends State<QuickSplit> {
               ),
           controller: controller,
           shrinkWrap: true,
-          physics: ScrollPhysics(),
+          physics: AlwaysScrollableScrollPhysics(),
           itemCount: widget.RoomData.value.length,
           itemBuilder: (BuildContext context, int index) {
             bool isRoomOwnerClosed = false;
@@ -6670,7 +6469,8 @@ class _QuickSplitState extends State<QuickSplit> {
                           widget.RoomData.value[index].isEdited,
                           widget.RoomData.value[index].lastModDate,
                           index,
-                          widget.RoomData.value[index].active));
+                          widget.RoomData.value[index].active,
+                          isRoomOwnerClosed));
                 },
                 child: SizedBox(
                     height: 140,

@@ -71,6 +71,11 @@ Future<void> main() async {
           channelName: "Miscellaneous",
           channelDescription: 'Notification channel for Miscellaneous',
           defaultColor: Colors.white),
+      NotificationChannel(
+          channelKey: "quickSplitID",
+          channelName: "Quick Split",
+          channelDescription: 'Notification channel for Quick Split',
+          defaultColor: Colors.white),
     ]);
   }
 

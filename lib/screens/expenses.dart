@@ -65,13 +65,12 @@ class _ExpensesState extends State<Expenses> {
   List<dynamic> category = [];
   List<dynamic> investmentCat = [];
   Set<int> filtercategoryIndex = Set();
-  bool isRoomFilter = false;
   int categoryIndex = 0;
   int investIndex = 0;
-  String CurDate = "";
+  String Curdate = "";
   final _formKey = GlobalKey<FormState>();
   final _updateExpense = GlobalKey<FormState>();
-  DateTime expenseDate = DateTime.now();
+  DateTime expensedate = DateTime.now();
 
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
@@ -104,7 +103,7 @@ class _ExpensesState extends State<Expenses> {
     investmentCat = widget.investmentCategory;
 
     var now = DateTime.now();
-    CurDate = (now.month - 1).toString() + now.year.toString();
+    Curdate = (now.month - 1).toString() + now.year.toString();
 
     String yr = "";
     String mn = "";
@@ -157,11 +156,12 @@ class _ExpensesState extends State<Expenses> {
     }
   }
 
-  removeRoomTransaction(String id, int index) async {
+  removeRoomTransaction(String id, int index, bool isRoom) async {
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(widget.email),
-        'id': crypto.encrypt(id)
+        'id': crypto.encrypt(id),
+        'isRoom': crypto.encrypt(isRoom?"1":"0")
       };
 
       final response = await createHTTPreq('transaction/personalExpense',
@@ -201,8 +201,8 @@ class _ExpensesState extends State<Expenses> {
         if (flag == "1") {
           TransList.removeAt(index);
         } else {
-          TransList[index]['Amount'] = crypto.encrypt(amount);
-          TransList[index]['Purpose'] = crypto.encrypt(purpose);
+          TransList[index]['amount'] = crypto.encrypt(amount);
+          TransList[index]['purpose'] = crypto.encrypt(purpose);
           TransList[index]['isEdited'] = true;
           TransList[index]['lastModDate'] = crypto.encrypt(
               DateFormat(global.dateTimeFormat).format(DateTime.now()));
@@ -221,12 +221,12 @@ class _ExpensesState extends State<Expenses> {
 
   Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
       String amount, int index) {
-    TextEditingController _updatePurpose = TextEditingController();
-    TextEditingController _updateAmount = TextEditingController();
+    TextEditingController _updatepurpose = TextEditingController();
+    TextEditingController _updateamount = TextEditingController();
 
     return StatefulBuilder(builder: (context, setState) {
-      _updateAmount.text = amount.substring(2);
-      _updatePurpose.text = purpose;
+      _updateamount.text = amount.substring(2);
+      _updatepurpose.text = purpose;
 
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -244,7 +244,7 @@ class _ExpensesState extends State<Expenses> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           TextFormField(
-                            controller: _updateAmount,
+                            controller: _updateamount,
                             keyboardType: TextInputType.number,
                             maxLength: 10,
                             maxLines: 1,
@@ -254,16 +254,16 @@ class _ExpensesState extends State<Expenses> {
                               RegExp validateNumber =
                                   RegExp(r'\b[1-9]{1}[\d]*\b');
                               if (!validateNumber
-                                  .hasMatch(_updateAmount.text)) {
-                                return "Enter Valid Amount";
+                                  .hasMatch(_updateamount.text)) {
+                                return "Enter Valid amount";
                               }
                               return null;
                             },
                             decoration: const InputDecoration(
                               counterText: "",
                               contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Enter Amount",
-                              labelText: "Amount",
+                              hintText: "Enter amount",
+                              labelText: "amount",
                               errorStyle: TextStyle(fontSize: 15),
                             ),
                           ),
@@ -271,7 +271,7 @@ class _ExpensesState extends State<Expenses> {
                             height: 10,
                           ),
                           TextFormField(
-                            controller: _updatePurpose,
+                            controller: _updatepurpose,
                             keyboardType: TextInputType.text,
                             maxLength: 1000,
                             maxLines: 1,
@@ -279,16 +279,16 @@ class _ExpensesState extends State<Expenses> {
                             autocorrect: false,
                             validator: (value) {
                               RegExp validateText = RegExp(r'\b[\w]+\b');
-                              if (!validateText.hasMatch(_updatePurpose.text)) {
-                                return "Enter Valid Purpose";
+                              if (!validateText.hasMatch(_updatepurpose.text)) {
+                                return "Enter Valid purpose";
                               }
                               return null;
                             },
                             decoration: const InputDecoration(
                               counterText: "",
                               contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Enter Purpose",
-                              labelText: "Purpose",
+                              hintText: "Enter purpose",
+                              labelText: "purpose",
                               errorStyle: TextStyle(fontSize: 15),
                             ),
                           ),
@@ -319,8 +319,8 @@ class _ExpensesState extends State<Expenses> {
                                       buildShowDialog(context);
                                     }
                                     await updatePersonalTransaction(
-                                        _updatePurpose.text,
-                                        _updateAmount.text,
+                                        _updatepurpose.text,
+                                        _updateamount.text,
                                         "0",
                                         id,
                                         index);
@@ -351,8 +351,9 @@ class _ExpensesState extends State<Expenses> {
       String date,
       String amount,
       bool room,
+      bool quickSplit,
       String id,
-      String roomExpenseType,
+      String roomExpensetype,
       bool isEdited,
       String lastModDate) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -378,14 +379,14 @@ class _ExpensesState extends State<Expenses> {
                       maxLines: 6,
                     ),
                   ),
-                  CurDate == widget.date
-                      ? (room
+                  Curdate == widget.date
+                      ? ((quickSplit || room)
                           ? IconButton(
                               onPressed: () async {
                                 if (this.mounted) {
                                   buildShowDialog(context);
                                 }
-                                await removeRoomTransaction(id, index);
+                                await removeRoomTransaction(id, index, room);
                                 if (this.mounted) {
                                   Navigator.pop(context);
                                 }
@@ -467,14 +468,14 @@ class _ExpensesState extends State<Expenses> {
                           style: TextStyle(fontSize: 18),
                         )
                       : Text(
-                          "Type: " + type,
+                          "type: " + type,
                           style: TextStyle(fontSize: 18),
                         ),
                   SizedBox(
                     height: 10,
                   ),
                   Text(
-                    "Amount: " + amount,
+                    "amount: " + amount,
                     style: TextStyle(fontSize: 18),
                   ),
                   SizedBox(
@@ -493,15 +494,15 @@ class _ExpensesState extends State<Expenses> {
                       ? Text("Modified: " + formatDateTime(lastModDate),
                           style: TextStyle(fontSize: 18))
                       : SizedBox(),
-                  roomExpenseType.isEmpty
+                  roomExpensetype.isEmpty
                       ? SizedBox()
                       : (SizedBox(
                           height: 10,
                         )),
-                  roomExpenseType.isEmpty
+                  roomExpensetype.isEmpty
                       ? SizedBox()
                       : (Text(
-                          "Category: " + roomExpenseType,
+                          "Category: " + roomExpensetype,
                           style: TextStyle(fontSize: 18),
                         )),
                 ],
@@ -555,7 +556,7 @@ class _ExpensesState extends State<Expenses> {
         'type': crypto.encrypt(categoryIndex.toString()),
         'investType': crypto.encrypt(investIndex.toString()),
         'date': crypto
-            .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
+            .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expensedate)),
       };
 
       final response = await createHTTPreq(
@@ -601,19 +602,13 @@ class _ExpensesState extends State<Expenses> {
       });
     }
 
-    if (filtercategoryIndex.isEmpty && !isRoomFilter) {
+    if (filtercategoryIndex.isEmpty) {
       showFilterResult = false;
     } else {
       TransList.forEach((element) {
-        if (element['room']) {
-          if (isRoomFilter) {
-            filterResult.add(element);
-          }
-        } else {
-          if (filtercategoryIndex
-              .contains(category.indexOf(crypto.decrypt(element['type'])))) {
-            filterResult.add(element);
-          }
+        if (filtercategoryIndex
+            .contains(category.indexOf(crypto.decrypt(element['type'])))) {
+          filterResult.add(element);
         }
       });
     }
@@ -679,37 +674,8 @@ class _ExpensesState extends State<Expenses> {
                       height: 570,
                       child: MasonryGridView.count(
                         crossAxisCount: 2,
-                        itemCount: category.length + 1,
+                        itemCount: category.length,
                         itemBuilder: (context, index) {
-                          if (category.length == index) {
-                            return InkWell(
-                              onTap: () {
-                                isRoomFilter = !isRoomFilter;
-                                if (this.mounted) {
-                                  setState(() {});
-                                }
-                              },
-                              child: Card(
-                                elevation: 1.0,
-                                color: themeProvider.isDarkTheme
-                                    ? Theme.of(context).scaffoldBackgroundColor
-                                    : Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  side: BorderSide(
-                                      color: isRoomFilter
-                                          ? Theme.of(context).primaryColor
-                                          : Theme.of(context).cardColor),
-                                  borderRadius: BorderRadius.circular(15.0),
-                                ),
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Text("Room"),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
                           return InkWell(
                             onTap: () {
                               if (filtercategoryIndex.contains(index)) {
@@ -799,7 +765,6 @@ class _ExpensesState extends State<Expenses> {
                       onPressed: () {
                         filtercategoryIndex.clear();
                         showFilterResult = false;
-                        isRoomFilter = false;
                         if (this.mounted) {
                           setState(() {});
                         }
@@ -975,7 +940,7 @@ class _ExpensesState extends State<Expenses> {
                                       itemCount: filterResult.length,
                                       itemBuilder:
                                           (BuildContext context, int index) {
-                                        if (filterResult[index]["room"]) {
+                                        if (filterResult[index]['quickSplit']) {
                                           return InkWell(
                                             onTap: () {
                                               showDialog(
@@ -985,21 +950,22 @@ class _ExpensesState extends State<Expenses> {
                                                     index,
                                                     crypto.decrypt(
                                                         filterResult[index]
-                                                            ["Purpose"]),
-                                                    crypto.decrypt(
-                                                        filterResult[index]
-                                                            ["RoomName"]),
+                                                            ["purpose"]),
+                                                    "Quick Split",
                                                     (crypto.decrypt(
                                                         filterResult[index]
-                                                            ["Date"])),
+                                                            ["date"])),
                                                     "₹ " +
-                                                        commaSeperator(
-                                                            crypto.decrypt(
-                                                                filterResult[index]
-                                                                    ["Amount"])),
+                                                        commaSeperator(crypto.decrypt(
+                                                            filterResult[index]
+                                                                ["amount"])),
                                                     filterResult[index]["room"],
-                                                    crypto.decrypt(filterResult[index]["id"]),
-                                                    crypto.decrypt(filterResult[index]["Type"]),
+                                                    filterResult[index]
+                                                        ["quickSplit"],
+                                                    crypto.decrypt(
+                                                        filterResult[index]
+                                                            ["id"]),
+                                                    crypto.decrypt(filterResult[index]["type"]),
                                                     filterResult[index]["isEdited"],
                                                     crypto.decrypt(filterResult[index]["lastModDate"])),
                                               );
@@ -1049,7 +1015,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     crypto.decrypt(
                                                                         filterResult[index]
                                                                             [
-                                                                            "Purpose"]),
+                                                                            "purpose"]),
                                                                     overflow:
                                                                         TextOverflow
                                                                             .ellipsis,
@@ -1070,7 +1036,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       crypto.decrypt(
                                                                           filterResult[index]
                                                                               [
-                                                                              "Type"]),
+                                                                              "type"]),
                                                                       style:
                                                                           const TextStyle(
                                                                         fontSize:
@@ -1085,10 +1051,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     opacity:
                                                                         0.8,
                                                                     child: Text(
-                                                                      crypto.decrypt(filterResult[index]
-                                                                              [
-                                                                              "RoomName"]) +
-                                                                          " (Room)",
+                                                                      "Quick Spilt",
                                                                       style:
                                                                           const TextStyle(
                                                                         fontSize:
@@ -1106,7 +1069,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       formatDateTime(crypto.decrypt(
                                                                           filterResult[index]
                                                                               [
-                                                                              "Date"])),
+                                                                              "date"])),
                                                                       style:
                                                                           const TextStyle(
                                                                         fontSize:
@@ -1180,7 +1143,230 @@ class _ExpensesState extends State<Expenses> {
                                                                       commaSeperator(crypto.decrypt(
                                                                           filterResult[index]
                                                                               [
-                                                                              "Amount"])),
+                                                                              "amount"])),
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      ]),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        } else if (filterResult[index]
+                                            ["room"]) {
+                                          return InkWell(
+                                            onTap: () {
+                                              showDialog(
+                                                context: context,
+                                                builder: (BuildContext context) => _buildPopupDialog(
+                                                    context,
+                                                    index,
+                                                    crypto.decrypt(
+                                                        filterResult[index]
+                                                            ["purpose"]),
+                                                    crypto.decrypt(
+                                                        filterResult[index]
+                                                            ["roomName"]),
+                                                    (crypto.decrypt(
+                                                        filterResult[index]
+                                                            ["date"])),
+                                                    "₹ " +
+                                                        commaSeperator(crypto.decrypt(
+                                                            filterResult[index]
+                                                                ["amount"])),
+                                                    filterResult[index]["room"],
+                                                    filterResult[index]
+                                                        ["quickSplit"],
+                                                    crypto.decrypt(filterResult[index]["id"]),
+                                                    crypto.decrypt(filterResult[index]["type"]),
+                                                    filterResult[index]["isEdited"],
+                                                    crypto.decrypt(filterResult[index]["lastModDate"])),
+                                              );
+                                            },
+                                            child: SizedBox(
+                                              height: 135,
+                                              child: Card(
+                                                elevation: 2.0,
+                                                shadowColor: Theme.of(context)
+                                                    .primaryColor,
+                                                color: Theme.of(context)
+                                                    .scaffoldBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: Theme.of(context)
+                                                          .primaryColor
+                                                          .withAlpha(95)),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          15.0),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      10.0),
+                                                  child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: [
+                                                        Expanded(
+                                                          flex: 1,
+                                                          child: SizedBox(
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.80,
+                                                            child: Column(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  SizedBox(
+                                                                    height: 4,
+                                                                  ),
+                                                                  Text(
+                                                                    crypto.decrypt(
+                                                                        filterResult[index]
+                                                                            [
+                                                                            "purpose"]),
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    maxLines: 5,
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            23,
+                                                                        fontWeight:
+                                                                            FontWeight.w500),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 4,
+                                                                  ),
+                                                                  Opacity(
+                                                                    opacity:
+                                                                        0.8,
+                                                                    child: Text(
+                                                                      crypto.decrypt(
+                                                                          filterResult[index]
+                                                                              [
+                                                                              "type"]),
+                                                                      style:
+                                                                          const TextStyle(
+                                                                        fontSize:
+                                                                            17,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 4,
+                                                                  ),
+                                                                  Opacity(
+                                                                    opacity:
+                                                                        0.8,
+                                                                    child: Text(
+                                                                      crypto.decrypt(filterResult[index]
+                                                                              [
+                                                                              "roomName"]) +
+                                                                          " (Room)",
+                                                                      style:
+                                                                          const TextStyle(
+                                                                        fontSize:
+                                                                            17,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(
+                                                                    height: 4,
+                                                                  ),
+                                                                  Opacity(
+                                                                    opacity:
+                                                                        0.8,
+                                                                    child: Text(
+                                                                      formatDateTime(crypto.decrypt(
+                                                                          filterResult[index]
+                                                                              [
+                                                                              "date"])),
+                                                                      style:
+                                                                          const TextStyle(
+                                                                        fontSize:
+                                                                            17,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ]),
+                                                          ),
+                                                        ),
+                                                        Column(
+                                                          mainAxisAlignment:
+                                                              filterResult[
+                                                                          index]
+                                                                      [
+                                                                      "isEdited"]
+                                                                  ? MainAxisAlignment
+                                                                      .start
+                                                                  : MainAxisAlignment
+                                                                      .center,
+                                                          children: [
+                                                            filterResult[index]
+                                                                    ["isEdited"]
+                                                                ? SizedBox(
+                                                                    height: 8,
+                                                                  )
+                                                                : SizedBox(),
+                                                            filterResult[index]
+                                                                    ["isEdited"]
+                                                                ? Container(
+                                                                    width: 55,
+                                                                    height: 30,
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .center,
+                                                                    decoration: BoxDecoration(
+                                                                        color: Colors.transparent,
+                                                                        border: Border.all(
+                                                                          color: themeProvider.isDarkTheme
+                                                                              ? Theme.of(context).primaryColor
+                                                                              : Colors.white,
+                                                                        ),
+                                                                        borderRadius: BorderRadius.all(Radius.circular(12))),
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .all(
+                                                                          4.0),
+                                                                      child: Text(
+                                                                          "Edited",
+                                                                          style: TextStyle(
+                                                                              fontSize: 13,
+                                                                              color: Colors.white)),
+                                                                    ))
+                                                                : SizedBox(),
+                                                            filterResult[index]
+                                                                    ["isEdited"]
+                                                                ? SizedBox(
+                                                                    height: 30,
+                                                                  )
+                                                                : SizedBox(),
+                                                            Expanded(
+                                                              flex: 0,
+                                                              child: SizedBox(
+                                                                width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width *
+                                                                    0.2,
+                                                                child: Text(
+                                                                  "₹ " +
+                                                                      commaSeperator(crypto.decrypt(
+                                                                          filterResult[index]
+                                                                              [
+                                                                              "amount"])),
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -1206,7 +1392,7 @@ class _ExpensesState extends State<Expenses> {
                                                     index,
                                                     crypto.decrypt(
                                                         filterResult[index]
-                                                            ["Purpose"]),
+                                                            ["purpose"]),
                                                     crypto.decrypt(
                                                             filterResult[index]
                                                                 ["type"]) +
@@ -1218,9 +1404,10 @@ class _ExpensesState extends State<Expenses> {
                                                                     filterResult[index]
                                                                         ["invType"]) +
                                                                 ")")),
-                                                    (crypto.decrypt(filterResult[index]["Date"])),
-                                                    "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["Amount"])),
+                                                    (crypto.decrypt(filterResult[index]["date"])),
+                                                    "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["amount"])),
                                                     filterResult[index]["room"],
+                                                    filterResult[index]["quickSplit"],
                                                     crypto.decrypt(filterResult[index]["id"]),
                                                     "",
                                                     filterResult[index]["isEdited"],
@@ -1273,7 +1460,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       crypto.decrypt(
                                                                           filterResult[index]
                                                                               [
-                                                                              "Purpose"]),
+                                                                              "purpose"]),
                                                                       overflow:
                                                                           TextOverflow
                                                                               .ellipsis,
@@ -1314,7 +1501,7 @@ class _ExpensesState extends State<Expenses> {
                                                                           Text(
                                                                         formatDateTime(crypto.decrypt(filterResult[index]
                                                                             [
-                                                                            "Date"])),
+                                                                            "date"])),
                                                                         style:
                                                                             const TextStyle(
                                                                           fontSize:
@@ -1391,7 +1578,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     "₹ " +
                                                                         commaSeperator(crypto.decrypt(filterResult[index]
                                                                             [
-                                                                            "Amount"])),
+                                                                            "amount"])),
                                                                     style:
                                                                         const TextStyle(
                                                                       fontSize:
@@ -1423,7 +1610,7 @@ class _ExpensesState extends State<Expenses> {
                                   itemCount: TransList.length,
                                   itemBuilder:
                                       (BuildContext context, int index) {
-                                    if (TransList[index]["room"]) {
+                                    if (TransList[index]["quickSplit"]) {
                                       return InkWell(
                                         onTap: () {
                                           showDialog(
@@ -1432,23 +1619,24 @@ class _ExpensesState extends State<Expenses> {
                                                 context,
                                                 index,
                                                 crypto.decrypt(TransList[index]
-                                                    ["Purpose"]),
-                                                crypto.decrypt(TransList[index]
-                                                    ["RoomName"]),
+                                                    ["purpose"]),
+                                                "Quick Split",
                                                 (crypto.decrypt(
-                                                    TransList[index]["Date"])),
+                                                    TransList[index]["date"])),
                                                 "₹ " +
-                                                    commaSeperator(crypto.decrypt(
-                                                        TransList[index]
-                                                            ["Amount"])),
+                                                    commaSeperator(
+                                                        crypto.decrypt(
+                                                            TransList[index]
+                                                                ["amount"])),
                                                 TransList[index]["room"],
+                                                TransList[index]["quickSplit"],
                                                 crypto.decrypt(
                                                     TransList[index]["id"]),
                                                 crypto.decrypt(
-                                                    TransList[index]["Type"]),
+                                                    TransList[index]["type"]),
                                                 TransList[index]["isEdited"],
-                                                crypto.decrypt(
-                                                    TransList[index]["lastModDate"])),
+                                                crypto.decrypt(TransList[index]
+                                                    ["lastModDate"])),
                                           );
                                         },
                                         child: SizedBox(
@@ -1496,7 +1684,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     TransList[
                                                                             index]
                                                                         [
-                                                                        "Purpose"]),
+                                                                        "purpose"]),
                                                                 overflow:
                                                                     TextOverflow
                                                                         .ellipsis,
@@ -1518,7 +1706,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       TransList[
                                                                               index]
                                                                           [
-                                                                          "Type"]),
+                                                                          "type"]),
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -1532,11 +1720,7 @@ class _ExpensesState extends State<Expenses> {
                                                               Opacity(
                                                                 opacity: 0.8,
                                                                 child: Text(
-                                                                  crypto.decrypt(
-                                                                          TransList[index]
-                                                                              [
-                                                                              "RoomName"]) +
-                                                                      " (Room)",
+                                                                  "Quick Split",
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -1554,7 +1738,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       crypto.decrypt(
                                                                           TransList[index]
                                                                               [
-                                                                              "Date"])),
+                                                                              "date"])),
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -1634,7 +1818,234 @@ class _ExpensesState extends State<Expenses> {
                                                                       crypto.decrypt(
                                                                           TransList[index]
                                                                               [
-                                                                              "Amount"])),
+                                                                              "amount"])),
+                                                              style:
+                                                                  const TextStyle(
+                                                                fontSize: 18,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ]),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    } else if (TransList[index]["room"]) {
+                                      return InkWell(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) => _buildPopupDialog(
+                                                context,
+                                                index,
+                                                crypto.decrypt(TransList[index]
+                                                    ["purpose"]),
+                                                crypto.decrypt(TransList[index]
+                                                    ["roomName"]),
+                                                (crypto.decrypt(
+                                                    TransList[index]["date"])),
+                                                "₹ " +
+                                                    commaSeperator(
+                                                        crypto.decrypt(
+                                                            TransList[index]
+                                                                ["amount"])),
+                                                TransList[index]["room"],
+                                                TransList[index]["quickSplit"],
+                                                crypto.decrypt(
+                                                    TransList[index]["id"]),
+                                                crypto.decrypt(
+                                                    TransList[index]["type"]),
+                                                TransList[index]["isEdited"],
+                                                crypto.decrypt(TransList[index]["lastModDate"])),
+                                          );
+                                        },
+                                        child: SizedBox(
+                                          height: 135,
+                                          child: Card(
+                                            elevation: 1.0,
+                                            shadowColor:
+                                                Theme.of(context).primaryColor,
+                                            color: Theme.of(context)
+                                                .scaffoldBackgroundColor,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  color: Theme.of(context)
+                                                      .primaryColor
+                                                      .withAlpha(95)),
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(10.0),
+                                              child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Expanded(
+                                                      flex: 1,
+                                                      child: SizedBox(
+                                                        width: MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width *
+                                                            0.80,
+                                                        child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            children: [
+                                                              SizedBox(
+                                                                height: 4,
+                                                              ),
+                                                              Text(
+                                                                crypto.decrypt(
+                                                                    TransList[
+                                                                            index]
+                                                                        [
+                                                                        "purpose"]),
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                maxLines: 5,
+                                                                style: const TextStyle(
+                                                                    fontSize:
+                                                                        23,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w500),
+                                                              ),
+                                                              SizedBox(
+                                                                height: 4,
+                                                              ),
+                                                              Opacity(
+                                                                opacity: 0.8,
+                                                                child: Text(
+                                                                  crypto.decrypt(
+                                                                      TransList[
+                                                                              index]
+                                                                          [
+                                                                          "type"]),
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        17,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: 4,
+                                                              ),
+                                                              Opacity(
+                                                                opacity: 0.8,
+                                                                child: Text(
+                                                                  crypto.decrypt(
+                                                                          TransList[index]
+                                                                              [
+                                                                              "roomName"]) +
+                                                                      " (Room)",
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        17,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                height: 4,
+                                                              ),
+                                                              Opacity(
+                                                                opacity: 0.8,
+                                                                child: Text(
+                                                                  formatDateTime(
+                                                                      crypto.decrypt(
+                                                                          TransList[index]
+                                                                              [
+                                                                              "date"])),
+                                                                  style:
+                                                                      const TextStyle(
+                                                                    fontSize:
+                                                                        17,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ]),
+                                                      ),
+                                                    ),
+                                                    Column(
+                                                      mainAxisAlignment:
+                                                          TransList[index]
+                                                                  ["isEdited"]
+                                                              ? MainAxisAlignment
+                                                                  .start
+                                                              : MainAxisAlignment
+                                                                  .center,
+                                                      children: [
+                                                        TransList[index]
+                                                                ["isEdited"]
+                                                            ? SizedBox(
+                                                                height: 8,
+                                                              )
+                                                            : SizedBox(),
+                                                        TransList[index]
+                                                                ["isEdited"]
+                                                            ? Container(
+                                                                width: 55,
+                                                                height: 30,
+                                                                alignment:
+                                                                    Alignment
+                                                                        .center,
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                        color: Colors
+                                                                            .transparent,
+                                                                        border: Border
+                                                                            .all(
+                                                                          color: themeProvider.isDarkTheme
+                                                                              ? Theme.of(context).primaryColor
+                                                                              : Colors.white,
+                                                                        ),
+                                                                        borderRadius:
+                                                                            BorderRadius.all(Radius.circular(12))),
+                                                                child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          4.0),
+                                                                  child: Text(
+                                                                      "Edited",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              13,
+                                                                          color:
+                                                                              Colors.white)),
+                                                                ))
+                                                            : SizedBox(),
+                                                        TransList[index]
+                                                                ["isEdited"]
+                                                            ? SizedBox(
+                                                                height: 30,
+                                                              )
+                                                            : SizedBox(),
+                                                        Expanded(
+                                                          flex: 0,
+                                                          child: SizedBox(
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width *
+                                                                0.2,
+                                                            child: Text(
+                                                              "₹ " +
+                                                                  commaSeperator(
+                                                                      crypto.decrypt(
+                                                                          TransList[index]
+                                                                              [
+                                                                              "amount"])),
                                                               style:
                                                                   const TextStyle(
                                                                 fontSize: 18,
@@ -1658,7 +2069,7 @@ class _ExpensesState extends State<Expenses> {
                                                 context,
                                                 index,
                                                 crypto.decrypt(TransList[index]
-                                                    ["Purpose"]),
+                                                    ["purpose"]),
                                                 crypto.decrypt(TransList[index]["type"]) +
                                                     (crypto.decrypt(TransList[index]
                                                                 ["invType"]) ==
@@ -1669,10 +2080,11 @@ class _ExpensesState extends State<Expenses> {
                                                                 ["invType"]) +
                                                             ")")),
                                                 (crypto.decrypt(
-                                                    TransList[index]["Date"])),
+                                                    TransList[index]["date"])),
                                                 "₹ " +
-                                                    commaSeperator(crypto.decrypt(TransList[index]["Amount"])),
+                                                    commaSeperator(crypto.decrypt(TransList[index]["amount"])),
                                                 TransList[index]["room"],
+                                                TransList[index]["quickSplit"],
                                                 crypto.decrypt(TransList[index]["id"]),
                                                 "",
                                                 TransList[index]["isEdited"],
@@ -1723,7 +2135,7 @@ class _ExpensesState extends State<Expenses> {
                                                                     TransList[
                                                                             index]
                                                                         [
-                                                                        "Purpose"]),
+                                                                        "purpose"]),
                                                                 overflow:
                                                                     TextOverflow
                                                                         .ellipsis,
@@ -1768,7 +2180,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       crypto.decrypt(
                                                                           TransList[index]
                                                                               [
-                                                                              "Date"])),
+                                                                              "date"])),
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -1848,7 +2260,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       crypto.decrypt(
                                                                           TransList[index]
                                                                               [
-                                                                              "Amount"])),
+                                                                              "amount"])),
                                                               style:
                                                                   const TextStyle(
                                                                 fontSize: 18,
@@ -1868,14 +2280,14 @@ class _ExpensesState extends State<Expenses> {
                             ),
                     )),
         ),
-        floatingActionButton: CurDate == widget.date
+        floatingActionButton: Curdate == widget.date
             ? FloatingActionButton(
                 child: Icon(
                   Icons.add,
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  expenseDate = DateTime.now();
+                  expensedate = DateTime.now();
                   showModalBottomSheet<void>(
                     context: context,
                     isScrollControlled: true,
@@ -2076,7 +2488,7 @@ class _ExpensesState extends State<Expenses> {
                                       children: [
                                         Text(
                                           DateFormat(global.dateTimeFormat_new)
-                                              .format(expenseDate),
+                                              .format(expensedate),
                                           style: TextStyle(fontSize: 18),
                                         ),
                                         InkWell(
@@ -2086,7 +2498,7 @@ class _ExpensesState extends State<Expenses> {
                                               context: context,
                                               is24HourMode: false,
                                               isShowSeconds: false,
-                                              initialDate: expenseDate,
+                                              initialDate: expensedate,
                                               firstDate: DateTime(2018),
                                               lastDate: DateTime.now(),
                                               borderRadius:
@@ -2096,7 +2508,7 @@ class _ExpensesState extends State<Expenses> {
                                             if (dateTime != null) {
                                               if (this.mounted) {
                                                 setState(() {
-                                                  expenseDate = dateTime;
+                                                  expensedate = dateTime;
                                                 });
                                               }
                                             }
