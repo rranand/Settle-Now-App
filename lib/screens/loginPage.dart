@@ -8,7 +8,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -268,7 +267,7 @@ class _LoginPageState extends State<LoginPage> {
                           }),
                     ),
                     SizedBox(
-                      height: 10,
+                      height: 8,
                     ),
                     InkWell(
                       onTap: () async {
@@ -401,46 +400,20 @@ class _LoginPageState extends State<LoginPage> {
                         } on Exception catch (_) {}
                       },
                       child: SizedBox(
-                        width: 240,
-                        child: Card(
-                          color: Theme.of(context).primaryColor.withAlpha(255),
-                          elevation: 2.5,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  FaIcon(FontAwesomeIcons.google,
-                                      color: Colors.white),
-                                  SizedBox(
-                                    width: 9,
-                                  ),
-                                  Text(
-                                    "Sign In With Google",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: Colors.white),
-                                  )
-                                ]),
-                          ),
-                        ),
+                        height: 55,
+                        child: themeProvider.isDarkTheme
+                            ? Image.asset(
+                                'assets/Images/google_sign_dark.png',
+                              )
+                            : Image.asset(
+                                'assets/Images/google_sign_light.png',
+                              ),
                       ),
                     ),
                   ],
                 )
               : Center(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(
-                        height: 8,
-                      ),
-                      Text("Checking Log-In Status...")
-                    ],
-                  ),
+                  child: CircularProgressIndicator(),
                 ),
         ),
       ),
