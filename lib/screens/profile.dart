@@ -18,18 +18,22 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/themes.dart';
 
+import '../others/GoogleSignIN.dart';
+
 class Profile extends StatefulWidget {
   final String picUrl;
   final String email;
   final String name;
   final String token;
+  final bool isGoogle;
 
   const Profile(
       {Key? key,
       required this.picUrl,
       required this.email,
       required this.name,
-      required this.token})
+      required this.token,
+      required this.isGoogle})
       : super(key: key);
 
   @override
@@ -56,6 +60,12 @@ class _ProfileState extends State<Profile> {
   String createdOn = "";
   bool isDataLoading = false;
   late SharedPreferences prefs;
+
+  Future<void> logOutFromGoogle() async {
+    if (widget.isGoogle) {
+      await GoogleSignIN.logout();
+    }
+  }
 
   deleteAccount() async {
     if (this.mounted) {
@@ -87,7 +97,8 @@ class _ProfileState extends State<Profile> {
           await Future.wait([
             prefs.remove("token"),
             prefs.remove("__token"),
-            prefs.remove("___token")
+            prefs.remove("___token"),
+            logOutFromGoogle()
           ]);
 
           if (this.mounted) {

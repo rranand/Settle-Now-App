@@ -4987,19 +4987,21 @@ class _DashBoardState extends State<DashBoard> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => Profile(
-                                    email: _email.text,
-                                    name: _name.text,
-                                    token: _token,
-                                    picUrl: isGoogle
-                                        ? (_currentUser != null
-                                            ? _currentUser!.photoUrl.toString()
-                                            : addCorsinImage(global.driveUrl +
-                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"))
-                                        : addCorsinImage(global.driveUrl +
-                                            (_profilePicID.length == 0
-                                                ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                : _profilePicID)),
-                                  )),
+                                  email: _email.text,
+                                  name: _name.text,
+                                  token: _token,
+                                  picUrl: isGoogle
+                                      ? (_currentUser != null
+                                          ? _currentUser!.photoUrl.toString()
+                                          : addCorsinImage(global.driveUrl +
+                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"))
+                                      : addCorsinImage(
+                                          global.driveUrl +
+                                              (_profilePicID.length == 0
+                                                  ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  : _profilePicID),
+                                        ),
+                                  isGoogle: isGoogle)),
                         );
                       }
                     },
@@ -6480,8 +6482,8 @@ class _QuickSplitState extends State<QuickSplit> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
-                            color: widget.RoomData.value[index].active &&
-                                    !isRoomOwnerClosed
+                            color: (widget.RoomData.value[index].active &&
+                                    !isRoomOwnerClosed)
                                 ? Theme.of(context).primaryColor.withAlpha(80)
                                 : Colors.redAccent),
                         borderRadius: BorderRadius.circular(15.0),
