@@ -656,7 +656,7 @@ class _RoomExpenseState extends State<RoomExpense>
       if (this.mounted) {
         Navigator.pop(context);
       }
-      await _initialisation();
+      await Future.wait([_initialisation(), _extractExpenseData()]);
     } on Exception catch (_) {
       if (this.mounted) {
         Navigator.pop(context);
