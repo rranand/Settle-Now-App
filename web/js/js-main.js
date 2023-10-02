@@ -9,18 +9,9 @@
     /*--
         Menu Sticky
     -----------------------------------*/
-    function redirectToLogin() {
-        if (window.localStorage.getItem('flutter.token') != null) {
-            window.location.href = "https://settlenow.in/login";
-        }
-    }
     
     var windows = $(window);
     var sticky = $('.header-sticky');
-
-    $(windows).ready(function(){
-        redirectToLogin();
-    });
     
     windows.on('scroll', function() {
         var scroll = windows.scrollTop();
