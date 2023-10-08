@@ -353,10 +353,6 @@ Future<dynamic> createHTTPreq(
         },
         body: jsonEncode({"data": tokenization}));
 
-    if (res.statusCode == 503) {
-      return res;
-    }
-
     var resData = jsonDecode(res.body);
     if (resData['data'] != null) {
       String jsonJWTData = jsonDecode(res.body)['data'];

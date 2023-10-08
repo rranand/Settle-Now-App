@@ -80,37 +80,34 @@ class _ProfileState extends State<Profile> {
       final response = await createHTTPreq(
           'profile/deleteAccount', http.post, widget.token, jsonInputData);
 
+      String responseMessage =
+          crypto.decrypt(jsonDecode(response.body)['Message']);
       if (response.statusCode == 200) {
-        String responseMessage =
-            crypto.decrypt(jsonDecode(response.body)['Message']);
+        prefs = await SharedPreferences.getInstance();
+        await Future.wait([
+          prefs.remove("token"),
+          prefs.remove("__token"),
+          prefs.remove("___token"),
+          logOutFromGoogle()
+        ]);
 
-        if (responseMessage.toLowerCase().contains("soon")) {
-          if (this.mounted) {
-            Navigator.pop(context);
-          }
-          if (this.mounted) {
-            Navigator.pop(context);
-          }
-          showToast(context, responseMessage, Icons.warning);
-        } else {
-          prefs = await SharedPreferences.getInstance();
-          await Future.wait([
-            prefs.remove("token"),
-            prefs.remove("__token"),
-            prefs.remove("___token"),
-            logOutFromGoogle()
-          ]);
+        if (this.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LoginPage()),
+            (Route<dynamic> route) => false,
+          );
 
-          if (this.mounted) {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => LoginPage()),
-              (Route<dynamic> route) => false,
-            );
-
-            showToast(context, responseMessage, Icons.done);
-          }
+          showToast(context, responseMessage, Icons.done);
         }
+      } else {
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        if (this.mounted) {
+          Navigator.pop(context);
+        }
+        showToast(context, responseMessage, Icons.warning_rounded);
       }
     } on Exception catch (_) {
       if (this.mounted) {

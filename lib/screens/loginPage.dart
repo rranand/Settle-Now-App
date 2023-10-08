@@ -273,129 +273,135 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () async {
                         try {
                           final user = await GoogleSignIN.login();
-
-                          if (this.mounted) {
-                            buildShowDialog(context);
-                          }
-                          String token = crypto.encrypt(
-                              (user?.email).toString() +
-                                  "#" +
-                                  _deviceData['id'] +
-                                  "#" +
-                                  DateTime.now().toString());
-                          Map<String, String> jsonInputData = {
-                            "email": (user?.email).toString(),
-                            "name": (user?.displayName).toString(),
-                            "token": token
-                          };
-                          String jwToken = await createJWT(
-                              (user?.email).toString(),
-                              jsonEncode(jsonInputData));
-
-                          await Future.wait([
-                            prefs.setString("token", jwToken),
-                            prefs.setBool("isGoogle", true)
-                          ]);
-
-                          var resp = null;
-                          if (kIsWeb) {
+                          if (user != null) {
+                            if (this.mounted) {
+                              buildShowDialog(context);
+                            }
+                            String token = crypto.encrypt(
+                                (user.email).toString() +
+                                    "#" +
+                                    _deviceData['id'] +
+                                    "#" +
+                                    DateTime.now().toString());
                             Map<String, String> jsonInputData = {
-                              'email': crypto.encrypt((user?.email).toString()),
-                              'name': crypto
-                                  .encrypt((user?.displayName).toString()),
-                              'profilePic':
-                                  crypto.encrypt((user?.photoUrl).toString()),
-                              'country': crypto.encrypt("Unknown"),
-                              'ip': crypto.encrypt("Unknown"),
-                              'state': crypto.encrypt("Unknown"),
-                              'city': crypto.encrypt("Unknown"),
-                              'isp': crypto.encrypt("Unknown"),
-                              'device': crypto.encrypt(_deviceData['device']),
-                              'deviceID': crypto.encrypt(_deviceData['id']),
-                              'deviceToken': crypto.encrypt("web"),
-                              "token": crypto.encrypt(token)
+                              "email": (user.email).toString(),
+                              "name": (user.displayName).toString(),
+                              "token": token
                             };
+                            String jwToken = await createJWT(
+                                (user.email).toString(),
+                                jsonEncode(jsonInputData));
 
-                            resp = await createHTTPreq(
-                                'login/google', http.post, "", jsonInputData);
-                          } else {
-                            List<dynamic> fwaitTemp = await Future.wait([
-                              getDeviceTokenToSendNotification(),
-                              http.get(
-                                Uri.parse('http://ip-api.com/json'),
-                              )
-                            ]);
-
-                            final ipAdd = fwaitTemp[1];
-                            final JD = jsonDecode(ipAdd.body);
-
-                            Map<String, String> jsonInputData = {
-                              'email': crypto.encrypt((user?.email).toString()),
-                              'name': crypto
-                                  .encrypt((user?.displayName).toString()),
-                              'profilePic':
-                                  crypto.encrypt((user?.photoUrl).toString()),
-                              'country': crypto.encrypt(JD['country']),
-                              'ip': crypto.encrypt(JD['query']),
-                              'state': crypto.encrypt(JD['regionName']),
-                              'city': crypto.encrypt(JD['city']),
-                              'isp': crypto.encrypt(JD['isp']),
-                              'device': crypto.encrypt(_deviceData['device']),
-                              'deviceID': crypto.encrypt(_deviceData['id']),
-                              'model': crypto.encrypt(_deviceData['model']),
-                              'product': crypto.encrypt(_deviceData['product']),
-                              'serial': crypto.encrypt(_deviceData['serial']),
-                              'android': crypto.encrypt(_deviceData['sdkInt']),
-                              'release': crypto.encrypt(_deviceData['release']),
-                              'deviceToken': crypto.encrypt(deviceToken),
-                              "token": crypto.encrypt(token)
-                            };
-
-                            resp = await createHTTPreq(
-                                'login/google', http.post, "", jsonInputData);
-                          }
-
-                          var remainingData = jsonDecode(resp.body)['data'];
-
-                          if (resp.statusCode == 200) {
                             await Future.wait([
-                              prefs.setString(
-                                  "___token", remainingData['createdOn']),
-                              prefs.setString(
-                                  "__token", remainingData['phoneNo'])
+                              prefs.setString("token", jwToken),
+                              prefs.setBool("isGoogle", true)
                             ]);
-                          } else {
-                            await Future.wait([
-                              prefs.setString("___token", crypto.encrypt("")),
-                              prefs.setString("__token", crypto.encrypt(""))
-                            ]);
-                          }
 
-                          if (this.mounted) {
-                            Navigator.pop(context);
-                          }
+                            var resp = null;
+                            if (kIsWeb) {
+                              Map<String, String> jsonInputData = {
+                                'email':
+                                    crypto.encrypt((user.email).toString()),
+                                'name': crypto
+                                    .encrypt((user.displayName).toString()),
+                                'profilePic':
+                                    crypto.encrypt((user.photoUrl).toString()),
+                                'country': crypto.encrypt("Unknown"),
+                                'ip': crypto.encrypt("Unknown"),
+                                'state': crypto.encrypt("Unknown"),
+                                'city': crypto.encrypt("Unknown"),
+                                'isp': crypto.encrypt("Unknown"),
+                                'device': crypto.encrypt(_deviceData['device']),
+                                'deviceID': crypto.encrypt(_deviceData['id']),
+                                'deviceToken': crypto.encrypt("web"),
+                                "token": crypto.encrypt(token)
+                              };
 
-                          if (this.mounted) {
-                            isOnBoardingCompleted
-                                ? Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => DashBoard(
-                                        version: version,
-                                        firstTime: true,
+                              resp = await createHTTPreq(
+                                  'login/google', http.post, "", jsonInputData);
+                            } else {
+                              List<dynamic> fwaitTemp = await Future.wait([
+                                getDeviceTokenToSendNotification(),
+                                http.get(
+                                  Uri.parse('http://ip-api.com/json'),
+                                )
+                              ]);
+
+                              final ipAdd = fwaitTemp[1];
+                              final JD = jsonDecode(ipAdd.body);
+
+                              Map<String, String> jsonInputData = {
+                                'email':
+                                    crypto.encrypt((user.email).toString()),
+                                'name': crypto
+                                    .encrypt((user.displayName).toString()),
+                                'profilePic':
+                                    crypto.encrypt((user.photoUrl).toString()),
+                                'country': crypto.encrypt(JD['country']),
+                                'ip': crypto.encrypt(JD['query']),
+                                'state': crypto.encrypt(JD['regionName']),
+                                'city': crypto.encrypt(JD['city']),
+                                'isp': crypto.encrypt(JD['isp']),
+                                'device': crypto.encrypt(_deviceData['device']),
+                                'deviceID': crypto.encrypt(_deviceData['id']),
+                                'model': crypto.encrypt(_deviceData['model']),
+                                'product':
+                                    crypto.encrypt(_deviceData['product']),
+                                'serial': crypto.encrypt(_deviceData['serial']),
+                                'android':
+                                    crypto.encrypt(_deviceData['sdkInt']),
+                                'release':
+                                    crypto.encrypt(_deviceData['release']),
+                                'deviceToken': crypto.encrypt(deviceToken),
+                                "token": crypto.encrypt(token)
+                              };
+
+                              resp = await createHTTPreq(
+                                  'login/google', http.post, "", jsonInputData);
+                            }
+
+                            var remainingData = jsonDecode(resp.body)['data'];
+
+                            if (resp.statusCode == 200) {
+                              await Future.wait([
+                                prefs.setString(
+                                    "___token", remainingData['createdOn']),
+                                prefs.setString(
+                                    "__token", remainingData['phoneNo'])
+                              ]);
+                            } else {
+                              await Future.wait([
+                                prefs.setString("___token", crypto.encrypt("")),
+                                prefs.setString("__token", crypto.encrypt(""))
+                              ]);
+                            }
+
+                            if (this.mounted) {
+                              Navigator.pop(context);
+                            }
+
+                            if (this.mounted) {
+                              isOnBoardingCompleted
+                                  ? Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DashBoard(
+                                          version: version,
+                                          firstTime: true,
+                                        ),
                                       ),
-                                    ),
-                                    (Route<dynamic> route) => false,
-                                  )
-                                : Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => onBoarding(
-                                        version: version,
+                                      (Route<dynamic> route) => false,
+                                    )
+                                  : Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => onBoarding(
+                                          version: version,
+                                        ),
                                       ),
-                                    ),
-                                    (Route<dynamic> route) => false,
-                                  );
+                                      (Route<dynamic> route) => false,
+                                    );
+                            }
                           }
                         } on Exception catch (_) {}
                       },
