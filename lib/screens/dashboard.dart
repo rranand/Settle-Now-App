@@ -2144,7 +2144,7 @@ class _DashBoardState extends State<DashBoard> {
                                     autocorrect: false,
                                     validator: (value) {
                                       RegExp validateNumber =
-                                          RegExp(r'\b[1-9]{1}[\d]*\b');
+                                          RegExp(r'^\d+(\.\d{1,2})?$');
                                       if (!validateNumber.hasMatch(_amt.text)) {
                                         return "Enter Valid Amount";
                                       }
@@ -5295,7 +5295,7 @@ class _DashBoardState extends State<DashBoard> {
                               return Padding(
                                 padding: MediaQuery.of(context).viewInsets,
                                 child: SizedBox(
-                                  height: 120,
+                                  height: open == 0 ? 60 : 120,
                                   child: Center(
                                     child: Column(
                                       mainAxisAlignment:
@@ -5435,132 +5435,142 @@ class _DashBoardState extends State<DashBoard> {
                                             }
                                           },
                                         ),
-                                        ListTile(
-                                          leading: Icon(
-                                            Icons.edit,
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                          ),
-                                          title: Text(open == 0
-                                              ? "Join Transaction"
-                                              : "Join Room"),
-                                          onTap: () {
-                                            showModalBottomSheet<void>(
-                                              context: context,
-                                              isScrollControlled: true,
-                                              builder: (BuildContext context) {
-                                                return Padding(
-                                                  padding:
-                                                      MediaQuery.of(context)
-                                                          .viewInsets,
-                                                  child: Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: <Widget>[
-                                                      Form(
-                                                        key: _JformKey,
-                                                        child: TextFormField(
-                                                          controller: _NRoom,
-                                                          keyboardType:
-                                                              TextInputType
-                                                                  .text,
-                                                          maxLength: 7,
-                                                          maxLines: 1,
-                                                          style:
-                                                              const TextStyle(
-                                                                  fontSize: 18),
-                                                          cursorColor:
-                                                              Colors.black,
-                                                          autocorrect: false,
-                                                          validator: (value) {
-                                                            RegExp
-                                                                validateText =
-                                                                RegExp(
-                                                                    r'\b[\w]{7}\b');
-                                                            if (!validateText
-                                                                .hasMatch(_NRoom
-                                                                    .text)) {
-                                                              return open == 0
-                                                                  ? "Enter Valid Transcation Key"
-                                                                  : "Enter Valid Room Key";
-                                                            }
-                                                            return null;
-                                                          },
-                                                          decoration:
-                                                              InputDecoration(
-                                                            counterText: "",
-                                                            contentPadding:
-                                                                EdgeInsets.all(
-                                                                    8.0),
-                                                            hintText: open == 0
-                                                                ? "Enter Valid Transaction Key"
-                                                                : "Enter Room Key",
-                                                            labelText: open == 0
-                                                                ? "Transaction Key"
-                                                                : "Room Key",
-                                                            errorStyle:
-                                                                TextStyle(
-                                                                    fontSize:
-                                                                        15),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 15,
-                                                      ),
-                                                      SizedBox(
-                                                        height: 43,
-                                                        width: 100,
-                                                        child: OutlinedButton(
-                                                            child: Text(
-                                                              "Join",
-                                                              style: TextStyle(
-                                                                  fontSize: 16,
-                                                                  color: themeProvider
-                                                                          .isDarkTheme
-                                                                      ? Colors
-                                                                          .white
-                                                                      : Colors
-                                                                          .black),
-                                                            ),
-                                                            style:
-                                                                OutlinedButton
-                                                                    .styleFrom(
-                                                              shape:
-                                                                  RoundedRectangleBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10.0),
-                                                              ),
-                                                              side: BorderSide(
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .primaryColor),
-                                                            ),
-                                                            onPressed: () {
-                                                              if (_JformKey
-                                                                  .currentState!
-                                                                  .validate()) {
-                                                                SendingData(
+                                        open == 0
+                                            ? SizedBox()
+                                            : ListTile(
+                                                leading: Icon(
+                                                  Icons.edit,
+                                                  color: Theme.of(context)
+                                                      .primaryColor,
+                                                ),
+                                                title: Text("Join Room"),
+                                                onTap: () {
+                                                  showModalBottomSheet<void>(
+                                                    context: context,
+                                                    isScrollControlled: true,
+                                                    builder:
+                                                        (BuildContext context) {
+                                                      return Padding(
+                                                        padding: MediaQuery.of(
+                                                                context)
+                                                            .viewInsets,
+                                                        child: Column(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          children: <Widget>[
+                                                            Form(
+                                                              key: _JformKey,
+                                                              child:
+                                                                  TextFormField(
+                                                                controller:
+                                                                    _NRoom,
+                                                                keyboardType:
+                                                                    TextInputType
+                                                                        .text,
+                                                                maxLength: 7,
+                                                                maxLines: 1,
+                                                                style:
+                                                                    const TextStyle(
+                                                                        fontSize:
+                                                                            18),
+                                                                cursorColor:
+                                                                    Colors
+                                                                        .black,
+                                                                autocorrect:
                                                                     false,
-                                                                    context);
-                                                              }
-                                                            }),
-                                                      ),
-                                                      SizedBox(
-                                                        height: 10,
-                                                      )
-                                                    ],
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                        ),
+                                                                validator:
+                                                                    (value) {
+                                                                  RegExp
+                                                                      validateText =
+                                                                      RegExp(
+                                                                          r'\b[\w]{7}\b');
+                                                                  if (!validateText
+                                                                      .hasMatch(
+                                                                          _NRoom
+                                                                              .text)) {
+                                                                    return open ==
+                                                                            0
+                                                                        ? "Enter Valid Transcation Key"
+                                                                        : "Enter Valid Room Key";
+                                                                  }
+                                                                  return null;
+                                                                },
+                                                                decoration:
+                                                                    InputDecoration(
+                                                                  counterText:
+                                                                      "",
+                                                                  contentPadding:
+                                                                      EdgeInsets
+                                                                          .all(
+                                                                              8.0),
+                                                                  hintText: open ==
+                                                                          0
+                                                                      ? "Enter Valid Transaction Key"
+                                                                      : "Enter Room Key",
+                                                                  labelText: open ==
+                                                                          0
+                                                                      ? "Transaction Key"
+                                                                      : "Room Key",
+                                                                  errorStyle:
+                                                                      TextStyle(
+                                                                          fontSize:
+                                                                              15),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 15,
+                                                            ),
+                                                            SizedBox(
+                                                              height: 43,
+                                                              width: 100,
+                                                              child:
+                                                                  OutlinedButton(
+                                                                      child:
+                                                                          Text(
+                                                                        "Join",
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                16,
+                                                                            color: themeProvider.isDarkTheme
+                                                                                ? Colors.white
+                                                                                : Colors.black),
+                                                                      ),
+                                                                      style: OutlinedButton
+                                                                          .styleFrom(
+                                                                        shape:
+                                                                            RoundedRectangleBorder(
+                                                                          borderRadius:
+                                                                              BorderRadius.circular(10.0),
+                                                                        ),
+                                                                        side: BorderSide(
+                                                                            color:
+                                                                                Theme.of(context).primaryColor),
+                                                                      ),
+                                                                      onPressed:
+                                                                          () {
+                                                                        if (_JformKey
+                                                                            .currentState!
+                                                                            .validate()) {
+                                                                          SendingData(
+                                                                              false,
+                                                                              context);
+                                                                        }
+                                                                      }),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 10,
+                                                            )
+                                                          ],
+                                                        ),
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                              ),
                                       ],
                                     ),
                                   ),
@@ -6022,6 +6032,96 @@ class _QuickSplitState extends State<QuickSplit> {
     return false;
   }
 
+  closeRoomWidget(BuildContext context, String id, int index) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    return Dialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: SingleChildScrollView(
+            child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Are You Sure?",
+                        style: TextStyle(fontSize: 22),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          SizedBox(
+                            width: 80,
+                            child: OutlinedButton(
+                              onPressed: () {
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              child: Text(
+                                "No",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black),
+                              ),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 80,
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
+                              ),
+                              onPressed: () async {
+                                if (this.mounted) {
+                                  buildShowDialog(context);
+                                }
+                                await settleThisTransaction(id, index);
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
+                                if (this.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child: Text(
+                                "Yes",
+                                style: TextStyle(
+                                    color: themeProvider.isDarkTheme
+                                        ? Colors.white
+                                        : Colors.black),
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                ))));
+  }
+
   Widget _buildPopupDialog(
       BuildContext context,
       String name,
@@ -6285,16 +6385,11 @@ class _QuickSplitState extends State<QuickSplit> {
                         width: MediaQuery.of(context).size.width * 0.95 - 25,
                         child: OutlinedButton(
                           onPressed: () async {
-                            if (this.mounted) {
-                              buildShowDialog(context);
-                            }
-                            await settleThisTransaction(id, index);
-                            if (this.mounted) {
-                              Navigator.pop(context);
-                            }
-                            if (this.mounted) {
-                              Navigator.pop(context);
-                            }
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  closeRoomWidget(context, id, index),
+                            );
                           },
                           style: OutlinedButton.styleFrom(
                             shape: RoundedRectangleBorder(

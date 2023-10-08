@@ -88,9 +88,10 @@ class _RoomExpenseState extends State<RoomExpense>
   List<String> membersListEmail = [];
   int roomClosedCount = 0;
   List<String> activeMembersEmail = [];
-  int membersListIndex = 0;
+  int membersListIndex = -1;
   int membersListIndexS = 0;
   int membersListIndexR = 0;
+  int selfIndex = 0;
   bool defaultPage = true;
   bool payment = false;
   String paymentTotal = "";
@@ -262,6 +263,10 @@ class _RoomExpenseState extends State<RoomExpense>
             expenseSplitWithExistingMembers = true;
             roomClosedCount++;
           } else if (crypto.decrypt(list[i]["email"]) != widget.email) {
+            if (membersListIndex == -1 &&
+                double.parse(crypto.decrypt(list[i]["current"])) > 0) {
+              membersListIndex = i - 1;
+            }
             activeMembersEmail.add(crypto.decrypt(list[i]["email"]));
           }
           if (!list[i]["done"]) {
@@ -280,15 +285,12 @@ class _RoomExpenseState extends State<RoomExpense>
               crypto.decrypt(list[i]["pic"]),
               double.parse(crypto.decrypt(list[i]["yourExpense"]))));
           if (crypto.decrypt(list[i]["email"]) == widget.email) {
+            selfIndex = i;
             yourExpense = crypto.decrypt(list[i]["yourExpense"]);
             if (list[i]["done"]) {
               locked = true;
             }
           }
-        }
-
-        if (widget.email == membersListEmail[0]) {
-          membersListIndex = 1;
         }
 
         if (this.mounted) {
@@ -564,6 +566,11 @@ class _RoomExpenseState extends State<RoomExpense>
           Navigator.pop(context);
         }
         if (response.statusCode == 200) {
+          if (this.mounted) {
+            setState(() {
+              membersListIndex = -1;
+            });
+          }
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
           await executeParallel();
         } else {
@@ -1400,8 +1407,8 @@ class _RoomExpenseState extends State<RoomExpense>
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
                 errorWidget: (context, url, error) => Container(
-                  width: 50.0,
-                  height: 50.0,
+                  width: 40.0,
+                  height: 40.0,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
@@ -1410,8 +1417,8 @@ class _RoomExpenseState extends State<RoomExpense>
                   ),
                 ),
                 imageBuilder: (context, imageProvider) => Container(
-                  width: 50.0,
-                  height: 50.0,
+                  width: 40.0,
+                  height: 40.0,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     image: DecorationImage(
@@ -1423,7 +1430,7 @@ class _RoomExpenseState extends State<RoomExpense>
                 crypto.decrypt(list[index]['Name']),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -2195,7 +2202,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           autocorrect: false,
                           validator: (value) {
                             RegExp validateNumber =
-                                RegExp(r'\b[1-9]{1}[\d]*\b');
+                                RegExp(r'^\d+(\.\d{1,2})?$');
                             if (!validateNumber
                                 .hasMatch(_paytoMemberAmt.text)) {
                               return "Enter Valid Amount";
@@ -3639,6 +3646,16 @@ class _RoomExpenseState extends State<RoomExpense>
                                                               context,
                                                               "More Than One Member Required",
                                                               Icons.close);
+                                                        } else if (double.parse(
+                                                                crypto.decrypt(list[
+                                                                        selfIndex]
+                                                                    [
+                                                                    "current"])) >
+                                                            0) {
+                                                          showToast(
+                                                              context,
+                                                              "You are already in gain",
+                                                              Icons.warning);
                                                         } else {
                                                           showDialog(
                                                               context: context,
@@ -3677,7 +3694,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                 Form(
                                                                                   key: _formKey,
                                                                                   child: Column(
-                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    mainAxisAlignment: MainAxisAlignment.start,
                                                                                     mainAxisSize: MainAxisSize.min,
                                                                                     children: <Widget>[
                                                                                       SizedBox(
@@ -3687,7 +3704,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                           scrollDirection: Axis.horizontal,
                                                                                           itemCount: list.length - 1,
                                                                                           itemBuilder: (BuildContext context, int index) {
-                                                                                            if (membersListEmail[index] == widget.email) {
+                                                                                            if (membersListEmail[index] == widget.email || list[index + 1]['done'] || double.parse(crypto.decrypt(list[index + 1]["current"])) < 0) {
                                                                                               return SizedBox();
                                                                                             } else {
                                                                                               return InkWell(
@@ -3706,6 +3723,17 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                           },
                                                                                         ),
                                                                                       ),
+                                                                                      SizedBox(
+                                                                                        height: 8,
+                                                                                      ),
+                                                                                      Text(
+                                                                                        "You can pay ₹ " + commaSeperator(min(-double.parse(crypto.decrypt(list[selfIndex]["current"])), double.parse(crypto.decrypt(list[membersListIndex + 1]["current"]))).toStringAsFixed(2)),
+                                                                                        overflow: TextOverflow.ellipsis,
+                                                                                        style: TextStyle(
+                                                                                          fontSize: 18,
+                                                                                          fontWeight: FontWeight.w500,
+                                                                                        ),
+                                                                                      ),
                                                                                       TextFormField(
                                                                                         controller: _amt,
                                                                                         keyboardType: TextInputType.number,
@@ -3713,10 +3741,24 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                         maxLines: 1,
                                                                                         style: const TextStyle(fontSize: 18),
                                                                                         autocorrect: false,
+                                                                                        onEditingComplete: () {
+                                                                                          RegExp validateNumber = RegExp(r'^\d+(\.\d{1,2})?$');
+                                                                                          if (validateNumber.hasMatch(_amt.text)) {
+                                                                                            String isAmountFull = min(-double.parse(crypto.decrypt(list[selfIndex]["current"])), double.parse(crypto.decrypt(list[membersListIndex + 1]["current"]))).toStringAsFixed(2);
+                                                                                            if (isAmountFull.split(".").first == _amt.text.split(".").first && (double.parse(isAmountFull) - double.parse(_amt.text)) < 1) {
+                                                                                              _amt.text = isAmountFull;
+                                                                                            }
+                                                                                          }
+                                                                                        },
                                                                                         validator: (value) {
-                                                                                          RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
+                                                                                          RegExp validateNumber = RegExp(r'^\d+(\.\d{1,2})?$');
                                                                                           if (!validateNumber.hasMatch(_amt.text)) {
                                                                                             return "Enter Valid Amount";
+                                                                                          }
+                                                                                          String isAmountFull = min(-double.parse(crypto.decrypt(list[selfIndex]["current"])), double.parse(crypto.decrypt(list[membersListIndex + 1]["current"]))).toStringAsFixed(2);
+                                                                                          if (isAmountFull.split(".").first == _amt.text.split(".").first && (double.parse(isAmountFull) - double.parse(_amt.text)) < 1) {
+                                                                                            _amt.text = isAmountFull;
+                                                                                            showToast(context, "Paying Full Amount ₹ " + _amt.text, Icons.payment);
                                                                                           }
                                                                                           return null;
                                                                                         },
@@ -3771,7 +3813,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                     style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                                                                                                   ),
                                                                                                   onPressed: () {
-                                                                                                    PayToMember(context);
+                                                                                                    if (_formKey.currentState!.validate()) {
+                                                                                                      PayToMember(context);
+                                                                                                    }
                                                                                                   }),
                                                                                             ),
                                                                                           ],
@@ -3856,7 +3900,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                             style: const TextStyle(fontSize: 18),
                                                                                             autocorrect: false,
                                                                                             validator: (value) {
-                                                                                              RegExp validateNumber = RegExp(r'\b[1-9]{1}[\d]*\b');
+                                                                                              RegExp validateNumber = RegExp(r'^\d+(\.\d{1,2})?$');
                                                                                               if (!validateNumber.hasMatch(_amt.text)) {
                                                                                                 return "Enter Valid Amount";
                                                                                               }
@@ -4778,7 +4822,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                             autocorrect: false,
                             validator: (value) {
                               RegExp validateNumber =
-                                  RegExp(r'\b[1-9]{1}[\d]*\b');
+                                  RegExp(r'^\d+(\.\d{1,2})?$');
                               if (!validateNumber.hasMatch(_amount.text)) {
                                 return "Enter Valid Amount";
                               }

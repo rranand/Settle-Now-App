@@ -601,7 +601,7 @@ class _LendPageState extends State<LendPage> {
                             autocorrect: false,
                             validator: (value) {
                               RegExp validateNumber =
-                                  RegExp(r'\b[1-9]{1}[\d]*\b');
+                                  RegExp(r'^\d+(\.\d{1,2})?$');
                               if (!validateNumber.hasMatch(_Eamount.text)) {
                                 return "Enter Valid Amount";
                               }
@@ -1562,7 +1562,7 @@ class _LendPageState extends State<LendPage> {
                                           style: const TextStyle(fontSize: 18),
                                           validator: (value) {
                                             RegExp validateNumber =
-                                                RegExp(r'\b[1-9]{1}[\d]*\b');
+                                                RegExp(r'^\d+(\.\d{1,2})?$');
                                             if (!validateNumber
                                                 .hasMatch(_amount.text)) {
                                               return "Enter Valid Amount";

@@ -252,7 +252,7 @@ class _ExpensesState extends State<Expenses> {
                             autocorrect: false,
                             validator: (value) {
                               RegExp validateNumber =
-                                  RegExp(r'\b[1-9]{1}[\d]*\b');
+                                  RegExp(r'^\d+(\.\d{1,2})?$');
                               if (!validateNumber
                                   .hasMatch(_updateamount.text)) {
                                 return "Enter Valid amount";
@@ -2310,7 +2310,7 @@ class _ExpensesState extends State<Expenses> {
                                   autocorrect: false,
                                   validator: (value) {
                                     RegExp validateNumber =
-                                        RegExp(r'\b[1-9]{1}[\d]*\b');
+                                        RegExp(r'^\d+(\.\d{1,2})?$');
                                     if (!validateNumber.hasMatch(_amt.text)) {
                                       return "Enter Valid Amount";
                                     }
