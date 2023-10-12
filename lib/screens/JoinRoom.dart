@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/screens/dashboard.dart';
 
@@ -8,6 +9,8 @@ import 'package:settlenow/others/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../others/themes.dart';
 
 class RoomJoin extends StatefulWidget {
   final String roomKey;
@@ -21,6 +24,7 @@ class RoomJoin extends StatefulWidget {
 class _RoomJoinState extends State<RoomJoin> {
   String version = '';
   late SharedPreferences prefs;
+  bool darkTheme = false;
   String message = "Joining Room";
 
   @override
@@ -31,6 +35,17 @@ class _RoomJoinState extends State<RoomJoin> {
   Future _roomJoin() async {
     version = await getAppVersion();
     prefs = await SharedPreferences.getInstance();
+
+    if (await prefs.getBool('darkTheme') != null) {
+      darkTheme = await prefs.getBool('darkTheme')!;
+    } else {
+      darkTheme =
+          (Brightness.dark == MediaQuery.of(context).platformBrightness);
+      await prefs.setBool('darkTheme', darkTheme);
+    }
+
+    final provider = Provider.of<ThemeProvider>(context, listen: false);
+    provider.toggleTheme(darkTheme);
 
     try {
       if (await prefs.getString("token") != null &&

@@ -4,7 +4,10 @@ import 'package:settlenow/screens/JoinRoom.dart';
 class RouteServices {
   static Route<dynamic> generateRoute(RouteSettings routeSettings) {
     return MaterialPageRoute(builder: (_) {
-      return RoomJoin(roomKey: routeSettings.name.toString().substring(6));
+      int ind = routeSettings.name.toString().indexOf("/room/") + 6;
+      return RoomJoin(
+        roomKey: routeSettings.name.toString().substring(ind)
+      );
     });
   }
 }
