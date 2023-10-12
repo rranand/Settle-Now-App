@@ -3267,65 +3267,67 @@ class _DashBoardState extends State<DashBoard> {
 
   Widget RequestWidget(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: SafeArea(
-        child: Container(
-            padding: EdgeInsets.all(12),
-            margin: EdgeInsets.symmetric(horizontal: 90, vertical: 16),
-            decoration: BoxDecoration(
-                color:
-                    Theme.of(context).colorScheme.background.withOpacity(0.5),
-                borderRadius: BorderRadius.all(Radius.circular(24))),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: () {
-                    if (this.mounted) {
-                      setState(() {
-                        requestType = true;
-                      });
-                    }
-                  },
+      bottomNavigationBar: Container(
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          margin: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.3,
+              vertical: 16),
+          decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.background.withOpacity(0.5),
+              borderRadius: BorderRadius.all(Radius.circular(24))),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  if (this.mounted) {
+                    setState(() {
+                      requestType = true;
+                    });
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 0.0, horizontal: 8.0),
                   child: Text(
                     "Receive",
                     style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         color:
                             requestType ? Theme.of(context).primaryColor : null,
                         fontWeight: FontWeight.w600),
                   ),
                 ),
-                SizedBox(
-                  width: 6,
-                ),
-                Text(
-                  "|",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
-                ),
-                SizedBox(
-                  width: 6,
-                ),
-                InkWell(
-                  onTap: () {
-                    if (this.mounted) {
-                      setState(() {
-                        requestType = false;
-                      });
-                    }
-                  },
+              ),
+              Text(
+                "|",
+                style: TextStyle(
+                    fontSize: 18, color: null, fontWeight: FontWeight.w600),
+              ),
+              InkWell(
+                onTap: () {
+                  if (this.mounted) {
+                    setState(() {
+                      requestType = false;
+                    });
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 0.0, horizontal: 8.0),
                   child: Text(
                     "Sent",
                     style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         color:
                             requestType ? null : Theme.of(context).primaryColor,
                         fontWeight: FontWeight.w600),
                   ),
                 ),
-              ],
-            )),
-      ),
+              ),
+            ],
+          )),
       body: requestType
           ? RefreshIndicator(
               key: _requestIndicatorKey,

@@ -352,63 +352,64 @@ class _AnalysisState extends State<Analysis> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Scaffold(
-      bottomNavigationBar: SafeArea(
-        child: Container(
-            padding: EdgeInsets.all(12),
-            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            decoration: BoxDecoration(
-                color:
-                    Theme.of(context).colorScheme.background.withOpacity(0.5),
-                borderRadius: BorderRadius.all(Radius.circular(24))),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: () {
-                    if (this.mounted) {
-                      setState(() {
-                        isRoom = true;
-                      });
-                    }
-                  },
+      bottomNavigationBar: Container(
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          margin: EdgeInsets.symmetric(
+              horizontal: MediaQuery.of(context).size.width * 0.2,
+              vertical: 16),
+          decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.background.withOpacity(0.5),
+              borderRadius: BorderRadius.all(Radius.circular(24))),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              InkWell(
+                onTap: () {
+                  if (this.mounted) {
+                    setState(() {
+                      isRoom = true;
+                    });
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 0.0, horizontal: 8.0),
                   child: Text(
                     "Room",
                     style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         color: isRoom ? Theme.of(context).primaryColor : null,
                         fontWeight: FontWeight.w600),
                   ),
                 ),
-                SizedBox(
-                  width: 6,
-                ),
-                Text(
-                  "|",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w100),
-                ),
-                SizedBox(
-                  width: 6,
-                ),
-                InkWell(
-                  onTap: () {
-                    if (this.mounted) {
-                      setState(() {
-                        isRoom = false;
-                      });
-                    }
-                  },
+              ),
+              Text(
+                "|",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w100),
+              ),
+              InkWell(
+                onTap: () {
+                  if (this.mounted) {
+                    setState(() {
+                      isRoom = false;
+                    });
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 0.0, horizontal: 8.0),
                   child: Text(
                     "Personal Expense",
                     style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         color: isRoom ? null : Theme.of(context).primaryColor,
                         fontWeight: FontWeight.w600),
                   ),
                 ),
-              ],
-            )),
-      ),
+              ),
+            ],
+          )),
       body: SizedBox(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
@@ -777,212 +778,266 @@ class _AnalysisState extends State<Analysis> {
                         SizedBox(
                           height: 10,
                         ),
-                        compareBetween.isNotEmpty
-                            ? SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                height: 50,
-                                child: ListView.separated(
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    separatorBuilder: (context, index) =>
-                                        SizedBox(
-                                          width: 5,
+                        widget.RoomDataC.isEmpty && widget.RoomDataO.isEmpty
+                            ? Column(
+                                children: [
+                                  SizedBox(
+                                    height: 100,
+                                  ),
+                                  Center(
+                                    child: Text("No Room Found",
+                                        style: TextStyle(fontSize: 20)),
+                                  ),
+                                ],
+                              )
+                            : Column(
+                                children: [
+                                  compareBetween.isNotEmpty
+                                      ? SizedBox(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          height: 50,
+                                          child: ListView.separated(
+                                              physics:
+                                                  AlwaysScrollableScrollPhysics(),
+                                              separatorBuilder:
+                                                  (context, index) => SizedBox(
+                                                        width: 5,
+                                                      ),
+                                              scrollDirection: Axis.horizontal,
+                                              shrinkWrap: true,
+                                              itemCount: compareBetween.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                RoomEach tempRoom =
+                                                    compareBetween
+                                                        .elementAt(index);
+                                                return Card(
+                                                  elevation: 1.0,
+                                                  shadowColor: Theme.of(context)
+                                                      .primaryColor,
+                                                  color: Theme.of(context)
+                                                      .scaffoldBackgroundColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withOpacity(0.6)),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Center(
+                                                      child: InkWell(
+                                                        onTap: () async {
+                                                          compareBetween
+                                                              .remove(tempRoom);
+                                                          if (this.mounted) {
+                                                            setState(() {});
+                                                          }
+                                                        },
+                                                        child: Text(
+                                                          tempRoom.roomName,
+                                                          style:
+                                                              const TextStyle(
+                                                            fontSize: 17,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }),
+                                        )
+                                      : SizedBox(),
+                                  compareBetween.isEmpty
+                                      ? SizedBox()
+                                      : SizedBox(
+                                          height: 15,
                                         ),
-                                    scrollDirection: Axis.horizontal,
-                                    shrinkWrap: true,
-                                    itemCount: compareBetween.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      RoomEach tempRoom =
-                                          compareBetween.elementAt(index);
-                                      return Card(
-                                        elevation: 1.0,
-                                        shadowColor:
-                                            Theme.of(context).primaryColor,
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
+                                  SizedBox(
+                                    height: 45,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: OutlinedButton(
+                                      child: Text(
+                                        "Select Room",
+                                        style: TextStyle(
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
                                         shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: Theme.of(context)
-                                                  .primaryColor
-                                                  .withOpacity(0.6)),
                                           borderRadius:
-                                              BorderRadius.circular(15.0),
+                                              BorderRadius.circular(10.0),
                                         ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10.0),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) =>
+                                              addRoomWidget(context),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  SizedBox(
+                                    height: 45,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: OutlinedButton(
+                                      child: Text(
+                                        "Analyse",
+                                        style: TextStyle(
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      onPressed: () async {
+                                        graphData.clear();
+                                        graphLoading = true;
+                                        if (this.mounted) {
+                                          setState(() {});
+                                        }
+                                        List<String> roomKeys = [];
+                                        for (int i = 0;
+                                            i < compareBetween.length;
+                                            i++) {
+                                          RoomEach tempObj =
+                                              compareBetween.elementAt(i);
+                                          roomKeys.add(tempObj.roomKey);
+                                        }
+                                        List<dynamic> roomData =
+                                            await getRoomData(roomKeys);
+                                        List<List<ChartData>> tempGraphData =
+                                            [];
+
+                                        for (int i = 0;
+                                            i < roomData.length;
+                                            i++) {
+                                          List<ChartData> temp = [];
+                                          for (int j = 0;
+                                              j <
+                                                  widget.RoomExpenseCategory
+                                                      .length;
+                                              j++) {
+                                            temp.add(ChartData.byRoom(
+                                                crypto.decrypt(
+                                                    roomData[i]["roomName"]),
+                                                widget.RoomExpenseCategory[j],
+                                                double.parse(crypto.decrypt(
+                                                    roomData[i]
+                                                        ["expense"][widget
+                                                            .RoomExpenseCategory[
+                                                        j]]))));
+                                          }
+                                          tempGraphData.add(temp);
+                                        }
+
+                                        for (int i = 0;
+                                            i < tempGraphData.length;
+                                            i++) {
+                                          graphData.add(BarSeries<ChartData, String>(
+                                              dataSource: tempGraphData[i],
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              width: 0.8,
+                                              xValueMapper:
+                                                  (ChartData data, _) =>
+                                                      data.type,
+                                              yValueMapper:
+                                                  (ChartData data, _) =>
+                                                      data.amount,
+                                              isVisibleInLegend: true,
+                                              pointColorMapper:
+                                                  (ChartData data, _) =>
+                                                      global.colorsList[_],
+                                              dataLabelMapper: (datum, index) =>
+                                                  datum.name +
+                                                  " (" +
+                                                  datum.type +
+                                                  ")" +
+                                                  "\n₹ " +
+                                                  datum.amount
+                                                      .toStringAsFixed(2),
+                                              dataLabelSettings:
+                                                  DataLabelSettings(
+                                                      isVisible: true),
+                                              xAxisName: "Category",
+                                              yAxisName: "Amount"));
+                                        }
+
+                                        graphLoading = false;
+                                        if (this.mounted) {
+                                          setState(() {});
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  graphLoading
+                                      ? SizedBox(
+                                          height: 200,
                                           child: Center(
-                                            child: InkWell(
-                                              onTap: () async {
-                                                compareBetween.remove(tempRoom);
-                                                if (this.mounted) {
-                                                  setState(() {});
-                                                }
-                                              },
-                                              child: Text(
-                                                tempRoom.roomName,
-                                                style: const TextStyle(
-                                                  fontSize: 17,
-                                                ),
-                                              ),
-                                            ),
+                                            child: CircularProgressIndicator(),
                                           ),
-                                        ),
-                                      );
-                                    }),
-                              )
-                            : SizedBox(),
-                        compareBetween.isEmpty
-                            ? SizedBox()
-                            : SizedBox(
-                                height: 15,
+                                        )
+                                      : (graphData.isNotEmpty
+                                          ? SizedBox(
+                                              height: 50 *
+                                                  graphData.length *
+                                                  widget.RoomExpenseCategory
+                                                      .length *
+                                                  1.0,
+                                              child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(6),
+                                                  child: SfCartesianChart(
+                                                      primaryXAxis:
+                                                          CategoryAxis(
+                                                              isVisible: false),
+                                                      primaryYAxis: NumericAxis(
+                                                          isVisible: false),
+                                                      tooltipBehavior:
+                                                          TooltipBehavior(
+                                                              enable: true,
+                                                              header: "",
+                                                              format:
+                                                                  "point.x : ₹ point.y"),
+                                                      plotAreaBorderWidth: 0,
+                                                      series: <BarSeries<ChartData, String>>[
+                                                        ...graphData
+                                                      ])),
+                                            )
+                                          : SizedBox(
+                                              height: 200,
+                                              child: Center(
+                                                  child: Text(
+                                                "Select Rooms To Analyse",
+                                                style: TextStyle(fontSize: 18),
+                                              )))),
+                                ],
                               ),
-                        SizedBox(
-                          height: 45,
-                          width: MediaQuery.of(context).size.width,
-                          child: OutlinedButton(
-                            child: Text(
-                              "Select Room",
-                              style: TextStyle(
-                                  color: themeProvider.isDarkTheme
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 16),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              side: BorderSide(
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) =>
-                                    addRoomWidget(context),
-                              );
-                            },
-                          ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        SizedBox(
-                          height: 45,
-                          width: MediaQuery.of(context).size.width,
-                          child: OutlinedButton(
-                            child: Text(
-                              "Analyse",
-                              style: TextStyle(
-                                  color: themeProvider.isDarkTheme
-                                      ? Colors.white
-                                      : Colors.black,
-                                  fontSize: 16),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              side: BorderSide(
-                                  color: Theme.of(context).primaryColor),
-                            ),
-                            onPressed: () async {
-                              graphData.clear();
-                              graphLoading = true;
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                              List<String> roomKeys = [];
-                              for (int i = 0; i < compareBetween.length; i++) {
-                                RoomEach tempObj = compareBetween.elementAt(i);
-                                roomKeys.add(tempObj.roomKey);
-                              }
-                              List<dynamic> roomData =
-                                  await getRoomData(roomKeys);
-                              List<List<ChartData>> tempGraphData = [];
-
-                              for (int i = 0; i < roomData.length; i++) {
-                                List<ChartData> temp = [];
-                                for (int j = 0;
-                                    j < widget.RoomExpenseCategory.length;
-                                    j++) {
-                                  temp.add(ChartData.byRoom(
-                                      crypto.decrypt(roomData[i]["roomName"]),
-                                      widget.RoomExpenseCategory[j],
-                                      double.parse(crypto.decrypt(roomData[i]
-                                              ["expense"]
-                                          [widget.RoomExpenseCategory[j]]))));
-                                }
-                                tempGraphData.add(temp);
-                              }
-
-                              for (int i = 0; i < tempGraphData.length; i++) {
-                                graphData.add(BarSeries<ChartData, String>(
-                                    dataSource: tempGraphData[i],
-                                    borderRadius: BorderRadius.circular(20),
-                                    width: 0.8,
-                                    xValueMapper: (ChartData data, _) =>
-                                        data.type,
-                                    yValueMapper: (ChartData data, _) =>
-                                        data.amount,
-                                    isVisibleInLegend: true,
-                                    pointColorMapper: (ChartData data, _) =>
-                                        global.colorsList[_],
-                                    dataLabelMapper: (datum, index) =>
-                                        datum.name +
-                                        " (" +
-                                        datum.type +
-                                        ")" +
-                                        "\n₹ " +
-                                        datum.amount.toStringAsFixed(2),
-                                    dataLabelSettings:
-                                        DataLabelSettings(isVisible: true),
-                                    xAxisName: "Category",
-                                    yAxisName: "Amount"));
-                              }
-
-                              graphLoading = false;
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                            },
-                          ),
-                        ),
-                        graphLoading
-                            ? SizedBox(
-                                height: 200,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            : (graphData.isNotEmpty
-                                ? SizedBox(
-                                    height: 50 *
-                                        graphData.length *
-                                        widget.RoomExpenseCategory.length *
-                                        1.0,
-                                    child: Padding(
-                                        padding: const EdgeInsets.all(6),
-                                        child: SfCartesianChart(
-                                            primaryXAxis:
-                                                CategoryAxis(isVisible: false),
-                                            primaryYAxis:
-                                                NumericAxis(isVisible: false),
-                                            tooltipBehavior: TooltipBehavior(
-                                                enable: true,
-                                                header: "",
-                                                format: "point.x : ₹ point.y"),
-                                            plotAreaBorderWidth: 0,
-                                            series: <BarSeries<ChartData,
-                                                String>>[...graphData])),
-                                  )
-                                : SizedBox(
-                                    height: 200,
-                                    child: Center(
-                                        child: Text(
-                                      "Select Rooms To Analyse",
-                                      style: TextStyle(fontSize: 18),
-                                    )))),
                       ],
                     )),
         ),

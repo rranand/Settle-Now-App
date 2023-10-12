@@ -331,8 +331,9 @@ class _SummaryPageState extends State<SummaryPage> {
                                       datum.type +
                                       "\n₹ " +
                                       datum.amount.toStringAsFixed(2),
-                                  dataLabelSettings:
-                                      DataLabelSettings(isVisible: true),
+                                  dataLabelSettings: DataLabelSettings(
+                                    isVisible: true,
+                                  ),
                                   xAxisName: "Category",
                                   yAxisName: "Amount")
                             ])),
