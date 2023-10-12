@@ -150,9 +150,11 @@ class _OtpNameState extends State<OtpName> {
   }
 
   Future<void> getDeviceTokenToSendNotification() async {
-    final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-    final token = await _fcm.getToken();
-    deviceToken = token.toString();
+    if (!kIsWeb) {
+      final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+      final token = await _fcm.getToken();
+      deviceToken = token.toString();
+    }
   }
 
   verifyStatus(String name, String otp, BuildContext context) async {
@@ -406,17 +408,19 @@ class _OtpNameState extends State<OtpName> {
                             controller: _otp,
                             forceErrorState: error,
                             errorText: errorText,
-                            onClipboardFound: (value) {
-                              RegExp validateOTP = RegExp(r'^[\d]{6}');
-                              if (validateOTP.hasMatch(value)) {
-                                if (this.mounted) {
-                                  setState(() {
-                                    error = false;
-                                    _otp.text = value;
-                                  });
-                                }
-                              }
-                            },
+                            onClipboardFound: kIsWeb
+                                ? null
+                                : (value) {
+                                    RegExp validateOTP = RegExp(r'^[\d]{6}');
+                                    if (validateOTP.hasMatch(value)) {
+                                      if (this.mounted) {
+                                        setState(() {
+                                          error = false;
+                                          _otp.text = value;
+                                        });
+                                      }
+                                    }
+                                  },
                           ),
                         ),
                         SizedBox(

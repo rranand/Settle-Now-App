@@ -355,7 +355,7 @@ class _AnalysisState extends State<Analysis> {
       bottomNavigationBar: Container(
           padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
           margin: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.2,
+              horizontal: (MediaQuery.of(context).size.width - 250) * 0.5,
               vertical: 16),
           decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.background.withOpacity(0.5),
