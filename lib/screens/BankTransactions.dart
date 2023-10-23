@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -95,6 +96,10 @@ class _BankTransactionsState extends State<BankTransactions> {
   late StreamSubscription subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
+  bool splitManually = false;
+  bool noSplit = false;
+  Map<String, Map<String, dynamic>> manualSplitMembers = {};
+  Map<String, double> manualSplitAmount = {};
 
   @override
   void dispose() {
@@ -180,6 +185,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         activeMembersEmail.clear();
         isClosedany = false;
         isSplitMemberLoading = true;
+        manualSplitMembers.clear();
       });
     }
     try {
@@ -200,6 +206,13 @@ class _BankTransactionsState extends State<BankTransactions> {
             isClosedany = true;
           } else if (crypto.decrypt(element['email']) != widget.email) {
             activeMembersEmail.add(crypto.decrypt(element['email']));
+          }
+          if (!element['done']) {
+            manualSplitMembers[crypto.decrypt(element["email"])] = {
+              "Name": crypto.decrypt(element["Name"]),
+              "Email": crypto.decrypt(element["email"]),
+              "Pic": crypto.decrypt(element["pic"]),
+            };
           }
         });
       }
@@ -550,6 +563,59 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
   }
 
+  AddExpenseManual(BuildContext context, String date) async {
+    var Tdata = null;
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomKey': roomData[roomIndex]["Key"],
+        'purpose': crypto.encrypt(_purpose.text),
+        'date': crypto.encrypt(date),
+        'type': crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
+        'split': crypto.encrypt(manualSplitAmount.toString())
+      };
+
+      final response = await createHTTPreq(
+          'manualSplit', http.post, widget.token, jsonInputData);
+
+      _purpose.text = "";
+      Tdata = jsonDecode(response.body);
+
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+
+      if (splitManually && this.mounted) {
+        Navigator.pop(context);
+      }
+
+      if (response.statusCode == 422) {
+        showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
+      } else {
+        showToast(context, "Expense Added Successfully", Icons.check);
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   AddLenDen(BuildContext context, String amount, String date, String id) async {
     if (_formKeyLenDen.currentState!.validate()) {
       var Tdata = null;
@@ -864,6 +930,305 @@ class _BankTransactionsState extends State<BankTransactions> {
     );
   }
 
+  splitManuallyWidget(BuildContext context, String date, String amount) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final _manualSplitKey = GlobalKey<FormState>();
+    List<TextEditingController> amountController = [];
+    for (int i = 0; i < manualSplitAmount.length; i++) {
+      amountController.add(TextEditingController(text: "0"));
+    }
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return Dialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0)),
+                child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.95,
+                    child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Total Amount: ₹ " + amount,
+                              style: TextStyle(fontSize: 14),
+                            ),
+                            Form(
+                              key: _manualSplitKey,
+                              child: SizedBox(
+                                height: min(75.0 * manualSplitAmount.length,
+                                    MediaQuery.of(context).size.height * 0.8),
+                                child: ListView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: manualSplitAmount.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    String key = "";
+                                    if (addExpenseTo.isEmpty) {
+                                      if (index == activeMembersEmail.length) {
+                                        key = widget.email;
+                                      } else {
+                                        key = activeMembersEmail[index];
+                                      }
+                                    } else {
+                                      if (index == addExpenseTo.length) {
+                                        key = widget.email;
+                                      } else {
+                                        key = addExpenseTo[index];
+                                      }
+                                    }
+                                    return Padding(
+                                      padding: const EdgeInsets.all(11.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              CachedNetworkImage(
+                                                httpHeaders: {
+                                                  'Access-Control-Allow-Origin':
+                                                      '*'
+                                                },
+                                                imageUrl: addCorsinImage(
+                                                    manualSplitMembers[key]![
+                                                                    'Pic']
+                                                                .length ==
+                                                            0
+                                                        ? global.driveUrl +
+                                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                        : manualSplitMembers[
+                                                            key]!['Pic']),
+                                                progressIndicatorBuilder:
+                                                    (context, url,
+                                                            downloadProgress) =>
+                                                        CircularProgressIndicator(
+                                                            value:
+                                                                downloadProgress
+                                                                    .progress),
+                                                errorWidget:
+                                                    (context, url, error) =>
+                                                        Container(
+                                                  width: 40.0,
+                                                  height: 40.0,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                        image: AssetImage(
+                                                            'assets/Images/unknown.jpeg'),
+                                                        fit: BoxFit.cover),
+                                                  ),
+                                                ),
+                                                imageBuilder:
+                                                    (context, imageProvider) =>
+                                                        Container(
+                                                  width: 40.0,
+                                                  height: 40.0,
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    image: DecorationImage(
+                                                        image: imageProvider,
+                                                        fit: BoxFit.cover),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 6,
+                                              ),
+                                              InkWell(
+                                                onTap: () => showToast(
+                                                    context,
+                                                    manualSplitMembers[key]![
+                                                        'Name'],
+                                                    Icons.person_outlined),
+                                                child: SizedBox(
+                                                  width: 130,
+                                                  child: Text(
+                                                    manualSplitMembers[key]![
+                                                        'Name'],
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "₹",
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              SizedBox(
+                                                width: 4,
+                                              ),
+                                              SizedBox(
+                                                width: 50,
+                                                child: TextFormField(
+                                                  controller:
+                                                      amountController[index],
+                                                  keyboardType:
+                                                      TextInputType.number,
+                                                  maxLines: 1,
+                                                  style: const TextStyle(
+                                                      fontSize: 15),
+                                                  autocorrect: false,
+                                                  decoration: InputDecoration(
+                                                    contentPadding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    counterText: "",
+                                                    errorStyle: const TextStyle(
+                                                        fontSize: 16),
+                                                  ),
+                                                  validator: (value) {
+                                                    if (key == widget.email) {
+                                                      if (amountController[
+                                                                  index]
+                                                              .text ==
+                                                          "0") {
+                                                        manualSplitAmount[
+                                                            key] = double.parse(
+                                                                amountController[
+                                                                        index]
+                                                                    .text) *
+                                                            100 /
+                                                            100;
+                                                        return null;
+                                                      }
+                                                    }
+                                                    RegExp validateText = RegExp(
+                                                        r"^[1-9]\d*(\.\d+)?$");
+                                                    if (!validateText.hasMatch(
+                                                        amountController[index]
+                                                            .text)) {
+                                                      return "";
+                                                    } else {
+                                                      manualSplitAmount[
+                                                          key] = double.parse(
+                                                              amountController[
+                                                                      index]
+                                                                  .text) *
+                                                          100 /
+                                                          100;
+                                                    }
+                                                    return null;
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox(
+                                    height: 43,
+                                    width: 100,
+                                    child: OutlinedButton(
+                                        style: OutlinedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        child: Text(
+                                          "Close",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeProvider.isDarkTheme
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                        onPressed: () {
+                                          if (this.mounted) {
+                                            Navigator.pop(context);
+                                          }
+                                        }),
+                                  ),
+                                  SizedBox(
+                                    height: 43,
+                                    width: 100,
+                                    child: OutlinedButton(
+                                        child: Text(
+                                          "Add",
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeProvider.isDarkTheme
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                        ),
+                                        onPressed: () async {
+                                          if (_manualSplitKey.currentState!
+                                              .validate()) {
+                                            double tempAmount = 0;
+                                            manualSplitAmount
+                                                .forEach((key, value) {
+                                              tempAmount += value;
+                                            });
+                                            tempAmount = double.parse(amount) -
+                                                tempAmount;
+                                            if (tempAmount.abs() >= 1) {
+                                              showToast(
+                                                  context,
+                                                  "₹ " +
+                                                      tempAmount.toString() +
+                                                      " not splitted properly",
+                                                  Icons.warning_outlined);
+                                            } else {
+                                              AddExpenseManual(context, date);
+                                            }
+                                          } else {
+                                            showToast(context, "Invalid Amount",
+                                                Icons.warning_outlined);
+                                          }
+                                        }),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            )
+                          ],
+                        ))));
+          });
+        });
+  }
+
   void showRoomDialog(String amount, String date) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
@@ -1014,187 +1379,214 @@ class _BankTransactionsState extends State<BankTransactions> {
                       ),
                       isSplitMemberLoading
                           ? CircularProgressIndicator()
-                          : SizedBox(
-                              height: 80,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: roomMembers.length + 1,
-                                itemBuilder: (BuildContext context, int index) {
-                                  if (index == 0) {
-                                    return InkWell(
-                                      child: SizedBox(
-                                        width: 85,
-                                        child: Padding(
+                          : (noSplit
+                              ? SizedBox()
+                              : SizedBox(
+                                  height: 80,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: roomMembers.length + 1,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      if (index == 0) {
+                                        return InkWell(
+                                          child: SizedBox(
+                                            width: 85,
+                                            child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: Card(
+                                                    color: Theme.of(context)
+                                                        .dialogBackgroundColor,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      side: BorderSide(
+                                                          color: addExpenseTo
+                                                                  .isEmpty
+                                                              ? Theme.of(
+                                                                      context)
+                                                                  .primaryColor
+                                                              : Theme.of(
+                                                                      context)
+                                                                  .cardColor),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15.0),
+                                                    ),
+                                                    child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Center(
+                                                          child: Text(
+                                                            "ALL",
+                                                            style: TextStyle(
+                                                              fontSize: 14,
+                                                            ),
+                                                          ),
+                                                        )))),
+                                          ),
+                                          onTap: () {
+                                            addExpenseTo.clear();
+                                            if (this.mounted) {
+                                              setState(() {});
+                                            }
+                                          },
+                                        );
+                                      } else if (roomMembers[index - 1]
+                                              ['done'] ||
+                                          crypto.decrypt(roomMembers[index - 1]
+                                                  ['email']) ==
+                                              widget.email) {
+                                        return SizedBox();
+                                      } else {
+                                        return InkWell(
+                                          child: Padding(
                                             padding: EdgeInsets.all(8.0),
                                             child: Card(
-                                                color: Theme.of(context)
-                                                    .dialogBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: addExpenseTo
-                                                              .isEmpty
-                                                          ? Theme.of(context)
-                                                              .primaryColor
-                                                          : Theme.of(context)
-                                                              .cardColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Center(
-                                                      child: Text(
-                                                        "ALL",
-                                                        style: TextStyle(
-                                                          fontSize: 14,
-                                                        ),
-                                                      ),
-                                                    )))),
-                                      ),
-                                      onTap: () {
-                                        addExpenseTo.clear();
-                                        if (this.mounted) {
-                                          setState(() {});
-                                        }
-                                      },
-                                    );
-                                  } else if (roomMembers[index - 1]['done'] ||
-                                      crypto.decrypt(roomMembers[index - 1]
-                                              ['email']) ==
-                                          widget.email) {
-                                    return SizedBox();
-                                  } else {
-                                    return InkWell(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(8.0),
-                                        child: Card(
-                                          color: Theme.of(context)
-                                              .dialogBackgroundColor,
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                                color: findElement(
-                                                        addExpenseTo,
-                                                        crypto.decrypt(
-                                                            roomMembers[index -
-                                                                1]['email']))
-                                                    ? Theme.of(context)
-                                                        .primaryColor
-                                                    : Theme.of(context)
-                                                        .cardColor),
-                                            borderRadius:
-                                                BorderRadius.circular(15.0),
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(5.0),
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                CachedNetworkImage(
-                                                  httpHeaders: {
-                                                    'Access-Control-Allow-Origin':
-                                                        '*'
-                                                  },
-                                                  imageUrl: crypto
-                                                              .decrypt(
-                                                                  roomMembers[
+                                              color: Theme.of(context)
+                                                  .dialogBackgroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: findElement(
+                                                            addExpenseTo,
+                                                            crypto.decrypt(
+                                                                roomMembers[
+                                                                        index -
+                                                                            1]
+                                                                    ['email']))
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor),
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(5.0),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    CachedNetworkImage(
+                                                      httpHeaders: {
+                                                        'Access-Control-Allow-Origin':
+                                                            '*'
+                                                      },
+                                                      imageUrl: crypto
+                                                                  .decrypt(roomMembers[
                                                                           index -
                                                                               1]
                                                                       ['pic'])
-                                                              .length ==
-                                                          0
-                                                      ? global.driveUrl +
-                                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                      : crypto.decrypt(
-                                                          roomMembers[index - 1]
-                                                              ['pic']),
-                                                  progressIndicatorBuilder: (context,
-                                                          url,
-                                                          downloadProgress) =>
-                                                      CircularProgressIndicator(
-                                                          value:
-                                                              downloadProgress
-                                                                  .progress),
-                                                  errorWidget:
-                                                      (context, url, error) =>
+                                                                  .length ==
+                                                              0
+                                                          ? global.driveUrl +
+                                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                          : crypto.decrypt(
+                                                              roomMembers[
+                                                                      index - 1]
+                                                                  ['pic']),
+                                                      progressIndicatorBuilder: (context,
+                                                              url,
+                                                              downloadProgress) =>
+                                                          CircularProgressIndicator(
+                                                              value:
+                                                                  downloadProgress
+                                                                      .progress),
+                                                      errorWidget: (context,
+                                                              url, error) =>
                                                           Container(
-                                                    width: 50.0,
-                                                    height: 50.0,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: AssetImage(
-                                                              'assets/Images/unknown.jpeg'),
-                                                          fit: BoxFit.cover),
+                                                        width: 50.0,
+                                                        height: 50.0,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          image: DecorationImage(
+                                                              image: AssetImage(
+                                                                  'assets/Images/unknown.jpeg'),
+                                                              fit:
+                                                                  BoxFit.cover),
+                                                        ),
+                                                      ),
+                                                      imageBuilder: (context,
+                                                              imageProvider) =>
+                                                          Container(
+                                                        width: 50.0,
+                                                        height: 50.0,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          shape:
+                                                              BoxShape.circle,
+                                                          image: DecorationImage(
+                                                              image:
+                                                                  imageProvider,
+                                                              fit:
+                                                                  BoxFit.cover),
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ),
-                                                  imageBuilder: (context,
-                                                          imageProvider) =>
-                                                      Container(
-                                                    width: 50.0,
-                                                    height: 50.0,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: imageProvider,
-                                                          fit: BoxFit.cover),
+                                                    Text(
+                                                      crypto.decrypt(
+                                                          roomMembers[index - 1]
+                                                              ['Name']),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
                                                     ),
-                                                  ),
+                                                  ],
                                                 ),
-                                                Text(
-                                                  crypto.decrypt(
-                                                      roomMembers[index - 1]
-                                                          ['Name']),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                              ],
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                      onTap: () {
-                                        if (findElement(
-                                            addExpenseTo,
-                                            crypto.decrypt(
-                                                roomMembers[index - 1]
-                                                    ['email']))) {
-                                          addExpenseTo.remove(crypto.decrypt(
-                                              roomMembers[index - 1]['email']));
-                                        } else {
-                                          addExpenseTo.add(crypto.decrypt(
-                                              roomMembers[index - 1]['email']));
+                                          onTap: () {
+                                            if (findElement(
+                                                addExpenseTo,
+                                                crypto.decrypt(
+                                                    roomMembers[index - 1]
+                                                        ['email']))) {
+                                              addExpenseTo.remove(
+                                                  crypto.decrypt(
+                                                      roomMembers[index - 1]
+                                                          ['email']));
+                                            } else {
+                                              addExpenseTo.add(crypto.decrypt(
+                                                  roomMembers[index - 1]
+                                                      ['email']));
 
-                                          if (addExpenseTo.length ==
-                                              roomMembers.length -
-                                                  roomClosedCount -
-                                                  1) {
-                                            addExpenseTo.clear();
-                                          }
-                                        }
+                                              if (addExpenseTo.length ==
+                                                  roomMembers.length -
+                                                      roomClosedCount -
+                                                      1) {
+                                                addExpenseTo.clear();
+                                              }
+                                            }
 
-                                        if (this.mounted) {
-                                          setState(() {});
-                                        }
-                                      },
-                                    );
-                                  }
-                                },
-                              ),
-                            ),
-                      (addExpenseTo.isEmpty && !isClosedany)
+                                            if (this.mounted) {
+                                              setState(() {});
+                                            }
+                                          },
+                                        );
+                                      }
+                                    },
+                                  ),
+                                )),
+                      (addExpenseTo.isEmpty &&
+                              !isClosedany &&
+                              !splitManually &&
+                              !noSplit)
                           ? SizedBox(
                               height: 7,
                             )
                           : SizedBox(),
-                      (addExpenseTo.isEmpty && !isClosedany)
+                      (addExpenseTo.isEmpty &&
+                              !isClosedany &&
+                              !splitManually &&
+                              !noSplit)
                           ? Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 8.0),
@@ -1232,11 +1624,95 @@ class _BankTransactionsState extends State<BankTransactions> {
                             )
                           : SizedBox(),
                       SizedBox(
+                        height: 7,
+                      ),
+                      splitManually
+                          ? SizedBox()
+                          : Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "No Split",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      if (this.mounted) {
+                                        setState(() {
+                                          noSplit = !noSplit;
+                                          if (noSplit) {
+                                            splitManually = false;
+                                          }
+                                        });
+                                      }
+                                    },
+                                    child: Icon(
+                                      noSplit
+                                          ? Icons.toggle_on
+                                          : Icons.toggle_off,
+                                      size: 40,
+                                      color: noSplit
+                                          ? Theme.of(context).primaryColor
+                                          : null,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                      SizedBox(
+                        height: 7,
+                      ),
+                      noSplit
+                          ? SizedBox()
+                          : Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Split Manually",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      if (this.mounted) {
+                                        setState(() {
+                                          splitManually = !splitManually;
+                                          if (splitManually) {
+                                            noSplit = false;
+                                          }
+                                        });
+                                      }
+                                    },
+                                    child: Icon(
+                                      splitManually
+                                          ? Icons.toggle_on
+                                          : Icons.toggle_off,
+                                      size: 40,
+                                      color: splitManually
+                                          ? Theme.of(context).primaryColor
+                                          : null,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                      SizedBox(
                         height: 45,
                         width: 90,
                         child: OutlinedButton(
                             child: Text(
-                              "Add",
+                              splitManually ? "Next" : "Add",
                               style: TextStyle(
                                   color: themeProvider.isDarkTheme
                                       ? Colors.white
@@ -1251,8 +1727,37 @@ class _BankTransactionsState extends State<BankTransactions> {
                                   color: Theme.of(context).primaryColor),
                             ),
                             onPressed: () {
-                              if (_formKeyRoom.currentState!.validate()) {
-                                AddRoomExpense(context, amount, date);
+                              if (noSplit) {
+                                if (_formKeyRoom.currentState!.validate()) {
+                                  manualSplitAmount.clear();
+                                  manualSplitAmount[widget.email] =
+                                      (double.parse(amount) * 100) / 100;
+                                  AddExpenseManual(context, date);
+                                }
+                              } else if (splitManually) {
+                                RegExp validateText = RegExp(r'\b[\w]+\b');
+                                if (!validateText.hasMatch(_purpose.text)) {
+                                  showToast(context, "Enter Valid Purpose",
+                                      Icons.warning_outlined);
+                                } else {
+                                  manualSplitAmount.clear();
+                                  if (addExpenseTo.isEmpty) {
+                                    manualSplitMembers.forEach((k, v) {
+                                      manualSplitAmount[k] = 0;
+                                    });
+                                  } else {
+                                    addExpenseTo.forEach((element) {
+                                      manualSplitAmount[element] = 0;
+                                    });
+                                  }
+
+                                  manualSplitAmount[widget.email] = 0;
+                                  splitManuallyWidget(context, date, amount);
+                                }
+                              } else {
+                                if (_formKeyRoom.currentState!.validate()) {
+                                  AddRoomExpense(context, amount, date);
+                                }
                               }
                             }),
                       ),
