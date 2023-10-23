@@ -195,6 +195,13 @@ String getPaymentMode(String message, String messageBody) {
       return global.paymentMode[i];
     } else if (messageBody.contains(global.paymentMode[i].toLowerCase())) {
       return global.paymentMode[i];
+    } else if (global.paymentMode[i] == "Card" &&
+        messageBody.contains(global.paymentMode[i].toLowerCase())) {
+      if (messageBody.contains("lmt") || messageBody.contains("limit")) {
+        return "Credit Card";
+      } else {
+        return "Debit Card";
+      }
     }
   }
   return "Unknown";
@@ -242,14 +249,14 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> _messages) async {
         messageBody.contains("due on")) {
       continue;
     }
-
     String bankName = getBankName(_messages[i].sender.toString().toLowerCase());
 
     if (bankName == "Unknown") {
       continue;
     }
-    bool isDebited =
-        messageBody.contains("debited") || messageBody.contains("withdrawn");
+    bool isDebited = messageBody.contains("debited") ||
+        messageBody.contains("withdrawn") ||
+        messageBody.contains("spent");
     bool isCredited = messageBody.contains("credited");
 
     if (!(isDebited || isCredited)) {
