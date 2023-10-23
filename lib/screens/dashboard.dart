@@ -1046,46 +1046,53 @@ class _DashBoardState extends State<DashBoard> {
         getInitialData(),
         _extractEmail(1),
         _extractEmail(2),
-        getRoomRequest(),
-        fetchSentRequest(),
         _getImageID(),
         getMembersData(1),
         getMembersData(2),
-        getFriendData(),
         getQuickSplitExpenses()
+      ]);
+      await Future.wait([
+        getRoomRequest(),
+        fetchSentRequest(),
+        getFriendData(),
       ]);
     } else if (Platform.isAndroid) {
       await Future.wait([
         getInitialData(),
         manualUpdateCheck(),
-        checkforScheduledNotifications(),
         _extractEmail(1),
         _extractEmail(2),
+        _getImageID(),
+        getMembersData(1),
+        getMembersData(2),
+        getQuickSplitExpenses()
+      ]);
+      await Future.wait([
+        checkforScheduledNotifications(),
         ContactPermissionGranted(),
         _updateCheck(),
         getRoomRequest(),
         fetchSentRequest(),
-        _getImageID(),
-        getMembersData(1),
-        getMembersData(2),
-        getFriendData(),
-        getQuickSplitExpenses()
+        getFriendData()
       ]);
     } else if (Platform.isIOS) {
       await Future.wait([
         getInitialData(),
         manualUpdateCheck(),
-        checkforScheduledNotifications(),
         _extractEmail(1),
         _extractEmail(2),
-        ContactPermissionGranted(),
-        getRoomRequest(),
-        fetchSentRequest(),
         _getImageID(),
         getMembersData(1),
         getMembersData(2),
-        getFriendData(),
         getQuickSplitExpenses()
+      ]);
+
+      await Future.wait([
+        checkforScheduledNotifications(),
+        ContactPermissionGranted(),
+        getRoomRequest(),
+        fetchSentRequest(),
+        getFriendData()
       ]);
     }
   }
