@@ -51,6 +51,7 @@ class QuickSplitEach {
   final bool isEdited;
   final String lastModDate;
   final String type;
+  final String subType;
   final String roomID;
   final List<dynamic> splitBetween;
   final bool isClosedAny;
@@ -65,6 +66,7 @@ class QuickSplitEach {
       required this.date,
       required this.isEdited,
       required this.type,
+      required this.subType,
       required this.lastModDate,
       required this.roomID,
       required this.splitBetween,
@@ -81,6 +83,7 @@ class QuickSplitEach {
         date: formatDateTime(crypto.decrypt(json['date'])),
         isEdited: json['isEdited'],
         type: crypto.decrypt(json['type']),
+        subType: crypto.decrypt(json['subType']),
         lastModDate: crypto.decrypt(json['lastModDate']) == ''
             ? ''
             : formatDateTime(crypto.decrypt(json['lastModDate'])),

@@ -1742,8 +1742,10 @@ class _DashBoardState extends State<DashBoard> {
         'email': crypto.encrypt(_email.text),
         'purpose': crypto.encrypt(_purpose.text),
         'type': crypto.encrypt(expenseCategory[roomExpenseCategoryIndex]),
-        'subType': crypto.encrypt(
-            subCategory[roomExpenseCategoryIndex][roomsubExpenseCategoryIndex]),
+        'subType': crypto.encrypt(roomsubExpenseCategoryIndex != -1 &&
+                subCategory[roomExpenseCategoryIndex].length > 0
+            ? subCategory[roomExpenseCategoryIndex][roomsubExpenseCategoryIndex]
+            : "None"),
         'SNsplit': crypto.encrypt(manualSplitAmount.toString()),
         '_split': crypto.encrypt(customManualSplitAmount.toString()),
         'amt': crypto.encrypt(manualSplit ? "-1" : _amt.text),
@@ -2182,6 +2184,7 @@ class _DashBoardState extends State<DashBoard> {
                                               () {
                                                 roomExpenseCategoryIndex =
                                                     index;
+                                                roomsubExpenseCategoryIndex = 0;
                                               },
                                             );
                                           }
@@ -2192,6 +2195,73 @@ class _DashBoardState extends State<DashBoard> {
                                 },
                               ),
                             ),
+                            subCategory[roomExpenseCategoryIndex].length > 0
+                                ? SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.96,
+                                    height: 70,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount:
+                                          subCategory[roomExpenseCategoryIndex]
+                                              .length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return SizedBox(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: InkWell(
+                                              child: Card(
+                                                color: Theme.of(context)
+                                                    .dialogBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: (index ==
+                                                              roomsubExpenseCategoryIndex
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor)),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Center(
+                                                    child: InkWell(
+                                                      child: Text(
+                                                        subCategory[
+                                                                roomExpenseCategoryIndex]
+                                                            [index],
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              onTap: () {
+                                                if (this.mounted) {
+                                                  setState(
+                                                    () {
+                                                      roomsubExpenseCategoryIndex =
+                                                          index;
+                                                    },
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : SizedBox(),
                             SizedBox(
                               height: 7,
                             ),
@@ -5575,7 +5645,8 @@ class _QuickSplitState extends State<QuickSplit> {
   int roomExpenseCategoryIndex = -1;
   int roomsubExpenseCategoryIndex = -1;
 
-  updateExpenseManual(List<dynamic> memberExpense, String id, int index) async {
+  updateExpenseManual(List<dynamic> memberExpense, String id, int index,
+      int roomExpenseCategoryIndex, int roomsubExpenseCategoryIndex) async {
     try {
       Map<String, String> splitMember = {};
       for (int i = 0; i < memberExpense.length; i++) {
@@ -5593,6 +5664,13 @@ class _QuickSplitState extends State<QuickSplit> {
         'purpose': crypto.encrypt(_purpose.text),
         'id': crypto.encrypt(id),
         'split': crypto.encrypt(splitMember.toString()),
+        'type':
+            crypto.encrypt(widget.expenseCategory[roomExpenseCategoryIndex]),
+        'subType': crypto.encrypt((roomsubExpenseCategoryIndex != -1 &&
+                widget.subCategory[roomExpenseCategoryIndex].length > 0
+            ? widget.subCategory[roomExpenseCategoryIndex]
+                [roomsubExpenseCategoryIndex]
+            : "None"))
       };
 
       final response = await createHTTPreq(
@@ -5614,8 +5692,14 @@ class _QuickSplitState extends State<QuickSplit> {
     }
   }
 
-  Widget splitManuallyWidget(BuildContext context,
-      List<dynamic> memberExpenseOG, String purpose, String id, int index) {
+  Widget splitManuallyWidget(
+      BuildContext context,
+      List<dynamic> memberExpenseOG,
+      String purpose,
+      String id,
+      int index,
+      int roomExpenseCategory,
+      int roomsubExpenseCategory) {
     List<dynamic> memberExpense = memberExpenseOG.toList();
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final _manualSplitKey = GlobalKey<FormState>();
@@ -5666,6 +5750,127 @@ class _QuickSplitState extends State<QuickSplit> {
                             SizedBox(
                               height: 10,
                             ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              height: 70,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: widget.expenseCategory.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        child: Card(
+                                          color: Theme.of(context)
+                                              .dialogBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color:
+                                                    roomExpenseCategory == index
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Center(
+                                              child: Text(
+                                                widget.expenseCategory[index],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          if (this.mounted) {
+                                            setState(
+                                              () {
+                                                roomExpenseCategory = index;
+                                                roomsubExpenseCategory = 0;
+                                              },
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            widget.subCategory[roomExpenseCategory].length > 0
+                                ? SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.96,
+                                    height: 70,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: widget
+                                          .subCategory[roomExpenseCategory]
+                                          .length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return SizedBox(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: InkWell(
+                                              child: Card(
+                                                color: Theme.of(context)
+                                                    .dialogBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: (index ==
+                                                              roomsubExpenseCategory
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor)),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Center(
+                                                    child: InkWell(
+                                                      child: Text(
+                                                        widget.subCategory[
+                                                                roomExpenseCategory]
+                                                            [index],
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              onTap: () {
+                                                if (this.mounted) {
+                                                  setState(
+                                                    () {
+                                                      roomsubExpenseCategory =
+                                                          index;
+                                                    },
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : SizedBox(),
                             SizedBox(
                               height: min(75.0 * memberExpense.length,
                                   MediaQuery.of(context).size.height * 0.8),
@@ -5899,7 +6104,11 @@ class _QuickSplitState extends State<QuickSplit> {
                                         buildShowDialog(context);
                                       }
                                       await updateExpenseManual(
-                                          memberExpense, id, index);
+                                          memberExpense,
+                                          id,
+                                          index,
+                                          roomExpenseCategory,
+                                          roomsubExpenseCategory);
                                       if (this.mounted) {
                                         Navigator.pop(context);
                                       }
@@ -6093,6 +6302,7 @@ class _QuickSplitState extends State<QuickSplit> {
       bool locked,
       List<dynamic> partialExpense,
       String type,
+      String subType,
       bool isEdited,
       String lastModDate,
       int index,
@@ -6136,7 +6346,13 @@ class _QuickSplitState extends State<QuickSplit> {
                                                 partialExpense,
                                                 purpose,
                                                 id,
-                                                index));
+                                                index,
+                                                widget.expenseCategory
+                                                    .indexOf(type),
+                                                widget.subCategory[widget
+                                                        .expenseCategory
+                                                        .indexOf(type)]
+                                                    .indexOf(subType)));
                                   },
                                   icon: Icon(Icons.edit)),
                             ],
@@ -6221,7 +6437,7 @@ class _QuickSplitState extends State<QuickSplit> {
                             return Card(
                               elevation: 1.0,
                               shadowColor: Theme.of(context).primaryColor,
-                              color: Theme.of(context).scaffoldBackgroundColor,
+                              color: Theme.of(context).dialogBackgroundColor,
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(
                                     color: !partialExpense[index]['isSettled']
@@ -6523,6 +6739,7 @@ class _QuickSplitState extends State<QuickSplit> {
                           widget.RoomData.value[index].isClosedAny,
                           widget.RoomData.value[index].splitBetween,
                           widget.RoomData.value[index].type,
+                          widget.RoomData.value[index].subType,
                           widget.RoomData.value[index].isEdited,
                           widget.RoomData.value[index].lastModDate,
                           index,
@@ -6581,12 +6798,33 @@ class _QuickSplitState extends State<QuickSplit> {
                                         ),
                                         Opacity(
                                           opacity: 0.8,
-                                          child: Text(
-                                            "Category: " +
-                                                widget
-                                                    .RoomData.value[index].type,
-                                            style: const TextStyle(
-                                              fontSize: 17,
+                                          child: InkWell(
+                                            onTap: () => showToast(
+                                                context,
+                                                widget.RoomData.value[index]
+                                                        .type +
+                                                    (widget
+                                                                .RoomData
+                                                                .value[index]
+                                                                .subType
+                                                                .length >
+                                                            0
+                                                        ? ' (${widget.RoomData.value[index].subType})'
+                                                        : ""),
+                                                Icons.check_outlined),
+                                            child: Text(
+                                              "Category: " +
+                                                  widget.RoomData.value[index]
+                                                      .type +
+                                                  (widget.RoomData.value[index]
+                                                              .subType.length >
+                                                          0
+                                                      ? ' (${widget.RoomData.value[index].subType})'
+                                                      : ""),
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 17,
+                                              ),
                                             ),
                                           ),
                                         ),
