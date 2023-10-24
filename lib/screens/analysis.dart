@@ -20,14 +20,16 @@ class Analysis extends StatefulWidget {
   final List<RoomEach> RoomDataC;
   final String email;
   final String token;
-  final List<dynamic> RoomExpenseCategory;
+  final List<dynamic> expenseCategory;
+  final List<List<dynamic>> subCategory;
   const Analysis(
       {Key? key,
       required this.RoomDataO,
       required this.RoomDataC,
       required this.email,
       required this.token,
-      required this.RoomExpenseCategory})
+      required this.expenseCategory,
+      required this.subCategory})
       : super(key: key);
 
   @override
@@ -938,19 +940,16 @@ class _AnalysisState extends State<Analysis> {
                                             i++) {
                                           List<ChartData> temp = [];
                                           for (int j = 0;
-                                              j <
-                                                  widget.RoomExpenseCategory
-                                                      .length;
+                                              j < widget.expenseCategory.length;
                                               j++) {
                                             temp.add(ChartData.byRoom(
                                                 crypto.decrypt(
                                                     roomData[i]["roomName"]),
-                                                widget.RoomExpenseCategory[j],
+                                                widget.expenseCategory[j],
                                                 double.parse(crypto.decrypt(
-                                                    roomData[i]
-                                                        ["expense"][widget
-                                                            .RoomExpenseCategory[
-                                                        j]]))));
+                                                    roomData[i]["expense"][
+                                                        widget.expenseCategory[
+                                                            j]]))));
                                           }
                                           tempGraphData.add(temp);
                                         }
@@ -1006,8 +1005,8 @@ class _AnalysisState extends State<Analysis> {
                                           ? SizedBox(
                                               height: 50 *
                                                   graphData.length *
-                                                  widget.RoomExpenseCategory
-                                                      .length *
+                                                  widget
+                                                      .expenseCategory.length *
                                                   1.0,
                                               child: Padding(
                                                   padding:

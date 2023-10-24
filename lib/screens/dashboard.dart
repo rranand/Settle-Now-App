@@ -132,63 +132,16 @@ class _DashBoardState extends State<DashBoard> {
   bool isRoomRequestLoaded = false;
   bool gotInitialData = false;
   List<dynamic> expenseCategory = [];
-  List<dynamic> investmentCategory = [];
-  List<dynamic> roomExpenseCategory = [];
+  List<List<dynamic>> subCategory = [];
   late ShareMessage shareMessage;
   bool activeRoomDataFetched = false;
   bool inActiveRoomDataFetched = false;
   bool quickSplitDataFetched = false;
   int roomExpenseCategoryIndex = 0;
+  int roomsubExpenseCategoryIndex = 0;
   bool isItAndroidDevice = false;
   final ValueNotifier<Map<String, List<dynamic>>> membersData =
       ValueNotifier(new Map());
-  List<String> Month = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
-  List<String> Date = [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '10',
-    '11',
-    '12',
-    '13',
-    '14',
-    '15',
-    '16',
-    '17',
-    '18',
-    '19',
-    '20',
-    '21',
-    '22',
-    '23',
-    '24',
-    '25',
-    '26',
-    '27',
-    '28',
-    '29',
-    '30',
-    '31'
-  ];
   bool initalDataLoaded = false;
   bool isInvitePremissionProvided = false;
   bool isSentRoomRequestLoaded = false;
@@ -449,18 +402,13 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode == 200) {
         gotInitialData = true;
         var data = jsonDecode(response.body);
-        expenseCategory = data['expenseCategory'];
-        for (int i = 0; i < expenseCategory.length; i++) {
-          expenseCategory[i] = crypto.decrypt(expenseCategory[i]);
-        }
-        investmentCategory = data['investmentCategory'];
-        for (int i = 0; i < investmentCategory.length; i++) {
-          investmentCategory[i] = crypto.decrypt(investmentCategory[i]);
-        }
-        roomExpenseCategory = data['roomExpenseCategory'];
-        for (int i = 0; i < roomExpenseCategory.length; i++) {
-          roomExpenseCategory[i] = crypto.decrypt(roomExpenseCategory[i]);
-        }
+        expenseCategory.clear();
+        subCategory.clear();
+        Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
+        categoryMap.forEach((key, value) {
+          expenseCategory.add(key);
+          subCategory.add(value);
+        });
         shareMessage = ShareMessage.fromJson(data['shareMessage']);
       }
     } on Exception catch (_) {}
@@ -1793,7 +1741,9 @@ class _DashBoardState extends State<DashBoard> {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email.text),
         'purpose': crypto.encrypt(_purpose.text),
-        'type': crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
+        'type': crypto.encrypt(expenseCategory[roomExpenseCategoryIndex]),
+        'subType': crypto.encrypt(
+            subCategory[roomExpenseCategoryIndex][roomsubExpenseCategoryIndex]),
         'SNsplit': crypto.encrypt(manualSplitAmount.toString()),
         '_split': crypto.encrypt(customManualSplitAmount.toString()),
         'amt': crypto.encrypt(manualSplit ? "-1" : _amt.text),
@@ -2192,7 +2142,7 @@ class _DashBoardState extends State<DashBoard> {
                               height: 70,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: roomExpenseCategory.length,
+                                itemCount: expenseCategory.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return SizedBox(
                                     child: Padding(
@@ -2217,7 +2167,7 @@ class _DashBoardState extends State<DashBoard> {
                                             padding: const EdgeInsets.all(12.0),
                                             child: Center(
                                               child: Text(
-                                                roomExpenseCategory[index],
+                                                expenseCategory[index],
                                                 style: TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w500,
@@ -2660,7 +2610,7 @@ class _DashBoardState extends State<DashBoard> {
                           height: 75,
                           child: ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: Month.length,
+                              itemCount: global.Month.length,
                               shrinkWrap: true,
                               itemBuilder: (BuildContext context, int index) {
                                 return SizedBox(
@@ -2701,7 +2651,7 @@ class _DashBoardState extends State<DashBoard> {
                                         child: Center(
                                           child: InkWell(
                                             child: Text(
-                                              Month[index],
+                                              global.Month[index],
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
@@ -2742,7 +2692,7 @@ class _DashBoardState extends State<DashBoard> {
                           height: 70,
                           child: ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: Date.length,
+                              itemCount: global.Date.length,
                               shrinkWrap: true,
                               itemBuilder: (BuildContext context, int index) {
                                 return SizedBox(
@@ -2783,7 +2733,7 @@ class _DashBoardState extends State<DashBoard> {
                                         child: Center(
                                           child: InkWell(
                                             child: Text(
-                                              Date[index],
+                                              global.Date[index],
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 color: dateIndex
@@ -3022,7 +2972,7 @@ class _DashBoardState extends State<DashBoard> {
     final dd = date.split(' ');
     int mn = 0;
     for (int i = 0; i < 12; i++) {
-      if (Month[i].contains(dd[0])) {
+      if (global.Month[i].contains(dd[0])) {
         mn = i;
       }
     }
@@ -4506,8 +4456,8 @@ class _DashBoardState extends State<DashBoard> {
                                         email: _email.text,
                                         hasMore: quickSplitDataHasMore,
                                         token: _token,
-                                        roomExpenseCategory:
-                                            roomExpenseCategory,
+                                        expenseCategory: expenseCategory,
+                                        subCategory: subCategory,
                                       ))
                               : open == 1
                                   ? RoomDataO.value.isEmpty
@@ -4607,7 +4557,7 @@ class _DashBoardState extends State<DashBoard> {
         date: date,
         token: _token,
         expenseCategory: expenseCategory,
-        investmentCategory: investmentCategory,
+        subCategory: subCategory,
       );
     } else if (dash == 3) {
       return LendCredit(
@@ -4620,14 +4570,15 @@ class _DashBoardState extends State<DashBoard> {
         RoomDataO: RoomDataO.value,
         email: _email.text,
         token: _token,
-        RoomExpenseCategory: roomExpenseCategory,
+        expenseCategory: expenseCategory,
+        subCategory: subCategory,
       );
     } else {
       return SummaryPage(
         email: _email.text,
         token: _token,
         expenseCategory: expenseCategory,
-        investmentCategory: investmentCategory,
+        subCategory: subCategory,
       );
     }
   }
@@ -5036,10 +4987,7 @@ class _DashBoardState extends State<DashBoard> {
                                           email: _email.text,
                                           token: _token,
                                           expenseCategory: expenseCategory,
-                                          investmentCategory:
-                                              investmentCategory,
-                                          roomExpenseCategory:
-                                              roomExpenseCategory,
+                                          subCategory: subCategory,
                                         )),
                               );
 
@@ -5603,7 +5551,8 @@ class QuickSplit extends StatefulWidget {
   final String token;
   final int fetchSize = 10;
   final ValueNotifier<bool> hasMore;
-  final List<dynamic> roomExpenseCategory;
+  final List<dynamic> expenseCategory;
+  final List<List<dynamic>> subCategory;
 
   const QuickSplit(
       {Key? key,
@@ -5611,7 +5560,8 @@ class QuickSplit extends StatefulWidget {
       required this.email,
       required this.token,
       required this.hasMore,
-      required this.roomExpenseCategory})
+      required this.expenseCategory,
+      required this.subCategory})
       : super(key: key);
 
   @override
@@ -5623,6 +5573,7 @@ class _QuickSplitState extends State<QuickSplit> {
   final TextEditingController _amount = TextEditingController();
   AutoScrollController controller = AutoScrollController();
   int roomExpenseCategoryIndex = -1;
+  int roomsubExpenseCategoryIndex = -1;
 
   updateExpenseManual(List<dynamic> memberExpense, String id, int index) async {
     try {

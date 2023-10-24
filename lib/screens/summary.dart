@@ -25,14 +25,14 @@ class SummaryPage extends StatefulWidget {
   final String email;
   final String token;
   final List<dynamic> expenseCategory;
-  final List<dynamic> investmentCategory;
+  final List<List<dynamic>> subCategory;
 
   const SummaryPage(
       {Key? key,
       required this.email,
       required this.token,
       required this.expenseCategory,
-      required this.investmentCategory})
+      required this.subCategory})
       : super(key: key);
 
   @override
@@ -661,8 +661,8 @@ class _SummaryPageState extends State<SummaryPage> {
                                                         token: widget.token,
                                                         expenseCategory: widget
                                                             .expenseCategory,
-                                                        investmentCategory: widget
-                                                            .investmentCategory,
+                                                        subCategory:
+                                                            widget.subCategory,
                                                       )),
                                             );
                                           }
@@ -763,8 +763,8 @@ class _SummaryPageState extends State<SummaryPage> {
                                                     token: widget.token,
                                                     expenseCategory:
                                                         widget.expenseCategory,
-                                                    investmentCategory: widget
-                                                        .investmentCategory,
+                                                    subCategory:
+                                                        widget.subCategory,
                                                   )),
                                         );
                                       }

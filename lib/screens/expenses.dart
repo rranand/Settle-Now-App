@@ -21,7 +21,7 @@ class Expenses extends StatefulWidget {
   final String date;
   final String token;
   final List<dynamic> expenseCategory;
-  final List<dynamic> investmentCategory;
+  final List<List<dynamic>> subCategory;
 
   const Expenses(
       {Key? key,
@@ -29,7 +29,7 @@ class Expenses extends StatefulWidget {
       required this.date,
       required this.token,
       required this.expenseCategory,
-      required this.investmentCategory})
+      required this.subCategory})
       : super(key: key);
 
   @override
@@ -62,11 +62,9 @@ class _ExpensesState extends State<Expenses> {
       new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
   String title = "Personal Expense";
-  List<dynamic> category = [];
-  List<dynamic> investmentCat = [];
   Set<int> filtercategoryIndex = Set();
   int categoryIndex = 0;
-  int investIndex = 0;
+  int subCategoryIndex = 0;
   String Curdate = "";
   final _formKey = GlobalKey<FormState>();
   final _updateExpense = GlobalKey<FormState>();
@@ -99,8 +97,6 @@ class _ExpensesState extends State<Expenses> {
 
   Future _initialization() async {
     loaded = false;
-    category = widget.expenseCategory;
-    investmentCat = widget.investmentCategory;
 
     var now = DateTime.now();
     Curdate = (now.month - 1).toString() + now.year.toString();
@@ -161,7 +157,7 @@ class _ExpensesState extends State<Expenses> {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(widget.email),
         'id': crypto.encrypt(id),
-        'isRoom': crypto.encrypt(isRoom?"1":"0")
+        'isRoom': crypto.encrypt(isRoom ? "1" : "0")
       };
 
       final response = await createHTTPreq('transaction/personalExpense',
@@ -554,7 +550,7 @@ class _ExpensesState extends State<Expenses> {
         'purpose': crypto.encrypt(_purpose.text),
         'amt': crypto.encrypt(_amt.text),
         'type': crypto.encrypt(categoryIndex.toString()),
-        'investType': crypto.encrypt(investIndex.toString()),
+        'investType': crypto.encrypt(subCategoryIndex.toString()),
         'date': crypto
             .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expensedate)),
       };
@@ -606,8 +602,8 @@ class _ExpensesState extends State<Expenses> {
       showFilterResult = false;
     } else {
       TransList.forEach((element) {
-        if (filtercategoryIndex
-            .contains(category.indexOf(crypto.decrypt(element['type'])))) {
+        if (filtercategoryIndex.contains(
+            widget.expenseCategory.indexOf(crypto.decrypt(element['type'])))) {
           filterResult.add(element);
         }
       });
@@ -674,7 +670,7 @@ class _ExpensesState extends State<Expenses> {
                       height: 570,
                       child: MasonryGridView.count(
                         crossAxisCount: 2,
-                        itemCount: category.length,
+                        itemCount: widget.expenseCategory.length,
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {
@@ -702,7 +698,7 @@ class _ExpensesState extends State<Expenses> {
                               child: Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
-                                  child: Text(category[index]),
+                                  child: Text(widget.expenseCategory[index]),
                                 ),
                               ),
                             ),
@@ -2072,12 +2068,12 @@ class _ExpensesState extends State<Expenses> {
                                                     ["purpose"]),
                                                 crypto.decrypt(TransList[index]["type"]) +
                                                     (crypto.decrypt(TransList[index]
-                                                                ["invType"]) ==
+                                                                ["subType"]) ==
                                                             "None"
                                                         ? ""
                                                         : (" (" +
                                                             crypto.decrypt(TransList[index]
-                                                                ["invType"]) +
+                                                                ["subType"]) +
                                                             ")")),
                                                 (crypto.decrypt(
                                                     TransList[index]["date"])),
@@ -2157,11 +2153,11 @@ class _ExpensesState extends State<Expenses> {
                                                                           TransList[index]
                                                                               [
                                                                               "type"]) +
-                                                                      (crypto.decrypt(TransList[index]["invType"]) ==
+                                                                      (crypto.decrypt(TransList[index]["subType"]) ==
                                                                               "None"
                                                                           ? ""
                                                                           : (" (" +
-                                                                              crypto.decrypt(TransList[index]["invType"]) +
+                                                                              crypto.decrypt(TransList[index]["subType"]) +
                                                                               ")")),
                                                                   style:
                                                                       const TextStyle(
@@ -2352,7 +2348,7 @@ class _ExpensesState extends State<Expenses> {
                                   height: 70,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
-                                    itemCount: category.length,
+                                    itemCount: widget.expenseCategory.length,
                                     itemBuilder:
                                         (BuildContext context, int index) {
                                       return SizedBox(
@@ -2379,7 +2375,8 @@ class _ExpensesState extends State<Expenses> {
                                                 child: Center(
                                                   child: InkWell(
                                                     child: Text(
-                                                      category[index],
+                                                      widget.expenseCategory[
+                                                          index],
                                                       style: TextStyle(
                                                         fontSize: 16,
                                                         fontWeight:
@@ -2405,7 +2402,7 @@ class _ExpensesState extends State<Expenses> {
                                     },
                                   ),
                                 ),
-                                categoryIndex == 1
+                                widget.subCategory[categoryIndex].length > 0
                                     ? SizedBox(
                                         width:
                                             MediaQuery.of(context).size.width *
@@ -2413,7 +2410,9 @@ class _ExpensesState extends State<Expenses> {
                                         height: 70,
                                         child: ListView.builder(
                                           scrollDirection: Axis.horizontal,
-                                          itemCount: investmentCat.length,
+                                          itemCount: widget
+                                              .subCategory[categoryIndex]
+                                              .length,
                                           itemBuilder: (BuildContext context,
                                               int index) {
                                             return SizedBox(
@@ -2428,7 +2427,7 @@ class _ExpensesState extends State<Expenses> {
                                                         RoundedRectangleBorder(
                                                       side: BorderSide(
                                                           color: (index ==
-                                                                  investIndex
+                                                                  subCategoryIndex
                                                               ? Theme.of(
                                                                       context)
                                                                   .primaryColor
@@ -2446,8 +2445,9 @@ class _ExpensesState extends State<Expenses> {
                                                       child: Center(
                                                         child: InkWell(
                                                           child: Text(
-                                                            investmentCat[
-                                                                index],
+                                                            widget.subCategory[
+                                                                    categoryIndex]
+                                                                [index],
                                                             style: TextStyle(
                                                               fontSize: 16,
                                                               fontWeight:
@@ -2463,7 +2463,7 @@ class _ExpensesState extends State<Expenses> {
                                                     if (this.mounted) {
                                                       setState(
                                                         () {
-                                                          investIndex = index;
+                                                          subCategoryIndex = index;
                                                         },
                                                       );
                                                     }

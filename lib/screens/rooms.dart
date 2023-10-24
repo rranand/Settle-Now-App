@@ -102,8 +102,10 @@ class _RoomExpenseState extends State<RoomExpense>
   bool showAllTransactionData = true;
   ScrollController _scrollController = ScrollController();
   List<String> addExpenseTo = [];
-  List<dynamic> roomExpenseCategory = [];
+  List<dynamic> expenseCategory = [];
+  List<List<dynamic>> subCategory = [];
   int roomExpenseCategoryIndex = 0;
+  int roomsubExpenseCategoryIndex = 0;
   List<dynamic> filterResult = [];
   double totalAmount = 0;
   bool isClosedany = false;
@@ -165,8 +167,8 @@ class _RoomExpenseState extends State<RoomExpense>
 
   Future<void> initChart() async {
     Map<String, double> tempMap = {};
-    for (int i = 0; i < roomExpenseCategory.length; i++) {
-      tempMap[roomExpenseCategory[i]] = 0;
+    for (int i = 0; i < expenseCategory.length; i++) {
+      tempMap[expenseCategory[i]] = 0;
     }
     totalAmount = 0;
 
@@ -176,10 +178,10 @@ class _RoomExpenseState extends State<RoomExpense>
               double.parse(crypto.decrypt(TransList[i]["Amount"])));
     }
 
-    for (int i = 0; i < roomExpenseCategory.length; i++) {
-      totalAmount += tempMap[roomExpenseCategory[i]]!;
-      dataMap.add(ChartData.byType(
-          roomExpenseCategory[i], tempMap[roomExpenseCategory[i]]!));
+    for (int i = 0; i < expenseCategory.length; i++) {
+      totalAmount += tempMap[expenseCategory[i]]!;
+      dataMap.add(
+          ChartData.byType(expenseCategory[i], tempMap[expenseCategory[i]]!));
     }
   }
 
@@ -229,7 +231,8 @@ class _RoomExpenseState extends State<RoomExpense>
         allExpenseList.clear();
         TransList.clear();
         list.clear();
-        roomExpenseCategory.clear();
+        expenseCategory.clear();
+        subCategory.clear();
         membersListName.clear();
         membersListEmail.clear();
         dataMapByUser.clear();
@@ -249,11 +252,12 @@ class _RoomExpenseState extends State<RoomExpense>
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         list = data['data'];
-        roomExpenseCategory = data['roomExpenseCategory'];
 
-        for (int i = 0; i < roomExpenseCategory.length; i++) {
-          roomExpenseCategory[i] = crypto.decrypt(roomExpenseCategory[i]);
-        }
+        Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
+        categoryMap.forEach((key, value) {
+          expenseCategory.add(key);
+          subCategory.add(value);
+        });
 
         isClear = list[0]["done"];
 
@@ -429,7 +433,11 @@ class _RoomExpenseState extends State<RoomExpense>
         'purpose': crypto.encrypt(_purpose.text),
         'date': crypto
             .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
-        'type': crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
+        'type': crypto.encrypt(expenseCategory[roomExpenseCategoryIndex]),
+        'subType': crypto.encrypt(roomsubExpenseCategoryIndex != -1 &&
+                subCategory[roomExpenseCategoryIndex].length > 0
+            ? subCategory[roomExpenseCategoryIndex][roomsubExpenseCategoryIndex]
+            : "None"),
         'split': crypto.encrypt(manualSplitAmount.toString())
       };
 
@@ -490,7 +498,12 @@ class _RoomExpenseState extends State<RoomExpense>
           'date': crypto
               .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
           'amt': crypto.encrypt(_amt.text),
-          'type': crypto.encrypt(roomExpenseCategory[roomExpenseCategoryIndex]),
+          'type': crypto.encrypt(expenseCategory[roomExpenseCategoryIndex]),
+          'subType': crypto.encrypt(roomsubExpenseCategoryIndex != -1 &&
+                  subCategory[roomExpenseCategoryIndex].length > 0
+              ? subCategory[roomExpenseCategoryIndex]
+                  [roomsubExpenseCategoryIndex]
+              : "None"),
           "members": crypto.encrypt(((addExpenseTo.isEmpty &&
                   (isClosedany || expenseSplitWithExistingMembers))
               ? activeMembersEmail.toString()
@@ -2137,7 +2150,8 @@ class _RoomExpenseState extends State<RoomExpense>
                               locked: locked,
                               isPreviousPageNeedToBeUpdated:
                                   isPreviousPageNeedToBeUpdated,
-                              roomExpenseCategory: roomExpenseCategory,
+                              expenseCategory: expenseCategory,
+                              subCategory: subCategory,
                               index: -1,
                               scrollController: _scrollController,
                             ))
@@ -2158,7 +2172,8 @@ class _RoomExpenseState extends State<RoomExpense>
                               locked: locked,
                               isPreviousPageNeedToBeUpdated:
                                   isPreviousPageNeedToBeUpdated,
-                              roomExpenseCategory: roomExpenseCategory,
+                              expenseCategory: expenseCategory,
+                              subCategory: subCategory,
                               index: scrollToExpense,
                               scrollController: _scrollController,
                             ))),
@@ -3043,7 +3058,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                 ),
                               )
                             : SizedBox(
-                                height: 50 * roomExpenseCategory.length * 1.0,
+                                height: 50 * expenseCategory.length * 1.0,
                                 child: Padding(
                                     padding: const EdgeInsets.all(6),
                                     child: SfCartesianChart(
@@ -3941,7 +3956,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                       height: 70,
                                                                                       child: ListView.builder(
                                                                                         scrollDirection: Axis.horizontal,
-                                                                                        itemCount: roomExpenseCategory.length,
+                                                                                        itemCount: expenseCategory.length,
                                                                                         itemBuilder: (BuildContext context, int index) {
                                                                                           return SizedBox(
                                                                                             child: Padding(
@@ -3957,7 +3972,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                     padding: const EdgeInsets.all(12.0),
                                                                                                     child: Center(
                                                                                                       child: Text(
-                                                                                                        roomExpenseCategory[index],
+                                                                                                        expenseCategory[index],
                                                                                                         style: TextStyle(
                                                                                                           fontSize: 16,
                                                                                                           fontWeight: FontWeight.w500,
@@ -3971,6 +3986,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                     setState(
                                                                                                       () {
                                                                                                         roomExpenseCategoryIndex = index;
+                                                                                                        roomsubExpenseCategoryIndex = 0;
                                                                                                       },
                                                                                                     );
                                                                                                   }
@@ -3981,6 +3997,58 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                         },
                                                                                       ),
                                                                                     ),
+                                                                                    SizedBox(
+                                                                                      height: 7,
+                                                                                    ),
+                                                                                    subCategory[roomExpenseCategoryIndex].length > 0
+                                                                                        ? SizedBox(
+                                                                                            width: MediaQuery.of(context).size.width * 0.96,
+                                                                                            height: 70,
+                                                                                            child: ListView.builder(
+                                                                                              scrollDirection: Axis.horizontal,
+                                                                                              itemCount: subCategory[roomExpenseCategoryIndex].length,
+                                                                                              itemBuilder: (BuildContext context, int index) {
+                                                                                                return SizedBox(
+                                                                                                  child: Padding(
+                                                                                                    padding: const EdgeInsets.all(8.0),
+                                                                                                    child: InkWell(
+                                                                                                      child: Card(
+                                                                                                        color: Theme.of(context).dialogBackgroundColor,
+                                                                                                        shape: RoundedRectangleBorder(
+                                                                                                          side: BorderSide(color: (index == roomsubExpenseCategoryIndex ? Theme.of(context).primaryColor : Theme.of(context).cardColor)),
+                                                                                                          borderRadius: BorderRadius.circular(10.0),
+                                                                                                        ),
+                                                                                                        child: Padding(
+                                                                                                          padding: const EdgeInsets.all(12.0),
+                                                                                                          child: Center(
+                                                                                                            child: InkWell(
+                                                                                                              child: Text(
+                                                                                                                subCategory[roomExpenseCategoryIndex][index],
+                                                                                                                style: TextStyle(
+                                                                                                                  fontSize: 16,
+                                                                                                                  fontWeight: FontWeight.w500,
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                            ),
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                      onTap: () {
+                                                                                                        if (this.mounted) {
+                                                                                                          setState(
+                                                                                                            () {
+                                                                                                              roomsubExpenseCategoryIndex = index;
+                                                                                                            },
+                                                                                                          );
+                                                                                                        }
+                                                                                                      },
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                );
+                                                                                              },
+                                                                                            ),
+                                                                                          )
+                                                                                        : SizedBox(),
                                                                                     SizedBox(
                                                                                       height: 7,
                                                                                     ),
@@ -4360,7 +4428,8 @@ class ExpenseData extends StatefulWidget {
   final String Email;
   final String Token;
   final bool locked;
-  final List<dynamic> roomExpenseCategory;
+  final List<dynamic> expenseCategory;
+  final List<List<dynamic>> subCategory;
   final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
   final ValueNotifier isPreviousPageNeedToBeUpdated;
   final int index;
@@ -4374,7 +4443,8 @@ class ExpenseData extends StatefulWidget {
       required this.refreshIndicatorKey,
       required this.locked,
       required this.isPreviousPageNeedToBeUpdated,
-      required this.roomExpenseCategory,
+      required this.expenseCategory,
+      required this.subCategory,
       required this.index,
       required this.scrollController})
       : super(key: key);
@@ -4387,6 +4457,7 @@ class _ExpenseDataState extends State<ExpenseData> {
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();
   int roomExpenseCategoryIndex = -1;
+  int roomSubExpenseCategoryIndex = -1;
   final _updateExpense = GlobalKey<FormState>();
   AutoScrollController controller = AutoScrollController();
 
@@ -4415,8 +4486,8 @@ class _ExpenseDataState extends State<ExpenseData> {
     super.dispose();
   }
 
-  updateExpenseManual(
-      List<dynamic> memberExpense, String id, String type) async {
+  updateExpenseManual(List<dynamic> memberExpense, String id, String type,
+      int typeCat, int subType) async {
     try {
       Map<String, String> splitMember = {};
       for (int i = 0; i < memberExpense.length; i++) {
@@ -4430,7 +4501,12 @@ class _ExpenseDataState extends State<ExpenseData> {
         'purpose': crypto.encrypt(_purpose.text),
         'id': crypto.encrypt(id),
         'split': crypto.encrypt(splitMember.toString()),
-        'type': crypto.encrypt(type)
+        'type': crypto.encrypt(type),
+        'typeCat': crypto.encrypt(widget.expenseCategory[typeCat]),
+        'subType': crypto.encrypt(
+            (subType != -1 && widget.expenseCategory[typeCat].length > 0
+                ? widget.subCategory[typeCat][subType]
+                : "")),
       };
 
       final response = await createHTTPreq(
@@ -4447,8 +4523,13 @@ class _ExpenseDataState extends State<ExpenseData> {
     }
   }
 
-  Widget splitManuallyWidget(BuildContext context,
-      List<dynamic> memberExpenseOG, String purpose, String id) {
+  Widget splitManuallyWidget(
+      BuildContext context,
+      List<dynamic> memberExpenseOG,
+      String purpose,
+      String id,
+      int roomExpenseCategory,
+      int roomsubExpenseCategory) {
     List<dynamic> memberExpense = memberExpenseOG.toList();
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final _manualSplitKey = GlobalKey<FormState>();
@@ -4499,6 +4580,127 @@ class _ExpenseDataState extends State<ExpenseData> {
                             SizedBox(
                               height: 10,
                             ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              height: 70,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: widget.expenseCategory.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        child: Card(
+                                          color: Theme.of(context)
+                                              .dialogBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color:
+                                                    roomExpenseCategory == index
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Center(
+                                              child: Text(
+                                                widget.expenseCategory[index],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          if (this.mounted) {
+                                            setState(
+                                              () {
+                                                roomExpenseCategory = index;
+                                                roomsubExpenseCategory = 0;
+                                              },
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            widget.subCategory[roomExpenseCategory].length > 0
+                                ? SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.96,
+                                    height: 70,
+                                    child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: widget
+                                          .subCategory[roomExpenseCategory]
+                                          .length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return SizedBox(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: InkWell(
+                                              child: Card(
+                                                color: Theme.of(context)
+                                                    .dialogBackgroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: (index ==
+                                                              roomsubExpenseCategory
+                                                          ? Theme.of(context)
+                                                              .primaryColor
+                                                          : Theme.of(context)
+                                                              .cardColor)),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          10.0),
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      12.0),
+                                                  child: Center(
+                                                    child: InkWell(
+                                                      child: Text(
+                                                        widget.subCategory[
+                                                                roomExpenseCategory]
+                                                            [index],
+                                                        style: TextStyle(
+                                                          fontSize: 16,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              onTap: () {
+                                                if (this.mounted) {
+                                                  setState(
+                                                    () {
+                                                      roomsubExpenseCategory =
+                                                          index;
+                                                    },
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : SizedBox(),
                             SizedBox(
                               height: min(75.0 * memberExpense.length,
                                   MediaQuery.of(context).size.height * 0.8),
@@ -4730,7 +4932,11 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         buildShowDialog(context);
                                       }
                                       await updateExpenseManual(
-                                          memberExpense, id, "0");
+                                          memberExpense,
+                                          id,
+                                          "0",
+                                          roomExpenseCategory,
+                                          roomsubExpenseCategory);
                                       if (this.mounted) {
                                         Navigator.pop(context);
                                       }
@@ -4764,7 +4970,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       String amount,
       String flag,
       String split,
-      int roomExpenseTypeIndex) async {
+      int roomExpenseTypeIndex,
+      int roomSubExpenseTypeIndex) async {
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(widget.Email),
@@ -4774,7 +4981,11 @@ class _ExpenseDataState extends State<ExpenseData> {
         'id': crypto.encrypt(id),
         'flag': crypto.encrypt(flag),
         'split': crypto.encrypt(split),
-        'type': crypto.encrypt(widget.roomExpenseCategory[roomExpenseTypeIndex])
+        'type': crypto.encrypt(widget.expenseCategory[roomExpenseTypeIndex]),
+        'subType': crypto.encrypt((roomSubExpenseTypeIndex != -1 &&
+                widget.subCategory[roomExpenseTypeIndex].length > 0
+            ? widget.subCategory[roomExpenseTypeIndex][roomSubExpenseTypeIndex]
+            : "None"))
       };
 
       final response = await createHTTPreq(
@@ -4792,8 +5003,10 @@ class _ExpenseDataState extends State<ExpenseData> {
   }
 
   Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
-      String amount, String split, String category) {
-    roomExpenseCategoryIndex = widget.roomExpenseCategory.indexOf(category);
+      String amount, String split, String category, String subCategory) {
+    roomExpenseCategoryIndex = widget.expenseCategory.indexOf(category);
+    roomSubExpenseCategoryIndex =
+        widget.subCategory[roomExpenseCategoryIndex].indexOf(subCategory);
     return StatefulBuilder(builder: (context, setState) {
       _purpose.text = purpose;
       _amount.text = amount;
@@ -4869,7 +5082,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                             height: 70,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
-                              itemCount: widget.roomExpenseCategory.length,
+                              itemCount: widget.expenseCategory.length,
                               itemBuilder: (BuildContext context, int index) {
                                 return SizedBox(
                                   child: Padding(
@@ -4893,7 +5106,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           padding: const EdgeInsets.all(12.0),
                                           child: Center(
                                             child: Text(
-                                              widget.roomExpenseCategory[index],
+                                              widget.expenseCategory[index],
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
@@ -4907,6 +5120,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           setState(
                                             () {
                                               roomExpenseCategoryIndex = index;
+                                              roomSubExpenseCategoryIndex = 0;
                                             },
                                           );
                                         }
@@ -4917,8 +5131,75 @@ class _ExpenseDataState extends State<ExpenseData> {
                               },
                             ),
                           ),
+                          widget.subCategory[roomExpenseCategoryIndex].length >
+                                  0
+                              ? SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.96,
+                                  height: 70,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: widget
+                                        .subCategory[roomExpenseCategoryIndex]
+                                        .length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return SizedBox(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: InkWell(
+                                            child: Card(
+                                              color: Theme.of(context)
+                                                  .dialogBackgroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: (index ==
+                                                            roomSubExpenseCategoryIndex
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor)),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.0),
+                                              ),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(12.0),
+                                                child: Center(
+                                                  child: InkWell(
+                                                    child: Text(
+                                                      widget.subCategory[
+                                                              roomExpenseCategoryIndex]
+                                                          [index],
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            onTap: () {
+                                              if (this.mounted) {
+                                                setState(
+                                                  () {
+                                                    roomSubExpenseCategoryIndex =
+                                                        index;
+                                                  },
+                                                );
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                )
+                              : SizedBox(),
                           SizedBox(
-                            height: 15,
+                            height: 10,
                           ),
                           SizedBox(
                             height: 43,
@@ -4951,7 +5232,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         _amount.text,
                                         "0",
                                         split,
-                                        roomExpenseCategoryIndex);
+                                        roomExpenseCategoryIndex,
+                                        roomSubExpenseCategoryIndex);
                                     if (this.mounted) {
                                       Navigator.pop(context);
                                     }
@@ -4961,6 +5243,33 @@ class _ExpenseDataState extends State<ExpenseData> {
                                     if (this.mounted) {
                                       Navigator.pop(context);
                                     }
+                                  }
+                                }),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          SizedBox(
+                            height: 43,
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            child: OutlinedButton(
+                                child: Text(
+                                  "Cancel",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(color: Colors.redAccent),
+                                ),
+                                onPressed: () {
+                                  if (this.mounted) {
+                                    Navigator.pop(context);
                                   }
                                 }),
                           ),
@@ -5019,6 +5328,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       bool locked,
       List<dynamic> partialExpense,
       String type,
+      String subType,
       bool isEdited,
       String lastModDate,
       bool manualSplit) {
@@ -5052,7 +5362,14 @@ class _ExpenseDataState extends State<ExpenseData> {
                                     }
                                     if (manualSplit) {
                                       await updateExpenseManual(
-                                          partialExpense, id, "1");
+                                          partialExpense,
+                                          id,
+                                          "1",
+                                          widget.expenseCategory.indexOf(type),
+                                          widget.subCategory[widget
+                                                  .expenseCategory
+                                                  .indexOf(type)]
+                                              .indexOf(subType));
                                     } else {
                                       await _updateTransaction(
                                           context,
@@ -5061,8 +5378,11 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           _amount.text,
                                           "1",
                                           partialExpense.isEmpty ? "0" : "1",
-                                          widget.roomExpenseCategory
-                                              .indexOf(type));
+                                          widget.expenseCategory.indexOf(type),
+                                          widget.subCategory[widget
+                                                  .expenseCategory
+                                                  .indexOf(type)]
+                                              .indexOf(subType));
                                     }
 
                                     if (this.mounted) {
@@ -5077,19 +5397,30 @@ class _ExpenseDataState extends State<ExpenseData> {
                                   onPressed: () async {
                                     showDialog(
                                       context: context,
-                                      builder: (BuildContext context) =>
-                                          manualSplit
-                                              ? splitManuallyWidget(context,
-                                                  partialExpense, purpose, id)
-                                              : _buildUpdateDialog(
-                                                  context,
-                                                  id,
-                                                  purpose,
-                                                  amount,
-                                                  partialExpense.isEmpty
-                                                      ? "0"
-                                                      : "1",
-                                                  type),
+                                      builder:
+                                          (BuildContext context) =>
+                                              manualSplit
+                                                  ? splitManuallyWidget(
+                                                      context,
+                                                      partialExpense,
+                                                      purpose,
+                                                      id,
+                                                      widget.expenseCategory
+                                                          .indexOf(type),
+                                                      widget.subCategory[widget
+                                                              .expenseCategory
+                                                              .indexOf(type)]
+                                                          .indexOf(subType))
+                                                  : _buildUpdateDialog(
+                                                      context,
+                                                      id,
+                                                      purpose,
+                                                      amount,
+                                                      partialExpense.isEmpty
+                                                          ? "0"
+                                                          : "1",
+                                                      type,
+                                                      subType),
                                     );
                                   },
                                   icon: Icon(Icons.edit)),
@@ -5126,7 +5457,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                               )
                             : SizedBox(),
                         Text(
-                          type,
+                          type + (subType.length > 0 ? ' (${subType})' : ""),
                           style: TextStyle(fontSize: 20),
                         ),
                       ],
@@ -5381,6 +5712,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                         widget.locked,
                         partialExpense,
                         crypto.decrypt(widget.TransList[index]["Type"]),
+                        crypto.decrypt(widget.TransList[index]["subType"]),
                         widget.TransList[index]["isEdited"],
                         crypto.decrypt(widget.TransList[index]["lastModDate"]),
                         widget.TransList[index]["isManualSplit"]),
@@ -5454,12 +5786,49 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         ),
                                         Opacity(
                                           opacity: 0.8,
-                                          child: Text(
-                                            "Category: " +
-                                                crypto.decrypt(widget
-                                                    .TransList[index]["Type"]),
-                                            style: const TextStyle(
-                                              fontSize: 17,
+                                          child: InkWell(
+                                            onTap: () => showToast(
+                                                context,
+                                                crypto.decrypt(
+                                                        widget.TransList[index]
+                                                            ["Type"]) +
+                                                    (crypto
+                                                                .decrypt(widget
+                                                                        .TransList[index]
+                                                                    ["subType"])
+                                                                .length >
+                                                            0
+                                                        ? " (" +
+                                                            crypto.decrypt(widget
+                                                                    .TransList[index]
+                                                                ["subType"]) +
+                                                            ")"
+                                                        : ""),
+                                                Icons.check_outlined),
+                                            child: Text(
+                                              "Category: " +
+                                                  crypto.decrypt(widget
+                                                          .TransList[index][
+                                                      "Type"]) +
+                                                  (crypto
+                                                              .decrypt(
+                                                                  widget.TransList[
+                                                                          index]
+                                                                      [
+                                                                      "subType"])
+                                                              .length >
+                                                          0
+                                                      ? " (" +
+                                                          crypto.decrypt(
+                                                              widget.TransList[
+                                                                      index]
+                                                                  ["subType"]) +
+                                                          ")"
+                                                      : ""),
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(
+                                                fontSize: 17,
+                                              ),
                                             ),
                                           ),
                                         ),

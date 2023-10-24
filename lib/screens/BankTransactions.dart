@@ -26,16 +26,14 @@ class BankTransactions extends StatefulWidget {
   final String email;
   final String token;
   final List<dynamic> expenseCategory;
-  final List<dynamic> investmentCategory;
-  final List<dynamic> roomExpenseCategory;
+  final List<List<dynamic>> subCategory;
 
   const BankTransactions(
       {Key? key,
       required this.email,
       required this.token,
       required this.expenseCategory,
-      required this.investmentCategory,
-      required this.roomExpenseCategory})
+      required this.subCategory})
       : super(key: key);
 
   @override
@@ -52,10 +50,9 @@ class _BankTransactionsState extends State<BankTransactions> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<TransactionEach> allTransactions = [];
   int categoryIndex = 0;
-  int investIndex = 0;
+  int subCategoryIndex = 0;
   int roomIndex = 0;
   int roomCategoryIndex = 0;
-  List<dynamic> category = [];
   int roomClosedCount = 0;
   List<String> activeMembersEmail = [];
   bool expenseSplitWithExistingMembers = false;
@@ -70,7 +67,6 @@ class _BankTransactionsState extends State<BankTransactions> {
   int lenDenIndex = 0;
   Set<int> transactionTypeIndex = Set();
   Set<int> transactionModeIndex = Set();
-  List<dynamic> investmentCat = [];
   List<dynamic> roomData = [];
   List<dynamic> LenDenData = [];
   bool showFilterResult = false;
@@ -242,9 +238,6 @@ class _BankTransactionsState extends State<BankTransactions> {
   }
 
   Future<void> getAllSms() async {
-    category = widget.expenseCategory;
-    investmentCat = widget.investmentCategory;
-
     if (this.mounted) {
       setState(() {});
     }
@@ -293,7 +286,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         'amt': crypto.encrypt(amount),
         'date': crypto.encrypt(date),
         'type': crypto.encrypt(categoryIndex.toString()),
-        'investType': crypto.encrypt(investIndex.toString()),
+        'subType': crypto.encrypt(subCategoryIndex.toString()),
       };
       final response = await createHTTPreq(
           'ptransaction', http.patch, widget.token, jsonInputData);
@@ -374,7 +367,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 70,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: category.length,
+                          itemCount: widget.expenseCategory.length,
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               child: Padding(
@@ -395,7 +388,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       child: Center(
                                         child: InkWell(
                                           child: Text(
-                                            category[index],
+                                            widget.expenseCategory[index],
                                             style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
@@ -420,13 +413,14 @@ class _BankTransactionsState extends State<BankTransactions> {
                           },
                         ),
                       ),
-                      categoryIndex == 1
+                      widget.subCategory[categoryIndex].length > 0
                           ? SizedBox(
                               width: MediaQuery.of(context).size.width * 0.96,
                               height: 70,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: investmentCat.length,
+                                itemCount:
+                                    widget.subCategory[categoryIndex].length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return SizedBox(
                                     child: Padding(
@@ -437,7 +431,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                               .dialogBackgroundColor,
                                           shape: RoundedRectangleBorder(
                                             side: BorderSide(
-                                                color: index == investIndex
+                                                color: index == subCategoryIndex
                                                     ? Theme.of(context)
                                                         .primaryColor
                                                     : Theme.of(context)
@@ -450,7 +444,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                             child: Center(
                                               child: InkWell(
                                                 child: Text(
-                                                  investmentCat[index],
+                                                  widget.subCategory[
+                                                      categoryIndex][index],
                                                   style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.w500,
@@ -464,7 +459,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                           if (this.mounted) {
                                             setState(
                                               () {
-                                                investIndex = index;
+                                                subCategoryIndex = index;
                                               },
                                             );
                                           }
@@ -574,7 +569,11 @@ class _BankTransactionsState extends State<BankTransactions> {
         'roomKey': roomData[roomIndex]["Key"],
         'purpose': crypto.encrypt(_purpose.text),
         'date': crypto.encrypt(date),
-        'type': crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
+        'type': crypto.encrypt(widget.expenseCategory[roomCategoryIndex]),
+        'subType': crypto.encrypt(
+            widget.subCategory[roomCategoryIndex].length > 0
+                ? widget.subCategory[roomCategoryIndex][subCategoryIndex]
+                : "None"),
         'split': crypto.encrypt(manualSplitAmount.toString())
       };
 
@@ -677,7 +676,11 @@ class _BankTransactionsState extends State<BankTransactions> {
           'roomKey': roomData[roomIndex]["Key"],
           'purpose': crypto.encrypt(_purpose.text),
           'amt': crypto.encrypt(amount),
-          'type': crypto.encrypt(widget.roomExpenseCategory[roomCategoryIndex]),
+          'type': crypto.encrypt(widget.expenseCategory[roomCategoryIndex]),
+          'subType': crypto.encrypt(
+              widget.subCategory[roomCategoryIndex].length > 0
+                  ? widget.subCategory[roomCategoryIndex][subCategoryIndex]
+                  : "None"),
           "members": crypto.encrypt(((addExpenseTo.isEmpty &&
                   (isClosedany || expenseSplitWithExistingMembers))
               ? activeMembersEmail.toString()
@@ -1328,7 +1331,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 70,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: widget.roomExpenseCategory.length,
+                          itemCount: widget.expenseCategory.length,
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               child: Padding(
@@ -1349,7 +1352,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       child: Center(
                                         child: InkWell(
                                           child: Text(
-                                            widget.roomExpenseCategory[index],
+                                            widget.expenseCategory[index],
                                             style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
