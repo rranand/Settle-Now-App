@@ -53,20 +53,6 @@ class _SummaryPageState extends State<SummaryPage> {
   bool fetchingData = false;
   bool isLoadingData = false;
   bool loadFirstTime = true;
-  List<String> Month = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
 
   List<String> Year = [];
   List<ChartData> dataMap = [];
@@ -180,7 +166,6 @@ class _SummaryPageState extends State<SummaryPage> {
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)['data'];
-
         for (int i = 0; i < category.length; i++) {
           dataMap.add(ChartData.byType(category[i],
               double.parse(crypto.decrypt(tempData[category[i]]))));
@@ -211,7 +196,7 @@ class _SummaryPageState extends State<SummaryPage> {
     } else {
       if (monthIndex.isNotEmpty) {
         personalExpense.forEach((element) {
-          if (monthIndex.contains(Month.indexOf(element.Month))) {
+          if (monthIndex.contains(global.Month.indexOf(element.Month))) {
             filterResult.add(element);
           }
         });
@@ -361,7 +346,7 @@ class _SummaryPageState extends State<SummaryPage> {
                   height: 65,
                   child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: Month.length,
+                      itemCount: global.Month.length,
                       shrinkWrap: true,
                       itemBuilder: (BuildContext context, int index) {
                         return SizedBox(
@@ -395,7 +380,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                 child: Center(
                                   child: InkWell(
                                     child: Text(
-                                      Month[index],
+                                      global.Month[index],
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
