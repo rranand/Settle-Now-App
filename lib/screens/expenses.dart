@@ -42,20 +42,6 @@ class _ExpensesState extends State<Expenses> {
   bool filterDialog = false;
   bool showFilterResult = false;
   List<dynamic> filterResult = [];
-  List<String> Months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December'
-  ];
   final TextEditingController _amt = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
@@ -112,7 +98,7 @@ class _ExpensesState extends State<Expenses> {
       }
     }
 
-    title = Months[int.parse(mn)] + ", " + yr;
+    title = global.Month[int.parse(mn)] + ", " + yr;
 
     if (this.mounted) {
       setState(() {});
@@ -350,6 +336,7 @@ class _ExpensesState extends State<Expenses> {
       bool quickSplit,
       String id,
       String roomExpensetype,
+      String subroomExpensetype,
       bool isEdited,
       String lastModDate) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -460,18 +447,22 @@ class _ExpensesState extends State<Expenses> {
                 children: [
                   room
                       ? Text(
-                          type + " (Room)",
+                          "Type: " + type + " (Room)",
                           style: TextStyle(fontSize: 18),
                         )
-                      : Text(
-                          "type: " + type,
-                          style: TextStyle(fontSize: 18),
-                        ),
-                  SizedBox(
-                    height: 10,
-                  ),
+                      : type.length == 0
+                          ? SizedBox()
+                          : Text(
+                              "Type: " + type,
+                              style: TextStyle(fontSize: 18),
+                            ),
+                  room || type.length > 0
+                      ? SizedBox(
+                          height: 10,
+                        )
+                      : SizedBox(),
                   Text(
-                    "amount: " + amount,
+                    "Amount: " + amount,
                     style: TextStyle(fontSize: 18),
                   ),
                   SizedBox(
@@ -498,7 +489,11 @@ class _ExpensesState extends State<Expenses> {
                   roomExpensetype.isEmpty
                       ? SizedBox()
                       : (Text(
-                          "Category: " + roomExpensetype,
+                          "Category: " +
+                              roomExpensetype +
+                              (subroomExpensetype.length > 0
+                                  ? ' (${subroomExpensetype})'
+                                  : ""),
                           style: TextStyle(fontSize: 18),
                         )),
                 ],
@@ -549,8 +544,11 @@ class _ExpensesState extends State<Expenses> {
         'email': crypto.encrypt(widget.email),
         'purpose': crypto.encrypt(_purpose.text),
         'amt': crypto.encrypt(_amt.text),
-        'type': crypto.encrypt(categoryIndex.toString()),
-        'investType': crypto.encrypt(subCategoryIndex.toString()),
+        'type': crypto.encrypt(widget.expenseCategory[categoryIndex]),
+        'subType': crypto.encrypt((subCategoryIndex != -1 &&
+                widget.subCategory[categoryIndex].length > 0
+            ? widget.subCategory[categoryIndex][subCategoryIndex]
+            : "None")),
         'date': crypto
             .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expensedate)),
       };
@@ -962,6 +960,7 @@ class _ExpensesState extends State<Expenses> {
                                                         filterResult[index]
                                                             ["id"]),
                                                     crypto.decrypt(filterResult[index]["type"]),
+                                                    crypto.decrypt(filterResult[index]["subType"]),
                                                     filterResult[index]["isEdited"],
                                                     crypto.decrypt(filterResult[index]["lastModDate"])),
                                               );
@@ -1029,10 +1028,12 @@ class _ExpensesState extends State<Expenses> {
                                                                     opacity:
                                                                         0.8,
                                                                     child: Text(
-                                                                      crypto.decrypt(
-                                                                          filterResult[index]
+                                                                      crypto.decrypt(filterResult[index]
                                                                               [
-                                                                              "type"]),
+                                                                              "type"]) +
+                                                                          (crypto.decrypt(filterResult[index]["subType"]).length > 0
+                                                                              ? ' (${crypto.decrypt(filterResult[index]["subType"])})'
+                                                                              : ""),
                                                                       style:
                                                                           const TextStyle(
                                                                         fontSize:
@@ -1164,9 +1165,8 @@ class _ExpensesState extends State<Expenses> {
                                                 builder: (BuildContext context) => _buildPopupDialog(
                                                     context,
                                                     index,
-                                                    crypto.decrypt(
-                                                        filterResult[index]
-                                                            ["purpose"]),
+                                                    crypto.decrypt(filterResult[index]
+                                                        ["purpose"]),
                                                     crypto.decrypt(
                                                         filterResult[index]
                                                             ["roomName"]),
@@ -1182,6 +1182,7 @@ class _ExpensesState extends State<Expenses> {
                                                         ["quickSplit"],
                                                     crypto.decrypt(filterResult[index]["id"]),
                                                     crypto.decrypt(filterResult[index]["type"]),
+                                                    crypto.decrypt(filterResult[index]["subType"]),
                                                     filterResult[index]["isEdited"],
                                                     crypto.decrypt(filterResult[index]["lastModDate"])),
                                               );
@@ -1249,10 +1250,12 @@ class _ExpensesState extends State<Expenses> {
                                                                     opacity:
                                                                         0.8,
                                                                     child: Text(
-                                                                      crypto.decrypt(
-                                                                          filterResult[index]
+                                                                      crypto.decrypt(filterResult[index]
                                                                               [
-                                                                              "type"]),
+                                                                              "type"]) +
+                                                                          (crypto.decrypt(filterResult[index]["subType"]).length > 0
+                                                                              ? ' (${crypto.decrypt(filterResult[index]["subType"])})'
+                                                                              : ""),
                                                                       style:
                                                                           const TextStyle(
                                                                         fontSize:
@@ -1389,23 +1392,22 @@ class _ExpensesState extends State<Expenses> {
                                                     crypto.decrypt(
                                                         filterResult[index]
                                                             ["purpose"]),
-                                                    crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["type"]) +
-                                                        (crypto.decrypt(filterResult[index]["invType"]) ==
-                                                                "None"
-                                                            ? ""
-                                                            : (" (" +
-                                                                crypto.decrypt(
-                                                                    filterResult[index]
-                                                                        ["invType"]) +
-                                                                ")")),
-                                                    (crypto.decrypt(filterResult[index]["date"])),
-                                                    "₹ " + commaSeperator(crypto.decrypt(filterResult[index]["amount"])),
-                                                    filterResult[index]["room"],
-                                                    filterResult[index]["quickSplit"],
-                                                    crypto.decrypt(filterResult[index]["id"]),
                                                     "",
+                                                    (crypto.decrypt(
+                                                        filterResult[index]
+                                                            ["date"])),
+                                                    "₹ " +
+                                                        commaSeperator(crypto.decrypt(
+                                                            filterResult[index]
+                                                                ["amount"])),
+                                                    filterResult[index]["room"],
+                                                    filterResult[index]
+                                                        ["quickSplit"],
+                                                    crypto.decrypt(
+                                                        filterResult[index]
+                                                            ["id"]),
+                                                    crypto.decrypt(filterResult[index]["type"]),
+                                                    crypto.decrypt(filterResult[index]["subType"]),
                                                     filterResult[index]["isEdited"],
                                                     crypto.decrypt(filterResult[index]["lastModDate"])),
                                               );
@@ -1477,9 +1479,9 @@ class _ExpensesState extends State<Expenses> {
                                                                       child:
                                                                           Text(
                                                                         crypto.decrypt(filterResult[index]["type"]) +
-                                                                            (crypto.decrypt(filterResult[index]["invType"]) == "None"
-                                                                                ? ""
-                                                                                : (" (" + crypto.decrypt(filterResult[index]["invType"]) + ")")),
+                                                                            (crypto.decrypt(filterResult[index]["subType"]).length > 0
+                                                                                ? ' (${crypto.decrypt(filterResult[index]["subType"])})'
+                                                                                : ""),
                                                                         style:
                                                                             const TextStyle(
                                                                           fontSize:
@@ -1630,9 +1632,10 @@ class _ExpensesState extends State<Expenses> {
                                                     TransList[index]["id"]),
                                                 crypto.decrypt(
                                                     TransList[index]["type"]),
-                                                TransList[index]["isEdited"],
                                                 crypto.decrypt(TransList[index]
-                                                    ["lastModDate"])),
+                                                    ["subType"]),
+                                                TransList[index]["isEdited"],
+                                                crypto.decrypt(TransList[index]["lastModDate"])),
                                           );
                                         },
                                         child: SizedBox(
@@ -1699,10 +1702,13 @@ class _ExpensesState extends State<Expenses> {
                                                                 opacity: 0.8,
                                                                 child: Text(
                                                                   crypto.decrypt(
-                                                                      TransList[
-                                                                              index]
-                                                                          [
-                                                                          "type"]),
+                                                                          TransList[index]
+                                                                              [
+                                                                              "type"]) +
+                                                                      (crypto.decrypt(TransList[index]["subType"]).length >
+                                                                              0
+                                                                          ? ' (${crypto.decrypt(TransList[index]["subType"])})'
+                                                                          : ""),
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -1854,6 +1860,7 @@ class _ExpensesState extends State<Expenses> {
                                                     TransList[index]["id"]),
                                                 crypto.decrypt(
                                                     TransList[index]["type"]),
+                                                crypto.decrypt(TransList[index]["subType"]),
                                                 TransList[index]["isEdited"],
                                                 crypto.decrypt(TransList[index]["lastModDate"])),
                                           );
@@ -1922,10 +1929,13 @@ class _ExpensesState extends State<Expenses> {
                                                                 opacity: 0.8,
                                                                 child: Text(
                                                                   crypto.decrypt(
-                                                                      TransList[
-                                                                              index]
-                                                                          [
-                                                                          "type"]),
+                                                                          TransList[index]
+                                                                              [
+                                                                              "type"]) +
+                                                                      (crypto.decrypt(TransList[index]["subType"]).length >
+                                                                              0
+                                                                          ? ' (${crypto.decrypt(TransList[index]["subType"])})'
+                                                                          : ""),
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -2066,23 +2076,22 @@ class _ExpensesState extends State<Expenses> {
                                                 index,
                                                 crypto.decrypt(TransList[index]
                                                     ["purpose"]),
-                                                crypto.decrypt(TransList[index]["type"]) +
-                                                    (crypto.decrypt(TransList[index]
-                                                                ["subType"]) ==
-                                                            "None"
-                                                        ? ""
-                                                        : (" (" +
-                                                            crypto.decrypt(TransList[index]
-                                                                ["subType"]) +
-                                                            ")")),
+                                                "",
                                                 (crypto.decrypt(
                                                     TransList[index]["date"])),
                                                 "₹ " +
-                                                    commaSeperator(crypto.decrypt(TransList[index]["amount"])),
+                                                    commaSeperator(
+                                                        crypto.decrypt(
+                                                            TransList[index]
+                                                                ["amount"])),
                                                 TransList[index]["room"],
                                                 TransList[index]["quickSplit"],
-                                                crypto.decrypt(TransList[index]["id"]),
-                                                "",
+                                                crypto.decrypt(
+                                                    TransList[index]["id"]),
+                                                crypto.decrypt(
+                                                    TransList[index]["type"]),
+                                                crypto.decrypt(TransList[index]
+                                                    ["subType"]),
                                                 TransList[index]["isEdited"],
                                                 crypto.decrypt(TransList[index]["lastModDate"])),
                                           );
@@ -2153,12 +2162,10 @@ class _ExpensesState extends State<Expenses> {
                                                                           TransList[index]
                                                                               [
                                                                               "type"]) +
-                                                                      (crypto.decrypt(TransList[index]["subType"]) ==
-                                                                              "None"
-                                                                          ? ""
-                                                                          : (" (" +
-                                                                              crypto.decrypt(TransList[index]["subType"]) +
-                                                                              ")")),
+                                                                      (crypto.decrypt(TransList[index]["subType"]).length >
+                                                                              0
+                                                                          ? ' (${crypto.decrypt(TransList[index]["subType"])})'
+                                                                          : ""),
                                                                   style:
                                                                       const TextStyle(
                                                                     fontSize:
@@ -2463,7 +2470,8 @@ class _ExpensesState extends State<Expenses> {
                                                     if (this.mounted) {
                                                       setState(
                                                         () {
-                                                          subCategoryIndex = index;
+                                                          subCategoryIndex =
+                                                              index;
                                                         },
                                                       );
                                                     }
