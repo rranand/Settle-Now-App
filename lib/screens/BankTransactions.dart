@@ -285,8 +285,10 @@ class _BankTransactionsState extends State<BankTransactions> {
         'purpose': crypto.encrypt(_purpose.text),
         'amt': crypto.encrypt(amount),
         'date': crypto.encrypt(date),
-        'type': crypto.encrypt(categoryIndex.toString()),
-        'subType': crypto.encrypt(subCategoryIndex.toString()),
+        'type': crypto.encrypt(widget.expenseCategory[categoryIndex]),
+        'subType': crypto.encrypt(widget.subCategory[categoryIndex].length > 0
+            ? widget.subCategory[categoryIndex][subCategoryIndex]
+            : "None"),
       };
       final response = await createHTTPreq(
           'ptransaction', http.patch, widget.token, jsonInputData);
@@ -1367,6 +1369,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       setState(
                                         () {
                                           roomCategoryIndex = index;
+                                          subCategoryIndex = 0;
                                         },
                                       );
                                     }
@@ -1377,6 +1380,64 @@ class _BankTransactionsState extends State<BankTransactions> {
                           },
                         ),
                       ),
+                      widget.subCategory[roomCategoryIndex].length > 0
+                          ? SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.96,
+                              height: 70,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: widget
+                                    .subCategory[roomCategoryIndex].length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        child: Card(
+                                          color: Theme.of(context)
+                                              .dialogBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: index == subCategoryIndex
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Theme.of(context)
+                                                        .cardColor),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Center(
+                                              child: InkWell(
+                                                child: Text(
+                                                  widget.subCategory[
+                                                      roomCategoryIndex][index],
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          if (this.mounted) {
+                                            setState(
+                                              () {
+                                                subCategoryIndex = index;
+                                              },
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                          : SizedBox(),
                       SizedBox(
                         height: 15,
                       ),
@@ -1858,6 +1919,13 @@ class _BankTransactionsState extends State<BankTransactions> {
                               width: MediaQuery.of(context).size.width * 0.85,
                               child: OutlinedButton(
                                 onPressed: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      categoryIndex = 0;
+                                      subCategoryIndex = 0;
+                                      roomCategoryIndex = 0;
+                                    });
+                                  }
                                   showPersonalExpenseDialog(amount, date);
                                 },
                                 style: OutlinedButton.styleFrom(
@@ -1889,6 +1957,13 @@ class _BankTransactionsState extends State<BankTransactions> {
                                         0.85,
                                     child: OutlinedButton(
                                       onPressed: () {
+                                        if (this.mounted) {
+                                          setState(() {
+                                            categoryIndex = 0;
+                                            subCategoryIndex = 0;
+                                            roomCategoryIndex = 0;
+                                          });
+                                        }
                                         showRoomDialog(amount, date);
                                       },
                                       style: OutlinedButton.styleFrom(
