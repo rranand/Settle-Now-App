@@ -94,6 +94,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-ads:21.2.0'
     implementation 'com.google.android.gms:play-services-auth:20.6.0'
     implementation 'com.google.android.gms:play-services-auth-api-phone:18.0.1'
+    implementation 'com.google.android.recaptcha:recaptcha:18.4.0'
 }
 
 android.buildTypes.release.ndk.debugSymbolLevel = 'FULL'
