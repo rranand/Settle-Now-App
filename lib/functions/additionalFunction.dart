@@ -327,7 +327,7 @@ createJSONDataTOJWT(dynamic data) {
   final jwt = JWT(data);
 
   return crypto.encrypt(
-      jwt.sign(SecretKey(global.jwtToken), expiresIn: Duration(seconds: 30)));
+      jwt.sign(SecretKey(global.jwtToken), expiresIn: Duration(seconds: 100)));
 }
 
 extractJSONfromJWT(String data) async {
