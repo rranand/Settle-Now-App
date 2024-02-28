@@ -815,11 +815,12 @@ class _DashBoardState extends State<DashBoard> {
           Navigator.pop(context);
         }
 
-        if (response.statusCode == 200) {
+        if (response.statusCode == 200 && flag) {
           RoomDataO.value
               .insert(0, RoomEach.fromJson(jsonDecode(response.body)['data']));
         } else {
-          showToast(context, crypto.decrypt(JsonData["Message"]), Icons.close);
+          showToast(context, crypto.decrypt(JsonData["Message"]),
+              response.statusCode == 200 ? Icons.check : Icons.close);
         }
       }
     } on Exception catch (_) {
@@ -3200,7 +3201,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future<void> JoinRequest(String flag, String roomKey) async {
+  Future<void> JoinRequest(String flag, String roomKey, String id) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
@@ -3208,6 +3209,7 @@ class _DashBoardState extends State<DashBoard> {
       Map<String, dynamic> jsonInputData = {
         'roomKey': roomKey,
         'email': crypto.encrypt(_email.text),
+        'id': id,
         'confirm': crypto.encrypt(flag)
       };
 
@@ -3588,12 +3590,17 @@ class _DashBoardState extends State<DashBoard> {
                                                     crypto.decrypt(
                                                             RoomRequest[index]
                                                                 ["by"]) +
-                                                        " invited to join " +
+                                                        (((crypto.decrypt(RoomRequest[index]["type"]) ==
+                                                                    "Room") &&
+                                                                RoomRequest[index]
+                                                                    [
+                                                                    "selfInvite"])
+                                                            ? " requested to join "
+                                                            : " invited to join ") +
                                                         crypto.decrypt(
                                                             RoomRequest[index]
                                                                 ["name"]) +
-                                                        (crypto.decrypt(RoomRequest[
-                                                                        index]
+                                                        (crypto.decrypt(RoomRequest[index]
                                                                     ["type"]) ==
                                                                 "Room"
                                                             ? ""
@@ -3632,7 +3639,10 @@ class _DashBoardState extends State<DashBoard> {
                                                                   "0",
                                                                   RoomRequest[
                                                                           index]
-                                                                      ["key"]);
+                                                                      ["key"],
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["id"]);
                                                             } else {
                                                               await JoinRequestLend(
                                                                   "0",
@@ -3658,7 +3668,10 @@ class _DashBoardState extends State<DashBoard> {
                                                                   "1",
                                                                   RoomRequest[
                                                                           index]
-                                                                      ["key"]);
+                                                                      ["key"],
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["id"]);
                                                             } else {
                                                               await JoinRequestLend(
                                                                   "1",
@@ -3932,21 +3945,27 @@ class _DashBoardState extends State<DashBoard> {
                                                           .width -
                                                       140,
                                                   child: Text(
-                                                    "You invited " +
-                                                        crypto.decrypt(
-                                                            sentRoomRequest[
-                                                                index]["by"]) +
-                                                        " to join " +
-                                                        crypto.decrypt(
-                                                            sentRoomRequest[
-                                                                    index]
-                                                                ["name"]) +
-                                                        (crypto.decrypt(sentRoomRequest[
-                                                                        index]
+                                                    ((crypto.decrypt(sentRoomRequest[index]
                                                                     ["type"]) ==
-                                                                "Room"
-                                                            ? ""
-                                                            : " (Len-Den)"),
+                                                                "Room") &&
+                                                            (sentRoomRequest[index]
+                                                                ["selfInvite"]))
+                                                        ? ("You requested to join " +
+                                                            crypto.decrypt(
+                                                                sentRoomRequest[index]
+                                                                    ["name"]))
+                                                        : ("You invited " +
+                                                            crypto.decrypt(
+                                                                sentRoomRequest[index]
+                                                                    ["by"]) +
+                                                            " to join " +
+                                                            crypto.decrypt(
+                                                                sentRoomRequest[index]
+                                                                    ["name"]) +
+                                                            (crypto.decrypt(sentRoomRequest[index]["type"]) ==
+                                                                    "Room"
+                                                                ? ""
+                                                                : " (Len-Den)")),
                                                     style: TextStyle(
                                                       overflow:
                                                           TextOverflow.clip,
