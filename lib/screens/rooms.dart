@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
@@ -54,6 +55,7 @@ class RoomExpense extends StatefulWidget {
 class _RoomExpenseState extends State<RoomExpense>
     with SingleTickerProviderStateMixin {
   List<dynamic> list = [];
+  final roomName = TextEditingController();
   List<dynamic> allExpenseList = [];
   List<dynamic> TransList = [];
   List<FriendEach> friendData = [];
@@ -484,6 +486,50 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
+  updateRoomName(BuildContext context, String newRoomName) async {
+    var Tdata = null;
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(widget.email),
+        'roomID': crypto.encrypt(widget.objID),
+        'roomName': crypto.encrypt(newRoomName),
+      };
+
+      final response = await createHTTPreq(
+          'updateRoomName/room', http.post, widget.token, jsonInputData);
+
+      Tdata = jsonDecode(response.body);
+      isPreviousPageNeedToBeUpdated.value = true;
+
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+
+      showToast(context, crypto.decrypt(Tdata["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
+
+      if (response.statusCode == 200) {
+        roomName.setText(newRoomName);
+      }
+    } on Exception catch (_) {
+      if (this.mounted) {
+        Navigator.pop(context);
+      }
+      if (this.mounted) {
+        await onException(context);
+      }
+    }
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   AddExpense(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
       var Tdata = null;
@@ -791,6 +837,7 @@ class _RoomExpenseState extends State<RoomExpense>
   @override
   void initState() {
     super.initState();
+    roomName.setText(widget.roomName);
     getConnectivity();
     if (!kIsWeb) {
       getContactsFromLocal();
@@ -838,7 +885,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             : IconButton(
                                 onPressed: () async {
                                   await Share.share("Join " +
-                                      widget.roomName +
+                                      roomName.text +
                                       "\nRoom Key: " +
                                       widget.roomKey +
                                       "\n" +
@@ -3488,25 +3535,164 @@ class _RoomExpenseState extends State<RoomExpense>
         });
   }
 
+  updateRoomNameDialog(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final _roomUpdateKey = GlobalKey<FormState>();
+    final _roomNameController = TextEditingController();
+    _roomNameController.setText(roomName.text);
+
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(builder: (context, setState) {
+            return Dialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0)),
+                child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.95,
+                    child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child:
+                            Column(mainAxisSize: MainAxisSize.min, children: [
+                          Form(
+                            key: _roomUpdateKey,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextFormField(
+                                  controller: _roomNameController,
+                                  keyboardType: TextInputType.text,
+                                  maxLength: 70,
+                                  maxLines: 1,
+                                  style: const TextStyle(fontSize: 18),
+                                  cursorColor: Colors.black,
+                                  autocorrect: false,
+                                  validator: (value) {
+                                    RegExp validateText =
+                                        RegExp(r'\b[\w]{4,}\b');
+                                    if (!validateText
+                                        .hasMatch(_roomNameController.text)) {
+                                      return "Enter Valid Room Name";
+                                    }
+                                    return null;
+                                  },
+                                  decoration: InputDecoration(
+                                    counterText: "",
+                                    contentPadding: EdgeInsets.all(8.0),
+                                    hintText: "Enter Room Name",
+                                    errorStyle: TextStyle(fontSize: 15),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SizedBox(
+                                      height: 43,
+                                      width: 130,
+                                      child: OutlinedButton(
+                                          child: Text(
+                                            "Cancel",
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: themeProvider.isDarkTheme
+                                                    ? Colors.white
+                                                    : Colors.black),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            side: BorderSide(
+                                                color: Colors.redAccent),
+                                          ),
+                                          onPressed: () {
+                                            if (this.mounted) {
+                                              Navigator.pop(context);
+                                            }
+                                          }),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    SizedBox(
+                                      height: 43,
+                                      width: 130,
+                                      child: OutlinedButton(
+                                          child: Text(
+                                            "Update",
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: themeProvider.isDarkTheme
+                                                    ? Colors.white
+                                                    : Colors.black),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .primaryColor),
+                                          ),
+                                          onPressed: () async {
+                                            if (_roomUpdateKey.currentState!
+                                                .validate()) {
+                                              await updateRoomName(context,
+                                                  _roomNameController.text);
+                                            }
+                                          }),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          )
+                        ]))));
+          });
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(widget.roomName),
+          title: Text(roomName.text),
           actions: [
             InkWell(
               onTap: () async {
+                await updateRoomNameDialog(context);
+              },
+              child: Icon(Icons.edit_outlined),
+            ),
+            SizedBox(
+              width: 16,
+            ),
+            InkWell(
+              onTap: () async {
                 await Share.share("Join " +
-                    widget.roomName +
+                    roomName.text +
                     "\nRoom Key: " +
                     widget.roomKey +
                     "\n" +
                     widget.roomLink);
               },
               child: Icon(Icons.share_outlined),
-            )
+            ),
+            SizedBox(
+              width: 12,
+            ),
           ],
         ),
         body: WillPopScope(

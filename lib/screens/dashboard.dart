@@ -3237,12 +3237,13 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future<void> JoinRequestLend(String flag, String id) async {
+  Future<void> JoinRequestLend(String flag, String roomKey, String id) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
     try {
       Map<String, dynamic> jsonInputData = {
+        'roomKey': roomKey,
         'id': id,
         'email': crypto.encrypt(_email.text),
         'confirm': crypto.encrypt(flag)
@@ -3590,17 +3591,15 @@ class _DashBoardState extends State<DashBoard> {
                                                     crypto.decrypt(
                                                             RoomRequest[index]
                                                                 ["by"]) +
-                                                        (((crypto.decrypt(RoomRequest[index]["type"]) ==
-                                                                    "Room") &&
-                                                                RoomRequest[index]
-                                                                    [
-                                                                    "selfInvite"])
+                                                        (RoomRequest[index]
+                                                                ["selfInvite"]
                                                             ? " requested to join "
                                                             : " invited to join ") +
                                                         crypto.decrypt(
                                                             RoomRequest[index]
                                                                 ["name"]) +
-                                                        (crypto.decrypt(RoomRequest[index]
+                                                        (crypto.decrypt(RoomRequest[
+                                                                        index]
                                                                     ["type"]) ==
                                                                 "Room"
                                                             ? ""
@@ -3648,7 +3647,10 @@ class _DashBoardState extends State<DashBoard> {
                                                                   "0",
                                                                   RoomRequest[
                                                                           index]
-                                                                      ["key"]);
+                                                                      ["key"],
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["id"]);
                                                             }
                                                           },
                                                           icon: Icon(
@@ -3677,7 +3679,10 @@ class _DashBoardState extends State<DashBoard> {
                                                                   "1",
                                                                   RoomRequest[
                                                                           index]
-                                                                      ["key"]);
+                                                                      ["key"],
+                                                                  RoomRequest[
+                                                                          index]
+                                                                      ["id"]);
                                                             }
                                                           },
                                                           icon: Icon(
@@ -3945,24 +3950,24 @@ class _DashBoardState extends State<DashBoard> {
                                                           .width -
                                                       140,
                                                   child: Text(
-                                                    ((crypto.decrypt(sentRoomRequest[index]
-                                                                    ["type"]) ==
-                                                                "Room") &&
-                                                            (sentRoomRequest[index]
-                                                                ["selfInvite"]))
+                                                    (sentRoomRequest[index]
+                                                            ["selfInvite"])
                                                         ? ("You requested to join " +
                                                             crypto.decrypt(
                                                                 sentRoomRequest[index]
                                                                     ["name"]))
                                                         : ("You invited " +
                                                             crypto.decrypt(
-                                                                sentRoomRequest[index]
+                                                                sentRoomRequest[
+                                                                        index]
                                                                     ["by"]) +
                                                             " to join " +
                                                             crypto.decrypt(
-                                                                sentRoomRequest[index]
+                                                                sentRoomRequest[
+                                                                        index]
                                                                     ["name"]) +
-                                                            (crypto.decrypt(sentRoomRequest[index]["type"]) ==
+                                                            (crypto.decrypt(sentRoomRequest[index]
+                                                                        ["type"]) ==
                                                                     "Room"
                                                                 ? ""
                                                                 : " (Len-Den)")),
@@ -7177,7 +7182,7 @@ class _RoomWidgetState extends State<RoomWidget> {
                 token: widget.token,
                 roomLink: widget.RoomData.value[index].roomLink,
                 isRoomActive: widget.RoomData.value[index].active,
-                objID: "",
+                objID: widget.RoomData.value[index].roomID,
               )),
     );
     if (dataFrom) {
