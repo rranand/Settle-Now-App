@@ -208,6 +208,7 @@ class _OtpNameState extends State<OtpName> {
             'isp': crypto.encrypt("Unknown"),
             'device': crypto.encrypt(_deviceData['device']),
             'deviceID': crypto.encrypt(_deviceData['id']),
+            'userAgent': crypto.encrypt(_deviceData['userAgent']),
             'deviceToken': crypto.encrypt("web")
           };
         } else {

@@ -27,7 +27,8 @@ Future<Map<String, dynamic>> initPlatformState() async {
       WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
       return <String, dynamic>{
         'id': describeEnum(data.browserName),
-        'device': describeEnum(data.browserName) + " (" + data.platform! + ")"
+        'device': describeEnum(data.browserName) + " (" + data.platform! + ")",
+        'userAgent': data.userAgent
       };
     } else if (Platform.isAndroid) {
       AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
@@ -38,7 +39,7 @@ Future<Map<String, dynamic>> initPlatformState() async {
         'product': build.product,
         'serial': build.serialNumber,
         'sdkInt': build.version.sdkInt.toString(),
-        'release': build.version.release
+        'release': build.version.release,
       };
     } else if (Platform.isIOS) {
       IosDeviceInfo build = await deviceInfoPlugin.iosInfo;
