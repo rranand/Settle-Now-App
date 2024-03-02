@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -361,11 +362,10 @@ Future<dynamic> createHTTPreq(
       return newRes;
     }
   } on Exception catch (_) {}
-
   return new Response(
       jsonEncode({
         "status": false,
-        "Message": "Some Unknown Error Occurred",
+        "Message": crypto.encrypt("Some Unknown Error Occurred"),
       }),
       422);
 }

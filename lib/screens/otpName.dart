@@ -175,7 +175,6 @@ class _OtpNameState extends State<OtpName> {
           await createHTTPreq('verify', http.post, "", jsonInputData);
 
       JsonData = jsonDecode(response.body);
-
       if (response.statusCode == 200) {
         Map<String, String> jsonInputData = {
           "email": widget.email,
@@ -237,11 +236,6 @@ class _OtpNameState extends State<OtpName> {
           await Future.wait([
             prefs.setString("___token", remainingData['createdOn']),
             prefs.setString("__token", remainingData['phoneNo'])
-          ]);
-        } else {
-          await Future.wait([
-            prefs.setString("___token", crypto.encrypt("")),
-            prefs.setString("__token", crypto.encrypt(""))
           ]);
         }
 
