@@ -101,6 +101,7 @@ class _LendPageState extends State<LendPage> {
   Map<String, dynamic> otherUserData = {};
   DateTime expenseDate = DateTime.now();
   bool closed = false;
+  bool isClosedByYou = false;
   final _formKey = GlobalKey<FormState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
@@ -955,6 +956,7 @@ class _LendPageState extends State<LendPage> {
         otherUserData = jsonDecode(response.body)['otherUser'];
         closed = jsonDecode(response.body)['closed'] ||
             jsonDecode(response.body)['closedOther'];
+        isClosedByYou = jsonDecode(response.body)['closed'];
       } else if (response.statusCode == 503) {
         if (this.mounted) {
           Navigator.pushAndRemoveUntil(
@@ -1131,36 +1133,41 @@ class _LendPageState extends State<LendPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text(roomName.text),
-          actions: [
-            InkWell(
-              onTap: () async {
-                await updateRoomNameDialog(context);
-              },
-              child: Icon(Icons.edit_outlined),
-            ),
-            SizedBox(
-              width: 16,
-            ),
-            otherUserData.isNotEmpty
-                ? SizedBox()
-                : IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) =>
-                            addFriendWidget(context),
-                      );
+          actions: load
+              ? [
+                  InkWell(
+                    onTap: () async {
+                      await updateRoomNameDialog(context);
                     },
-                    icon: Icon(Icons.person_add)),
-            IconButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => closeRoomWidget(context),
-                  );
-                },
-                icon: Icon(Icons.delete))
-          ],
+                    child: Icon(Icons.edit_outlined),
+                  ),
+                  SizedBox(
+                    width: 16,
+                  ),
+                  (otherUserData.isNotEmpty || closed)
+                      ? SizedBox()
+                      : IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  addFriendWidget(context),
+                            );
+                          },
+                          icon: Icon(Icons.person_add)),
+                  isClosedByYou
+                      ? IconButton(
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  closeRoomWidget(context),
+                            );
+                          },
+                          icon: Icon(Icons.delete))
+                      : SizedBox()
+                ]
+              : [],
         ),
         body: WillPopScope(
           onWillPop: () {

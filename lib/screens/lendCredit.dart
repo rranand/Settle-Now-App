@@ -254,7 +254,9 @@ class _LendCreditState extends State<LendCredit> {
                                       Theme.of(context).scaffoldBackgroundColor,
                                   shape: RoundedRectangleBorder(
                                     side: BorderSide(
-                                        color: Theme.of(context).cardColor),
+                                        color: data[index]["isClosedByYou"]
+                                            ? Colors.red
+                                            : Theme.of(context).cardColor),
                                     borderRadius: BorderRadius.circular(15.0),
                                   ),
                                   child: indexLoading == index

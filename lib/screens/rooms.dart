@@ -63,6 +63,7 @@ class _RoomExpenseState extends State<RoomExpense>
   bool expenseSplitWithExistingMembers = false;
   bool splitManually = false;
   int dash = 0;
+  bool isRoomActive = false;
   bool locked = false;
   final ValueNotifier<bool> isPreviousPageNeedToBeUpdated =
       ValueNotifier(false);
@@ -321,7 +322,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> getFriendData() async {
-    if (!widget.isRoomActive) {
+    if (!isRoomActive) {
       return null;
     }
 
@@ -714,6 +715,9 @@ class _RoomExpenseState extends State<RoomExpense>
 
       isClear = true;
       CloseData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        isRoomActive = !CloseData["isRoomClosed"];
+      }
       isPreviousPageNeedToBeUpdated.value = true;
       showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
       if (this.mounted) {
@@ -837,6 +841,7 @@ class _RoomExpenseState extends State<RoomExpense>
   @override
   void initState() {
     super.initState();
+    isRoomActive = widget.isRoomActive;
     roomName.setText(widget.roomName);
     getConnectivity();
     if (!kIsWeb) {
@@ -3233,7 +3238,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Widget chooseFromBottomNavigator(int dash) {
-    if (widget.isRoomActive && !isClosedany) {
+    if (isRoomActive && !isClosedany) {
       if (dash == 0) {
         return homeWidget();
       } else if (dash == 1) {
@@ -3669,31 +3674,37 @@ class _RoomExpenseState extends State<RoomExpense>
     return Scaffold(
         appBar: AppBar(
           title: Text(roomName.text),
-          actions: [
-            InkWell(
-              onTap: () async {
-                await updateRoomNameDialog(context);
-              },
-              child: Icon(Icons.edit_outlined),
-            ),
-            SizedBox(
-              width: 16,
-            ),
-            InkWell(
-              onTap: () async {
-                await Share.share("Join " +
-                    roomName.text +
-                    "\nRoom Key: " +
-                    widget.roomKey +
-                    "\n" +
-                    widget.roomLink);
-              },
-              child: Icon(Icons.share_outlined),
-            ),
-            SizedBox(
-              width: 12,
-            ),
-          ],
+          actions: loaded
+              ? [
+                  isClear
+                      ? SizedBox()
+                      : InkWell(
+                          onTap: () async {
+                            await updateRoomNameDialog(context);
+                          },
+                          child: Icon(Icons.edit_outlined),
+                        ),
+                  SizedBox(
+                    width: 16,
+                  ),
+                  isRoomActive
+                      ? InkWell(
+                          onTap: () async {
+                            await Share.share("Join " +
+                                roomName.text +
+                                "\nRoom Key: " +
+                                widget.roomKey +
+                                "\n" +
+                                widget.roomLink);
+                          },
+                          child: Icon(Icons.share_outlined),
+                        )
+                      : SizedBox(),
+                  SizedBox(
+                    width: 12,
+                  ),
+                ]
+              : [],
         ),
         body: WillPopScope(
             onWillPop: () {
@@ -3728,7 +3739,7 @@ class _RoomExpenseState extends State<RoomExpense>
                 onTap: (index) => setState(() {
                       dash = index;
                     }),
-                items: (widget.isRoomActive && !isClosedany
+                items: (isRoomActive && !isClosedany
                     ? [
                         BottomNavigationBarItem(
                           icon: Icon(
@@ -3783,7 +3794,7 @@ class _RoomExpenseState extends State<RoomExpense>
                         )
                       ])),
         floatingActionButton: dash == 0
-            ? (widget.isRoomActive
+            ? (isRoomActive
                 ? FloatingActionButton(
                     onPressed: () {
                       expenseDate = DateTime.now();
