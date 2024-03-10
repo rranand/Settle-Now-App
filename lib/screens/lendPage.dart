@@ -1156,7 +1156,8 @@ class _LendPageState extends State<LendPage> {
                           },
                           icon: Icon(Icons.person_add)),
                   isClosedByYou
-                      ? IconButton(
+                      ? SizedBox()
+                      : IconButton(
                           onPressed: () {
                             showDialog(
                               context: context,
@@ -1165,7 +1166,6 @@ class _LendPageState extends State<LendPage> {
                             );
                           },
                           icon: Icon(Icons.delete))
-                      : SizedBox()
                 ]
               : [],
         ),
