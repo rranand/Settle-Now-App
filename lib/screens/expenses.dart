@@ -626,20 +626,23 @@ class _ExpensesState extends State<Expenses> {
     return Scaffold(
         appBar: AppBar(
           title: Text(title),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  filterDialog = _scaffoldKey.currentState!.isEndDrawerOpen;
-                  filterDialog = !filterDialog;
+          actions: widget.expenseCategory.length == 0
+              ? []
+              : [
+                  IconButton(
+                      onPressed: () {
+                        filterDialog =
+                            _scaffoldKey.currentState!.isEndDrawerOpen;
+                        filterDialog = !filterDialog;
 
-                  if (filterDialog) {
-                    _scaffoldKey.currentState!.openEndDrawer();
-                  } else {
-                    _scaffoldKey.currentState!.closeEndDrawer();
-                  }
-                },
-                icon: Icon(Icons.filter_alt_outlined))
-          ],
+                        if (filterDialog) {
+                          _scaffoldKey.currentState!.openEndDrawer();
+                        } else {
+                          _scaffoldKey.currentState!.closeEndDrawer();
+                        }
+                      },
+                      icon: Icon(Icons.filter_alt_outlined))
+                ],
         ),
         body: Scaffold(
           key: _scaffoldKey,
@@ -2284,294 +2287,327 @@ class _ExpensesState extends State<Expenses> {
                     )),
         ),
         floatingActionButton: Curdate == widget.date
-            ? FloatingActionButton(
-                child: Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  expensedate = DateTime.now();
-                  showModalBottomSheet<void>(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (BuildContext context) {
-                      return StatefulBuilder(builder: (context, setState) {
-                        return Padding(
-                          padding: MediaQuery.of(context).viewInsets,
-                          child: Form(
-                            key: _formKey,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                TextFormField(
-                                  controller: _amt,
-                                  keyboardType: TextInputType.number,
-                                  maxLength: 10,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 18),
-                                  autocorrect: false,
-                                  validator: (value) {
-                                    RegExp validateNumber =
-                                        RegExp(r'^\d+(\.\d{1,2})?$');
-                                    if (!validateNumber.hasMatch(_amt.text)) {
-                                      return "Enter Valid Amount";
-                                    }
-                                    return null;
-                                  },
-                                  decoration: const InputDecoration(
-                                    counterText: "",
-                                    contentPadding: EdgeInsets.all(8.0),
-                                    hintText: "Enter Amount",
-                                    labelText: "Amount",
-                                    errorStyle: TextStyle(fontSize: 15),
-                                  ),
-                                ),
-                                TextFormField(
-                                  controller: _purpose,
-                                  keyboardType: TextInputType.text,
-                                  maxLength: 1000,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 18),
-                                  autocorrect: false,
-                                  validator: (value) {
-                                    RegExp validateText = RegExp(r'\b[\w]+\b');
-                                    if (!validateText.hasMatch(_purpose.text)) {
-                                      return "Enter Valid Purpose";
-                                    }
-                                    return null;
-                                  },
-                                  decoration: const InputDecoration(
-                                    counterText: "",
-                                    contentPadding: EdgeInsets.all(8.0),
-                                    hintText: "Enter Purpose",
-                                    labelText: "Purpose",
-                                    errorStyle: TextStyle(fontSize: 15),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.96,
-                                  height: 70,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: widget.expenseCategory.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return SizedBox(
-                                        child: Padding(
-                                          padding: EdgeInsets.all(8.0),
-                                          child: InkWell(
-                                            child: Card(
-                                              color: Theme.of(context)
-                                                  .scaffoldBackgroundColor,
-                                              shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: (index ==
-                                                            categoryIndex
-                                                        ? Theme.of(context)
-                                                            .primaryColor
-                                                        : Theme.of(context)
-                                                            .scaffoldBackgroundColor)),
-                                                borderRadius:
-                                                    BorderRadius.circular(10.0),
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(12.0),
-                                                child: Center(
-                                                  child: InkWell(
-                                                    child: Text(
-                                                      widget.expenseCategory[
-                                                          index],
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            onTap: () {
-                                              if (this.mounted) {
-                                                setState(
-                                                  () {
-                                                    categoryIndex = index;
-                                                  },
-                                                );
-                                              }
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                widget.subCategory[categoryIndex].length > 0
-                                    ? SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width *
+            ? (widget.expenseCategory.length == 0
+                ? null
+                : FloatingActionButton(
+                    child: Icon(
+                      Icons.add,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      expensedate = DateTime.now();
+                      showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (BuildContext context) {
+                          return StatefulBuilder(builder: (context, setState) {
+                            return Padding(
+                              padding: MediaQuery.of(context).viewInsets,
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    TextFormField(
+                                      controller: _amt,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 10,
+                                      maxLines: 1,
+                                      style: const TextStyle(fontSize: 18),
+                                      autocorrect: false,
+                                      validator: (value) {
+                                        RegExp validateNumber =
+                                            RegExp(r'^\d+(\.\d{1,2})?$');
+                                        if (!validateNumber
+                                            .hasMatch(_amt.text)) {
+                                          return "Enter Valid Amount";
+                                        }
+                                        return null;
+                                      },
+                                      decoration: const InputDecoration(
+                                        counterText: "",
+                                        contentPadding: EdgeInsets.all(8.0),
+                                        hintText: "Enter Amount",
+                                        labelText: "Amount",
+                                        errorStyle: TextStyle(fontSize: 15),
+                                      ),
+                                    ),
+                                    TextFormField(
+                                      controller: _purpose,
+                                      keyboardType: TextInputType.text,
+                                      maxLength: 1000,
+                                      maxLines: 1,
+                                      style: const TextStyle(fontSize: 18),
+                                      autocorrect: false,
+                                      validator: (value) {
+                                        RegExp validateText =
+                                            RegExp(r'\b[\w]+\b');
+                                        if (!validateText
+                                            .hasMatch(_purpose.text)) {
+                                          return "Enter Valid Purpose";
+                                        }
+                                        return null;
+                                      },
+                                      decoration: const InputDecoration(
+                                        counterText: "",
+                                        contentPadding: EdgeInsets.all(8.0),
+                                        hintText: "Enter Purpose",
+                                        labelText: "Purpose",
+                                        errorStyle: TextStyle(fontSize: 15),
+                                      ),
+                                    ),
+                                    widget.expenseCategory.length == 0
+                                        ? SizedBox()
+                                        : SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
                                                 0.96,
-                                        height: 70,
-                                        child: ListView.builder(
-                                          scrollDirection: Axis.horizontal,
-                                          itemCount: widget
-                                              .subCategory[categoryIndex]
-                                              .length,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            return SizedBox(
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: InkWell(
-                                                  child: Card(
-                                                    color: Theme.of(context)
-                                                        .scaffoldBackgroundColor,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      side: BorderSide(
-                                                          color: (index ==
-                                                                  subCategoryIndex
-                                                              ? Theme.of(
-                                                                      context)
-                                                                  .primaryColor
-                                                              : Theme.of(
-                                                                      context)
-                                                                  .scaffoldBackgroundColor)),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10.0),
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              12.0),
-                                                      child: Center(
-                                                        child: InkWell(
-                                                          child: Text(
-                                                            widget.subCategory[
-                                                                    categoryIndex]
-                                                                [index],
-                                                            style: TextStyle(
-                                                              fontSize: 16,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w500,
+                                            height: 70,
+                                            child: ListView.builder(
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount:
+                                                  widget.expenseCategory.length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return SizedBox(
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.all(8.0),
+                                                    child: InkWell(
+                                                      child: Card(
+                                                        color: Theme.of(context)
+                                                            .scaffoldBackgroundColor,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          side: BorderSide(
+                                                              color: (index ==
+                                                                      categoryIndex
+                                                                  ? Theme.of(
+                                                                          context)
+                                                                      .primaryColor
+                                                                  : Theme.of(
+                                                                          context)
+                                                                      .scaffoldBackgroundColor)),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12.0),
+                                                          child: Center(
+                                                            child: InkWell(
+                                                              child: Text(
+                                                                widget.expenseCategory[
+                                                                    index],
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
                                                             ),
                                                           ),
                                                         ),
                                                       ),
+                                                      onTap: () {
+                                                        if (this.mounted) {
+                                                          setState(
+                                                            () {
+                                                              categoryIndex =
+                                                                  index;
+                                                            },
+                                                          );
+                                                        }
+                                                      },
                                                     ),
                                                   ),
-                                                  onTap: () {
-                                                    if (this.mounted) {
-                                                      setState(
-                                                        () {
-                                                          subCategoryIndex =
-                                                              index;
-                                                        },
-                                                      );
-                                                    }
-                                                  },
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      )
-                                    : SizedBox(),
-                                SizedBox(
-                                  height: 7,
-                                ),
-                                SizedBox(
-                                  width: MediaQuery.of(context).size.width,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          DateFormat(global.dateTimeFormat_new)
-                                              .format(expensedate),
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                        InkWell(
-                                          onTap: () async {
-                                            DateTime? dateTime =
-                                                await showOmniDateTimePicker(
-                                              context: context,
-                                              is24HourMode: false,
-                                              isShowSeconds: false,
-                                              initialDate: expensedate,
-                                              firstDate: DateTime(2018),
-                                              lastDate: DateTime.now(),
-                                              borderRadius:
-                                                  BorderRadius.circular(16.0),
-                                            );
-
-                                            if (dateTime != null) {
-                                              if (this.mounted) {
-                                                setState(() {
-                                                  expensedate = dateTime;
-                                                });
-                                              }
-                                            }
-                                          },
-                                          child: Icon(
-                                            Icons.edit_calendar,
-                                            size: 22,
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        )
-                                      ],
+                                    (widget.subCategory.length >
+                                                categoryIndex &&
+                                            widget.subCategory[categoryIndex]
+                                                    .length >
+                                                0)
+                                        ? SizedBox(
+                                            width: MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.96,
+                                            height: 70,
+                                            child: ListView.builder(
+                                              scrollDirection: Axis.horizontal,
+                                              itemCount: widget
+                                                  .subCategory[categoryIndex]
+                                                  .length,
+                                              itemBuilder:
+                                                  (BuildContext context,
+                                                      int index) {
+                                                return SizedBox(
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: InkWell(
+                                                      child: Card(
+                                                        color: Theme.of(context)
+                                                            .scaffoldBackgroundColor,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          side: BorderSide(
+                                                              color: (index ==
+                                                                      subCategoryIndex
+                                                                  ? Theme.of(
+                                                                          context)
+                                                                      .primaryColor
+                                                                  : Theme.of(
+                                                                          context)
+                                                                      .scaffoldBackgroundColor)),
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      10.0),
+                                                        ),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12.0),
+                                                          child: Center(
+                                                            child: InkWell(
+                                                              child: Text(
+                                                                widget.subCategory[
+                                                                        categoryIndex]
+                                                                    [index],
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      onTap: () {
+                                                        if (this.mounted) {
+                                                          setState(
+                                                            () {
+                                                              subCategoryIndex =
+                                                                  index;
+                                                            },
+                                                          );
+                                                        }
+                                                      },
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          )
+                                        : SizedBox(),
+                                    SizedBox(
+                                      height: 7,
                                     ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: 15,
-                                ),
-                                SizedBox(
-                                  height: 45,
-                                  width: 90,
-                                  child: OutlinedButton(
-                                      child: Text(
-                                        "Add",
-                                        style: TextStyle(
-                                            color: themeProvider.isDarkTheme
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontSize: 16),
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              DateFormat(
+                                                      global.dateTimeFormat_new)
+                                                  .format(expensedate),
+                                              style: TextStyle(fontSize: 18),
+                                            ),
+                                            InkWell(
+                                              onTap: () async {
+                                                DateTime? dateTime =
+                                                    await showOmniDateTimePicker(
+                                                  context: context,
+                                                  is24HourMode: false,
+                                                  isShowSeconds: false,
+                                                  initialDate: expensedate,
+                                                  firstDate: DateTime(2018),
+                                                  lastDate: DateTime.now(),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          16.0),
+                                                );
+
+                                                if (dateTime != null) {
+                                                  if (this.mounted) {
+                                                    setState(() {
+                                                      expensedate = dateTime;
+                                                    });
+                                                  }
+                                                }
+                                              },
+                                              child: Icon(
+                                                Icons.edit_calendar,
+                                                size: 22,
+                                              ),
+                                            )
+                                          ],
                                         ),
-                                        side: BorderSide(
-                                            color:
-                                                Theme.of(context).primaryColor),
                                       ),
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          AddExpense(context);
-                                        }
-                                      }),
+                                    ),
+                                    SizedBox(
+                                      height: 15,
+                                    ),
+                                    SizedBox(
+                                      height: 45,
+                                      width: 90,
+                                      child: OutlinedButton(
+                                          child: Text(
+                                            "Add",
+                                            style: TextStyle(
+                                                color: themeProvider.isDarkTheme
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                                fontSize: 16),
+                                          ),
+                                          style: OutlinedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                            ),
+                                            side: BorderSide(
+                                                color: Theme.of(context)
+                                                    .primaryColor),
+                                          ),
+                                          onPressed: () {
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              AddExpense(context);
+                                            }
+                                          }),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    )
+                                  ],
                                 ),
-                                SizedBox(
-                                  height: 10,
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      });
+                              ),
+                            );
+                          });
+                        },
+                      );
                     },
-                  );
-                },
-              )
+                  ))
             : null,
         bottomNavigationBar: isAlertSet
             ? Container(

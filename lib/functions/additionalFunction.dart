@@ -366,7 +366,7 @@ Future<dynamic> createHTTPreq(
   return new Response(
       jsonEncode({
         "status": false,
-        "Message": crypto.encrypt("Some Unknown Error Occurred"),
+        "Message": crypto.encrypt("No Internet Connection!"),
       }),
       422);
 }

@@ -1896,7 +1896,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                   padding: MediaQuery.of(context).viewInsets,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    height: roomData.isNotEmpty ? 240 : 185,
+                    height: roomData.isNotEmpty
+                        ? 240
+                        : (widget.expenseCategory.length == 0 ? 145 : 185),
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Column(
@@ -1914,37 +1916,42 @@ class _BankTransactionsState extends State<BankTransactions> {
                             SizedBox(
                               height: 16,
                             ),
-                            SizedBox(
-                              height: 45,
-                              width: MediaQuery.of(context).size.width * 0.85,
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  if (this.mounted) {
-                                    setState(() {
-                                      categoryIndex = 0;
-                                      subCategoryIndex = 0;
-                                      roomCategoryIndex = 0;
-                                    });
-                                  }
-                                  showPersonalExpenseDialog(amount, date);
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
+                            widget.expenseCategory.length == 0
+                                ? SizedBox()
+                                : SizedBox(
+                                    height: 45,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.85,
+                                    child: OutlinedButton(
+                                      onPressed: () {
+                                        if (this.mounted) {
+                                          setState(() {
+                                            categoryIndex = 0;
+                                            subCategoryIndex = 0;
+                                            roomCategoryIndex = 0;
+                                          });
+                                        }
+                                        showPersonalExpenseDialog(amount, date);
+                                      },
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      child: Text(
+                                        "Personal Expense",
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
+                                    ),
                                   ),
-                                  side: BorderSide(
-                                      color: Theme.of(context).primaryColor),
-                                ),
-                                child: Text(
-                                  "Personal Expense",
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      color: themeProvider.isDarkTheme
-                                          ? Colors.white
-                                          : Colors.black),
-                                ),
-                              ),
-                            ),
                             roomData.isNotEmpty
                                 ? SizedBox(
                                     height: 10,
