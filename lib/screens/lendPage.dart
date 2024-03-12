@@ -73,20 +73,31 @@ class _LendPageState extends State<LendPage> {
     } on Exception catch (_) {}
   }
 
-  getConnectivity() =>
-      subscription = Connectivity().onConnectivityChanged.listen(
-        (ConnectivityResult result) async {
-          isDeviceConnected = await InternetConnectionChecker().hasConnection;
-          setState(() {});
-          if (!isDeviceConnected && isAlertSet == false) {
-            setState(() => isAlertSet = true);
-          } else if (isDeviceConnected && isAlertSet == true) {
-            Future.delayed(Duration(seconds: 1), () {
-              setState(() => isAlertSet = false);
-            });
-          }
-        },
-      );
+  getConnectivity() async {
+    subscription = Connectivity().onConnectivityChanged.listen(
+      (ConnectivityResult result) async {
+        isDeviceConnected = await InternetConnectionChecker().hasConnection;
+        setState(() {});
+        if (!isDeviceConnected && isAlertSet == false) {
+          setState(() => isAlertSet = true);
+        } else if (isDeviceConnected && isAlertSet == true) {
+          Future.delayed(Duration(seconds: 1), () {
+            setState(() => isAlertSet = false);
+          });
+        }
+      },
+    );
+
+    isDeviceConnected = await InternetConnectionChecker().hasConnection;
+    setState(() {});
+    if (!isDeviceConnected && isAlertSet == false) {
+      setState(() => isAlertSet = true);
+    } else if (isDeviceConnected && isAlertSet == true) {
+      Future.delayed(Duration(seconds: 1), () {
+        setState(() => isAlertSet = false);
+      });
+    }
+  }
 
   final TextEditingController _purpose = TextEditingController();
   final TextEditingController _amount = TextEditingController();

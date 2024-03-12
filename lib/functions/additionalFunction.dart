@@ -6,6 +6,7 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path/path.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:sqflite/sqflite.dart';
@@ -363,10 +364,14 @@ Future<dynamic> createHTTPreq(
       return newRes;
     }
   } on Exception catch (_) {}
+
+  bool isDeviceConnected = await InternetConnectionChecker().hasConnection;
   return new Response(
       jsonEncode({
         "status": false,
-        "Message": crypto.encrypt("No Internet Connection!"),
+        "Message": crypto.encrypt(isDeviceConnected
+            ? "Server Error, Try Again!"
+            : "No Internet Connection!"),
       }),
       422);
 }

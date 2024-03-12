@@ -284,20 +284,31 @@ class _OtpNameState extends State<OtpName> {
     }
   }
 
-  getConnectivity() =>
-      subscription = Connectivity().onConnectivityChanged.listen(
-        (ConnectivityResult result) async {
-          isDeviceConnected = await InternetConnectionChecker().hasConnection;
-          setState(() {});
-          if (!isDeviceConnected && isAlertSet == false) {
-            setState(() => isAlertSet = true);
-          } else if (isDeviceConnected && isAlertSet == true) {
-            Future.delayed(Duration(seconds: 1), () {
-              setState(() => isAlertSet = false);
-            });
-          }
-        },
-      );
+  getConnectivity() async {
+    subscription = Connectivity().onConnectivityChanged.listen(
+      (ConnectivityResult result) async {
+        isDeviceConnected = await InternetConnectionChecker().hasConnection;
+        setState(() {});
+        if (!isDeviceConnected && isAlertSet == false) {
+          setState(() => isAlertSet = true);
+        } else if (isDeviceConnected && isAlertSet == true) {
+          Future.delayed(Duration(seconds: 1), () {
+            setState(() => isAlertSet = false);
+          });
+        }
+      },
+    );
+
+    isDeviceConnected = await InternetConnectionChecker().hasConnection;
+    setState(() {});
+    if (!isDeviceConnected && isAlertSet == false) {
+      setState(() => isAlertSet = true);
+    } else if (isDeviceConnected && isAlertSet == true) {
+      Future.delayed(Duration(seconds: 1), () {
+        setState(() => isAlertSet = false);
+      });
+    }
+  }
 
   @override
   void initState() {
