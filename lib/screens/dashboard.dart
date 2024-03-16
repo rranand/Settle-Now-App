@@ -230,9 +230,6 @@ class _DashBoardState extends State<DashBoard> {
       setState(() {
         isLogoutTriggered = true;
       });
-      if (!manually) {
-        showToast(context, "Login Expired", Icons.warning_outlined);
-      }
       buildShowDialog(context);
       if (kIsWeb) {
         await Future.wait([
