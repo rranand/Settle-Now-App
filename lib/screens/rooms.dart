@@ -4699,8 +4699,16 @@ class _ExpenseDataState extends State<ExpenseData> {
     try {
       Map<String, String> splitMember = {};
       for (int i = 0; i < memberExpense.length; i++) {
-        splitMember[crypto.decrypt(memberExpense[i]['Email'])] =
-            crypto.decrypt(memberExpense[i]['amt']);
+        splitMember[crypto.decrypt(memberExpense[i]['Email'])] = crypto
+            .decrypt(memberExpense[i]['amt'].toString().replaceFirst(".0", ""));
+      }
+
+      String subCategory = "";
+
+      if (subType != -1 &&
+          widget.expenseCategory.length > typeCat &&
+          widget.expenseCategory[typeCat].toString().length > 0) {
+        subCategory = crypto.encrypt(widget.subCategory[typeCat][subType]);
       }
 
       Map<String, String> jsonInputData = {
@@ -4711,12 +4719,8 @@ class _ExpenseDataState extends State<ExpenseData> {
         'split': crypto.encrypt(splitMember.toString()),
         'type': crypto.encrypt(type),
         'typeCat': crypto.encrypt(widget.expenseCategory[typeCat]),
-        'subType': crypto.encrypt(
-            (subType != -1 && widget.expenseCategory[typeCat].length > 0
-                ? widget.subCategory[typeCat][subType]
-                : "")),
+        'subType': subCategory,
       };
-
       final response = await createHTTPreq(
           'manualSplit', http.put, widget.Token, jsonInputData);
 
@@ -5034,8 +5038,11 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                               ['Email']) ==
                                                       widget.Email) {
                                                     if (amountController[index]
-                                                            .text ==
-                                                        "0") {
+                                                                .text ==
+                                                            "0" ||
+                                                        amountController[index]
+                                                                .text ==
+                                                            "0.0") {
                                                       memberExpense[index]
                                                               ['amt'] =
                                                           crypto.encrypt(
