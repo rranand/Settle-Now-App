@@ -4709,6 +4709,8 @@ class _ExpenseDataState extends State<ExpenseData> {
           widget.expenseCategory.length > typeCat &&
           widget.expenseCategory[typeCat].toString().length > 0) {
         subCategory = crypto.encrypt(widget.subCategory[typeCat][subType]);
+      } else {
+        subCategory = crypto.encrypt("None");
       }
 
       Map<String, String> jsonInputData = {
@@ -4835,7 +4837,15 @@ class _ExpenseDataState extends State<ExpenseData> {
                                             setState(
                                               () {
                                                 roomExpenseCategory = index;
-                                                roomsubExpenseCategory = 0;
+                                                if (widget
+                                                        .subCategory[
+                                                            roomExpenseCategory]
+                                                        .length >
+                                                    0) {
+                                                  roomsubExpenseCategory = 0;
+                                                } else {
+                                                  roomsubExpenseCategory = -1;
+                                                }
                                               },
                                             );
                                           }
