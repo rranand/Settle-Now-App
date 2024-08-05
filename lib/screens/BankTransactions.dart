@@ -1453,7 +1453,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 15,
                       ),
                       isSplitMemberLoading
-                          ? CircularProgressIndicator()
+                          ? CircularProgressIndicator.adaptive()
                           : (noSplit
                               ? SizedBox()
                               : SizedBox(

@@ -259,7 +259,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     SizedBox(
                       width: 140,
-                      height: 45,
+                      height: 50,
                       child: ElevatedButton(
                           child: Text(
                             "Send OTP",
@@ -281,173 +281,174 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       height: 8,
                     ),
-                    InkWell(
-                      onTap: () async {
-                        try {
-                          final user = await GoogleSignIN.login();
-                          if (user != null) {
-                            if (this.mounted) {
-                              buildShowDialog(context);
-                            }
-                            String token = crypto.encrypt(
-                                (user.email).toString() +
-                                    "#" +
-                                    _deviceData['id'] +
-                                    "#" +
-                                    DateTime.now().toString());
-                            Map<String, String> jsonInputData = {
-                              "email": (user.email).toString(),
-                              "name": (user.displayName).toString(),
-                              "token": token
-                            };
-                            String jwToken = await createJWT(
-                                (user.email).toString(),
-                                jsonEncode(jsonInputData));
-
-                            await Future.wait([
-                              prefs.setString("token", jwToken),
-                              prefs.setBool("isGoogle", true)
-                            ]);
-
-                            var resp = null;
-                            if (kIsWeb) {
-                              Map<String, String> jsonInputData = {
-                                'email':
-                                    crypto.encrypt((user.email).toString()),
-                                'name': crypto
-                                    .encrypt((user.displayName).toString()),
-                                'profilePic':
-                                    crypto.encrypt((user.photoUrl).toString()),
-                                'country': crypto.encrypt("Unknown"),
-                                'ip': crypto.encrypt("Unknown"),
-                                'state': crypto.encrypt("Unknown"),
-                                'city': crypto.encrypt("Unknown"),
-                                'isp': crypto.encrypt("Unknown"),
-                                'device': crypto.encrypt(_deviceData['device']),
-                                'deviceID': crypto.encrypt(_deviceData['id']),
-                                'deviceToken': crypto.encrypt("web"),
-                                "token": crypto.encrypt(token)
-                              };
-
-                              resp = await createHTTPreq(
-                                  'login/google', http.post, "", jsonInputData);
-                            } else {
-                              List<dynamic> fwaitTemp = await Future.wait([
-                                getDeviceTokenToSendNotification(),
-                                http.get(
-                                  Uri.parse('http://ip-api.com/json'),
-                                )
-                              ]);
-
-                              final ipAdd = fwaitTemp[1];
-                              final JD = jsonDecode(ipAdd.body);
-
-                              Map<String, String> jsonInputData = {
-                                'email':
-                                    crypto.encrypt((user.email).toString()),
-                                'name': crypto
-                                    .encrypt((user.displayName).toString()),
-                                'profilePic':
-                                    crypto.encrypt((user.photoUrl).toString()),
-                                'country': crypto.encrypt(JD['country']),
-                                'ip': crypto.encrypt(JD['query']),
-                                'state': crypto.encrypt(JD['regionName']),
-                                'city': crypto.encrypt(JD['city']),
-                                'isp': crypto.encrypt(JD['isp']),
-                                'device': crypto.encrypt(_deviceData['device']),
-                                'deviceID': crypto.encrypt(_deviceData['id']),
-                                'model': crypto.encrypt(_deviceData['model']),
-                                'product':
-                                    crypto.encrypt(_deviceData['product']),
-                                'serial': crypto.encrypt(_deviceData['serial']),
-                                'android':
-                                    crypto.encrypt(_deviceData['sdkInt']),
-                                'release':
-                                    crypto.encrypt(_deviceData['release']),
-                                'deviceToken': crypto.encrypt(deviceToken),
-                                "token": crypto.encrypt(token)
-                              };
-
-                              resp = await createHTTPreq(
-                                  'login/google', http.post, "", jsonInputData);
-                            }
-
-                            var remainingData = jsonDecode(resp.body)['data'];
-
-                            if (resp.statusCode == 200) {
-                              await Future.wait([
-                                prefs.setString(
-                                    "___token", remainingData['createdOn']),
-                                prefs.setString(
-                                    "__token", remainingData['phoneNo'])
-                              ]);
-                            } else {
-                              await Future.wait([
-                                prefs.setString("___token", crypto.encrypt("")),
-                                prefs.setString("__token", crypto.encrypt(""))
-                              ]);
-                            }
-
-                            if (this.mounted) {
-                              Navigator.pop(context);
-                            }
-
-                            if (this.mounted) {
-                              isOnBoardingCompleted
-                                  ? Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => DashBoard(
-                                          version: version,
-                                          firstTime: true,
-                                        ),
-                                      ),
-                                      (Route<dynamic> route) => false,
-                                    )
-                                  : Navigator.pushAndRemoveUntil(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => onBoarding(
-                                          version: version,
-                                        ),
-                                      ),
-                                      (Route<dynamic> route) => false,
-                                    );
-                            }
-                          }
-                        } on Exception catch (_) {}
-                      },
-                      child: SizedBox(
-                        width: 240,
-                        child: Card(
-                          color: Theme.of(context).primaryColor.withAlpha(255),
-                          elevation: 2.5,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  FaIcon(FontAwesomeIcons.google,
+                    SizedBox(
+                      width: 260,
+                      height: 50,
+                      child: ElevatedButton(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                FaIcon(FontAwesomeIcons.google,
+                                    color: Colors.white),
+                                SizedBox(
+                                  width: 9,
+                                ),
+                                Text(
+                                  "Sign In With Google",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 17,
                                       color: Colors.white),
-                                  SizedBox(
-                                    width: 9,
-                                  ),
-                                  Text(
-                                    "Sign In With Google",
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                        color: Colors.white),
-                                  )
-                                ]),
-                          ),
+                                )
+                              ]),
                         ),
+                        onPressed: () async {
+                          try {
+                            final user = await GoogleSignIN.login();
+                            if (user != null) {
+                              if (this.mounted) {
+                                buildShowDialog(context);
+                              }
+                              String token = crypto.encrypt(
+                                  (user.email).toString() +
+                                      "#" +
+                                      _deviceData['id'] +
+                                      "#" +
+                                      DateTime.now().toString());
+                              Map<String, String> jsonInputData = {
+                                "email": (user.email).toString(),
+                                "name": (user.displayName).toString(),
+                                "token": token
+                              };
+                              String jwToken = await createJWT(
+                                  (user.email).toString(),
+                                  jsonEncode(jsonInputData));
+
+                              await Future.wait([
+                                prefs.setString("token", jwToken),
+                                prefs.setBool("isGoogle", true)
+                              ]);
+
+                              var resp = null;
+                              if (kIsWeb) {
+                                Map<String, String> jsonInputData = {
+                                  'email':
+                                      crypto.encrypt((user.email).toString()),
+                                  'name': crypto
+                                      .encrypt((user.displayName).toString()),
+                                  'profilePic': crypto
+                                      .encrypt((user.photoUrl).toString()),
+                                  'country': crypto.encrypt("Unknown"),
+                                  'ip': crypto.encrypt("Unknown"),
+                                  'state': crypto.encrypt("Unknown"),
+                                  'city': crypto.encrypt("Unknown"),
+                                  'isp': crypto.encrypt("Unknown"),
+                                  'device':
+                                      crypto.encrypt(_deviceData['device']),
+                                  'deviceID': crypto.encrypt(_deviceData['id']),
+                                  'deviceToken': crypto.encrypt("web"),
+                                  "token": crypto.encrypt(token)
+                                };
+
+                                resp = await createHTTPreq('login/google',
+                                    http.post, "", jsonInputData);
+                              } else {
+                                List<dynamic> fwaitTemp = await Future.wait([
+                                  getDeviceTokenToSendNotification(),
+                                  http.get(
+                                    Uri.parse('http://ip-api.com/json'),
+                                  )
+                                ]);
+
+                                final ipAdd = fwaitTemp[1];
+                                final JD = jsonDecode(ipAdd.body);
+
+                                Map<String, String> jsonInputData = {
+                                  'email':
+                                      crypto.encrypt((user.email).toString()),
+                                  'name': crypto
+                                      .encrypt((user.displayName).toString()),
+                                  'profilePic': crypto
+                                      .encrypt((user.photoUrl).toString()),
+                                  'country': crypto.encrypt(JD['country']),
+                                  'ip': crypto.encrypt(JD['query']),
+                                  'state': crypto.encrypt(JD['regionName']),
+                                  'city': crypto.encrypt(JD['city']),
+                                  'isp': crypto.encrypt(JD['isp']),
+                                  'device':
+                                      crypto.encrypt(_deviceData['device']),
+                                  'deviceID': crypto.encrypt(_deviceData['id']),
+                                  'model': crypto.encrypt(_deviceData['model']),
+                                  'product':
+                                      crypto.encrypt(_deviceData['product']),
+                                  'serial':
+                                      crypto.encrypt(_deviceData['serial']),
+                                  'android':
+                                      crypto.encrypt(_deviceData['sdkInt']),
+                                  'release':
+                                      crypto.encrypt(_deviceData['release']),
+                                  'deviceToken': crypto.encrypt(deviceToken),
+                                  "token": crypto.encrypt(token)
+                                };
+
+                                resp = await createHTTPreq('login/google',
+                                    http.post, "", jsonInputData);
+                              }
+
+                              var remainingData = jsonDecode(resp.body)['data'];
+
+                              if (resp.statusCode == 200) {
+                                await Future.wait([
+                                  prefs.setString(
+                                      "___token", remainingData['createdOn']),
+                                  prefs.setString(
+                                      "__token", remainingData['phoneNo'])
+                                ]);
+                              } else {
+                                await Future.wait([
+                                  prefs.setString(
+                                      "___token", crypto.encrypt("")),
+                                  prefs.setString("__token", crypto.encrypt(""))
+                                ]);
+                              }
+
+                              if (this.mounted) {
+                                Navigator.pop(context);
+                              }
+
+                              if (this.mounted) {
+                                isOnBoardingCompleted
+                                    ? Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => DashBoard(
+                                            version: version,
+                                            firstTime: true,
+                                          ),
+                                        ),
+                                        (Route<dynamic> route) => false,
+                                      )
+                                    : Navigator.pushAndRemoveUntil(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => onBoarding(
+                                            version: version,
+                                          ),
+                                        ),
+                                        (Route<dynamic> route) => false,
+                                      );
+                              }
+                            }
+                          } on Exception catch (_) {}
+                        },
                       ),
                     ),
                   ],
                 )
               : Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator.adaptive(),
                 ),
         ),
       ),

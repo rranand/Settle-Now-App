@@ -1694,7 +1694,7 @@ class _DashBoardState extends State<DashBoard> {
                       : SizedBox(
                           height: MediaQuery.of(context).size.height - 310,
                           child: Center(
-                            child: CircularProgressIndicator(),
+                            child: CircularProgressIndicator.adaptive(),
                           ),
                         )
                 ],
@@ -4375,7 +4375,7 @@ class _DashBoardState extends State<DashBoard> {
                     : (SearchRoomData.value.isEmpty
                         ? Center(
                             child: searching
-                                ? CircularProgressIndicator()
+                                ? CircularProgressIndicator.adaptive()
                                 : Text("No Results Found",
                                     style: TextStyle(
                                       fontSize: 22,
@@ -4880,7 +4880,7 @@ class _DashBoardState extends State<DashBoard> {
                 children: [
                   _name.text.length == 0
                       ? Center(
-                          child: CircularProgressIndicator(),
+                          child: CircularProgressIndicator.adaptive(),
                         )
                       : UserAccountsDrawerHeader(
                           decoration: BoxDecoration(
@@ -4929,7 +4929,8 @@ class _DashBoardState extends State<DashBoard> {
                                     )
                                   : (imageUploading
                                       ? Center(
-                                          child: CircularProgressIndicator(),
+                                          child: CircularProgressIndicator
+                                              .adaptive(),
                                         )
                                       : CachedNetworkImage(
                                           httpHeaders: {
@@ -6779,7 +6780,7 @@ class _QuickSplitState extends State<QuickSplit> {
                           isRoomOwnerClosed));
                 },
                 child: SizedBox(
-                    height: 140,
+                    height: 150,
                     child: Card(
                       elevation: 1.0,
                       shadowColor: Theme.of(context).primaryColor,
@@ -6793,7 +6794,7 @@ class _QuickSplitState extends State<QuickSplit> {
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(10.0),
+                        padding: EdgeInsets.fromLTRB(8.0, 8.0, 0, 8.0),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -7612,7 +7613,7 @@ class _RoomWidgetState extends State<RoomWidget> {
                                   }
                                 } else {
                                   return Center(
-                                    child: CircularProgressIndicator(),
+                                    child: CircularProgressIndicator.adaptive(),
                                   );
                                 }
                                 return Stack(

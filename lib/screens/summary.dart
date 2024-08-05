@@ -542,7 +542,7 @@ class _SummaryPageState extends State<SummaryPage> {
             ),
             SizedBox(
               width: MediaQuery.of(context).size.width,
-              height: 150,
+              height: 160,
               child: personalExpense.isEmpty
                   ? Center(
                       child: personalLoaded
@@ -561,8 +561,8 @@ class _SummaryPageState extends State<SummaryPage> {
                                   return Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: Container(
-                                      height: 150,
-                                      width: 150,
+                                      height: 160,
+                                      width: 160,
                                       decoration: BoxDecoration(
                                           border: Border.all(
                                             color: Colors.white,
@@ -636,10 +636,10 @@ class _SummaryPageState extends State<SummaryPage> {
                               itemBuilder: (BuildContext context, int index) {
                                 return ConstrainedBox(
                                   constraints: new BoxConstraints(
-                                    minWidth: 150.0,
+                                    minWidth: 160.0,
                                   ),
                                   child: SizedBox(
-                                    height: 150,
+                                    height: 160,
                                     child: Padding(
                                       padding: EdgeInsets.all(8.0),
                                       child: InkWell(
@@ -740,10 +740,10 @@ class _SummaryPageState extends State<SummaryPage> {
                             }
                             return ConstrainedBox(
                               constraints: new BoxConstraints(
-                                minWidth: 150.0,
+                                minWidth: 160.0,
                               ),
                               child: SizedBox(
-                                height: 150,
+                                height: 160,
                                 child: Padding(
                                   padding: EdgeInsets.all(8.0),
                                   child: InkWell(

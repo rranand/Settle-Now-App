@@ -348,7 +348,7 @@ class _OtpNameState extends State<OtpName> {
               width: MediaQuery.of(context).size.width * 0.8,
               child: (data == null
                   ? const Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator.adaptive(),
                     )
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.center,

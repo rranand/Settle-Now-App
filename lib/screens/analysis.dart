@@ -457,7 +457,8 @@ class _AnalysisState extends State<Analysis> {
                                   padding: const EdgeInsets.all(6),
                                   child: isDataLoading
                                       ? Center(
-                                          child: CircularProgressIndicator(),
+                                          child: CircularProgressIndicator
+                                              .adaptive(),
                                         )
                                       : (yearwiseSpend.isNotEmpty
                                           ? SfCartesianChart(
@@ -652,7 +653,8 @@ class _AnalysisState extends State<Analysis> {
                               height: 300,
                               child: isDataLoading
                                   ? Center(
-                                      child: CircularProgressIndicator(),
+                                      child:
+                                          CircularProgressIndicator.adaptive(),
                                     )
                                   : (personalExpenseByYear.isNotEmpty
                                       ? SfCartesianChart(
@@ -1009,7 +1011,8 @@ class _AnalysisState extends State<Analysis> {
                                       ? SizedBox(
                                           height: 200,
                                           child: Center(
-                                            child: CircularProgressIndicator(),
+                                            child: CircularProgressIndicator
+                                                .adaptive(),
                                           ),
                                         )
                                       : (graphData.isNotEmpty

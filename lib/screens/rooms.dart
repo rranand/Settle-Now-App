@@ -180,22 +180,24 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> initChart() async {
-    Map<String, double> tempMap = {};
-    for (int i = 0; i < expenseCategory.length; i++) {
-      tempMap[expenseCategory[i]] = 0;
-    }
-    totalAmount = 0;
+    if (isPreviousPageNeedToBeUpdated.value || dataMap.isEmpty) {
+      Map<String, double> tempMap = {};
+      for (int i = 0; i < expenseCategory.length; i++) {
+        tempMap[expenseCategory[i]] = 0;
+      }
+      totalAmount = 0;
+      dataMap.clear();
+      for (int i = 0; i < TransList.length; i++) {
+        tempMap[crypto.decrypt(TransList[i]["Type"])] =
+            (tempMap[crypto.decrypt(TransList[i]["Type"])]! +
+                double.parse(crypto.decrypt(TransList[i]["Amount"])));
+      }
 
-    for (int i = 0; i < TransList.length; i++) {
-      tempMap[crypto.decrypt(TransList[i]["Type"])] =
-          (tempMap[crypto.decrypt(TransList[i]["Type"])]! +
-              double.parse(crypto.decrypt(TransList[i]["Amount"])));
-    }
-
-    for (int i = 0; i < expenseCategory.length; i++) {
-      totalAmount += tempMap[expenseCategory[i]]!;
-      dataMap.add(
-          ChartData.byType(expenseCategory[i], tempMap[expenseCategory[i]]!));
+      for (int i = 0; i < expenseCategory.length; i++) {
+        totalAmount += tempMap[expenseCategory[i]]!;
+        dataMap.add(
+            ChartData.byType(expenseCategory[i], tempMap[expenseCategory[i]]!));
+      }
     }
   }
 
@@ -1276,7 +1278,7 @@ class _RoomExpenseState extends State<RoomExpense>
   Widget memberCard(BuildContext context, int index) {
     return SizedBox(
       child: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
         child: InkWell(
           onTap: () async {
             TransList.clear();
@@ -1354,90 +1356,97 @@ class _RoomExpenseState extends State<RoomExpense>
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        InkWell(
-                          child: Text(
-                            crypto.decrypt(list[index]['Name']),
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.w500,
-                              foreground: kIsWeb?null:(Paint()..shader = linearGradient_1),
+                      padding: const EdgeInsets.all(4.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InkWell(
+                            child: Text(
+                              crypto.decrypt(list[index]['Name']),
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 21,
+                                fontWeight: FontWeight.w500,
+                                foreground: kIsWeb
+                                    ? null
+                                    : (Paint()..shader = linearGradient_1),
+                              ),
                             ),
+                            onTap: () => showToast(
+                                context,
+                                crypto.decrypt(list[index]['Name']),
+                                Icons.check),
                           ),
-                          onTap: () => showToast(context,
-                              crypto.decrypt(list[index]['Name']), Icons.check),
-                        ),
-                        SizedBox(
-                          height: 4,
-                        ),
-                        Text(
-                          "Contribution : ₹ " +
-                              commaSeperator((double.parse(crypto
-                                          .decrypt(list[index]['Expense'])) +
-                                      double.parse(crypto.decrypt(
-                                          list[index]['TotalSplitExpense'])))
-                                  .toStringAsFixed(2)),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            foreground: kIsWeb?null:(Paint()..shader = linearGradient_2),
+                          SizedBox(
+                            height: 4,
                           ),
-                        ),
-                        SizedBox(
-                          height: 3,
-                        ),
-                        Text(
-                            "Spent : ₹ " +
+                          Text(
+                            "Contribution : ₹ " +
                                 commaSeperator((double.parse(crypto
-                                        .decrypt(list[index]["yourExpense"])))
+                                            .decrypt(list[index]['Expense'])) +
+                                        double.parse(crypto.decrypt(
+                                            list[index]['TotalSplitExpense'])))
                                     .toStringAsFixed(2)),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              foreground: kIsWeb?null:(Paint()..shader = linearGradient_2),
-                            )),
-                        SizedBox(
-                          height: 3,
-                        ),
-                        double.parse(double.parse(
-                                        crypto.decrypt(list[index]["current"]))
-                                    .toStringAsFixed(2)) >
-                                0
-                            ? Text(
-                                "Gain : ₹ " +
-                                    commaSeperator(double.parse(crypto
-                                            .decrypt(list[index]["current"]))
-                                        .toStringAsFixed(2)),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.green,
-                                ),
-                              )
-                            : double.parse(double.parse(crypto
-                                            .decrypt(list[index]["current"]))
-                                        .toStringAsFixed(2)) <
-                                    0
-                                ? Text(
-                                    "Owe : ₹ " +
-                                        commaSeperator(double.parse(
-                                                crypto.decrypt(
-                                                    list[index]["current"]))
-                                            .toStringAsFixed(2)),
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.red,
-                                    ),
-                                  )
-                                : SizedBox()
-                      ],
-                    ),
-                  )
+                              foreground: kIsWeb
+                                  ? null
+                                  : (Paint()..shader = linearGradient_2),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 3,
+                          ),
+                          Text(
+                              "Spent : ₹ " +
+                                  commaSeperator((double.parse(crypto
+                                          .decrypt(list[index]["yourExpense"])))
+                                      .toStringAsFixed(2)),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                foreground: kIsWeb
+                                    ? null
+                                    : (Paint()..shader = linearGradient_2),
+                              )),
+                          SizedBox(
+                            height: 3,
+                          ),
+                          double.parse(double.parse(crypto
+                                          .decrypt(list[index]["current"]))
+                                      .toStringAsFixed(2)) >
+                                  0
+                              ? Text(
+                                  "Gain : ₹ " +
+                                      commaSeperator(double.parse(crypto
+                                              .decrypt(list[index]["current"]))
+                                          .toStringAsFixed(2)),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.green,
+                                  ),
+                                )
+                              : double.parse(double.parse(crypto
+                                              .decrypt(list[index]["current"]))
+                                          .toStringAsFixed(2)) <
+                                      0
+                                  ? Text(
+                                      "Owe : ₹ " +
+                                          commaSeperator(double.parse(
+                                                  crypto.decrypt(
+                                                      list[index]["current"]))
+                                              .toStringAsFixed(2)),
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.red,
+                                      ),
+                                    )
+                                  : SizedBox(),
+                        ],
+                      ))
                 ],
               ),
             ),
@@ -1517,32 +1526,6 @@ class _RoomExpenseState extends State<RoomExpense>
     );
   }
 
-  Widget memberExpenseAll(BuildContext context) {
-    return SizedBox(
-      width: 85,
-      child: Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Card(
-              elevation: 1.4,
-              shadowColor: Theme.of(context).primaryColor,
-              color: Theme.of(context).scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(
-                side: BorderSide(color: Theme.of(context).primaryColor),
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: Text(
-                      "ALL",
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  )))),
-    );
-  }
-
   getFilterData() async {
     if (this.mounted) {
       setState(() {
@@ -1567,48 +1550,6 @@ class _RoomExpenseState extends State<RoomExpense>
     if (this.mounted) {
       setState(() {});
     }
-  }
-
-  Widget memberAll(BuildContext context) {
-    return SizedBox(
-        width: 140,
-        child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: InkWell(
-                onTap: () async {
-                  TransList.clear();
-                  expenseTitle = "All Expense";
-                  TransList.addAll(allExpenseList);
-
-                  if (this.mounted) {
-                    setState(() {});
-                  }
-
-                  if (showExpenseYouAreIn) {
-                    getFilterData();
-                  }
-                },
-                child: Card(
-                    elevation: 1.0,
-                    shadowColor: Theme.of(context).primaryColor,
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          color: Theme.of(context).primaryColor.withAlpha(90)),
-                      borderRadius: BorderRadius.circular(15.0),
-                    ),
-                    child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                          child: Text(
-                            "ALL",
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              foreground: kIsWeb?null:(Paint()..shader = linearGradient_4),
-                            ),
-                          ),
-                        ))))));
   }
 
   Widget homeWidget() {
@@ -1724,27 +1665,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                       itemBuilder:
                                           (BuildContext context, int index) {
                                         if (index == 0) {
-                                          return Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Container(
-                                              height: 170,
-                                              width: 140,
-                                              child: Center(
-                                                  child: Text("All",
-                                                      style: TextStyle(
-                                                        fontSize: 24,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ))),
-                                              decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                    color: Colors.white,
-                                                  ),
-                                                  borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(20))),
-                                            ),
-                                          );
+                                          return SizedBox();
                                         } else {
                                           return Padding(
                                             padding: const EdgeInsets.all(8.0),
@@ -1902,12 +1823,18 @@ class _RoomExpenseState extends State<RoomExpense>
                                     ],
                                   ),
                                   Divider(),
-                                  Text(
-                                    expenseTitle,
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        expenseTitle,
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(12.0),
@@ -2114,7 +2041,7 @@ class _RoomExpenseState extends State<RoomExpense>
                   SliverToBoxAdapter(child: const Divider()),
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(15.0),
+                      padding: EdgeInsets.symmetric(horizontal: 15.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -2130,14 +2057,14 @@ class _RoomExpenseState extends State<RoomExpense>
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
-                            height: 140,
+                            height: isClear ? 120 : 145,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               shrinkWrap: true,
                               itemCount: list.length,
                               itemBuilder: (BuildContext context, int index) {
                                 if (index == 0) {
-                                  return memberAll(context);
+                                  return SizedBox();
                                 } else {
                                   return memberCard(context, index);
                                 }
@@ -2172,13 +2099,45 @@ class _RoomExpenseState extends State<RoomExpense>
                             ],
                           ),
                           Divider(),
-                          Text(
-                            expenseTitle,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          SizedBox(
+                            height: expenseTitle == "All Expense" ? 3 : 0,
                           ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                expenseTitle,
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              expenseTitle == "All Expense"
+                                  ? SizedBox()
+                                  : IconButton(
+                                      onPressed: () async {
+                                        TransList.clear();
+                                        expenseTitle = "All Expense";
+                                        TransList.addAll(allExpenseList);
+
+                                        if (this.mounted) {
+                                          setState(() {});
+                                        }
+
+                                        if (showExpenseYouAreIn) {
+                                          getFilterData();
+                                        }
+                                      },
+                                      icon: Icon(
+                                        Icons.restart_alt_outlined,
+                                        size: 32,
+                                      ))
+                            ],
+                          ),
+                          SizedBox(
+                            height: expenseTitle == "All Expense" ? 13 : 0,
+                          )
                         ],
                       ),
                     ),
@@ -2194,7 +2153,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                 fontSize: 18,
                               ),
                             )
-                          : CircularProgressIndicator())
+                          : CircularProgressIndicator.adaptive())
                   : (showExpenseYouAreIn
                       ? (filterResult.isEmpty
                           ? Center(
@@ -3242,7 +3201,7 @@ class _RoomExpenseState extends State<RoomExpense>
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
               child: Center(
-                child: CircularProgressIndicator(),
+                child: CircularProgressIndicator.adaptive(),
               ),
             ),
     );
@@ -5897,10 +5856,10 @@ class _ExpenseDataState extends State<ExpenseData> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Padding(
-      padding: const EdgeInsets.all(12.0),
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
       child: ListView.separated(
           separatorBuilder: (context, index) => SizedBox(
-                height: 5,
+                height: 3,
               ),
           shrinkWrap: true,
           controller: controller,
@@ -5944,7 +5903,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                   );
                 },
                 child: SizedBox(
-                    height: 165,
+                    height: 185,
                     child: Card(
                       elevation: 1.0,
                       shadowColor: Theme.of(context).primaryColor,
@@ -5957,7 +5916,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(10.0),
+                        padding: EdgeInsets.fromLTRB(12, 8, 0, 8),
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

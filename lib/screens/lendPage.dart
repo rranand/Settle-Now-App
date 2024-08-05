@@ -550,7 +550,7 @@ class _LendPageState extends State<LendPage> {
                       : SizedBox(
                           height: MediaQuery.of(context).size.height - 310,
                           child: Center(
-                            child: CircularProgressIndicator(),
+                            child: CircularProgressIndicator.adaptive(),
                           ),
                         )
                 ],

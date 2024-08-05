@@ -133,7 +133,7 @@ buildShowDialog(BuildContext context) {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator.adaptive(),
         );
       });
 }
@@ -180,7 +180,7 @@ Widget textWidget(String text, Shader gradient) {
     style: TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w500,
-      foreground: kIsWeb?null:(Paint()..shader = gradient),
+      foreground: kIsWeb ? null : (Paint()..shader = gradient),
     ),
   );
 }

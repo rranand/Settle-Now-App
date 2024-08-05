@@ -542,7 +542,7 @@ class _ProfileState extends State<Profile> {
         body: Center(
           child: isDataLoading
               ? SizedBox(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator.adaptive(),
                 )
               : Column(
                   mainAxisAlignment: MainAxisAlignment.start,
