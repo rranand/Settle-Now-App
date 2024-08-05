@@ -23,7 +23,12 @@
       {
         "source": "/login",
         "destination": "/login.html"
-      }
+      },
+      {
+        "source": "**",
+        "destination": "/404.html",
+        "type": 404
+      } 
     ]
   }
 }
