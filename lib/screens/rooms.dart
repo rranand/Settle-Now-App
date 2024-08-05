@@ -1365,7 +1365,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             style: TextStyle(
                               fontSize: 21,
                               fontWeight: FontWeight.w500,
-                              foreground: Paint()..shader = linearGradient_1,
+                              foreground: kIsWeb?null:(Paint()..shader = linearGradient_1),
                             ),
                           ),
                           onTap: () => showToast(context,
@@ -1384,7 +1384,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            foreground: Paint()..shader = linearGradient_2,
+                            foreground: kIsWeb?null:(Paint()..shader = linearGradient_2),
                           ),
                         ),
                         SizedBox(
@@ -1398,7 +1398,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
-                              foreground: Paint()..shader = linearGradient_2,
+                              foreground: kIsWeb?null:(Paint()..shader = linearGradient_2),
                             )),
                         SizedBox(
                           height: 3,
@@ -1605,7 +1605,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
-                              foreground: Paint()..shader = linearGradient_4,
+                              foreground: kIsWeb?null:(Paint()..shader = linearGradient_4),
                             ),
                           ),
                         ))))));

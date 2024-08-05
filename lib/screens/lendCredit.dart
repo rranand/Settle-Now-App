@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
@@ -340,9 +341,9 @@ class _LendCreditState extends State<LendCredit> {
                                                   style: TextStyle(
                                                     fontSize: 20,
                                                     fontWeight: FontWeight.w500,
-                                                    foreground: Paint()
+                                                    foreground: kIsWeb?null:(Paint()
                                                       ..shader =
-                                                          linearGradient_1,
+                                                          linearGradient_1),
                                                   ),
                                                 ),
                                                 onTap: () async {

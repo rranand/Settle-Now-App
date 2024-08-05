@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:settlenow/functions/gradient.dart';
@@ -21,7 +22,7 @@ class AboutUs extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                foreground: Paint()..shader = linearGradient,
+                foreground: kIsWeb?null:(Paint()..shader = linearGradient),
               ),
             ),
             SizedBox(
