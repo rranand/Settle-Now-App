@@ -640,7 +640,8 @@ class _DashBoardState extends State<DashBoard> {
     if (open == 0) {
       await getQuickSplitExpenses();
     } else {
-      await Future.wait([_extractEmail(open), getMembersData(open)]);
+      _extractEmail(open);
+      getMembersData(open);
     }
   }
 
@@ -1017,58 +1018,31 @@ class _DashBoardState extends State<DashBoard> {
     } while (!initalDataLoaded);
 
     if (kIsWeb) {
-      await Future.wait([
-        getInitialData(),
-        _extractEmail(1),
-        _extractEmail(2),
-        _getImageID(),
-        getMembersData(1),
-        getMembersData(2),
-        getQuickSplitExpenses()
-      ]);
-      await Future.wait([
-        getRoomRequest(),
-        fetchSentRequest(),
-        getFriendData(),
-      ]);
+      getInitialData();
+      _extractEmail(1);
+      _extractEmail(2);
+      _getImageID();
+      getMembersData(1);
+      getMembersData(2);
+      getQuickSplitExpenses();
+      getRoomRequest();
+      fetchSentRequest();
+      getFriendData();
     } else if (Platform.isAndroid) {
-      await Future.wait([
-        getInitialData(),
-        manualUpdateCheck(),
-        _extractEmail(1),
-        _extractEmail(2),
-        _getImageID(),
-        getMembersData(1),
-        getMembersData(2),
-        getQuickSplitExpenses()
-      ]);
-      await Future.wait([
-        checkforScheduledNotifications(),
-        ContactPermissionGranted(),
-        _updateCheck(),
-        getRoomRequest(),
-        fetchSentRequest(),
-        getFriendData()
-      ]);
-    } else if (Platform.isIOS) {
-      await Future.wait([
-        getInitialData(),
-        manualUpdateCheck(),
-        _extractEmail(1),
-        _extractEmail(2),
-        _getImageID(),
-        getMembersData(1),
-        getMembersData(2),
-        getQuickSplitExpenses()
-      ]);
-
-      await Future.wait([
-        checkforScheduledNotifications(),
-        ContactPermissionGranted(),
-        getRoomRequest(),
-        fetchSentRequest(),
-        getFriendData()
-      ]);
+      getInitialData();
+      manualUpdateCheck();
+      _extractEmail(1);
+      _extractEmail(2);
+      _getImageID();
+      getMembersData(1);
+      getMembersData(2);
+      getQuickSplitExpenses();
+      checkforScheduledNotifications();
+      ContactPermissionGranted();
+      _updateCheck();
+      getRoomRequest();
+      fetchSentRequest();
+      getFriendData();
     }
   }
 
@@ -3253,8 +3227,9 @@ class _DashBoardState extends State<DashBoard> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
       if (flag == "1") {
-        await Future.wait(
-            [_extractEmail(1), getRoomRequest(), getMembersData(1)]);
+        _extractEmail(1);
+        getRoomRequest();
+        getMembersData(1);
       } else {
         await _requestIndicatorKey.currentState?.show();
       }
@@ -7080,7 +7055,8 @@ class _RoomWidgetState extends State<RoomWidget> {
   }
 
   Future _executeParallelRefresh(bool roomType) async {
-    await Future.wait([_extractEmail(roomType), getMembersData(roomType)]);
+    _extractEmail(roomType);
+    getMembersData(roomType);
   }
 
   Future<void> getMembersData(bool roomType) async {

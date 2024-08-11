@@ -477,10 +477,8 @@ class _RoomExpenseState extends State<RoomExpense>
       if (response.statusCode == 422) {
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
       } else {
-        await Future.wait([
-          _initialisation(),
-          _extractExpenseData(),
-        ]);
+        _initialisation();
+        _extractExpenseData();
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -583,10 +581,8 @@ class _RoomExpenseState extends State<RoomExpense>
         if (response.statusCode == 422) {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         } else {
-          await Future.wait([
-            _initialisation(),
-            _extractExpenseData(),
-          ]);
+          _initialisation();
+          _extractExpenseData();
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
@@ -733,7 +729,7 @@ class _RoomExpenseState extends State<RoomExpense>
       if (this.mounted) {
         Navigator.pop(context);
       }
-      await Future.wait([_initialisation(), _extractExpenseData()]);
+      _initialisation(); _extractExpenseData();
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
@@ -839,12 +835,10 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> executeParallel() async {
-    await Future.wait([
-      _initialisation(),
-      _extractExpenseData(),
-      _getPaymentData(),
-      getFriendData(),
-    ]);
+      _initialisation();
+      _extractExpenseData();
+      _getPaymentData();
+      getFriendData();
   }
 
   @override

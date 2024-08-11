@@ -97,7 +97,8 @@ class _SummaryPageState extends State<SummaryPage> {
   }
 
   Future _executeParallelRefresh() async {
-    await Future.wait([_initialisation(), updatePieChart("all")]);
+    _initialisation();
+    updatePieChart("all");
   }
 
   Future<void> _initialisation() async {
