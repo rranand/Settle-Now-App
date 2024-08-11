@@ -37,14 +37,14 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<dynamic> TransList = [];
   bool filterDialog = false;
   bool showFilterResult = false;
   List<dynamic> filterResult = [];
-  final TextEditingController _amt = TextEditingController();
-  final TextEditingController _purpose = TextEditingController();
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  TextEditingController _amt = TextEditingController();
+  TextEditingController _purpose = TextEditingController();
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
   String title = "Personal Expense";
@@ -52,8 +52,8 @@ class _ExpensesState extends State<Expenses> {
   int categoryIndex = 0;
   int subCategoryIndex = 0;
   String Curdate = "";
-  final _formKey = GlobalKey<FormState>();
-  final _updateExpense = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _updateExpense = GlobalKey<FormState>();
   DateTime expensedate = DateTime.now();
 
   late StreamSubscription<List<ConnectivityResult>> subscription;

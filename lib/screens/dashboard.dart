@@ -108,22 +108,22 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _search = TextEditingController();
   String _token = "";
   late SharedPreferences prefs;
-  final ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
-  final ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
-  final ValueNotifier<bool> quickSplitDataHasMore = ValueNotifier(true);
-  final TextEditingController _NRoom = TextEditingController();
-  final ValueNotifier<List<QuickSplitEach>> quickSplitData = ValueNotifier([]);
-  final ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
-  final ValueNotifier<List<RoomEach>> RoomDataC = ValueNotifier([]);
-  final ValueNotifier<List<RoomEach>> SearchRoomData = ValueNotifier([]);
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
+  ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
+  ValueNotifier<bool> quickSplitDataHasMore = ValueNotifier(true);
+  TextEditingController _NRoom = TextEditingController();
+  ValueNotifier<List<QuickSplitEach>> quickSplitData = ValueNotifier([]);
+  ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
+  ValueNotifier<List<RoomEach>> RoomDataC = ValueNotifier([]);
+  ValueNotifier<List<RoomEach>> SearchRoomData = ValueNotifier([]);
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _requestIndicatorKey =
+  GlobalKey<RefreshIndicatorState> _requestIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<RefreshIndicatorState> _sentrequestIndicatorKey =
+  GlobalKey<RefreshIndicatorState> _sentrequestIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
-  final _CformKey = GlobalKey<FormState>();
-  final _JformKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _CformKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _JformKey = GlobalKey<FormState>();
   bool isContactPermissionGranted = false;
   bool searchTrigger = false;
   bool searching = false;
@@ -174,7 +174,7 @@ class _DashBoardState extends State<DashBoard> {
   bool isDeviceConnected = false;
   bool isLogoutTriggered = false;
   bool isAlertSet = false;
-  final _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool splitManually = false;
   DateTime expenseDate = DateTime.now();
   Map<String, double> manualSplitAmount = {};
@@ -1458,7 +1458,7 @@ class _DashBoardState extends State<DashBoard> {
             InkWell(
               onTap: () {
                 final name = new TextEditingController();
-                final nameForm = GlobalKey<FormState>();
+                GlobalKey<FormState> nameForm = GlobalKey<FormState>();
                 final themeProvider =
                     Provider.of<ThemeProvider>(context, listen: false);
                 showDialog(
@@ -1957,7 +1957,8 @@ class _DashBoardState extends State<DashBoard> {
 
   splitManuallyWidget(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final _manualSplitKey = GlobalKey<FormState>();
+    GlobalKey<FormState> _manualSplitKeySplitManuallyWidget =
+        GlobalKey<FormState>();
 
     showDialog(
         context: context,
@@ -1974,7 +1975,7 @@ class _DashBoardState extends State<DashBoard> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Form(
-                              key: _manualSplitKey,
+                              key: _manualSplitKeySplitManuallyWidget,
                               child: SizedBox(
                                 height: min(
                                     75.0 *
@@ -2075,7 +2076,8 @@ class _DashBoardState extends State<DashBoard> {
                                                   .primaryColor),
                                         ),
                                         onPressed: () async {
-                                          if (_manualSplitKey.currentState!
+                                          if (_manualSplitKeySplitManuallyWidget
+                                              .currentState!
                                               .validate()) {
                                             addQuickSplitExpenseToSN(true);
                                           } else {
@@ -4095,7 +4097,7 @@ class _DashBoardState extends State<DashBoard> {
                     physics: AlwaysScrollableScrollPhysics(),
                     children: [
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.8,
+                        height: MediaQuery.of(context).size.height * 0.9,
                         width: MediaQuery.of(context).size.width,
                         child: Center(
                           child: Text(
@@ -4554,7 +4556,7 @@ class _DashBoardState extends State<DashBoard> {
                           }
                         },
                         child: SizedBox(
-                          height: (MediaQuery.of(context).size.height - 200),
+                          height: (MediaQuery.of(context).size.height - 220),
                           child: open == 0
                               ? quickSplitData.value.isEmpty
                                   ? Scrollbar(
@@ -5762,7 +5764,7 @@ class _QuickSplitState extends State<QuickSplit> {
       int roomsubExpenseCategory) {
     List<dynamic> memberExpense = memberExpenseOG.toList();
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final _manualSplitKey = GlobalKey<FormState>();
+    GlobalKey<FormState> _manualSplitKey_2 = GlobalKey<FormState>();
     _purpose.text = purpose;
     List<TextEditingController> amountController = [];
     for (int i = 0; i < memberExpense.length; i++) {
@@ -5781,7 +5783,7 @@ class _QuickSplitState extends State<QuickSplit> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Form(
-                        key: _manualSplitKey,
+                        key: _manualSplitKey_2,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -6158,7 +6160,7 @@ class _QuickSplitState extends State<QuickSplit> {
                                         color: Theme.of(context).primaryColor),
                                   ),
                                   onPressed: () async {
-                                    if (_manualSplitKey.currentState!
+                                    if (_manualSplitKey_2.currentState!
                                         .validate()) {
                                       if (this.mounted) {
                                         buildShowDialog(context);
@@ -6492,7 +6494,7 @@ class _QuickSplitState extends State<QuickSplit> {
                     ? SizedBox()
                     : SizedBox(
                         width: MediaQuery.of(context).size.width - 65,
-                        height: 85,
+                        height: 90,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: partialExpense.length,
@@ -6511,7 +6513,7 @@ class _QuickSplitState extends State<QuickSplit> {
                                 borderRadius: BorderRadius.circular(15.0),
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(10.0),
+                                padding: EdgeInsets.fromLTRB(10, 8, 10, 5),
                                 child: Column(
                                   children: [
                                     Row(

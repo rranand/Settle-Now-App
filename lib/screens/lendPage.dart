@@ -118,16 +118,16 @@ class _LendPageState extends State<LendPage> {
   DateTime expenseDate = DateTime.now();
   bool closed = false;
   bool isClosedByYou = false;
-  final _formKey = GlobalKey<FormState>();
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<FormState> _formKeyLendPage = GlobalKey<FormState>();
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyLendPage =
       new GlobalKey<RefreshIndicatorState>();
-  final _updateExpense = GlobalKey<FormState>();
+  GlobalKey<FormState> _updateExpenseLendPage = GlobalKey<FormState>();
   bool isFriendDataLoaded = false;
   bool gaveMoney = false;
   bool EgaveMoney = false;
 
   Future<void> addLoan(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKeyLendPage.currentState!.validate()) {
       try {
         Map<String, String> jsonInputData = {
           "email": crypto.encrypt(widget.email),
@@ -148,7 +148,7 @@ class _LendPageState extends State<LendPage> {
           if (this.mounted) {
             Navigator.pop(context);
           }
-          _refreshIndicatorKey.currentState?.show();
+          _refreshIndicatorKeyLendPage.currentState?.show();
         } else {
           showToast(
               context,
@@ -337,7 +337,7 @@ class _LendPageState extends State<LendPage> {
 
   updateRoomNameDialog(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final _roomUpdateKey = GlobalKey<FormState>();
+    GlobalKey<FormState> _roomUpdateKeyLendPage = GlobalKey<FormState>();
     final _roomNameController = TextEditingController();
     _roomNameController.setText(roomName.text);
 
@@ -355,7 +355,7 @@ class _LendPageState extends State<LendPage> {
                         child:
                             Column(mainAxisSize: MainAxisSize.min, children: [
                           Form(
-                            key: _roomUpdateKey,
+                            key: _roomUpdateKeyLendPage,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,7 +445,8 @@ class _LendPageState extends State<LendPage> {
                                                     .primaryColor),
                                           ),
                                           onPressed: () async {
-                                            if (_roomUpdateKey.currentState!
+                                            if (_roomUpdateKeyLendPage
+                                                .currentState!
                                                 .validate()) {
                                               await updateRoomName(context,
                                                   _roomNameController.text);
@@ -699,7 +700,7 @@ class _LendPageState extends State<LendPage> {
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
       isPreviousPageNeedToBeUpdated = true;
-      _refreshIndicatorKey.currentState?.show();
+      _refreshIndicatorKeyLendPage.currentState?.show();
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -727,7 +728,7 @@ class _LendPageState extends State<LendPage> {
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Form(
-                      key: _updateExpense,
+                      key: _updateExpenseLendPage,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -866,7 +867,7 @@ class _LendPageState extends State<LendPage> {
                                               Theme.of(context).primaryColor),
                                     ),
                                     onPressed: () async {
-                                      if (_updateExpense.currentState!
+                                      if (_updateExpenseLendPage.currentState!
                                           .validate()) {
                                         if (this.mounted) {
                                           buildShowDialog(context);
@@ -909,7 +910,7 @@ class _LendPageState extends State<LendPage> {
                                               Theme.of(context).primaryColor),
                                     ),
                                     onPressed: () async {
-                                      if (_updateExpense.currentState!
+                                      if (_updateExpenseLendPage.currentState!
                                           .validate()) {
                                         if (this.mounted) {
                                           buildShowDialog(context);
@@ -1196,9 +1197,15 @@ class _LendPageState extends State<LendPage> {
               : [],
         ),
         body: PopScope(
-          canPop: isPreviousPageNeedToBeUpdated,
+          canPop: false,
+          onPopInvoked: ((didPop) {
+            if (didPop) {
+              return;
+            }
+            Navigator.pop(context, isPreviousPageNeedToBeUpdated);
+          }),
           child: RefreshIndicator(
-              key: _refreshIndicatorKey,
+              key: _refreshIndicatorKeyLendPage,
               onRefresh: _initialization,
               child: SizedBox(
                 height: MediaQuery.of(context).size.height,
@@ -1694,7 +1701,7 @@ class _LendPageState extends State<LendPage> {
                                     height: 10,
                                   ),
                                   Form(
-                                    key: _formKey,
+                                    key: _formKeyLendPage,
                                     child: Column(
                                       children: [
                                         Row(

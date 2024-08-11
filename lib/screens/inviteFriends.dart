@@ -177,7 +177,13 @@ class _InviteFriendsState extends State<InviteFriends> {
             style: TextStyle(fontWeight: FontWeight.bold),
           )),
       body: PopScope(
-        canPop: contactPermissionGranted,
+        canPop: false,
+        onPopInvoked: ((didPop) {
+          if (didPop) {
+            return;
+          }
+          Navigator.pop(context, contactPermissionGranted);
+        }),
         child: SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,

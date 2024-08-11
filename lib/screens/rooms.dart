@@ -71,7 +71,7 @@ class _RoomExpenseState extends State<RoomExpense>
   final TextEditingController _searchFriend = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
   DateTime expenseDate = DateTime.now();
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyRooms =
       new GlobalKey<RefreshIndicatorState>();
   bool isClear = false;
   bool loaded = false;
@@ -79,7 +79,7 @@ class _RoomExpenseState extends State<RoomExpense>
   double heightExpense = 0;
   String paymentTotalALL = "";
   bool paidTransactionData = false;
-  final _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKeyRooms = GlobalKey<FormState>();
   bool showExpenseYouAreIn = false;
   String yourExpense = "";
   List<ChartData> dataMap = [];
@@ -538,7 +538,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   AddExpense(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKeyRooms.currentState!.validate()) {
       var Tdata = null;
       if (this.mounted) {
         buildShowDialog(context);
@@ -604,7 +604,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   PayToMember(BuildContext context) async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKeyRooms.currentState!.validate()) {
       var Tdata = null;
       if (this.mounted) {
         buildShowDialog(context);
@@ -1958,7 +1958,7 @@ class _RoomExpenseState extends State<RoomExpense>
             ],
           )
         : RefreshIndicator(
-            key: _refreshIndicatorKey,
+            key: _refreshIndicatorKeyRooms,
             onRefresh: executeParallel,
             child: NestedScrollView(
               floatHeaderSlivers: true,
@@ -2161,7 +2161,8 @@ class _RoomExpenseState extends State<RoomExpense>
                               RoomKey: widget.roomKey,
                               Email: widget.email,
                               Token: widget.token,
-                              refreshIndicatorKey: _refreshIndicatorKey,
+                              refreshIndicatorKeyExpenseData:
+                                  _refreshIndicatorKeyRooms,
                               locked: locked,
                               isPreviousPageNeedToBeUpdated:
                                   isPreviousPageNeedToBeUpdated,
@@ -2183,7 +2184,8 @@ class _RoomExpenseState extends State<RoomExpense>
                               RoomKey: widget.roomKey,
                               Email: widget.email,
                               Token: widget.token,
-                              refreshIndicatorKey: _refreshIndicatorKey,
+                              refreshIndicatorKeyExpenseData:
+                                  _refreshIndicatorKeyRooms,
                               locked: locked,
                               isPreviousPageNeedToBeUpdated:
                                   isPreviousPageNeedToBeUpdated,
@@ -2579,7 +2581,7 @@ class _RoomExpenseState extends State<RoomExpense>
                               SingleChildScrollView(
                                 child: SizedBox(
                                   height:
-                                      MediaQuery.of(context).size.height - 390,
+                                      MediaQuery.of(context).size.height - 420,
                                   child: Padding(
                                     padding: const EdgeInsets.all(8.0),
                                     child: ListView.separated(
@@ -3226,7 +3228,8 @@ class _RoomExpenseState extends State<RoomExpense>
 
   splitManuallyWidget(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final _manualSplitKey = GlobalKey<FormState>();
+    GlobalKey<FormState> _manualSplitKeysplitManuallyWidget =
+        GlobalKey<FormState>();
     List<TextEditingController> amountController = [];
     for (int i = 0; i < manualSplitAmount.length; i++) {
       amountController.add(TextEditingController(text: "0"));
@@ -3246,7 +3249,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Form(
-                              key: _manualSplitKey,
+                              key: _manualSplitKeysplitManuallyWidget,
                               child: SizedBox(
                                 height: min(75.0 * manualSplitAmount.length,
                                     MediaQuery.of(context).size.height * 0.8),
@@ -3482,7 +3485,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                                   .primaryColor),
                                         ),
                                         onPressed: () async {
-                                          if (_manualSplitKey.currentState!
+                                          if (_manualSplitKeysplitManuallyWidget
+                                              .currentState!
                                               .validate()) {
                                             AddExpenseManual(context);
                                           } else {
@@ -3505,7 +3509,7 @@ class _RoomExpenseState extends State<RoomExpense>
 
   updateRoomNameDialog(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final _roomUpdateKey = GlobalKey<FormState>();
+    GlobalKey<FormState> _roomUpdateKeyRooms = GlobalKey<FormState>();
     final _roomNameController = TextEditingController();
     _roomNameController.setText(roomName.text);
 
@@ -3523,7 +3527,7 @@ class _RoomExpenseState extends State<RoomExpense>
                         child:
                             Column(mainAxisSize: MainAxisSize.min, children: [
                           Form(
-                            key: _roomUpdateKey,
+                            key: _roomUpdateKeyRooms,
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -3613,7 +3617,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                                     .primaryColor),
                                           ),
                                           onPressed: () async {
-                                            if (_roomUpdateKey.currentState!
+                                            if (_roomUpdateKeyRooms
+                                                .currentState!
                                                 .validate()) {
                                               await updateRoomName(context,
                                                   _roomNameController.text);
@@ -3670,7 +3675,13 @@ class _RoomExpenseState extends State<RoomExpense>
               : [],
         ),
         body: PopScope(
-            canPop: isPreviousPageNeedToBeUpdated.value,
+            canPop: false,
+            onPopInvoked: ((didPop) {
+              if (didPop) {
+                return;
+              }
+              Navigator.pop(context, isPreviousPageNeedToBeUpdated.value);
+            }),
             child: SizedBox(
                 height: MediaQuery.of(context).size.height,
                 child: chooseFromBottomNavigator(dash))),
@@ -3864,7 +3875,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                   height: 5,
                                                                                 ),
                                                                                 Form(
-                                                                                  key: _formKey,
+                                                                                  key: _formKeyRooms,
                                                                                   child: Column(
                                                                                     mainAxisAlignment: MainAxisAlignment.start,
                                                                                     mainAxisSize: MainAxisSize.min,
@@ -3985,7 +3996,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                     style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
                                                                                                   ),
                                                                                                   onPressed: () {
-                                                                                                    if (_formKey.currentState!.validate()) {
+                                                                                                    if (_formKeyRooms.currentState!.validate()) {
                                                                                                       PayToMember(context);
                                                                                                     }
                                                                                                   }),
@@ -4057,7 +4068,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                 height: 5,
                                                                               ),
                                                                               Form(
-                                                                                key: _formKey,
+                                                                                key: _formKeyRooms,
                                                                                 child: Column(
                                                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                                                   mainAxisSize: MainAxisSize.min,
@@ -4513,7 +4524,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                 ),
                                                                                                 onPressed: () {
                                                                                                   if (noSplit) {
-                                                                                                    if (_formKey.currentState!.validate()) {
+                                                                                                    if (_formKeyRooms.currentState!.validate()) {
                                                                                                       manualSplitAmount.clear();
                                                                                                       manualSplitAmount[widget.email] = (double.parse(_amt.text) * 100) / 100;
                                                                                                       AddExpenseManual(context);
@@ -4587,7 +4598,7 @@ class ExpenseData extends StatefulWidget {
   final bool locked;
   final List<dynamic> expenseCategory;
   final List<List<dynamic>> subCategory;
-  final GlobalKey<RefreshIndicatorState> refreshIndicatorKey;
+  final GlobalKey<RefreshIndicatorState> refreshIndicatorKeyExpenseData;
   final ValueNotifier isPreviousPageNeedToBeUpdated;
   final int index;
   final ScrollController scrollController;
@@ -4597,7 +4608,7 @@ class ExpenseData extends StatefulWidget {
       required this.RoomKey,
       required this.Email,
       required this.Token,
-      required this.refreshIndicatorKey,
+      required this.refreshIndicatorKeyExpenseData,
       required this.locked,
       required this.isPreviousPageNeedToBeUpdated,
       required this.expenseCategory,
@@ -4615,7 +4626,7 @@ class _ExpenseDataState extends State<ExpenseData> {
   final TextEditingController _amount = TextEditingController();
   int roomExpenseCategoryIndex = -1;
   int roomSubExpenseCategoryIndex = -1;
-  final _updateExpense = GlobalKey<FormState>();
+  GlobalKey<FormState> _updateExpenseRoom = GlobalKey<FormState>();
   AutoScrollController controller = AutoScrollController();
 
   @override
@@ -4678,7 +4689,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
       widget.isPreviousPageNeedToBeUpdated.value = true;
-      widget.refreshIndicatorKey.currentState?.show();
+      widget.refreshIndicatorKeyExpenseData.currentState?.show();
     } on Exception catch (err, stackTrace) {
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->updateExpenseManual"]);
@@ -4694,7 +4705,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       int roomsubExpenseCategory) {
     List<dynamic> memberExpense = memberExpenseOG.toList();
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final _manualSplitKey = GlobalKey<FormState>();
+    GlobalKey<FormState> _manualSplitKeysplitManuallyWidget =
+        GlobalKey<FormState>();
     _purpose.text = purpose;
     List<TextEditingController> amountController = [];
     for (int i = 0; i < memberExpense.length; i++) {
@@ -4713,7 +4725,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Form(
-                        key: _manualSplitKey,
+                        key: _manualSplitKeysplitManuallyWidget,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -5099,7 +5111,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         color: Theme.of(context).primaryColor),
                                   ),
                                   onPressed: () async {
-                                    if (_manualSplitKey.currentState!
+                                    if (_manualSplitKeysplitManuallyWidget
+                                        .currentState!
                                         .validate()) {
                                       if (this.mounted) {
                                         buildShowDialog(context);
@@ -5167,7 +5180,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
       widget.isPreviousPageNeedToBeUpdated.value = true;
-      widget.refreshIndicatorKey.currentState?.show();
+      widget.refreshIndicatorKeyExpenseData.currentState?.show();
     } on Exception catch (err, stackTrace) {
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_updateTransaction"]);
@@ -5193,7 +5206,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Form(
-                      key: _updateExpense,
+                      key: _updateExpenseRoom,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -5393,7 +5406,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                       color: Theme.of(context).primaryColor),
                                 ),
                                 onPressed: () async {
-                                  if (_updateExpense.currentState!.validate()) {
+                                  if (_updateExpenseRoom.currentState!
+                                      .validate()) {
                                     if (this.mounted) {
                                       buildShowDialog(context);
                                     }

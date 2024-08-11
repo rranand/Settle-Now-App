@@ -45,9 +45,9 @@ class _BankTransactionsState extends State<BankTransactions> {
   late SharedPreferences pref;
   bool permissionGranted = false;
   final SmsQuery _query = SmsQuery();
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyBankTrans =
       new GlobalKey<RefreshIndicatorState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  GlobalKey<ScaffoldState> _scaffoldKeyBankTrans = GlobalKey<ScaffoldState>();
   List<TransactionEach> allTransactions = [];
   int categoryIndex = 0;
   int subCategoryIndex = 0;
@@ -70,11 +70,11 @@ class _BankTransactionsState extends State<BankTransactions> {
   List<dynamic> roomData = [];
   List<dynamic> LenDenData = [];
   bool showFilterResult = false;
-  final _formKey = GlobalKey<FormState>();
-  final _formKeyRoom = GlobalKey<FormState>();
-  final _formKeyLenDen = GlobalKey<FormState>();
-  final TextEditingController _purpose = TextEditingController();
-  final TextEditingController _lenDenRoom = TextEditingController();
+  GlobalKey<FormState> _formKeyBankTrans = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKeyRoomBankTrans = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKeyLenDenBankTrans = GlobalKey<FormState>();
+  TextEditingController _purpose = TextEditingController();
+  TextEditingController _lenDenRoom = TextEditingController();
   String LenDenRoomID = "";
   List<dynamic> roomMembers = [];
   List<String> addExpenseTo = [];
@@ -151,7 +151,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-         onException(context, err, stackTrace,
+        onException(context, err, stackTrace,
             reason: "Unknwon Error", info: ["BankTransaction->getLenDenData"]);
       }
     }
@@ -176,7 +176,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-         onException(context, err, stackTrace,
+        onException(context, err, stackTrace,
             reason: "Unknwon Error", info: ["BankTransaction->getActiveRooms"]);
       }
     }
@@ -227,7 +227,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-         onException(context, err, stackTrace,
+        onException(context, err, stackTrace,
             reason: "Unknwon Error", info: ["BankTransaction->getMembers"]);
       }
     }
@@ -352,7 +352,7 @@ class _BankTransactionsState extends State<BankTransactions> {
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Form(
-                  key: _formKey,
+                  key: _formKeyBankTrans,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
@@ -511,7 +511,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                   color: Theme.of(context).primaryColor),
                             ),
                             onPressed: () {
-                              if (_formKey.currentState!.validate()) {
+                              if (_formKeyBankTrans.currentState!.validate()) {
                                 AddExpense(context, amount, date);
                               }
                             }),
@@ -638,7 +638,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   }
 
   AddLenDen(BuildContext context, String amount, String date, String id) async {
-    if (_formKeyLenDen.currentState!.validate()) {
+    if (_formKeyLenDenBankTrans.currentState!.validate()) {
       var Tdata = null;
       if (this.mounted) {
         buildShowDialog(context);
@@ -687,7 +687,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   }
 
   AddRoomExpense(BuildContext context, String amount, String date) async {
-    if (_formKeyRoom.currentState!.validate()) {
+    if (_formKeyRoomBankTrans.currentState!.validate()) {
       var Tdata = null;
       if (this.mounted) {
         buildShowDialog(context);
@@ -763,7 +763,7 @@ class _BankTransactionsState extends State<BankTransactions> {
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Form(
-                  key: _formKeyLenDen,
+                  key: _formKeyLenDenBankTrans,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
@@ -933,7 +933,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                   color: Theme.of(context).primaryColor),
                             ),
                             onPressed: () async {
-                              if (_formKeyLenDen.currentState!.validate()) {
+                              if (_formKeyLenDenBankTrans.currentState!
+                                  .validate()) {
                                 if (lenDenIndex == LenDenData.length) {
                                   await createLenDenRoom(context);
                                   AddLenDen(
@@ -961,7 +962,7 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   splitManuallyWidget(BuildContext context, String date, String amount) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    final _manualSplitKey = GlobalKey<FormState>();
+    GlobalKey<FormState> _manualSplitKeyBankTrans = GlobalKey<FormState>();
     List<TextEditingController> amountController = [];
     for (int i = 0; i < manualSplitAmount.length; i++) {
       amountController.add(TextEditingController(text: "0"));
@@ -985,7 +986,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                               style: TextStyle(fontSize: 14),
                             ),
                             Form(
-                              key: _manualSplitKey,
+                              key: _manualSplitKeyBankTrans,
                               child: SizedBox(
                                 height: min(75.0 * manualSplitAmount.length,
                                     MediaQuery.of(context).size.height * 0.8),
@@ -1221,7 +1222,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                   .primaryColor),
                                         ),
                                         onPressed: () async {
-                                          if (_manualSplitKey.currentState!
+                                          if (_manualSplitKeyBankTrans
+                                              .currentState!
                                               .validate()) {
                                             double tempAmount = 0;
                                             manualSplitAmount
@@ -1273,7 +1275,7 @@ class _BankTransactionsState extends State<BankTransactions> {
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Form(
-                  key: _formKeyRoom,
+                  key: _formKeyRoomBankTrans,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
@@ -1816,7 +1818,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                             ),
                             onPressed: () {
                               if (noSplit) {
-                                if (_formKeyRoom.currentState!.validate()) {
+                                if (_formKeyRoomBankTrans.currentState!
+                                    .validate()) {
                                   manualSplitAmount.clear();
                                   manualSplitAmount[widget.email] =
                                       (double.parse(amount) * 100) / 100;
@@ -1843,7 +1846,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                   splitManuallyWidget(context, date, amount);
                                 }
                               } else {
-                                if (_formKeyRoom.currentState!.validate()) {
+                                if (_formKeyRoomBankTrans.currentState!
+                                    .validate()) {
                                   AddRoomExpense(context, amount, date);
                                 }
                               }
@@ -2178,13 +2182,14 @@ class _BankTransactionsState extends State<BankTransactions> {
             : [
                 IconButton(
                     onPressed: () {
-                      filterDialog = _scaffoldKey.currentState!.isEndDrawerOpen;
+                      filterDialog =
+                          _scaffoldKeyBankTrans.currentState!.isEndDrawerOpen;
                       filterDialog = !filterDialog;
 
                       if (filterDialog) {
-                        _scaffoldKey.currentState!.openEndDrawer();
+                        _scaffoldKeyBankTrans.currentState!.openEndDrawer();
                       } else {
-                        _scaffoldKey.currentState!.closeEndDrawer();
+                        _scaffoldKeyBankTrans.currentState!.closeEndDrawer();
                       }
                     },
                     icon: Icon(Icons.filter_alt_outlined))
@@ -2211,7 +2216,7 @@ class _BankTransactionsState extends State<BankTransactions> {
             )
           : null,
       body: Scaffold(
-        key: _scaffoldKey,
+        key: _scaffoldKeyBankTrans,
         endDrawer: bankNameFound.isEmpty
             ? null
             : Drawer(
@@ -2598,7 +2603,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                             ),
                             onPressed: () async {
                               showFilterResult = true;
-                              _scaffoldKey.currentState!.closeEndDrawer();
+                              _scaffoldKeyBankTrans.currentState!
+                                  .closeEndDrawer();
                               await getFilterResult();
                               if (this.mounted) {
                                 setState(() {});
@@ -2737,7 +2743,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                     )),
                   )
                 : RefreshIndicator(
-                    key: _refreshIndicatorKey,
+                    key: _refreshIndicatorKeyBankTrans,
                     onRefresh: executeParallel,
                     child: dataFetched
                         ? (allTransactions.isEmpty

@@ -21,10 +21,10 @@ class ContactUs extends StatefulWidget {
 }
 
 class _ContactUsState extends State<ContactUs> {
-  final TextEditingController _subject = TextEditingController();
-  final TextEditingController _message = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  final ScrollController _controller = ScrollController();
+  TextEditingController _subject = TextEditingController();
+  TextEditingController _message = TextEditingController();
+  GlobalKey<FormState> _formKeyContactUs = GlobalKey<FormState>();
+  ScrollController _controller = ScrollController();
   late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
@@ -69,7 +69,7 @@ class _ContactUsState extends State<ContactUs> {
       }
       return;
     }
-    if (_formKey.currentState!.validate()) {
+    if (_formKeyContactUs.currentState!.validate()) {
       var Tdata = null;
       if (this.mounted) {
         buildShowDialog(context);
@@ -100,8 +100,7 @@ class _ContactUsState extends State<ContactUs> {
 
         if (this.mounted) {
           onException(context, err, stackTrace,
-              reason: "Unknwon Error",
-              info: ["ContactUs->sendContactData"]);
+              reason: "Unknwon Error", info: ["ContactUs->sendContactData"]);
         }
       }
 
@@ -141,7 +140,7 @@ class _ContactUsState extends State<ContactUs> {
                   height: 25,
                 ),
                 Form(
-                    key: _formKey,
+                    key: _formKeyContactUs,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

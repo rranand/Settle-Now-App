@@ -25,12 +25,12 @@ class ScheduleNotification extends StatefulWidget {
 }
 
 class _ScheduleNotificationState extends State<ScheduleNotification> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKeySchduledNotify =
       new GlobalKey<RefreshIndicatorState>();
-  final TextEditingController _name = TextEditingController();
+  TextEditingController _name = TextEditingController();
   int currentDateIndex = 0;
   bool load = true;
-  final _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKeySchduledNotify = GlobalKey<FormState>();
   List<dynamic> data = [];
   List<String> dates = [];
 
@@ -74,8 +74,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   void initState() {
     super.initState();
     getConnectivity();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _refreshIndicatorKeySchduledNotify.currentState?.show());
   }
 
   Future _initialization() async {
@@ -181,7 +181,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   }
 
   Future _addRemainder() async {
-    if (_formKey.currentState!.validate()) {
+    if (_formKeySchduledNotify.currentState!.validate()) {
       if (this.mounted) {
         if (this.mounted) {
           buildShowDialog(context);
@@ -379,7 +379,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Form(
-                        key: _formKey,
+                        key: _formKeySchduledNotify,
                         child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -537,8 +537,14 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
             : null,
         body: PopScope(
             canPop: false,
+            onPopInvoked: ((didPop) {
+              if (didPop) {
+                return;
+              }
+              Navigator.pop(context, false);
+            }),
             child: RefreshIndicator(
-                key: _refreshIndicatorKey,
+                key: _refreshIndicatorKeySchduledNotify,
                 onRefresh: _initialization,
                 child: SizedBox(
                   height: MediaQuery.of(context).size.height,

@@ -47,11 +47,12 @@ class _ProfileState extends State<Profile> {
   final CountdownController _OTPCountdownController =
       new CountdownController(autoStart: true);
   bool isAlertSet = false;
-  final _deleteConfirmationText = new TextEditingController();
-  final _deleteConfirmationForm = GlobalKey<FormState>();
-  final _phoneNo = new TextEditingController();
-  final _otp = new TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  TextEditingController _deleteConfirmationText = new TextEditingController();
+  GlobalKey<FormState> _deleteConfirmationFormLoginPage =
+      GlobalKey<FormState>();
+  TextEditingController _phoneNo = new TextEditingController();
+  TextEditingController _otp = new TextEditingController();
+  GlobalKey<FormState> _formKeyLoginPage = GlobalKey<FormState>();
   String verificationOTP = "";
   String OTPverificationError = "";
   bool isVerificationSuccessful = false;
@@ -416,7 +417,7 @@ class _ProfileState extends State<Profile> {
                         height: 10,
                       ),
                       Form(
-                        key: _deleteConfirmationForm,
+                        key: _deleteConfirmationFormLoginPage,
                         child: TextFormField(
                           style: TextStyle(fontSize: 16),
                           controller: _deleteConfirmationText,
@@ -484,7 +485,8 @@ class _ProfileState extends State<Profile> {
                                 side: BorderSide(color: Colors.redAccent),
                               ),
                               onPressed: () async {
-                                if (_deleteConfirmationForm.currentState!
+                                if (_deleteConfirmationFormLoginPage
+                                    .currentState!
                                     .validate()) {
                                   await deleteAccount();
                                 }
@@ -608,7 +610,7 @@ class _ProfileState extends State<Profile> {
                             ),
                           ),
                           Form(
-                            key: _formKey,
+                            key: _formKeyLoginPage,
                             child: AutofillGroup(
                               child: TextFormField(
                                 readOnly:
@@ -662,7 +664,8 @@ class _ProfileState extends State<Profile> {
                                               Theme.of(context).primaryColor),
                                     ),
                                     onPressed: () async {
-                                      if (_formKey.currentState!.validate()) {
+                                      if (_formKeyLoginPage.currentState!
+                                          .validate()) {
                                         await sendOTP(
                                             _phoneNo.text, themeProvider);
                                       }

@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
   late SharedPreferences prefs;
   bool canLoad = false;
   String deviceToken = "";
-  final _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKeyLoginPage = GlobalKey<FormState>();
   bool darkTheme = false;
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   String version = "";
@@ -229,7 +229,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.9,
                       child: Form(
-                        key: _formKey,
+                        key: _formKeyLoginPage,
                         child: AutofillGroup(
                           child: TextFormField(
                             controller: _emailId,
@@ -272,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
                                   context,
                                   OtpName(
                                       email: _emailId.text, version: version),
-                                  _formKey);
+                                  _formKeyLoginPage);
                             }
                           }),
                     ),

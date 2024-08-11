@@ -32,8 +32,8 @@ class _LendCreditState extends State<LendCredit> {
   bool load = false;
   bool validateText = false;
   int indexLoading = -1;
-  final TextEditingController _name = TextEditingController();
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  TextEditingController _name = TextEditingController();
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyLendCredit =
       new GlobalKey<RefreshIndicatorState>();
 
   late StreamSubscription<List<ConnectivityResult>> subscription;
@@ -194,8 +194,8 @@ class _LendCreditState extends State<LendCredit> {
   void initState() {
     super.initState();
     getConnectivity();
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _refreshIndicatorKeyLendCredit.currentState?.show());
   }
 
   @override
@@ -203,7 +203,7 @@ class _LendCreditState extends State<LendCredit> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: RefreshIndicator(
-          key: _refreshIndicatorKey,
+          key: _refreshIndicatorKeyLendCredit,
           onRefresh: _initialization,
           child: SizedBox(
             height: MediaQuery.of(context).size.height,

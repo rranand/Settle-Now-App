@@ -84,9 +84,9 @@ Future<String> getAppVersion() async {
   return await packageInfo.version.toString();
 }
 
-MoveToNext(
-    BuildContext context, Widget widget, GlobalKey<FormState> _formKey) async {
-  if (_formKey.currentState!.validate()) {
+MoveToNext(BuildContext context, Widget widget,
+    GlobalKey<FormState> _formKeyMoveToNext) async {
+  if (_formKeyMoveToNext.currentState!.validate()) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => widget));
   }
 }
