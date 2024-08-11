@@ -341,18 +341,17 @@ Widget sampleRoomGraph(BuildContext context) {
             plotAreaBorderWidth: 0,
             series: <BarSeries<RoomEach, String>>[
               BarSeries<RoomEach, String>(
-                  dataSource: data,
-                  borderRadius: BorderRadius.circular(20),
-                  xValueMapper: (RoomEach data, _) => data.roomName,
-                  yValueMapper: (RoomEach data, _) => data.spend,
-                  isVisibleInLegend: true,
-                  width: 0.8,
-                  pointColorMapper: (RoomEach data, _) => global.colorsList[_],
-                  dataLabelMapper: (datum, index) =>
-                      datum.roomName + "\n₹ " + datum.spend.toStringAsFixed(2),
-                  dataLabelSettings: DataLabelSettings(isVisible: true),
-                  xAxisName: "Category",
-                  yAxisName: "Amount")
+                dataSource: data,
+                borderRadius: BorderRadius.circular(20),
+                xValueMapper: (RoomEach data, _) => data.roomName,
+                yValueMapper: (RoomEach data, _) => data.spend,
+                isVisibleInLegend: true,
+                width: 0.8,
+                pointColorMapper: (RoomEach data, _) => global.colorsList[_],
+                dataLabelMapper: (datum, index) =>
+                    datum.roomName + "\n₹ " + datum.spend.toStringAsFixed(2),
+                dataLabelSettings: DataLabelSettings(isVisible: true),
+              )
             ])),
   );
 }

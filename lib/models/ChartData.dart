@@ -23,3 +23,13 @@ class ChartData {
     this.amount = amount;
   }
 }
+
+class ChartSampleData {
+  String x = "";
+  double y = 0;
+
+  ChartSampleData(String type, double amount) {
+    this.x = type;
+    this.y = amount;
+  }
+}

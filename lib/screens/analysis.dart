@@ -356,7 +356,7 @@ class _AnalysisState extends State<Analysis> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-         onException(context, err, stackTrace,
+        onException(context, err, stackTrace,
             reason: "Unknwon Error", info: ["Analysis->getRoomData"]);
       }
     }
@@ -755,30 +755,26 @@ class _AnalysisState extends State<Analysis> {
                                         plotAreaBorderWidth: 0,
                                         series: <BarSeries<RoomEach, String>>[
                                           BarSeries<RoomEach, String>(
-                                              dataSource: widget.RoomDataO,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              xValueMapper:
-                                                  (RoomEach data, _) =>
-                                                      data.roomName,
-                                              yValueMapper:
-                                                  (RoomEach data, _) =>
-                                                      data.spend,
-                                              isVisibleInLegend: true,
-                                              width: 0.8,
-                                              pointColorMapper:
-                                                  (RoomEach data, _) =>
-                                                      global.colorsList[_],
-                                              dataLabelMapper: (datum, index) =>
-                                                  datum.roomName +
-                                                  "\n₹ " +
-                                                  datum.spend
-                                                      .toStringAsFixed(2),
-                                              dataLabelSettings:
-                                                  DataLabelSettings(
-                                                      isVisible: true),
-                                              xAxisName: "Category",
-                                              yAxisName: "Amount")
+                                            dataSource: widget.RoomDataO,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            xValueMapper: (RoomEach data, _) =>
+                                                data.roomName,
+                                            yValueMapper: (RoomEach data, _) =>
+                                                data.spend,
+                                            isVisibleInLegend: true,
+                                            width: 0.8,
+                                            pointColorMapper:
+                                                (RoomEach data, _) =>
+                                                    global.colorsList[_],
+                                            dataLabelMapper: (datum, index) =>
+                                                datum.roomName +
+                                                "\n₹ " +
+                                                datum.spend.toStringAsFixed(2),
+                                            dataLabelSettings:
+                                                DataLabelSettings(
+                                                    isVisible: true),
+                                          )
                                         ])),
                               ),
                         Divider(),

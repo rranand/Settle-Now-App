@@ -3095,10 +3095,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                   BorderRadius.circular(20),
                                               xValueMapper:
                                                   (ChartData data, _) =>
-                                                      data.type,
+                                                      data.type as String,
                                               yValueMapper:
                                                   (ChartData data, _) =>
-                                                      data.amount,
+                                                      data.amount as num,
                                               isVisibleInLegend: true,
                                               width: 0.8,
                                               pointColorMapper:
@@ -3111,9 +3111,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                       .toStringAsFixed(2),
                                               dataLabelSettings:
                                                   DataLabelSettings(
-                                                      isVisible: true),
-                                              xAxisName: "Category",
-                                              yAxisName: "Amount")
+                                                      isVisible: true))
                                         ])),
                               ),
                       ),
@@ -3160,30 +3158,26 @@ class _RoomExpenseState extends State<RoomExpense>
                                         plotAreaBorderWidth: 0,
                                         series: <BarSeries<ChartData, String>>[
                                           BarSeries<ChartData, String>(
-                                              dataSource: dataMapByUser,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              width: 0.8,
-                                              xValueMapper:
-                                                  (ChartData data, _) =>
-                                                      data.name,
-                                              yValueMapper:
-                                                  (ChartData data, _) =>
-                                                      data.amount,
-                                              isVisibleInLegend: true,
-                                              pointColorMapper:
-                                                  (ChartData data, _) =>
-                                                      global.colorsList[_],
-                                              dataLabelMapper: (datum, index) =>
-                                                  datum.name +
-                                                  "\n₹ " +
-                                                  datum.amount
-                                                      .toStringAsFixed(2),
-                                              dataLabelSettings:
-                                                  DataLabelSettings(
-                                                      isVisible: true),
-                                              xAxisName: "User",
-                                              yAxisName: "Amount")
+                                            dataSource: dataMapByUser,
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            width: 0.8,
+                                            xValueMapper: (ChartData data, _) =>
+                                                data.name,
+                                            yValueMapper: (ChartData data, _) =>
+                                                data.amount,
+                                            isVisibleInLegend: true,
+                                            pointColorMapper:
+                                                (ChartData data, _) =>
+                                                    global.colorsList[_],
+                                            dataLabelMapper: (datum, index) =>
+                                                datum.name +
+                                                "\n₹ " +
+                                                datum.amount.toStringAsFixed(2),
+                                            dataLabelSettings:
+                                                DataLabelSettings(
+                                                    isVisible: true),
+                                          )
                                         ])),
                               ),
                       ),

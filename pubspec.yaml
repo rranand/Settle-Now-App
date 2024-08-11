@@ -44,7 +44,7 @@ dependencies:
   permission_handler: ^11.3.1
   app_settings: ^5.0.0
   shimmer: ^3.0.0
-  syncfusion_flutter_charts: ^26.2.8
+  syncfusion_flutter_charts: ^24.1.46
   awesome_notifications: ^0.9.3+1
   image_cropper: ^8.0.1
   auto_size_text: ^3.0.0

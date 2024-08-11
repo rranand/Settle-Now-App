@@ -331,9 +331,7 @@ class _SummaryPageState extends State<SummaryPage> {
                                       datum.amount.toStringAsFixed(2),
                                   dataLabelSettings: DataLabelSettings(
                                     isVisible: true,
-                                  ),
-                                  xAxisName: "Category",
-                                  yAxisName: "Amount")
+                                  ))
                             ])),
                   ),
             SizedBox(
