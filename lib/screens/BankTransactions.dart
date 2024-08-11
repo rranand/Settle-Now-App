@@ -89,7 +89,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   List<TransactionEach> filteredResult = [];
   bool isClosedany = false;
 
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
   bool splitManually = false;
@@ -103,9 +103,9 @@ class _BankTransactionsState extends State<BankTransactions> {
     super.dispose();
   }
 
- getConnectivity() async {
+  getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -2644,11 +2644,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                   ),
                 ),
               ),
-        body: WillPopScope(
-          onWillPop: () {
-            Navigator.pop(context, true);
-            return new Future(() => true);
-          },
+        body: PopScope(
+          canPop: true,
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,

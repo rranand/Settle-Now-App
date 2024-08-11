@@ -159,11 +159,8 @@ class _InviteFriendsState extends State<InviteFriends> {
             "Import Contacts",
             style: TextStyle(fontWeight: FontWeight.bold),
           )),
-      body: WillPopScope(
-        onWillPop: () {
-          Navigator.pop(context, contactPermissionGranted);
-          return new Future(() => false);
-        },
+      body: PopScope(
+        canPop: contactPermissionGranted,
         child: SingleChildScrollView(
           child: Container(
             width: MediaQuery.of(context).size.width,

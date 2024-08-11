@@ -113,7 +113,7 @@ class _RoomExpenseState extends State<RoomExpense>
   double totalAmount = 0;
   bool isClosedany = false;
   final TextEditingController _paytoMemberAmt = TextEditingController();
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
   int scrollToExpense = -1;
@@ -129,7 +129,7 @@ class _RoomExpenseState extends State<RoomExpense>
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -3676,11 +3676,8 @@ class _RoomExpenseState extends State<RoomExpense>
                 ]
               : [],
         ),
-        body: WillPopScope(
-            onWillPop: () {
-              Navigator.pop(context, isPreviousPageNeedToBeUpdated.value);
-              return new Future(() => false);
-            },
+        body: PopScope(
+            canPop: isPreviousPageNeedToBeUpdated.value,
             child: SizedBox(
                 height: MediaQuery.of(context).size.height,
                 child: chooseFromBottomNavigator(dash))),

@@ -56,7 +56,7 @@ class _ExpensesState extends State<Expenses> {
   final _updateExpense = GlobalKey<FormState>();
   DateTime expensedate = DateTime.now();
 
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
@@ -68,7 +68,7 @@ class _ExpensesState extends State<Expenses> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {

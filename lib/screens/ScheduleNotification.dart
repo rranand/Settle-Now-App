@@ -34,13 +34,13 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   List<dynamic> data = [];
   List<String> dates = [];
 
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -528,11 +528,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                 ),
               )
             : null,
-        body: WillPopScope(
-            onWillPop: () {
-              Navigator.pop(context, false);
-              return new Future(() => false);
-            },
+        body: PopScope(
+            canPop: false,
             child: RefreshIndicator(
                 key: _refreshIndicatorKey,
                 onRefresh: _initialization,

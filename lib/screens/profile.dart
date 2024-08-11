@@ -41,7 +41,7 @@ class Profile extends StatefulWidget {
 }
 
 class _ProfileState extends State<Profile> {
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool canResendOTP = false;
   final CountdownController _OTPCountdownController =
@@ -119,7 +119,7 @@ class _ProfileState extends State<Profile> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -269,8 +269,6 @@ class _ProfileState extends State<Profile> {
                       Center(
                         child: Pinput(
                           length: 6,
-                          androidSmsAutofillMethod:
-                              AndroidSmsAutofillMethod.smsUserConsentApi,
                           defaultPinTheme: defaultPinTheme,
                           focusedPinTheme: focusedPinTheme,
                           errorPinTheme: defaultPinTheme.copyDecorationWith(
@@ -514,7 +512,9 @@ class _ProfileState extends State<Profile> {
 
     await auth.verifyPhoneNumber(
       phoneNumber: "+91" + phoneNo,
-      verificationCompleted: (PhoneAuthCredential credential) {},
+      verificationCompleted: (PhoneAuthCredential credential) {
+        _otp.setText(credential.smsCode!);
+      },
       verificationFailed: (FirebaseAuthException e) {},
       codeSent: (String verificationId, int? resendToken) {
         verificationOTP = verificationId;

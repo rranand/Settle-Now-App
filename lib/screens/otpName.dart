@@ -52,7 +52,7 @@ class _OtpNameState extends State<OtpName> {
   bool canResendOTP = false;
   final CountdownController _OTPCountdownController =
       new CountdownController(autoStart: true);
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
@@ -286,7 +286,7 @@ class _OtpNameState extends State<OtpName> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {

@@ -52,7 +52,7 @@ class _LendPageState extends State<LendPage> {
   bool isPreviousPageNeedToBeUpdated = false;
   int expenseIndex = -1;
   bool firstTimeLoad = true;
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   List<Map> getContactsFromDB = [];
   bool isDeviceConnected = false;
   bool isAlertSet = false;
@@ -75,7 +75,7 @@ class _LendPageState extends State<LendPage> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -1180,11 +1180,8 @@ class _LendPageState extends State<LendPage> {
                 ]
               : [],
         ),
-        body: WillPopScope(
-          onWillPop: () {
-            Navigator.pop(context, isPreviousPageNeedToBeUpdated);
-            return new Future(() => false);
-          },
+        body: PopScope(
+          canPop: isPreviousPageNeedToBeUpdated,
           child: RefreshIndicator(
               key: _refreshIndicatorKey,
               onRefresh: _initialization,

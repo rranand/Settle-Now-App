@@ -35,7 +35,7 @@ class MyTheme {
         ).apply(bodyColor: Colors.black, displayColor: Colors.white),
         scaffoldBackgroundColor: Colors.white,
         scrollbarTheme: ScrollbarThemeData(
-          thumbColor: MaterialStateProperty.all(Colors.deepPurpleAccent),
+          thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
         ),
         progressIndicatorTheme: const ProgressIndicatorThemeData(
           color: Colors.deepPurple,
@@ -61,8 +61,7 @@ class MyTheme {
       floatingActionButtonTheme:
           FloatingActionButtonThemeData(backgroundColor: Colors.greenAccent),
       scrollbarTheme: ScrollbarThemeData(
-        thumbColor:
-            MaterialStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
+        thumbColor: WidgetStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
       ),
       textTheme: TextTheme(
         bodyLarge: TextStyle(),

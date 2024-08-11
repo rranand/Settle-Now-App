@@ -201,7 +201,7 @@ class _DashBoardState extends State<DashBoard> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -462,13 +462,6 @@ class _DashBoardState extends State<DashBoard> {
 
     CroppedFile? image = await ImageCropper().cropImage(
       sourcePath: orgImage!.path,
-      aspectRatioPresets: [
-        CropAspectRatioPreset.square,
-        CropAspectRatioPreset.ratio3x2,
-        CropAspectRatioPreset.original,
-        CropAspectRatioPreset.ratio4x3,
-        CropAspectRatioPreset.ratio16x9
-      ],
       uiSettings: [
         AndroidUiSettings(
             toolbarTitle: 'Crop',
@@ -478,6 +471,9 @@ class _DashBoardState extends State<DashBoard> {
             toolbarWidgetColor: Colors.white,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false),
+          WebUiSettings(
+            context: context,
+          ),
       ],
     );
 
@@ -3311,7 +3307,7 @@ class _DashBoardState extends State<DashBoard> {
               horizontal: (MediaQuery.of(context).size.width - 162) * 0.5,
               vertical: 16),
           decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
               borderRadius: BorderRadius.all(Radius.circular(24))),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -7008,7 +7004,7 @@ class _RoomWidgetState extends State<RoomWidget> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -7424,7 +7420,7 @@ class _RoomWidgetState extends State<RoomWidget> {
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                           child: Text(
                             widget.RoomData.value[index].roomName,
-                            textScaleFactor: 1.0,
+                            textScaler: TextScaler.linear(1.0),
                             maxLines: 1,
                             style: TextStyle(
                                 fontSize: 22, overflow: TextOverflow.ellipsis),
@@ -7668,7 +7664,7 @@ class _RoomWidgetState extends State<RoomWidget> {
                                     child: Text(
                                       "Room Key: " +
                                           widget.RoomData.value[index].roomKey,
-                                      textScaleFactor: 1.0,
+                                      textScaler: TextScaler.linear(1.0),
                                       style: TextStyle(
                                         color: Theme.of(context).primaryColor,
                                         fontSize: 13,

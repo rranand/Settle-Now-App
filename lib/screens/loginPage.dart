@@ -39,12 +39,11 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   bool darkTheme = false;
   Map<String, dynamic> _deviceData = <String, dynamic>{};
-  double textScale = 1.0;
   String version = "";
   bool isOnBoardingCompleted = false;
   bool isItAndroidDevice = false;
 
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
@@ -56,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -196,7 +195,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    textScale = MediaQuery.of(context).textScaleFactor;
 
     return Scaffold(
       body: SingleChildScrollView(

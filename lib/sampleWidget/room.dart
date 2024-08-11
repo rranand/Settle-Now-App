@@ -124,7 +124,7 @@ Widget sampleRoom(BuildContext context) {
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 "Udaipur Trip",
-                textScaleFactor: 1.0,
+                textScaler: TextScaler.linear(1.0),
                 maxLines: 1,
                 style: TextStyle(fontSize: 22, overflow: TextOverflow.ellipsis),
               ),
@@ -160,7 +160,7 @@ Widget sampleRoom(BuildContext context) {
                       ),
                       Text(
                         "Room Key: djsWnaQ",
-                        textScaleFactor: 1.0,
+                        textScaler: TextScaler.linear(1.0),
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontSize: 13,
@@ -388,7 +388,7 @@ Widget samplePEGraph(BuildContext context) {
             tooltipBehavior: TooltipBehavior(
                 enable: true, header: "", format: "point.x : ₹ point.y"),
             plotAreaBorderWidth: 0,
-            series: <ChartSeries>[
+            series: <CartesianSeries>[
               LineSeries<dynamic, String>(
                   color: Theme.of(context).primaryColor,
                   dataSource: yearwiseSpend,

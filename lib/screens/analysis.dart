@@ -52,7 +52,7 @@ class _AnalysisState extends State<Analysis> {
   List<BarSeries<ChartData, String>> graphData = [];
   bool isDataLoading = false;
 
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
@@ -64,7 +64,7 @@ class _AnalysisState extends State<Analysis> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -371,7 +371,7 @@ class _AnalysisState extends State<Analysis> {
               horizontal: (MediaQuery.of(context).size.width - 250) * 0.5,
               vertical: 16),
           decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.background.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
               borderRadius: BorderRadius.all(Radius.circular(24))),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -474,7 +474,7 @@ class _AnalysisState extends State<Analysis> {
                                                   format:
                                                       "point.x : ₹ point.y"),
                                               plotAreaBorderWidth: 0,
-                                              series: <ChartSeries>[
+                                              series: <CartesianSeries>[
                                                   LineSeries<dynamic, String>(
                                                       color: Theme.of(context)
                                                           .primaryColor,
@@ -659,8 +659,8 @@ class _AnalysisState extends State<Analysis> {
                                   : (personalExpenseByYear.isNotEmpty
                                       ? SfCartesianChart(
                                           primaryXAxis: CategoryAxis(
-                                            visibleMinimum: 0,
-                                            visibleMaximum: 5,
+                                            initialVisibleMinimum: 0,
+                                            initialVisibleMaximum: 5,
                                             isVisible: true,
                                           ),
                                           primaryYAxis: NumericAxis(
@@ -675,7 +675,7 @@ class _AnalysisState extends State<Analysis> {
                                             enablePanning: true,
                                           ),
                                           plotAreaBorderWidth: 0,
-                                          series: <ChartSeries>[
+                                          series: <CartesianSeries>[
                                               LineSeries<PersonalExpenseEach,
                                                       String>(
                                                   color: Theme.of(context)

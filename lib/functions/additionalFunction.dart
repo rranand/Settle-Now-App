@@ -27,8 +27,8 @@ Future<Map<String, dynamic>> initPlatformState() async {
     if (kIsWeb) {
       WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
       return <String, dynamic>{
-        'id': describeEnum(data.browserName),
-        'device': describeEnum(data.browserName) + " (" + data.platform! + ")",
+        'id': data.browserName.name,
+        'device': data.browserName.name + " (" + data.platform! + ")",
         'userAgent': data.userAgent
       };
     } else if (Platform.isAndroid) {

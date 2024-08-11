@@ -36,7 +36,7 @@ class _LendCreditState extends State<LendCredit> {
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
 
-  late StreamSubscription subscription;
+  late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool isAlertSet = false;
 
@@ -48,7 +48,7 @@ class _LendCreditState extends State<LendCredit> {
 
   getConnectivity() async {
     subscription = Connectivity().onConnectivityChanged.listen(
-      (ConnectivityResult result) async {
+      (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
         setState(() {});
         if (!isDeviceConnected && isAlertSet == false) {
@@ -341,9 +341,11 @@ class _LendCreditState extends State<LendCredit> {
                                                   style: TextStyle(
                                                     fontSize: 20,
                                                     fontWeight: FontWeight.w500,
-                                                    foreground: kIsWeb?null:(Paint()
-                                                      ..shader =
-                                                          linearGradient_1),
+                                                    foreground: kIsWeb
+                                                        ? null
+                                                        : (Paint()
+                                                          ..shader =
+                                                              linearGradient_1),
                                                   ),
                                                 ),
                                                 onTap: () async {
