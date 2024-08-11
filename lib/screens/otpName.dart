@@ -72,7 +72,11 @@ class _OtpNameState extends State<OtpName> {
       };
 
       await createHTTPreq('login', http.post, "", jsonInputData);
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["OTPName->resendOTP"]);
+      }
       setState(() {
         error = true;
         errorText = "Unable To Sent OTP";
@@ -274,12 +278,14 @@ class _OtpNameState extends State<OtpName> {
           Navigator.pop(context);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
+
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["OTPName->verifyStatus"]);
       }
     }
   }

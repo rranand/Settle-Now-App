@@ -439,7 +439,13 @@ class _LoginPageState extends State<LoginPage> {
                                       );
                               }
                             }
-                          } on Exception catch (_) {}
+                          } on Exception catch (err, stackTrace) {
+                            if (this.mounted) {
+                              onException(context, err, stackTrace,
+                                  reason: "Unknwon Error",
+                                  info: ["LoginPage->SignInWithGoogle"]);
+                            }
+                          }
                         },
                       ),
                     ),

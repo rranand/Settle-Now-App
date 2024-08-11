@@ -115,12 +115,15 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
+
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["ScheduleNotification->_initialization"]);
       }
     }
 
@@ -162,12 +165,14 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       } else {
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["ScheduleNotification->_initialization"]);
       }
     }
     if (this.mounted) {
@@ -233,9 +238,11 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         } else {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
-      } on Exception catch (_) {
+      } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          await onException(context);
+          onException(context, err, stackTrace,
+              reason: "Unknwon Error",
+              info: ["ScheduleNotification->_addRemainder"]);
         }
       }
       if (this.mounted) {

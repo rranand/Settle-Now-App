@@ -92,9 +92,10 @@ class _LendCreditState extends State<LendCredit> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["LendCredit->createRoom"]);
       }
     }
 
@@ -129,9 +130,10 @@ class _LendCreditState extends State<LendCredit> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["LendCredit->updateRoom"]);
       }
     }
 
@@ -171,12 +173,13 @@ class _LendCreditState extends State<LendCredit> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["LendCredit->_initialization"]);
       }
     }
 

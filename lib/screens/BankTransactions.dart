@@ -149,9 +149,10 @@ class _BankTransactionsState extends State<BankTransactions> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+         onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["BankTransaction->getLenDenData"]);
       }
     }
     if (this.mounted) {
@@ -173,9 +174,10 @@ class _BankTransactionsState extends State<BankTransactions> {
           await getMembers(roomData[0]['Key']);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+         onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["BankTransaction->getActiveRooms"]);
       }
     }
 
@@ -223,9 +225,10 @@ class _BankTransactionsState extends State<BankTransactions> {
           }
         });
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+         onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["BankTransaction->getMembers"]);
       }
     }
 
@@ -321,12 +324,13 @@ class _BankTransactionsState extends State<BankTransactions> {
       } else {
         showToast(context, "Expense Added Successfully", Icons.check);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["BankTransaction->AddExpense"]);
       }
     }
     if (this.mounted) {
@@ -557,9 +561,11 @@ class _BankTransactionsState extends State<BankTransactions> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["BankTransaction->createLenDenRoom"]);
       }
     }
 
@@ -615,12 +621,15 @@ class _BankTransactionsState extends State<BankTransactions> {
       } else {
         showToast(context, "Expense Added Successfully", Icons.check);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
+
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["BankTransaction->AddExpenseManual"]);
       }
     }
     if (this.mounted) {
@@ -664,9 +673,10 @@ class _BankTransactionsState extends State<BankTransactions> {
         } else {
           showToast(context, "Expense Added Successfully", Icons.check);
         }
-      } on Exception catch (_) {
+      } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          Navigator.pop(context);
+          onException(context, err, stackTrace,
+              reason: "Unknwon Error", info: ["BankTransaction->AddLenDen"]);
         }
       }
       LenDenRoomID = "";
@@ -721,12 +731,15 @@ class _BankTransactionsState extends State<BankTransactions> {
         } else {
           showToast(context, "Expense Added Successfully", Icons.check);
         }
-      } on Exception catch (_) {
+      } on Exception catch (err, stackTrace) {
         if (this.mounted) {
           Navigator.pop(context);
         }
+
         if (this.mounted) {
-          await onException(context);
+          onException(context, err, stackTrace,
+              reason: "Unknwon Error",
+              info: ["BankTransaction->AddRoomExpense"]);
         }
       }
       if (this.mounted) {

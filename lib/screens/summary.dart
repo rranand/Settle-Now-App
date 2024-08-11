@@ -147,9 +147,10 @@ class _SummaryPageState extends State<SummaryPage> {
             crypto.decrypt(jsonDecode(response_1.body)["Message"]),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Summary->_initialisation"]);
       }
     }
     isLoadingData = false;
@@ -185,9 +186,10 @@ class _SummaryPageState extends State<SummaryPage> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Summary->updatePieChart"]);
       }
     }
 

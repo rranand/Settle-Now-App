@@ -139,9 +139,10 @@ class _ExpensesState extends State<Expenses> {
       } else {
         showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Expenses->_initialization"]);
       }
     }
     if (this.mounted) {
@@ -165,9 +166,10 @@ class _ExpensesState extends State<Expenses> {
         TransList.removeAt(index);
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Expenses->removeRoomTransaction"]);
       }
     }
     if (this.mounted) {
@@ -202,9 +204,11 @@ class _ExpensesState extends State<Expenses> {
         }
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["Expenses->updatePersonalTransaction"]);
       }
     }
     if (this.mounted) {
@@ -583,12 +587,14 @@ class _ExpensesState extends State<Expenses> {
       if (response.statusCode == 422) {
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["Expenses->AddExpense"]);
       }
     }
 

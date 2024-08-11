@@ -109,10 +109,11 @@ class _ProfileState extends State<Profile> {
         }
         showToast(context, responseMessage, Icons.warning_rounded);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Profile->deleteAccount"]);
       }
     }
   }
@@ -196,9 +197,10 @@ class _ProfileState extends State<Profile> {
         prefs = await SharedPreferences.getInstance();
         await prefs.setString("__token", crypto.encrypt(_phoneNo.text));
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Profile->pushPhoneToDB"]);
       }
     }
 

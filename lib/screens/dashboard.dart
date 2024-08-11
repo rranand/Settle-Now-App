@@ -7,6 +7,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -190,7 +191,10 @@ class _DashBoardState extends State<DashBoard> {
       Database database = await openDatabase(path);
       getContactsFromDB =
           await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
-    } on Exception catch (_) {}
+    } on Exception catch (err, stackTrace) {
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["DashBoard->getContactsFromLocal"]);
+    }
   }
 
   @override
@@ -300,7 +304,11 @@ class _DashBoardState extends State<DashBoard> {
             }
           }
         }
-      } on Exception catch (_) {}
+      } on Exception catch (err, stackTrace) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["DashBoard->checkforScheduledNotifications"]);
+      }
       if (this.mounted) {
         setState(() {
           notificationSetupComplete = true;
@@ -353,9 +361,10 @@ class _DashBoardState extends State<DashBoard> {
           membersData.value[tempData[i][0]] = tempData[i][1];
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->getMembersData"]);
       }
     }
     if (this.mounted) {
@@ -385,9 +394,10 @@ class _DashBoardState extends State<DashBoard> {
           _profilePicID = "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8";
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->_getImageID"]);
       }
     }
 
@@ -419,7 +429,10 @@ class _DashBoardState extends State<DashBoard> {
         });
         shareMessage = ShareMessage.fromJson(data['shareMessage']);
       }
-    } on Exception catch (_) {}
+    } on Exception catch (err, stackTrace) {
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["DashBoard->getInitialData"]);
+    }
 
     if (this.mounted) {
       setState(() {});
@@ -443,7 +456,10 @@ class _DashBoardState extends State<DashBoard> {
           importantUpdate = true;
         }
       }
-    } on Exception catch (_) {}
+    } on Exception catch (err, stackTrace) {
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["DashBoard->manualUpdateCheck"]);
+    }
     if (this.mounted) {
       setState(() {});
     }
@@ -471,9 +487,9 @@ class _DashBoardState extends State<DashBoard> {
             toolbarWidgetColor: Colors.white,
             initAspectRatio: CropAspectRatioPreset.original,
             lockAspectRatio: false),
-          WebUiSettings(
-            context: context,
-          ),
+        WebUiSettings(
+          context: context,
+        ),
       ],
     );
 
@@ -580,7 +596,7 @@ class _DashBoardState extends State<DashBoard> {
       var tokenData = await prefs.getString("token");
       if (tokenData != null && parseJWT(tokenData.toString()) != null) {
         Map<String, dynamic> jsonOutData = parseJWT(prefs.getString("token")!);
-
+        FirebaseCrashlytics.instance.setUserIdentifier(jsonOutData["email"]!);
         _email.text = jsonOutData["email"]!;
         _name.text = jsonOutData["name"]!;
         _token = jsonOutData["token"]!;
@@ -698,9 +714,10 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->_extractEmail"]);
       }
     }
 
@@ -737,9 +754,10 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->getRoomRequest"]);
       }
     }
 
@@ -827,13 +845,13 @@ class _DashBoardState extends State<DashBoard> {
               response.statusCode == 200 ? Icons.check : Icons.close);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
-      if (this.mounted) {
-        await onException(context);
-      }
+
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["DashBoard->SendingData"]);
     }
   }
 
@@ -868,9 +886,10 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, errorMessage, Icons.close);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->fetchSentRequest"]);
       }
     }
     isSentRoomRequestLoaded = true;
@@ -895,9 +914,10 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode != 200) {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->cancelSentRequest"]);
       }
     }
 
@@ -979,9 +999,11 @@ class _DashBoardState extends State<DashBoard> {
           quickSplitData.value.add(QuickSplitEach.fromJson(tempArr[i]));
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["DashBoard->getQuickSplitExpenses"]);
       }
     }
     if (this.mounted) {
@@ -1153,7 +1175,10 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       await createHTTPreq('verify', http.delete, _token, jsonInputData);
-    } on Exception catch (_) {}
+    } on Exception catch (err, stackTrace) {
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["DashBoard->sendContactData"]);
+    }
   }
 
   buildLiveFilterDialog(BuildContext context) {
@@ -1725,9 +1750,10 @@ class _DashBoardState extends State<DashBoard> {
           showToast(context, crypto.decrypt(data["Message"]), Icons.close);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Analysis->getFriendData"]);
       }
     }
     if (!kIsWeb) {
@@ -1790,7 +1816,7 @@ class _DashBoardState extends State<DashBoard> {
           Navigator.pop(context);
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
@@ -1806,7 +1832,9 @@ class _DashBoardState extends State<DashBoard> {
         }
       }
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["DashBoard->addQuickSplitExpenseToSN"]);
       }
     }
   }
@@ -3231,12 +3259,13 @@ class _DashBoardState extends State<DashBoard> {
       if (this.mounted) {
         Navigator.pop(context);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->JoinRequest"]);
       }
     }
   }
@@ -3262,12 +3291,13 @@ class _DashBoardState extends State<DashBoard> {
       if (this.mounted) {
         Navigator.pop(context);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         Navigator.pop(context);
       }
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->JoinRequestLend"]);
       }
     }
   }
@@ -5714,9 +5744,10 @@ class _QuickSplitState extends State<QuickSplit> {
         }
       }
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->updateExpenseManual"]);
       }
     }
   }
@@ -6185,9 +6216,11 @@ class _QuickSplitState extends State<QuickSplit> {
         }
       }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error",
+            info: ["DashBoard->settleThisTransaction"]);
       }
     }
     if (this.mounted) {
@@ -6210,9 +6243,10 @@ class _QuickSplitState extends State<QuickSplit> {
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->addToPersonalExpense"]);
       }
     }
     if (this.mounted) {
@@ -6713,9 +6747,10 @@ class _QuickSplitState extends State<QuickSplit> {
         }
       }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->deleteExpense"]);
       }
     }
     if (this.mounted) {
@@ -7064,9 +7099,10 @@ class _RoomWidgetState extends State<RoomWidget> {
           widget.membersData.value[tempData[i][0]] = tempData[i][1];
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->getMembersData"]);
       }
     }
     if (this.mounted) {
@@ -7106,9 +7142,10 @@ class _RoomWidgetState extends State<RoomWidget> {
           );
         }
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->_extractEmail"]);
       }
     }
 
@@ -7175,9 +7212,10 @@ class _RoomWidgetState extends State<RoomWidget> {
         showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
             Icons.close);
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["DashBoard->updateRoom"]);
       }
     }
 
@@ -7229,7 +7267,10 @@ class _RoomWidgetState extends State<RoomWidget> {
         var data = jsonDecode(response.body);
         return data['data'];
       }
-    } on Exception catch (_) {}
+    } on Exception catch (err, stackTrace) {
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["DashBoard->sendContactData"]);
+    }
     return [];
   }
 

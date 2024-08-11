@@ -107,7 +107,12 @@ class _RoomJoinState extends State<RoomJoin> {
           (Route<dynamic> route) => false,
         );
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["JoinRoom->_roomJoin"]);
+      }
+
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(

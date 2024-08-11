@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -226,7 +227,9 @@ Future<bool> checkAndroidInsideWeb() async {
   return false;
 }
 
-onException(BuildContext context) async {
+onException(BuildContext context, Exception err, StackTrace stackTrace,
+    {String reason = "", List<String>? info}) async {
+  pushCrashDataToFirebase(err, stackTrace, reason: reason, info: info);
   showToast(context, "Server Error Try Again", Icons.warning_rounded);
 }
 
@@ -343,6 +346,25 @@ extractJSONfromJWT(String data) async {
   return {};
 }
 
+pushCrashDataToFirebase(Exception err, StackTrace stackTrace,
+    {String reason = "", List<String>? info}) async {
+  Map<String, dynamic> additionalData = {};
+  if (reason != "") {
+    additionalData['reason'] = reason;
+  } else {
+    additionalData['reason'] = "Unknown";
+  }
+  if (info!.length > 0) {
+    additionalData['information'] = info;
+  } else {
+    additionalData['information'] = [];
+  }
+
+  await FirebaseCrashlytics.instance.recordError(err, stackTrace,
+      reason: additionalData['reason'],
+      information: additionalData['information']);
+}
+
 Future<dynamic> createHTTPreq(
     String url, Function httpType, String token, dynamic JSONData) async {
   try {
@@ -352,7 +374,7 @@ Future<dynamic> createHTTPreq(
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Auth': token,
-          'Access-Control-Allow-Origin': 'https://api.settlenow.in'
+          'Access-Control-Allow-Origin': global.url
         },
         body: jsonEncode({"data": tokenization}));
 
@@ -363,7 +385,10 @@ Future<dynamic> createHTTPreq(
           new Response(await extractJSONfromJWT(jsonJWTData), res.statusCode);
       return newRes;
     }
-  } on Exception catch (_) {}
+  } on Exception catch (err, stackTrace) {
+    pushCrashDataToFirebase(err, stackTrace,
+        reason: "API Error", info: ["createHTTPreq", url]);
+  }
 
   bool isDeviceConnected = await InternetConnectionChecker().hasConnection;
   return new Response(

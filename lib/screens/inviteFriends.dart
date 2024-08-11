@@ -52,14 +52,26 @@ class _InviteFriendsState extends State<InviteFriends> {
                 allContactsData[i].name,
                 allContactsData[i].email
               ]);
-        } on Exception catch (_) {}
+        } on Exception catch (err, stackTrace) {
+          if (this.mounted) {
+            onException(context, err, stackTrace,
+                reason: "Unknwon Error",
+                info: ["InviteFriends->pushToDB->allContactsData"]);
+          }
+        }
       }
       for (int i = 0; i < allContacts.length; i++) {
         try {
           await txn.rawInsert(
               'INSERT INTO ContactHasNoAccountOnSN(phoneNo) VALUES(?)',
               [allContacts[i]]);
-        } on Exception catch (_) {}
+        } on Exception catch (err, stackTrace) {
+          if (this.mounted) {
+            onException(context, err, stackTrace,
+                reason: "Unknwon Error",
+                info: ["InviteFriends->pushToDB->allContacts"]);
+          }
+        }
       }
     });
 
@@ -103,7 +115,12 @@ class _InviteFriendsState extends State<InviteFriends> {
         pushToDB(Set.from(allContacts).toList(), allContactsData);
         showToast(context, "Contacts Imported Successfully", Icons.done);
       }
-    } on Exception catch (_) {}
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["InviteFriends->getContacts"]);
+      }
+    }
 
     if (this.mounted) {
       Navigator.pop(context, contactPermissionGranted);

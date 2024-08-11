@@ -138,9 +138,10 @@ class _AnalysisState extends State<Analysis> {
           });
         });
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Analysis->_initialisation"]);
       }
     }
 
@@ -353,9 +354,10 @@ class _AnalysisState extends State<Analysis> {
       if (response.statusCode == 200) {
         RoomData = jsonDecode(response.body)['data'];
       }
-    } on Exception catch (_) {
+    } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        await onException(context);
+         onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Analysis->getRoomData"]);
       }
     }
     return RoomData;
