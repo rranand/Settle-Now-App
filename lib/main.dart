@@ -29,10 +29,19 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  String firebaseProjectName = '[DEFAULT]';
+  if (kDebugMode) {
+    firebaseProjectName = 'SettleNow-Dev';
+  }
+  if (Firebase.apps.length == 0) {
+    await Firebase.initializeApp(
+        name: firebaseProjectName,
+        options: DefaultFirebaseOptions.currentPlatform);
+  } else {
+    Firebase.app();
+  }
 
   if (kIsWeb) {
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
     setPathUrlStrategy();
   } else {
     await Permission.notification.isDenied.then((value) {
@@ -40,9 +49,6 @@ Future<void> main() async {
         Permission.notification.request();
       }
     });
-
-    await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform);
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     AwesomeNotifications()
@@ -79,6 +85,7 @@ Future<void> main() async {
           defaultColor: Colors.white),
     ]);
   }
+
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };

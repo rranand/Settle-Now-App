@@ -359,7 +359,6 @@ pushCrashDataToFirebase(Exception err, StackTrace stackTrace,
   } else {
     additionalData['information'] = [];
   }
-
   await FirebaseCrashlytics.instance.recordError(err, stackTrace,
       reason: additionalData['reason'],
       information: additionalData['information']);

@@ -1925,7 +1925,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: roomData.isNotEmpty
-                        ? 240
+                        ? 245
                         : (widget.expenseCategory.length == 0 ? 145 : 185),
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),

@@ -30,7 +30,6 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-
 android {
     compileSdkVersion 34
 
@@ -76,6 +75,18 @@ android {
         disable "Instantiatable"
         checkReleaseBuilds false
         abortOnError false
+    }
+
+    flavorDimensions "default"
+
+    productFlavors {
+        prod {
+            resValue "string", "app_name", "Settle Now"
+        }
+        dev {
+            resValue "string", "app_name", "Settle Now Dev"
+            applicationIdSuffix ".dev"
+        }
     }
 }
 

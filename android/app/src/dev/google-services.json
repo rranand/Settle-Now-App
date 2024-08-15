@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "373327328514",
+    "project_id": "settlenow-dev",
+    "storage_bucket": "settlenow-dev.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:373327328514:android:3dab1f669dd307d0577e1b",
+        "android_client_info": {
+          "package_name": "com.rohit.settlenow.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE5v23Yn_sGYVtdicuCNxA8TMHR_AUzAE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
