@@ -4,9 +4,12 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pinput/pinput.dart';
-import 'package:settlenow/screens/loginPage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:settlenow/contents.dart' as global;
+import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -21,26 +24,22 @@ import 'package:settlenow/others/themes.dart';
 import '../others/GoogleSignIN.dart';
 
 class Profile extends StatefulWidget {
-  final String picUrl;
-  final String email;
-  final String name;
-  final String token;
-  final bool isGoogle;
-
-  const Profile(
-      {Key? key,
-      required this.picUrl,
-      required this.email,
-      required this.name,
-      required this.token,
-      required this.isGoogle})
-      : super(key: key);
+  const Profile({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<Profile> createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
+  String _email = "";
+  String _token = "";
+  String picUrl = "";
+  String name = "";
+  bool isGoogle = false;
+  GoogleSignInAccount? _currentUser;
+  GoogleSignIn _googleSignIn = GoogleSignIn();
   late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
   bool canResendOTP = false;
@@ -60,10 +59,9 @@ class _ProfileState extends State<Profile> {
   FirebaseAuth auth = FirebaseAuth.instance;
   String createdOn = "";
   bool isDataLoading = false;
-  late SharedPreferences prefs;
 
   Future<void> logOutFromGoogle() async {
-    if (widget.isGoogle) {
+    if (isGoogle) {
       await GoogleSignIN.logout();
     }
   }
@@ -75,44 +73,38 @@ class _ProfileState extends State<Profile> {
 
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
       };
 
       final response = await createHTTPreq(
-          'profile/deleteAccount', http.post, widget.token, jsonInputData);
+          'profile/deleteAccount', http.post, _token, jsonInputData);
 
       String responseMessage =
           crypto.decrypt(jsonDecode(response.body)['Message']);
       if (response.statusCode == 200) {
-        prefs = await SharedPreferences.getInstance();
         await Future.wait([
-          prefs.remove("token"),
-          prefs.remove("__token"),
-          prefs.remove("___token"),
+          removePref(["token", "__token", "___token"]),
           logOutFromGoogle()
         ]);
 
         if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => LoginPage()),
-            (Route<dynamic> route) => false,
-          );
-
+          while (context.canPop()) {
+            context.pop();
+          }
+          context.push(AppRouteConstants.loginRouteName);
           showToast(context, responseMessage, Icons.done);
         }
       } else {
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
+        for (int i = 0; i < 2 && context.canPop(); i++) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
         showToast(context, responseMessage, Icons.warning_rounded);
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
         onException(context, err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->deleteAccount"]);
       }
@@ -145,6 +137,55 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  fetchBasicInfo() async {
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(_email),
+      };
+
+      final response = await createHTTPreq(
+          'profile/basic_info', http.post, _token, jsonInputData);
+
+      String responseMessage =
+          crypto.decrypt(jsonDecode(response.body)['Message']);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if (this.mounted) {
+          setState(() {
+            picUrl = crypto.decrypt(data['picUrl']);
+            name = crypto.decrypt(data['name']);
+            isGoogle = crypto.decrypt(data['isGoogle']) == "true";
+          });
+        }
+        if (isGoogle) {
+          _googleSignIn.onCurrentUserChanged
+              .listen((GoogleSignInAccount? account) async {
+            setState(() {
+              _currentUser = account;
+              picUrl = (_currentUser != null
+                  ? _currentUser!.photoUrl.toString()
+                  : addCorsinImage(
+                      global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"));
+            });
+          });
+        } else {
+          picUrl = addCorsinImage(global.driveUrl +
+              (picUrl.length == 0
+                  ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                  : picUrl));
+        }
+      } else {
+        showToast(context, responseMessage, Icons.warning_rounded);
+      }
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Profile->fetchBasicInfo"]);
+      }
+    }
+  }
+
   initialization() async {
     if (this.mounted) {
       setState(() {
@@ -152,13 +193,25 @@ class _ProfileState extends State<Profile> {
       });
     }
 
-    prefs = await SharedPreferences.getInstance();
-    if ((await prefs.getString("__token")) != null) {
-      _phoneNo.text = crypto.decrypt(await prefs.getString("__token")!);
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
     }
-    if ((await prefs.getString("___token")) != null) {
-      createdOn = crypto.decrypt(await prefs.getString("___token")!);
-    }
+
+    await fetchBasicInfo();
+
+    _phoneNo.text =
+        crypto.decrypt(await getStringPref("__token") ?? crypto.encrypt(""));
+    createdOn =
+        crypto.decrypt(await getStringPref("___token") ?? crypto.encrypt(""));
+
     if (_phoneNo.text.isNotEmpty) {
       havePhoneNo = true;
     }
@@ -186,17 +239,16 @@ class _ProfileState extends State<Profile> {
   pushPhoneToDB(String phoneNo) async {
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'phoneNo': crypto.encrypt(phoneNo)
       };
 
       final response = await createHTTPreq(
-          'profile/phoneNo', http.post, widget.token, jsonInputData);
+          'profile/phoneNo', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         havePhoneNo = true;
-        prefs = await SharedPreferences.getInstance();
-        await prefs.setString("__token", crypto.encrypt(_phoneNo.text));
+        setStringPref("__token", crypto.encrypt(_phoneNo.text));
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -257,7 +309,7 @@ class _ProfileState extends State<Profile> {
                           IconButton(
                               onPressed: () async {
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                               },
                               icon: Icon(
@@ -365,7 +417,7 @@ class _ProfileState extends State<Profile> {
                                 isVerificationSuccessful = true;
                                 await pushPhoneToDB(_phoneNo.text);
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                                 showToast(context,
                                     "OTP Verification Successful", Icons.done);
@@ -373,7 +425,7 @@ class _ProfileState extends State<Profile> {
                                 OTPverificationError = "Invalid OTP";
                               }
                               if (this.mounted) {
-                                Navigator.pop(context);
+                                context.pop();
                                 setState((() {}));
                                 setStates((() {}));
                               }
@@ -462,7 +514,7 @@ class _ProfileState extends State<Profile> {
                                     color: Theme.of(context).primaryColor),
                               ),
                               onPressed: () async {
-                                Navigator.pop(context);
+                                context.pop();
                               },
                             ),
                           ),
@@ -528,7 +580,7 @@ class _ProfileState extends State<Profile> {
     );
 
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
     if (!isVerificationPageOpened) {
       verifyOTPDialog(context, themeProvider);
@@ -556,7 +608,7 @@ class _ProfileState extends State<Profile> {
                     ),
                     CachedNetworkImage(
                       httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                      imageUrl: addCorsinImage(widget.picUrl),
+                      imageUrl: addCorsinImage(picUrl),
                       progressIndicatorBuilder:
                           (context, url, downloadProgress) =>
                               CircularProgressIndicator(
@@ -591,8 +643,7 @@ class _ProfileState extends State<Profile> {
                           TextField(
                             style: TextStyle(fontSize: 16),
                             readOnly: true,
-                            controller:
-                                TextEditingController(text: widget.name),
+                            controller: TextEditingController(text: name),
                             decoration: InputDecoration(
                                 border: InputBorder.none,
                                 labelText: "Name",
@@ -601,8 +652,7 @@ class _ProfileState extends State<Profile> {
                           TextField(
                             style: TextStyle(fontSize: 16),
                             readOnly: true,
-                            controller:
-                                TextEditingController(text: widget.email),
+                            controller: TextEditingController(text: _email),
                             decoration: InputDecoration(
                               border: InputBorder.none,
                               labelText: "Email",

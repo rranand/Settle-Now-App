@@ -8,6 +8,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
@@ -17,9 +18,10 @@ import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
-import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -30,23 +32,8 @@ import 'package:share_plus/share_plus.dart';
 
 class RoomExpense extends StatefulWidget {
   final String roomKey;
-  final String email;
-  final String roomName;
-  final String token;
-  final String roomLink;
-  final bool isRoomActive;
-  final String objID;
 
-  const RoomExpense(
-      {Key? key,
-      required this.roomKey,
-      required this.email,
-      required this.roomName,
-      required this.token,
-      required this.roomLink,
-      required this.isRoomActive,
-      required this.objID})
-      : super(key: key);
+  const RoomExpense({Key? key, required this.roomKey}) : super(key: key);
 
   @override
   _RoomExpenseState createState() => _RoomExpenseState();
@@ -54,6 +41,12 @@ class RoomExpense extends StatefulWidget {
 
 class _RoomExpenseState extends State<RoomExpense>
     with SingleTickerProviderStateMixin {
+  String _email = "";
+  String _token = "";
+
+  String roomLink = "";
+  bool isRoomActive = false;
+  String objID = "";
   List<dynamic> list = [];
   final roomName = TextEditingController();
   List<dynamic> allExpenseList = [];
@@ -63,7 +56,6 @@ class _RoomExpenseState extends State<RoomExpense>
   bool expenseSplitWithExistingMembers = false;
   bool splitManually = false;
   int dash = 0;
-  bool isRoomActive = false;
   bool locked = false;
   final ValueNotifier<bool> isPreviousPageNeedToBeUpdated =
       ValueNotifier(false);
@@ -157,7 +149,7 @@ class _RoomExpenseState extends State<RoomExpense>
       BuildContext context, String objID, String deleteFlag, int index) async {
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomKey': crypto.encrypt(widget.roomKey),
         'amt': crypto.encrypt(_paytoMemberAmt.text),
         'objID': objID,
@@ -165,7 +157,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response = await createHTTPreq(
-          'data/updatePayMember', http.put, widget.token, jsonInputData);
+          'data/updatePayMember', http.put, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         await _getPaymentData();
@@ -208,11 +200,11 @@ class _RoomExpenseState extends State<RoomExpense>
     try {
       Map<String, String> jsonInputData = {
         'roomKey': crypto.encrypt(widget.roomKey),
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
       };
 
       final response = await createHTTPreq(
-          'transaction/all', http.delete, widget.token, jsonInputData);
+          'transaction/all', http.delete, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -257,14 +249,18 @@ class _RoomExpenseState extends State<RoomExpense>
     try {
       Map<String, String> jsonInputData = {
         'roomKey': crypto.encrypt(widget.roomKey),
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
       };
 
       final response =
-          await createHTTPreq('data', http.patch, widget.token, jsonInputData);
+          await createHTTPreq('data', http.patch, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        roomName.setText(crypto.decrypt(data['roomName']));
+        roomLink = crypto.decrypt(data['roomLink']);
+        isRoomActive = crypto.decrypt(data['isRoomActive']) == "true";
+        objID = crypto.decrypt(data['objID']);
         list = data['data'];
 
         Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
@@ -280,7 +276,7 @@ class _RoomExpenseState extends State<RoomExpense>
           if (list[i]["done"]) {
             expenseSplitWithExistingMembers = true;
             roomClosedCount++;
-          } else if (crypto.decrypt(list[i]["email"]) != widget.email) {
+          } else if (crypto.decrypt(list[i]["email"]) != _email) {
             if (membersListIndex == -1 &&
                 double.parse(crypto.decrypt(list[i]["current"])) > 0) {
               membersListIndex = i - 1;
@@ -302,7 +298,7 @@ class _RoomExpenseState extends State<RoomExpense>
               crypto.decrypt(list[i]["email"]),
               crypto.decrypt(list[i]["pic"]),
               double.parse(crypto.decrypt(list[i]["yourExpense"]))));
-          if (crypto.decrypt(list[i]["email"]) == widget.email) {
+          if (crypto.decrypt(list[i]["email"]) == _email) {
             selfIndex = i;
             yourExpense = crypto.decrypt(list[i]["yourExpense"]);
             if (list[i]["done"]) {
@@ -315,13 +311,12 @@ class _RoomExpenseState extends State<RoomExpense>
           setState(() {});
         }
       } else if (response.statusCode == 503) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+        while (context.canPop()) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
+        context.push(AppRouteConstants.maintainRouteName);
       } else {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
@@ -345,11 +340,11 @@ class _RoomExpenseState extends State<RoomExpense>
       }
       Map<String, String> jsonInputData = {
         'roomKey': crypto.encrypt(widget.roomKey),
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
       };
 
-      final response = await createHTTPreq(
-          'friend', http.patch, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('friend', http.patch, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -398,12 +393,12 @@ class _RoomExpenseState extends State<RoomExpense>
     scrollToExpense = -1;
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomKey': crypto.encrypt(widget.roomKey),
       };
 
-      final response = await createHTTPreq(
-          'transaction', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('transaction', http.post, _token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -413,7 +408,7 @@ class _RoomExpenseState extends State<RoomExpense>
           TransList = jsonDecode(response.body)['data'];
           if (firstTimeLoad) {
             scrollToExpense = TransList.indexWhere(
-                (element) => crypto.decrypt(element['id']) == widget.objID);
+                (element) => crypto.decrypt(element['id']) == objID);
           }
         }
       } else {
@@ -439,7 +434,7 @@ class _RoomExpenseState extends State<RoomExpense>
     }
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomKey': crypto.encrypt(widget.roomKey),
         'purpose': crypto.encrypt(_purpose.text),
         'date': crypto
@@ -452,26 +447,22 @@ class _RoomExpenseState extends State<RoomExpense>
         'split': crypto.encrypt(manualSplitAmount.toString())
       };
 
-      final response = await createHTTPreq(
-          'manualSplit', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('manualSplit', http.post, _token, jsonInputData);
 
       _amt.text = "";
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated.value = true;
 
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
+      for (int i = 0; i < 3 && context.canPop(); i++) {
+        if (this.mounted) {
+          context.pop();
+        }
       }
 
       if (splitManually && this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       if (response.statusCode == 422) {
@@ -482,7 +473,7 @@ class _RoomExpenseState extends State<RoomExpense>
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->AddExpenseManual"]);
@@ -499,22 +490,21 @@ class _RoomExpenseState extends State<RoomExpense>
     }
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
-        'roomID': crypto.encrypt(widget.objID),
+        'email': crypto.encrypt(_email),
+        'roomID': crypto.encrypt(objID),
         'roomName': crypto.encrypt(newRoomName),
       };
 
       final response = await createHTTPreq(
-          'updateRoomName/room', http.post, widget.token, jsonInputData);
+          'updateRoomName/room', http.post, _token, jsonInputData);
 
       Tdata = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated.value = true;
 
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
+      for (int i = 0; i < 2 && context.canPop(); i++) {
+        if (this.mounted) {
+          context.pop();
+        }
       }
 
       showToast(context, crypto.decrypt(Tdata["Message"]),
@@ -525,7 +515,7 @@ class _RoomExpenseState extends State<RoomExpense>
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->updateRoomName"]);
@@ -543,7 +533,7 @@ class _RoomExpenseState extends State<RoomExpense>
       }
       try {
         Map<String, String> jsonInputData = {
-          'email': crypto.encrypt(widget.email),
+          'email': crypto.encrypt(_email),
           'roomKey': crypto.encrypt(widget.roomKey),
           'purpose': crypto.encrypt(_purpose.text),
           'date': crypto
@@ -561,21 +551,17 @@ class _RoomExpenseState extends State<RoomExpense>
               : addExpenseTo.toString()))
         };
 
-        final response = await createHTTPreq(
-            'data', http.delete, widget.token, jsonInputData);
+        final response =
+            await createHTTPreq('data', http.delete, _token, jsonInputData);
 
         _amt.text = "";
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
         isPreviousPageNeedToBeUpdated.value = true;
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
+        for (int i = 0; i < 3 && context.canPop(); i++) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
 
         if (response.statusCode == 422) {
@@ -586,7 +572,7 @@ class _RoomExpenseState extends State<RoomExpense>
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
         if (this.mounted) {
           onException(context, err, stackTrace,
@@ -608,25 +594,21 @@ class _RoomExpenseState extends State<RoomExpense>
 
       try {
         Map<String, String> jsonInputData = {
-          'emailS': crypto.encrypt(widget.email),
+          'emailS': crypto.encrypt(_email),
           'emailR': crypto.encrypt(membersListEmail[membersListIndex]),
           'roomKey': crypto.encrypt(widget.roomKey),
           'amt': crypto.encrypt(_amt.text),
         };
 
         final response =
-            await createHTTPreq('data', http.put, widget.token, jsonInputData);
+            await createHTTPreq('data', http.put, _token, jsonInputData);
 
         _amt.text = "";
         Tdata = jsonDecode(response.body);
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
+        for (int i = 0; i < 3 && context.canPop(); i++) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
         if (response.statusCode == 200) {
           if (this.mounted) {
@@ -641,7 +623,7 @@ class _RoomExpenseState extends State<RoomExpense>
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
         if (this.mounted) {
           onException(context, err, stackTrace,
@@ -673,7 +655,7 @@ class _RoomExpenseState extends State<RoomExpense>
         };
 
         final response = await createHTTPreq(
-            'transaction', http.delete, widget.token, jsonInputData);
+            'transaction', http.delete, _token, jsonInputData);
 
         if (response.statusCode == 200) {
           paymentData = jsonDecode(response.body)["data"];
@@ -692,7 +674,7 @@ class _RoomExpenseState extends State<RoomExpense>
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->retrievePaymentData"]);
@@ -709,12 +691,12 @@ class _RoomExpenseState extends State<RoomExpense>
     try {
       var CloseData = null;
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomKey': crypto.encrypt(widget.roomKey),
       };
 
       final response =
-          await createHTTPreq('room', http.delete, widget.token, jsonInputData);
+          await createHTTPreq('room', http.delete, _token, jsonInputData);
 
       isClear = true;
       CloseData = jsonDecode(response.body);
@@ -723,16 +705,16 @@ class _RoomExpenseState extends State<RoomExpense>
       }
       isPreviousPageNeedToBeUpdated.value = true;
       showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
-      if (this.mounted) {
-        Navigator.pop(context);
+      for (int i = 0; i < 2 && context.canPop(); i++) {
+        if (this.mounted) {
+          context.pop();
+        }
       }
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      _initialisation(); _extractExpenseData();
+      _initialisation();
+      _extractExpenseData();
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->CloseRoom"]);
@@ -773,7 +755,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             child: OutlinedButton(
                               onPressed: () {
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                               },
                               style: OutlinedButton.styleFrom(
@@ -835,17 +817,27 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> executeParallel() async {
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+
       _initialisation();
       _extractExpenseData();
       _getPaymentData();
       getFriendData();
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    isRoomActive = widget.isRoomActive;
-    roomName.setText(widget.roomName);
     getConnectivity();
     if (!kIsWeb) {
       getContactsFromLocal();
@@ -897,7 +889,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                       "\nRoom Key: " +
                                       widget.roomKey +
                                       "\n" +
-                                      widget.roomLink);
+                                      roomLink);
                                 },
                                 icon: Icon(
                                   Icons.send,
@@ -1091,13 +1083,13 @@ class _RoomExpenseState extends State<RoomExpense>
     try {
       Map<String, String> jsonInputData = {
         'roomKey': crypto.encrypt(widget.roomKey),
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'fEmail': crypto.encrypt(email),
         'isFromContact': crypto.encrypt(isFromContact.toString())
       };
 
       final response =
-          await createHTTPreq('friend', http.post, widget.token, jsonInputData);
+          await createHTTPreq('friend', http.post, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -1107,7 +1099,7 @@ class _RoomExpenseState extends State<RoomExpense>
           reason: "Unknwon Error", info: ["Rooms->sendJoinRequest"]);
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -1123,7 +1115,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('friend', http.put, widget.token, jsonInputData);
+          await createHTTPreq('friend', http.put, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -1132,7 +1124,7 @@ class _RoomExpenseState extends State<RoomExpense>
           reason: "Unknwon Error", info: ["Rooms->cancelJoinRequest"]);
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -1140,11 +1132,11 @@ class _RoomExpenseState extends State<RoomExpense>
     try {
       Map<String, String> jsonInputData = {
         'roomKey': crypto.encrypt(widget.roomKey),
-        'email': crypto.encrypt(widget.email)
+        'email': crypto.encrypt(_email)
       };
 
-      final response = await createHTTPreq(
-          'transaction', http.put, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('transaction', http.put, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -1526,7 +1518,7 @@ class _RoomExpenseState extends State<RoomExpense>
         filterResult.add(element);
       } else {
         for (int i = 0; i < partialExpense.length; i++) {
-          if (crypto.decrypt(partialExpense[i]['Email']) == widget.email) {
+          if (crypto.decrypt(partialExpense[i]['Email']) == _email) {
             filterResult.add(element);
             break;
           }
@@ -2153,8 +2145,8 @@ class _RoomExpenseState extends State<RoomExpense>
                           : ExpenseData(
                               TransList: filterResult,
                               RoomKey: widget.roomKey,
-                              Email: widget.email,
-                              Token: widget.token,
+                              Email: _email,
+                              Token: _token,
                               refreshIndicatorKeyExpenseData:
                                   _refreshIndicatorKeyRooms,
                               locked: locked,
@@ -2176,8 +2168,8 @@ class _RoomExpenseState extends State<RoomExpense>
                           : ExpenseData(
                               TransList: TransList,
                               RoomKey: widget.roomKey,
-                              Email: widget.email,
-                              Token: widget.token,
+                              Email: _email,
+                              Token: _token,
                               refreshIndicatorKeyExpenseData:
                                   _refreshIndicatorKeyRooms,
                               locked: locked,
@@ -2273,10 +2265,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                     await _updatePayToMember(
                                         context, data["objID"], "0", index);
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                   }),
                             ),
@@ -2304,10 +2296,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                     await _updatePayToMember(
                                         context, data["objID"], "1", index);
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                   }),
                             ),
@@ -2595,7 +2587,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                           allTransactionData[
                                                                   index]
                                                               ['sEmail']) ==
-                                                      widget.email) {
+                                                      _email) {
                                                 showDialog(
                                                   context: context,
                                                   builder: (BuildContext
@@ -2666,7 +2658,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                             index]
                                                                         [
                                                                         "sEmail"]) ==
-                                                                    widget.email
+                                                                    _email
                                                             ? Icon(
                                                                 Icons.edit,
                                                                 size: 20,
@@ -2932,7 +2924,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                             allTransactionData[
                                                                     index]
                                                                 ['sEmail']) ==
-                                                        widget.email) {
+                                                        _email) {
                                                   showDialog(
                                                     context: context,
                                                     builder: (BuildContext
@@ -2989,8 +2981,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                           allTransactionData[index]
                                                                               [
                                                                               'sEmail']) ==
-                                                                      widget
-                                                                          .email))
+                                                                      _email))
                                                               ? MainAxisAlignment
                                                                   .spaceBetween
                                                               : MainAxisAlignment
@@ -3000,8 +2991,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                     (crypto.decrypt(allTransactionData[index]
                                                                             [
                                                                             'sEmail']) ==
-                                                                        widget
-                                                                            .email))
+                                                                        _email))
                                                                 ? Icon(
                                                                     Icons.edit,
                                                                     size: 17,
@@ -3249,13 +3239,13 @@ class _RoomExpenseState extends State<RoomExpense>
                                     String key = "";
                                     if (addExpenseTo.isEmpty) {
                                       if (index == activeMembersEmail.length) {
-                                        key = widget.email;
+                                        key = _email;
                                       } else {
                                         key = activeMembersEmail[index];
                                       }
                                     } else {
                                       if (index == addExpenseTo.length) {
-                                        key = widget.email;
+                                        key = _email;
                                       } else {
                                         key = addExpenseTo[index];
                                       }
@@ -3372,7 +3362,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                         fontSize: 16),
                                                   ),
                                                   validator: (value) {
-                                                    if (key == widget.email) {
+                                                    if (key == _email) {
                                                       if (amountController[
                                                                   index]
                                                               .text ==
@@ -3447,7 +3437,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                         ),
                                         onPressed: () {
                                           if (this.mounted) {
-                                            Navigator.pop(context);
+                                            context.pop();
                                           }
                                         }),
                                   ),
@@ -3576,7 +3566,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                           ),
                                           onPressed: () {
                                             if (this.mounted) {
-                                              Navigator.pop(context);
+                                              context.pop();
                                             }
                                           }),
                                     ),
@@ -3651,7 +3641,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                 "\nRoom Key: " +
                                 widget.roomKey +
                                 "\n" +
-                                widget.roomLink);
+                                roomLink);
                           },
                           child: Icon(Icons.share_outlined),
                         )
@@ -3668,7 +3658,7 @@ class _RoomExpenseState extends State<RoomExpense>
               if (didPop) {
                 return;
               }
-              Navigator.pop(context, isPreviousPageNeedToBeUpdated.value);
+              context.pop(isPreviousPageNeedToBeUpdated.value);
             }),
             child: SizedBox(
                 height: MediaQuery.of(context).size.height,
@@ -3793,10 +3783,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                   }
                                                   await closeRoomRequest();
                                                   if (this.mounted) {
-                                                    Navigator.pop(context);
+                                                    context.pop();
                                                   }
                                                   if (this.mounted) {
-                                                    Navigator.pop(context);
+                                                    context.pop();
                                                   }
                                                 },
                                               ),
@@ -3875,7 +3865,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                           scrollDirection: Axis.horizontal,
                                                                                           itemCount: list.length - 1,
                                                                                           itemBuilder: (BuildContext context, int index) {
-                                                                                            if (membersListEmail[index] == widget.email || list[index + 1]['done'] || double.parse(crypto.decrypt(list[index + 1]["current"])) < 0) {
+                                                                                            if (membersListEmail[index] == _email || list[index + 1]['done'] || double.parse(crypto.decrypt(list[index + 1]["current"])) < 0) {
                                                                                               return SizedBox();
                                                                                             } else {
                                                                                               return InkWell(
@@ -3965,7 +3955,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                   ),
                                                                                                   onPressed: () {
                                                                                                     if (this.mounted) {
-                                                                                                      Navigator.pop(context);
+                                                                                                      context.pop();
                                                                                                     }
                                                                                                   }),
                                                                                             ),
@@ -4246,7 +4236,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                       }
                                                                                                     },
                                                                                                   );
-                                                                                                } else if (list[index]['done'] || membersListEmail[index - 1] == widget.email) {
+                                                                                                } else if (list[index]['done'] || membersListEmail[index - 1] == _email) {
                                                                                                   return SizedBox();
                                                                                                 } else {
                                                                                                   return InkWell(
@@ -4492,7 +4482,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                 ),
                                                                                                 onPressed: () {
                                                                                                   if (this.mounted) {
-                                                                                                    Navigator.pop(context);
+                                                                                                    context.pop();
                                                                                                   }
                                                                                                 }),
                                                                                           ),
@@ -4514,7 +4504,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                   if (noSplit) {
                                                                                                     if (_formKeyRooms.currentState!.validate()) {
                                                                                                       manualSplitAmount.clear();
-                                                                                                      manualSplitAmount[widget.email] = (double.parse(_amt.text) * 100) / 100;
+                                                                                                      manualSplitAmount[_email] = (double.parse(_amt.text) * 100) / 100;
                                                                                                       AddExpenseManual(context);
                                                                                                     }
                                                                                                   } else if (splitManually) {
@@ -4533,7 +4523,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                         });
                                                                                                       }
 
-                                                                                                      manualSplitAmount[widget.email] = 0;
+                                                                                                      manualSplitAmount[_email] = 0;
                                                                                                       splitManuallyWidget(context);
                                                                                                     }
                                                                                                   } else {
@@ -5075,7 +5065,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                   ),
                                   onPressed: () {
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                   }),
                             ),
@@ -5111,14 +5101,12 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           "0",
                                           roomExpenseCategory,
                                           roomsubExpenseCategory);
-                                      if (this.mounted) {
-                                        Navigator.pop(context);
-                                      }
-                                      if (this.mounted) {
-                                        Navigator.pop(context);
-                                      }
-                                      if (this.mounted) {
-                                        Navigator.pop(context);
+                                      for (int i = 0;
+                                          i < 3 && context.canPop();
+                                          i++) {
+                                        if (this.mounted) {
+                                          context.pop();
+                                        }
                                       }
                                     } else {
                                       showToast(context, "Invalid Amount",
@@ -5409,13 +5397,13 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         roomExpenseCategoryIndex,
                                         roomSubExpenseCategoryIndex);
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                   }
                                 }),
@@ -5443,7 +5431,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                 ),
                                 onPressed: () {
                                   if (this.mounted) {
-                                    Navigator.pop(context);
+                                    context.pop();
                                   }
                                 }),
                           ),
@@ -5476,7 +5464,7 @@ class _ExpenseDataState extends State<ExpenseData> {
           reason: "Unknwon Error", info: ["Rooms->addToPersonalExpense"]);
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -5559,10 +5547,10 @@ class _ExpenseDataState extends State<ExpenseData> {
                                     }
 
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                   },
                                   icon: Icon(Icons.delete)),
@@ -5777,11 +5765,10 @@ class _ExpenseDataState extends State<ExpenseData> {
                                 partialExpense.isEmpty
                                     ? "0"
                                     : (manualSplit ? "2" : "1"));
-                            if (this.mounted) {
-                              Navigator.pop(context);
-                            }
-                            if (this.mounted) {
-                              Navigator.pop(context);
+                            for (int i = 0; i < 2 && context.canPop(); i++) {
+                              if (this.mounted) {
+                                context.pop();
+                              }
                             }
                           },
                           style: OutlinedButton.styleFrom(
@@ -5828,7 +5815,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                     ),
                     onPressed: () {
                       if (this.mounted) {
-                        Navigator.pop(context);
+                        context.pop();
                       }
                     },
                   ),

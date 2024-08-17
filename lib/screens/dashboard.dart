@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
@@ -25,21 +26,15 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
-import 'package:settlenow/screens/BankTransactions.dart';
-import 'package:settlenow/screens/aboutus.dart';
-import 'package:settlenow/screens/profile.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:settlenow/screens/analysis.dart';
-import 'package:settlenow/screens/contactUs.dart';
 import 'package:settlenow/screens/expenses.dart';
-import 'package:settlenow/screens/inviteFriends.dart';
 import 'package:settlenow/screens/lendCredit.dart';
-import 'package:settlenow/screens/loginPage.dart';
 import 'package:settlenow/screens/summary.dart';
-import 'package:settlenow/screens/rooms.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -51,8 +46,6 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
-import 'ScheduleNotification.dart';
-import 'maintain.dart';
 import 'package:http_parser/http_parser.dart';
 
 class ShareMessage {
@@ -81,11 +74,9 @@ class ShareMessage {
 }
 
 class DashBoard extends StatefulWidget {
-  final String version;
   final int dash;
   final bool firstTime;
-  const DashBoard(
-      {Key? key, required this.version, this.dash = 0, required this.firstTime})
+  const DashBoard({Key? key, this.dash = 0, required this.firstTime})
       : super(key: key);
 
   @override
@@ -107,7 +98,6 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController();
   String _token = "";
-  late SharedPreferences prefs;
   ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
   ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
   ValueNotifier<bool> quickSplitDataHasMore = ValueNotifier(true);
@@ -183,6 +173,7 @@ class _DashBoardState extends State<DashBoard> {
   List<Map> getContactsFromDB = [];
   final TextEditingController _searchFriend = TextEditingController();
   List<FriendEach> aditionalMembers = [];
+  String appVersion = "Unknown";
 
   Future<void> getContactsFromLocal() async {
     try {
@@ -237,34 +228,23 @@ class _DashBoardState extends State<DashBoard> {
       buildShowDialog(context);
       if (kIsWeb) {
         await Future.wait([
-          prefs.remove("token"),
-          prefs.remove("__token"),
-          prefs.remove("___token"),
+          removePref(["token", "__token", "___token"]),
           deleteToken(),
           logOutFromGoogle()
         ]);
       } else {
         await Future.wait([
           deleteDB(),
-          prefs.remove("token"),
-          prefs.remove("__token"),
-          prefs.remove("___token"),
+          removePref(["token", "__token", "___token"]),
           AwesomeNotifications().cancelAllSchedules(),
           deleteToken(),
           logOutFromGoogle()
         ]);
       }
-      Navigator.pop(context);
-
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (context) => Overlay(initialEntries: [
-                  OverlayEntry(
-                      builder: (context) => SafeArea(child: LoginPage()))
-                ])),
-        (Route<dynamic> route) => false,
-      );
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      context.push(AppRouteConstants.loginRouteName);
     }
   }
 
@@ -555,33 +535,18 @@ class _DashBoardState extends State<DashBoard> {
     isItAndroidDevice = await checkAndroidInsideWeb();
 
     if (_email.text == "") {
-      prefs = await SharedPreferences.getInstance();
-
       if (!kIsWeb) {
-        if (await prefs.getBool("isInvitePremissionProvided") != null) {
-          isInvitePremissionProvided =
-              await prefs.getBool("isInvitePremissionProvided")!;
-        } else {
-          await prefs.setBool("isInvitePremissionProvided", false);
-        }
+        isInvitePremissionProvided = await getInvitePermissionStatus();
       }
 
-      if (await prefs.getBool("isGoogle") != null) {
-        isGoogle = await prefs.getBool("isGoogle")!;
-      }
-
-      if (await prefs.getInt("liveCategoryIndex") != null) {
-        int indexes = await prefs.getInt("liveCategoryIndex")!;
-        if (indexes == 2) {
-          filterliveRoomCategoryIndex.add(1);
-          filterliveRoomCategoryIndex.add(0);
-        } else {
-          filterliveRoomCategoryIndex.add(indexes);
-        }
-      } else {
-        await prefs.setInt("liveCategoryIndex", 2);
+      isGoogle = await getBoolPrefs("isGoogle") ?? false;
+      int indexes = await getIntPref("liveCategoryIndex") ?? 2;
+      if (indexes == 2) {
+        setIntPref("liveCategoryIndex", 2);
         filterliveRoomCategoryIndex.add(1);
         filterliveRoomCategoryIndex.add(0);
+      } else {
+        filterliveRoomCategoryIndex.add(indexes);
       }
 
       if (isGoogle) {
@@ -591,11 +556,11 @@ class _DashBoardState extends State<DashBoard> {
             _currentUser = account;
           });
         });
-        _googleSignIn.signInSilently();
+        //_googleSignIn.signInSilently();
       }
-      var tokenData = await prefs.getString("token");
-      if (tokenData != null && parseJWT(tokenData.toString()) != null) {
-        Map<String, dynamic> jsonOutData = parseJWT(prefs.getString("token")!);
+      var tokenData = await getStringPref("token");
+      if (tokenData != null && parseJWT(tokenData) != null) {
+        Map<String, dynamic> jsonOutData = parseJWT(tokenData);
         FirebaseCrashlytics.instance.setUserIdentifier(jsonOutData["email"]!);
         _email.text = jsonOutData["email"]!;
         _name.text = jsonOutData["name"]!;
@@ -603,31 +568,20 @@ class _DashBoardState extends State<DashBoard> {
         initalDataLoaded = true;
 
         if (!kIsWeb && !isInvitePremissionProvided) {
-          isContactPermissionGranted = await Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => InviteFriends(
-                        email: _email.text,
-                        token: _token,
-                        firstTime: true,
-                      )));
+          isContactPermissionGranted = await context.push(
+              AppRouteConstants.inviteFriendsRouteName,
+              extra: {"firstTime": true}) as bool;
         }
       } else {
         if (this.mounted) {
           buildShowDialog(context);
         }
 
-        if (this.mounted) {
-          Navigator.pop(context);
+        while (this.mounted && context.canPop()) {
+          context.pop();
         }
 
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => const LoginPage()),
-            (Route<dynamic> route) => false,
-          );
-        }
+        context.push(AppRouteConstants.loginRouteName);
       }
     }
 
@@ -654,7 +608,7 @@ class _DashBoardState extends State<DashBoard> {
       RoomDataC.value.clear();
     }
 
-    String appVersion = await getAppVersion();
+    appVersion = await getAppVersion();
 
     if (this.mounted) {
       setState(() {});
@@ -698,13 +652,12 @@ class _DashBoardState extends State<DashBoard> {
           setState(() {});
         }
       } else if (response.statusCode == 503) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+        while (context.canPop()) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
+        context.push(AppRouteConstants.maintainRouteName);
       } else {
         String errorMessage =
             crypto.decrypt(jsonDecode(response.body)['Message']);
@@ -789,13 +742,13 @@ class _DashBoardState extends State<DashBoard> {
           var JsonData = jsonDecode(response.body);
 
           if (this.mounted) {
-            Navigator.pop(context);
+            context.pop();
           }
           if (this.mounted) {
-            Navigator.pop(context);
+            context.pop();
           }
           if (this.mounted) {
-            Navigator.pop(context);
+            context.pop();
           }
 
           if (response.statusCode == 200) {
@@ -829,13 +782,13 @@ class _DashBoardState extends State<DashBoard> {
         var JsonData = jsonDecode(response.body);
 
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
 
         if (response.statusCode == 200 && flag) {
@@ -848,7 +801,7 @@ class _DashBoardState extends State<DashBoard> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       onException(context, err, stackTrace,
@@ -1237,7 +1190,7 @@ class _DashBoardState extends State<DashBoard> {
                                           ),
                                           onPressed: () {
                                             if (this.mounted) {
-                                              Navigator.pop(context);
+                                              context.pop();
                                             }
                                           },
                                           style: OutlinedButton.styleFrom(
@@ -1287,16 +1240,16 @@ class _DashBoardState extends State<DashBoard> {
                                                 if (filterliveRoomCategoryIndex
                                                         .length ==
                                                     2) {
-                                                  await prefs.setInt(
+                                                  setIntPref(
                                                       "liveCategoryIndex", 2);
                                                 } else {
-                                                  await prefs.setInt(
+                                                  setIntPref(
                                                       "liveCategoryIndex",
                                                       filterliveRoomCategoryIndex
                                                           .first);
                                                 }
                                                 if (this.mounted) {
-                                                  Navigator.pop(context);
+                                                  context.pop();
                                                 }
                                                 setStat(() {});
                                                 setState(() {});
@@ -1509,7 +1462,7 @@ class _DashBoardState extends State<DashBoard> {
                                               ),
                                               onPressed: () {
                                                 if (this.mounted) {
-                                                  Navigator.pop(context);
+                                                  context.pop();
                                                 }
                                               }),
                                         ),
@@ -1550,7 +1503,7 @@ class _DashBoardState extends State<DashBoard> {
                                                           fromContact: false));
                                                   if (this.mounted) {
                                                     setState(() {});
-                                                    Navigator.pop(context);
+                                                    context.pop();
                                                   }
                                                 }
                                               }),
@@ -1618,7 +1571,7 @@ class _DashBoardState extends State<DashBoard> {
                       ),
                       InkWell(
                         onTap: () {
-                          Navigator.pop(context);
+                          context.pop();
                         },
                         child: Icon(Icons.cancel_outlined),
                       )
@@ -1777,32 +1730,32 @@ class _DashBoardState extends State<DashBoard> {
         }
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (manualSplit) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (manualSplit) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
       }
       if (this.mounted) {
@@ -2024,7 +1977,7 @@ class _DashBoardState extends State<DashBoard> {
                                         ),
                                         onPressed: () {
                                           if (this.mounted) {
-                                            Navigator.pop(context);
+                                            context.pop();
                                           }
                                         }),
                                   ),
@@ -2418,7 +2371,7 @@ class _DashBoardState extends State<DashBoard> {
                                         ),
                                         onPressed: () {
                                           if (this.mounted) {
-                                            Navigator.pop(context);
+                                            context.pop();
                                           }
                                         }),
                                   ),
@@ -2939,7 +2892,7 @@ class _DashBoardState extends State<DashBoard> {
                                 ),
                                 onPressed: () {
                                   if (this.mounted) {
-                                    Navigator.pop(context);
+                                    context.pop();
                                   }
                                 },
                                 style: OutlinedButton.styleFrom(
@@ -3026,7 +2979,7 @@ class _DashBoardState extends State<DashBoard> {
                                   if (!error) {
                                     DateChanged = true;
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                   }
                                   setState(() {});
@@ -3234,11 +3187,11 @@ class _DashBoardState extends State<DashBoard> {
         await _requestIndicatorKey.currentState?.show();
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -3266,11 +3219,11 @@ class _DashBoardState extends State<DashBoard> {
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
       await _requestIndicatorKey.currentState?.show();
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -3294,7 +3247,7 @@ class _DashBoardState extends State<DashBoard> {
                 final provider =
                     Provider.of<ThemeProvider>(context, listen: false);
                 provider.toggleTheme(!themeProvider.darkTheme);
-                await prefs.setBool('darkTheme', themeProvider.darkTheme);
+                setBoolPrefs('darkTheme', themeProvider.darkTheme);
               },
               icon: Icon(
                 Icons.brightness_2,
@@ -4011,8 +3964,7 @@ class _DashBoardState extends State<DashBoard> {
                                                               sentRoomRequest[
                                                                       index]
                                                                   ["type"]);
-                                                          Navigator.pop(
-                                                              context);
+                                                          context.pop();
                                                         },
                                                         child: SizedBox(
                                                           child: Card(
@@ -4658,30 +4610,19 @@ class _DashBoardState extends State<DashBoard> {
       return RequestWidget(context);
     } else if (dash == 2) {
       return Expenses(
-        email: _email.text,
         date: date,
-        token: _token,
-        expenseCategory: expenseCategory,
-        subCategory: subCategory,
       );
     } else if (dash == 3) {
-      return LendCredit(
-        email: _email.text,
-        token: _token,
-      );
+      return LendCredit();
     } else if (dash == 4) {
       return Analysis(
         RoomDataC: RoomDataC.value,
         RoomDataO: RoomDataO.value,
-        email: _email.text,
-        token: _token,
         expenseCategory: expenseCategory,
         subCategory: subCategory,
       );
     } else {
       return SummaryPage(
-        email: _email.text,
-        token: _token,
         expenseCategory: expenseCategory,
         subCategory: subCategory,
       );
@@ -5006,8 +4947,7 @@ class _DashBoardState extends State<DashBoard> {
                                                             imageUpload(
                                                                 ImageSource
                                                                     .camera);
-                                                            Navigator.pop(
-                                                                context);
+                                                            context.pop();
                                                           },
                                                         ),
                                                         ListTile(
@@ -5019,8 +4959,7 @@ class _DashBoardState extends State<DashBoard> {
                                                             imageUpload(
                                                                 ImageSource
                                                                     .gallery);
-                                                            Navigator.pop(
-                                                                context);
+                                                            context.pop();
                                                           },
                                                         ),
                                                       ],
@@ -5049,26 +4988,7 @@ class _DashBoardState extends State<DashBoard> {
                   ListTile(
                     onTap: () {
                       if (this.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => Profile(
-                                  email: _email.text,
-                                  name: _name.text,
-                                  token: _token,
-                                  picUrl: isGoogle
-                                      ? (_currentUser != null
-                                          ? _currentUser!.photoUrl.toString()
-                                          : addCorsinImage(global.driveUrl +
-                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"))
-                                      : addCorsinImage(
-                                          global.driveUrl +
-                                              (_profilePicID.length == 0
-                                                  ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                                                  : _profilePicID),
-                                        ),
-                                  isGoogle: isGoogle)),
-                        );
+                        context.push(AppRouteConstants.profileRouteName);
                       }
                     },
                     leading: Icon(
@@ -5086,15 +5006,8 @@ class _DashBoardState extends State<DashBoard> {
                       : ListTile(
                           onTap: () async {
                             if (this.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => BankTransactions(
-                                          email: _email.text,
-                                          token: _token,
-                                          expenseCategory: expenseCategory,
-                                          subCategory: subCategory,
-                                        )),
+                              context.push(
+                                AppRouteConstants.bankTransactionRouteName,
                               );
 
                               if (this.mounted) {
@@ -5136,14 +5049,8 @@ class _DashBoardState extends State<DashBoard> {
                       : ListTile(
                           onTap: () {
                             if (this.mounted) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ScheduleNotification(
-                                          email: _email.text,
-                                          token: _token,
-                                        )),
-                              );
+                              context.push(AppRouteConstants
+                                  .schduleNotificationRouteName);
                             }
                           },
                           leading: Icon(
@@ -5160,15 +5067,9 @@ class _DashBoardState extends State<DashBoard> {
                       ? SizedBox()
                       : ListTile(
                           onTap: () async {
-                            isContactPermissionGranted = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => InviteFriends(
-                                        email: _email.text,
-                                        token: _token,
-                                        firstTime: false,
-                                      )),
-                            );
+                            isContactPermissionGranted = await context.push(
+                                AppRouteConstants.inviteFriendsRouteName,
+                                extra: {"firstTime": false}) as bool;
                             if (this.mounted) {
                               setState(() {});
                             }
@@ -5198,8 +5099,7 @@ class _DashBoardState extends State<DashBoard> {
                           final provider = Provider.of<ThemeProvider>(context,
                               listen: false);
                           provider.toggleTheme(!themeProvider.darkTheme);
-                          await prefs.setBool(
-                              'darkTheme', themeProvider.darkTheme);
+                          setBoolPrefs('darkTheme', themeProvider.darkTheme);
                         },
                         icon: Icon(
                           Icons.brightness_2,
@@ -5232,10 +5132,7 @@ class _DashBoardState extends State<DashBoard> {
                   ListTile(
                     onTap: () {
                       if (this.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => AboutUs()),
-                        );
+                        context.push(AppRouteConstants.aboutRouteName);
                       }
                     },
                     leading: Icon(
@@ -5251,14 +5148,7 @@ class _DashBoardState extends State<DashBoard> {
                   ListTile(
                     onTap: () {
                       if (this.mounted) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => ContactUs(
-                                    email: _email.text,
-                                    token: _token,
-                                  )),
-                        );
+                        context.push(AppRouteConstants.contactUsRouteName);
                       }
                     },
                     leading: Icon(
@@ -5306,7 +5196,7 @@ class _DashBoardState extends State<DashBoard> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Version " + widget.version,
+                          "Version " + appVersion,
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 12, color: Colors.white),
                         ),
@@ -6111,7 +6001,7 @@ class _QuickSplitState extends State<QuickSplit> {
                                   ),
                                   onPressed: () {
                                     if (this.mounted) {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     }
                                   }),
                             ),
@@ -6147,13 +6037,13 @@ class _QuickSplitState extends State<QuickSplit> {
                                           roomExpenseCategory,
                                           roomsubExpenseCategory);
                                       if (this.mounted) {
-                                        Navigator.pop(context);
+                                        context.pop();
                                       }
                                       if (this.mounted) {
-                                        Navigator.pop(context);
+                                        context.pop();
                                       }
                                       if (this.mounted) {
-                                        Navigator.pop(context);
+                                        context.pop();
                                       }
                                     } else {
                                       showToast(context, "Invalid Amount",
@@ -6201,7 +6091,7 @@ class _QuickSplitState extends State<QuickSplit> {
       }
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -6227,7 +6117,7 @@ class _QuickSplitState extends State<QuickSplit> {
       }
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -6271,7 +6161,7 @@ class _QuickSplitState extends State<QuickSplit> {
                             child: OutlinedButton(
                               onPressed: () {
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                               },
                               style: OutlinedButton.styleFrom(
@@ -6306,13 +6196,13 @@ class _QuickSplitState extends State<QuickSplit> {
                                 }
                                 await settleThisTransaction(id, index);
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                               },
                               child: Text(
@@ -6642,10 +6532,10 @@ class _QuickSplitState extends State<QuickSplit> {
                       }
                       await addToPersonalExpense(id);
                       if (this.mounted) {
-                        Navigator.pop(context);
+                        context.pop();
                       }
                       if (this.mounted) {
-                        Navigator.pop(context);
+                        context.pop();
                       }
                     },
                     style: OutlinedButton.styleFrom(
@@ -6687,7 +6577,7 @@ class _QuickSplitState extends State<QuickSplit> {
                     ),
                     onPressed: () {
                       if (this.mounted) {
-                        Navigator.pop(context);
+                        context.pop();
                       }
                     },
                   ),
@@ -6720,7 +6610,7 @@ class _QuickSplitState extends State<QuickSplit> {
           setState(() {});
         }
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
       }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -6731,7 +6621,7 @@ class _QuickSplitState extends State<QuickSplit> {
       }
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -7112,13 +7002,12 @@ class _RoomWidgetState extends State<RoomWidget> {
           setState(() {});
         }
       } else if (response.statusCode == 503) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+        while (context.canPop()) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
+        context.push(AppRouteConstants.maintainRouteName);
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -7204,19 +7093,9 @@ class _RoomWidgetState extends State<RoomWidget> {
   }
 
   _MoveToNext(BuildContext context, int index) async {
-    final dataFrom = await Navigator.push(
-      context,
-      MaterialPageRoute(
-          builder: (context) => RoomExpense(
-                roomKey: widget.RoomData.value[index].roomKey,
-                email: widget.email,
-                roomName: widget.RoomData.value[index].roomName,
-                token: widget.token,
-                roomLink: widget.RoomData.value[index].roomLink,
-                isRoomActive: widget.RoomData.value[index].active,
-                objID: widget.RoomData.value[index].roomID,
-              )),
-    );
+    final dataFrom = await context.push(AppRouteConstants.roomRouteName +
+        "/" +
+        widget.RoomData.value[index].roomKey) as bool;
     if (dataFrom) {
       await updateRoom(context, index, widget.RoomData.value[index].roomKey);
     }

@@ -9,20 +9,18 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
-import 'package:settlenow/screens/onBoarding.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:settlenow/screens/dashboard.dart';
-import 'package:settlenow/screens/otpName.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../others/themes.dart';
+import 'package:settlenow/others/themes.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -33,7 +31,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailId = TextEditingController();
-  late SharedPreferences prefs;
   bool canLoad = false;
   String deviceToken = "";
   GlobalKey<FormState> _formKeyLoginPage = GlobalKey<FormState>();
@@ -57,7 +54,9 @@ class _LoginPageState extends State<LoginPage> {
     subscription = Connectivity().onConnectivityChanged.listen(
       (List<ConnectivityResult> result) async {
         isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
+        if (this.mounted) {
+          setState(() {});
+        }
         if (!isDeviceConnected && isAlertSet == false) {
           setState(() => isAlertSet = true);
         } else if (isDeviceConnected && isAlertSet == true) {
@@ -69,7 +68,9 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
+    if (this.mounted) {
+      setState(() {});
+    }
     if (!isDeviceConnected && isAlertSet == false) {
       setState(() => isAlertSet = true);
     } else if (isDeviceConnected && isAlertSet == true) {
@@ -80,53 +81,46 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> deleteTempData() async {
-    await Future.wait([
-      prefs.remove("token"),
-      prefs.remove("__token"),
-      prefs.remove("___token")
-    ]);
+    removePref(["token", "__token", "___token"]);
     if (!kIsWeb) {
-      await AwesomeNotifications().cancelAllSchedules();
       String path = await getDBFilePath('contact_data.db');
-
       await deleteDatabase(path);
-
       Database database = await openDatabase(path, version: 1,
           onCreate: (Database db, int version) async {
-        await db.execute(
-            'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)');
-        await db.execute(
-            'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)');
+        await Future.wait([
+          db.execute(
+              'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)'),
+          db.execute(
+              'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)')
+        ]);
       });
 
-      await database.close();
+      Future.wait([
+        AwesomeNotifications().cancelAllSchedules(),
+        database.close(),
+      ]);
     }
   }
 
   Future<void> _extractEmail() async {
-    version = await getAppVersion();
-    prefs = await SharedPreferences.getInstance();
-    _deviceData = await initPlatformState();
-    isItAndroidDevice = await checkAndroidInsideWeb();
-
-    if (await prefs.getBool('darkTheme') != null) {
-      darkTheme = await prefs.getBool('darkTheme')!;
-    } else {
-      darkTheme =
-          (Brightness.dark == MediaQuery.of(context).platformBrightness);
-      await prefs.setBool('darkTheme', darkTheme);
-    }
+    var futureOut = await Future.wait([
+      getAppVersion(),
+      initPlatformState(),
+      checkAndroidInsideWeb(),
+      getTheme(context),
+      getBoardingStatus(),
+      getStringPref('token')
+    ]);
+    version = futureOut[0] as String;
+    _deviceData = futureOut[1] as Map<String, dynamic>;
+    isItAndroidDevice = futureOut[2] as bool;
+    darkTheme = futureOut[3] as bool;
+    isOnBoardingCompleted = futureOut[4] as bool;
+    var tempData = futureOut[5] as String?;
 
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
 
-    if (await prefs.getBool("isOnBoardingCompleted") != null) {
-      isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
-    } else {
-      await prefs.setBool("isOnBoardingCompleted", false);
-    }
-
-    var tempData = await prefs.getString("token");
     if (tempData == null) {
       await deleteTempData();
       if (this.mounted) {
@@ -150,25 +144,14 @@ class _LoginPageState extends State<LoginPage> {
         return;
       } else {
         if (this.mounted) {
+          while (context.canPop()) {
+            context.pop();
+          }
           isOnBoardingCompleted
-              ? Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DashBoard(
-                      version: version,
-                      firstTime: false,
-                    ),
-                  ),
-                  (Route<dynamic> route) => false,
-                )
-              : Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => onBoarding(
-                      version: version,
-                    ),
-                  ),
-                  (Route<dynamic> route) => false,
+              ? context.go(AppRouteConstants.dashboardRouteName,
+                  extra: {"firstTime": false})
+              : context.go(
+                  AppRouteConstants.onBoardingRouteName,
                 );
         }
       }
@@ -268,11 +251,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           onPressed: () {
                             if (this.mounted) {
-                              MoveToNext(
-                                  context,
-                                  OtpName(
-                                      email: _emailId.text, version: version),
-                                  _formKeyLoginPage);
+                              context.push(AppRouteConstants.verifyRouteName,
+                                  extra: {
+                                    "version": version,
+                                    "email": _emailId.text
+                                  });
                             }
                           }),
                     ),
@@ -325,8 +308,8 @@ class _LoginPageState extends State<LoginPage> {
                                   jsonEncode(jsonInputData));
 
                               await Future.wait([
-                                prefs.setString("token", jwToken),
-                                prefs.setBool("isGoogle", true)
+                                setStringPref('token', jwToken),
+                                setBoolPrefs('isGoogle', true),
                               ]);
 
                               var resp = null;
@@ -399,44 +382,35 @@ class _LoginPageState extends State<LoginPage> {
 
                               if (resp.statusCode == 200) {
                                 await Future.wait([
-                                  prefs.setString(
-                                      "___token", remainingData['createdOn']),
-                                  prefs.setString(
-                                      "__token", remainingData['phoneNo'])
+                                  setStringPref(
+                                      '___token', remainingData['createdOn']),
+                                  setStringPref(
+                                      '__token', remainingData['phoneNo'])
                                 ]);
                               } else {
                                 await Future.wait([
-                                  prefs.setString(
-                                      "___token", crypto.encrypt("")),
-                                  prefs.setString("__token", crypto.encrypt(""))
+                                  setStringPref('___token', crypto.encrypt("")),
+                                  setStringPref('__token', crypto.encrypt(""))
                                 ]);
                               }
 
                               if (this.mounted) {
-                                Navigator.pop(context);
+                                while (context.canPop()) {
+                                  context.pop();
+                                }
                               }
 
                               if (this.mounted) {
                                 isOnBoardingCompleted
-                                    ? Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => DashBoard(
-                                            version: version,
-                                            firstTime: true,
-                                          ),
-                                        ),
-                                        (Route<dynamic> route) => false,
-                                      )
-                                    : Navigator.pushAndRemoveUntil(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => onBoarding(
-                                            version: version,
-                                          ),
-                                        ),
-                                        (Route<dynamic> route) => false,
-                                      );
+                                    ? context.go(
+                                        AppRouteConstants.dashboardRouteName,
+                                        extra: {
+                                            "version": version,
+                                            "firstTime": true
+                                          })
+                                    : context.go(
+                                        AppRouteConstants.onBoardingRouteName,
+                                        extra: {"version": version});
                               }
                             }
                           } on Exception catch (err, stackTrace) {

@@ -3,38 +3,43 @@ import 'dart:convert';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
 import 'package:settlenow/others/crypto.dart';
 
 class InviteFriends extends StatefulWidget {
-  final String email;
-  final String token;
   final bool firstTime;
-  const InviteFriends(
-      {Key? key,
-      required this.email,
-      required this.token,
-      required this.firstTime})
-      : super(key: key);
+  const InviteFriends({Key? key, required this.firstTime}) : super(key: key);
 
   @override
   State<InviteFriends> createState() => _InviteFriendsState();
 }
 
 class _InviteFriendsState extends State<InviteFriends> {
-  late SharedPreferences prefs;
   bool contactPermissionGranted = false;
+  String _email = "";
+  String _token = "";
 
   initialization() async {
-    prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("isInvitePremissionProvided", true);
+    setBoolPrefs('isInvitePremissionProvided', true);
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+    }
   }
 
   pushToDB(List<dynamic> allContacts, List<FriendEach> allContactsData) async {
@@ -95,12 +100,12 @@ class _InviteFriendsState extends State<InviteFriends> {
       }
 
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'contacts': crypto.encrypt(allContacts.toString())
       };
 
       final response = await createHTTPreq(
-          'profile/localContact', http.post, widget.token, jsonInputData);
+          'profile/localContact', http.post, _token, jsonInputData);
 
       var resData = jsonDecode(response.body)['data'];
 
@@ -123,10 +128,10 @@ class _InviteFriendsState extends State<InviteFriends> {
     }
 
     if (this.mounted) {
-      Navigator.pop(context, contactPermissionGranted);
+      context.pop(contactPermissionGranted);
     }
     if (this.mounted) {
-      Navigator.pop(context, contactPermissionGranted);
+      context.pop(contactPermissionGranted);
     }
   }
 
@@ -182,7 +187,7 @@ class _InviteFriendsState extends State<InviteFriends> {
           if (didPop) {
             return;
           }
-          Navigator.pop(context, contactPermissionGranted);
+          context.pop(contactPermissionGranted);
         }),
         child: SingleChildScrollView(
           child: Container(
@@ -482,7 +487,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                           side: BorderSide(color: Colors.redAccent),
                         ),
                         onPressed: () async {
-                          Navigator.pop(context, false);
+                          context.pop(false);
                         },
                       ),
                     ),

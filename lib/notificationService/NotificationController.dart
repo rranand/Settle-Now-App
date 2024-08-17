@@ -46,7 +46,6 @@ class NotificationController {
       } else {
         NavKey.navKey.currentState!.push(MaterialPageRoute(
             builder: (_) => DashBoard(
-                  version: receivedAction.payload!["version"].toString(),
                   dash: 1,
                   firstTime: false,
                 )));
@@ -73,7 +72,6 @@ class NotificationController {
       } else {
         NavKey.navKey.currentState!.push(MaterialPageRoute(
             builder: (_) => DashBoard(
-                  version: receivedAction.payload!["version"].toString(),
                   dash: 1,
                   firstTime: false,
                 )));
@@ -84,30 +82,13 @@ class NotificationController {
           builder: (_) => ((receivedAction.payload!["type"]!) == "room"
               ? RoomExpense(
                   roomKey: receivedAction.payload!["roomKey"]!,
-                  email: receivedAction.payload!["email"]!,
-                  roomName: receivedAction.payload!["roomName"]!,
-                  token: receivedAction.payload!["token"]!,
-                  roomLink: receivedAction.payload!["roomLink"]!,
-                  objID: receivedAction.payload!["objID"] == null
-                      ? ""
-                      : receivedAction.payload!["objID"]!,
-                  isRoomActive:
-                      ((receivedAction.payload!["isRoomActive"]!) == 'true'
-                          ? true
-                          : false))
+                )
               : LendPage(
-                  objID: receivedAction.payload!["objID"] == null
-                      ? ""
-                      : receivedAction.payload!["objID"]!,
-                  email: receivedAction.payload!["email"]!,
-                  token: receivedAction.payload!["token"]!,
-                  name: receivedAction.payload!["roomName"]!,
-                  roomkey: receivedAction.payload!["key"]!,
-                  roomLink: receivedAction.payload!["roomLink"]!))));
+                  roomkey: receivedAction.payload!["roomkey"]!,
+                ))));
     } else {
       NavKey.navKey.currentState!.push(MaterialPageRoute(
           builder: (_) => DashBoard(
-                version: receivedAction.payload!["version"].toString(),
                 dash: 1,
                 firstTime: false,
               )));

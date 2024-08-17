@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -10,33 +11,28 @@ import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
-import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import '../contents.dart' as global;
 
 class Expenses extends StatefulWidget {
-  final String email;
   final String date;
-  final String token;
-  final List<dynamic> expenseCategory;
-  final List<List<dynamic>> subCategory;
 
-  const Expenses(
-      {Key? key,
-      required this.email,
-      required this.date,
-      required this.token,
-      required this.expenseCategory,
-      required this.subCategory})
-      : super(key: key);
+  const Expenses({
+    Key? key,
+    required this.date,
+  }) : super(key: key);
 
   @override
   _ExpensesState createState() => _ExpensesState();
 }
 
 class _ExpensesState extends State<Expenses> {
+  String _email = "";
+  String _token = "";
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<dynamic> TransList = [];
   bool filterDialog = false;
@@ -55,6 +51,8 @@ class _ExpensesState extends State<Expenses> {
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   GlobalKey<FormState> _updateExpense = GlobalKey<FormState>();
   DateTime expensedate = DateTime.now();
+  List<dynamic> expenseCategory = [];
+  List<List<dynamic>> subCategory = [];
 
   late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
@@ -92,9 +90,51 @@ class _ExpensesState extends State<Expenses> {
     }
   }
 
+  Future<void> getExpenseCategory() async {
+    try {
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email),
+      };
+
+      final response =
+          await createHTTPreq('profile', http.patch, _token, jsonInputData);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        expenseCategory.clear();
+        subCategory.clear();
+        Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
+        categoryMap.forEach((key, value) {
+          expenseCategory.add(key);
+          subCategory.add(value);
+        });
+      }
+    } on Exception catch (err, stackTrace) {
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["Expenses->getExpenseCategory"]);
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   Future _initialization() async {
     loaded = false;
 
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+    }
+
+    getExpenseCategory();
     var now = DateTime.now();
     Curdate = (now.month - 1).toString() + now.year.toString();
 
@@ -117,25 +157,24 @@ class _ExpensesState extends State<Expenses> {
 
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'date': crypto.encrypt(widget.date),
       };
 
-      final response = await createHTTPreq(
-          'ptransaction', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('ptransaction', http.post, _token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
         loaded = true;
         TransList = jsonDecode(response.body)['data'];
       } else if (response.statusCode == 503) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+        while (context.canPop()) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
+        context.push(AppRouteConstants.maintainRouteName);
       } else {
         showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
       }
@@ -153,13 +192,13 @@ class _ExpensesState extends State<Expenses> {
   removeRoomTransaction(String id, int index, bool isRoom) async {
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'id': crypto.encrypt(id),
         'isRoom': crypto.encrypt(isRoom ? "1" : "0")
       };
 
-      final response = await createHTTPreq('transaction/personalExpense',
-          http.delete, widget.token, jsonInputData);
+      final response = await createHTTPreq(
+          'transaction/personalExpense', http.delete, _token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -181,15 +220,15 @@ class _ExpensesState extends State<Expenses> {
       String purpose, String amount, String flag, String id, int index) async {
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'purpose': crypto.encrypt(purpose),
         'amount': crypto.encrypt(amount),
         'flag': crypto.encrypt(flag),
         'id': crypto.encrypt(id)
       };
 
-      final response = await createHTTPreq(
-          'ptransaction', http.put, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('ptransaction', http.put, _token, jsonInputData);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -321,14 +360,12 @@ class _ExpensesState extends State<Expenses> {
                                         "0",
                                         id,
                                         index);
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
-                                    }
-                                    if (this.mounted) {
-                                      Navigator.pop(context);
+                                    for (int i = 0;
+                                        i < 3 && context.canPop();
+                                        i++) {
+                                      if (this.mounted) {
+                                        context.pop();
+                                      }
                                     }
                                   }
                                 }),
@@ -386,10 +423,10 @@ class _ExpensesState extends State<Expenses> {
                                 }
                                 await removeRoomTransaction(id, index, room);
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                               },
                               icon: Icon(Icons.delete))
@@ -403,10 +440,10 @@ class _ExpensesState extends State<Expenses> {
                                       await updatePersonalTransaction(
                                           purpose, amount, "1", id, index);
                                       if (this.mounted) {
-                                        Navigator.pop(context);
+                                        context.pop();
                                       }
                                       if (this.mounted) {
-                                        Navigator.pop(context);
+                                        context.pop();
                                       }
                                     },
                                     icon: Icon(Icons.delete)),
@@ -536,7 +573,7 @@ class _ExpensesState extends State<Expenses> {
                   ),
                   onPressed: () {
                     if (this.mounted) {
-                      Navigator.pop(context);
+                      context.pop();
                     }
                   },
                 ),
@@ -556,27 +593,27 @@ class _ExpensesState extends State<Expenses> {
 
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'purpose': crypto.encrypt(_purpose.text),
         'amt': crypto.encrypt(_amt.text),
-        'type': crypto.encrypt(widget.expenseCategory[categoryIndex]),
-        'subType': crypto.encrypt((subCategoryIndex != -1 &&
-                widget.subCategory[categoryIndex].length > 0
-            ? widget.subCategory[categoryIndex][subCategoryIndex]
-            : "None")),
+        'type': crypto.encrypt(expenseCategory[categoryIndex]),
+        'subType': crypto.encrypt(
+            (subCategoryIndex != -1 && subCategory[categoryIndex].length > 0
+                ? subCategory[categoryIndex][subCategoryIndex]
+                : "None")),
         'date': crypto
             .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expensedate)),
       };
 
       final response = await createHTTPreq(
-          'ptransaction', http.patch, widget.token, jsonInputData);
+          'ptransaction', http.patch, _token, jsonInputData);
 
       Tdata = jsonDecode(response.body);
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       if (response.statusCode == 200) {
@@ -589,12 +626,11 @@ class _ExpensesState extends State<Expenses> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
-            reason: "Unknwon Error",
-            info: ["Expenses->AddExpense"]);
+            reason: "Unknwon Error", info: ["Expenses->AddExpense"]);
       }
     }
 
@@ -618,7 +654,7 @@ class _ExpensesState extends State<Expenses> {
     } else {
       TransList.forEach((element) {
         if (filtercategoryIndex.contains(
-            widget.expenseCategory.indexOf(crypto.decrypt(element['type'])))) {
+            expenseCategory.indexOf(crypto.decrypt(element['type'])))) {
           filterResult.add(element);
         }
       });
@@ -643,7 +679,7 @@ class _ExpensesState extends State<Expenses> {
     return Scaffold(
         appBar: AppBar(
           title: Text(title),
-          actions: widget.expenseCategory.length == 0
+          actions: expenseCategory.length == 0
               ? []
               : [
                   IconButton(
@@ -688,7 +724,7 @@ class _ExpensesState extends State<Expenses> {
                       height: 570,
                       child: MasonryGridView.count(
                         crossAxisCount: 2,
-                        itemCount: widget.expenseCategory.length,
+                        itemCount: expenseCategory.length,
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {
@@ -716,7 +752,7 @@ class _ExpensesState extends State<Expenses> {
                               child: Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
-                                  child: Text(widget.expenseCategory[index]),
+                                  child: Text(expenseCategory[index]),
                                 ),
                               ),
                             ),
@@ -2304,7 +2340,7 @@ class _ExpensesState extends State<Expenses> {
                     )),
         ),
         floatingActionButton: Curdate == widget.date
-            ? (widget.expenseCategory.length == 0
+            ? (expenseCategory.length == 0
                 ? null
                 : FloatingActionButton(
                     child: Icon(
@@ -2374,7 +2410,7 @@ class _ExpensesState extends State<Expenses> {
                                         errorStyle: TextStyle(fontSize: 15),
                                       ),
                                     ),
-                                    widget.expenseCategory.length == 0
+                                    expenseCategory.length == 0
                                         ? SizedBox()
                                         : SizedBox(
                                             width: MediaQuery.of(context)
@@ -2384,8 +2420,7 @@ class _ExpensesState extends State<Expenses> {
                                             height: 70,
                                             child: ListView.builder(
                                               scrollDirection: Axis.horizontal,
-                                              itemCount:
-                                                  widget.expenseCategory.length,
+                                              itemCount: expenseCategory.length,
                                               itemBuilder:
                                                   (BuildContext context,
                                                       int index) {
@@ -2420,7 +2455,7 @@ class _ExpensesState extends State<Expenses> {
                                                           child: Center(
                                                             child: InkWell(
                                                               child: Text(
-                                                                widget.expenseCategory[
+                                                                expenseCategory[
                                                                     index],
                                                                 style:
                                                                     TextStyle(
@@ -2450,10 +2485,8 @@ class _ExpensesState extends State<Expenses> {
                                               },
                                             ),
                                           ),
-                                    (widget.subCategory.length >
-                                                categoryIndex &&
-                                            widget.subCategory[categoryIndex]
-                                                    .length >
+                                    (subCategory.length > categoryIndex &&
+                                            subCategory[categoryIndex].length >
                                                 0)
                                         ? SizedBox(
                                             width: MediaQuery.of(context)
@@ -2463,9 +2496,9 @@ class _ExpensesState extends State<Expenses> {
                                             height: 70,
                                             child: ListView.builder(
                                               scrollDirection: Axis.horizontal,
-                                              itemCount: widget
-                                                  .subCategory[categoryIndex]
-                                                  .length,
+                                              itemCount:
+                                                  subCategory[categoryIndex]
+                                                      .length,
                                               itemBuilder:
                                                   (BuildContext context,
                                                       int index) {
@@ -2501,7 +2534,7 @@ class _ExpensesState extends State<Expenses> {
                                                           child: Center(
                                                             child: InkWell(
                                                               child: Text(
-                                                                widget.subCategory[
+                                                                subCategory[
                                                                         categoryIndex]
                                                                     [index],
                                                                 style:

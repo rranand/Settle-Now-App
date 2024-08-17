@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -10,29 +11,23 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/PersonalExpenseEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
-import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
 
 import '../models/ChartData.dart';
-import 'expenses.dart';
 
 class SummaryPage extends StatefulWidget {
-  final String email;
-  final String token;
   final List<dynamic> expenseCategory;
   final List<List<dynamic>> subCategory;
 
   const SummaryPage(
-      {Key? key,
-      required this.email,
-      required this.token,
-      required this.expenseCategory,
-      required this.subCategory})
+      {Key? key, required this.expenseCategory, required this.subCategory})
       : super(key: key);
 
   @override
@@ -40,6 +35,8 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _SummaryPageState extends State<SummaryPage> {
+  String _email = "";
+  String _token = "";
   List<PersonalExpenseEach> personalExpense = [];
   bool personalLoaded = false;
   bool roomLoaded = false;
@@ -108,18 +105,29 @@ class _SummaryPageState extends State<SummaryPage> {
     }
     category = widget.expenseCategory;
 
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+    }
     if (this.mounted) {
       setState(() {});
     }
 
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'alreadyHave': crypto.encrypt(personalExpense.length.toString())
       };
 
-      final response_1 = await createHTTPreq(
-          'profile', http.post, widget.token, jsonInputData);
+      final response_1 =
+          await createHTTPreq('profile', http.post, _token, jsonInputData);
 
       if (response_1.statusCode == 200) {
         if (loadFirstTime) {
@@ -135,13 +143,12 @@ class _SummaryPageState extends State<SummaryPage> {
           setState(() {});
         }
       } else if (response_1.statusCode == 503) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+        while (context.canPop()) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
+        context.push(AppRouteConstants.maintainRouteName);
       } else {
         showToast(
             context,
@@ -170,12 +177,12 @@ class _SummaryPageState extends State<SummaryPage> {
     }
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'date': crypto.encrypt(date),
       };
 
       final response = await createHTTPreq(
-          'ptransaction', http.delete, widget.token, jsonInputData);
+          'ptransaction', http.delete, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)['data'];
@@ -646,21 +653,11 @@ class _SummaryPageState extends State<SummaryPage> {
                                       child: InkWell(
                                         onTap: () {
                                           if (this.mounted) {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      Expenses(
-                                                        email: widget.email,
-                                                        date:
-                                                            filterResult[index]
-                                                                .Date,
-                                                        token: widget.token,
-                                                        expenseCategory: widget
-                                                            .expenseCategory,
-                                                        subCategory:
-                                                            widget.subCategory,
-                                                      )),
+                                            context.push(
+                                              AppRouteConstants
+                                                      .personalExpenseRouteName +
+                                                  "/" +
+                                                  filterResult[index].Date,
                                             );
                                           }
                                         },
@@ -750,19 +747,11 @@ class _SummaryPageState extends State<SummaryPage> {
                                   child: InkWell(
                                     onTap: () {
                                       if (this.mounted) {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Expenses(
-                                                    email: widget.email,
-                                                    date: personalExpense[index]
-                                                        .Date,
-                                                    token: widget.token,
-                                                    expenseCategory:
-                                                        widget.expenseCategory,
-                                                    subCategory:
-                                                        widget.subCategory,
-                                                  )),
+                                        context.push(
+                                          AppRouteConstants
+                                                  .personalExpenseRouteName +
+                                              "/" +
+                                              personalExpense[index].Date,
                                         );
                                       }
                                     },

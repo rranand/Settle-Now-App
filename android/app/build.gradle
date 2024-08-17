@@ -104,6 +104,7 @@ dependencies {
     implementation 'com.google.android.recaptcha:recaptcha:18.4.0'
     implementation 'com.google.firebase:firebase-perf'
     implementation 'com.google.firebase:firebase-crashlytics-ndk'
+    implementation 'androidx.activity:activity:1.6.0-alpha05'
 }
 
 android.buildTypes.release.ndk.debugSymbolLevel = 'FULL'

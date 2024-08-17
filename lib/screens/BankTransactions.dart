@@ -7,13 +7,14 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
 import 'package:shimmer/shimmer.dart';
@@ -23,26 +24,20 @@ import '../functions/filterBankSMS.dart';
 import '../contents.dart' as global;
 
 class BankTransactions extends StatefulWidget {
-  final String email;
-  final String token;
-  final List<dynamic> expenseCategory;
-  final List<List<dynamic>> subCategory;
-
-  const BankTransactions(
-      {Key? key,
-      required this.email,
-      required this.token,
-      required this.expenseCategory,
-      required this.subCategory})
-      : super(key: key);
+  const BankTransactions({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<BankTransactions> createState() => _BankTransactionsState();
 }
 
 class _BankTransactionsState extends State<BankTransactions> {
+  String _email = "";
+  String _token = "";
+  List<dynamic> expenseCategory = [];
+  List<List<dynamic>> subCategory = [];
   List<SmsMessage> _messages = [];
-  late SharedPreferences pref;
   bool permissionGranted = false;
   final SmsQuery _query = SmsQuery();
   GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyBankTrans =
@@ -129,13 +124,40 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
   }
 
+  Future<void> getExpenseCategory() async {
+    try {
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email),
+      };
+
+      final response =
+          await createHTTPreq('profile', http.patch, _token, jsonInputData);
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        expenseCategory.clear();
+        subCategory.clear();
+        Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
+        categoryMap.forEach((key, value) {
+          expenseCategory.add(key);
+          subCategory.add(value);
+        });
+      }
+    } on Exception catch (err, stackTrace) {
+      onException(context, err, stackTrace,
+          reason: "Unknwon Error", info: ["Expenses->getExpenseCategory"]);
+    }
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   Future<void> getLenDenData() async {
     try {
-      Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email)
-      };
+      Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
       final response =
-          await createHTTPreq('lend', http.patch, widget.token, jsonInputData);
+          await createHTTPreq('lend', http.patch, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         List<dynamic> temp = jsonDecode(response.body)['data'];
@@ -162,11 +184,9 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   Future<void> getActiveRooms() async {
     try {
-      Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email)
-      };
+      Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
       final response = await createHTTPreq(
-          'room/fullActiveRoom', http.post, widget.token, jsonInputData);
+          'room/fullActiveRoom', http.post, _token, jsonInputData);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         roomData = data['data'];
@@ -199,11 +219,11 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomKey': roomkey
       };
       final response = await createHTTPreq(
-          'room/roomSplitMembers', http.post, widget.token, jsonInputData);
+          'room/roomSplitMembers', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -213,7 +233,7 @@ class _BankTransactionsState extends State<BankTransactions> {
             expenseSplitWithExistingMembers = true;
             roomClosedCount++;
             isClosedany = true;
-          } else if (crypto.decrypt(element['email']) != widget.email) {
+          } else if (crypto.decrypt(element['email']) != _email) {
             activeMembersEmail.add(crypto.decrypt(element['email']));
           }
           if (!element['done']) {
@@ -243,7 +263,8 @@ class _BankTransactionsState extends State<BankTransactions> {
     if (this.mounted) {
       setState(() {});
     }
-    await Future.wait([getAllSms(), getActiveRooms(), getLenDenData()]);
+    await Future.wait(
+        [getExpenseCategory(), getAllSms(), getActiveRooms(), getLenDenData()]);
 
     dataFetched = true;
     if (this.mounted) {
@@ -295,28 +316,25 @@ class _BankTransactionsState extends State<BankTransactions> {
 
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'purpose': crypto.encrypt(_purpose.text),
         'amt': crypto.encrypt(amount),
         'date': crypto.encrypt(date),
-        'type': crypto.encrypt(widget.expenseCategory[categoryIndex]),
-        'subType': crypto.encrypt(widget.subCategory[categoryIndex].length > 0
-            ? widget.subCategory[categoryIndex][subCategoryIndex]
+        'type': crypto.encrypt(expenseCategory[categoryIndex]),
+        'subType': crypto.encrypt(subCategory[categoryIndex].length > 0
+            ? subCategory[categoryIndex][subCategoryIndex]
             : "None"),
       };
       final response = await createHTTPreq(
-          'ptransaction', http.patch, widget.token, jsonInputData);
+          'ptransaction', http.patch, _token, jsonInputData);
 
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
+
+      for (int i = 0; i < 3 && context.canPop(); i++) {
+        if (this.mounted) {
+          context.pop();
+        }
       }
 
       if (response.statusCode == 422) {
@@ -326,7 +344,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -384,7 +402,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 70,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: widget.expenseCategory.length,
+                          itemCount: expenseCategory.length,
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               child: Padding(
@@ -405,7 +423,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       child: Center(
                                         child: InkWell(
                                           child: Text(
-                                            widget.expenseCategory[index],
+                                            expenseCategory[index],
                                             style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
@@ -430,14 +448,13 @@ class _BankTransactionsState extends State<BankTransactions> {
                           },
                         ),
                       ),
-                      widget.subCategory[categoryIndex].length > 0
+                      subCategory[categoryIndex].length > 0
                           ? SizedBox(
                               width: MediaQuery.of(context).size.width * 0.96,
                               height: 70,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount:
-                                    widget.subCategory[categoryIndex].length,
+                                itemCount: subCategory[categoryIndex].length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return SizedBox(
                                     child: Padding(
@@ -461,8 +478,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                             child: Center(
                                               child: InkWell(
                                                 child: Text(
-                                                  widget.subCategory[
-                                                      categoryIndex][index],
+                                                  subCategory[categoryIndex]
+                                                      [index],
                                                   style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.w500,
@@ -547,12 +564,12 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
 
       Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email),
+        "email": crypto.encrypt(_email),
         "name": crypto.encrypt(_lenDenRoom.text)
       };
 
       final response =
-          await createHTTPreq('lend', http.post, widget.token, jsonInputData);
+          await createHTTPreq('lend', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         LenDenRoomID = jsonDecode(response.body)["id"];
@@ -570,7 +587,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
 
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
     if (this.mounted) {
       setState(() {});
@@ -584,36 +601,31 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomKey': roomData[roomIndex]["Key"],
         'purpose': crypto.encrypt(_purpose.text),
         'date': crypto.encrypt(date),
-        'type': crypto.encrypt(widget.expenseCategory[roomCategoryIndex]),
-        'subType': crypto.encrypt(
-            widget.subCategory[roomCategoryIndex].length > 0
-                ? widget.subCategory[roomCategoryIndex][subCategoryIndex]
-                : "None"),
+        'type': crypto.encrypt(expenseCategory[roomCategoryIndex]),
+        'subType': crypto.encrypt(subCategory[roomCategoryIndex].length > 0
+            ? subCategory[roomCategoryIndex][subCategoryIndex]
+            : "None"),
         'split': crypto.encrypt(manualSplitAmount.toString())
       };
 
-      final response = await createHTTPreq(
-          'manualSplit', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('manualSplit', http.post, _token, jsonInputData);
 
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
 
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      if (this.mounted) {
-        Navigator.pop(context);
+      for (int i = 0; i < 3 && context.canPop(); i++) {
+        if (this.mounted) {
+          context.pop();
+        }
       }
 
       if (splitManually && this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       if (response.statusCode == 422) {
@@ -623,7 +635,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       if (this.mounted) {
@@ -646,26 +658,22 @@ class _BankTransactionsState extends State<BankTransactions> {
 
       try {
         Map<String, String> jsonInputData = {
-          'email': crypto.encrypt(widget.email),
+          'email': crypto.encrypt(_email),
           'key': id,
           'purpose': crypto.encrypt(_purpose.text),
           'amount': crypto.encrypt(amount),
           "date": crypto.encrypt(date)
         };
 
-        final response = await createHTTPreq(
-            'lend', http.delete, widget.token, jsonInputData);
+        final response =
+            await createHTTPreq('lend', http.delete, _token, jsonInputData);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
+        for (int i = 0; i < 3 && context.canPop(); i++) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
 
         if (response.statusCode == 422) {
@@ -695,15 +703,14 @@ class _BankTransactionsState extends State<BankTransactions> {
 
       try {
         Map<String, String> jsonInputData = {
-          'email': crypto.encrypt(widget.email),
+          'email': crypto.encrypt(_email),
           'roomKey': roomData[roomIndex]["Key"],
           'purpose': crypto.encrypt(_purpose.text),
           'amt': crypto.encrypt(amount),
-          'type': crypto.encrypt(widget.expenseCategory[roomCategoryIndex]),
-          'subType': crypto.encrypt(
-              widget.subCategory[roomCategoryIndex].length > 0
-                  ? widget.subCategory[roomCategoryIndex][subCategoryIndex]
-                  : "None"),
+          'type': crypto.encrypt(expenseCategory[roomCategoryIndex]),
+          'subType': crypto.encrypt(subCategory[roomCategoryIndex].length > 0
+              ? subCategory[roomCategoryIndex][subCategoryIndex]
+              : "None"),
           "members": crypto.encrypt(((addExpenseTo.isEmpty &&
                   (isClosedany || expenseSplitWithExistingMembers))
               ? activeMembersEmail.toString()
@@ -711,19 +718,15 @@ class _BankTransactionsState extends State<BankTransactions> {
           "date": crypto.encrypt(date)
         };
 
-        final response = await createHTTPreq(
-            'data', http.delete, widget.token, jsonInputData);
+        final response =
+            await createHTTPreq('data', http.delete, _token, jsonInputData);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
-        }
-        if (this.mounted) {
-          Navigator.pop(context);
+        for (int i = 0; i < 3 && context.canPop(); i++) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
 
         if (response.statusCode == 422) {
@@ -733,7 +736,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
 
         if (this.mounted) {
@@ -998,13 +1001,13 @@ class _BankTransactionsState extends State<BankTransactions> {
                                     String key = "";
                                     if (addExpenseTo.isEmpty) {
                                       if (index == activeMembersEmail.length) {
-                                        key = widget.email;
+                                        key = _email;
                                       } else {
                                         key = activeMembersEmail[index];
                                       }
                                     } else {
                                       if (index == addExpenseTo.length) {
-                                        key = widget.email;
+                                        key = _email;
                                       } else {
                                         key = addExpenseTo[index];
                                       }
@@ -1121,7 +1124,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                         fontSize: 16),
                                                   ),
                                                   validator: (value) {
-                                                    if (key == widget.email) {
+                                                    if (key == _email) {
                                                       if (amountController[
                                                                   index]
                                                               .text ==
@@ -1196,7 +1199,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                         ),
                                         onPressed: () {
                                           if (this.mounted) {
-                                            Navigator.pop(context);
+                                            context.pop();
                                           }
                                         }),
                                   ),
@@ -1359,7 +1362,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                         height: 70,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: widget.expenseCategory.length,
+                          itemCount: expenseCategory.length,
                           itemBuilder: (BuildContext context, int index) {
                             return SizedBox(
                               child: Padding(
@@ -1380,7 +1383,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       child: Center(
                                         child: InkWell(
                                           child: Text(
-                                            widget.expenseCategory[index],
+                                            expenseCategory[index],
                                             style: TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.w500,
@@ -1406,14 +1409,14 @@ class _BankTransactionsState extends State<BankTransactions> {
                           },
                         ),
                       ),
-                      widget.subCategory[roomCategoryIndex].length > 0
+                      subCategory[roomCategoryIndex].length > 0
                           ? SizedBox(
                               width: MediaQuery.of(context).size.width * 0.96,
                               height: 70,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                itemCount: widget
-                                    .subCategory[roomCategoryIndex].length,
+                                itemCount:
+                                    subCategory[roomCategoryIndex].length,
                                 itemBuilder: (BuildContext context, int index) {
                                   return SizedBox(
                                     child: Padding(
@@ -1437,8 +1440,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                             child: Center(
                                               child: InkWell(
                                                 child: Text(
-                                                  widget.subCategory[
-                                                      roomCategoryIndex][index],
+                                                  subCategory[roomCategoryIndex]
+                                                      [index],
                                                   style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight: FontWeight.w500,
@@ -1526,7 +1529,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                               ['done'] ||
                                           crypto.decrypt(roomMembers[index - 1]
                                                   ['email']) ==
-                                              widget.email) {
+                                              _email) {
                                         return SizedBox();
                                       } else {
                                         return InkWell(
@@ -1821,7 +1824,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 if (_formKeyRoomBankTrans.currentState!
                                     .validate()) {
                                   manualSplitAmount.clear();
-                                  manualSplitAmount[widget.email] =
+                                  manualSplitAmount[_email] =
                                       (double.parse(amount) * 100) / 100;
                                   AddExpenseManual(context, date);
                                 }
@@ -1842,7 +1845,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                     });
                                   }
 
-                                  manualSplitAmount[widget.email] = 0;
+                                  manualSplitAmount[_email] = 0;
                                   splitManuallyWidget(context, date, amount);
                                 }
                               } else {
@@ -1926,7 +1929,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                     width: MediaQuery.of(context).size.width * 0.9,
                     height: roomData.isNotEmpty
                         ? 245
-                        : (widget.expenseCategory.length == 0 ? 145 : 185),
+                        : (expenseCategory.length == 0 ? 145 : 185),
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Column(
@@ -1944,7 +1947,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                             SizedBox(
                               height: 16,
                             ),
-                            widget.expenseCategory.length == 0
+                            expenseCategory.length == 0
                                 ? SizedBox()
                                 : SizedBox(
                                     height: 45,
@@ -2162,11 +2165,27 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
   }
 
+  initialisation() async {
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+
+      executeParallel();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     getConnectivity();
-    executeParallel();
+    initialisation();
   }
 
   @override
@@ -2725,7 +2744,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 ),
                                 onPressed: () {
                                   if (this.mounted) {
-                                    Navigator.pop(context);
+                                    context.pop();
                                   }
                                 },
                                 style: OutlinedButton.styleFrom(

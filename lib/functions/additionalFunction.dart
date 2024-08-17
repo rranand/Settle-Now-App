@@ -84,13 +84,6 @@ Future<String> getAppVersion() async {
   return await packageInfo.version.toString();
 }
 
-MoveToNext(BuildContext context, Widget widget,
-    GlobalKey<FormState> _formKeyMoveToNext) async {
-  if (_formKeyMoveToNext.currentState!.validate()) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => widget));
-  }
-}
-
 Widget privacyAndVersionBottomAppBar(String version) {
   return BottomAppBar(
     elevation: 0,
@@ -368,7 +361,6 @@ Future<dynamic> createHTTPreq(
     String url, Function httpType, String token, dynamic JSONData) async {
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
-
     Response res = await httpType(Uri.parse(global.url + url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',

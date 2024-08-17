@@ -6,10 +6,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow/screens/loginPage.dart';
+import 'package:settlenow/routes/route_config.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'firebase_options.dart';
-import 'others/route_service.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -130,8 +129,8 @@ class _MyAppState extends State<MyApp> {
         create: (context) => ThemeProvider(),
         builder: (context, _) {
           final themeProvider = Provider.of<ThemeProvider>(context);
-          return MaterialApp(
-            navigatorKey: NavKey.navKey,
+          return MaterialApp.router(
+            routerConfig: AppRouter.router,
             builder: (context, child) {
               return MediaQuery(
                 data: MediaQuery.of(context)
@@ -144,10 +143,6 @@ class _MyAppState extends State<MyApp> {
             theme: MyTheme.lightTheme(context),
             darkTheme: MyTheme.darTheme(context),
             title: "Settle Now",
-            home: SafeArea(
-              child: LoginPage(),
-            ),
-            onGenerateRoute: kIsWeb ? null : RouteServices.generateRoute,
             scrollBehavior: kIsWeb ? MyCustomScrollBehavior() : null,
           );
         });

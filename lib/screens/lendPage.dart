@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -15,9 +16,10 @@ import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
-import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sqflite/sqflite.dart';
@@ -25,27 +27,21 @@ import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
 class LendPage extends StatefulWidget {
-  final String email;
-  final String token;
-  final String name;
   final String roomkey;
-  final String roomLink;
-  final String objID;
-  const LendPage(
-      {Key? key,
-      required this.email,
-      required this.token,
-      required this.name,
-      required this.roomkey,
-      required this.roomLink,
-      required this.objID})
-      : super(key: key);
+  const LendPage({
+    Key? key,
+    required this.roomkey,
+  }) : super(key: key);
 
   @override
   State<LendPage> createState() => _LendPageState();
 }
 
 class _LendPageState extends State<LendPage> {
+  String _email = "";
+  String _token = "";
+  String roomLink = "";
+  String objID = "";
   final roomName = TextEditingController();
   List<dynamic> data = [];
   bool load = false;
@@ -130,7 +126,7 @@ class _LendPageState extends State<LendPage> {
     if (_formKeyLendPage.currentState!.validate()) {
       try {
         Map<String, String> jsonInputData = {
-          "email": crypto.encrypt(widget.email),
+          "email": crypto.encrypt(_email),
           "key": crypto.encrypt(widget.roomkey),
           "amount": crypto.encrypt((gaveMoney ? "" : "-") + _amount.text),
           "purpose": crypto.encrypt(_purpose.text),
@@ -138,15 +134,15 @@ class _LendPageState extends State<LendPage> {
               .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate))
         };
 
-        final response = await createHTTPreq(
-            'lend', http.delete, widget.token, jsonInputData);
+        final response =
+            await createHTTPreq('lend', http.delete, _token, jsonInputData);
 
         if (response.statusCode == 200) {
           isPreviousPageNeedToBeUpdated = true;
           _purpose.text = "";
           _amount.text = "";
           if (this.mounted) {
-            Navigator.pop(context);
+            context.pop();
           }
           _refreshIndicatorKeyLendPage.currentState?.show();
         } else {
@@ -157,7 +153,7 @@ class _LendPageState extends State<LendPage> {
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
 
         if (this.mounted) {
@@ -178,11 +174,11 @@ class _LendPageState extends State<LendPage> {
       }
       Map<String, String> jsonInputData = {
         'key': crypto.encrypt(widget.roomkey),
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
       };
 
-      final response = await createHTTPreq(
-          'friend/lend', http.patch, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('friend/lend', http.patch, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -217,22 +213,22 @@ class _LendPageState extends State<LendPage> {
     }
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomID': crypto.encrypt(widget.roomkey),
         'roomName': crypto.encrypt(newRoomName),
       };
 
       final response = await createHTTPreq(
-          'updateRoomName/lendRoom', http.post, widget.token, jsonInputData);
+          'updateRoomName/lendRoom', http.post, _token, jsonInputData);
 
       Tdata = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated = true;
 
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       showToast(context, crypto.decrypt(Tdata["Message"]),
@@ -243,7 +239,7 @@ class _LendPageState extends State<LendPage> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       if (this.mounted) {
@@ -285,13 +281,13 @@ class _LendPageState extends State<LendPage> {
     try {
       Map<String, String> jsonInputData = {
         'key': crypto.encrypt(widget.roomkey),
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'fEmail': crypto.encrypt(email),
         'isFromContact': crypto.encrypt(isFromContact.toString())
       };
 
-      final response = await createHTTPreq(
-          'friend/lend', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('friend/lend', http.post, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -303,7 +299,7 @@ class _LendPageState extends State<LendPage> {
       }
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -319,8 +315,8 @@ class _LendPageState extends State<LendPage> {
         'confirm': crypto.encrypt("0")
       };
 
-      final response = await createHTTPreq(
-          'friend/lend', http.put, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('friend/lend', http.put, _token, jsonInputData);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -331,7 +327,7 @@ class _LendPageState extends State<LendPage> {
       }
     }
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -416,7 +412,7 @@ class _LendPageState extends State<LendPage> {
                                           ),
                                           onPressed: () {
                                             if (this.mounted) {
-                                              Navigator.pop(context);
+                                              context.pop();
                                             }
                                           }),
                                     ),
@@ -490,7 +486,7 @@ class _LendPageState extends State<LendPage> {
                                     roomName.text +
                                     " (Len-Den) " +
                                     "\n" +
-                                    widget.roomLink);
+                                    roomLink);
                               },
                               icon: Icon(
                                 Icons.send,
@@ -687,7 +683,7 @@ class _LendPageState extends State<LendPage> {
     try {
       Map<String, String> jsonInputData = {
         "roomID": crypto.encrypt(widget.roomkey),
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'purpose': crypto.encrypt(purpose),
         'amount': crypto.encrypt(amount),
         'id': crypto.encrypt(id),
@@ -695,7 +691,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response = await createHTTPreq(
-          'lend/transaction', http.delete, widget.token, jsonInputData);
+          'lend/transaction', http.delete, _token, jsonInputData);
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
@@ -880,10 +876,10 @@ class _LendPageState extends State<LendPage> {
                                                 _Eamount.text,
                                             "0");
                                         if (this.mounted) {
-                                          Navigator.pop(context);
+                                          context.pop();
                                         }
                                         if (this.mounted) {
-                                          Navigator.pop(context);
+                                          context.pop();
                                         }
                                       }
                                     }),
@@ -923,10 +919,10 @@ class _LendPageState extends State<LendPage> {
                                                 _Eamount.text,
                                             "1");
                                         if (this.mounted) {
-                                          Navigator.pop(context);
+                                          context.pop();
                                         }
                                         if (this.mounted) {
-                                          Navigator.pop(context);
+                                          context.pop();
                                         }
                                       }
                                     }),
@@ -942,6 +938,17 @@ class _LendPageState extends State<LendPage> {
 
   Future _initialization() async {
     try {
+      var tokenData = await getStringPref('token');
+
+      if (tokenData != null) {
+        Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+        if (this.mounted) {
+          setState(() {
+            _email = jsonOutData["email"]!;
+            _token = jsonOutData["token"]!;
+          });
+        }
+      }
       if (this.mounted) {
         setState(() {
           expenseIndex = -1;
@@ -950,15 +957,19 @@ class _LendPageState extends State<LendPage> {
         });
       }
       Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email),
+        "email": crypto.encrypt(_email),
         "key": crypto.encrypt(widget.roomkey)
       };
 
       final response =
-          await createHTTPreq('lend', http.put, widget.token, jsonInputData);
+          await createHTTPreq('lend', http.put, _token, jsonInputData);
 
       if (response.statusCode == 200) {
-        data = jsonDecode(response.body)['data'];
+        var resData = jsonDecode(response.body);
+        data = resData['data'];
+        roomName.setText(crypto.decrypt(resData['name']));
+        roomLink = crypto.decrypt(resData['roomLink']);
+        objID = crypto.decrypt(resData['key']);
         data.sort((b, a) {
           DateTime tempDate_1 = new DateFormat(global.dateTimeFormat)
               .parse(crypto.decrypt(a["date"]));
@@ -967,8 +978,8 @@ class _LendPageState extends State<LendPage> {
           return tempDate_1.compareTo(tempDate_2);
         });
         if (firstTimeLoad) {
-          expenseIndex = data.indexWhere(
-              (element) => crypto.decrypt(element['_id']) == widget.objID);
+          expenseIndex = data
+              .indexWhere((element) => crypto.decrypt(element['_id']) == objID);
           if (expenseIndex != -1) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               controller.scrollToIndex(expenseIndex,
@@ -983,20 +994,19 @@ class _LendPageState extends State<LendPage> {
             jsonDecode(response.body)['closedOther'];
         isClosedByYou = jsonDecode(response.body)['closed'];
       } else if (response.statusCode == 503) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+        while (context.canPop()) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
+        context.push(AppRouteConstants.maintainRouteName);
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -1022,7 +1032,6 @@ class _LendPageState extends State<LendPage> {
   @override
   void initState() {
     super.initState();
-    roomName.setText(widget.name);
     getConnectivity();
     getContactsFromLocal();
     _initialization();
@@ -1040,26 +1049,25 @@ class _LendPageState extends State<LendPage> {
     try {
       var CloseData = null;
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomID': crypto.encrypt(widget.roomkey),
       };
 
-      final response = await createHTTPreq(
-          'lend/delete', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('lend/delete', http.post, _token, jsonInputData);
 
       CloseData = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated = true;
-      if (this.mounted) {
-        Navigator.pop(context);
+      for (int i = 0; i < 2 && context.canPop(); i++) {
+        if (this.mounted) {
+          context.pop();
+        }
       }
-      if (this.mounted) {
-        Navigator.pop(context);
-      }
-      Navigator.pop(context, isPreviousPageNeedToBeUpdated);
+      context.pop(isPreviousPageNeedToBeUpdated);
       showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -1110,7 +1118,7 @@ class _LendPageState extends State<LendPage> {
                               ),
                               onPressed: () {
                                 if (this.mounted) {
-                                  Navigator.pop(context);
+                                  context.pop();
                                 }
                               },
                               child: Text(
@@ -1202,7 +1210,7 @@ class _LendPageState extends State<LendPage> {
             if (didPop) {
               return;
             }
-            Navigator.pop(context, isPreviousPageNeedToBeUpdated);
+            context.pop(isPreviousPageNeedToBeUpdated);
           }),
           child: RefreshIndicator(
               key: _refreshIndicatorKeyLendPage,
@@ -1263,12 +1271,12 @@ class _LendPageState extends State<LendPage> {
                                         padding: EdgeInsets.symmetric(
                                             vertical: (crypto.decrypt(
                                                         data[index]["by"]) ==
-                                                    widget.email
+                                                    _email
                                                 ? 5.0
                                                 : 18.0),
                                             horizontal: (crypto.decrypt(
                                                         data[index]["by"]) ==
-                                                    widget.email
+                                                    _email
                                                 ? 8.0
                                                 : 12.0)),
                                         child: Column(
@@ -1284,7 +1292,7 @@ class _LendPageState extends State<LendPage> {
                                                   children: [
                                                     (crypto.decrypt(data[index]
                                                                 ["by"]) ==
-                                                            widget.email
+                                                            _email
                                                         ? CachedNetworkImage(
                                                             httpHeaders: {
                                                               'Access-Control-Allow-Origin':
@@ -1406,7 +1414,7 @@ class _LendPageState extends State<LendPage> {
                                                       (crypto.decrypt(
                                                                   data[index]
                                                                       ["by"]) ==
-                                                              widget.email
+                                                              _email
                                                           ? crypto.decrypt(
                                                               userData['name'])
                                                           : crypto.decrypt(
@@ -1457,7 +1465,7 @@ class _LendPageState extends State<LendPage> {
                                                         : SizedBox(),
                                                     crypto.decrypt(data[index]
                                                                 ["by"]) ==
-                                                            widget.email
+                                                            _email
                                                         ? IconButton(
                                                             onPressed:
                                                                 () async {
@@ -1489,7 +1497,7 @@ class _LendPageState extends State<LendPage> {
                                             ),
                                             (crypto.decrypt(
                                                         data[index]["by"]) ==
-                                                    widget.email
+                                                    _email
                                                 ? SizedBox()
                                                 : SizedBox(height: 8.0)),
                                             Text.rich(TextSpan(children: [
@@ -1897,7 +1905,7 @@ class _LendPageState extends State<LendPage> {
                                         }
                                         await addLoan(context);
                                         if (this.mounted) {
-                                          Navigator.pop(context);
+                                          context.pop();
                                         }
                                       },
                                       style: OutlinedButton.styleFrom(

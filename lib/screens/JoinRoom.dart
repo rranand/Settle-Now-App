@@ -1,14 +1,14 @@
 import 'dart:convert';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
-import 'package:settlenow/screens/dashboard.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/routes/route_constant.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
 
 import 'package:flutter/material.dart';
-import 'package:settlenow/screens/loginPage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../others/themes.dart';
 
@@ -23,7 +23,6 @@ class RoomJoin extends StatefulWidget {
 
 class _RoomJoinState extends State<RoomJoin> {
   String version = '';
-  late SharedPreferences prefs;
   bool darkTheme = false;
   String message = "Joining Room";
 
@@ -33,25 +32,17 @@ class _RoomJoinState extends State<RoomJoin> {
   }
 
   Future _roomJoin() async {
-    version = await getAppVersion();
-    prefs = await SharedPreferences.getInstance();
-
-    if (await prefs.getBool('darkTheme') != null) {
-      darkTheme = await prefs.getBool('darkTheme')!;
-    } else {
-      darkTheme =
-          (Brightness.dark == MediaQuery.of(context).platformBrightness);
-      await prefs.setBool('darkTheme', darkTheme);
-    }
+    var futureOut = await Future.wait([getAppVersion(), getTheme(context)]);
+    version = futureOut[0] as String;
+    darkTheme = futureOut[1] as bool;
 
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
 
     try {
-      if (await prefs.getString("token") != null &&
-          parseJWT(await prefs.getString("token")!) != null) {
-        Map<String, dynamic> jsonOutData =
-            parseJWT(await prefs.getString("token")!);
+      var tokenData = await getStringPref("token");
+      if (tokenData != null && parseJWT(tokenData) != null) {
+        Map<String, dynamic> jsonOutData = parseJWT(tokenData);
 
         String email = jsonOutData["email"]!;
         String _token = jsonOutData["token"]!;
@@ -87,25 +78,21 @@ class _RoomJoinState extends State<RoomJoin> {
         }
 
         Future.delayed(const Duration(milliseconds: 1000), () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashBoard(
-                version: version,
-                firstTime: false,
-              ),
-            ),
-            (Route<dynamic> route) => false,
-          );
+          if (this.mounted) {
+            while (context.canPop()) {
+              context.pop();
+            }
+          }
+          context.go(AppRouteConstants.dashboardRouteName,
+              extra: {"firstTime": false});
         });
       } else {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginPage(),
-          ),
-          (Route<dynamic> route) => false,
-        );
+        if (this.mounted) {
+          while (context.canPop()) {
+            context.pop();
+          }
+          context.push(AppRouteConstants.loginRouteName);
+        }
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -113,16 +100,13 @@ class _RoomJoinState extends State<RoomJoin> {
             reason: "Unknwon Error", info: ["JoinRoom->_roomJoin"]);
       }
 
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DashBoard(
-            version: version,
-            firstTime: false,
-          ),
-        ),
-        (Route<dynamic> route) => false,
-      );
+      if (this.mounted) {
+        while (context.canPop()) {
+          context.pop();
+        }
+      }
+      context.go(AppRouteConstants.dashboardRouteName,
+          extra: {"firstTime": false});
     }
   }
 

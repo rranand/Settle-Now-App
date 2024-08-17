@@ -4,21 +4,19 @@ import 'dart:convert';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import '../others/themes.dart';
-import 'maintain.dart';
 
 class ScheduleNotification extends StatefulWidget {
-  final String email;
-  final String token;
-  const ScheduleNotification(
-      {Key? key, required this.email, required this.token})
-      : super(key: key);
+  const ScheduleNotification({Key? key}) : super(key: key);
 
   @override
   State<ScheduleNotification> createState() => _ScheduleNotificationState();
@@ -33,6 +31,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   GlobalKey<FormState> _formKeySchduledNotify = GlobalKey<FormState>();
   List<dynamic> data = [];
   List<String> dates = [];
+  String _email = "";
+  String _token = "";
 
   late StreamSubscription<List<ConnectivityResult>> subscription;
   bool isDeviceConnected = false;
@@ -64,6 +64,20 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
     }
   }
 
+  initialisation() async {
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     subscription.cancel();
@@ -74,6 +88,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   void initState() {
     super.initState();
     getConnectivity();
+    initialisation();
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => _refreshIndicatorKeySchduledNotify.currentState?.show());
   }
@@ -94,22 +109,21 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       }
 
       Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email),
+        "email": crypto.encrypt(_email),
       };
 
-      final response = await createHTTPreq(
-          'remainder', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('remainder', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body);
         data = tempData['data'];
       } else if (response.statusCode == 503) {
         if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+          while (context.canPop()) {
+            context.pop();
+          }
+          context.push(AppRouteConstants.maintainRouteName);
         }
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
@@ -117,7 +131,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       if (this.mounted) {
@@ -144,15 +158,15 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
 
     try {
       Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'id': crypto.encrypt(id)
       };
 
-      final response = await createHTTPreq(
-          'remainder', http.delete, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('remainder', http.delete, _token, jsonInputData);
 
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
 
       var Tdata = jsonDecode(response.body);
@@ -167,7 +181,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -197,21 +211,21 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
 
       try {
         Map<String, String> jsonInputData = {
-          'email': crypto.encrypt(widget.email),
+          'email': crypto.encrypt(_email),
           'name': crypto.encrypt(_name.text),
           'date': crypto.encrypt(dates[currentDateIndex]),
           'notID': crypto.encrypt(IDs.toString())
         };
 
-        final response = await createHTTPreq(
-            'remainder', http.patch, widget.token, jsonInputData);
+        final response =
+            await createHTTPreq('remainder', http.patch, _token, jsonInputData);
 
         _name.text = "";
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
 
         var Tdata = jsonDecode(response.body);
@@ -302,7 +316,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                     onPressed: () async {
                                       await _deleteRemainder(id, index, notID);
                                       if (this.mounted) {
-                                        Navigator.pop(context);
+                                        context.pop();
                                       }
                                     },
                                     style: OutlinedButton.styleFrom(
@@ -330,7 +344,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                   width: 100,
                                   child: OutlinedButton(
                                     onPressed: () {
-                                      Navigator.pop(context);
+                                      context.pop();
                                     },
                                     style: OutlinedButton.styleFrom(
                                       shape: RoundedRectangleBorder(
@@ -541,7 +555,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
               if (didPop) {
                 return;
               }
-              Navigator.pop(context, false);
+              context.pop(false);
             }),
             child: RefreshIndicator(
                 key: _refreshIndicatorKeySchduledNotify,

@@ -5,17 +5,15 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
-import 'package:settlenow/screens/dashboard.dart';
-import 'package:settlenow/screens/loginPage.dart';
-import 'package:settlenow/screens/maintain.dart';
-import 'package:settlenow/screens/onBoarding.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,10 +22,8 @@ import '../others/themes.dart';
 
 class OtpName extends StatefulWidget {
   final String email;
-  final String version;
 
-  const OtpName({Key? key, required this.email, required this.version})
-      : super(key: key);
+  const OtpName({Key? key, required this.email}) : super(key: key);
 
   @override
   _OtpNameState createState() => _OtpNameState();
@@ -46,7 +42,6 @@ class _OtpNameState extends State<OtpName> {
   String deviceToken = "";
   final TextEditingController _name = TextEditingController();
   final TextEditingController _otp = TextEditingController();
-  late SharedPreferences prefs;
   Map<String, dynamic> _deviceData = <String, dynamic>{};
   bool isOnBoardingCompleted = false;
   bool canResendOTP = false;
@@ -84,7 +79,7 @@ class _OtpNameState extends State<OtpName> {
     }
 
     if (this.mounted) {
-      Navigator.pop(context);
+      context.pop();
     }
   }
 
@@ -94,15 +89,13 @@ class _OtpNameState extends State<OtpName> {
     };
 
     List<dynamic> fwaitTemp = await Future.wait([
-      SharedPreferences.getInstance(),
       initPlatformState(),
       getDeviceTokenToSendNotification(),
       createHTTPreq('login', http.post, token, jsonInputData)
     ]);
 
-    prefs = fwaitTemp[0];
-    _deviceData = fwaitTemp[1];
-    final response = fwaitTemp[3];
+    _deviceData = fwaitTemp[0];
+    final response = fwaitTemp[2];
 
     token = crypto.encrypt(widget.email +
         "#" +
@@ -130,27 +123,23 @@ class _OtpNameState extends State<OtpName> {
       }
     } else if (response.statusCode == 503) {
       if (this.mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Maintenance()),
-          (Route<dynamic> route) => false,
-        );
+        while (context.canPop()) {
+          context.pop();
+        }
+        context.push(AppRouteConstants.maintainRouteName);
       }
     } else {
       showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
           Icons.close);
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-        (Route<dynamic> route) => false,
-      );
+      if (this.mounted) {
+        while (context.canPop()) {
+          context.pop();
+        }
+        context.push(AppRouteConstants.loginRouteName);
+      }
     }
 
-    if (await prefs.getBool("isOnBoardingCompleted") != null) {
-      isOnBoardingCompleted = await prefs.getBool("isOnBoardingCompleted")!;
-    } else {
-      await prefs.setBool("isOnBoardingCompleted", false);
-    }
+    isOnBoardingCompleted = await getBoardingStatus();
   }
 
   Future<void> getDeviceTokenToSendNotification() async {
@@ -194,11 +183,8 @@ class _OtpNameState extends State<OtpName> {
 
         String jwToken =
             await createJWT(widget.email, jsonEncode(jsonInputData));
-
-        await Future.wait([
-          prefs.setString("token", jwToken),
-          prefs.setBool("isGoogle", false)
-        ]);
+        await Future.wait(
+            [setStringPref("token", jwToken), setBoolPrefs("isGoogle", false)]);
 
         var resp = null;
         Map<String, String> jsonInputDataReq = {};
@@ -239,34 +225,22 @@ class _OtpNameState extends State<OtpName> {
 
         if (resp.statusCode == 200) {
           await Future.wait([
-            prefs.setString("___token", remainingData['createdOn']),
-            prefs.setString("__token", remainingData['phoneNo'])
+            setStringPref("___token", remainingData['createdOn']),
+            setStringPref("__token", remainingData['phoneNo'])
           ]);
         }
 
         if (this.mounted) {
-          Navigator.pop(context);
+          while (context.canPop()) {
+            context.pop();
+          }
         }
         if (this.mounted) {
           isOnBoardingCompleted
-              ? Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => DashBoard(
-                      version: widget.version,
-                      firstTime: true,
-                    ),
-                  ),
-                  (Route<dynamic> route) => false,
-                )
-              : Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => onBoarding(
-                      version: widget.version,
-                    ),
-                  ),
-                  (Route<dynamic> route) => false,
+              ? context.go(AppRouteConstants.dashboardRouteName,
+                  extra: {"firstTime": true})
+              : context.go(
+                  AppRouteConstants.onBoardingRouteName,
                 );
         }
       } else {
@@ -275,12 +249,12 @@ class _OtpNameState extends State<OtpName> {
             error = true;
             errorText = crypto.decrypt(JsonData['Message']);
           });
-          Navigator.pop(context);
+          context.pop(context);
         }
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop(context);
       }
 
       if (this.mounted) {

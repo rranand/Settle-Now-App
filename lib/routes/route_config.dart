@@ -1,61 +1,140 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow/routes/route_constant.dart';
+import 'package:settlenow/screens/BankTransactions.dart';
+import 'package:settlenow/screens/ScheduleNotification.dart';
 import 'package:settlenow/screens/aboutus.dart';
 import 'package:settlenow/screens/contactUs.dart';
 import 'package:settlenow/screens/dashboard.dart';
-/*
+import 'package:settlenow/screens/expenses.dart';
+import 'package:settlenow/screens/inviteFriends.dart';
+import 'package:settlenow/screens/lendPage.dart';
+import 'package:settlenow/screens/loginPage.dart';
+import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/screens/onBoarding.dart';
+import 'package:settlenow/screens/otpName.dart';
+import 'package:settlenow/screens/profile.dart';
+import 'package:settlenow/screens/rooms.dart';
+
 class AppRouter {
-  static GoRouter returnRouter(bool isAuth) {
-    GoRouter router = GoRouter(
-      routes: [
+  static _allRoutes() {
+    List<RouteBase> allRoutes = [
+      GoRoute(
+        path: AppRouteConstants.loginRouteName,
+        builder: (context, state) {
+          return LoginPage();
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.verifyRouteName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return OtpName(
+            email: extra!['email'] as String,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.dashboardRouteName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return DashBoard(
+            dash: extra!['dash'] ?? 0,
+            firstTime: extra['firstTime'] ?? false,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.inviteFriendsRouteName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return InviteFriends(
+            firstTime: extra!['firstTime'] as bool,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.onBoardingRouteName,
+        builder: (context, state) {
+          return onBoarding();
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.maintainRouteName,
+        builder: (context, state) {
+          return Maintenance();
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.personalExpenseRouteName + '/:date',
+        builder: (context, state) {
+          return Expenses(
+            date: state.pathParameters['date']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.lendByTitleRouteName + '/:roomkey',
+        builder: (context, state) {
+          return LendPage(
+            roomkey: state.pathParameters['roomkey']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.roomRouteName + '/:roomkey',
+        builder: (context, state) {
+          return RoomExpense(roomKey: state.pathParameters['roomkey']!);
+        },
+      ),
+      GoRoute(
+        path: AppRouteConstants.profileRouteName,
+        builder: (context, state) {
+          return Profile();
+        },
+      ),
+      GoRoute(
+        name: AppRouteConstants.aboutRouteName,
+        path: '/about',
+        builder: (context, state) {
+          return AboutUs();
+        },
+      ),
+      GoRoute(
+        name: AppRouteConstants.contactUsRouteName,
+        path: '/contact_us',
+        builder: (context, state) {
+          return ContactUs();
+        },
+      )
+    ];
+
+    if (!kIsWeb) {
+      allRoutes.add(
         GoRoute(
-          name: AppRouteConstants.dashboardRouteName,
-          path: '/',
-          pageBuilder: (context, state) {
-            return MaterialPage(child: DashBoard());
+          path: AppRouteConstants.schduleNotificationRouteName,
+          builder: (context, state) {
+            return ScheduleNotification();
           },
         ),
+      );
+      allRoutes.add(
         GoRoute(
-          name: AppRouteConstants.profileRouteName,
-          path: '/profile/:username/:userid',
-          pageBuilder: (context, state) {
-            return MaterialPage(
-                child: Profile(
-              userid: state.params['userid']!,
-              username: state.params['username']!,
-            ));
+          path: AppRouteConstants.bankTransactionRouteName,
+          builder: (context, state) {
+            return BankTransactions();
           },
         ),
-        GoRoute(
-          name: AppRouteConstants.aboutRouteName,
-          path: '/about',
-          pageBuilder: (context, state) {
-            return MaterialPage(child: AboutUs());
-          },
-        ),
-        GoRoute(
-          name: AppRouteConstants.contactUsRouteName,
-          path: '/contact_us',
-          pageBuilder: (context, state) {
-            return MaterialPage(child: ContactUs());
-          },
-        )
-      ],
-      errorPageBuilder: (context, state) {
-        return MaterialPage(child: ErrorPage());
-      },
-      redirect: (context, state) {
-        if (!isAuth &&
-            state.location
-                .startsWith('/${AppRouteConstants.profileRouteName}')) {
-          return context.namedLocation(AppRouteConstants.contactUsRouteName);
-        } else {
-          return null;
-        }
-      },
-    );
-    return router;
+      );
+    }
+
+    return allRoutes;
   }
+
+  static final _router = GoRouter(
+    routes: _allRoutes(),
+    initialLocation: AppRouteConstants.loginRouteName,
+  );
+
+  static GoRouter get router => _router;
 }
-*/

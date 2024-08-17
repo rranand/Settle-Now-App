@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:settlenow/sampleWidget/room.dart';
-import 'package:settlenow/screens/dashboard.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class onBoardingData {
   String title;
@@ -19,8 +20,9 @@ class onBoardingData {
 }
 
 class onBoarding extends StatefulWidget {
-  final String version;
-  const onBoarding({Key? key, required this.version}) : super(key: key);
+  const onBoarding({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<onBoarding> createState() => _onBoardingState();
@@ -31,7 +33,6 @@ class _onBoardingState extends State<onBoarding> {
   int pageIndex = 0;
   bool isLastPage = false;
   List<onBoardingData> data = [];
-  late SharedPreferences prefs;
 
   contextBuilder(BuildContext) {
     data.add(onBoardingData(
@@ -85,17 +86,12 @@ class _onBoardingState extends State<onBoarding> {
   }
 
   MoveToDashBoard() async {
-    prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("isOnBoardingCompleted", true);
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(
-          builder: (context) => DashBoard(
-                version: widget.version,
-                firstTime: false,
-              )),
-      (Route<dynamic> route) => false,
-    );
+    setBoolPrefs("isOnBoardingCompleted", true);
+    while (context.canPop()) {
+      context.pop();
+    }
+    context.push(AppRouteConstants.dashboardRouteName,
+        extra: {"firstTime": false});
   }
 
   Container buildDot(int index, BuildContext context) {

@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/ChartData.dart';
 import 'package:settlenow/models/PersonalExpenseEach.dart';
 import 'package:settlenow/others/crypto.dart';
@@ -18,16 +20,12 @@ import '../others/themes.dart';
 class Analysis extends StatefulWidget {
   final List<RoomEach> RoomDataO;
   final List<RoomEach> RoomDataC;
-  final String email;
-  final String token;
   final List<dynamic> expenseCategory;
   final List<List<dynamic>> subCategory;
   const Analysis(
       {Key? key,
       required this.RoomDataO,
       required this.RoomDataC,
-      required this.email,
-      required this.token,
       required this.expenseCategory,
       required this.subCategory})
       : super(key: key);
@@ -37,6 +35,8 @@ class Analysis extends StatefulWidget {
 }
 
 class _AnalysisState extends State<Analysis> {
+  String _email = "";
+  String _token = "";
   List<PersonalExpenseEach> personalExpense = [];
   List<PersonalExpenseEach> personalExpenseByYear = [];
   double totalPersonalExpense = 0;
@@ -104,14 +104,26 @@ class _AnalysisState extends State<Analysis> {
       });
     }
 
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+    }
+
     try {
       Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'alreadyHave': crypto.encrypt("-1")
       };
 
-      final response = await createHTTPreq(
-          'profile', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('profile', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         List<dynamic> tempData = jsonDecode(response.body)['data'];
@@ -271,7 +283,7 @@ class _AnalysisState extends State<Analysis> {
                         style: TextStyle(fontSize: 22),
                       ),
                       IconButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () => context.pop(),
                           icon: Icon(Icons.cancel_outlined))
                     ],
                   ),
@@ -344,12 +356,12 @@ class _AnalysisState extends State<Analysis> {
     List<dynamic> RoomData = [];
     try {
       Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(widget.email),
+        'email': crypto.encrypt(_email),
         'roomKey': crypto.encrypt(roomKeys.toString())
       };
 
       final response = await createHTTPreq(
-          'transaction/analysis', http.post, widget.token, jsonInputData);
+          'transaction/analysis', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         RoomData = jsonDecode(response.body)['data'];

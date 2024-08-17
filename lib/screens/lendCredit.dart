@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -10,24 +11,24 @@ import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/gradient.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/themes.dart';
-import 'package:settlenow/screens/lendPage.dart';
-import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:settlenow/others/crypto.dart';
 
 class LendCredit extends StatefulWidget {
-  final String email;
-  final String token;
-
-  const LendCredit({Key? key, required this.email, required this.token})
-      : super(key: key);
+  const LendCredit({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<LendCredit> createState() => _LendCreditState();
 }
 
 class _LendCreditState extends State<LendCredit> {
+  String _email = "";
+  String _token = "";
   List<dynamic> data = [];
   bool load = false;
   bool validateText = false;
@@ -75,16 +76,16 @@ class _LendCreditState extends State<LendCredit> {
   Future createRoom(BuildContext context) async {
     try {
       Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email),
+        "email": crypto.encrypt(_email),
         "name": crypto.encrypt(_name.text)
       };
 
       final response =
-          await createHTTPreq('lend', http.post, widget.token, jsonInputData);
+          await createHTTPreq('lend', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
         data.add(jsonDecode(response.body)['data']);
         _name.text = "";
@@ -112,12 +113,12 @@ class _LendCreditState extends State<LendCredit> {
     }
     try {
       Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email),
+        "email": crypto.encrypt(_email),
         "roomKey": roomID
       };
 
-      final response = await createHTTPreq(
-          'update/lend', http.post, widget.token, jsonInputData);
+      final response =
+          await createHTTPreq('update/lend', http.post, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         bool isDeleted = jsonDecode(response.body)["isDeleted"];
@@ -152,30 +153,39 @@ class _LendCreditState extends State<LendCredit> {
         });
       }
 
-      Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(widget.email)
-      };
+      var tokenData = await getStringPref('token');
+
+      if (tokenData != null) {
+        Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+        if (this.mounted) {
+          setState(() {
+            _email = jsonOutData["email"]!;
+            _token = jsonOutData["token"]!;
+          });
+        }
+      }
+
+      Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
 
       final response =
-          await createHTTPreq('lend', http.patch, widget.token, jsonInputData);
+          await createHTTPreq('lend', http.patch, _token, jsonInputData);
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
       } else if (response.statusCode == 503) {
-        if (this.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => Maintenance()),
-            (Route<dynamic> route) => false,
-          );
+        while (context.canPop()) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
+        context.push(AppRouteConstants.maintainRouteName);
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -242,20 +252,11 @@ class _LendCreditState extends State<LendCredit> {
                               child: InkWell(
                                 onTap: () async {
                                   if (this.mounted) {
-                                    final dataFrom = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => LendPage(
-                                                  objID: "",
-                                                  email: widget.email,
-                                                  token: widget.token,
-                                                  name: crypto.decrypt(
-                                                      data[index]["name"]),
-                                                  roomkey: crypto.decrypt(
-                                                      data[index]["key"]),
-                                                  roomLink: crypto.decrypt(
-                                                      data[index]["roomLink"]),
-                                                )));
+                                    final dataFrom = await context.push(
+                                      AppRouteConstants.lendByTitleRouteName +
+                                          "/" +
+                                          crypto.decrypt(data[index]["key"]),
+                                    ) as bool;
                                     if (dataFrom) {
                                       await updateRoom(
                                           context, index, data[index]["key"]);
@@ -532,7 +533,7 @@ class _LendCreditState extends State<LendCredit> {
                                   }
                                   await createRoom(context);
                                   if (this.mounted) {
-                                    Navigator.pop(context);
+                                    context.pop();
                                   }
                                 } else {
                                   validateText = true;

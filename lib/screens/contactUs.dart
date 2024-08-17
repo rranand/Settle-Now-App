@@ -3,24 +3,27 @@ import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../others/themes.dart';
 
 class ContactUs extends StatefulWidget {
-  final String token;
-  final String email;
-  const ContactUs({Key? key, required this.email, required this.token})
-      : super(key: key);
+  const ContactUs({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<ContactUs> createState() => _ContactUsState();
 }
 
 class _ContactUsState extends State<ContactUs> {
+  String _email = "";
+  String _token = "";
   TextEditingController _subject = TextEditingController();
   TextEditingController _message = TextEditingController();
   GlobalKey<FormState> _formKeyContactUs = GlobalKey<FormState>();
@@ -65,7 +68,7 @@ class _ContactUsState extends State<ContactUs> {
   sendContactData(BuildContext context) async {
     if (!isDeviceConnected) {
       if (this.mounted) {
-        Navigator.pop(context);
+        context.pop();
       }
       return;
     }
@@ -77,25 +80,25 @@ class _ContactUsState extends State<ContactUs> {
 
       try {
         Map<String, String> jsonInputData = {
-          'email': crypto.encrypt(widget.email),
+          'email': crypto.encrypt(_email),
           'subject': crypto.encrypt(_subject.text),
           'message': crypto.encrypt(_message.text),
         };
 
-        final response = await createHTTPreq(
-            'contact', http.post, widget.token, jsonInputData);
+        final response =
+            await createHTTPreq('contact', http.post, _token, jsonInputData);
 
         _subject.text = "";
         _message.text = "";
         Tdata = jsonDecode(response.body);
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
 
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          Navigator.pop(context);
+          context.pop();
         }
 
         if (this.mounted) {
@@ -110,10 +113,25 @@ class _ContactUsState extends State<ContactUs> {
     }
   }
 
+  initialisation() async {
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     getConnectivity();
+    initialisation();
   }
 
   Widget contactForm() {
