@@ -241,7 +241,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           onPressed: () {
                             if (this.mounted) {
-                              context.push(AppRouteConstants.verifyRouteName,
+                              context.push(
+                                  AppRouteConstants.loginRouteName +
+                                      AppRouteConstants.verifyRouteName,
                                   extra: {
                                     "version": version,
                                     "email": _emailId.text

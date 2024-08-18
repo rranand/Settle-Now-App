@@ -79,6 +79,14 @@ class _OtpNameState extends State<OtpName> {
   }
 
   Future _initialisation() async {
+    if (widget.email.isEmpty) {
+      if (this.mounted) {
+        while (context.canPop()) {
+          context.pop();
+        }
+        context.push(AppRouteConstants.loginRouteName);
+      }
+    }
     Map<String, String> jsonInputData = {
       'email': crypto.encrypt(widget.email),
     };

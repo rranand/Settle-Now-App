@@ -23,47 +23,47 @@ class AppRouter {
       FirebaseAnalyticsObserver(analytics: analytics);
 
   static _allRoutes() {
+    List<RouteBase> androidRoutes = [];
+    if (!kIsWeb) {
+      androidRoutes.add(
+        GoRoute(
+          path: AppRouteConstants.schduleNotificationRouteName.substring(1),
+          builder: (context, state) {
+            return ScheduleNotification();
+          },
+        ),
+      );
+      androidRoutes.add(
+        GoRoute(
+          path: AppRouteConstants.bankTransactionRouteName.substring(1),
+          builder: (context, state) {
+            return BankTransactions();
+          },
+        ),
+      );
+    }
     List<RouteBase> allRoutes = [
       GoRoute(
-        path: AppRouteConstants.loginRouteName,
-        builder: (context, state) {
-          return LoginPage();
-        },
-      ),
-      GoRoute(
-        path: AppRouteConstants.verifyRouteName,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return OtpName(
-            email: extra!['email'] as String,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRouteConstants.dashboardRouteName,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return DashBoard(
-            dash: extra!['dash'] ?? 0,
-            firstTime: extra['firstTime'] ?? false,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRouteConstants.inviteFriendsRouteName,
-        builder: (context, state) {
-          final extra = state.extra as Map<String, dynamic>?;
-          return InviteFriends(
-            firstTime: extra!['firstTime'] as bool,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRouteConstants.onBoardingRouteName,
-        builder: (context, state) {
-          return onBoarding();
-        },
-      ),
+          path: AppRouteConstants.loginRouteName,
+          builder: (context, state) {
+            return LoginPage();
+          },
+          routes: [
+            GoRoute(
+              path: AppRouteConstants.verifyRouteName.substring(1),
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>?;
+                if (extra == null) {
+                  return OtpName(
+                    email: "",
+                  );
+                }
+                return OtpName(
+                  email: extra['email'] as String,
+                );
+              },
+            ),
+          ]),
       GoRoute(
         path: AppRouteConstants.maintainRouteName,
         builder: (context, state) {
@@ -71,67 +71,88 @@ class AppRouter {
         },
       ),
       GoRoute(
-        path: AppRouteConstants.personalExpenseRouteName + '/:date',
-        builder: (context, state) {
-          return Expenses(
-            date: state.pathParameters['date']!,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRouteConstants.lendByTitleRouteName + '/:roomkey',
-        builder: (context, state) {
-          return LendPage(
-            roomkey: state.pathParameters['roomkey']!,
-          );
-        },
-      ),
-      GoRoute(
-        path: AppRouteConstants.roomRouteName + '/:roomkey',
-        builder: (context, state) {
-          return RoomExpense(roomKey: state.pathParameters['roomkey']!);
-        },
-      ),
-      GoRoute(
-        path: AppRouteConstants.profileRouteName,
-        builder: (context, state) {
-          return Profile();
-        },
-      ),
-      GoRoute(
-        name: AppRouteConstants.aboutRouteName,
-        path: '/about',
-        builder: (context, state) {
-          return AboutUs();
-        },
-      ),
-      GoRoute(
-        name: AppRouteConstants.contactUsRouteName,
-        path: '/contact_us',
-        builder: (context, state) {
-          return ContactUs();
-        },
-      )
-    ];
+          path: AppRouteConstants.dashboardRouteName,
+          builder: (context, state) {
+            final extra = state.extra as Map<String, dynamic>?;
 
-    if (!kIsWeb) {
-      allRoutes.add(
-        GoRoute(
-          path: AppRouteConstants.schduleNotificationRouteName,
-          builder: (context, state) {
-            return ScheduleNotification();
+            if (extra == null) {
+              return DashBoard(
+                dash: 0,
+                firstTime: false,
+              );
+            }
+
+            return DashBoard(
+              dash: extra['dash'] ?? 0,
+              firstTime: extra['firstTime'] ?? false,
+            );
           },
-        ),
-      );
-      allRoutes.add(
-        GoRoute(
-          path: AppRouteConstants.bankTransactionRouteName,
-          builder: (context, state) {
-            return BankTransactions();
-          },
-        ),
-      );
-    }
+          routes: [
+            GoRoute(
+              path: AppRouteConstants.personalExpenseRouteName.substring(1) +
+                  '/:date',
+              builder: (context, state) {
+                return Expenses(
+                  date: state.pathParameters['date']!,
+                );
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.lendByTitleRouteName.substring(1) +
+                  '/:roomkey',
+              builder: (context, state) {
+                return LendPage(
+                  roomkey: state.pathParameters['roomkey']!,
+                );
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.roomRouteName.substring(1) + '/:roomkey',
+              builder: (context, state) {
+                return RoomExpense(roomKey: state.pathParameters['roomkey']!);
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.profileRouteName.substring(1),
+              builder: (context, state) {
+                return Profile();
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.aboutRouteName.substring(1),
+              builder: (context, state) {
+                return AboutUs();
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.contactUsRouteName.substring(1),
+              builder: (context, state) {
+                return ContactUs();
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.inviteFriendsRouteName.substring(1),
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>?;
+                if (extra == null) {
+                  return InviteFriends(
+                    firstTime: false,
+                  );
+                }
+                return InviteFriends(
+                  firstTime: extra['firstTime'] as bool,
+                );
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.onBoardingRouteName.substring(1),
+              builder: (context, state) {
+                return onBoarding();
+              },
+            ),
+            ...androidRoutes
+          ]),
+    ];
 
     return allRoutes;
   }

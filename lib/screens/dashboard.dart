@@ -499,6 +499,8 @@ class _DashBoardState extends State<DashBoard> {
     for (int i = date.year; i >= 2018; i--) {
       Year.add(i.toString());
     }
+    final provider = Provider.of<ThemeProvider>(context, listen: false);
+    provider.toggleTheme(await getTheme(context));
 
     isItAndroidDevice = await checkAndroidInsideWeb();
 
@@ -708,16 +710,9 @@ class _DashBoardState extends State<DashBoard> {
           _NRoom.text = "";
           var JsonData = jsonDecode(response.body);
 
-          if (this.mounted) {
+          for (int i = 0; i < 3 && this.mounted && context.canPop(); i++) {
             context.pop();
           }
-          if (this.mounted) {
-            context.pop();
-          }
-          if (this.mounted) {
-            context.pop();
-          }
-
           if (response.statusCode == 200) {
             quickSplitData.value.insert(
                 0, QuickSplitEach.fromJson(jsonDecode(response.body)['data']));
@@ -748,13 +743,7 @@ class _DashBoardState extends State<DashBoard> {
         _NRoom.text = "";
         var JsonData = jsonDecode(response.body);
 
-        if (this.mounted) {
-          context.pop();
-        }
-        if (this.mounted) {
-          context.pop();
-        }
-        if (this.mounted) {
+        for (int i = 0; i < 3 && this.mounted && context.canPop(); i++) {
           context.pop();
         }
 

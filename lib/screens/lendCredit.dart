@@ -47,8 +47,8 @@ class _LendCreditState extends State<LendCredit> {
         "name": crypto.encrypt(_name.text)
       };
 
-      final response =
-          await createHTTPreq('lend', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'lend', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         if (this.mounted) {
@@ -84,8 +84,8 @@ class _LendCreditState extends State<LendCredit> {
         "roomKey": roomID
       };
 
-      final response =
-          await createHTTPreq('update/lend', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'update/lend', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         bool isDeleted = jsonDecode(response.body)["isDeleted"];
@@ -142,8 +142,8 @@ class _LendCreditState extends State<LendCredit> {
 
       Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
 
-      final response =
-          await createHTTPreq('lend', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'lend', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];
@@ -227,7 +227,9 @@ class _LendCreditState extends State<LendCredit> {
                                 onTap: () async {
                                   if (this.mounted) {
                                     final dataFrom = await context.push(
-                                      AppRouteConstants.lendByTitleRouteName +
+                                      
+                                          AppRouteConstants
+                                              .lendByTitleRouteName +
                                           "/" +
                                           crypto.decrypt(data[index]["key"]),
                                     ) as bool;
