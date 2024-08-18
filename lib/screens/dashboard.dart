@@ -6,7 +6,6 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -18,7 +17,6 @@ import 'package:http/http.dart' as http;
 import 'package:image_cropper/image_cropper.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -29,6 +27,7 @@ import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:settlenow/screens/analysis.dart';
 import 'package:settlenow/screens/expenses.dart';
@@ -159,10 +158,7 @@ class _DashBoardState extends State<DashBoard> {
   bool importantUpdate = false;
   List<String> liveRoomCategory = ["Settled", "Not Settled"];
   Set<int> filterliveRoomCategoryIndex = Set();
-  late StreamSubscription subscription;
-  bool isDeviceConnected = false;
   bool isLogoutTriggered = false;
-  bool isAlertSet = false;
   GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool splitManually = false;
   DateTime expenseDate = DateTime.now();
@@ -189,34 +185,7 @@ class _DashBoardState extends State<DashBoard> {
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
   }
 
   Future<void> logout(bool manually) async {
@@ -255,8 +224,8 @@ class _DashBoardState extends State<DashBoard> {
           "email": crypto.encrypt(_email.text),
         };
 
-        final response =
-            await createHTTPreq('remainder', http.post, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'remainder', http.post, _token, jsonInputData, context);
 
         if (response.statusCode == 200) {
           var tempData = jsonDecode(response.body);
@@ -361,8 +330,8 @@ class _DashBoardState extends State<DashBoard> {
         'email': crypto.encrypt(_email.text),
       };
 
-      final response =
-          await createHTTPreq('login', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'login', http.put, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var imgData = jsonDecode(response.body);
@@ -393,8 +362,8 @@ class _DashBoardState extends State<DashBoard> {
         'email': crypto.encrypt(_email.text),
       };
 
-      final response =
-          await createHTTPreq('profile', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'profile', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         gotInitialData = true;
@@ -620,8 +589,8 @@ class _DashBoardState extends State<DashBoard> {
         'hasAlready': crypto.encrypt("0")
       };
 
-      final response =
-          await createHTTPreq('data', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'data', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         if (roomType == 1) {
@@ -690,8 +659,8 @@ class _DashBoardState extends State<DashBoard> {
         'email': crypto.encrypt(_email.text),
       };
 
-      final response =
-          await createHTTPreq('friend', http.delete, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend', http.delete, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
 
@@ -764,16 +733,16 @@ class _DashBoardState extends State<DashBoard> {
             'roomName': crypto.encrypt(_NRoom.text),
           };
 
-          response =
-              await createHTTPreq('room', http.post, _token, jsonInputData, context);
+          response = await createHTTPreq(
+              'room', http.post, _token, jsonInputData, context);
         } else {
           Map<String, dynamic> jsonInputData = {
             'email': crypto.encrypt(_email.text),
             'roomKey': crypto.encrypt(_NRoom.text),
           };
 
-          response =
-              await createHTTPreq('room', http.put, _token, jsonInputData, context);
+          response = await createHTTPreq(
+              'room', http.put, _token, jsonInputData, context);
         }
 
         _NRoom.text = "";
@@ -859,8 +828,8 @@ class _DashBoardState extends State<DashBoard> {
         'type': type
       };
 
-      final response =
-          await createHTTPreq('friend/sender', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend/sender', http.put, _token, jsonInputData, context);
       var data = jsonDecode(response.body);
 
       if (response.statusCode != 200) {
@@ -1000,7 +969,6 @@ class _DashBoardState extends State<DashBoard> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     executeParallel();
 
     if (!kIsWeb) {
@@ -1099,7 +1067,8 @@ class _DashBoardState extends State<DashBoard> {
         'from': crypto.encrypt(kIsWeb ? 'web' : 'android')
       };
 
-      await createHTTPreq('verify', http.delete, _token, jsonInputData, context);
+      await createHTTPreq(
+          'verify', http.delete, _token, jsonInputData, context);
     } on Exception catch (err, stackTrace) {
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["DashBoard->sendContactData"]);
@@ -1120,9 +1089,11 @@ class _DashBoardState extends State<DashBoard> {
                 child: SingleChildScrollView(
                     child: Container(
                         width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width * 0.95))
-              : MediaQuery.of(context).size.width * 0.95,
+                            ? max(
+                                MediaQuery.of(context).size.width * 0.5,
+                                min(400,
+                                    MediaQuery.of(context).size.width * 0.95))
+                            : MediaQuery.of(context).size.width * 0.95,
                         child: Padding(
                             padding: const EdgeInsets.all(15.0),
                             child: Column(
@@ -1557,8 +1528,8 @@ class _DashBoardState extends State<DashBoard> {
       child: Container(
           width: kIsWeb
               ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width ))
-              :  MediaQuery.of(context).size.width,
+                  min(400, MediaQuery.of(context).size.width))
+              : MediaQuery.of(context).size.width,
           child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
@@ -1666,8 +1637,8 @@ class _DashBoardState extends State<DashBoard> {
         'email': crypto.encrypt(_email.text),
       };
 
-      final response =
-          await createHTTPreq('friend/all', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend/all', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -1715,8 +1686,8 @@ class _DashBoardState extends State<DashBoard> {
             .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate)),
       };
 
-      final response =
-          await createHTTPreq('quickSplit', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'quickSplit', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -1900,9 +1871,9 @@ class _DashBoardState extends State<DashBoard> {
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
                     width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width * 0.95))
-              : MediaQuery.of(context).size.width * 0.95,
+                        ? max(MediaQuery.of(context).size.width * 0.5,
+                            min(400, MediaQuery.of(context).size.width * 0.95))
+                        : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child: Column(
@@ -2044,9 +2015,9 @@ class _DashBoardState extends State<DashBoard> {
                   borderRadius: BorderRadius.circular(12.0)),
               child: Container(
                 width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width * 0.9))
-              : MediaQuery.of(context).size.width * 0.9,
+                    ? max(MediaQuery.of(context).size.width * 0.5,
+                        min(400, MediaQuery.of(context).size.width * 0.9))
+                    : MediaQuery.of(context).size.width * 0.9,
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(18.0),
@@ -2488,9 +2459,9 @@ class _DashBoardState extends State<DashBoard> {
               child: SingleChildScrollView(
                 child: Container(
                   width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width * 0.95))
-              :  MediaQuery.of(context).size.width * 0.95,
+                      ? max(MediaQuery.of(context).size.width * 0.5,
+                          min(400, MediaQuery.of(context).size.width * 0.95))
+                      : MediaQuery.of(context).size.width * 0.95,
                   child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Column(
@@ -3187,8 +3158,8 @@ class _DashBoardState extends State<DashBoard> {
         'confirm': crypto.encrypt(flag)
       };
 
-      final response =
-          await createHTTPreq('friend', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -3225,8 +3196,8 @@ class _DashBoardState extends State<DashBoard> {
         'confirm': crypto.encrypt(flag)
       };
 
-      final response =
-          await createHTTPreq('friend/lend', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend/lend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -4645,7 +4616,8 @@ class _DashBoardState extends State<DashBoard> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
     return importantUpdate
         ? updateWidget(context)
         : Scaffold(
@@ -4736,11 +4708,13 @@ class _DashBoardState extends State<DashBoard> {
                                     ),
                                   ))))),
             body: chooseFromBottomNavigator(dash),
-            bottomNavigationBar: isAlertSet
+            bottomNavigationBar: internetConnProvider.isAlertSet
                 ? Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(6)),
-                      color: isDeviceConnected ? Colors.green : Colors.red,
+                      color: internetConnProvider.isDeviceConnected
+                          ? Colors.green
+                          : Colors.red,
                     ),
                     height: 40,
                     width: MediaQuery.of(context).size.width,
@@ -4748,7 +4722,7 @@ class _DashBoardState extends State<DashBoard> {
                       padding: const EdgeInsets.all(4.0),
                       child: Center(
                           child: Text(
-                        isDeviceConnected
+                        internetConnProvider.isDeviceConnected
                             ? "You are connected to Internet"
                             : "You aren't connected to Internet",
                         style: TextStyle(fontSize: 17, color: Colors.white),
@@ -5654,10 +5628,10 @@ class _QuickSplitState extends State<QuickSplit> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SizedBox(
-              width:kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width * 0.95))
-              :  MediaQuery.of(context).size.width * 0.95,
+              width: kIsWeb
+                  ? max(MediaQuery.of(context).size.width * 0.5,
+                      min(400, MediaQuery.of(context).size.width * 0.95))
+                  : MediaQuery.of(context).size.width * 0.95,
               child: Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: Column(
@@ -6121,8 +6095,8 @@ class _QuickSplitState extends State<QuickSplit> {
         'id': crypto.encrypt(objId)
       };
 
-      final response = await createHTTPreq(
-          'quickSplit/personalExpense', http.post, widget.token, jsonInputData, context);
+      final response = await createHTTPreq('quickSplit/personalExpense',
+          http.post, widget.token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -6155,9 +6129,9 @@ class _QuickSplitState extends State<QuickSplit> {
         child: SingleChildScrollView(
             child: Container(
                 width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width ))
-              :  MediaQuery.of(context).size.width,
+                    ? max(MediaQuery.of(context).size.width * 0.5,
+                        min(400, MediaQuery.of(context).size.width))
+                    : MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
@@ -6922,39 +6896,8 @@ class _RoomWidgetState extends State<RoomWidget> {
   bool isDataLoading = false;
   bool fetchingData = false;
 
-  late StreamSubscription subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
-  }
-
   @override
   void dispose() {
-    subscription.cancel();
     scrollController.dispose();
     super.dispose();
   }
@@ -6962,7 +6905,6 @@ class _RoomWidgetState extends State<RoomWidget> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     scrollController.addListener(_scrollListener);
   }
 
@@ -6979,8 +6921,8 @@ class _RoomWidgetState extends State<RoomWidget> {
         'hasAlready': crypto.encrypt(widget.RoomData.value.length.toString())
       };
 
-      final response = await createHTTPreq(
-          'room/allRoomMembers', http.post, widget.token, jsonInputData, context);
+      final response = await createHTTPreq('room/allRoomMembers', http.post,
+          widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)["data"];
@@ -7009,8 +6951,8 @@ class _RoomWidgetState extends State<RoomWidget> {
         'hasAlready': crypto.encrypt(widget.RoomData.value.length.toString())
       };
 
-      final response =
-          await createHTTPreq('data', http.post, widget.token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'data', http.post, widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         List<dynamic> list = jsonDecode(response.body)['data'];
@@ -7139,8 +7081,8 @@ class _RoomWidgetState extends State<RoomWidget> {
         'roomKey': crypto.encrypt(widget.RoomData.value[index].roomKey)
       };
 
-      final response = await createHTTPreq(
-          'room/roomSplitMembers', http.post, widget.token, jsonInputData, context);
+      final response = await createHTTPreq('room/roomSplitMembers', http.post,
+          widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);

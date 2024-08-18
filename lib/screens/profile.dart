@@ -11,14 +11,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pinput/pinput.dart';
 import 'package:settlenow/contents.dart' as global;
 import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
 import 'package:settlenow/others/crypto.dart';
-
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/themes.dart';
@@ -42,12 +40,9 @@ class _ProfileState extends State<Profile> {
   bool isGoogle = false;
   GoogleSignInAccount? _currentUser;
   GoogleSignIn _googleSignIn = GoogleSignIn();
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
   bool canResendOTP = false;
   final CountdownController _OTPCountdownController =
       new CountdownController(autoStart: true);
-  bool isAlertSet = false;
   TextEditingController _deleteConfirmationText = new TextEditingController();
   GlobalKey<FormState> _deleteConfirmationFormLoginPage =
       GlobalKey<FormState>();
@@ -110,32 +105,6 @@ class _ProfileState extends State<Profile> {
         onException(context, err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->deleteAccount"]);
       }
-    }
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
     }
   }
 
@@ -236,13 +205,11 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     initialization();
   }
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
   }
 
@@ -606,6 +573,8 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -781,11 +750,13 @@ class _ProfileState extends State<Profile> {
                   ],
                 ),
         ),
-        bottomNavigationBar: isAlertSet
+        bottomNavigationBar: internetConnProvider.isAlertSet
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
-                  color: isDeviceConnected ? Colors.green : Colors.red,
+                  color: internetConnProvider.isDeviceConnected
+                      ? Colors.green
+                      : Colors.red,
                 ),
                 height: 40,
                 width: MediaQuery.of(context).size.width,
@@ -793,7 +764,7 @@ class _ProfileState extends State<Profile> {
                   padding: const EdgeInsets.all(4.0),
                   child: Center(
                       child: Text(
-                    isDeviceConnected
+                    internetConnProvider.isDeviceConnected
                         ? "You are connected to Internet"
                         : "You aren't connected to Internet",
                     style: TextStyle(fontSize: 17, color: Colors.white),

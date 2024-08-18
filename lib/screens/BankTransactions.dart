@@ -3,18 +3,17 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
@@ -86,9 +85,6 @@ class _BankTransactionsState extends State<BankTransactions> {
   List<TransactionEach> filteredResult = [];
   bool isClosedany = false;
 
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
   bool splitManually = false;
   bool noSplit = false;
   Map<String, Map<String, dynamic>> manualSplitMembers = {};
@@ -96,34 +92,7 @@ class _BankTransactionsState extends State<BankTransactions> {
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
   }
 
   Future<void> getExpenseCategory() async {
@@ -132,8 +101,8 @@ class _BankTransactionsState extends State<BankTransactions> {
         'email': crypto.encrypt(_email),
       };
 
-      final response =
-          await createHTTPreq('profile', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'profile', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -158,8 +127,8 @@ class _BankTransactionsState extends State<BankTransactions> {
   Future<void> getLenDenData() async {
     try {
       Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
-      final response =
-          await createHTTPreq('lend', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'lend', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         List<dynamic> temp = jsonDecode(response.body)['data'];
@@ -573,8 +542,8 @@ class _BankTransactionsState extends State<BankTransactions> {
         "name": crypto.encrypt(_lenDenRoom.text)
       };
 
-      final response =
-          await createHTTPreq('lend', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'lend', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         LenDenRoomID = jsonDecode(response.body)["id"];
@@ -617,8 +586,8 @@ class _BankTransactionsState extends State<BankTransactions> {
         'split': crypto.encrypt(manualSplitAmount.toString())
       };
 
-      final response =
-          await createHTTPreq('manualSplit', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'manualSplit', http.post, _token, jsonInputData, context);
 
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
@@ -670,8 +639,8 @@ class _BankTransactionsState extends State<BankTransactions> {
           "date": crypto.encrypt(date)
         };
 
-        final response =
-            await createHTTPreq('lend', http.delete, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'lend', http.delete, _token, jsonInputData, context);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
@@ -723,8 +692,8 @@ class _BankTransactionsState extends State<BankTransactions> {
           "date": crypto.encrypt(date)
         };
 
-        final response =
-            await createHTTPreq('data', http.delete, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'data', http.delete, _token, jsonInputData, context);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
@@ -2209,7 +2178,6 @@ class _BankTransactionsState extends State<BankTransactions> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     initialisation();
   }
 
@@ -2218,6 +2186,9 @@ class _BankTransactionsState extends State<BankTransactions> {
     double drawerWidth = MediaQuery.of(context).size.width * 0.75;
     int crossAxisCountFilter = (drawerWidth / 110).round();
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Bank Transactions"),
@@ -2239,11 +2210,13 @@ class _BankTransactionsState extends State<BankTransactions> {
                     icon: Icon(Icons.filter_alt_outlined))
               ],
       ),
-      bottomNavigationBar: isAlertSet
+      bottomNavigationBar: internetConnProvider.isAlertSet
           ? Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(6)),
-                color: isDeviceConnected ? Colors.green : Colors.red,
+                color: internetConnProvider.isDeviceConnected
+                    ? Colors.green
+                    : Colors.red,
               ),
               height: 40,
               width: MediaQuery.of(context).size.width,
@@ -2251,7 +2224,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                 padding: const EdgeInsets.all(4.0),
                 child: Center(
                     child: Text(
-                  isDeviceConnected
+                  internetConnProvider.isDeviceConnected
                       ? "You are connected to Internet"
                       : "You aren't connected to Internet",
                   style: TextStyle(fontSize: 17, color: Colors.white),

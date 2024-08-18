@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -16,6 +15,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:http/http.dart' as http;
 import 'package:sqflite/sqflite.dart';
@@ -39,45 +39,17 @@ class _LoginPageState extends State<LoginPage> {
   String version = "";
   bool isOnBoardingCompleted = false;
   bool isItAndroidDevice = false;
+  final connectionChecker = InternetConnectionChecker();
+  late StreamSubscription<InternetConnectionStatus> subscription;
 
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
+  void checkInternetConnection() async {
+    print("Checking internet connection Called");
+  }
 
   @override
   void dispose() {
     subscription.cancel();
     super.dispose();
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        if (this.mounted) {
-          setState(() {});
-        }
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    if (this.mounted) {
-      setState(() {});
-    }
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
   }
 
   Future<void> deleteTempData() async {
@@ -171,13 +143,31 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
+    subscription = connectionChecker.onStatusChange.listen(
+      (InternetConnectionStatus status) {
+        final provider =
+            Provider.of<InternetconnectivityProvider>(context, listen: false);
+        bool isDeviceConnected = (status == InternetConnectionStatus.connected);
+        if (isDeviceConnected != provider.isDeviceConnected) {
+          provider.toggleDeviceConnected(isDeviceConnected);
+        }
+        if (!isDeviceConnected && provider.isAlertSet == false) {
+          provider.toggleAlertSet(true);
+        } else if (isDeviceConnected && provider.isAlertSet == true) {
+          Future.delayed(Duration(seconds: 1), () {
+            provider.toggleAlertSet(false);
+          });
+        }
+      },
+    );
     _extractEmail();
   }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -430,11 +420,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
         ),
       ),
-      bottomNavigationBar: isAlertSet
+      bottomNavigationBar: internetConnProvider.isAlertSet
           ? Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(6)),
-                color: isDeviceConnected ? Colors.green : Colors.red,
+                color: internetConnProvider.isDeviceConnected
+                    ? Colors.green
+                    : Colors.red,
               ),
               height: 40,
               width: MediaQuery.of(context).size.width,
@@ -442,7 +434,7 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.all(4.0),
                 child: Center(
                     child: Text(
-                  isDeviceConnected
+                  internetConnProvider.isDeviceConnected
                       ? "You are connected to Internet"
                       : "You aren't connected to Internet",
                   style: TextStyle(fontSize: 17, color: Colors.white),

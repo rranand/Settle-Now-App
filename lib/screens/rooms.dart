@@ -4,13 +4,11 @@ import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:pinput/pinput.dart';
@@ -21,6 +19,7 @@ import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sqflite/sqflite.dart';
@@ -105,9 +104,6 @@ class _RoomExpenseState extends State<RoomExpense>
   double totalAmount = 0;
   bool isClosedany = false;
   final TextEditingController _paytoMemberAmt = TextEditingController();
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
   int scrollToExpense = -1;
   bool firstTimeLoad = true;
   Map<String, Map<String, dynamic>> manualSplitMembers = {};
@@ -115,34 +111,7 @@ class _RoomExpenseState extends State<RoomExpense>
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
   }
 
   _updatePayToMember(
@@ -852,7 +821,6 @@ class _RoomExpenseState extends State<RoomExpense>
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     if (!kIsWeb) {
       getContactsFromLocal();
     }
@@ -3643,6 +3611,8 @@ class _RoomExpenseState extends State<RoomExpense>
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -3690,11 +3660,11 @@ class _RoomExpenseState extends State<RoomExpense>
             child: SizedBox(
                 height: MediaQuery.of(context).size.height,
                 child: chooseFromBottomNavigator(dash))),
-        bottomNavigationBar: isAlertSet
+        bottomNavigationBar:internetConnProvider.isAlertSet
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
-                  color: isDeviceConnected ? Colors.green : Colors.red,
+                  color: internetConnProvider.isDeviceConnected ? Colors.green : Colors.red,
                 ),
                 height: 40,
                 width: MediaQuery.of(context).size.width,
@@ -3702,7 +3672,7 @@ class _RoomExpenseState extends State<RoomExpense>
                   padding: const EdgeInsets.all(4.0),
                   child: Center(
                       child: Text(
-                    isDeviceConnected
+                    internetConnProvider.isDeviceConnected
                         ? "You are connected to Internet"
                         : "You aren't connected to Internet",
                     style: TextStyle(fontSize: 17, color: Colors.white),

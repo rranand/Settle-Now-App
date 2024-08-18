@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_config.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'firebase_options.dart';
@@ -129,27 +132,37 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (context) => ThemeProvider(),
-        builder: (context, _) {
-          final themeProvider = Provider.of<ThemeProvider>(context);
-          return MaterialApp.router(
-            routerConfig: AppRouter.router,
-            builder: (context, child) {
-              return MediaQuery(
-                data: MediaQuery.of(context)
-                    .copyWith(textScaler: TextScaler.linear(1.0)),
-                child: child!,
-              );
-            },
-            themeMode:
-                themeProvider.darkTheme ? ThemeMode.dark : ThemeMode.light,
-            theme: MyTheme.lightTheme(context),
-            darkTheme: MyTheme.darTheme(context),
-            title: "Settle Now",
-            scrollBehavior: kIsWeb ? MyCustomScrollBehavior() : null,
-          );
+        create: (context) => InternetconnectivityProvider(),
+        builder: (context, __) {
+          return ChangeNotifierProvider(
+              create: (context) => ThemeProvider(),
+              builder: (context, _) {
+                final themeProvider = Provider.of<ThemeProvider>(context);
+                return MaterialApp.router(
+                  routerConfig: AppRouter.router,
+                  builder: (context, child) {
+                    return MediaQuery(
+                      data: MediaQuery.of(context)
+                          .copyWith(textScaler: TextScaler.linear(1.0)),
+                      child: child!,
+                    );
+                  },
+                  themeMode: themeProvider.darkTheme
+                      ? ThemeMode.dark
+                      : ThemeMode.light,
+                  theme: MyTheme.lightTheme(context),
+                  darkTheme: MyTheme.darTheme(context),
+                  title: "Settle Now",
+                  scrollBehavior: kIsWeb ? MyCustomScrollBehavior() : null,
+                );
+              });
         });
   }
 }

@@ -2,19 +2,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
@@ -56,40 +55,9 @@ class _ExpensesState extends State<Expenses> {
   List<dynamic> expenseCategory = [];
   List<List<dynamic>> subCategory = [];
 
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
-
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
   }
 
   Future<void> getExpenseCategory() async {
@@ -98,8 +66,8 @@ class _ExpensesState extends State<Expenses> {
         'email': crypto.encrypt(_email),
       };
 
-      final response =
-          await createHTTPreq('profile', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'profile', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -171,8 +139,8 @@ class _ExpensesState extends State<Expenses> {
         'date': crypto.encrypt(widget.date),
       };
 
-      final response =
-          await createHTTPreq('ptransaction', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'ptransaction', http.post, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -207,8 +175,8 @@ class _ExpensesState extends State<Expenses> {
         'isRoom': crypto.encrypt(isRoom ? "1" : "0")
       };
 
-      final response = await createHTTPreq(
-          'transaction/personalExpense', http.delete, _token, jsonInputData, context);
+      final response = await createHTTPreq('transaction/personalExpense',
+          http.delete, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -237,8 +205,8 @@ class _ExpensesState extends State<Expenses> {
         'id': crypto.encrypt(id)
       };
 
-      final response =
-          await createHTTPreq('ptransaction', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'ptransaction', http.put, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -690,7 +658,6 @@ class _ExpensesState extends State<Expenses> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
   }
@@ -698,6 +665,8 @@ class _ExpensesState extends State<Expenses> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text(title),
@@ -2681,11 +2650,11 @@ class _ExpensesState extends State<Expenses> {
                     },
                   ))
             : null,
-        bottomNavigationBar: isAlertSet
+        bottomNavigationBar: internetConnProvider.isAlertSet
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
-                  color: isDeviceConnected ? Colors.green : Colors.red,
+                  color: internetConnProvider.isDeviceConnected ? Colors.green : Colors.red,
                 ),
                 height: 40,
                 width: MediaQuery.of(context).size.width,
@@ -2693,7 +2662,7 @@ class _ExpensesState extends State<Expenses> {
                   padding: const EdgeInsets.all(4.0),
                   child: Center(
                       child: Text(
-                    isDeviceConnected
+                    internetConnProvider.isDeviceConnected
                         ? "You are connected to Internet"
                         : "You aren't connected to Internet",
                     style: TextStyle(fontSize: 17, color: Colors.white),

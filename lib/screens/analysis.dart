@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
@@ -55,40 +53,9 @@ class _AnalysisState extends State<Analysis> {
   List<BarSeries<ChartData, String>> graphData = [];
   bool isDataLoading = false;
 
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
-
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
   }
 
   Future _initialisation() async {
@@ -133,8 +100,8 @@ class _AnalysisState extends State<Analysis> {
         'alreadyHave': crypto.encrypt("-1")
       };
 
-      final response =
-          await createHTTPreq('profile', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'profile', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         List<dynamic> tempData = jsonDecode(response.body)['data'];
@@ -267,7 +234,6 @@ class _AnalysisState extends State<Analysis> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     _initialisation();
   }
 

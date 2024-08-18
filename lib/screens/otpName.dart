@@ -1,18 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:timer_count_down/timer_controller.dart';
 import 'package:timer_count_down/timer_count_down.dart';
@@ -47,13 +46,9 @@ class _OtpNameState extends State<OtpName> {
   bool canResendOTP = false;
   final CountdownController _OTPCountdownController =
       new CountdownController(autoStart: true);
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
   }
 
@@ -265,42 +260,17 @@ class _OtpNameState extends State<OtpName> {
     }
   }
 
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     _initialisation();
   }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
     final height = MediaQuery.of(context).size.height;
 
     final defaultPinTheme = PinTheme(
@@ -499,11 +469,13 @@ class _OtpNameState extends State<OtpName> {
                     )),
             )),
       ),
-      bottomNavigationBar: isAlertSet
+      bottomNavigationBar: internetConnProvider.isAlertSet
           ? Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(6)),
-                color: isDeviceConnected ? Colors.green : Colors.red,
+                color: internetConnProvider.isDeviceConnected
+                    ? Colors.green
+                    : Colors.red,
               ),
               height: 40,
               width: MediaQuery.of(context).size.width,
@@ -511,7 +483,7 @@ class _OtpNameState extends State<OtpName> {
                 padding: const EdgeInsets.all(4.0),
                 child: Center(
                     child: Text(
-                  isDeviceConnected
+                  internetConnProvider.isDeviceConnected
                       ? "You are connected to Internet"
                       : "You aren't connected to Internet",
                   style: TextStyle(fontSize: 17, color: Colors.white),

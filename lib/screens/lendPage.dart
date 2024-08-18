@@ -3,14 +3,12 @@ import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:pinput/pinput.dart';
@@ -19,6 +17,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:share_plus/share_plus.dart';
@@ -49,14 +48,10 @@ class _LendPageState extends State<LendPage> {
   bool isPreviousPageNeedToBeUpdated = false;
   int expenseIndex = -1;
   bool firstTimeLoad = true;
-  late StreamSubscription<List<ConnectivityResult>> subscription;
   List<Map> getContactsFromDB = [];
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
   }
 
@@ -72,32 +67,6 @@ class _LendPageState extends State<LendPage> {
         onException(context, err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->getContactsFromLocal"]);
       }
-    }
-  }
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
     }
   }
 
@@ -135,8 +104,8 @@ class _LendPageState extends State<LendPage> {
               .encrypt(DateFormat("MMM dd yyyy h:mm a").format(expenseDate))
         };
 
-        final response =
-            await createHTTPreq('lend', http.delete, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'lend', http.delete, _token, jsonInputData, context);
 
         if (response.statusCode == 200) {
           isPreviousPageNeedToBeUpdated = true;
@@ -178,8 +147,8 @@ class _LendPageState extends State<LendPage> {
         'email': crypto.encrypt(_email),
       };
 
-      final response =
-          await createHTTPreq('friend/lend', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend/lend', http.patch, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -287,8 +256,8 @@ class _LendPageState extends State<LendPage> {
         'isFromContact': crypto.encrypt(isFromContact.toString())
       };
 
-      final response =
-          await createHTTPreq('friend/lend', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend/lend', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -316,8 +285,8 @@ class _LendPageState extends State<LendPage> {
         'confirm': crypto.encrypt("0")
       };
 
-      final response =
-          await createHTTPreq('friend/lend', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend/lend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -1078,7 +1047,6 @@ class _LendPageState extends State<LendPage> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     getContactsFromLocal();
     _initialization();
     controller = AutoScrollController(
@@ -1099,8 +1067,8 @@ class _LendPageState extends State<LendPage> {
         'roomID': crypto.encrypt(widget.roomkey),
       };
 
-      final response =
-          await createHTTPreq('lend/delete', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'lend/delete', http.post, _token, jsonInputData, context);
 
       CloseData = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated = true;
@@ -1214,6 +1182,8 @@ class _LendPageState extends State<LendPage> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text(roomName.text),
@@ -1983,11 +1953,13 @@ class _LendPageState extends State<LendPage> {
                   color: Colors.white,
                 ),
               ),
-        bottomNavigationBar: isAlertSet
+        bottomNavigationBar: internetConnProvider.isAlertSet
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
-                  color: isDeviceConnected ? Colors.green : Colors.red,
+                  color: internetConnProvider.isDeviceConnected
+                      ? Colors.green
+                      : Colors.red,
                 ),
                 height: 40,
                 width: MediaQuery.of(context).size.width,
@@ -1995,7 +1967,7 @@ class _LendPageState extends State<LendPage> {
                   padding: const EdgeInsets.all(4.0),
                   child: Center(
                       child: Text(
-                    isDeviceConnected
+                    internetConnProvider.isDeviceConnected
                         ? "You are connected to Internet"
                         : "You aren't connected to Internet",
                     style: TextStyle(fontSize: 17, color: Colors.white),

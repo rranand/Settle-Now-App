@@ -3,16 +3,15 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import '../others/themes.dart';
@@ -35,36 +34,6 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
   List<String> dates = [];
   String _email = "";
   String _token = "";
-
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
-  }
 
   initialisation() async {
     var tokenData = await getStringPref('token');
@@ -90,14 +59,12 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
 
   @override
   void dispose() {
-    subscription.cancel();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     initialisation();
     WidgetsBinding.instance.addPostFrameCallback(
         (_) => _refreshIndicatorKeySchduledNotify.currentState?.show());
@@ -122,8 +89,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         "email": crypto.encrypt(_email),
       };
 
-      final response =
-          await createHTTPreq('remainder', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'remainder', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body);
@@ -172,8 +139,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         'id': crypto.encrypt(id)
       };
 
-      final response =
-          await createHTTPreq('remainder', http.delete, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'remainder', http.delete, _token, jsonInputData, context);
 
       if (this.mounted) {
         context.pop();
@@ -227,8 +194,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
           'notID': crypto.encrypt(IDs.toString())
         };
 
-        final response =
-            await createHTTPreq('remainder', http.patch, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'remainder', http.patch, _token, jsonInputData, context);
 
         _name.text = "";
         if (this.mounted) {
@@ -541,15 +508,19 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
 
   @override
   Widget build(BuildContext context) {
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
     return Scaffold(
         appBar: AppBar(
           title: Text("Remainder"),
         ),
-        bottomNavigationBar: isAlertSet
+        bottomNavigationBar: internetConnProvider.isAlertSet
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
-                  color: isDeviceConnected ? Colors.green : Colors.red,
+                  color: internetConnProvider.isDeviceConnected
+                      ? Colors.green
+                      : Colors.red,
                 ),
                 height: 40,
                 width: MediaQuery.of(context).size.width,
@@ -557,7 +528,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                   padding: const EdgeInsets.all(4.0),
                   child: Center(
                       child: Text(
-                    isDeviceConnected
+                    internetConnProvider.isDeviceConnected
                         ? "You are connected to Internet"
                         : "You aren't connected to Internet",
                     style: TextStyle(fontSize: 17, color: Colors.white),

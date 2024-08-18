@@ -1,15 +1,13 @@
-import 'dart:async';
 import 'dart:convert';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import '../others/themes.dart';
 
@@ -29,48 +27,21 @@ class _ContactUsState extends State<ContactUs> {
   TextEditingController _message = TextEditingController();
   GlobalKey<FormState> _formKeyContactUs = GlobalKey<FormState>();
   ScrollController _controller = ScrollController();
-  late StreamSubscription<List<ConnectivityResult>> subscription;
-  bool isDeviceConnected = false;
-  bool isAlertSet = false;
-
-  getConnectivity() async {
-    subscription = Connectivity().onConnectivityChanged.listen(
-      (List<ConnectivityResult> result) async {
-        isDeviceConnected = await InternetConnectionChecker().hasConnection;
-        setState(() {});
-        if (!isDeviceConnected && isAlertSet == false) {
-          setState(() => isAlertSet = true);
-        } else if (isDeviceConnected && isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            setState(() => isAlertSet = false);
-          });
-        }
-      },
-    );
-
-    isDeviceConnected = await InternetConnectionChecker().hasConnection;
-    setState(() {});
-    if (!isDeviceConnected && isAlertSet == false) {
-      setState(() => isAlertSet = true);
-    } else if (isDeviceConnected && isAlertSet == true) {
-      Future.delayed(Duration(seconds: 1), () {
-        setState(() => isAlertSet = false);
-      });
-    }
-  }
 
   @override
   void dispose() {
-    subscription.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   sendContactData(BuildContext context) async {
-    if (!isDeviceConnected) {
+    final internetConnProvider =
+        Provider.of<InternetconnectivityProvider>(context);
+    if (!internetConnProvider.isDeviceConnected) {
       if (this.mounted) {
         context.pop();
       }
+      showToast(context, "No Internet Connection", Icons.wifi_off);
       return;
     }
     if (_formKeyContactUs.currentState!.validate()) {
@@ -86,8 +57,8 @@ class _ContactUsState extends State<ContactUs> {
           'message': crypto.encrypt(_message.text),
         };
 
-        final response =
-            await createHTTPreq('contact', http.post, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'contact', http.post, _token, jsonInputData, context);
 
         _subject.text = "";
         _message.text = "";
@@ -139,7 +110,6 @@ class _ContactUsState extends State<ContactUs> {
   @override
   void initState() {
     super.initState();
-    getConnectivity();
     initialisation();
   }
 
