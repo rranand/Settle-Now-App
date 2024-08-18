@@ -345,7 +345,9 @@ class _LendPageState extends State<LendPage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.95,
+                    width: kIsWeb
+                        ? MediaQuery.of(context).size.width * 0.5
+                        : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child:
@@ -463,7 +465,9 @@ class _LendPageState extends State<LendPage> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
-          width: MediaQuery.of(context).size.width,
+          width: kIsWeb
+              ? MediaQuery.of(context).size.width * 0.5
+              : MediaQuery.of(context).size.width,
           child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
@@ -720,7 +724,9 @@ class _LendPageState extends State<LendPage> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width,
+                width: kIsWeb
+                    ? MediaQuery.of(context).size.width * 0.5
+                    : MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Form(
@@ -1087,7 +1093,9 @@ class _LendPageState extends State<LendPage> {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         child: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width,
+                width: kIsWeb
+                    ? MediaQuery.of(context).size.width * 0.5
+                    : MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(

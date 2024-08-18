@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -264,7 +265,9 @@ class _AnalysisState extends State<Analysis> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
-          width: MediaQuery.of(context).size.width,
+          width: kIsWeb
+              ? MediaQuery.of(context).size.width * 0.5
+              : MediaQuery.of(context).size.width,
           child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Column(

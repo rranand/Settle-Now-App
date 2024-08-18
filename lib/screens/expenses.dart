@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -270,7 +271,9 @@ class _ExpensesState extends State<Expenses> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width,
+                width: kIsWeb
+                    ? MediaQuery.of(context).size.width * 0.5
+                    : MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Form(
@@ -395,7 +398,9 @@ class _ExpensesState extends State<Expenses> {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
-        width: MediaQuery.of(context).size.width * 0.96,
+        width: kIsWeb
+              ? MediaQuery.of(context).size.width * 0.5
+              :MediaQuery.of(context).size.width * 0.96,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Column(

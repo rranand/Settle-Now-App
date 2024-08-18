@@ -4,10 +4,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/routes/route_config.dart';
-import 'package:url_strategy/url_strategy.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'firebase_options.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -28,6 +29,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  GoRouter.optionURLReflectsImperativeAPIs = true;
   String firebaseProjectName = '[DEFAULT]';
   if (kDebugMode) {
     firebaseProjectName = 'SettleNow-Dev';
@@ -37,11 +39,11 @@ Future<void> main() async {
         name: firebaseProjectName,
         options: DefaultFirebaseOptions.currentPlatform);
   } else {
-    Firebase.app();
+    Firebase.app(firebaseProjectName);
   }
 
   if (kIsWeb) {
-    setPathUrlStrategy();
+    usePathUrlStrategy();
   } else {
     await Permission.notification.isDenied.then((value) {
       if (value) {
@@ -84,7 +86,6 @@ Future<void> main() async {
           defaultColor: Colors.white),
     ]);
   }
-
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };

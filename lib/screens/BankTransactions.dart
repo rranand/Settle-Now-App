@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -366,7 +367,9 @@ class _BankTransactionsState extends State<BankTransactions> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0)),
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
+              width: kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.5
+                  : MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Form(
@@ -762,7 +765,9 @@ class _BankTransactionsState extends State<BankTransactions> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0)),
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
+              width: kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.5
+                  : MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Form(
@@ -978,7 +983,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.95,
+                    width: kIsWeb
+                        ? MediaQuery.of(context).size.width * 0.5
+                        : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child: Column(
@@ -1274,7 +1281,9 @@ class _BankTransactionsState extends State<BankTransactions> {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.0)),
             child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.9,
+              width: kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.5
+                  : MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Form(
@@ -1926,7 +1935,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                 child: Padding(
                   padding: MediaQuery.of(context).viewInsets,
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
+                    width: kIsWeb
+                        ? MediaQuery.of(context).size.width * 0.5
+                        : MediaQuery.of(context).size.width * 0.9,
                     height: roomData.isNotEmpty
                         ? 245
                         : (expenseCategory.length == 0 ? 145 : 185),

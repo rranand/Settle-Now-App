@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow/routes/route_constant.dart';
@@ -17,6 +18,10 @@ import 'package:settlenow/screens/profile.dart';
 import 'package:settlenow/screens/rooms.dart';
 
 class AppRouter {
+  static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+  static FirebaseAnalyticsObserver observer =
+      FirebaseAnalyticsObserver(analytics: analytics);
+
   static _allRoutes() {
     List<RouteBase> allRoutes = [
       GoRoute(
@@ -134,6 +139,7 @@ class AppRouter {
   static final _router = GoRouter(
     routes: _allRoutes(),
     initialLocation: AppRouteConstants.loginRouteName,
+    observers: [observer],
   );
 
   static GoRouter get router => _router;

@@ -732,7 +732,9 @@ class _RoomExpenseState extends State<RoomExpense>
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         child: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width,
+                width: kIsWeb
+                    ? MediaQuery.of(context).size.width * 0.5
+                    : MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
@@ -1959,28 +1961,32 @@ class _RoomExpenseState extends State<RoomExpense>
                             context, "Join Key Copied", Icons.copy_outlined);
                       },
                       child: ListTile(
-                        title: Text("Room Key   "),
-                        trailing: Text(widget.roomKey),
+                        title: Text("Room Key"),
+                        trailing: Text(widget.roomKey,
+                            style: TextStyle(fontSize: 14)),
                       ),
                     ),
                   ),
                   SliverToBoxAdapter(
                     child: ListTile(
                       title: const Text("You Spent"),
-                      trailing: Text("₹ " + commaSeperator(yourExpense)),
+                      trailing: Text("₹ " + commaSeperator(yourExpense),
+                          style: TextStyle(fontSize: 14)),
                     ),
                   ),
                   SliverToBoxAdapter(
                     child: ListTile(
                       title: const Text("Members"),
-                      trailing: Text(crypto.decrypt(list[0]["cnt"])),
+                      trailing: Text(crypto.decrypt(list[0]["cnt"]),
+                          style: TextStyle(fontSize: 14)),
                     ),
                   ),
                   SliverToBoxAdapter(
                     child: ListTile(
                       title: const Text("Created On"),
-                      trailing:
-                          Text(formatDateTime(crypto.decrypt(list[0]["date"]))),
+                      trailing: Text(
+                          formatDateTime(crypto.decrypt(list[0]["date"])),
+                          style: TextStyle(fontSize: 14)),
                     ),
                   ),
                   SliverToBoxAdapter(
@@ -2193,7 +2199,9 @@ class _RoomExpenseState extends State<RoomExpense>
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width,
+                width: kIsWeb
+                    ? MediaQuery.of(context).size.width * 0.5
+                    : MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Column(
@@ -3220,7 +3228,9 @@ class _RoomExpenseState extends State<RoomExpense>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.95,
+                    width: kIsWeb
+                        ? MediaQuery.of(context).size.width * 0.5
+                        : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child: Column(
@@ -3499,7 +3509,9 @@ class _RoomExpenseState extends State<RoomExpense>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.95,
+                    width: kIsWeb
+                        ? MediaQuery.of(context).size.width * 0.5
+                        : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child:
@@ -3835,8 +3847,11 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                               12.0)),
                                                                       child:
                                                                           Container(
-                                                                        width: MediaQuery.of(context).size.width *
-                                                                            0.9,
+                                                                        width: kIsWeb
+                                                                            ? MediaQuery.of(context).size.width *
+                                                                                0.5
+                                                                            : MediaQuery.of(context).size.width *
+                                                                                0.9,
                                                                         child:
                                                                             Padding(
                                                                           padding: const EdgeInsets
@@ -4023,10 +4038,11 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                               12.0)),
                                                                   child:
                                                                       Container(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.9,
+                                                                    width: kIsWeb
+                                                                        ? MediaQuery.of(context).size.width *
+                                                                            0.5
+                                                                        : MediaQuery.of(context).size.width *
+                                                                            0.9,
                                                                     child:
                                                                         SingleChildScrollView(
                                                                       child:
@@ -4696,7 +4712,9 @@ class _ExpenseDataState extends State<ExpenseData> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.95,
+              width: kIsWeb
+                  ? MediaQuery.of(context).size.width * 0.5
+                  : MediaQuery.of(context).size.width * 0.95,
               child: Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: Column(
@@ -5499,7 +5517,9 @@ class _ExpenseDataState extends State<ExpenseData> {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.95,
+          width: kIsWeb
+              ? MediaQuery.of(context).size.width * 0.5
+              : MediaQuery.of(context).size.width * 0.95,
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Column(
