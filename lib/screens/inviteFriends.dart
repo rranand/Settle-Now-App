@@ -11,6 +11,7 @@ import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:http/http.dart' as http;
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:settlenow/others/crypto.dart';
 
@@ -39,6 +40,14 @@ class _InviteFriendsState extends State<InviteFriends> {
           _token = jsonOutData["token"]!;
         });
       }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
   }
 
@@ -105,7 +114,7 @@ class _InviteFriendsState extends State<InviteFriends> {
       };
 
       final response = await createHTTPreq(
-          'profile/localContact', http.post, _token, jsonInputData);
+          'profile/localContact', http.post, _token, jsonInputData, context);
 
       var resData = jsonDecode(response.body)['data'];
 

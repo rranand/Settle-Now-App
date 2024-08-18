@@ -157,7 +157,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response = await createHTTPreq(
-          'data/updatePayMember', http.put, _token, jsonInputData);
+          'data/updatePayMember', http.put, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         await _getPaymentData();
@@ -204,7 +204,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response = await createHTTPreq(
-          'transaction/all', http.delete, _token, jsonInputData);
+          'transaction/all', http.delete, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -253,7 +253,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('data', http.patch, _token, jsonInputData);
+          await createHTTPreq('data', http.patch, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -348,7 +348,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('friend', http.patch, _token, jsonInputData);
+          await createHTTPreq('friend', http.patch, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -402,7 +402,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('transaction', http.post, _token, jsonInputData);
+          await createHTTPreq('transaction', http.post, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -452,7 +452,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('manualSplit', http.post, _token, jsonInputData);
+          await createHTTPreq('manualSplit', http.post, _token, jsonInputData, context);
 
       _amt.text = "";
       _purpose.text = "";
@@ -500,7 +500,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response = await createHTTPreq(
-          'updateRoomName/room', http.post, _token, jsonInputData);
+          'updateRoomName/room', http.post, _token, jsonInputData, context);
 
       Tdata = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated.value = true;
@@ -556,7 +556,7 @@ class _RoomExpenseState extends State<RoomExpense>
         };
 
         final response =
-            await createHTTPreq('data', http.delete, _token, jsonInputData);
+            await createHTTPreq('data', http.delete, _token, jsonInputData, context);
 
         _amt.text = "";
         _purpose.text = "";
@@ -605,7 +605,7 @@ class _RoomExpenseState extends State<RoomExpense>
         };
 
         final response =
-            await createHTTPreq('data', http.put, _token, jsonInputData);
+            await createHTTPreq('data', http.put, _token, jsonInputData, context);
 
         _amt.text = "";
         Tdata = jsonDecode(response.body);
@@ -659,7 +659,7 @@ class _RoomExpenseState extends State<RoomExpense>
         };
 
         final response = await createHTTPreq(
-            'transaction', http.delete, _token, jsonInputData);
+            'transaction', http.delete, _token, jsonInputData, context);
 
         if (response.statusCode == 200) {
           paymentData = jsonDecode(response.body)["data"];
@@ -700,7 +700,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('room', http.delete, _token, jsonInputData);
+          await createHTTPreq('room', http.delete, _token, jsonInputData, context);
 
       isClear = true;
       CloseData = jsonDecode(response.body);
@@ -838,6 +838,14 @@ class _RoomExpenseState extends State<RoomExpense>
       _initialisation();
       _extractExpenseData();
       _getPaymentData();
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
   }
 
@@ -1095,7 +1103,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('friend', http.post, _token, jsonInputData);
+          await createHTTPreq('friend', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -1121,7 +1129,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('friend', http.put, _token, jsonInputData);
+          await createHTTPreq('friend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -1142,7 +1150,7 @@ class _RoomExpenseState extends State<RoomExpense>
       };
 
       final response =
-          await createHTTPreq('transaction', http.put, _token, jsonInputData);
+          await createHTTPreq('transaction', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -4705,7 +4713,7 @@ class _ExpenseDataState extends State<ExpenseData> {
         'subType': subCategory,
       };
       final response = await createHTTPreq(
-          'manualSplit', http.put, widget.Token, jsonInputData);
+          'manualSplit', http.put, widget.Token, jsonInputData, context);
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
@@ -5197,7 +5205,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       };
 
       final response = await createHTTPreq(
-          'transaction', http.patch, widget.Token, jsonInputData);
+          'transaction', http.patch, widget.Token, jsonInputData, context);
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
@@ -5504,7 +5512,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       };
 
       final response = await createHTTPreq('transaction/personalExpense',
-          http.post, widget.Token, jsonInputData);
+          http.post, widget.Token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);

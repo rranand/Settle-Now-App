@@ -136,7 +136,7 @@ class _LendPageState extends State<LendPage> {
         };
 
         final response =
-            await createHTTPreq('lend', http.delete, _token, jsonInputData);
+            await createHTTPreq('lend', http.delete, _token, jsonInputData, context);
 
         if (response.statusCode == 200) {
           isPreviousPageNeedToBeUpdated = true;
@@ -179,7 +179,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response =
-          await createHTTPreq('friend/lend', http.patch, _token, jsonInputData);
+          await createHTTPreq('friend/lend', http.patch, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -220,7 +220,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response = await createHTTPreq(
-          'updateRoomName/lendRoom', http.post, _token, jsonInputData);
+          'updateRoomName/lendRoom', http.post, _token, jsonInputData, context);
 
       Tdata = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated = true;
@@ -288,7 +288,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response =
-          await createHTTPreq('friend/lend', http.post, _token, jsonInputData);
+          await createHTTPreq('friend/lend', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -317,7 +317,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response =
-          await createHTTPreq('friend/lend', http.put, _token, jsonInputData);
+          await createHTTPreq('friend/lend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -698,7 +698,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response = await createHTTPreq(
-          'lend/transaction', http.delete, _token, jsonInputData);
+          'lend/transaction', http.delete, _token, jsonInputData, context);
 
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
@@ -986,6 +986,14 @@ class _LendPageState extends State<LendPage> {
             _token = jsonOutData["token"]!;
           });
         }
+      } else {
+        while (this.mounted && context.canPop()) {
+          context.pop();
+        }
+        if (this.mounted) {
+          context.go(AppRouteConstants.loginRouteName);
+        }
+        return;
       }
       if (this.mounted) {
         setState(() {
@@ -1000,7 +1008,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response =
-          await createHTTPreq('lend', http.put, _token, jsonInputData);
+          await createHTTPreq('lend', http.put, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var resData = jsonDecode(response.body);
@@ -1092,7 +1100,7 @@ class _LendPageState extends State<LendPage> {
       };
 
       final response =
-          await createHTTPreq('lend/delete', http.post, _token, jsonInputData);
+          await createHTTPreq('lend/delete', http.post, _token, jsonInputData, context);
 
       CloseData = jsonDecode(response.body);
       isPreviousPageNeedToBeUpdated = true;

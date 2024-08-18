@@ -99,7 +99,7 @@ class _ExpensesState extends State<Expenses> {
       };
 
       final response =
-          await createHTTPreq('profile', http.patch, _token, jsonInputData);
+          await createHTTPreq('profile', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -134,6 +134,14 @@ class _ExpensesState extends State<Expenses> {
           _token = jsonOutData["token"]!;
         });
       }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
 
     getExpenseCategory();
@@ -164,7 +172,7 @@ class _ExpensesState extends State<Expenses> {
       };
 
       final response =
-          await createHTTPreq('ptransaction', http.post, _token, jsonInputData);
+          await createHTTPreq('ptransaction', http.post, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -200,7 +208,7 @@ class _ExpensesState extends State<Expenses> {
       };
 
       final response = await createHTTPreq(
-          'transaction/personalExpense', http.delete, _token, jsonInputData);
+          'transaction/personalExpense', http.delete, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -230,7 +238,7 @@ class _ExpensesState extends State<Expenses> {
       };
 
       final response =
-          await createHTTPreq('ptransaction', http.put, _token, jsonInputData);
+          await createHTTPreq('ptransaction', http.put, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -620,7 +628,7 @@ class _ExpensesState extends State<Expenses> {
       };
 
       final response = await createHTTPreq(
-          'ptransaction', http.patch, _token, jsonInputData);
+          'ptransaction', http.patch, _token, jsonInputData, context);
 
       Tdata = jsonDecode(response.body);
       if (this.mounted) {

@@ -18,6 +18,7 @@ import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../functions/additionalFunction.dart';
@@ -132,7 +133,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       };
 
       final response =
-          await createHTTPreq('profile', http.patch, _token, jsonInputData);
+          await createHTTPreq('profile', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -158,7 +159,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     try {
       Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
       final response =
-          await createHTTPreq('lend', http.patch, _token, jsonInputData);
+          await createHTTPreq('lend', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         List<dynamic> temp = jsonDecode(response.body)['data'];
@@ -187,7 +188,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     try {
       Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
       final response = await createHTTPreq(
-          'room/fullActiveRoom', http.post, _token, jsonInputData);
+          'room/fullActiveRoom', http.post, _token, jsonInputData, context);
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         roomData = data['data'];
@@ -224,7 +225,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         'roomKey': roomkey
       };
       final response = await createHTTPreq(
-          'room/roomSplitMembers', http.post, _token, jsonInputData);
+          'room/roomSplitMembers', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -327,7 +328,7 @@ class _BankTransactionsState extends State<BankTransactions> {
             : "None"),
       };
       final response = await createHTTPreq(
-          'ptransaction', http.patch, _token, jsonInputData);
+          'ptransaction', http.patch, _token, jsonInputData, context);
 
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
@@ -573,7 +574,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       };
 
       final response =
-          await createHTTPreq('lend', http.post, _token, jsonInputData);
+          await createHTTPreq('lend', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         LenDenRoomID = jsonDecode(response.body)["id"];
@@ -617,7 +618,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       };
 
       final response =
-          await createHTTPreq('manualSplit', http.post, _token, jsonInputData);
+          await createHTTPreq('manualSplit', http.post, _token, jsonInputData, context);
 
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
@@ -670,7 +671,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         };
 
         final response =
-            await createHTTPreq('lend', http.delete, _token, jsonInputData);
+            await createHTTPreq('lend', http.delete, _token, jsonInputData, context);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
@@ -723,7 +724,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         };
 
         final response =
-            await createHTTPreq('data', http.delete, _token, jsonInputData);
+            await createHTTPreq('data', http.delete, _token, jsonInputData, context);
 
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
@@ -2194,6 +2195,14 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
 
       executeParallel();
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
   }
 

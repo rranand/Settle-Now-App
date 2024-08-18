@@ -110,6 +110,14 @@ class _SummaryPageState extends State<SummaryPage> {
           _token = jsonOutData["token"]!;
         });
       }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
     if (this.mounted) {
       setState(() {});
@@ -122,7 +130,7 @@ class _SummaryPageState extends State<SummaryPage> {
       };
 
       final response_1 =
-          await createHTTPreq('profile', http.post, _token, jsonInputData);
+          await createHTTPreq('profile', http.post, _token, jsonInputData, context);
 
       if (response_1.statusCode == 200) {
         if (loadFirstTime) {
@@ -177,7 +185,7 @@ class _SummaryPageState extends State<SummaryPage> {
       };
 
       final response = await createHTTPreq(
-          'ptransaction', http.delete, _token, jsonInputData);
+          'ptransaction', http.delete, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)['data'];

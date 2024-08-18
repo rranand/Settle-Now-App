@@ -334,7 +334,7 @@ class _LoginPageState extends State<LoginPage> {
                                 };
 
                                 resp = await createHTTPreq('login/google',
-                                    http.post, "", jsonInputData);
+                                    http.post, "", jsonInputData, context);
                               } else {
                                 List<dynamic> fwaitTemp = await Future.wait([
                                   getDeviceTokenToSendNotification(),
@@ -375,7 +375,7 @@ class _LoginPageState extends State<LoginPage> {
                                 };
 
                                 resp = await createHTTPreq('login/google',
-                                    http.post, "", jsonInputData);
+                                    http.post, "", jsonInputData, context);
                               }
 
                               var remainingData = jsonDecode(resp.body)['data'];

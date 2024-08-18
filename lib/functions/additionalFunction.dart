@@ -6,10 +6,13 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path/path.dart';
+import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:sqflite/sqflite.dart';
 import '../contents.dart' as global;
 import 'package:flutter/material.dart';
@@ -360,8 +363,8 @@ pushCrashDataToFirebase(Exception err, StackTrace stackTrace,
       information: additionalData['information']);
 }
 
-Future<dynamic> createHTTPreq(
-    String url, Function httpType, String token, dynamic JSONData) async {
+Future<dynamic> createHTTPreq(String url, Function httpType, String token,
+    dynamic JSONData, BuildContext context) async {
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
     Response res = await httpType(Uri.parse(global.url + url),
@@ -373,10 +376,21 @@ Future<dynamic> createHTTPreq(
         body: jsonEncode({"data": tokenization}));
 
     var resData = jsonDecode(res.body);
+
     if (resData['data'] != null) {
       String jsonJWTData = jsonDecode(res.body)['data'];
-      final newRes =
-          new Response(await extractJSONfromJWT(jsonJWTData), res.statusCode);
+      String responseBody = await extractJSONfromJWT(jsonJWTData);
+      if (res.statusCode == 422) {
+        var decodedData = jsonDecode(responseBody);
+        if (crypto.decrypt(decodedData['Message']) == "Login Expired") {
+          removePref(["token", "__token", "___token"]);
+          while (context.canPop()) {
+            context.pop();
+          }
+          context.go(AppRouteConstants.loginRouteName);
+        }
+      }
+      final newRes = new Response(responseBody, res.statusCode);
       return newRes;
     }
   } on Exception catch (err, stackTrace) {

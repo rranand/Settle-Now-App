@@ -256,7 +256,7 @@ class _DashBoardState extends State<DashBoard> {
         };
 
         final response =
-            await createHTTPreq('remainder', http.post, _token, jsonInputData);
+            await createHTTPreq('remainder', http.post, _token, jsonInputData, context);
 
         if (response.statusCode == 200) {
           var tempData = jsonDecode(response.body);
@@ -331,7 +331,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response = await createHTTPreq(
-          'room/allRoomMembers', http.post, _token, jsonInputData);
+          'room/allRoomMembers', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)["data"];
@@ -362,7 +362,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('login', http.put, _token, jsonInputData);
+          await createHTTPreq('login', http.put, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var imgData = jsonDecode(response.body);
@@ -394,7 +394,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('profile', http.patch, _token, jsonInputData);
+          await createHTTPreq('profile', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         gotInitialData = true;
@@ -423,7 +423,7 @@ class _DashBoardState extends State<DashBoard> {
       Map<String, dynamic> jsonInputData = {};
 
       final response =
-          await createHTTPreq('login', http.patch, "", jsonInputData);
+          await createHTTPreq('login', http.patch, "", jsonInputData, context);
 
       if (response.statusCode == 200) {
         updateData = jsonDecode(response.body);
@@ -621,7 +621,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('data', http.post, _token, jsonInputData);
+          await createHTTPreq('data', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         if (roomType == 1) {
@@ -691,7 +691,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('friend', http.delete, _token, jsonInputData);
+          await createHTTPreq('friend', http.delete, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
 
@@ -734,7 +734,7 @@ class _DashBoardState extends State<DashBoard> {
           };
 
           response = await createHTTPreq(
-              'quickSplit/join', http.post, _token, jsonInputData);
+              'quickSplit/join', http.post, _token, jsonInputData, context);
 
           _NRoom.text = "";
           var JsonData = jsonDecode(response.body);
@@ -765,7 +765,7 @@ class _DashBoardState extends State<DashBoard> {
           };
 
           response =
-              await createHTTPreq('room', http.post, _token, jsonInputData);
+              await createHTTPreq('room', http.post, _token, jsonInputData, context);
         } else {
           Map<String, dynamic> jsonInputData = {
             'email': crypto.encrypt(_email.text),
@@ -773,7 +773,7 @@ class _DashBoardState extends State<DashBoard> {
           };
 
           response =
-              await createHTTPreq('room', http.put, _token, jsonInputData);
+              await createHTTPreq('room', http.put, _token, jsonInputData, context);
         }
 
         _NRoom.text = "";
@@ -824,7 +824,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response = await createHTTPreq(
-          'friend/sender', http.post, _token, jsonInputData);
+          'friend/sender', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
 
@@ -860,7 +860,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('friend/sender', http.put, _token, jsonInputData);
+          await createHTTPreq('friend/sender', http.put, _token, jsonInputData, context);
       var data = jsonDecode(response.body);
 
       if (response.statusCode != 200) {
@@ -939,7 +939,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response = await createHTTPreq(
-          'quickSplit/get', http.post, _token, jsonInputData);
+          'quickSplit/get', http.post, _token, jsonInputData, context);
       var data = jsonDecode(response.body);
 
       quickSplitDataFetched = true;
@@ -1099,7 +1099,7 @@ class _DashBoardState extends State<DashBoard> {
         'from': crypto.encrypt(kIsWeb ? 'web' : 'android')
       };
 
-      await createHTTPreq('verify', http.delete, _token, jsonInputData);
+      await createHTTPreq('verify', http.delete, _token, jsonInputData, context);
     } on Exception catch (err, stackTrace) {
       onException(context, err, stackTrace,
           reason: "Unknwon Error", info: ["DashBoard->sendContactData"]);
@@ -1667,7 +1667,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('friend/all', http.post, _token, jsonInputData);
+          await createHTTPreq('friend/all', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -1716,7 +1716,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('quickSplit', http.post, _token, jsonInputData);
+          await createHTTPreq('quickSplit', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -3188,7 +3188,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('friend', http.put, _token, jsonInputData);
+          await createHTTPreq('friend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -3226,7 +3226,7 @@ class _DashBoardState extends State<DashBoard> {
       };
 
       final response =
-          await createHTTPreq('friend/lend', http.put, _token, jsonInputData);
+          await createHTTPreq('friend/lend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -5613,7 +5613,7 @@ class _QuickSplitState extends State<QuickSplit> {
       };
 
       final response = await createHTTPreq(
-          'quickSplit', http.put, widget.token, jsonInputData);
+          'quickSplit', http.put, widget.token, jsonInputData, context);
 
       var updateMessage = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -6089,7 +6089,7 @@ class _QuickSplitState extends State<QuickSplit> {
       };
 
       final response = await createHTTPreq(
-          'quickSplit/settle', http.post, widget.token, jsonInputData);
+          'quickSplit/settle', http.post, widget.token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -6122,7 +6122,7 @@ class _QuickSplitState extends State<QuickSplit> {
       };
 
       final response = await createHTTPreq(
-          'quickSplit/personalExpense', http.post, widget.token, jsonInputData);
+          'quickSplit/personalExpense', http.post, widget.token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -6623,7 +6623,7 @@ class _QuickSplitState extends State<QuickSplit> {
       };
 
       final response = await createHTTPreq(
-          'quickSplit', http.delete, widget.token, jsonInputData);
+          'quickSplit', http.delete, widget.token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -6980,7 +6980,7 @@ class _RoomWidgetState extends State<RoomWidget> {
       };
 
       final response = await createHTTPreq(
-          'room/allRoomMembers', http.post, widget.token, jsonInputData);
+          'room/allRoomMembers', http.post, widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body)["data"];
@@ -7010,7 +7010,7 @@ class _RoomWidgetState extends State<RoomWidget> {
       };
 
       final response =
-          await createHTTPreq('data', http.post, widget.token, jsonInputData);
+          await createHTTPreq('data', http.post, widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         List<dynamic> list = jsonDecode(response.body)['data'];
@@ -7086,7 +7086,7 @@ class _RoomWidgetState extends State<RoomWidget> {
       };
 
       final response = await createHTTPreq(
-          'update/room', http.post, widget.token, jsonInputData);
+          'update/room', http.post, widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         RoomEach tempData =
@@ -7140,7 +7140,7 @@ class _RoomWidgetState extends State<RoomWidget> {
       };
 
       final response = await createHTTPreq(
-          'room/roomSplitMembers', http.post, widget.token, jsonInputData);
+          'room/roomSplitMembers', http.post, widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);

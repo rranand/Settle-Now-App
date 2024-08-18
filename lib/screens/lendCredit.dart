@@ -81,7 +81,7 @@ class _LendCreditState extends State<LendCredit> {
       };
 
       final response =
-          await createHTTPreq('lend', http.post, _token, jsonInputData);
+          await createHTTPreq('lend', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         if (this.mounted) {
@@ -118,7 +118,7 @@ class _LendCreditState extends State<LendCredit> {
       };
 
       final response =
-          await createHTTPreq('update/lend', http.post, _token, jsonInputData);
+          await createHTTPreq('update/lend', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         bool isDeleted = jsonDecode(response.body)["isDeleted"];
@@ -163,12 +163,20 @@ class _LendCreditState extends State<LendCredit> {
             _token = jsonOutData["token"]!;
           });
         }
+      } else {
+        while (this.mounted && context.canPop()) {
+          context.pop();
+        }
+        if (this.mounted) {
+          context.go(AppRouteConstants.loginRouteName);
+        }
+        return;
       }
 
       Map<String, String> jsonInputData = {"email": crypto.encrypt(_email)};
 
       final response =
-          await createHTTPreq('lend', http.patch, _token, jsonInputData);
+          await createHTTPreq('lend', http.patch, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         data = jsonDecode(response.body)['data'];

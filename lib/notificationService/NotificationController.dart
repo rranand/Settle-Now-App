@@ -32,8 +32,12 @@ class NotificationController {
           'confirm': crypto.encrypt("1")
         };
 
-        await createHTTPreq('friend', http.put,
-            receivedAction.payload!["token"].toString(), jsonInputData);
+        await createHTTPreq(
+            'friend',
+            http.put,
+            receivedAction.payload!["token"].toString(),
+            jsonInputData,
+            context);
       } else if (receivedAction.buttonKeyPressed == "CANCEL") {
         Map<String, dynamic> jsonInputData = {
           'roomKey': crypto.encrypt(receivedAction.payload!["key"].toString()),
@@ -41,8 +45,12 @@ class NotificationController {
           'confirm': crypto.encrypt("0")
         };
 
-        await createHTTPreq('friend', http.put,
-            receivedAction.payload!["token"].toString(), jsonInputData);
+        await createHTTPreq(
+            'friend',
+            http.put,
+            receivedAction.payload!["token"].toString(),
+            jsonInputData,
+            context);
       } else {
         NavKey.navKey.currentState!.push(MaterialPageRoute(
             builder: (_) => DashBoard(
@@ -58,8 +66,12 @@ class NotificationController {
           'confirm': crypto.encrypt("1")
         };
 
-        await createHTTPreq('friend/lend', http.put,
-            receivedAction.payload!["token"].toString(), jsonInputData);
+        await createHTTPreq(
+            'friend/lend',
+            http.put,
+            receivedAction.payload!["token"].toString(),
+            jsonInputData,
+            context);
       } else if (receivedAction.buttonKeyPressed == "CANCEL") {
         Map<String, dynamic> jsonInputData = {
           'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
@@ -67,8 +79,12 @@ class NotificationController {
           'confirm': crypto.encrypt("0")
         };
 
-        await createHTTPreq('friend/lend', http.put,
-            receivedAction.payload!["token"].toString(), jsonInputData);
+        await createHTTPreq(
+            'friend/lend',
+            http.put,
+            receivedAction.payload!["token"].toString(),
+            jsonInputData,
+            context);
       } else {
         NavKey.navKey.currentState!.push(MaterialPageRoute(
             builder: (_) => DashBoard(

@@ -79,7 +79,7 @@ class _ProfileState extends State<Profile> {
       };
 
       final response = await createHTTPreq(
-          'profile/deleteAccount', http.post, _token, jsonInputData);
+          'profile/deleteAccount', http.post, _token, jsonInputData, context);
 
       String responseMessage =
           crypto.decrypt(jsonDecode(response.body)['Message']);
@@ -146,7 +146,7 @@ class _ProfileState extends State<Profile> {
       };
 
       final response = await createHTTPreq(
-          'profile/basic_info', http.post, _token, jsonInputData);
+          'profile/basic_info', http.post, _token, jsonInputData, context);
 
       String responseMessage =
           crypto.decrypt(jsonDecode(response.body)['Message']);
@@ -205,6 +205,14 @@ class _ProfileState extends State<Profile> {
           _token = jsonOutData["token"]!;
         });
       }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
 
     await fetchBasicInfo();
@@ -246,7 +254,7 @@ class _ProfileState extends State<Profile> {
       };
 
       final response = await createHTTPreq(
-          'profile/phoneNo', http.post, _token, jsonInputData);
+          'profile/phoneNo', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         havePhoneNo = true;

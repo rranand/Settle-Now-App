@@ -54,7 +54,7 @@ class _RoomJoinState extends State<RoomJoin> {
           };
 
           final response =
-              await createHTTPreq('room', http.put, _token, jsonInputData);
+              await createHTTPreq('room', http.put, _token, jsonInputData, context);
 
           if (this.mounted) {
             setState(() {
@@ -68,7 +68,7 @@ class _RoomJoinState extends State<RoomJoin> {
           };
 
           final response = await createHTTPreq(
-              'lend/addPerson', http.post, _token, jsonInputData);
+              'lend/addPerson', http.post, _token, jsonInputData, context);
 
           if (this.mounted) {
             setState(() {

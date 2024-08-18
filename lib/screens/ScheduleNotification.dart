@@ -77,6 +77,14 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
           _token = jsonOutData["token"]!;
         });
       }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
   }
 
@@ -115,7 +123,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       };
 
       final response =
-          await createHTTPreq('remainder', http.post, _token, jsonInputData);
+          await createHTTPreq('remainder', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body);
@@ -165,7 +173,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       };
 
       final response =
-          await createHTTPreq('remainder', http.delete, _token, jsonInputData);
+          await createHTTPreq('remainder', http.delete, _token, jsonInputData, context);
 
       if (this.mounted) {
         context.pop();
@@ -220,7 +228,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         };
 
         final response =
-            await createHTTPreq('remainder', http.patch, _token, jsonInputData);
+            await createHTTPreq('remainder', http.patch, _token, jsonInputData, context);
 
         _name.text = "";
         if (this.mounted) {

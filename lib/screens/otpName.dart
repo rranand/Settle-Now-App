@@ -66,7 +66,7 @@ class _OtpNameState extends State<OtpName> {
         'email': crypto.encrypt(widget.email),
       };
 
-      await createHTTPreq('login', http.post, "", jsonInputData);
+      await createHTTPreq('login', http.post, "", jsonInputData, context);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         onException(context, err, stackTrace,
@@ -91,7 +91,7 @@ class _OtpNameState extends State<OtpName> {
     List<dynamic> fwaitTemp = await Future.wait([
       initPlatformState(),
       getDeviceTokenToSendNotification(),
-      createHTTPreq('login', http.post, token, jsonInputData)
+      createHTTPreq('login', http.post, token, jsonInputData, context)
     ]);
 
     _deviceData = fwaitTemp[0];
@@ -165,7 +165,7 @@ class _OtpNameState extends State<OtpName> {
       };
 
       final response =
-          await createHTTPreq('verify', http.post, "", jsonInputData);
+          await createHTTPreq('verify', http.post, "", jsonInputData, context);
 
       JsonData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -219,7 +219,8 @@ class _OtpNameState extends State<OtpName> {
             'release': crypto.encrypt(_deviceData['release']),
           };
         }
-        resp = await createHTTPreq('verify', http.patch, "", jsonInputDataReq);
+        resp = await createHTTPreq(
+            'verify', http.patch, "", jsonInputDataReq, context);
 
         var remainingData = jsonDecode(resp.body)['data'];
 

@@ -13,6 +13,7 @@ import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/ChartData.dart';
 import 'package:settlenow/models/PersonalExpenseEach.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
 
@@ -116,6 +117,14 @@ class _AnalysisState extends State<Analysis> {
           _token = jsonOutData["token"]!;
         });
       }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
 
     try {
@@ -125,7 +134,7 @@ class _AnalysisState extends State<Analysis> {
       };
 
       final response =
-          await createHTTPreq('profile', http.post, _token, jsonInputData);
+          await createHTTPreq('profile', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         List<dynamic> tempData = jsonDecode(response.body)['data'];
@@ -366,7 +375,7 @@ class _AnalysisState extends State<Analysis> {
       };
 
       final response = await createHTTPreq(
-          'transaction/analysis', http.post, _token, jsonInputData);
+          'transaction/analysis', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         RoomData = jsonDecode(response.body)['data'];

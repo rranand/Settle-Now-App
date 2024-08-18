@@ -10,6 +10,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import '../others/themes.dart';
 
 class ContactUs extends StatefulWidget {
@@ -86,7 +87,7 @@ class _ContactUsState extends State<ContactUs> {
         };
 
         final response =
-            await createHTTPreq('contact', http.post, _token, jsonInputData);
+            await createHTTPreq('contact', http.post, _token, jsonInputData, context);
 
         _subject.text = "";
         _message.text = "";
@@ -124,6 +125,14 @@ class _ContactUsState extends State<ContactUs> {
           _token = jsonOutData["token"]!;
         });
       }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
   }
 
