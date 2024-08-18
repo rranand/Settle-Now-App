@@ -985,34 +985,31 @@ class _AnalysisState extends State<Analysis> {
                                         for (int i = 0;
                                             i < tempGraphData.length;
                                             i++) {
-                                          graphData.add(BarSeries<ChartData, String>(
-                                              dataSource: tempGraphData[i],
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              width: 0.8,
-                                              xValueMapper:
-                                                  (ChartData data, _) =>
-                                                      data.type,
-                                              yValueMapper:
-                                                  (ChartData data, _) =>
-                                                      data.amount,
-                                              isVisibleInLegend: true,
-                                              pointColorMapper:
-                                                  (ChartData data, _) =>
-                                                      global.colorsList[_],
-                                              dataLabelMapper: (datum, index) =>
-                                                  datum.name +
-                                                  " (" +
-                                                  datum.type +
-                                                  ")" +
-                                                  "\n₹ " +
-                                                  datum.amount
-                                                      .toStringAsFixed(2),
-                                              dataLabelSettings:
-                                                  DataLabelSettings(
-                                                      isVisible: true),
-                                              xAxisName: "Category",
-                                              yAxisName: "Amount"));
+                                          graphData
+                                              .add(BarSeries<ChartData, String>(
+                                            dataSource: tempGraphData[i],
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            width: 0.8,
+                                            xValueMapper: (ChartData data, _) =>
+                                                data.type,
+                                            yValueMapper: (ChartData data, _) =>
+                                                data.amount,
+                                            isVisibleInLegend: true,
+                                            pointColorMapper:
+                                                (ChartData data, _) =>
+                                                    global.colorsList[_],
+                                            dataLabelMapper: (datum, index) =>
+                                                datum.name +
+                                                " (" +
+                                                datum.type +
+                                                ")" +
+                                                "\n₹ " +
+                                                datum.amount.toStringAsFixed(2),
+                                            dataLabelSettings:
+                                                DataLabelSettings(
+                                                    isVisible: true),
+                                          ));
                                         }
 
                                         graphLoading = false;

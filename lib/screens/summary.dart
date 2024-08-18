@@ -93,11 +93,6 @@ class _SummaryPageState extends State<SummaryPage> {
     super.dispose();
   }
 
-  Future _executeParallelRefresh() async {
-    _initialisation();
-    updatePieChart("all");
-  }
-
   Future<void> _initialisation() async {
     isLoadingData = true;
     if (loadFirstTime) {
@@ -119,7 +114,7 @@ class _SummaryPageState extends State<SummaryPage> {
     if (this.mounted) {
       setState(() {});
     }
-
+    updatePieChart("all");
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email),
@@ -266,7 +261,7 @@ class _SummaryPageState extends State<SummaryPage> {
     getConnectivity();
     fillYear();
     scrollController.addListener(_scrollListener);
-    _executeParallelRefresh();
+    _initialisation();
   }
 
   void _scrollListener() async {

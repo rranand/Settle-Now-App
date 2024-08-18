@@ -469,7 +469,7 @@ class _LendPageState extends State<LendPage> {
       child: Container(
           width: kIsWeb
               ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width ))
+                  min(400, MediaQuery.of(context).size.width))
               : MediaQuery.of(context).size.width,
           child: Padding(
               padding: const EdgeInsets.all(10.0),
@@ -849,11 +849,10 @@ class _LendPageState extends State<LendPage> {
                             height: 15,
                           ),
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               SizedBox(
                                 height: 43,
-                                width: MediaQuery.of(context).size.width * 0.3,
                                 child: OutlinedButton(
                                     child: Text(
                                       "Update",
@@ -895,8 +894,10 @@ class _LendPageState extends State<LendPage> {
                                     }),
                               ),
                               SizedBox(
+                                width: 8,
+                              ),
+                              SizedBox(
                                 height: 43,
-                                width: MediaQuery.of(context).size.width * 0.3,
                                 child: OutlinedButton(
                                     child: Text(
                                       "Delete",
@@ -934,6 +935,33 @@ class _LendPageState extends State<LendPage> {
                                         if (this.mounted) {
                                           context.pop();
                                         }
+                                      }
+                                    }),
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              SizedBox(
+                                height: 43,
+                                child: OutlinedButton(
+                                    child: Text(
+                                      "Cancel",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      side: BorderSide(color: Colors.redAccent),
+                                    ),
+                                    onPressed: () async {
+                                      if (this.mounted) {
+                                        context.pop();
                                       }
                                     }),
                               ),
@@ -1099,7 +1127,7 @@ class _LendPageState extends State<LendPage> {
             child: Container(
                 width: kIsWeb
                     ? max(MediaQuery.of(context).size.width * 0.5,
-                        min(400, MediaQuery.of(context).size.width ))
+                        min(400, MediaQuery.of(context).size.width))
                     : MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),

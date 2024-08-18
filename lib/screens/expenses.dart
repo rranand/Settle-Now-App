@@ -273,9 +273,9 @@ class _ExpensesState extends State<Expenses> {
           child: SingleChildScrollView(
             child: Container(
                 width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width ))
-              : MediaQuery.of(context).size.width,
+                    ? max(MediaQuery.of(context).size.width * 0.5,
+                        min(400, MediaQuery.of(context).size.width))
+                    : MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Form(
@@ -401,9 +401,9 @@ class _ExpensesState extends State<Expenses> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
         width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width * 0.96))
-              : MediaQuery.of(context).size.width * 0.96,
+            ? max(MediaQuery.of(context).size.width * 0.5,
+                min(400, MediaQuery.of(context).size.width * 0.96))
+            : MediaQuery.of(context).size.width * 0.96,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Column(
@@ -414,7 +414,13 @@ class _ExpensesState extends State<Expenses> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.5 - 20,
+                    width: (kIsWeb
+                            ? max(
+                                MediaQuery.of(context).size.width * 0.5,
+                                min(400,
+                                    MediaQuery.of(context).size.width * 0.96))
+                            : MediaQuery.of(context).size.width * 0.96) -
+                        120,
                     child: Text(
                       purpose,
                       style: TextStyle(fontSize: 26),
