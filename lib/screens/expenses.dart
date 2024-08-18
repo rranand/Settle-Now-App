@@ -32,6 +32,7 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
+  String dateFromUrl = "";
   String _email = "";
   String _token = "";
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -126,7 +127,14 @@ class _ExpensesState extends State<Expenses> {
         mn = widget.date[i] + mn;
       }
     }
-
+    var isPossibleDate = DateTime(int.parse(yr), int.parse(mn) + 1);
+    if (isPossibleDate.month != int.parse(mn) + 1 ||
+        isPossibleDate.year != int.parse(yr)) {
+      context.go(AppRouteConstants.errorPageRouteName);
+      return;
+    }
+    dateFromUrl =
+        (isPossibleDate.month - 1).toString() + isPossibleDate.year.toString();
     title = global.Month[int.parse(mn)] + ", " + yr;
 
     if (this.mounted) {
@@ -136,7 +144,7 @@ class _ExpensesState extends State<Expenses> {
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email),
-        'date': crypto.encrypt(widget.date),
+        'date': crypto.encrypt(dateFromUrl),
       };
 
       final response = await createHTTPreq(
@@ -404,7 +412,7 @@ class _ExpensesState extends State<Expenses> {
                       maxLines: 6,
                     ),
                   ),
-                  Curdate == widget.date
+                  Curdate == dateFromUrl
                       ? ((quickSplit || room)
                           ? IconButton(
                               onPressed: () async {
@@ -658,6 +666,7 @@ class _ExpensesState extends State<Expenses> {
   @override
   void initState() {
     super.initState();
+    dateFromUrl = widget.date;
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
   }
@@ -2330,7 +2339,7 @@ class _ExpensesState extends State<Expenses> {
                             ),
                     )),
         ),
-        floatingActionButton: Curdate == widget.date
+        floatingActionButton: Curdate == dateFromUrl
             ? (expenseCategory.length == 0
                 ? null
                 : FloatingActionButton(
@@ -2654,7 +2663,9 @@ class _ExpensesState extends State<Expenses> {
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
-                  color: internetConnProvider.isDeviceConnected ? Colors.green : Colors.red,
+                  color: internetConnProvider.isDeviceConnected
+                      ? Colors.green
+                      : Colors.red,
                 ),
                 height: 40,
                 width: MediaQuery.of(context).size.width,

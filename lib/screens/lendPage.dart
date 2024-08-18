@@ -979,8 +979,8 @@ class _LendPageState extends State<LendPage> {
       final response =
           await createHTTPreq('lend', http.put, _token, jsonInputData, context);
 
+      var resData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        var resData = jsonDecode(response.body);
         data = resData['data'];
         roomName.setText(crypto.decrypt(resData['name']));
         roomLink = crypto.decrypt(resData['roomLink']);
@@ -1015,6 +1015,10 @@ class _LendPageState extends State<LendPage> {
           }
         }
         context.push(AppRouteConstants.maintainRouteName);
+      } else if (response.statusCode == 422) {
+        if (crypto.decrypt(resData["Message"]) == "Room Not Found") {
+          context.push(AppRouteConstants.errorPageRouteName);
+        }
       } else {
         showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
             Icons.close);

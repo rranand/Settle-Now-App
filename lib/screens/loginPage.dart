@@ -42,10 +42,6 @@ class _LoginPageState extends State<LoginPage> {
   final connectionChecker = InternetConnectionChecker();
   late StreamSubscription<InternetConnectionStatus> subscription;
 
-  void checkInternetConnection() async {
-    print("Checking internet connection Called");
-  }
-
   @override
   void dispose() {
     subscription.cancel();

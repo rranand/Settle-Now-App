@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:settlenow/screens/BankTransactions.dart';
+import 'package:settlenow/screens/JoinRoom.dart';
 import 'package:settlenow/screens/ScheduleNotification.dart';
 import 'package:settlenow/screens/aboutus.dart';
 import 'package:settlenow/screens/contactUs.dart';
@@ -16,6 +17,7 @@ import 'package:settlenow/screens/onBoarding.dart';
 import 'package:settlenow/screens/otpName.dart';
 import 'package:settlenow/screens/profile.dart';
 import 'package:settlenow/screens/rooms.dart';
+import 'package:settlenow/screens/ErrorPage.dart';
 
 class AppRouter {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -152,8 +154,29 @@ class AppRouter {
             ),
             ...androidRoutes
           ]),
+      GoRoute(
+        path: AppRouteConstants.errorPageRouteName,
+        builder: (context, state) {
+          return ErrorPage();
+        },
+      ),
     ];
-
+    if (!kIsWeb) {
+      allRoutes.add(GoRoute(
+        path: AppRouteConstants.deepLinkJoinRoom + '/:roomkey',
+        builder: (context, state) {
+          return RoomJoin(roomKey: state.pathParameters['roomkey']!);
+        },
+      ));
+      allRoutes.add(
+        GoRoute(
+          path: AppRouteConstants.deepLinkJoinLend + '/:roomkey',
+          builder: (context, state) {
+            return RoomJoin(roomKey: state.pathParameters['roomkey']!);
+          },
+        ),
+      );
+    }
     return allRoutes;
   }
 
@@ -161,6 +184,7 @@ class AppRouter {
     routes: _allRoutes(),
     initialLocation: AppRouteConstants.loginRouteName,
     observers: [observer],
+    errorBuilder: (context, state) => ErrorPage(),
   );
 
   static GoRouter get router => _router;

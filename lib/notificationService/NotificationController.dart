@@ -1,11 +1,9 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/functions/additionalFunction.dart';
-import 'package:settlenow/others/route_service.dart';
-import 'package:settlenow/screens/dashboard.dart';
-import 'package:settlenow/screens/lendPage.dart';
-import 'package:settlenow/screens/rooms.dart';
+import 'package:settlenow/routes/route_constant.dart';
 import 'package:settlenow/others/crypto.dart';
 
 class NotificationController {
@@ -52,11 +50,8 @@ class NotificationController {
             jsonInputData,
             context);
       } else {
-        NavKey.navKey.currentState!.push(MaterialPageRoute(
-            builder: (_) => DashBoard(
-                  dash: 1,
-                  firstTime: false,
-                )));
+        context.push(AppRouteConstants.dashboardRouteName,
+            extra: {'dash': 1, 'firstTime': false});
       }
     } else if (receivedAction.payload!["type"] == "LenDenRequest") {
       if (receivedAction.buttonKeyPressed == "JOIN") {
@@ -86,28 +81,23 @@ class NotificationController {
             jsonInputData,
             context);
       } else {
-        NavKey.navKey.currentState!.push(MaterialPageRoute(
-            builder: (_) => DashBoard(
-                  dash: 1,
-                  firstTime: false,
-                )));
+        context.push(AppRouteConstants.dashboardRouteName,
+            extra: {'dash': 1, 'firstTime': false});
       }
     } else if (receivedAction.payload!["type"] == "room" ||
         receivedAction.payload!["type"] == "lend") {
-      NavKey.navKey.currentState!.push(MaterialPageRoute(
-          builder: (_) => ((receivedAction.payload!["type"]!) == "room"
-              ? RoomExpense(
-                  roomKey: receivedAction.payload!["roomKey"]!,
-                )
-              : LendPage(
-                  roomkey: receivedAction.payload!["roomkey"]!,
-                ))));
+      if ((receivedAction.payload!["type"]!) == "room") {
+        context.push(AppRouteConstants.roomRouteName +
+            "/" +
+            receivedAction.payload!["roomKey"]!);
+      } else {
+        context.push(AppRouteConstants.lendByTitleRouteName +
+            "/" +
+            receivedAction.payload!["roomKey"]!);
+      }
     } else {
-      NavKey.navKey.currentState!.push(MaterialPageRoute(
-          builder: (_) => DashBoard(
-                dash: 1,
-                firstTime: false,
-              )));
+      context.push(AppRouteConstants.dashboardRouteName,
+          extra: {'dash': 1, 'firstTime': false});
     }
   }
 }

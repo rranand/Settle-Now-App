@@ -221,8 +221,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'email': crypto.encrypt(_email),
       };
 
-      final response =
-          await createHTTPreq('data', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'data', http.patch, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -290,6 +290,10 @@ class _RoomExpenseState extends State<RoomExpense>
           }
         }
         context.push(AppRouteConstants.maintainRouteName);
+      } else if (response.statusCode == 422) {
+        if (crypto.decrypt(data["Message"]) == "Room Not Found") {
+          context.push(AppRouteConstants.errorPageRouteName);
+        }
       } else {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
@@ -316,8 +320,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'email': crypto.encrypt(_email),
       };
 
-      final response =
-          await createHTTPreq('friend', http.patch, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend', http.patch, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -370,8 +374,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'roomKey': crypto.encrypt(widget.roomKey),
       };
 
-      final response =
-          await createHTTPreq('transaction', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'transaction', http.post, _token, jsonInputData, context);
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -420,8 +424,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'split': crypto.encrypt(manualSplitAmount.toString())
       };
 
-      final response =
-          await createHTTPreq('manualSplit', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'manualSplit', http.post, _token, jsonInputData, context);
 
       _amt.text = "";
       _purpose.text = "";
@@ -524,8 +528,8 @@ class _RoomExpenseState extends State<RoomExpense>
               : addExpenseTo.toString()))
         };
 
-        final response =
-            await createHTTPreq('data', http.delete, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'data', http.delete, _token, jsonInputData, context);
 
         _amt.text = "";
         _purpose.text = "";
@@ -573,8 +577,8 @@ class _RoomExpenseState extends State<RoomExpense>
           'amt': crypto.encrypt(_amt.text),
         };
 
-        final response =
-            await createHTTPreq('data', http.put, _token, jsonInputData, context);
+        final response = await createHTTPreq(
+            'data', http.put, _token, jsonInputData, context);
 
         _amt.text = "";
         Tdata = jsonDecode(response.body);
@@ -668,8 +672,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'roomKey': crypto.encrypt(widget.roomKey),
       };
 
-      final response =
-          await createHTTPreq('room', http.delete, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'room', http.delete, _token, jsonInputData, context);
 
       isClear = true;
       CloseData = jsonDecode(response.body);
@@ -1070,8 +1074,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'isFromContact': crypto.encrypt(isFromContact.toString())
       };
 
-      final response =
-          await createHTTPreq('friend', http.post, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       friendData[index].fromContact = false;
@@ -1096,8 +1100,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'confirm': crypto.encrypt("0")
       };
 
-      final response =
-          await createHTTPreq('friend', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'friend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -1117,8 +1121,8 @@ class _RoomExpenseState extends State<RoomExpense>
         'email': crypto.encrypt(_email)
       };
 
-      final response =
-          await createHTTPreq('transaction', http.put, _token, jsonInputData, context);
+      final response = await createHTTPreq(
+          'transaction', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
@@ -3660,11 +3664,13 @@ class _RoomExpenseState extends State<RoomExpense>
             child: SizedBox(
                 height: MediaQuery.of(context).size.height,
                 child: chooseFromBottomNavigator(dash))),
-        bottomNavigationBar:internetConnProvider.isAlertSet
+        bottomNavigationBar: internetConnProvider.isAlertSet
             ? Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
-                  color: internetConnProvider.isDeviceConnected ? Colors.green : Colors.red,
+                  color: internetConnProvider.isDeviceConnected
+                      ? Colors.green
+                      : Colors.red,
                 ),
                 height: 40,
                 width: MediaQuery.of(context).size.width,
