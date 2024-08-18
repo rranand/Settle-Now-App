@@ -1120,8 +1120,9 @@ class _DashBoardState extends State<DashBoard> {
                 child: SingleChildScrollView(
                     child: Container(
                         width: kIsWeb
-                            ? MediaQuery.of(context).size.width * 0.5
-                            : MediaQuery.of(context).size.width * 0.95,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              : MediaQuery.of(context).size.width * 0.95,
                         child: Padding(
                             padding: const EdgeInsets.all(15.0),
                             child: Column(
@@ -1555,8 +1556,9 @@ class _DashBoardState extends State<DashBoard> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
           width: kIsWeb
-              ? MediaQuery.of(context).size.width * 0.5
-              : MediaQuery.of(context).size.width,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width ))
+              :  MediaQuery.of(context).size.width,
           child: Padding(
               padding: const EdgeInsets.all(10.0),
               child: Column(
@@ -1898,8 +1900,9 @@ class _DashBoardState extends State<DashBoard> {
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
                     width: kIsWeb
-                        ? MediaQuery.of(context).size.width * 0.5
-                        : MediaQuery.of(context).size.width * 0.95,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child: Column(
@@ -2041,8 +2044,9 @@ class _DashBoardState extends State<DashBoard> {
                   borderRadius: BorderRadius.circular(12.0)),
               child: Container(
                 width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
-                    : MediaQuery.of(context).size.width * 0.9,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.9))
+              : MediaQuery.of(context).size.width * 0.9,
                 child: SingleChildScrollView(
                   child: Padding(
                     padding: const EdgeInsets.all(18.0),
@@ -2484,8 +2488,9 @@ class _DashBoardState extends State<DashBoard> {
               child: SingleChildScrollView(
                 child: Container(
                   width: kIsWeb
-                      ? MediaQuery.of(context).size.width * 0.5
-                      : MediaQuery.of(context).size.width * 0.95,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              :  MediaQuery.of(context).size.width * 0.95,
                   child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Column(
@@ -5649,9 +5654,10 @@ class _QuickSplitState extends State<QuickSplit> {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SizedBox(
-              width: kIsWeb
-                  ? MediaQuery.of(context).size.width * 0.5
-                  : MediaQuery.of(context).size.width * 0.95,
+              width:kIsWeb
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              :  MediaQuery.of(context).size.width * 0.95,
               child: Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: Column(
@@ -6149,8 +6155,9 @@ class _QuickSplitState extends State<QuickSplit> {
         child: SingleChildScrollView(
             child: Container(
                 width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
-                    : MediaQuery.of(context).size.width,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width ))
+              :  MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
@@ -6257,7 +6264,8 @@ class _QuickSplitState extends State<QuickSplit> {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         child: SizedBox(
           width: kIsWeb
-              ? MediaQuery.of(context).size.width * 0.5
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
               : MediaQuery.of(context).size.width * 0.95,
           child: Padding(
             padding: const EdgeInsets.all(15.0),

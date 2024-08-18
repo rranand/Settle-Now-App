@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
@@ -272,8 +273,9 @@ class _ExpensesState extends State<Expenses> {
           child: SingleChildScrollView(
             child: Container(
                 width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
-                    : MediaQuery.of(context).size.width,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width ))
+              : MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Form(
@@ -399,8 +401,9 @@ class _ExpensesState extends State<Expenses> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
         width: kIsWeb
-              ? MediaQuery.of(context).size.width * 0.5
-              :MediaQuery.of(context).size.width * 0.96,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.96))
+              : MediaQuery.of(context).size.width * 0.96,
         child: Padding(
           padding: const EdgeInsets.all(15.0),
           child: Column(

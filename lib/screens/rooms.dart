@@ -733,8 +733,9 @@ class _RoomExpenseState extends State<RoomExpense>
         child: SingleChildScrollView(
             child: Container(
                 width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
-                    : MediaQuery.of(context).size.width,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width ))
+              : MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
@@ -2199,9 +2200,10 @@ class _RoomExpenseState extends State<RoomExpense>
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SingleChildScrollView(
             child: Container(
-                width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
-                    : MediaQuery.of(context).size.width,
+                width:kIsWeb
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width ))
+              :  MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Column(
@@ -3229,8 +3231,9 @@ class _RoomExpenseState extends State<RoomExpense>
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
                     width: kIsWeb
-                        ? MediaQuery.of(context).size.width * 0.5
-                        : MediaQuery.of(context).size.width * 0.95,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              :  MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child: Column(
@@ -3510,8 +3513,9 @@ class _RoomExpenseState extends State<RoomExpense>
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
                     width: kIsWeb
-                        ? MediaQuery.of(context).size.width * 0.5
-                        : MediaQuery.of(context).size.width * 0.95,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
                         child:
@@ -3773,6 +3777,13 @@ class _RoomExpenseState extends State<RoomExpense>
                                       padding:
                                           MediaQuery.of(context).viewInsets,
                                       child: SizedBox(
+                                        width:kIsWeb
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.9))
+              :  MediaQuery.of(context)
+                                                    .size
+                                                    .width *
+                                                0.9,
                                         height:
                                             isClear ? 60 : (locked ? 120 : 170),
                                         child: Center(
@@ -3847,10 +3858,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                               12.0)),
                                                                       child:
                                                                           Container(
-                                                                        width: kIsWeb
-                                                                            ? MediaQuery.of(context).size.width *
-                                                                                0.5
-                                                                            : MediaQuery.of(context).size.width *
+                                                                        width:kIsWeb
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.9))
+              : MediaQuery.of(context).size.width *
                                                                                 0.9,
                                                                         child:
                                                                             Padding(
@@ -4038,10 +4049,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                               12.0)),
                                                                   child:
                                                                       Container(
-                                                                    width: kIsWeb
-                                                                        ? MediaQuery.of(context).size.width *
-                                                                            0.5
-                                                                        : MediaQuery.of(context).size.width *
+                                                                    width:kIsWeb
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.9))
+              : MediaQuery.of(context).size.width *
                                                                             0.9,
                                                                     child:
                                                                         SingleChildScrollView(
@@ -4713,8 +4724,9 @@ class _ExpenseDataState extends State<ExpenseData> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SizedBox(
               width: kIsWeb
-                  ? MediaQuery.of(context).size.width * 0.5
-                  : MediaQuery.of(context).size.width * 0.95,
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              : MediaQuery.of(context).size.width * 0.95,
               child: Padding(
                   padding: const EdgeInsets.all(18.0),
                   child: Column(
@@ -5196,7 +5208,10 @@ class _ExpenseDataState extends State<ExpenseData> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
           child: SingleChildScrollView(
             child: Container(
-                width: MediaQuery.of(context).size.width,
+                width: kIsWeb
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width))
+              : MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: Form(
@@ -5517,9 +5532,10 @@ class _ExpenseDataState extends State<ExpenseData> {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         child: SizedBox(
-          width: kIsWeb
-              ? MediaQuery.of(context).size.width * 0.5
-              : MediaQuery.of(context).size.width * 0.95,
+          width:kIsWeb
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width * 0.95))
+              :  MediaQuery.of(context).size.width * 0.95,
           child: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Column(

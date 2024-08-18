@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -266,7 +267,8 @@ class _AnalysisState extends State<Analysis> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
           width: kIsWeb
-              ? MediaQuery.of(context).size.width * 0.5
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width))
               : MediaQuery.of(context).size.width,
           child: Padding(
               padding: const EdgeInsets.all(12.0),

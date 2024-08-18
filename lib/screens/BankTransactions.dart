@@ -368,7 +368,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                 borderRadius: BorderRadius.circular(12.0)),
             child: SizedBox(
               width: kIsWeb
-                  ? MediaQuery.of(context).size.width * 0.5
+                  ? max(MediaQuery.of(context).size.width * 0.5,
+                      min(400, MediaQuery.of(context).size.width * 0.9))
                   : MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
@@ -766,7 +767,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                 borderRadius: BorderRadius.circular(12.0)),
             child: SizedBox(
               width: kIsWeb
-                  ? MediaQuery.of(context).size.width * 0.5
+                  ? max(MediaQuery.of(context).size.width * 0.5,
+                      min(400, MediaQuery.of(context).size.width * 0.9))
                   : MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
@@ -984,7 +986,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
                     width: kIsWeb
-                        ? MediaQuery.of(context).size.width * 0.5
+                        ? max(MediaQuery.of(context).size.width * 0.5,
+                            min(400, MediaQuery.of(context).size.width * 0.95))
                         : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
@@ -1282,7 +1285,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                 borderRadius: BorderRadius.circular(12.0)),
             child: SizedBox(
               width: kIsWeb
-                  ? MediaQuery.of(context).size.width * 0.5
+                  ? max(MediaQuery.of(context).size.width * 0.5,
+                      min(400, MediaQuery.of(context).size.width * 0.9))
                   : MediaQuery.of(context).size.width * 0.9,
               child: Padding(
                 padding: const EdgeInsets.all(18.0),
@@ -1936,7 +1940,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                   padding: MediaQuery.of(context).viewInsets,
                   child: SizedBox(
                     width: kIsWeb
-                        ? MediaQuery.of(context).size.width * 0.5
+                        ? max(MediaQuery.of(context).size.width * 0.5,
+                            min(400, MediaQuery.of(context).size.width * 0.9))
                         : MediaQuery.of(context).size.width * 0.9,
                     height: roomData.isNotEmpty
                         ? 245

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -346,7 +347,8 @@ class _LendPageState extends State<LendPage> {
                     borderRadius: BorderRadius.circular(12.0)),
                 child: SizedBox(
                     width: kIsWeb
-                        ? MediaQuery.of(context).size.width * 0.5
+                        ? max(MediaQuery.of(context).size.width * 0.5,
+                            min(400, MediaQuery.of(context).size.width * 0.95))
                         : MediaQuery.of(context).size.width * 0.95,
                     child: Padding(
                         padding: const EdgeInsets.all(18.0),
@@ -466,7 +468,8 @@ class _LendPageState extends State<LendPage> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
       child: Container(
           width: kIsWeb
-              ? MediaQuery.of(context).size.width * 0.5
+              ? max(MediaQuery.of(context).size.width * 0.5,
+                  min(400, MediaQuery.of(context).size.width ))
               : MediaQuery.of(context).size.width,
           child: Padding(
               padding: const EdgeInsets.all(10.0),
@@ -725,7 +728,8 @@ class _LendPageState extends State<LendPage> {
           child: SingleChildScrollView(
             child: Container(
                 width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
+                    ? max(MediaQuery.of(context).size.width * 0.5,
+                        min(400, MediaQuery.of(context).size.width))
                     : MediaQuery.of(context).size.width,
                 child: Padding(
                     padding: const EdgeInsets.all(15.0),
@@ -1094,7 +1098,8 @@ class _LendPageState extends State<LendPage> {
         child: SingleChildScrollView(
             child: Container(
                 width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
+                    ? max(MediaQuery.of(context).size.width * 0.5,
+                        min(400, MediaQuery.of(context).size.width ))
                     : MediaQuery.of(context).size.width,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),

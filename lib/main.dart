@@ -31,10 +31,10 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   String firebaseProjectName = '[DEFAULT]';
-  if (kDebugMode) {
+  if (!kIsWeb && kDebugMode) {
     firebaseProjectName = 'SettleNow-Dev';
   }
-  if (Firebase.apps.length == 0) {
+  if (kIsWeb || Firebase.apps.length == 0) {
     await Firebase.initializeApp(
         name: firebaseProjectName,
         options: DefaultFirebaseOptions.currentPlatform);
@@ -86,13 +86,17 @@ Future<void> main() async {
           defaultColor: Colors.white),
     ]);
   }
-  FlutterError.onError = (errorDetails) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-    return true;
-  };
+
+  if (!kIsWeb) {
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
+
   runApp(MyApp());
 }
 

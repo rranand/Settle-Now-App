@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -290,7 +291,10 @@ class _ProfileState extends State<Profile> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0)),
               child: Container(
-                width: MediaQuery.of(context).size.width * 0.9,
+                width: kIsWeb
+                    ? max(MediaQuery.of(context).size.width * 0.5,
+                        min(400, MediaQuery.of(context).size.width * 0.9))
+                    : MediaQuery.of(context).size.width * 0.9,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Column(
@@ -459,7 +463,8 @@ class _ProfileState extends State<Profile> {
                   borderRadius: BorderRadius.circular(12.0)),
               child: Container(
                 width: kIsWeb
-                    ? MediaQuery.of(context).size.width * 0.5
+                    ? max(MediaQuery.of(context).size.width * 0.5,
+                        min(400, MediaQuery.of(context).size.width * 0.9))
                     : MediaQuery.of(context).size.width * 0.9,
                 child: Padding(
                   padding: const EdgeInsets.all(15.0),

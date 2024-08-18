@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -280,7 +282,10 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                 child: Padding(
                   padding: MediaQuery.of(context).viewInsets,
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
+                    width: kIsWeb
+                        ? max(MediaQuery.of(context).size.width * 0.5,
+                            min(400, MediaQuery.of(context).size.width * 0.9))
+                        : MediaQuery.of(context).size.width * 0.9,
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Column(
@@ -389,7 +394,10 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
+                    width: kIsWeb
+                        ? max(MediaQuery.of(context).size.width * 0.5,
+                            min(400, MediaQuery.of(context).size.width * 0.9))
+                        : MediaQuery.of(context).size.width * 0.9,
                     child: Padding(
                       padding: const EdgeInsets.all(14.0),
                       child: Form(

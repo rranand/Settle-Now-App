@@ -341,6 +341,9 @@ extractJSONfromJWT(String data) async {
 
 pushCrashDataToFirebase(Exception err, StackTrace stackTrace,
     {String reason = "", List<String>? info}) async {
+  if (kIsWeb) {
+    return;
+  }
   Map<String, dynamic> additionalData = {};
   if (reason != "") {
     additionalData['reason'] = reason;
