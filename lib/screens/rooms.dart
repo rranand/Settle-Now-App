@@ -1379,27 +1379,14 @@ class _RoomExpenseState extends State<RoomExpense>
                           SizedBox(
                             height: 3,
                           ),
-                          double.parse(double.parse(crypto
-                                          .decrypt(list[index]["current"]))
-                                      .toStringAsFixed(2)) >
-                                  0
-                              ? Text(
-                                  "Gain : ₹ " +
-                                      commaSeperator(double.parse(crypto
+                          list[index]['done']
+                              ? SizedBox()
+                              : (double.parse(double.parse(crypto
                                               .decrypt(list[index]["current"]))
-                                          .toStringAsFixed(2)),
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.green,
-                                  ),
-                                )
-                              : double.parse(double.parse(crypto
-                                              .decrypt(list[index]["current"]))
-                                          .toStringAsFixed(2)) <
+                                          .toStringAsFixed(2)) >
                                       0
                                   ? Text(
-                                      "Owe : ₹ " +
+                                      "Gain : ₹ " +
                                           commaSeperator(double.parse(
                                                   crypto.decrypt(
                                                       list[index]["current"]))
@@ -1407,10 +1394,26 @@ class _RoomExpenseState extends State<RoomExpense>
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
-                                        color: Colors.red,
+                                        color: Colors.green,
                                       ),
                                     )
-                                  : SizedBox(),
+                                  : double.parse(double.parse(crypto.decrypt(
+                                                  list[index]["current"]))
+                                              .toStringAsFixed(2)) <
+                                          0
+                                      ? Text(
+                                          "Owe : ₹ " +
+                                              commaSeperator(double.parse(
+                                                      crypto.decrypt(list[index]
+                                                          ["current"]))
+                                                  .toStringAsFixed(2)),
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.red,
+                                          ),
+                                        )
+                                      : SizedBox()),
                         ],
                       ))
                 ],
