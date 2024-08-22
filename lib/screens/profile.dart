@@ -130,15 +130,15 @@ class _ProfileState extends State<Profile> {
           });
         }
         if (isGoogle) {
-          _googleSignIn.onCurrentUserChanged
-              .listen((GoogleSignInAccount? account) async {
-            setState(() {
-              _currentUser = account;
-              picUrl = (_currentUser != null
-                  ? _currentUser!.photoUrl.toString()
-                  : addCorsinImage(dotenv.get('driveUrl') +
-                      dotenv.get('unknown_avatar_id')));
-            });
+          _googleSignIn.isSignedIn().then((value) {
+            if (value) {
+              _googleSignIn.signInSilently().then((value) {
+                if (value != null) {
+                  _currentUser = value;
+                  picUrl = _currentUser!.photoUrl.toString();
+                }
+              });
+            }
           });
         } else {
           picUrl = addCorsinImage(dotenv.get('driveUrl') +

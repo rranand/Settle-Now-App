@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ThemeProvider extends ChangeNotifier {
-  bool darkTheme = false;
+  bool darkTheme = true;
 
   bool get isDarkTheme => darkTheme;
 
@@ -15,6 +15,8 @@ class ThemeProvider extends ChangeNotifier {
 class MyTheme {
   static ThemeData lightTheme(BuildContext context) {
     return ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.light,
         primarySwatch: Colors.deepPurple,
         primaryColor: Colors.deepPurple.shade900,
         fontFamily: GoogleFonts.lato().fontFamily,
@@ -33,16 +35,22 @@ class MyTheme {
           bodyLarge: TextStyle(),
           bodyMedium: TextStyle(),
         ).apply(bodyColor: Colors.black87, displayColor: Colors.white),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+            backgroundColor: Colors.deepPurpleAccent),
         scaffoldBackgroundColor: Colors.white,
         scrollbarTheme: ScrollbarThemeData(
           thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
         ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.deepPurple))),
         progressIndicatorTheme: const ProgressIndicatorThemeData(
           color: Colors.deepPurple,
         ));
   }
 
-  static ThemeData darTheme(BuildContext context) => ThemeData(
+  static ThemeData darkTheme(BuildContext context) => ThemeData(
+      useMaterial3: true,
       brightness: Brightness.dark,
       primarySwatch: MaterialColor(0xFF69F0AE, <int, Color>{
         50: Color(0xFFEDFDF5),

@@ -189,7 +189,7 @@ class _DashBoardState extends State<DashBoard> {
     super.dispose();
   }
 
-  Future<void> logout(bool manually) async {
+  Future<void> logout() async {
     if (this.mounted && Overlay.of(context).mounted && !isLogoutTriggered) {
       setState(() {
         isLogoutTriggered = true;
@@ -210,6 +210,9 @@ class _DashBoardState extends State<DashBoard> {
           logOutFromGoogle()
         ]);
       }
+      setState(() {
+        isLogoutTriggered = false;
+      });
       while (this.mounted && context.canPop()) {
         context.pop();
       }
@@ -521,13 +524,15 @@ class _DashBoardState extends State<DashBoard> {
       }
 
       if (isGoogle) {
-        _googleSignIn.onCurrentUserChanged
-            .listen((GoogleSignInAccount? account) async {
-          setState(() {
-            _currentUser = account;
-          });
+        _googleSignIn.isSignedIn().then((value) {
+          if (value) {
+            _googleSignIn.signInSilently().then((value) {
+              if (value != null) {
+                _currentUser = value;
+              }
+            });
+          }
         });
-        //_googleSignIn.signInSilently();
       }
       var tokenData = await getStringPref("token");
       if (tokenData != null && parseJWT(tokenData) != null) {
@@ -633,7 +638,7 @@ class _DashBoardState extends State<DashBoard> {
             crypto.decrypt(jsonDecode(response.body)['Message']);
 
         if (errorMessage == 'Login Expired') {
-          await logout(false);
+          await logout();
         } else if (this.mounted) {
           showToast(context, errorMessage, Icons.close);
         }
@@ -673,7 +678,7 @@ class _DashBoardState extends State<DashBoard> {
         String errorMessage = crypto.decrypt(data["Message"]);
 
         if (errorMessage == 'Login Expired') {
-          await logout(false);
+          await logout();
         } else if (this.mounted) {
           showToast(context, errorMessage, Icons.close);
         }
@@ -792,7 +797,7 @@ class _DashBoardState extends State<DashBoard> {
       } else {
         String errorMessage = crypto.decrypt(data["Message"]);
         if (errorMessage == 'Login Expired') {
-          await logout(false);
+          await logout();
         } else if (this.mounted) {
           showToast(context, errorMessage, Icons.close);
         }
@@ -4725,7 +4730,10 @@ class _DashBoardState extends State<DashBoard> {
                     ),
                   )
                 : BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
+                    type: BottomNavigationBarType.shifting,
+                    selectedItemColor: Theme.of(context).primaryColor,
+                    unselectedItemColor: Colors.grey,
+                    backgroundColor: Colors.transparent,
                     currentIndex: dash,
                     onTap: (index) => setState(() {
                       dash = index;
@@ -5162,7 +5170,7 @@ class _DashBoardState extends State<DashBoard> {
                   ListTile(
                     onTap: () async {
                       if (this.mounted) {
-                        await logout(true);
+                        await logout();
                       }
                     },
                     leading: Icon(

@@ -159,7 +159,7 @@ class _MyAppState extends State<MyApp> {
                       ? ThemeMode.dark
                       : ThemeMode.light,
                   theme: MyTheme.lightTheme(context),
-                  darkTheme: MyTheme.darTheme(context),
+                  darkTheme: MyTheme.darkTheme(context),
                   title: "Settle Now",
                   scrollBehavior: kIsWeb ? MyCustomScrollBehavior() : null,
                 );

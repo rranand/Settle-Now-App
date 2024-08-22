@@ -3690,7 +3690,10 @@ class _RoomExpenseState extends State<RoomExpense>
                 ),
               )
             : BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
+                type: BottomNavigationBarType.shifting,
+                selectedItemColor: Theme.of(context).primaryColor,
+                unselectedItemColor: Colors.grey,
+                backgroundColor: Colors.transparent,
                 currentIndex: dash,
                 onTap: (index) => setState(() {
                       dash = index;
