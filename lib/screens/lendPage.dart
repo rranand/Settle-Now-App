@@ -5,6 +5,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:convert';
 
@@ -23,7 +24,6 @@ import 'package:settlenow/routes/route_constant.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sqflite/sqflite.dart';
-import '../contents.dart' as global;
 import 'package:settlenow/others/crypto.dart';
 
 class LendPage extends StatefulWidget {
@@ -577,8 +577,8 @@ class _LendPageState extends State<LendPage> {
                                     'Access-Control-Allow-Origin': '*'
                                   },
                                   imageUrl: data[index].pic.length == 0
-                                      ? addCorsinImage(global.driveUrl +
-                                          "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                      ? addCorsinImage(dotenv.get('driveUrl') +
+                                          dotenv.get('unknown_avatar_id'))
                                       : addCorsinImage(data[index].pic),
                                   progressIndicatorBuilder:
                                       (context, url, downloadProgress) =>
@@ -986,9 +986,9 @@ class _LendPageState extends State<LendPage> {
         roomLink = crypto.decrypt(resData['roomLink']);
         objID = crypto.decrypt(resData['key']);
         data.sort((b, a) {
-          DateTime tempDate_1 = new DateFormat(global.dateTimeFormat)
+          DateTime tempDate_1 = new DateFormat(dotenv.get('dateTimeFormat'))
               .parse(crypto.decrypt(a["date"]));
-          DateTime tempDate_2 = new DateFormat(global.dateTimeFormat)
+          DateTime tempDate_2 = new DateFormat(dotenv.get('dateTimeFormat'))
               .parse(crypto.decrypt(b["date"]));
           return tempDate_1.compareTo(tempDate_2);
         });
@@ -1326,9 +1326,11 @@ class _LendPageState extends State<LendPage> {
                                                                             'pic'])
                                                                         .length ==
                                                                     0
-                                                                ? addCorsinImage(
-                                                                    global.driveUrl +
-                                                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                                                ? addCorsinImage(dotenv
+                                                                        .get(
+                                                                            'driveUrl') +
+                                                                    dotenv.get(
+                                                                        'unknown_avatar_id'))
                                                                 : addCorsinImage(
                                                                     crypto.decrypt(
                                                                         userData[
@@ -1383,9 +1385,11 @@ class _LendPageState extends State<LendPage> {
                                                                             'pic'])
                                                                         .length ==
                                                                     0
-                                                                ? addCorsinImage(
-                                                                    global.driveUrl +
-                                                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                                                ? addCorsinImage(dotenv
+                                                                        .get(
+                                                                            'driveUrl') +
+                                                                    dotenv.get(
+                                                                        'unknown_avatar_id'))
                                                                 : addCorsinImage(
                                                                     crypto.decrypt(
                                                                         otherUserData[
@@ -1870,8 +1874,8 @@ class _LendPageState extends State<LendPage> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            DateFormat(
-                                                    global.dateTimeFormat_new)
+                                            DateFormat(dotenv
+                                                    .get('dateTimeFormat_new'))
                                                 .format(expenseDate),
                                             style: TextStyle(fontSize: 18),
                                           ),

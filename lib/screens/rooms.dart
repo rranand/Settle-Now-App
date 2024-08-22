@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -932,7 +933,7 @@ class _RoomExpenseState extends State<RoomExpense>
                               SingleChildScrollView(
                                 child: SizedBox(
                                   height:
-                                      MediaQuery.of(context).size.height - 310,
+                                      MediaQuery.of(context).size.height - 335,
                                   child: _searchFriend.text.isEmpty
                                       ? friendListWidget(context, friendData)
                                       : (friendDataSearched.isEmpty
@@ -1164,8 +1165,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                   'Access-Control-Allow-Origin': '*'
                                 },
                                 imageUrl: data[index].pic.length == 0
-                                    ? addCorsinImage(global.driveUrl +
-                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                    ? addCorsinImage(dotenv.get('driveUrl') +
+                                        dotenv.get('unknown_avatar_id'))
                                     : addCorsinImage(data[index].pic),
                                 progressIndicatorBuilder:
                                     (context, url, downloadProgress) =>
@@ -1287,8 +1288,8 @@ class _RoomExpenseState extends State<RoomExpense>
                     child: CachedNetworkImage(
                       httpHeaders: {'Access-Control-Allow-Origin': '*'},
                       imageUrl: crypto.decrypt(list[index]['pic']).length == 0
-                          ? addCorsinImage(global.driveUrl +
-                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                          ? addCorsinImage(dotenv.get('driveUrl') +
+                              dotenv.get('unknown_avatar_id'))
                           : addCorsinImage(crypto.decrypt(list[index]['pic'])),
                       progressIndicatorBuilder:
                           (context, url, downloadProgress) =>
@@ -1451,8 +1452,8 @@ class _RoomExpenseState extends State<RoomExpense>
               CachedNetworkImage(
                 httpHeaders: {'Access-Control-Allow-Origin': '*'},
                 imageUrl: crypto.decrypt(list[index]['pic']).length == 0
-                    ? addCorsinImage(
-                        global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                    ? addCorsinImage(dotenv.get('driveUrl') +
+                        dotenv.get('unknown_avatar_id'))
                     : addCorsinImage(crypto.decrypt(list[index]['pic'])),
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
@@ -2355,8 +2356,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                             .decrypt(list[index + 1]['pic'])
                                             .length ==
                                         0
-                                    ? addCorsinImage(global.driveUrl +
-                                        "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                    ? addCorsinImage(dotenv.get('driveUrl') +
+                                        dotenv.get('unknown_avatar_id'))
                                     : addCorsinImage(
                                         crypto.decrypt(list[index + 1]['pic'])),
                                 progressIndicatorBuilder:
@@ -2452,8 +2453,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                                 .decrypt(list[index + 1]['pic'])
                                                 .length ==
                                             0
-                                        ? addCorsinImage(global.driveUrl +
-                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                        ? addCorsinImage(
+                                            dotenv.get('driveUrl') +
+                                                dotenv.get('unknown_avatar_id'))
                                         : addCorsinImage(crypto
                                             .decrypt(list[index + 1]['pic'])),
                                     progressIndicatorBuilder: (context, url,
@@ -3266,8 +3268,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                     'Pic']
                                                                 .length ==
                                                             0
-                                                        ? global.driveUrl +
-                                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                        ? dotenv.get(
+                                                                'driveUrl') +
+                                                            dotenv.get(
+                                                                'unknown_avatar_id')
                                                         : manualSplitMembers[
                                                             key]!['Pic']),
                                                 progressIndicatorBuilder:
@@ -4284,7 +4288,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                                 httpHeaders: {
                                                                                                                   'Access-Control-Allow-Origin': '*'
                                                                                                                 },
-                                                                                                                imageUrl: addCorsinImage(crypto.decrypt(list[index]['pic']).length == 0 ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8" : crypto.decrypt(list[index]['pic'])),
+                                                                                                                imageUrl: addCorsinImage(crypto.decrypt(list[index]['pic']).length == 0 ? dotenv.get('driveUrl') + dotenv.get('unknown_avatar_id') : crypto.decrypt(list[index]['pic'])),
                                                                                                                 progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
                                                                                                                 errorWidget: (context, url, error) => Container(
                                                                                                                   width: 50.0,
@@ -4453,7 +4457,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                           children: [
                                                                                             Text(
-                                                                                              DateFormat(global.dateTimeFormat_new).format(expenseDate),
+                                                                                              DateFormat(dotenv.get('dateTimeFormat_new')).format(expenseDate),
                                                                                               style: TextStyle(fontSize: 18),
                                                                                             ),
                                                                                             InkWell(
@@ -4920,8 +4924,9 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                                   'pic'])
                                                           .length ==
                                                       0
-                                                  ? global.driveUrl +
-                                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  ? dotenv.get('driveUrl') +
+                                                      dotenv.get(
+                                                          'unknown_avatar_id')
                                                   : crypto.decrypt(
                                                       memberExpense[index]![
                                                           'pic'])),
@@ -5717,8 +5722,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                             ['pic'])
                                                     .length ==
                                                 0
-                                            ? global.driveUrl +
-                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                            ? dotenv.get('driveUrl') +
+                                                dotenv.get('unknown_avatar_id')
                                             : crypto.decrypt(
                                                 partialExpense[index]['pic'])),
                                         progressIndicatorBuilder: (context, url,

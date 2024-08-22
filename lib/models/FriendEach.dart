@@ -1,5 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:settlenow/others/crypto.dart';
-import '../contents.dart' as global;
 
 class FriendEach {
   String name;
@@ -38,7 +38,7 @@ class FriendEach {
       fromContact: true,
       email: contactEach.containsKey('email') ? contactEach['email'] : '',
       status: 'NJ',
-      pic: global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8",
+      pic: dotenv.env["driveUrl"]! + dotenv.env["unknown_avatar_id"]!,
       isGoogle: false,
       phoneNo: contactEach.containsKey('phoneNo') ? contactEach['phoneNo'] : '',
     );
@@ -54,7 +54,7 @@ class FriendEach {
           ? crypto.decrypt(contactEach['email'])
           : '',
       status: 'NJ',
-      pic: global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8",
+      pic: dotenv.env["driveUrl"]! + dotenv.env["unknown_avatar_id"]!,
       isGoogle: false,
       phoneNo: contactEach.containsKey('phoneNo')
           ? crypto.decrypt(contactEach['phoneNo'])

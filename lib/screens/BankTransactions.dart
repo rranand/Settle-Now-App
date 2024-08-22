@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,6 @@ import 'package:shimmer/shimmer.dart';
 
 import '../functions/additionalFunction.dart';
 import '../functions/filterBankSMS.dart';
-import '../contents.dart' as global;
 
 class BankTransactions extends StatefulWidget {
   const BankTransactions({
@@ -1012,8 +1012,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                     'Pic']
                                                                 .length ==
                                                             0
-                                                        ? global.driveUrl +
-                                                            "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                        ? dotenv.get(
+                                                                'driveUrl') +
+                                                            dotenv.get(
+                                                                'unknown_avatar_id')
                                                         : manualSplitMembers[
                                                             key]!['Pic']),
                                                 progressIndicatorBuilder:
@@ -1556,8 +1558,10 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                       ['pic'])
                                                                   .length ==
                                                               0
-                                                          ? global.driveUrl +
-                                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                          ? dotenv.get(
+                                                                  'driveUrl') +
+                                                              dotenv.get(
+                                                                  'unknown_avatar_id')
                                                           : crypto.decrypt(
                                                               roomMembers[
                                                                       index - 1]

@@ -6,10 +6,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pinput/pinput.dart';
-import 'package:settlenow/contents.dart' as global;
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
@@ -136,15 +136,13 @@ class _ProfileState extends State<Profile> {
               _currentUser = account;
               picUrl = (_currentUser != null
                   ? _currentUser!.photoUrl.toString()
-                  : addCorsinImage(
-                      global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"));
+                  : addCorsinImage(dotenv.get('driveUrl') +
+                      dotenv.get('unknown_avatar_id')));
             });
           });
         } else {
-          picUrl = addCorsinImage(global.driveUrl +
-              (picUrl.length == 0
-                  ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
-                  : picUrl));
+          picUrl = addCorsinImage(dotenv.get('driveUrl') +
+              (picUrl.length == 0 ? dotenv.get('unknown_avatar_id') : picUrl));
         }
       } else {
         showToast(context, responseMessage, Icons.warning_rounded);

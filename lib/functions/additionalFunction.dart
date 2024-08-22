@@ -6,6 +6,7 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -14,7 +15,6 @@ import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:sqflite/sqflite.dart';
-import '../contents.dart' as global;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -67,15 +67,15 @@ addCorsinImage(String picUrl) {
   if (kIsWeb) {
     if (picUrl.contains("https://drive.google.com/uc?export=view&id=")) {
       return picUrl.replaceAll("https://drive.google.com/uc?export=view&id=",
-              global.drivewebUrl) +
+              dotenv.env["drivewebUrl"]!) +
           '?key=' +
-          global.googleApiKey +
+          dotenv.env["googleApiKey"]! +
           '&alt=media&source=downloadUrl';
     }
     return picUrl.replaceAll(
-            "https://drive.google.com/uc?id=", global.drivewebUrl) +
+            "https://drive.google.com/uc?id=", dotenv.env["drivewebUrl"]!) +
         '?key=' +
-        global.googleApiKey +
+        dotenv.env["googleApiKey"]! +
         '&alt=media&source=downloadUrl';
   } else {
     return picUrl;
@@ -235,7 +235,7 @@ commaSeperator(String amount) {
 }
 
 formatDateTime(String dateTime) {
-  DateFormat dateFormat = DateFormat(global.dateTimeFormat);
+  DateFormat dateFormat = DateFormat(dotenv.env["dateTimeFormat"]!);
   DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
   DateTime olddateTime = dateFormat.parse(dateTime);
   return dateFormat_new.format(olddateTime);
@@ -328,14 +328,14 @@ List<FriendEach> getUnionOfContacts(
 createJSONDataTOJWT(dynamic data) {
   final jwt = JWT(data);
 
-  return crypto.encrypt(
-      jwt.sign(SecretKey(global.jwtToken), expiresIn: Duration(seconds: 100)));
+  return crypto.encrypt(jwt.sign(SecretKey(dotenv.env["jwtToken"]!),
+      expiresIn: Duration(seconds: 100)));
 }
 
 extractJSONfromJWT(String data) async {
   try {
     data = crypto.decrypt(data);
-    final reqData = await JWT.verify(data, SecretKey(global.jwtToken));
+    final reqData = await JWT.verify(data, SecretKey(dotenv.env["jwtToken"]!));
     return jsonEncode(reqData.payload);
   } on Exception catch (_) {}
 
@@ -367,11 +367,11 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
     dynamic JSONData, BuildContext context) async {
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
-    Response res = await httpType(Uri.parse(global.url + url),
+    Response res = await httpType(Uri.parse(dotenv.env["url"]! + url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Auth': token,
-          'Access-Control-Allow-Origin': global.url
+          'Access-Control-Allow-Origin': dotenv.env["url"]!
         },
         body: jsonEncode({"data": tokenization}));
 

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -225,7 +226,7 @@ class _ExpensesState extends State<Expenses> {
           TransList[index]['purpose'] = crypto.encrypt(purpose);
           TransList[index]['isEdited'] = true;
           TransList[index]['lastModDate'] = crypto.encrypt(
-              DateFormat(global.dateTimeFormat).format(DateTime.now()));
+              DateFormat(dotenv.get('dateTimeFormat')).format(DateTime.now()));
         }
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
@@ -404,7 +405,7 @@ class _ExpensesState extends State<Expenses> {
                                 min(400,
                                     MediaQuery.of(context).size.width * 0.96))
                             : MediaQuery.of(context).size.width * 0.96) -
-                        120,
+                        200,
                     child: Text(
                       purpose,
                       style: TextStyle(fontSize: 26),
@@ -2431,7 +2432,7 @@ class _ExpensesState extends State<Expenses> {
                                                     child: InkWell(
                                                       child: Card(
                                                         color: Theme.of(context)
-                                                            .scaffoldBackgroundColor,
+                                                            .dialogBackgroundColor,
                                                         shape:
                                                             RoundedRectangleBorder(
                                                           side: BorderSide(
@@ -2442,7 +2443,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       .primaryColor
                                                                   : Theme.of(
                                                                           context)
-                                                                      .scaffoldBackgroundColor)),
+                                                                      .cardColor)),
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(
@@ -2510,7 +2511,7 @@ class _ExpensesState extends State<Expenses> {
                                                     child: InkWell(
                                                       child: Card(
                                                         color: Theme.of(context)
-                                                            .scaffoldBackgroundColor,
+                                                            .dialogBackgroundColor,
                                                         shape:
                                                             RoundedRectangleBorder(
                                                           side: BorderSide(
@@ -2521,7 +2522,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       .primaryColor
                                                                   : Theme.of(
                                                                           context)
-                                                                      .scaffoldBackgroundColor)),
+                                                                      .cardColor)),
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(
@@ -2578,8 +2579,8 @@ class _ExpensesState extends State<Expenses> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              DateFormat(
-                                                      global.dateTimeFormat_new)
+                                              DateFormat(dotenv.get(
+                                                      'dateTimeFormat_new'))
                                                   .format(expensedate),
                                               style: TextStyle(fontSize: 18),
                                             ),

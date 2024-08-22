@@ -16,7 +16,7 @@ class MyTheme {
   static ThemeData lightTheme(BuildContext context) {
     return ThemeData(
         primarySwatch: Colors.deepPurple,
-        primaryColor: Colors.deepPurple,
+        primaryColor: Colors.deepPurple.shade900,
         fontFamily: GoogleFonts.lato().fontFamily,
         appBarTheme: AppBarTheme(
           color: Colors.white,
@@ -32,7 +32,7 @@ class MyTheme {
         textTheme: TextTheme(
           bodyLarge: TextStyle(),
           bodyMedium: TextStyle(),
-        ).apply(bodyColor: Colors.black, displayColor: Colors.white),
+        ).apply(bodyColor: Colors.black87, displayColor: Colors.white),
         scaffoldBackgroundColor: Colors.white,
         scrollbarTheme: ScrollbarThemeData(
           thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),

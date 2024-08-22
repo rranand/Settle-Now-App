@@ -3,14 +3,13 @@
 *.log
 *.pyc
 *.swp
+*.env
 .DS_Store
 .atom/
 .buildlog/
 .history
 .svn/
 key.properties
-crypto.dart
-contents.dart
 firebase_options.dart
 .firebase/
 .github/

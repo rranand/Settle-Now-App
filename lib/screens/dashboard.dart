@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
@@ -339,7 +340,7 @@ class _DashBoardState extends State<DashBoard> {
         if (imgData['havePic']) {
           _profilePicID = crypto.decrypt(imgData["fileId"]);
         } else {
-          _profilePicID = "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8";
+          _profilePicID = dotenv.get('unknown_avatar_id');
         }
       }
     } on Exception catch (err, stackTrace) {
@@ -465,7 +466,7 @@ class _DashBoardState extends State<DashBoard> {
           "email": crypto.encrypt(_email.text),
         });
 
-        final response = await dio.delete(global.url + 'login',
+        final response = await dio.delete(dotenv.get('url') + 'login',
             data: formData,
             options: Options(headers: {
               "Content-Type": "multipart/form-data",
@@ -1244,8 +1245,8 @@ class _DashBoardState extends State<DashBoard> {
                       child: CachedNetworkImage(
                         httpHeaders: {'Access-Control-Allow-Origin': '*'},
                         imageUrl: data[index].pic.length == 0
-                            ? addCorsinImage(global.driveUrl +
-                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                            ? addCorsinImage(dotenv.get('driveUrl') +
+                                dotenv.get('unknown_avatar_id'))
                             : addCorsinImage(data[index].pic),
                         progressIndicatorBuilder:
                             (context, url, downloadProgress) =>
@@ -1743,7 +1744,7 @@ class _DashBoardState extends State<DashBoard> {
               CachedNetworkImage(
                 httpHeaders: {'Access-Control-Allow-Origin': '*'},
                 imageUrl: addCorsinImage(data[index].pic.length == 0
-                    ? global.driveUrl + "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                    ? dotenv.get('driveUrl') + dotenv.get('unknown_avatar_id')
                     : data[index].pic),
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
@@ -2274,7 +2275,8 @@ class _DashBoardState extends State<DashBoard> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      DateFormat(global.dateTimeFormat_new)
+                                      DateFormat(
+                                              dotenv.get('dateTimeFormat_new'))
                                           .format(expenseDate),
                                       style: TextStyle(fontSize: 18),
                                     ),
@@ -3120,9 +3122,9 @@ class _DashBoardState extends State<DashBoard> {
 
     SearchRoomData.value.sort((b, a) {
       DateTime tempDate_1 =
-          new DateFormat(global.dateTimeFormat_new).parse(a.date);
+          new DateFormat(dotenv.get('dateTimeFormat_new')).parse(a.date);
       DateTime tempDate_2 =
-          new DateFormat(global.dateTimeFormat_new).parse(b.date);
+          new DateFormat(dotenv.get('dateTimeFormat_new')).parse(b.date);
       return tempDate_1.compareTo(tempDate_2);
     });
 
@@ -3478,8 +3480,10 @@ class _DashBoardState extends State<DashBoard> {
                                                               ["pic"])
                                                       .length ==
                                                   0
-                                              ? addCorsinImage(global.driveUrl +
-                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                              ? addCorsinImage(dotenv
+                                                      .get('driveUrl') +
+                                                  dotenv
+                                                      .get('unknown_avatar_id'))
                                               : addCorsinImage(crypto.decrypt(
                                                   RoomRequest[index]["pic"])),
                                           progressIndicatorBuilder: (context,
@@ -3839,8 +3843,10 @@ class _DashBoardState extends State<DashBoard> {
                                                               ["pic"])
                                                       .length ==
                                                   0
-                                              ? addCorsinImage(global.driveUrl +
-                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                              ? addCorsinImage(dotenv
+                                                      .get('driveUrl') +
+                                                  dotenv
+                                                      .get('unknown_avatar_id'))
                                               : addCorsinImage(crypto.decrypt(
                                                   sentRoomRequest[index]
                                                       ["pic"])),
@@ -4817,8 +4823,9 @@ class _DashBoardState extends State<DashBoard> {
                                       },
                                       imageUrl: (_currentUser != null
                                           ? _currentUser!.photoUrl.toString()
-                                          : addCorsinImage(global.driveUrl +
-                                              "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")),
+                                          : addCorsinImage(dotenv
+                                                  .get('driveUrl') +
+                                              dotenv.get('unknown_avatar_id'))),
                                       progressIndicatorBuilder: (context, url,
                                               downloadProgress) =>
                                           CircularProgressIndicator(
@@ -4856,10 +4863,11 @@ class _DashBoardState extends State<DashBoard> {
                                           httpHeaders: {
                                             'Access-Control-Allow-Origin': '*'
                                           },
-                                          imageUrl: addCorsinImage(global
-                                                  .driveUrl +
+                                          imageUrl: addCorsinImage(dotenv
+                                                  .get('driveUrl') +
                                               (_profilePicID.length == 0
-                                                  ? "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  ? dotenv
+                                                      .get('unknown_avatar_id')
                                                   : _profilePicID)),
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>
@@ -5806,8 +5814,9 @@ class _QuickSplitState extends State<QuickSplit> {
                                                               ['pic'])
                                                           .length ==
                                                       0
-                                                  ? global.driveUrl +
-                                                      "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                                  ? dotenv.get('driveUrl') +
+                                                      dotenv.get(
+                                                          'unknown_avatar_id')
                                                   : crypto.decrypt(
                                                       memberExpense[index]
                                                           ['userData']['pic'])),
@@ -6381,8 +6390,9 @@ class _QuickSplitState extends State<QuickSplit> {
                                                               ['pic'])
                                                       .length ==
                                                   0
-                                              ? global.driveUrl +
-                                                  "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8"
+                                              ? dotenv.get('driveUrl') +
+                                                  dotenv
+                                                      .get('unknown_avatar_id')
                                               : crypto.decrypt(
                                                   partialExpense[index]
                                                       ['userData']['pic'])),
@@ -7303,8 +7313,9 @@ class _RoomWidgetState extends State<RoomWidget> {
                                                         ['pic'])
                                                     .length ==
                                                 0
-                                            ? addCorsinImage(global.driveUrl +
-                                                "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                            ? addCorsinImage(dotenv
+                                                    .get('driveUrl') +
+                                                dotenv.get('unknown_avatar_id'))
                                             : addCorsinImage(crypto.decrypt(
                                                 snapshot.data![i]['pic'])),
                                         progressIndicatorBuilder: (context, url,
@@ -7349,9 +7360,10 @@ class _RoomWidgetState extends State<RoomWidget> {
                                                             .data![i]['pic'])
                                                         .length ==
                                                     0
-                                                ? addCorsinImage(global
-                                                        .driveUrl +
-                                                    "11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8")
+                                                ? addCorsinImage(dotenv
+                                                        .get('driveUrl') +
+                                                    dotenv.get(
+                                                        'unknown_avatar_id'))
                                                 : addCorsinImage(crypto.decrypt(
                                                     snapshot.data![i]['pic'])),
                                             progressIndicatorBuilder: (context,
