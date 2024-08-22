@@ -10,9 +10,9 @@ class Assets {
   static const String androidSettings = 'android/settings.gradle';
   static const String androidSettlenowAndroid = 'android/settlenow_android.iml';
   static const String appBuild = 'android/app/build.gradle';
-  static const String appGoogleServices = 'android/app/google-services.json';
   static const String appLocal = 'android/app/local.properties';
   static const String debugAndroidManifest = 'android/app/src/debug/AndroidManifest.xml';
+  static const String devGoogleServices = 'android/app/src/dev/google-services.json';
   static const String drawableHdpiIcNotificationIcon = 'android/app/src/main/res/drawable-hdpi/ic_notification_icon.png';
   static const String drawableLaunchBackground = 'android/app/src/main/res/drawable/launch_background.xml';
   static const String drawableMdpiIcNotificationIcon = 'android/app/src/main/res/drawable-mdpi/ic_notification_icon.png';
@@ -23,7 +23,11 @@ class Assets {
   static const String gradleWrapperGradleWrapper = 'android/gradle/wrapper/gradle-wrapper.properties';
   static const String iconGoogle = 'assets/icon/google.jpg';
   static const String iconSNWBG = 'assets/icon/SN_WBG.png';
+  static const String images404Error = 'assets/Images/404Error.gif';
+  static const String imagesGoogleSignDark = 'assets/Images/google_sign_dark.png';
+  static const String imagesGoogleSignLight = 'assets/Images/google_sign_light.png';
   static const String imagesMaintenance = 'assets/Images/maintenance.jpg';
+  static const String imagesPlayStore = 'assets/Images/play_store.png';
   static const String imagesSN = 'assets/Images/SN.jpg';
   static const String imagesSNDark = 'assets/Images/SN_dark.jpg';
   static const String imagesUnknown = 'assets/Images/unknown.jpeg';
@@ -50,6 +54,7 @@ class Assets {
   static const String mipmapXxxhdpiIcLauncherForeground = 'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png';
   static const String mipmapXxxhdpiIcLauncherMonochrome = 'android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_monochrome.png';
   static const String pluginsGeneratedPluginRegistrant = 'android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java';
+  static const String prodGoogleServices = 'android/app/src/prod/google-services.json';
   static const String profileAndroidManifest = 'android/app/src/profile/AndroidManifest.xml';
   static const String settlenowAndroidGradlew = 'android/gradlew.bat';
   static const String settlenowMainActivity = 'android/app/src/main/kotlin/com/example/settlenow/MainActivity.kt';
