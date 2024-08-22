@@ -1,16 +1,5 @@
 import 'package:flutter/material.dart';
 
-//const url = 'https://api.settlenow.in/';
-//const url = 'http://192.168.1.4:9007/';
-//const driveUrl = 'https://drive.google.com/uc?export=view&id=';
-//const drivewebUrl = 'https://www.googleapis.com/drive/v2/files/';
-//const googleApiKey =
-//     'AIzaSyApNchuFZfvl0tDGIFv89xonkbwzLfXDz4' + '&alt=media&source=downloadUrl';
-// const jwtToken =
-//     'BY#uu4qQiLb^SYcOCsxS@lQxu7TZKRozctbbCwGtN93LccoKVU3f6F0IjiDH#J2GH2N!2t^*UTwQtZmD4S#Fy8w#Y3b6d1gN#SHVYgcKX%s4pxQ@vq4vS%Emd#KRKqkF31EQjuB34x!3IMn@TfSTt7';
-
-// const dateTimeFormat = "MMM dd yyyy HH:mm:ss";
-// const dateTimeFormat_new = "MMM dd yyyy h:mm a";
 List<Color> colorsList = [
   Colors.green,
   Colors.redAccent,
