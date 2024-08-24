@@ -53,8 +53,8 @@ class _RoomJoinState extends State<RoomJoin> {
             'roomKey': crypto.encrypt(widget.roomKey),
           };
 
-          final response =
-              await createHTTPreq('room', http.put, _token, jsonInputData, context);
+          final response = await createHTTPreq(
+              'room', http.put, _token, jsonInputData, context);
 
           if (this.mounted) {
             setState(() {

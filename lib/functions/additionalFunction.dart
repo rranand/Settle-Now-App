@@ -67,15 +67,15 @@ addCorsinImage(String picUrl) {
   if (kIsWeb) {
     if (picUrl.contains("https://drive.google.com/uc?export=view&id=")) {
       return picUrl.replaceAll("https://drive.google.com/uc?export=view&id=",
-              dotenv.env["drivewebUrl"]!) +
+              dotenv.get("drivewebUrl")) +
           '?key=' +
-          dotenv.env["googleApiKey"]! +
+          dotenv.get("googleApiKey") +
           '&alt=media&source=downloadUrl';
     }
     return picUrl.replaceAll(
-            "https://drive.google.com/uc?id=", dotenv.env["drivewebUrl"]!) +
+            "https://drive.google.com/uc?id=", dotenv.get("drivewebUrl")) +
         '?key=' +
-        dotenv.env["googleApiKey"]! +
+        dotenv.get("googleApiKey") +
         '&alt=media&source=downloadUrl';
   } else {
     return picUrl;
@@ -235,7 +235,7 @@ commaSeperator(String amount) {
 }
 
 formatDateTime(String dateTime) {
-  DateFormat dateFormat = DateFormat(dotenv.env["dateTimeFormat"]!);
+  DateFormat dateFormat = DateFormat(dotenv.get("dateTimeFormat"));
   DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
   DateTime olddateTime = dateFormat.parse(dateTime);
   return dateFormat_new.format(olddateTime);
@@ -328,14 +328,14 @@ List<FriendEach> getUnionOfContacts(
 createJSONDataTOJWT(dynamic data) {
   final jwt = JWT(data);
 
-  return crypto.encrypt(jwt.sign(SecretKey(dotenv.env["jwtToken"]!),
+  return crypto.encrypt(jwt.sign(SecretKey(dotenv.get("jwtToken")),
       expiresIn: Duration(seconds: 100)));
 }
 
 extractJSONfromJWT(String data) async {
   try {
     data = crypto.decrypt(data);
-    final reqData = await JWT.verify(data, SecretKey(dotenv.env["jwtToken"]!));
+    final reqData = await JWT.verify(data, SecretKey(dotenv.get("jwtToken")));
     return jsonEncode(reqData.payload);
   } on Exception catch (_) {}
 
@@ -367,11 +367,11 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
     dynamic JSONData, BuildContext context) async {
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
-    Response res = await httpType(Uri.parse(dotenv.env["url"]! + url),
+    Response res = await httpType(Uri.parse(dotenv.get("url") + url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Auth': token,
-          'Access-Control-Allow-Origin': dotenv.env["url"]!
+          'Access-Control-Allow-Origin': dotenv.get("url")
         },
         body: jsonEncode({"data": tokenization}));
 

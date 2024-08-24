@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -45,6 +46,12 @@ Future<void> main() async {
   } else {
     Firebase.app(firebaseProjectName);
   }
+
+  await FirebaseAppCheck.instance.activate(
+    webProvider: ReCaptchaV3Provider(dotenv.get('recaptcha-key')),
+    androidProvider: AndroidProvider.playIntegrity,
+    appleProvider: AppleProvider.deviceCheck,
+  );
 
   if (kIsWeb) {
     usePathUrlStrategy();
