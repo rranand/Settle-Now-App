@@ -460,6 +460,8 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             TextSpan(
                               text: 'Privacy Policy',
+                              style: TextStyle(
+                                  fontSize: 16, color: Colors.blueAccent),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () async {
                                   launchUrl(
