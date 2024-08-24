@@ -163,7 +163,7 @@ class _ExpensesState extends State<Expenses> {
         }
         context.push(AppRouteConstants.maintainRouteName);
       } else {
-        showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
+        showToast(context, TransData["Message"]?crypto.decrypt(TransData["Message"]):"Some Unknown Error Occurred", Icons.close);
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {

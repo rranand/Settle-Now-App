@@ -908,7 +908,12 @@ class _DashBoardState extends State<DashBoard> {
 
       quickSplitDataFetched = true;
       if (response.statusCode != 200) {
-        showToast(context, crypto.decrypt(data["Message"]), Icons.close);
+        showToast(
+            context,
+            data["Message"]
+                ? crypto.decrypt(data["Message"])
+                : "Some Unknown Error Occurred",
+            Icons.close);
       } else {
         var tempArr = data["data"];
         for (int i = 0; i < tempArr.length; i++) {

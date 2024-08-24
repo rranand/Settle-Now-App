@@ -169,7 +169,8 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery.of(context).size.height -
+              (isItAndroidDevice ? 150 : 50),
           alignment: Alignment.center,
           child: canLoad
               ? Column(
@@ -237,7 +238,8 @@ class _LoginPageState extends State<LoginPage> {
                                 color: Colors.white),
                           ),
                           onPressed: () {
-                            if (this.mounted) {
+                            if (this.mounted &&
+                                _formKeyLoginPage.currentState!.validate()) {
                               context.push(
                                   AppRouteConstants.loginRouteName +
                                       AppRouteConstants.verifyRouteName,
@@ -443,6 +445,7 @@ class _LoginPageState extends State<LoginPage> {
           : (canLoad
               ? BottomAppBar(
                   elevation: 0,
+                  height: isItAndroidDevice ? 150 : 50,
                   color: Colors.transparent,
                   child: ListView(shrinkWrap: true, children: [
                     RichText(

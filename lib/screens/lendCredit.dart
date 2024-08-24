@@ -155,7 +155,13 @@ class _LendCreditState extends State<LendCredit> {
         }
         context.push(AppRouteConstants.maintainRouteName);
       } else {
-        showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
+        String? apiErrorMessage = jsonDecode(response.body)["Message"];
+
+        showToast(
+            context,
+            apiErrorMessage != null
+                ? crypto.decrypt(apiErrorMessage)
+                : "Some Unknown Error Occurred",
             Icons.close);
       }
     } on Exception catch (err, stackTrace) {
@@ -227,9 +233,7 @@ class _LendCreditState extends State<LendCredit> {
                                 onTap: () async {
                                   if (this.mounted) {
                                     final dataFrom = await context.push(
-                                      
-                                          AppRouteConstants
-                                              .lendByTitleRouteName +
+                                      AppRouteConstants.lendByTitleRouteName +
                                           "/" +
                                           crypto.decrypt(data[index]["key"]),
                                     ) as bool;
