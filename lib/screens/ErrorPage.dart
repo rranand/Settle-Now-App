@@ -40,13 +40,25 @@ class _ErrorPageState extends State<ErrorPage> {
         width: MediaQuery.of(context).size.width,
         child: Column(
           children: [
-            Text(
-              "Settle Now",
-              style: TextStyle(
-                fontSize: 60,
-                fontWeight: FontWeight.bold,
-                color: darkTheme ? null : Theme.of(context).primaryColor,
-              ),
+            SizedBox(
+              height: 60,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/icon/SN_WBG.png', height: 65, width: 65),
+                SizedBox(
+                  width: 20,
+                ),
+                Text(
+                  "Settle Now",
+                  style: TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.normal,
+                    color: darkTheme ? null : Theme.of(context).primaryColor,
+                  ),
+                ),
+              ],
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
