@@ -1063,8 +1063,7 @@ class _DashBoardState extends State<DashBoard> {
   Future<void> deleteToken() async {
     try {
       Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email.text),
-        'from': crypto.encrypt(kIsWeb ? 'web' : 'android')
+        'email': crypto.encrypt(_email.text)
       };
 
       await createHTTPreq(

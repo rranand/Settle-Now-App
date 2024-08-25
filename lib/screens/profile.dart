@@ -9,8 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
+import 'package:moment_dart/moment_dart.dart';
 import 'package:pinput/pinput.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/models/LoggedInEach.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:timer_count_down/timer_controller.dart';
@@ -56,6 +59,7 @@ class _ProfileState extends State<Profile> {
   FirebaseAuth auth = FirebaseAuth.instance;
   String createdOn = "";
   bool isDataLoading = false;
+  List<LoggedInEach> loggedInData = [];
 
   Future<void> logOutFromGoogle() async {
     if (isGoogle) {
@@ -108,6 +112,47 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  logoutSpecific(String loggedInID, int index) async {
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
+
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        'loggedInID': crypto.encrypt(loggedInID),
+      };
+
+      final response = await createHTTPreq(
+          'verify/logoutSpecific', http.delete, _token, jsonInputData, context);
+
+      String responseMessage =
+          crypto.decrypt(jsonDecode(response.body)['Message']);
+
+      if (response.statusCode == 200) {
+        loggedInData.removeAt(index);
+        if (this.mounted) {
+          setState(() {});
+        }
+        if (this.mounted) {
+          context.pop();
+        }
+        showToast(context, responseMessage, Icons.done);
+      } else {
+        if (this.mounted) {
+          context.pop();
+        }
+        showToast(context, responseMessage, Icons.warning_outlined);
+      }
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        context.pop();
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Profile->logoutSpecific"]);
+      }
+    }
+  }
+
   fetchBasicInfo() async {
     try {
       Map<String, String> jsonInputData = {
@@ -122,6 +167,10 @@ class _ProfileState extends State<Profile> {
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
+        for (int i = 0; i < data['data'].length; i++) {
+          loggedInData.add(LoggedInEach.fromJson(data['data'][i]));
+        }
+        loggedInData.sort((a, b) => a.id.length.compareTo(b.id.length));
         if (this.mounted) {
           setState(() {
             picUrl = crypto.decrypt(data['picUrl']);
@@ -133,16 +182,24 @@ class _ProfileState extends State<Profile> {
           _googleSignIn.isSignedIn().then((value) {
             if (value) {
               _googleSignIn.signInSilently().then((value) {
-                if (value != null) {
-                  _currentUser = value;
-                  picUrl = _currentUser!.photoUrl.toString();
+                if (value != null && this.mounted) {
+                  setState(() {
+                    _currentUser = value;
+                    picUrl = _currentUser!.photoUrl.toString();
+                  });
                 }
               });
             }
           });
         } else {
-          picUrl = addCorsinImage(dotenv.get('driveUrl') +
-              (picUrl.length == 0 ? dotenv.get('unknown_avatar_id') : picUrl));
+          if (this.mounted) {
+            setState(() {
+              picUrl = addCorsinImage(dotenv.get('driveUrl') +
+                  (picUrl.length == 0
+                      ? dotenv.get('unknown_avatar_id')
+                      : picUrl));
+            });
+          }
         }
       } else {
         showToast(context, responseMessage, Icons.warning_rounded);
@@ -591,7 +648,7 @@ class _ProfileState extends State<Profile> {
                     ),
                     CachedNetworkImage(
                       httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                      imageUrl: addCorsinImage(picUrl),
+                      imageUrl: (isGoogle ? picUrl : addCorsinImage(picUrl)),
                       progressIndicatorBuilder:
                           (context, url, downloadProgress) =>
                               CircularProgressIndicator(
@@ -662,7 +719,7 @@ class _ProfileState extends State<Profile> {
                                 autofillHints: [AutofillHints.telephoneNumber],
                                 keyboardType: TextInputType.number,
                                 validator: (value) {
-                                  RegExp validateEmail = RegExp(r'^[\d]{10}$');
+                                  RegExp validateEmail = RegExp(r'^[\d]{10}');
                                   if (!validateEmail.hasMatch(_phoneNo.text)) {
                                     return "Invalid Phone No";
                                   }
@@ -707,14 +764,107 @@ class _ProfileState extends State<Profile> {
                                 )
                               : SizedBox(),
                           SizedBox(
-                            height: 15,
+                            height: 7,
                           ),
                           createdOn.length >= 12
                               ? Text(
                                   "Member Since " + createdOn.substring(0, 11),
                                   style: TextStyle(fontSize: 16),
                                 )
-                              : SizedBox()
+                              : SizedBox(),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            child: ListView.builder(
+                              scrollDirection: Axis.vertical,
+                              itemCount: loggedInData.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  height: 100,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.85,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Card(
+                                      color: Theme.of(context)
+                                          .dialogBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: loggedInData[index]
+                                                        .id
+                                                        .length ==
+                                                    0
+                                                ? Theme.of(context).primaryColor
+                                                : Theme.of(context).cardColor),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(5.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                Icon(
+                                                  loggedInData[index].device ==
+                                                          "Android"
+                                                      ? Icons
+                                                          .phone_android_outlined
+                                                      : Icons
+                                                          .desktop_mac_outlined,
+                                                  size: 35,
+                                                ),
+                                                SizedBox(
+                                                  width: 15,
+                                                ),
+                                                Text(
+                                                  loggedInData[index].device +
+                                                      "\n" +
+                                                      "Last Used : " +
+                                                      DateFormat(dotenv.get(
+                                                              "dateTimeFormat_new"))
+                                                          .parse(loggedInData[
+                                                                  index]
+                                                              .lastUsed)
+                                                          .toMoment()
+                                                          .fromNow(),
+                                                  style: TextStyle(
+                                                    fontSize: 15,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            loggedInData[index].id.length > 0
+                                                ? ElevatedButton(
+                                                    child: Text(
+                                                      "Logout",
+                                                      style: TextStyle(
+                                                          fontSize: 17,
+                                                          color: Colors.white),
+                                                    ),
+                                                    onPressed: () async {
+                                                      await logoutSpecific(
+                                                          loggedInData[index]
+                                                              .id,
+                                                          index);
+                                                    })
+                                                : SizedBox()
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ),

@@ -139,7 +139,13 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    subscription = connectionChecker.onStatusChange.listen(
+    subscription = InternetConnectionChecker.createInstance(
+      checkInterval: Duration(seconds: 30),
+      customCheckOptions: [
+        AddressCheckOption(uri: Uri.parse('https://1.1.1.1')),
+      ],
+      useDefaultOptions: false,
+    ).onStatusChange.listen(
       (InternetConnectionStatus status) {
         final provider =
             Provider.of<InternetconnectivityProvider>(context, listen: false);
@@ -185,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: 150,
                     ),
                     Text(
-                      "Settle Now",
+                      "Settle_Now",
                       style: TextStyle(
                         fontSize: 60,
                         fontWeight: FontWeight.bold,

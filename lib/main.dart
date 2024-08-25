@@ -47,15 +47,15 @@ Future<void> main() async {
     Firebase.app(firebaseProjectName);
   }
 
-  await FirebaseAppCheck.instance.activate(
-    webProvider: ReCaptchaV3Provider(dotenv.get('recaptcha-key')),
-    androidProvider: AndroidProvider.playIntegrity,
-    appleProvider: AppleProvider.deviceCheck,
-  );
-
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
+    await FirebaseAppCheck.instance.activate(
+      webProvider: ReCaptchaV3Provider(dotenv.get('recaptcha-key')),
+      androidProvider: AndroidProvider.playIntegrity,
+      appleProvider: AppleProvider.deviceCheck,
+    );
+
     await Permission.notification.isDenied.then((value) {
       if (value) {
         Permission.notification.request();

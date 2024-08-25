@@ -1,73 +1,108 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <base href="/">
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Settle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about &apos;who owes who.&apos;
-By using the Settle Now, we can efficiently manage all costs per individual, track &apos;who paid how much&apos; and &apos;who should pay to whom&apos;">
+	<head>
+		<base href="/" />
+		<meta charset="UTF-8" />
+		<meta content="IE=Edge" http-equiv="X-UA-Compatible" />
+		<meta
+			name="description"
+			content="Settle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about 'who owes who.'
+By using the Settle Now, we can efficiently manage all costs per individual, track 'who paid how much' and 'who should pay to whom'"
+		/>
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Settle Now">
-  <link rel="apple-touch-icon" href="https://settlenow.in/icons/Icon-192.png">
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<meta name="apple-mobile-web-app-title" content="Settle Now" />
+		<link
+			rel="apple-touch-icon"
+			href="https://settlenow.in/icons/icon-192.png"
+		/>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.css"
+		/>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 
-  <link rel="icon" type="image/png" href="https://settlenow.in/icons/favicon.png"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="https://settlenow.in/icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="https://settlenow.in/icons/favicon-16x16.png">
-  <link rel="shortcut icon" href="https://settlenow.in/icons/favicon.ico" />
+		<link
+			rel="icon"
+			type="image/png"
+			href="https://settlenow.in/icons/favicon.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="32x32"
+			href="https://settlenow.in/icons/favicon-32x32.png"
+		/>
+		<link
+			rel="icon"
+			type="image/png"
+			sizes="16x16"
+			href="https://settlenow.in/icons/favicon-16x16.png"
+		/>
+		<link rel="shortcut icon" href="https://settlenow.in/icons/favicon.ico" />
 
-  <link rel="icon" type="image/png" href="favicon.png"/>
+		<link rel="icon" type="image/png" href="favicon.png" />
 
-  <title>Settle Now</title>
-  <link rel="manifest" href="manifest.json">
+		<title>Settle Now</title>
+		<link rel="manifest" href="manifest.json" />
 
-  <script>
-    var serviceWorkerVersion = '2432010939';
-  </script>
-  <meta name="google-signin-client_id" content="950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com">
-</head>
-<body>
-  <script>
-    window.addEventListener('load', function(ev) {
-      var seconds = new Date().getTime()
-         xmlhttp = new XMLHttpRequest();
-         xmlhttp.responseType = 'json';
-         xmlhttp.open("GET", '/version.json?v=' + seconds, true);
-         xmlhttp.onload = function () {
-             if (xmlhttp.status == 200) {
-                 var buildNumber = xmlhttp.response.build_number;
-                 var currentBuildNumber = window.localStorage.getItem('buildNumber');
+		<script>
+			var serviceWorkerVersion = "2432010939";
+		</script>
+		<meta
+			name="google-signin-client_id"
+			content="950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com"
+		/>
+	</head>
+	<body>
+		<script>
+			{{flutter_js}}
+      {{flutter_build_config}}
+			window.addEventListener("load", function (ev) {
+				var seconds = new Date().getTime();
+				xmlhttp = new XMLHttpRequest();
+				xmlhttp.responseType = "json";
+				xmlhttp.open("GET", "/version.json?v=" + seconds, true);
+				xmlhttp.onload = function () {
+					if (xmlhttp.status == 200) {
+						var buildNumber = xmlhttp.response.build_number;
+						var currentBuildNumber = window.localStorage.getItem("buildNumber");
 
-                 if (currentBuildNumber && currentBuildNumber != buildNumber) {
-                     caches.delete('flutter-app-manifest');
-                     caches.delete('flutter-temp-cache');
-                     caches.delete('flutter-app-cache');
-                 }
+						if (currentBuildNumber && currentBuildNumber != buildNumber) {
+							caches.delete("flutter-app-manifest");
+							caches.delete("flutter-temp-cache");
+							caches.delete("flutter-app-cache");
+						}
 
-                 window.localStorage.setItem('buildNumber', buildNumber);
-             }
-             navigator.serviceWorker.register('./flutter_bootstrap.js');
-         }
-         xmlhttp.error = function () {navigator.serviceWorker.register('./flutter_bootstrap.js');}
-         xmlhttp.abort = function () {navigator.serviceWorker.register('./flutter_bootstrap.js');}
-         xmlhttp.timeout = function () {navigator.serviceWorker.register('./flutter_bootstrap.js');}
-         xmlhttp.send();
-      _flutter.loader.load({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        }
-      }).then(function(engineInitializer) {
-        return engineInitializer.initializeEngine();
-      }).then(function(appRunner) {
-        return appRunner.runApp();
-      });
-    });
-  </script>
+						window.localStorage.setItem("buildNumber", buildNumber);
+					}
+					navigator.serviceWorker.register("/flutter_bootstrap.js");
+				};
+				xmlhttp.error = function () {
+					navigator.serviceWorker.register("/flutter_bootstrap.js");
+				};
+				xmlhttp.abort = function () {
+					navigator.serviceWorker.register("/flutter_bootstrap.js");
+				};
+				xmlhttp.timeout = function () {
+					navigator.serviceWorker.register("/flutter_bootstrap.js");
+				};
+				xmlhttp.send();
 
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+				_flutter.loader.load({
+          serviceWorkerSettings: {
+            serviceWorkerVersion: "2432010939",
+          },
+					onEntrypointLoaded: async function (engineInitializer) {
+						const appRunner = await engineInitializer.initializeEngine();
+						await appRunner.runApp();
+					},
+				});
+			});
+		</script>
+
+		<script src="flutter_bootstrap.js" async></script>
+	</body>
 </html>
