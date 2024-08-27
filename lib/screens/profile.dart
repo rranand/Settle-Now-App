@@ -806,21 +806,23 @@ class _ProfileState extends State<Profile> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            SizedBox(
-                                              width: 10,
-                                            ),
                                             Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
                                               children: [
-                                                Icon(
-                                                  loggedInData[index].device ==
-                                                          "Android"
-                                                      ? Icons
-                                                          .phone_android_outlined
-                                                      : Icons
-                                                          .desktop_mac_outlined,
-                                                  size: 35,
+                                                Padding(
+                                                  padding: EdgeInsets.fromLTRB(
+                                                      10, 0, 0, 0),
+                                                  child: Icon(
+                                                    loggedInData[index]
+                                                                .device ==
+                                                            "Android"
+                                                        ? Icons
+                                                            .phone_android_outlined
+                                                        : Icons
+                                                            .desktop_mac_outlined,
+                                                    size: 35,
+                                                  ),
                                                 ),
                                                 SizedBox(
                                                   width: 15,
