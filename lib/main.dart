@@ -16,7 +16,7 @@ import 'firebase_options.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'contents.dart' as global;
+// import 'contents.dart' as global;
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
