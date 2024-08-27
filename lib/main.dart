@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
-// import 'package:firebase_app_check/firebase_app_check.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -17,6 +17,7 @@ import 'firebase_options.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'contents.dart' as global;
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -45,11 +46,11 @@ Future<void> main() async {
     Firebase.app(firebaseProjectName);
   }
 
-  // await FirebaseAppCheck.instance.activate(
-  //   webProvider: ReCaptchaV3Provider(global.recaptcha_key),
-  //   androidProvider: AndroidProvider.playIntegrity,
-  //   appleProvider: AppleProvider.deviceCheck,
-  // );
+  await FirebaseAppCheck.instance.activate(
+    webProvider: ReCaptchaV3Provider(global.recaptcha_key),
+    androidProvider: AndroidProvider.playIntegrity,
+    appleProvider: AppleProvider.deviceCheck,
+  );
 
   if (kIsWeb) {
     usePathUrlStrategy();
