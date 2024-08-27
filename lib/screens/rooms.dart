@@ -2028,7 +2028,10 @@ class _RoomExpenseState extends State<RoomExpense>
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width,
-                            height: isClear ? 120 : 145,
+                            height:
+                                membersListEmail.length - roomClosedCount == 0
+                                    ? 120
+                                    : 145,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               shrinkWrap: true,
@@ -3074,7 +3077,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                   BorderRadius.circular(20),
                                               xValueMapper:
                                                   (ChartData data, _) =>
-                                                      data.type as String,
+                                                      data.type,
                                               yValueMapper:
                                                   (ChartData data, _) =>
                                                       data.amount as num,

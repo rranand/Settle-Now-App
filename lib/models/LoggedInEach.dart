@@ -22,7 +22,6 @@ class LoggedInEach {
   });
 
   factory LoggedInEach.fromJson(Map<String, dynamic> json) {
-    print(json['currentSession']);
     return LoggedInEach(
         country: crypto.decrypt(json['country']),
         city: crypto.decrypt(json['city']),
