@@ -58,48 +58,25 @@ By using the Settle Now, we can efficiently manage all costs per individual, tra
 	</head>
 	<body>
 		<script>
-			{{flutter_js}}
-      		{{flutter_build_config}}
-			window.addEventListener("load", function (ev) {
-				var seconds = new Date().getTime();
-				xmlhttp = new XMLHttpRequest();
-				xmlhttp.responseType = "json";
-				xmlhttp.open("GET", "/version.json?v=" + seconds, true);
-				xmlhttp.onload = function () {
-					if (xmlhttp.status == 200) {
-						var buildNumber = xmlhttp.response.build_number;
-						var currentBuildNumber = window.localStorage.getItem("buildNumber");
+			{
+				{
+					flutter_js;
+				}
+			}
+			{
+				{
+					flutter_build_config;
+				}
+			}
 
-						if (currentBuildNumber && currentBuildNumber != buildNumber) {
-							caches.delete("flutter-app-manifest");
-							caches.delete("flutter-temp-cache");
-							caches.delete("flutter-app-cache");
-						}
-
-						window.localStorage.setItem("buildNumber", buildNumber);
-					}
-					navigator.serviceWorker.register("/flutter_bootstrap.js");
-				};
-				xmlhttp.error = function () {
-					navigator.serviceWorker.register("/flutter_bootstrap.js");
-				};
-				xmlhttp.abort = function () {
-					navigator.serviceWorker.register("/flutter_bootstrap.js");
-				};
-				xmlhttp.timeout = function () {
-					navigator.serviceWorker.register("/flutter_bootstrap.js");
-				};
-				xmlhttp.send();
-
-				_flutter.loader.load({
-          serviceWorkerSettings: {
-            serviceWorkerVersion: "2432010939",
-          },
-					onEntrypointLoaded: async function (engineInitializer) {
-						const appRunner = await engineInitializer.initializeEngine();
-						await appRunner.runApp();
-					},
-				});
+			_flutter.loader.load({
+				serviceWorkerSettings: {
+					serviceWorkerVersion: "2432010939",
+				},
+				onEntrypointLoaded: async function (engineInitializer) {
+					const appRunner = await engineInitializer.initializeEngine();
+					await appRunner.runApp();
+				},
 			});
 		</script>
 
