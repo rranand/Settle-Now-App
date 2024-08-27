@@ -6,13 +6,13 @@ import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:path/path.dart';
+import 'package:provider/provider.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
+import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +23,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:settlenow/others/crypto.dart';
+import '../contents.dart' as global;
 
 Future<Map<String, dynamic>> initPlatformState() async {
   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -65,18 +66,15 @@ Future<Map<String, dynamic>> initPlatformState() async {
 
 addCorsinImage(String picUrl) {
   if (kIsWeb) {
-    if (picUrl.contains("https://drive.google.com/uc?export=view&id=")) {
-      return picUrl.replaceAll("https://drive.google.com/uc?export=view&id=",
-              dotenv.get("drivewebUrl")) +
+    if (picUrl.contains(global.driveUrl)) {
+      return picUrl.replaceAll(global.driveUrl, global.drivewebUrl) +
           '?key=' +
-          dotenv.get("googleApiKey") +
-          '&alt=media&source=downloadUrl';
+          global.googleApiKey;
     }
     return picUrl.replaceAll(
-            "https://drive.google.com/uc?id=", dotenv.get("drivewebUrl")) +
+            "https://drive.google.com/uc?id=", global.drivewebUrl) +
         '?key=' +
-        dotenv.get("googleApiKey") +
-        '&alt=media&source=downloadUrl';
+        global.googleApiKey;
   } else {
     return picUrl;
   }
@@ -235,8 +233,8 @@ commaSeperator(String amount) {
 }
 
 formatDateTime(String dateTime) {
-  DateFormat dateFormat = DateFormat(dotenv.get("dateTimeFormat"));
-  DateFormat dateFormat_new = DateFormat("MMM dd yyyy h:mm a");
+  DateFormat dateFormat = DateFormat(global.dateTimeFormat);
+  DateFormat dateFormat_new = DateFormat(global.dateTimeFormat_new);
   DateTime olddateTime = dateFormat.parse(dateTime);
   return dateFormat_new.format(olddateTime);
 }
@@ -328,14 +326,14 @@ List<FriendEach> getUnionOfContacts(
 createJSONDataTOJWT(dynamic data) {
   final jwt = JWT(data);
 
-  return crypto.encrypt(jwt.sign(SecretKey(dotenv.get("jwtToken")),
-      expiresIn: Duration(seconds: 100)));
+  return crypto.encrypt(
+      jwt.sign(SecretKey(global.jwtToken), expiresIn: Duration(seconds: 100)));
 }
 
 extractJSONfromJWT(String data) async {
   try {
     data = crypto.decrypt(data);
-    final reqData = await JWT.verify(data, SecretKey(dotenv.get("jwtToken")));
+    final reqData = await JWT.verify(data, SecretKey(global.jwtToken));
     return jsonEncode(reqData.payload);
   } on Exception catch (_) {}
 
@@ -367,11 +365,11 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
     dynamic JSONData, BuildContext context) async {
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
-    Response res = await httpType(Uri.parse(dotenv.get("url") + url),
+    Response res = await httpType(Uri.parse(global.url + url),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Auth': token,
-          'Access-Control-Allow-Origin': dotenv.get("url")
+          'Access-Control-Allow-Origin': global.url
         },
         body: jsonEncode({"data": tokenization}));
 
@@ -398,11 +396,11 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
         reason: "API Error", info: ["createHTTPreq", url]);
   }
 
-  bool isDeviceConnected = await InternetConnectionChecker().hasConnection;
+  final internetChecker = Provider.of<InternetconnectivityProvider>(context);
   return new Response(
       jsonEncode({
         "status": false,
-        "Message": crypto.encrypt(isDeviceConnected
+        "Message": crypto.encrypt(internetChecker.isDeviceConnected
             ? "Server Error, Try Again!"
             : "No Internet Connection!"),
       }),

@@ -1,9 +1,9 @@
 import 'package:encrypt/encrypt.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../contents.dart' as global;
 
 class crypto {
-  static final _key = Key.fromUtf8(dotenv.get("crypto_key"));
-  static final _iv = IV.fromUtf8(dotenv.get('crypto_iv'));
+  static final _key = Key.fromUtf8(global.crypto_key);
+  static final _iv = IV.fromUtf8(global.crypto_iv);
 
   static final encrypter = Encrypter(AES(_key, mode: AESMode.cbc));
 

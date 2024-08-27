@@ -9,7 +9,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
@@ -39,12 +38,12 @@ class _LoginPageState extends State<LoginPage> {
   String version = "";
   bool isOnBoardingCompleted = false;
   bool isItAndroidDevice = false;
-  final connectionChecker = InternetConnectionChecker();
-  late StreamSubscription<InternetConnectionStatus> subscription;
+  // final connectionChecker = InternetConnectionChecker();
+  // late StreamSubscription<InternetConnectionStatus> subscription;
 
   @override
   void dispose() {
-    subscription.cancel();
+    // subscription.cancel();
     super.dispose();
   }
 
@@ -139,29 +138,33 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    subscription = InternetConnectionChecker.createInstance(
-      checkInterval: Duration(seconds: 30),
-      customCheckOptions: [
-        AddressCheckOption(uri: Uri.parse('https://1.1.1.1')),
-      ],
-      useDefaultOptions: false,
-    ).onStatusChange.listen(
-      (InternetConnectionStatus status) {
-        final provider =
-            Provider.of<InternetconnectivityProvider>(context, listen: false);
-        bool isDeviceConnected = (status == InternetConnectionStatus.connected);
-        if (isDeviceConnected != provider.isDeviceConnected) {
-          provider.toggleDeviceConnected(isDeviceConnected);
-        }
-        if (!isDeviceConnected && provider.isAlertSet == false) {
-          provider.toggleAlertSet(true);
-        } else if (isDeviceConnected && provider.isAlertSet == true) {
-          Future.delayed(Duration(seconds: 1), () {
-            provider.toggleAlertSet(false);
-          });
-        }
-      },
-    );
+    // if (!kIsWeb) {
+    //   subscription = InternetConnectionChecker.createInstance(
+    //     checkInterval: Duration(seconds: 30),
+    //     customCheckOptions: [
+    //       AddressCheckOption(uri: Uri.parse('https://1.1.1.1')),
+    //     ],
+    //     useDefaultOptions: false,
+    //   ).onStatusChange.listen(
+    //     (InternetConnectionStatus status) {
+    //       final provider =
+    //           Provider.of<InternetconnectivityProvider>(context, listen: false);
+    //       bool isDeviceConnected =
+    //           (status == InternetConnectionStatus.connected);
+    //       if (isDeviceConnected != provider.isDeviceConnected) {
+    //         provider.toggleDeviceConnected(isDeviceConnected);
+    //       }
+    //       if (!isDeviceConnected && provider.isAlertSet == false) {
+    //         provider.toggleAlertSet(true);
+    //       } else if (isDeviceConnected && provider.isAlertSet == true) {
+    //         Future.delayed(Duration(seconds: 1), () {
+    //           provider.toggleAlertSet(false);
+    //         });
+    //       }
+    //     },
+    //   );
+    // }
+
     _extractEmail();
   }
 
@@ -191,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                       width: 150,
                     ),
                     Text(
-                      "Settle_Now",
+                      "Settle Now",
                       style: TextStyle(
                         fontSize: 60,
                         fontWeight: FontWeight.bold,

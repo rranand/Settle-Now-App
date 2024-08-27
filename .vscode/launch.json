@@ -1,22 +1,72 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "prod",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "prod"]
-        },
-        {
-            "name": "dev",
-            "request": "launch",
-            "type": "dart",
-            "program": "lib/main.dart",
-            "args": ["--flavor", "dev"]
-        }
-    ]
+	// Use IntelliSense to learn about possible attributes.
+	// Hover to view descriptions of existing attributes.
+	// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "prod",
+			"request": "launch",
+			"type": "dart",
+			"program": "lib/main.dart",
+			"args": [
+				"--flavor",
+				"prod",
+				"--dart-define",
+				"url=https://api.settlenow.in/",
+				"--dart-define",
+				"driveUrl=https://drive.google.com/uc?export=view&id=",
+				"--dart-define",
+				"drivewebUrl=https://www.googleapis.com/drive/v2/files/",
+				"--dart-define",
+				"googleApiKey=AIzaSyApNchuFZfvl0tDGIFv89xonkbwzLfXDz4&alt=media&source=downloadUrl",
+				"--dart-define",
+				"jwtToken=BY#uu4qQiLb^SYcOCsxS@lQxu7TZKRozctbbCwGtN93LccoKVU3f6F0IjiDH#J2GH2N!2t^*UTwQtZmD4S#Fy8w#Y3b6d1gN#SHVYgcKX%s4pxQ@vq4vS%Emd#KRKqkF31EQjuB34x!3IMn@TfSTt7",
+				"--dart-define",
+				"dateTimeFormat=MMM dd yyyy HH:mm:ss",
+				"--dart-define",
+				"dateTimeFormat_new=MMM dd yyyy h:mm a",
+				"--dart-define",
+				"crypto_key=H5Zc8cngjd8tEtmAmRnwDhY3jhxnLbM7",
+				"--dart-define",
+				"crypto_iv=H5Jz8BRezMwVEqvv",
+				"--dart-define",
+				"unknown_avatar_id=11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8",
+				"--dart-define",
+				"recaptcha-key=6LcI-OgnAAAAAI-V0bHmauAorcKlh1W3wDvfmN40"
+			]
+		},
+		{
+			"name": "dev",
+			"request": "launch",
+			"type": "dart",
+			"program": "lib/main.dart",
+			"args": [
+				"--flavor",
+				"dev",
+				"--dart-define",
+				"url=https://api.settlenow.in/",
+				"--dart-define",
+				"driveUrl=https://drive.google.com/uc?export=view&id=",
+				"--dart-define",
+				"drivewebUrl=https://www.googleapis.com/drive/v2/files/",
+				"--dart-define",
+				"googleApiKey=AIzaSyApNchuFZfvl0tDGIFv89xonkbwzLfXDz4&alt=media&source=downloadUrl",
+				"--dart-define",
+				"jwtToken=BY#uu4qQiLb^SYcOCsxS@lQxu7TZKRozctbbCwGtN93LccoKVU3f6F0IjiDH#J2GH2N!2t^*UTwQtZmD4S#Fy8w#Y3b6d1gN#SHVYgcKX%s4pxQ@vq4vS%Emd#KRKqkF31EQjuB34x!3IMn@TfSTt7",
+				"--dart-define",
+				"dateTimeFormat=MMM dd yyyy HH:mm:ss",
+				"--dart-define",
+				"dateTimeFormat_new=MMM dd yyyy h:mm a",
+				"--dart-define",
+				"crypto_key=H5Zc8cngjd8tEtmAmRnwDhY3jhxnLbM7",
+				"--dart-define",
+				"crypto_iv=H5Jz8BRezMwVEqvv",
+				"--dart-define",
+				"unknown_avatar_id=11tIuRVao7Si0p_xYS8XRcnvuJB_NyfI8",
+				"--dart-define",
+				"recaptcha-key=6LcI-OgnAAAAAI-V0bHmauAorcKlh1W3wDvfmN40"
+			]
+		}
+	]
 }

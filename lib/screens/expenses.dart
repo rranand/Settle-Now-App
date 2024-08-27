@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
@@ -163,7 +162,12 @@ class _ExpensesState extends State<Expenses> {
         }
         context.push(AppRouteConstants.maintainRouteName);
       } else {
-        showToast(context, TransData["Message"]?crypto.decrypt(TransData["Message"]):"Some Unknown Error Occurred", Icons.close);
+        showToast(
+            context,
+            TransData["Message"]
+                ? crypto.decrypt(TransData["Message"])
+                : "Some Unknown Error Occurred",
+            Icons.close);
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -226,7 +230,7 @@ class _ExpensesState extends State<Expenses> {
           TransList[index]['purpose'] = crypto.encrypt(purpose);
           TransList[index]['isEdited'] = true;
           TransList[index]['lastModDate'] = crypto.encrypt(
-              DateFormat(dotenv.get('dateTimeFormat')).format(DateTime.now()));
+              DateFormat(global.dateTimeFormat).format(DateTime.now()));
         }
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
@@ -2579,8 +2583,8 @@ class _ExpensesState extends State<Expenses> {
                                               MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
-                                              DateFormat(dotenv.get(
-                                                      'dateTimeFormat_new'))
+                                              DateFormat(
+                                                      global.dateTimeFormat_new)
                                                   .format(expensedate),
                                               style: TextStyle(fontSize: 18),
                                             ),

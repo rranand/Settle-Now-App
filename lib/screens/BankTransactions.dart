@@ -5,7 +5,6 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +19,7 @@ import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
+import '../contents.dart' as global;
 
 import '../functions/additionalFunction.dart';
 import '../functions/filterBankSMS.dart';
@@ -1012,10 +1012,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                     'Pic']
                                                                 .length ==
                                                             0
-                                                        ? dotenv.get(
-                                                                'driveUrl') +
-                                                            dotenv.get(
-                                                                'unknown_avatar_id')
+                                                        ? global.driveUrl +
+                                                            global
+                                                                .unknown_avatar_id
                                                         : manualSplitMembers[
                                                             key]!['Pic']),
                                                 progressIndicatorBuilder:
@@ -1558,10 +1557,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                       ['pic'])
                                                                   .length ==
                                                               0
-                                                          ? dotenv.get(
-                                                                  'driveUrl') +
-                                                              dotenv.get(
-                                                                  'unknown_avatar_id')
+                                                          ? global.driveUrl +
+                                                              global
+                                                                  .unknown_avatar_id
                                                           : crypto.decrypt(
                                                               roomMembers[
                                                                       index - 1]

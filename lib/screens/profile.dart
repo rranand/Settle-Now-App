@@ -6,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +23,7 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/themes.dart';
 
+import '../contents.dart' as global;
 import '../others/GoogleSignIN.dart';
 
 class Profile extends StatefulWidget {
@@ -194,10 +194,8 @@ class _ProfileState extends State<Profile> {
         } else {
           if (this.mounted) {
             setState(() {
-              picUrl = addCorsinImage(dotenv.get('driveUrl') +
-                  (picUrl.length == 0
-                      ? dotenv.get('unknown_avatar_id')
-                      : picUrl));
+              picUrl = addCorsinImage(global.driveUrl +
+                  (picUrl.length == 0 ? global.unknown_avatar_id : picUrl));
             });
           }
         }
@@ -828,8 +826,8 @@ class _ProfileState extends State<Profile> {
                                                   loggedInData[index].device +
                                                       "\n" +
                                                       "Last Used : " +
-                                                      DateFormat(dotenv.get(
-                                                              "dateTimeFormat_new"))
+                                                      DateFormat(global
+                                                              .dateTimeFormat_new)
                                                           .parse(loggedInData[
                                                                   index]
                                                               .lastUsed)

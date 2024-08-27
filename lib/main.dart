@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:firebase_app_check/firebase_app_check.dart';
+// import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -32,7 +31,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> main() async {
-  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   String firebaseProjectName = '[DEFAULT]';
@@ -47,15 +45,15 @@ Future<void> main() async {
     Firebase.app(firebaseProjectName);
   }
 
+  // await FirebaseAppCheck.instance.activate(
+  //   webProvider: ReCaptchaV3Provider(global.recaptcha_key),
+  //   androidProvider: AndroidProvider.playIntegrity,
+  //   appleProvider: AppleProvider.deviceCheck,
+  // );
+
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
-    await FirebaseAppCheck.instance.activate(
-      webProvider: ReCaptchaV3Provider(dotenv.get('recaptcha-key')),
-      androidProvider: AndroidProvider.playIntegrity,
-      appleProvider: AppleProvider.deviceCheck,
-    );
-
     await Permission.notification.isDenied.then((value) {
       if (value) {
         Permission.notification.request();
