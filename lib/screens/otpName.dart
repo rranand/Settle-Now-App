@@ -180,8 +180,8 @@ class _OtpNameState extends State<OtpName> {
         await Future.wait([
           setStringPref("token", jwToken),
           setBoolPrefs("isGoogle", false),
-          setStringPref("___token", JsonData['createdOn']),
-          setStringPref("__token", JsonData['phoneNo'])
+          setStringPref("___token", JsonData['data']['createdOn']),
+          setStringPref("__token", JsonData['data']['phoneNo'])
         ]);
 
         if (this.mounted) {
