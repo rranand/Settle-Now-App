@@ -815,7 +815,7 @@ class _ProfileState extends State<Profile> {
                                                       10, 0, 0, 0),
                                                   child: Icon(
                                                     loggedInData[index]
-                                                                .device ==
+                                                                .deviceType ==
                                                             "Android"
                                                         ? Icons
                                                             .phone_android_outlined
@@ -828,7 +828,7 @@ class _ProfileState extends State<Profile> {
                                                   width: 15,
                                                 ),
                                                 Text(
-                                                  loggedInData[index].device +
+                                                  loggedInData[index].deviceType +
                                                       "\n" +
                                                       "Last Used : " +
                                                       captalizeFirstLetter(

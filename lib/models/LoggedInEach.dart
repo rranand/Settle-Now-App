@@ -6,7 +6,7 @@ class LoggedInEach {
   String country;
   String city;
   String device;
-  String os;
+  String deviceType;
   String id;
   String lastUsed;
   bool currentSession;
@@ -15,7 +15,7 @@ class LoggedInEach {
     required this.country,
     required this.city,
     required this.device,
-    required this.os,
+    required this.deviceType,
     required this.id,
     required this.lastUsed,
     required this.currentSession,
@@ -26,7 +26,7 @@ class LoggedInEach {
         country: crypto.decrypt(json['country']),
         city: crypto.decrypt(json['city']),
         device: crypto.decrypt(json['device']),
-        os: (crypto.decrypt(json['os'])),
+        deviceType: (crypto.decrypt(json['deviceType'])),
         id: (crypto.decrypt(json['id'])),
         lastUsed: formatDateTime(crypto.decrypt(json['lastUsed'])),
         currentSession: (json['currentSession'] == 'true'));
