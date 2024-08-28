@@ -154,6 +154,7 @@ class _OtpNameState extends State<OtpName> {
         'token': crypto.encrypt(token),
         'device': crypto.encrypt(_deviceData['device']),
         'deviceToken': crypto.encrypt(kIsWeb ? "web" : deviceToken),
+        'userAgent': crypto.encrypt(_deviceData['userAgent']),
         'ip': crypto.encrypt(widget.ipAddress),
       };
 

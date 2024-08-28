@@ -350,7 +350,9 @@ class _LoginPageState extends State<LoginPage> {
                                 'device': crypto.encrypt(_deviceData['device']),
                                 'deviceToken': crypto
                                     .encrypt(kIsWeb ? "web" : deviceToken),
-                                "token": crypto.encrypt(token)
+                                "token": crypto.encrypt(token),
+                                'userAgent':
+                                    crypto.encrypt(_deviceData['userAgent']),
                               };
 
                               resp = await createHTTPreq('login/google',
