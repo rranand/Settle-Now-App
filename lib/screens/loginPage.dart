@@ -85,7 +85,6 @@ class _LoginPageState extends State<LoginPage> {
     darkTheme = futureOut[3] as bool;
     isOnBoardingCompleted = futureOut[4] as bool;
     var tempData = futureOut[5] as String?;
-
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
 
