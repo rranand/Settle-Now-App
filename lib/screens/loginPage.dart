@@ -79,6 +79,7 @@ class _LoginPageState extends State<LoginPage> {
       getBoardingStatus(),
       getStringPref('token'),
     ]);
+
     version = futureOut[0] as String;
     _deviceData = futureOut[1] as Map<String, dynamic>;
     isItAndroidDevice = futureOut[2] as bool;

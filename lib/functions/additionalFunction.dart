@@ -32,17 +32,24 @@ Future<Map<String, dynamic>> initPlatformState() async {
     if (kIsWeb) {
       WebBrowserInfo data = await deviceInfoPlugin.webBrowserInfo;
       return <String, dynamic>{
-        'device': data.browserName.name + " (" + data.platform! + ")",
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'device': captalizeFirstLetter(data.browserName.name) +
+            " (" +
+            data.platform! +
+            ")",
+        'userAgent': data.userAgent!,
       };
     } else if (Platform.isAndroid) {
       AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
       return <String, dynamic>{
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'device': build.model +
             " (Android " +
             build.version.release +
             ", " +
             build.device +
-            ")"
+            ")",
+        'userAgent': "Unknown",
       };
     }
   } on PlatformException {}
