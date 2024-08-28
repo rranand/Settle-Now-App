@@ -831,13 +831,15 @@ class _ProfileState extends State<Profile> {
                                                   loggedInData[index].device +
                                                       "\n" +
                                                       "Last Used : " +
-                                                      DateFormat(global
-                                                              .dateTimeFormat_new)
-                                                          .parse(loggedInData[
-                                                                  index]
-                                                              .lastUsed)
-                                                          .toMoment()
-                                                          .fromNow(),
+                                                      captalizeFirstLetter(
+                                                          DateFormat(global
+                                                                  .dateTimeFormat_new)
+                                                              .parse(
+                                                                  loggedInData[
+                                                                          index]
+                                                                      .lastUsed)
+                                                              .toMoment()
+                                                              .fromNow()),
                                                   style: TextStyle(
                                                     fontSize: 15,
                                                   ),

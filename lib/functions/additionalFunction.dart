@@ -392,3 +392,10 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
       }),
       422);
 }
+
+String captalizeFirstLetter(String str) {
+  if (str.length == 0) {
+    return "";
+  }
+  return str[0].toUpperCase() + str.substring(1);
+}
