@@ -153,6 +153,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> getDeviceTokenToSendNotification() async {
+    if (kIsWeb) {
+      return;
+    }
     final FirebaseMessaging _fcm = FirebaseMessaging.instance;
     final token = await _fcm.getToken();
     deviceToken = token.toString();
