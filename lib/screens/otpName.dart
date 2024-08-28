@@ -21,8 +21,9 @@ import '../others/themes.dart';
 
 class OtpName extends StatefulWidget {
   final String email;
-
-  const OtpName({Key? key, required this.email}) : super(key: key);
+  final String ipAddress;
+  const OtpName({Key? key, required this.email, required this.ipAddress})
+      : super(key: key);
 
   @override
   _OtpNameState createState() => _OtpNameState();
@@ -36,7 +37,6 @@ class _OtpNameState extends State<OtpName> {
   late var data = null;
   bool verified = false;
   var JsonData = null;
-  var JD = null;
   String token = "";
   String deviceToken = "";
   final TextEditingController _name = TextEditingController();
@@ -112,18 +112,6 @@ class _OtpNameState extends State<OtpName> {
           data = jsonDecode(response.body);
         });
       }
-
-      if (!kIsWeb) {
-        final ipAdd = await http.get(
-          Uri.parse('http://ip-api.com/json'),
-        );
-
-        if (this.mounted) {
-          setState(() {
-            JD = jsonDecode(ipAdd.body);
-          });
-        }
-      }
     } else if (response.statusCode == 503) {
       if (this.mounted) {
         while (context.canPop()) {
@@ -164,13 +152,14 @@ class _OtpNameState extends State<OtpName> {
         'otp': crypto.encrypt(otp),
         'name': crypto.encrypt(name),
         'token': crypto.encrypt(token),
-        'deviceToken': crypto.encrypt(kIsWeb ? "web" : "android")
+        'deviceToken': crypto.encrypt(kIsWeb ? "web" : deviceToken),
+        'ip': crypto.encrypt(widget.ipAddress),
       };
 
       final response =
           await createHTTPreq('verify', http.post, "", jsonInputData, context);
 
-      JsonData = jsonDecode(response.body);
+      JsonData = jsonDecode(response.body)['data'];
       if (response.statusCode == 200) {
         Map<String, String> jsonInputData = {
           "email": widget.email,
@@ -186,53 +175,12 @@ class _OtpNameState extends State<OtpName> {
 
         String jwToken =
             await createJWT(widget.email, jsonEncode(jsonInputData));
-        await Future.wait(
-            [setStringPref("token", jwToken), setBoolPrefs("isGoogle", false)]);
-
-        var resp = null;
-        Map<String, String> jsonInputDataReq = {};
-        if (kIsWeb) {
-          jsonInputDataReq = {
-            'email': crypto.encrypt(widget.email),
-            'country': crypto.encrypt("Unknown"),
-            'ip': crypto.encrypt("Unknown"),
-            'state': crypto.encrypt("Unknown"),
-            'city': crypto.encrypt("Unknown"),
-            'isp': crypto.encrypt("Unknown"),
-            'device': crypto.encrypt(_deviceData['device']),
-            'deviceID': crypto.encrypt(_deviceData['id']),
-            'userAgent': crypto.encrypt(_deviceData['userAgent']),
-            'deviceToken': crypto.encrypt("web")
-          };
-        } else {
-          jsonInputDataReq = {
-            'email': crypto.encrypt(widget.email),
-            'country': crypto.encrypt(JD['country']),
-            'ip': crypto.encrypt(JD['query']),
-            'state': crypto.encrypt(JD['regionName']),
-            'city': crypto.encrypt(JD['city']),
-            'isp': crypto.encrypt(JD['isp']),
-            'device': crypto.encrypt(_deviceData['device']),
-            'deviceID': crypto.encrypt(_deviceData['id']),
-            'deviceToken': crypto.encrypt(deviceToken),
-            'model': crypto.encrypt(_deviceData['model']),
-            'product': crypto.encrypt(_deviceData['product']),
-            'serial': crypto.encrypt(_deviceData['serial']),
-            'android': crypto.encrypt(_deviceData['sdkInt']),
-            'release': crypto.encrypt(_deviceData['release']),
-          };
-        }
-        resp = await createHTTPreq(
-            'verify', http.patch, "", jsonInputDataReq, context);
-
-        var remainingData = jsonDecode(resp.body)['data'];
-
-        if (resp.statusCode == 200) {
-          await Future.wait([
-            setStringPref("___token", remainingData['createdOn']),
-            setStringPref("__token", remainingData['phoneNo'])
-          ]);
-        }
+        await Future.wait([
+          setStringPref("token", jwToken),
+          setBoolPrefs("isGoogle", false),
+          setStringPref("___token", JsonData['createdOn']),
+          setStringPref("__token", JsonData['phoneNo'])
+        ]);
 
         if (this.mounted) {
           while (context.canPop()) {
@@ -248,12 +196,12 @@ class _OtpNameState extends State<OtpName> {
                 );
         }
       } else {
+        context.pop(context);
         if (this.mounted) {
           setState(() {
             error = true;
             errorText = crypto.decrypt(JsonData['Message']);
           });
-          context.pop(context);
         }
       }
     } on Exception catch (err, stackTrace) {

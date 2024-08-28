@@ -58,10 +58,12 @@ class AppRouter {
                 if (extra == null) {
                   return OtpName(
                     email: "",
+                    ipAddress: "",
                   );
                 }
                 return OtpName(
                   email: extra['email'] as String,
+                  ipAddress: extra['ipAddress'] as String,
                 );
               },
             ),

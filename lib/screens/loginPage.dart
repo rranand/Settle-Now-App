@@ -38,6 +38,7 @@ class _LoginPageState extends State<LoginPage> {
   String version = "";
   bool isOnBoardingCompleted = false;
   bool isItAndroidDevice = false;
+  String ipAddress = "";
   // final connectionChecker = InternetConnectionChecker();
   // late StreamSubscription<InternetConnectionStatus> subscription;
 
@@ -76,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
       checkAndroidInsideWeb(),
       getTheme(context),
       getBoardingStatus(),
-      getStringPref('token')
+      getStringPref('token'),
     ]);
     version = futureOut[0] as String;
     _deviceData = futureOut[1] as Map<String, dynamic>;
@@ -129,6 +130,25 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> fetchIP() async {
+    try {
+      final ipAddressReq = await http.get(Uri.parse('https://api64.ipify.org'));
+
+      if (ipAddressReq.statusCode == 200) {
+        if (this.mounted) {
+          setState(() {
+            ipAddress = ipAddressReq.body;
+          });
+        }
+      }
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["LoginPage->fetchIP"]);
+      }
+    }
+  }
+
   Future<void> getDeviceTokenToSendNotification() async {
     final FirebaseMessaging _fcm = FirebaseMessaging.instance;
     final token = await _fcm.getToken();
@@ -164,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
     //     },
     //   );
     // }
-
+    fetchIP();
     _extractEmail();
   }
 
@@ -254,7 +274,8 @@ class _LoginPageState extends State<LoginPage> {
                                       AppRouteConstants.verifyRouteName,
                                   extra: {
                                     "version": version,
-                                    "email": _emailId.text
+                                    "email": _emailId.text,
+                                    "ipAddress": ipAddress,
                                   });
                             }
                           }),
@@ -313,70 +334,24 @@ class _LoginPageState extends State<LoginPage> {
                               ]);
 
                               var resp = null;
-                              if (kIsWeb) {
-                                Map<String, String> jsonInputData = {
-                                  'email':
-                                      crypto.encrypt((user.email).toString()),
-                                  'name': crypto
-                                      .encrypt((user.displayName).toString()),
-                                  'profilePic': crypto
-                                      .encrypt((user.photoUrl).toString()),
-                                  'country': crypto.encrypt("Unknown"),
-                                  'ip': crypto.encrypt("Unknown"),
-                                  'state': crypto.encrypt("Unknown"),
-                                  'city': crypto.encrypt("Unknown"),
-                                  'isp': crypto.encrypt("Unknown"),
-                                  'device':
-                                      crypto.encrypt(_deviceData['device']),
-                                  'deviceID': crypto.encrypt(_deviceData['id']),
-                                  'deviceToken': crypto.encrypt("web"),
-                                  "token": crypto.encrypt(token)
-                                };
+                              await getDeviceTokenToSendNotification();
 
-                                resp = await createHTTPreq('login/google',
-                                    http.post, "", jsonInputData, context);
-                              } else {
-                                List<dynamic> fwaitTemp = await Future.wait([
-                                  getDeviceTokenToSendNotification(),
-                                  http.get(
-                                    Uri.parse('http://ip-api.com/json'),
-                                  )
-                                ]);
+                              jsonInputData = {
+                                'email':
+                                    crypto.encrypt((user.email).toString()),
+                                'name': crypto
+                                    .encrypt((user.displayName).toString()),
+                                'profilePic':
+                                    crypto.encrypt((user.photoUrl).toString()),
+                                'ip': crypto.encrypt(ipAddress),
+                                'device': crypto.encrypt(_deviceData['device']),
+                                'deviceToken': crypto
+                                    .encrypt(kIsWeb ? "web" : deviceToken),
+                                "token": crypto.encrypt(token)
+                              };
 
-                                final ipAdd = fwaitTemp[1];
-                                final JD = jsonDecode(ipAdd.body);
-
-                                Map<String, String> jsonInputData = {
-                                  'email':
-                                      crypto.encrypt((user.email).toString()),
-                                  'name': crypto
-                                      .encrypt((user.displayName).toString()),
-                                  'profilePic': crypto
-                                      .encrypt((user.photoUrl).toString()),
-                                  'country': crypto.encrypt(JD['country']),
-                                  'ip': crypto.encrypt(JD['query']),
-                                  'state': crypto.encrypt(JD['regionName']),
-                                  'city': crypto.encrypt(JD['city']),
-                                  'isp': crypto.encrypt(JD['isp']),
-                                  'device':
-                                      crypto.encrypt(_deviceData['device']),
-                                  'deviceID': crypto.encrypt(_deviceData['id']),
-                                  'model': crypto.encrypt(_deviceData['model']),
-                                  'product':
-                                      crypto.encrypt(_deviceData['product']),
-                                  'serial':
-                                      crypto.encrypt(_deviceData['serial']),
-                                  'android':
-                                      crypto.encrypt(_deviceData['sdkInt']),
-                                  'release':
-                                      crypto.encrypt(_deviceData['release']),
-                                  'deviceToken': crypto.encrypt(deviceToken),
-                                  "token": crypto.encrypt(token)
-                                };
-
-                                resp = await createHTTPreq('login/google',
-                                    http.post, "", jsonInputData, context);
-                              }
+                              resp = await createHTTPreq('login/google',
+                                  http.post, "", jsonInputData, context);
 
                               var remainingData = jsonDecode(resp.body)['data'];
 
