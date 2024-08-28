@@ -152,6 +152,7 @@ class _OtpNameState extends State<OtpName> {
         'otp': crypto.encrypt(otp),
         'name': crypto.encrypt(name),
         'token': crypto.encrypt(token),
+        'device': crypto.encrypt(_deviceData['device']),
         'deviceToken': crypto.encrypt(kIsWeb ? "web" : deviceToken),
         'ip': crypto.encrypt(widget.ipAddress),
       };
@@ -159,7 +160,7 @@ class _OtpNameState extends State<OtpName> {
       final response =
           await createHTTPreq('verify', http.post, "", jsonInputData, context);
 
-      JsonData = jsonDecode(response.body)['data'];
+      JsonData = jsonDecode(response.body);
       if (response.statusCode == 200) {
         Map<String, String> jsonInputData = {
           "email": widget.email,

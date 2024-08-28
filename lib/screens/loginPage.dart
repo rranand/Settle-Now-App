@@ -88,6 +88,9 @@ class _LoginPageState extends State<LoginPage> {
     var tempData = futureOut[5] as String?;
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
+    final internetProvider =
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
+    internetProvider.toggleDeviceConnected(true);
 
     if (tempData == null) {
       await deleteTempData();
