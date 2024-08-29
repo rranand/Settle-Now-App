@@ -23,6 +23,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/manualUpdateWidget.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -774,10 +775,6 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future<void> _updateCheck() async {
-    await checkForUpdate();
-  }
-
   Future<void> fetchSentRequest() async {
     try {
       if (this.mounted) {
@@ -957,7 +954,7 @@ class _DashBoardState extends State<DashBoard> {
       getQuickSplitExpenses();
       checkforScheduledNotifications();
       ContactPermissionGranted();
-      _updateCheck();
+      checkForUpdate();
       getRoomRequest();
       fetchSentRequest();
       getFriendData();
@@ -3213,33 +3210,6 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Widget updateWidget(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Settle Now (New Update Available)",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                final provider =
-                    Provider.of<ThemeProvider>(context, listen: false);
-                provider.toggleTheme(!themeProvider.darkTheme);
-                setBoolPrefs('darkTheme', themeProvider.darkTheme);
-              },
-              icon: Icon(
-                Icons.brightness_2,
-                color: themeProvider.darkTheme ? Colors.white : Colors.black87,
-              ))
-        ],
-      ),
-      body: updatePage(data: updateData),
-    );
-  }
-
   Widget RequestWidget(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: Container(
@@ -4616,7 +4586,7 @@ class _DashBoardState extends State<DashBoard> {
     final internetConnProvider =
         Provider.of<InternetconnectivityProvider>(context);
     return importantUpdate
-        ? updateWidget(context)
+        ? updateWidget(context, updateData)
         : Scaffold(
             appBar: dash == 0
                 ? AppBar(
@@ -7655,88 +7625,6 @@ class _RoomWidgetState extends State<RoomWidget> {
           return roomSectors(context, index);
         }
       },
-    );
-  }
-}
-
-class updatePage extends StatelessWidget {
-  final data;
-  updatePage({Key? key, required this.data}) : super(key: key);
-
-  _launchURL(BuildContext context) async {
-    launchUrl(
-      Uri.parse(crypto.decrypt(data["link"])),
-      mode: LaunchMode.externalApplication,
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-            MediaQuery.of(context).size.width * 0.15, 0, 10.0, 0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Version: ' + crypto.decrypt(data["Version"]).split('+').first,
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Text(
-              'What\'s new \n' +
-                  crypto
-                      .decrypt(data["description"])
-                      .split(',')
-                      .map((e) => '  * ' + e)
-                      .join('\n'),
-              style: TextStyle(
-                fontSize: 16,
-              ),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Align(
-                alignment: Alignment.bottomRight,
-                child: SizedBox(
-                  height: 40,
-                  child: OutlinedButton(
-                    child: Text(
-                      'Download',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(13.0),
-                      ),
-                      side: BorderSide(color: Theme.of(context).primaryColor),
-                    ),
-                    onPressed: () {
-                      _launchURL(context);
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
