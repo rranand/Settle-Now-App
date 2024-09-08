@@ -28,7 +28,7 @@ class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -146,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
 
     if (tempData == null) {
       if (kIsWeb) {
-        await deleteTempData();
+        await Future.wait([deleteTempData()]);
       } else {
         await Future.wait(
             [deleteTempData(), manualUpdateCheck(), checkForUpdate()]);
@@ -164,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
 
       if (checkJWTToken == null) {
         if (kIsWeb) {
-          await deleteTempData();
+          await Future.wait([deleteTempData()]);
         } else {
           await Future.wait(
               [deleteTempData(), manualUpdateCheck(), checkForUpdate()]);
@@ -512,6 +512,9 @@ class _LoginPageState extends State<LoginPage> {
                         height: isItAndroidDevice ? 150 : 50,
                         color: Colors.transparent,
                         child: ListView(shrinkWrap: true, children: [
+                          SizedBox(
+                            height: 8,
+                          ),
                           RichText(
                             textAlign: TextAlign.center,
                             text: TextSpan(

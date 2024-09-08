@@ -13,10 +13,10 @@ packages:
     dependency: transitive
     description:
       name: _flutterfire_internals
-      sha256: b1595874fbc8f7a50da90f5d8f327bb0bfd6a95dc906c390efe991540c3b54aa
+      sha256: "9371d13b8ee442e3bfc08a24e3a1b3742c839abbfaf5eef11b79c4b862c89bf7"
       url: "https://pub.dev"
     source: hosted
-    version: "1.3.40"
+    version: "1.3.41"
   adaptive_number:
     dependency: transitive
     description:
@@ -169,14 +169,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
-  corbado_frontend_api_client:
-    dependency: transitive
-    description:
-      name: corbado_frontend_api_client
-      sha256: "7040edd0b73ef023ab3fb82da9d284d1f53ba31037d7c227747b527d168855a3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.1"
   cross_file:
     dependency: transitive
     description:
@@ -345,30 +337,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.9+1"
-  firebase_app_check:
-    dependency: "direct main"
-    description:
-      name: firebase_app_check
-      sha256: "8314938830d6b47217e369664567f6d8a1e77603448e1dbdaf4f7d8c2111ff5c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.3.0+4"
-  firebase_app_check_platform_interface:
-    dependency: transitive
-    description:
-      name: firebase_app_check_platform_interface
-      sha256: edefbd312d2f4c52ab6a62d4efca512012bcc580f152c856a5730bfabcf8a924
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.0+34"
-  firebase_app_check_web:
-    dependency: transitive
-    description:
-      name: firebase_app_check_web
-      sha256: "2c2377ecf922514c540c2d4a9c06e46830a0706fdfc3d59b7ade9b75843b81c5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.1.2+12"
   firebase_auth:
     dependency: "direct main"
     description:
@@ -397,26 +365,26 @@ packages:
     dependency: "direct main"
     description:
       name: firebase_core
-      sha256: "3187f4f8e49968573fd7403011dca67ba95aae419bc0d8131500fae160d94f92"
+      sha256: "06537da27db981947fa535bb91ca120b4e9cb59cb87278dbdde718558cafc9ff"
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.0"
+    version: "3.4.0"
   firebase_core_platform_interface:
     dependency: transitive
     description:
       name: firebase_core_platform_interface
-      sha256: "3c3a1e92d6f4916c32deea79c4a7587aa0e9dbbe5889c7a16afcf005a485ee02"
+      sha256: f7d7180c7f99babd4b4c517754d41a09a4943a0f7a69b65c894ca5c68ba66315
       url: "https://pub.dev"
     source: hosted
-    version: "5.2.0"
+    version: "5.2.1"
   firebase_core_web:
     dependency: transitive
     description:
       name: firebase_core_web
-      sha256: e8d1e22de72cb21cdcfc5eed7acddab3e99cd83f3b317f54f7a96c32f25fd11e
+      sha256: "362e52457ed2b7b180964769c1e04d1e0ea0259fdf7025fdfedd019d4ae2bd88"
       url: "https://pub.dev"
     source: hosted
-    version: "2.17.4"
+    version: "2.17.5"
   firebase_crashlytics:
     dependency: "direct main"
     description:
@@ -792,14 +760,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.1"
-  json_annotation:
-    dependency: transitive
-    description:
-      name: json_annotation
-      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.9.0"
   leak_tracker:
     dependency: transitive
     description:
@@ -904,14 +864,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
-  openapi_generator_annotations:
-    dependency: transitive
-    description:
-      name: openapi_generator_annotations
-      sha256: "86d924de3037a4a82e8a8d3b60c4120eced3df9e6b52a7d17cdec12ff4299ac5"
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.2"
   package_info_plus:
     dependency: "direct main"
     description:
@@ -928,46 +880,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.1"
-  passkeys:
-    dependency: "direct main"
-    description:
-      name: passkeys
-      sha256: f7858feeb9fcaa3b206e8eb0ee6da4bf6ad90c9a35a30f7df0cd1cb78227a96f
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.9"
-  passkeys_android:
-    dependency: transitive
-    description:
-      name: passkeys_android
-      sha256: "9dc0b84dad03329ff2f3be18bedecf1b8de9309c8e9cda6ef821dc88556a126d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.4"
-  passkeys_ios:
-    dependency: transitive
-    description:
-      name: passkeys_ios
-      sha256: "411b10c3cd159c9601426d47b2dc5aa4dd1e34ef69deefaac01ff81712ea6064"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.3"
-  passkeys_platform_interface:
-    dependency: transitive
-    description:
-      name: passkeys_platform_interface
-      sha256: a1f1f5c637049f68350cf43323df9689be2e86fe5822a6e098362e7f6168351e
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
-  passkeys_web:
-    dependency: transitive
-    description:
-      name: passkeys_web
-      sha256: "04b306c484f1a7d30720785563c160b46cf9232a708ce65286863f91dd78b19d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   path:
     dependency: "direct main"
     description:
@@ -1132,10 +1044,10 @@ packages:
     dependency: transitive
     description:
       name: rxdart
-      sha256: "5c3004a4a8dbb94bd4bf5412a4def4acdaa12e12f269737a5751369e12d1a962"
+      sha256: "0c7c0cedd93788d996e33041ffecda924cc54389199cde4e6a34b440f50044cb"
       url: "https://pub.dev"
     source: hosted
-    version: "0.28.0"
+    version: "0.27.7"
   scroll_to_index:
     dependency: "direct main"
     description:
@@ -1341,14 +1253,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
-  ua_client_hints:
-    dependency: transitive
-    description:
-      name: ua_client_hints
-      sha256: ee3da4e4b6ed211fe54deaa19832dd25613f11fc2951912d4e62a093da03fbbb
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.1"
   universal_platform:
     dependency: transitive
     description:

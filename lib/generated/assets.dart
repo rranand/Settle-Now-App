@@ -11,6 +11,7 @@ class Assets {
   static const String androidSettlenowAndroid = 'android/settlenow_android.iml';
   static const String appBuild = 'android/app/build.gradle';
   static const String appLocal = 'android/app/local.properties';
+  static const String appProguardRules = 'android/app/proguard-rules.pro';
   static const String debugAndroidManifest = 'android/app/src/debug/AndroidManifest.xml';
   static const String devGoogleServices = 'android/app/src/dev/google-services.json';
   static const String drawableHdpiIcNotificationIcon = 'android/app/src/main/res/drawable-hdpi/ic_notification_icon.png';

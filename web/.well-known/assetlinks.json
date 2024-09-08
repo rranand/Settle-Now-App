@@ -1,7 +1,8 @@
 [
   {
     "relation": [
-      "delegate_permission/common.handle_all_urls"
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
     ],
     "target": {
       "namespace": "android_app",
@@ -11,6 +12,16 @@
         "23:C6:5D:6A:71:5F:86:01:89:65:E7:75:52:0E:09:9F:8B:A5:21:8B:D0:CE:37:D6:2C:78:AD:72:0D:D1:96:78",
         "F4:97:8B:FE:E9:E8:11:04:F9:F2:1F:40:92:55:89:54:C8:AA:FA:07:E5:6C:6A:C1:F8:CF:EF:55:F3:8B:D1:4A"
       ]
+    }
+  },
+  {
+    "relation": [
+        "delegate_permission/common.handle_all_urls",
+        "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+        "namespace": "web",
+        "site": "https://settlenow.in"
     }
   }
 ]

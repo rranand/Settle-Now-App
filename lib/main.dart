@@ -16,7 +16,6 @@ import 'firebase_options.dart';
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
-// import 'contents.dart' as global;
 
 class MyCustomScrollBehavior extends MaterialScrollBehavior {
   @override
@@ -44,12 +43,6 @@ Future<void> main() async {
   } else {
     Firebase.app(firebaseProjectName);
   }
-
-  // await FirebaseAppCheck.instance.activate(
-  //   webProvider: ReCaptchaV3Provider(global.recaptcha_key),
-  //   androidProvider: AndroidProvider.playIntegrity,
-  //   appleProvider: AppleProvider.deviceCheck,
-  // );
 
   if (kIsWeb) {
     usePathUrlStrategy();
@@ -106,7 +99,9 @@ Future<void> main() async {
     };
   }
 
-  runApp(MyApp());
+  runApp(
+    MyApp(),
+  );
 }
 
 class MainScreen extends StatelessWidget {
