@@ -62,7 +62,9 @@ class Assets {
   static const String valuesColors = 'android/app/src/main/res/values/colors.xml';
   static const String valuesIcLauncherBackground = 'android/app/src/main/res/values/ic_launcher_background.xml';
   static const String valuesNightColors = 'android/app/src/main/res/values-night/colors.xml';
+  static const String valuesNightStrings = 'android/app/src/main/res/values-night/strings.xml';
   static const String valuesNightStyles = 'android/app/src/main/res/values-night/styles.xml';
+  static const String valuesStrings = 'android/app/src/main/res/values/strings.xml';
   static const String valuesStyles = 'android/app/src/main/res/values/styles.xml';
   static const String wrapperGradleWrapper = 'android/gradle/wrapper/gradle-wrapper.jar';
 

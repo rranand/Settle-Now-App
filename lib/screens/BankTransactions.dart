@@ -251,6 +251,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     var permission = await Permission.sms.status;
     if (permission.isGranted) {
       final messages = await _query.querySms(
+        count: 3000,
         kinds: [SmsQueryKind.inbox],
       );
       _messages = messages;

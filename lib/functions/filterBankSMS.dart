@@ -90,9 +90,10 @@ String getReferenceNo(String message) {
 String getTransferTo(String message) {
   bool fromReg = false;
   List<RegExp> regexPatternList = [
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2} on '),
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2} & '),
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2};'),
-    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}.'),
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}\.'),
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2},'),
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}')
   ];
@@ -121,7 +122,9 @@ String getTransferTo(String message) {
 
   int index = fromReg
       ? (message.indexOf(regexPatternList[patternIndex]) +
-          (patternIndex == 0 ? 12 : (patternIndex < 4 ? 10 : 9)))
+          (patternIndex <= 1
+              ? 13 - patternIndex
+              : (patternIndex < (regexPatternList.length - 1) ? 10 : 9)))
       : (message.indexOf(global.transferTo[patternIndex]) +
           global.transferTo[patternIndex].length);
 
@@ -142,7 +145,14 @@ String getTransferTo(String message) {
       uptoIndex = min(uptoIndex, message.indexOf("and credited"));
     }
   }
-
+  if (uptoIndex == 99999999999) {
+    for (int i = 0; i < global.transferNameEnd.length; i++) {
+      if (message.contains(global.transferNameEnd[i], index + 1)) {
+        uptoIndex = min(
+            message.indexOf(global.transferNameEnd[i], index + 1), uptoIndex);
+      }
+    }
+  }
   if (uptoIndex == 99999999999) {
     for (int i = 0; i < global.refNoPattern.length; i++) {
       if (message.contains(global.refNoPattern[i], index + 1)) {
@@ -169,7 +179,7 @@ String getTransferTo(String message) {
       transferTo += message[i];
     }
   }
-  if (transferTo.contains("on")) {
+  if (transferTo.contains(" on ")) {
     transferTo = transferTo.split("on")[0];
   }
   return transferTo == "" ? "Unknown" : transferTo;
@@ -187,7 +197,14 @@ String getBankName(String message) {
 
 String getPaymentMode(String message, String messageBody) {
   for (int i = 0; i < global.paymentMode.length; i++) {
-    if (global.paymentMode[i] == "ATM") {
+    if (global.paymentMode[i] == "Card" &&
+        messageBody.contains(global.paymentMode[i].toLowerCase())) {
+      if (messageBody.contains("lmt") || messageBody.contains("limit")) {
+        return "Credit Card";
+      } else {
+        return "Debit Card";
+      }
+    } else if (global.paymentMode[i] == "ATM") {
       if (messageBody.contains("withdrawn")) {
         return global.paymentMode[i];
       }
@@ -195,13 +212,6 @@ String getPaymentMode(String message, String messageBody) {
       return global.paymentMode[i];
     } else if (messageBody.contains(global.paymentMode[i].toLowerCase())) {
       return global.paymentMode[i];
-    } else if (global.paymentMode[i] == "Card" &&
-        messageBody.contains(global.paymentMode[i].toLowerCase())) {
-      if (messageBody.contains("lmt") || messageBody.contains("limit")) {
-        return "Credit Card";
-      } else {
-        return "Debit Card";
-      }
     }
   }
   return "Unknown";
@@ -273,16 +283,25 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> _messages) async {
     }
     paymentModeFound.add(paymentMode);
     bankNameFound.add(bankName);
+    String transactionType =
+        isDebited ? "Debit" : (isCredited ? "Credit" : "Debit");
+    String receiver = "";
+    if ((bankName == "ICICI") &&
+        (paymentMode == "Credit Card") &&
+        (transactionType == "Credit") &&
+        messageBody.contains("refund of")) {
+      receiver = messageBody.substring(
+          0, max(0, messageBody.indexOf("refund of") - 1));
+    }
     String transactionID = getReferenceNo(messageBody);
-    String receiver = getTransferTo(messageBody);
-
+    receiver = receiver.length == 0 ? getTransferTo(messageBody) : receiver;
     Transactions.add(TransactionEach(
         amount: amount,
         date: timeStrap,
         transactionID: transactionID,
         receiver:
             paymentMode == "ATM" ? "Self" : capitalizeFirstLetter(receiver),
-        type: isDebited ? "Debit" : (isCredited ? "Credit" : "Debit"),
+        type: transactionType,
         bank: bankName,
         mode: paymentMode));
   }
