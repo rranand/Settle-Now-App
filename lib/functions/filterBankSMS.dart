@@ -90,6 +90,9 @@ String getReferenceNo(String message) {
 String getTransferTo(String message) {
   bool fromReg = false;
   List<RegExp> regexPatternList = [
+    RegExp(r'[\d]{2}[\w]{3}[\d]{2} trf to '),
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2} from '),
+    RegExp(r'[\d]{2}-[\w]{3}-[\d]{2}\. info: '),
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2} on '),
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2} & '),
     RegExp(r'[\d]{2}-[\w]{3}-[\d]{2};'),
@@ -99,32 +102,33 @@ String getTransferTo(String message) {
   ];
 
   int patternIndex = -1;
-  for (int i = 0; i < global.transferTo.length; i++) {
-    if (message.contains(global.transferTo[i])) {
+  for (int i = 0; i < regexPatternList.length; i++) {
+    if (message.contains(regexPatternList[i])) {
       patternIndex = i;
+      fromReg = true;
       break;
     }
   }
 
   if (patternIndex == -1) {
-    for (int i = 0; i < regexPatternList.length; i++) {
-      if (message.contains(regexPatternList[i])) {
+    for (int i = 0; i < global.transferTo.length; i++) {
+      if (message.contains(global.transferTo[i])) {
         patternIndex = i;
         break;
       }
     }
-
     if (patternIndex == -1) {
       return "Unknown";
     }
-    fromReg = true;
   }
 
   int index = fromReg
       ? (message.indexOf(regexPatternList[patternIndex]) +
-          (patternIndex <= 1
-              ? 13 - patternIndex
-              : (patternIndex < (regexPatternList.length - 1) ? 10 : 9)))
+          ((patternIndex <= 2
+              ? (patternIndex == 2 ? 17 : 15)
+              : (patternIndex <= 3
+                  ? 13 - patternIndex + 3
+                  : (patternIndex < (regexPatternList.length - 1) ? 10 : 9)))))
       : (message.indexOf(global.transferTo[patternIndex]) +
           global.transferTo[patternIndex].length);
 
@@ -293,8 +297,10 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> _messages) async {
       receiver = messageBody.substring(
           0, max(0, messageBody.indexOf("refund of") - 1));
     }
+
     String transactionID = getReferenceNo(messageBody);
     receiver = receiver.length == 0 ? getTransferTo(messageBody) : receiver;
+
     Transactions.add(TransactionEach(
         amount: amount,
         date: timeStrap,
