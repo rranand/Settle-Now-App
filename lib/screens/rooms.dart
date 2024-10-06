@@ -3840,7 +3840,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                         selfIndex]
                                                                     [
                                                                     "current"])) >
-                                                            0) {
+                                                            -0.1) {
                                                           showToast(
                                                               context,
                                                               "You are already in gain",
