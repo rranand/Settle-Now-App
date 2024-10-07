@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -71,7 +72,6 @@ class _RoomExpenseState extends State<RoomExpense>
   String paymentTotalALL = "";
   bool paidTransactionData = false;
   GlobalKey<FormState> _formKeyRooms = GlobalKey<FormState>();
-  bool showExpenseYouAreIn = false;
   String yourExpense = "";
   List<ChartData> dataMap = [];
   List<ChartData> dataMapByUser = [];
@@ -100,7 +100,6 @@ class _RoomExpenseState extends State<RoomExpense>
   List<List<dynamic>> subCategory = [];
   int roomExpenseCategoryIndex = 0;
   int roomsubExpenseCategoryIndex = 0;
-  List<dynamic> filterResult = [];
   double totalAmount = 0;
   bool isClosedany = false;
   final TextEditingController _paytoMemberAmt = TextEditingController();
@@ -108,6 +107,21 @@ class _RoomExpenseState extends State<RoomExpense>
   bool firstTimeLoad = true;
   Map<String, Map<String, dynamic>> manualSplitMembers = {};
   Map<String, double> manualSplitAmount = {};
+  Set<int> filtercategoryIndex = Set();
+  List<dynamic> filterResult = [];
+  bool showExpenseYouAreIn = false;
+  bool showFilterResult = false;
+  bool filterDialog = false;
+  RangeValues _currentAmountValues = const RangeValues(0, 100);
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  double maxSpentAmount = 10000;
+  int curMemberIndex = -1;
+  DateTimeRange dateRange = DateTimeRange(
+      start: new DateTime(DateTime.now().year - 1, 1), end: DateTime.now());
+  List<TextEditingController> _amountRangeValues = [
+    new TextEditingController(text: "0"),
+    new TextEditingController(text: "100000")
+  ];
 
   @override
   void dispose() {
@@ -386,6 +400,18 @@ class _RoomExpenseState extends State<RoomExpense>
           if (firstTimeLoad) {
             scrollToExpense = TransList.indexWhere(
                 (element) => crypto.decrypt(element['id']) == objID);
+            maxSpentAmount = 100;
+            allExpenseList.forEach((ele) {
+              maxSpentAmount = max(
+                  maxSpentAmount, double.parse(crypto.decrypt(ele['Amount'])));
+            });
+            maxSpentAmount = maxSpentAmount.ceilToDouble();
+            String amtInStr = maxSpentAmount.toInt().toString();
+            int firstD = int.parse(amtInStr[0]) + 1;
+            maxSpentAmount =
+                double.parse(firstD.toString() + '0' * (amtInStr.length - 1));
+            _currentAmountValues = RangeValues(0, maxSpentAmount);
+            _amountRangeValues[1].setText(maxSpentAmount.toInt().toString());
           }
         }
       } else {
@@ -1246,21 +1272,11 @@ class _RoomExpenseState extends State<RoomExpense>
         padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
         child: InkWell(
           onTap: () async {
-            TransList.clear();
-            allExpenseList.forEach((element) {
-              if (crypto.decrypt(list[index]['email']) ==
-                  crypto.decrypt(element['Email'])) {
-                TransList.add(element);
-              }
-            });
-
             expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
+            curMemberIndex = index;
+            getFilterResult();
             if (this.mounted) {
               setState(() {});
-            }
-
-            if (showExpenseYouAreIn) {
-              getFilterData();
             }
           },
           child: Card(
@@ -1491,32 +1507,6 @@ class _RoomExpenseState extends State<RoomExpense>
         ),
       ),
     );
-  }
-
-  getFilterData() async {
-    if (this.mounted) {
-      setState(() {
-        filterResult.clear();
-      });
-    }
-
-    TransList.forEach((element) {
-      List<dynamic> partialExpense = element["members"];
-      if (partialExpense.isEmpty) {
-        filterResult.add(element);
-      } else {
-        for (int i = 0; i < partialExpense.length; i++) {
-          if (crypto.decrypt(partialExpense[i]['Email']) == _email) {
-            filterResult.add(element);
-            break;
-          }
-        }
-      }
-    });
-
-    if (this.mounted) {
-      setState(() {});
-    }
   }
 
   Widget homeWidget() {
@@ -1765,29 +1755,6 @@ class _RoomExpenseState extends State<RoomExpense>
                                         }
                                       },
                                     ),
-                                  ),
-                                  Divider(),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        "Show Expenses You Are In",
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Icon(
-                                        showExpenseYouAreIn
-                                            ? Icons.toggle_on
-                                            : Icons.toggle_off,
-                                        size: 40,
-                                        color: showExpenseYouAreIn
-                                            ? Theme.of(context).primaryColor
-                                            : null,
-                                      )
-                                    ],
                                   ),
                                   Divider(),
                                   Row(
@@ -2046,33 +2013,6 @@ class _RoomExpenseState extends State<RoomExpense>
                             ),
                           ),
                           Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Show Expenses You Are In",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              IconButton(
-                                  onPressed: () {
-                                    showExpenseYouAreIn = !showExpenseYouAreIn;
-                                    getFilterData();
-                                  },
-                                  icon: Icon(
-                                    showExpenseYouAreIn
-                                        ? Icons.toggle_on
-                                        : Icons.toggle_off,
-                                    size: 40,
-                                    color: showExpenseYouAreIn
-                                        ? Theme.of(context).primaryColor
-                                        : null,
-                                  ))
-                            ],
-                          ),
-                          Divider(),
                           SizedBox(
                             height: expenseTitle == "All Expense" ? 3 : 0,
                           ),
@@ -2081,7 +2021,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                expenseTitle,
+                                "$expenseTitle (${TransList.length})",
                                 style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
@@ -2093,14 +2033,15 @@ class _RoomExpenseState extends State<RoomExpense>
                                       onPressed: () async {
                                         TransList.clear();
                                         expenseTitle = "All Expense";
+                                        curMemberIndex = -1;
                                         TransList.addAll(allExpenseList);
+
+                                        if (showFilterResult) {
+                                          getFilterResult();
+                                        }
 
                                         if (this.mounted) {
                                           setState(() {});
-                                        }
-
-                                        if (showExpenseYouAreIn) {
-                                          getFilterData();
                                         }
                                       },
                                       icon: Icon(
@@ -2128,53 +2069,29 @@ class _RoomExpenseState extends State<RoomExpense>
                               ),
                             )
                           : CircularProgressIndicator.adaptive())
-                  : (showExpenseYouAreIn
-                      ? (filterResult.isEmpty
-                          ? Center(
-                              child: Text(
-                              "No Expense Found",
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ))
-                          : ExpenseData(
-                              TransList: filterResult,
-                              RoomKey: widget.roomKey,
-                              Email: _email,
-                              Token: _token,
-                              refreshIndicatorKeyExpenseData:
-                                  _refreshIndicatorKeyRooms,
-                              locked: locked,
-                              isPreviousPageNeedToBeUpdated:
-                                  isPreviousPageNeedToBeUpdated,
-                              expenseCategory: expenseCategory,
-                              subCategory: subCategory,
-                              index: -1,
-                              scrollController: _scrollController,
-                            ))
-                      : (TransList.isEmpty
-                          ? Center(
-                              child: Text(
-                              "No Expense Found",
-                              style: TextStyle(
-                                fontSize: 18,
-                              ),
-                            ))
-                          : ExpenseData(
-                              TransList: TransList,
-                              RoomKey: widget.roomKey,
-                              Email: _email,
-                              Token: _token,
-                              refreshIndicatorKeyExpenseData:
-                                  _refreshIndicatorKeyRooms,
-                              locked: locked,
-                              isPreviousPageNeedToBeUpdated:
-                                  isPreviousPageNeedToBeUpdated,
-                              expenseCategory: expenseCategory,
-                              subCategory: subCategory,
-                              index: scrollToExpense,
-                              scrollController: _scrollController,
-                            ))),
+                  : (TransList.isEmpty
+                      ? Center(
+                          child: Text(
+                          "No Expense Found",
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ))
+                      : ExpenseData(
+                          TransList: TransList,
+                          RoomKey: widget.roomKey,
+                          Email: _email,
+                          Token: _token,
+                          refreshIndicatorKeyExpenseData:
+                              _refreshIndicatorKeyRooms,
+                          locked: locked,
+                          isPreviousPageNeedToBeUpdated:
+                              isPreviousPageNeedToBeUpdated,
+                          expenseCategory: expenseCategory,
+                          subCategory: subCategory,
+                          index: scrollToExpense,
+                          scrollController: _scrollController,
+                        )),
             ),
           );
   }
@@ -3618,6 +3535,106 @@ class _RoomExpenseState extends State<RoomExpense>
         });
   }
 
+  void pickDateRange() async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final picked = await showDateRangePicker(
+        context: context,
+        initialDateRange: dateRange,
+        confirmText: "Ok",
+        helpText: "Select Date",
+        saveText: "Save",
+        firstDate: new DateTime(1999),
+        lastDate: DateTime.now(),
+        builder: (context, child) {
+          return Theme(
+            data: themeProvider.isDarkTheme
+                ? ThemeData.dark().copyWith(
+                    colorScheme: ColorScheme.dark(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                      onSurface: Colors.white,
+                    ),
+                    dialogBackgroundColor: Colors.white,
+                  )
+                : ThemeData.light().copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                      onSurface: Colors.black,
+                    ),
+                    dialogBackgroundColor: Colors.white,
+                  ),
+            child: child!,
+          );
+        });
+    if (picked != null) {
+      if (this.mounted) {
+        setState(() {
+          dateRange = picked;
+        });
+      }
+    }
+  }
+
+  getFilterResult() {
+    List<dynamic> dataToBeFiltered = [];
+    DateFormat dateFormat = DateFormat(global.dateTimeFormat);
+
+    if (expenseTitle == "All Expense") {
+      dataToBeFiltered = [...allExpenseList];
+    } else {
+      TransList.clear();
+      allExpenseList.forEach((element) {
+        if (crypto.decrypt(list[curMemberIndex]['email']) ==
+            crypto.decrypt(element['Email'])) {
+          TransList.add(element);
+        }
+      });
+      dataToBeFiltered = [...TransList];
+    }
+
+    double leftAmount = _currentAmountValues.start.round().toDouble();
+    double rightAmount = _currentAmountValues.end.round().toDouble();
+    TransList.clear();
+
+    dataToBeFiltered.forEach((element) {
+      DateTime transDate = dateFormat
+          .parse(crypto.decrypt(element['Date']).substring(0, 12) + "00:00:00");
+      double amt = double.parse(crypto.decrypt(element['Amount']));
+
+      if ((dateRange.start.isAtSameMomentAs(transDate) ||
+              dateRange.start.isBefore(transDate)) &&
+          (dateRange.end.isAtSameMomentAs(transDate) ||
+              dateRange.end.isAfter(transDate)) &&
+          amt >= leftAmount &&
+          amt <= rightAmount) {
+        if (filtercategoryIndex.isEmpty ||
+            filtercategoryIndex.contains(
+                expenseCategory.indexOf(crypto.decrypt(element['Type'])))) {
+          if (showExpenseYouAreIn) {
+            List<dynamic> partialExpense = element["members"];
+            if (partialExpense.isEmpty) {
+              TransList.add(element);
+            } else {
+              for (int i = 0; i < partialExpense.length; i++) {
+                if (crypto.decrypt(partialExpense[i]['Email']) == _email) {
+                  TransList.add(element);
+                  break;
+                }
+              }
+            }
+          } else {
+            TransList.add(element);
+          }
+        }
+      }
+    });
+
+    if (this.mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -3625,6 +3642,7 @@ class _RoomExpenseState extends State<RoomExpense>
         Provider.of<InternetconnectivityProvider>(context);
 
     return Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
           title: Text(roomName.text),
           actions: loaded
@@ -3656,8 +3674,414 @@ class _RoomExpenseState extends State<RoomExpense>
                   SizedBox(
                     width: 12,
                   ),
+                  InkWell(
+                    onTap: () async {
+                      filterDialog = _scaffoldKey.currentState!.isEndDrawerOpen;
+                      filterDialog = !filterDialog;
+
+                      if (filterDialog) {
+                        _scaffoldKey.currentState!.openEndDrawer();
+                      } else {
+                        _scaffoldKey.currentState!.closeEndDrawer();
+                      }
+                    },
+                    child: Icon(showFilterResult
+                        ? Icons.filter_alt_off
+                        : Icons.filter_alt_outlined),
+                  )
                 ]
               : [],
+        ),
+        endDrawer: Scrollbar(
+          child: Drawer(
+            backgroundColor: themeProvider.isDarkTheme
+                ? Theme.of(context).scaffoldBackgroundColor
+                : Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 16.0),
+              child: ListView(
+                children: [
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Amount",
+                        style: TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      RangeSlider(
+                        values: _currentAmountValues,
+                        activeColor: Theme.of(context).primaryColor,
+                        overlayColor: WidgetStateProperty.all(
+                            Theme.of(context).primaryColor),
+                        max: maxSpentAmount,
+                        divisions: 8,
+                        labels: RangeLabels(
+                          _currentAmountValues.start.round().toString(),
+                          _currentAmountValues.end.round().toString(),
+                        ),
+                        onChanged: (RangeValues values) {
+                          setState(() {
+                            _currentAmountValues = values;
+                            _amountRangeValues[0].setText(
+                                values.start.round().toInt().toString());
+                            _amountRangeValues[1]
+                                .setText(values.end.round().toInt().toString());
+                          });
+                        },
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            child: TextFormField(
+                              controller: _amountRangeValues[0],
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.done,
+                              maxLines: 1,
+                              decoration: InputDecoration(
+                                counterText: "",
+                                contentPadding: EdgeInsets.all(8.0),
+                                prefixText: "₹ ",
+                              ),
+                              onChanged: (String s) {
+                                if (this.mounted) {
+                                  setState(() {
+                                    _currentAmountValues = RangeValues(
+                                        double.parse(s),
+                                        _currentAmountValues.end);
+                                    _amountRangeValues[0].text = s;
+                                    _amountRangeValues[0].selection =
+                                        TextSelection.collapsed(
+                                            offset: _amountRangeValues[0]
+                                                .text
+                                                .length);
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          Text("-", style: TextStyle(fontSize: 16)),
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            child: TextFormField(
+                              controller: _amountRangeValues[1],
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.done,
+                              maxLines: 1,
+                              decoration: InputDecoration(
+                                counterText: "",
+                                contentPadding: EdgeInsets.all(8.0),
+                                prefixText: "₹ ",
+                              ),
+                              onChanged: (String s) {
+                                if (this.mounted) {
+                                  setState(() {
+                                    _currentAmountValues = RangeValues(
+                                        _currentAmountValues.start,
+                                        double.parse(s));
+                                    _amountRangeValues[1].text = s;
+                                    _amountRangeValues[1].selection =
+                                        TextSelection.collapsed(
+                                            offset: _amountRangeValues[1]
+                                                .text
+                                                .length);
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Divider(),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Show Expenses You Are In",
+                        style: TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w600),
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              showExpenseYouAreIn = true;
+
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            child: Card(
+                              color: themeProvider.isDarkTheme
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: showExpenseYouAreIn
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).cardColor),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Text("Yes"),
+                                ),
+                              ),
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              showExpenseYouAreIn = false;
+
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            child: Card(
+                              color: themeProvider.isDarkTheme
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: !showExpenseYouAreIn
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).cardColor),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Text("No"),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Divider(),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Date",
+                        style: TextStyle(
+                            fontSize: 21, fontWeight: FontWeight.w600),
+                      ),
+                      IconButton(
+                          onPressed: pickDateRange,
+                          icon: Icon(Icons.date_range)),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 6,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      InkWell(
+                        onTap: pickDateRange,
+                        child: Card(
+                          elevation: 1,
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          shape: RoundedRectangleBorder(
+                            side:
+                                BorderSide(color: Theme.of(context).cardColor),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Text(
+                                DateFormat('dd MMM, yyyy')
+                                    .format(dateRange.start),
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 35,
+                        child: Text("-", style: TextStyle(fontSize: 18)),
+                      ),
+                      Card(
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Theme.of(context).cardColor),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: InkWell(
+                              onTap: pickDateRange,
+                              child: Text(
+                                  DateFormat('dd MMM, yyyy')
+                                      .format(dateRange.end),
+                                  style: TextStyle(fontSize: 18)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Divider(),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Text(
+                    "Filter by Category",
+                    style: TextStyle(fontSize: 21, fontWeight: FontWeight.w600),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Scrollbar(
+                    radius: Radius.circular(10.0),
+                    thickness: 5.5,
+                    child: SizedBox(
+                      height: 450,
+                      child: MasonryGridView.count(
+                        crossAxisCount: 2,
+                        itemCount: expenseCategory.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              if (filtercategoryIndex.contains(index)) {
+                                filtercategoryIndex.remove(index);
+                              } else {
+                                filtercategoryIndex.add(index);
+                              }
+
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            child: Card(
+                              color: themeProvider.isDarkTheme
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: filtercategoryIndex.contains(index)
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).cardColor),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Text(expenseCategory[index]),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 45,
+                    child: OutlinedButton(
+                      child: Text(
+                        "Apply",
+                        style: TextStyle(
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      onPressed: () {
+                        showFilterResult = true;
+                        getFilterResult();
+                        _scaffoldKey.currentState!.closeEndDrawer();
+                        if (this.mounted) {
+                          setState(() {});
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13.0),
+                        ),
+                        side: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 15,
+                  ),
+                  SizedBox(
+                    height: 45,
+                    child: OutlinedButton(
+                      child: Text(
+                        "Clear Filter",
+                        style: TextStyle(
+                          color: themeProvider.isDarkTheme
+                              ? Colors.white
+                              : Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13.0),
+                        ),
+                        side: BorderSide(color: Theme.of(context).primaryColor),
+                      ),
+                      onPressed: () {
+                        filtercategoryIndex.clear();
+                        _currentAmountValues = RangeValues(0, maxSpentAmount);
+                        showExpenseYouAreIn = false;
+                        showFilterResult = false;
+                        TransList = [...allExpenseList];
+                        if (this.mounted) {
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         body: PopScope(
             canPop: false,
@@ -3692,10 +4116,9 @@ class _RoomExpenseState extends State<RoomExpense>
                 ),
               )
             : BottomNavigationBar(
-                type: BottomNavigationBarType.shifting,
+                type: BottomNavigationBarType.fixed,
                 selectedItemColor: Theme.of(context).primaryColor,
                 unselectedItemColor: Colors.grey,
-                backgroundColor: Colors.transparent,
                 currentIndex: dash,
                 onTap: (index) => setState(() {
                       dash = index;

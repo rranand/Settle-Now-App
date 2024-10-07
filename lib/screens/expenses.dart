@@ -699,7 +699,9 @@ class _ExpensesState extends State<Expenses> {
                           _scaffoldKey.currentState!.closeEndDrawer();
                         }
                       },
-                      icon: Icon(Icons.filter_alt_outlined))
+                      icon: Icon(showFilterResult
+                          ? Icons.filter_alt_off
+                          : Icons.filter_alt_outlined))
                 ],
         ),
         body: Scaffold(

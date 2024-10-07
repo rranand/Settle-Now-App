@@ -265,8 +265,6 @@ class _onBoardingState extends State<onBoarding> {
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 4.0),
                             child: BottomNavigationBar(
-                              backgroundColor:
-                                  Theme.of(context).scaffoldBackgroundColor,
                               type: BottomNavigationBarType.fixed,
                               elevation: 0,
                               currentIndex: data[i].bottomIndex,

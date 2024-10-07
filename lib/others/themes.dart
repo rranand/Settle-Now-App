@@ -38,6 +38,8 @@ class MyTheme {
         floatingActionButtonTheme: FloatingActionButtonThemeData(
             backgroundColor: Colors.deepPurpleAccent),
         scaffoldBackgroundColor: Colors.white,
+        bottomNavigationBarTheme:
+            BottomNavigationBarThemeData(backgroundColor: Colors.white),
         scrollbarTheme: ScrollbarThemeData(
           thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
         ),
@@ -50,32 +52,47 @@ class MyTheme {
   }
 
   static ThemeData darkTheme(BuildContext context) => ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      primarySwatch: MaterialColor(0xFF69F0AE, <int, Color>{
-        50: Color(0xFFEDFDF5),
-        100: Color(0xFFD2FBE7),
-        200: Color(0xFFB4F8D7),
-        300: Color(0xFF96F5C6),
-        400: Color(0xFF80F2BA),
-        500: Color(0xFF69F0AE),
-        600: Color(0xFF61EEA7),
-        700: Color(0xFF56EC9D),
-        800: Color(0xFF4CE994),
-        900: Color(0xFF3BE584),
-      }),
-      primaryColor: Colors.greenAccent.withAlpha(205),
-      fontFamily: GoogleFonts.lato().fontFamily,
-      floatingActionButtonTheme:
-          FloatingActionButtonThemeData(backgroundColor: Colors.greenAccent),
-      scrollbarTheme: ScrollbarThemeData(
-        thumbColor: WidgetStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
-      ),
-      textTheme: TextTheme(
-        bodyLarge: TextStyle(),
-        bodyMedium: TextStyle(),
-      ).apply(bodyColor: Colors.white, displayColor: Colors.black),
-      progressIndicatorTheme: const ProgressIndicatorThemeData(
-        color: Colors.greenAccent,
-      ));
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        primarySwatch: MaterialColor(0xFF69F0AE, <int, Color>{
+          50: Color(0xFFEDFDF5),
+          100: Color(0xFFD2FBE7),
+          200: Color(0xFFB4F8D7),
+          300: Color(0xFF96F5C6),
+          400: Color(0xFF80F2BA),
+          500: Color(0xFF69F0AE),
+          600: Color(0xFF61EEA7),
+          700: Color(0xFF56EC9D),
+          800: Color(0xFF4CE994),
+          900: Color(0xFF3BE584),
+        }),
+        primaryColor: Colors.greenAccent.withAlpha(205),
+        fontFamily: GoogleFonts.lato().fontFamily,
+        floatingActionButtonTheme:
+            FloatingActionButtonThemeData(backgroundColor: Colors.greenAccent),
+        scrollbarTheme: ScrollbarThemeData(
+          thumbColor:
+              WidgetStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
+        ),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Colors.white,
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(),
+          bodyMedium: TextStyle(),
+        ).apply(bodyColor: Colors.white, displayColor: Colors.black),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: Colors.greenAccent,
+        ),
+        appBarTheme: AppBarTheme(
+          elevation: 0.0,
+          iconTheme: IconThemeData(color: Colors.white),
+          toolbarTextStyle: Theme.of(context).textTheme.bodyMedium,
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 22),
+        ),
+        drawerTheme: DrawerThemeData(),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(Colors.deepPurple))),
+      );
 }

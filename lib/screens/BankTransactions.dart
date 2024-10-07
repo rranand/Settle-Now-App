@@ -79,8 +79,7 @@ class _BankTransactionsState extends State<BankTransactions> {
   Set<int> filtercategoryIndex = Set();
   bool dataFetched = false;
   DateTimeRange dateRange = DateTimeRange(
-      start: new DateTime(DateTime.now().year, DateTime.now().month),
-      end: DateTime.now());
+      start: new DateTime(DateTime.now().year - 1, 1), end: DateTime.now());
 
   List<TransactionEach> filteredResult = [];
   bool isClosedany = false;
@@ -2058,11 +2057,13 @@ class _BankTransactionsState extends State<BankTransactions> {
     DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
 
     allTransactions.forEach((element) {
+      DateTime transDate =
+          dateFormat.parse(element.date.substring(0, 12) + "12:00 AM");
       if (allBanksIndex.isEmpty) {
-        if ((dateRange.start.isAtSameMomentAs(dateFormat.parse(element.date)) ||
-                dateRange.start.isBefore(dateFormat.parse(element.date))) &&
-            (dateRange.end.isAtSameMomentAs(dateFormat.parse(element.date)) ||
-                dateRange.end.isAfter(dateFormat.parse(element.date)))) {
+        if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                dateRange.start.isBefore(transDate)) &&
+            (dateRange.end.isAtSameMomentAs(transDate) ||
+                dateRange.end.isAfter(transDate))) {
           double amt = double.parse(element.amount);
           if (amt >= int.parse(_amountRangeValues[0].text) &&
               amt <= int.parse(_amountRangeValues[1].text)) {
@@ -2102,12 +2103,10 @@ class _BankTransactionsState extends State<BankTransactions> {
           String bankName = bankNameFound[abElement];
 
           if (bankName == element.bank) {
-            if ((dateRange.start
-                        .isAtSameMomentAs(dateFormat.parse(element.date)) ||
-                    dateRange.start.isBefore(dateFormat.parse(element.date))) &&
-                (dateRange.end
-                        .isAtSameMomentAs(dateFormat.parse(element.date)) ||
-                    dateRange.end.isAfter(dateFormat.parse(element.date)))) {
+            if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                    dateRange.start.isBefore(transDate)) &&
+                (dateRange.end.isAtSameMomentAs(transDate) ||
+                    dateRange.end.isAfter(transDate))) {
               double amt = double.parse(element.amount);
 
               if (amt >= int.parse(_amountRangeValues[0].text) &&
