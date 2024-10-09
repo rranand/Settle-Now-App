@@ -40,6 +40,14 @@ class MyTheme {
         scaffoldBackgroundColor: Colors.white,
         bottomNavigationBarTheme:
             BottomNavigationBarThemeData(backgroundColor: Colors.white),
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.deepPurpleAccent),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.deepPurpleAccent),
+          ),
+        ),
         scrollbarTheme: ScrollbarThemeData(
           thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
         ),
@@ -91,8 +99,17 @@ class MyTheme {
           titleTextStyle: TextStyle(color: Colors.white, fontSize: 22),
         ),
         drawerTheme: DrawerThemeData(),
+        inputDecorationTheme: InputDecorationTheme(
+          focusColor: Colors.greenAccent,
+          enabledBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.greenAccent),
+          ),
+          focusedBorder: UnderlineInputBorder(
+            borderSide: BorderSide(color: Colors.greenAccent),
+          ),
+        ),
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(Colors.deepPurple))),
+                backgroundColor: WidgetStateProperty.all(Colors.greenAccent))),
       );
 }

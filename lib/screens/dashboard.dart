@@ -1112,6 +1112,8 @@ class _DashBoardState extends State<DashBoard> {
                                         itemCount: liveRoomCategory.length,
                                         itemBuilder: ((context, index) {
                                           return CheckboxListTile(
+                                            activeColor:
+                                                Theme.of(context).primaryColor,
                                             title:
                                                 Text(liveRoomCategory[index]),
                                             value: filterliveRoomCategoryIndex

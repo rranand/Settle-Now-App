@@ -3755,9 +3755,19 @@ class _RoomExpenseState extends State<RoomExpense>
                               onChanged: (String s) {
                                 if (this.mounted) {
                                   setState(() {
-                                    _currentAmountValues = RangeValues(
-                                        double.parse(s),
-                                        _currentAmountValues.end);
+                                    if (s.length > 0) {
+                                      _currentAmountValues = RangeValues(
+                                          min(double.parse(s),
+                                              _currentAmountValues.end),
+                                          _currentAmountValues.end);
+                                      if (double.parse(s) >
+                                          _currentAmountValues.end) {
+                                        showToast(
+                                            context,
+                                            "Amount should be not greater than end value",
+                                            Icons.warning_outlined);
+                                      }
+                                    }
                                     _amountRangeValues[0].text = s;
                                     _amountRangeValues[0].selection =
                                         TextSelection.collapsed(
@@ -3785,9 +3795,19 @@ class _RoomExpenseState extends State<RoomExpense>
                               onChanged: (String s) {
                                 if (this.mounted) {
                                   setState(() {
-                                    _currentAmountValues = RangeValues(
-                                        _currentAmountValues.start,
-                                        double.parse(s));
+                                    if (s.length > 0) {
+                                      _currentAmountValues = RangeValues(
+                                          _currentAmountValues.start,
+                                          max(double.parse(s),
+                                              _currentAmountValues.start));
+                                      if (double.parse(s) >
+                                          _currentAmountValues.end) {
+                                        showToast(
+                                            context,
+                                            "Amount should be not less than start value",
+                                            Icons.warning_outlined);
+                                      }
+                                    }
                                     _amountRangeValues[1].text = s;
                                     _amountRangeValues[1].selection =
                                         TextSelection.collapsed(
