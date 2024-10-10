@@ -10,6 +10,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
@@ -54,8 +55,10 @@ class _BankTransactionsState extends State<BankTransactions> {
   bool expenseSplitWithExistingMembers = false;
   List<TextEditingController> _amountRangeValues = [
     new TextEditingController(text: "0"),
-    new TextEditingController(text: "100000")
+    new TextEditingController(text: "200000")
   ];
+  double maxSpentAmount = 200000;
+  RangeValues _currentAmountValues = const RangeValues(0, 200000);
   List<String> transactionType = ["Credit", "Debit"];
   List<String> bankNameFound = [];
   List<String> transactionMode = [];
@@ -258,13 +261,23 @@ class _BankTransactionsState extends State<BankTransactions> {
       allTransactions = temp[0];
       bankNameFound = temp[1];
       transactionMode = temp[2];
+      maxSpentAmount = 100;
       allTransactions.sort((b, a) {
+        maxSpentAmount = max(maxSpentAmount,
+            max(double.parse(b.amount), double.parse(a.amount)));
         DateTime tempDate_1 =
             new DateFormat("MMM dd yyyy h:mm a").parse(a.date);
         DateTime tempDate_2 =
             new DateFormat("MMM dd yyyy h:mm a").parse(b.date);
         return tempDate_1.compareTo(tempDate_2);
       });
+      maxSpentAmount = maxSpentAmount.ceilToDouble();
+      String amtInStr = maxSpentAmount.toInt().toString();
+      int firstD = int.parse(amtInStr[0]) + 1;
+      maxSpentAmount =
+          double.parse(firstD.toString() + '0' * (amtInStr.length - 1));
+      _currentAmountValues = RangeValues(0, maxSpentAmount);
+      _amountRangeValues[1].setText(maxSpentAmount.toInt().toString());
     } else {
       await Permission.sms.request();
       permissionGranted = await Permission.sms.isDenied;
@@ -2209,7 +2222,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                         _scaffoldKeyBankTrans.currentState!.closeEndDrawer();
                       }
                     },
-                    icon: Icon(Icons.filter_alt_outlined))
+                    icon: Icon(showFilterResult
+                        ? Icons.filter_alt_off
+                        : Icons.filter_alt_outlined))
               ],
       ),
       bottomNavigationBar: internetConnProvider.isAlertSet
@@ -2458,6 +2473,31 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 style: TextStyle(
                                     fontSize: 21, fontWeight: FontWeight.w600),
                               ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              RangeSlider(
+                                values: _currentAmountValues,
+                                overlayColor: WidgetStateProperty.all(
+                                    Theme.of(context).primaryColor),
+                                max: maxSpentAmount,
+                                divisions: 8,
+                                labels: RangeLabels(
+                                  _currentAmountValues.start.round().toString(),
+                                  _currentAmountValues.end.round().toString(),
+                                ),
+                                onChanged: (RangeValues values) {
+                                  setState(() {
+                                    _currentAmountValues = values;
+                                    _amountRangeValues[0].setText(values.start
+                                        .round()
+                                        .toInt()
+                                        .toString());
+                                    _amountRangeValues[1].setText(
+                                        values.end.round().toInt().toString());
+                                  });
+                                },
+                              ),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -2478,6 +2518,22 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       onChanged: (String s) {
                                         if (this.mounted) {
                                           setState(() {
+                                            if (s.length > 0) {
+                                              _currentAmountValues =
+                                                  RangeValues(
+                                                      min(
+                                                          double.parse(s),
+                                                          _currentAmountValues
+                                                              .end),
+                                                      _currentAmountValues.end);
+                                              if (double.parse(s) >
+                                                  _currentAmountValues.end) {
+                                                showToast(
+                                                    context,
+                                                    "Amount should be not greater than end value",
+                                                    Icons.warning_outlined);
+                                              }
+                                            }
                                             _amountRangeValues[0].text = s;
                                             _amountRangeValues[0].selection =
                                                 TextSelection.collapsed(
@@ -2490,6 +2546,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       },
                                     ),
                                   ),
+                                  Text("-", style: TextStyle(fontSize: 16)),
                                   SizedBox(
                                     width:
                                         MediaQuery.of(context).size.width * 0.3,
@@ -2506,6 +2563,23 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       onChanged: (String s) {
                                         if (this.mounted) {
                                           setState(() {
+                                            if (s.length > 0) {
+                                              _currentAmountValues =
+                                                  RangeValues(
+                                                      _currentAmountValues
+                                                          .start,
+                                                      max(
+                                                          double.parse(s),
+                                                          _currentAmountValues
+                                                              .start));
+                                              if (double.parse(s) >
+                                                  _currentAmountValues.end) {
+                                                showToast(
+                                                    context,
+                                                    "Amount should be not less than start value",
+                                                    Icons.warning_outlined);
+                                              }
+                                            }
                                             _amountRangeValues[1].text = s;
                                             _amountRangeValues[1].selection =
                                                 TextSelection.collapsed(

@@ -4637,7 +4637,9 @@ class _DashBoardState extends State<DashBoard> {
                                 }
                               },
                               icon: Icon(
-                                Icons.filter_alt_outlined,
+                                filterliveRoomCategoryIndex.length != 2
+                                    ? Icons.filter_alt_off
+                                    : Icons.filter_alt_outlined,
                                 color: themeProvider.darkTheme
                                     ? Colors.white
                                     : Colors.black,

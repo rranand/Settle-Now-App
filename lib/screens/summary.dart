@@ -325,7 +325,9 @@ class _SummaryPageState extends State<SummaryPage> {
                 ),
               ),
               trailing: Icon(
-                Icons.filter_alt_outlined,
+                showfilterResult
+                    ? Icons.filter_alt_off
+                    : Icons.filter_alt_outlined,
                 color: themeProvider.isDarkTheme ? Colors.white : Colors.black,
               ),
               children: [
