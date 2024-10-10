@@ -3717,7 +3717,6 @@ class _RoomExpenseState extends State<RoomExpense>
                       ),
                       RangeSlider(
                         values: _currentAmountValues,
-                        activeColor: Theme.of(context).primaryColor,
                         overlayColor: WidgetStateProperty.all(
                             Theme.of(context).primaryColor),
                         max: maxSpentAmount,
@@ -6146,7 +6145,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                     ? SizedBox()
                     : SizedBox(
                         width: MediaQuery.of(context).size.width - 65,
-                        height: 80,
+                        height: 85,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: partialExpense.length,

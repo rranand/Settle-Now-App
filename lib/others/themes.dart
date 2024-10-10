@@ -58,6 +58,11 @@ class MyTheme {
         scrollbarTheme: ScrollbarThemeData(
           thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
         ),
+        sliderTheme: SliderThemeData(
+            thumbColor: Colors.deepPurpleAccent,
+            activeTrackColor: Colors.deepPurpleAccent.withOpacity(0.5),
+            valueIndicatorColor: Colors.grey.withOpacity(0.3),
+            valueIndicatorTextStyle: TextStyle(color: Colors.black)),
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.deepPurple))),
@@ -120,6 +125,11 @@ class MyTheme {
             color: Colors.white,
           ),
         ),
+        sliderTheme: SliderThemeData(
+            thumbColor: Colors.greenAccent,
+            activeTrackColor: Colors.greenAccent.withOpacity(0.5),
+            valueIndicatorColor: Colors.grey.withOpacity(0.3),
+            valueIndicatorTextStyle: TextStyle(color: Colors.white)),
         elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.all(Colors.greenAccent))),
