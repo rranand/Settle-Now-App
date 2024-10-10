@@ -335,7 +335,6 @@ class _LendPageState extends State<LendPage> {
                                   maxLength: 70,
                                   maxLines: 1,
                                   style: const TextStyle(fontSize: 18),
-                                  cursorColor: Colors.black,
                                   autocorrect: false,
                                   validator: (value) {
                                     RegExp validateText =

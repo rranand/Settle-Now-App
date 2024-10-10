@@ -30,7 +30,11 @@ class MyTheme {
         drawerTheme: DrawerThemeData(
           backgroundColor: Colors.deepPurple,
         ),
-        textSelectionTheme: TextSelectionThemeData(cursorColor: Colors.black),
+        textSelectionTheme: TextSelectionThemeData(
+          cursorColor: Colors.black,
+          selectionColor: Colors.deepPurple.withAlpha(70),
+          selectionHandleColor: Colors.deepPurple.withAlpha(70),
+        ),
         textTheme: TextTheme(
           bodyLarge: TextStyle(),
           bodyMedium: TextStyle(),
@@ -46,6 +50,9 @@ class MyTheme {
           ),
           focusedBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.deepPurpleAccent),
+          ),
+          labelStyle: TextStyle(
+            color: Colors.black,
           ),
         ),
         scrollbarTheme: ScrollbarThemeData(
@@ -84,6 +91,8 @@ class MyTheme {
         ),
         textSelectionTheme: TextSelectionThemeData(
           cursorColor: Colors.white,
+          selectionColor: Colors.greenAccent.withAlpha(70),
+          selectionHandleColor: Colors.greenAccent.withAlpha(70),
         ),
         textTheme: TextTheme(
           bodyLarge: TextStyle(),
@@ -106,6 +115,9 @@ class MyTheme {
           ),
           focusedBorder: UnderlineInputBorder(
             borderSide: BorderSide(color: Colors.greenAccent),
+          ),
+          labelStyle: TextStyle(
+            color: Colors.white,
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(

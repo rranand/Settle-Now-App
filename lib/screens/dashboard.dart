@@ -5257,8 +5257,6 @@ class _DashBoardState extends State<DashBoard> {
                                                                 const TextStyle(
                                                                     fontSize:
                                                                         18),
-                                                            cursorColor:
-                                                                Colors.black,
                                                             autocorrect: false,
                                                             validator: (value) {
                                                               RegExp
@@ -5387,9 +5385,6 @@ class _DashBoardState extends State<DashBoard> {
                                                                     const TextStyle(
                                                                         fontSize:
                                                                             18),
-                                                                cursorColor:
-                                                                    Colors
-                                                                        .black,
                                                                 autocorrect:
                                                                     false,
                                                                 validator:
