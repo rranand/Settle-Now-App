@@ -724,48 +724,48 @@ class _ExpensesState extends State<Expenses> {
                   SizedBox(
                     height: 10,
                   ),
-                  Scrollbar(
-                    radius: Radius.circular(10.0),
-                    thickness: 5.5,
-                    child: SizedBox(
-                      height: 570,
-                      child: MasonryGridView.count(
-                        crossAxisCount: 2,
-                        itemCount: expenseCategory.length,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              if (filtercategoryIndex.contains(index)) {
-                                filtercategoryIndex.remove(index);
-                              } else {
-                                filtercategoryIndex.add(index);
-                              }
-
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                            },
-                            child: Card(
-                              color: themeProvider.isDarkTheme
-                                  ? Theme.of(context).scaffoldBackgroundColor
-                                  : Colors.white,
-                              shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    color: filtercategoryIndex.contains(index)
-                                        ? Theme.of(context).primaryColor
-                                        : Theme.of(context).cardColor),
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              child: Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12.0),
-                                  child: Text(expenseCategory[index]),
-                                ),
+                  SizedBox(
+                    height:  53 *
+                        (expenseCategory.length / 2 +
+                            expenseCategory.length % 2),
+                    child: MasonryGridView.count(
+                      physics: ScrollPhysics(),
+                      shrinkWrap: true,
+                      crossAxisCount: 2,
+                      itemCount: expenseCategory.length,
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () {
+                            if (filtercategoryIndex.contains(index)) {
+                              filtercategoryIndex.remove(index);
+                            } else {
+                              filtercategoryIndex.add(index);
+                            }
+                  
+                            if (this.mounted) {
+                              setState(() {});
+                            }
+                          },
+                          child: Card(
+                            color: themeProvider.isDarkTheme
+                                ? Theme.of(context).scaffoldBackgroundColor
+                                : Colors.white,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                  color: filtercategoryIndex.contains(index)
+                                      ? Theme.of(context).primaryColor
+                                      : Theme.of(context).cardColor),
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Text(expenseCategory[index]),
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   SizedBox(
