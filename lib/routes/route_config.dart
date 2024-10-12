@@ -154,6 +154,18 @@ class AppRouter {
                 return onBoarding();
               },
             ),
+            GoRoute(
+              path: AppRouteConstants.deepLinkJoinRoom + '/:roomkey',
+              builder: (context, state) {
+                return RoomJoin(roomKey: state.pathParameters['roomkey']!);
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.deepLinkJoinLend + '/:roomkey',
+              builder: (context, state) {
+                return RoomJoin(roomKey: state.pathParameters['roomkey']!);
+              },
+            ),
             ...androidRoutes
           ]),
       GoRoute(
@@ -163,22 +175,6 @@ class AppRouter {
         },
       ),
     ];
-    if (!kIsWeb) {
-      allRoutes.add(GoRoute(
-        path: AppRouteConstants.deepLinkJoinRoom + '/:roomkey',
-        builder: (context, state) {
-          return RoomJoin(roomKey: state.pathParameters['roomkey']!);
-        },
-      ));
-      allRoutes.add(
-        GoRoute(
-          path: AppRouteConstants.deepLinkJoinLend + '/:roomkey',
-          builder: (context, state) {
-            return RoomJoin(roomKey: state.pathParameters['roomkey']!);
-          },
-        ),
-      );
-    }
     return allRoutes;
   }
 
