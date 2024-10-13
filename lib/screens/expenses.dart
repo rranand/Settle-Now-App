@@ -725,7 +725,7 @@ class _ExpensesState extends State<Expenses> {
                     height: 10,
                   ),
                   SizedBox(
-                    height:  53 *
+                    height: 53 *
                         (expenseCategory.length / 2 +
                             expenseCategory.length % 2),
                     child: MasonryGridView.count(
@@ -741,7 +741,7 @@ class _ExpensesState extends State<Expenses> {
                             } else {
                               filtercategoryIndex.add(index);
                             }
-                  
+
                             if (this.mounted) {
                               setState(() {});
                             }
@@ -833,7 +833,7 @@ class _ExpensesState extends State<Expenses> {
             ),
           ),
           body: RefreshIndicator(
-                    color: Theme.of(context).primaryColor,
+              color: Theme.of(context).primaryColor,
               key: _refreshIndicatorKey,
               onRefresh: _initialization,
               child: TransList.isEmpty
@@ -2353,8 +2353,13 @@ class _ExpensesState extends State<Expenses> {
                 : FloatingActionButton(
                     child: Icon(
                       Icons.add,
-                      color: Colors.white,
+                      color: Theme.of(context).primaryColor,
                     ),
+                    backgroundColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            width: 3, color: Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(20)),
                     onPressed: () {
                       expensedate = DateTime.now();
                       showModalBottomSheet<void>(

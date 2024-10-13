@@ -442,8 +442,12 @@ class _LendCreditState extends State<LendCredit> {
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.add,
-          color: Colors.white,
+          color: Theme.of(context).primaryColor,
         ),
+        backgroundColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+            side: BorderSide(width: 3, color: Theme.of(context).primaryColor),
+            borderRadius: BorderRadius.circular(20)),
         onPressed: () {
           showModalBottomSheet<void>(
               context: context,

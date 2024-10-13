@@ -1900,7 +1900,7 @@ class _RoomExpenseState extends State<RoomExpense>
             ],
           )
         : RefreshIndicator(
-                    color: Theme.of(context).primaryColor,
+            color: Theme.of(context).primaryColor,
             key: _refreshIndicatorKeyRooms,
             onRefresh: executeParallel,
             child: NestedScrollView(
@@ -5037,10 +5037,15 @@ class _RoomExpenseState extends State<RoomExpense>
                             );
                           });
                     },
-                    child: const Icon(
+                    child: Icon(
                       Icons.edit,
-                      color: Colors.white,
+                      color: Theme.of(context).primaryColor,
                     ),
+                    backgroundColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                            width: 3, color: Theme.of(context).primaryColor),
+                        borderRadius: BorderRadius.circular(20)),
                   )
                 : null)
             : null);

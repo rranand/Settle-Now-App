@@ -1954,9 +1954,14 @@ class _LendPageState extends State<LendPage> {
                         });
                       });
                 },
+                backgroundColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        width: 3, color: Theme.of(context).primaryColor),
+                    borderRadius: BorderRadius.circular(20)),
                 child: Icon(
                   Icons.add,
-                  color: Colors.white,
+                  color: Theme.of(context).primaryColor,
                 ),
               ),
         bottomNavigationBar: internetConnProvider.isAlertSet

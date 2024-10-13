@@ -4433,7 +4433,7 @@ class _DashBoardState extends State<DashBoard> {
                         child: SizedBox(
                           height: (MediaQuery.of(context).size.height - 220),
                           child: open == 0
-                              ? quickSplitData.value.isEmpty
+                              ? !quickSplitData.value.isEmpty
                                   ? (quickSplitDataFetched
                                       ? Scrollbar(
                                           radius: Radius.circular(10.0),
@@ -4622,7 +4622,7 @@ class _DashBoardState extends State<DashBoard> {
                                         subCategory: subCategory,
                                       ))
                               : open == 1
-                                  ? RoomDataO.value.isEmpty
+                                  ? !RoomDataO.value.isEmpty
                                       ? activeRoomDataFetched
                                           ? Scrollbar(
                                               radius: Radius.circular(10.0),
@@ -4679,7 +4679,7 @@ class _DashBoardState extends State<DashBoard> {
                                                         : 2),
                                             membersData: membersData,
                                           ))
-                                  : (RoomDataC.value.isEmpty
+                                  : (!RoomDataC.value.isEmpty
                                       ? inActiveRoomDataFetched
                                           ? Scrollbar(
                                               radius: Radius.circular(10.0),
@@ -5665,10 +5665,16 @@ class _DashBoardState extends State<DashBoard> {
                             },
                           );
                         },
-                        child: const Icon(
+                        child: Icon(
                           Icons.add,
-                          color: Colors.white,
+                          color: Theme.of(context).primaryColor,
                         ),
+                        backgroundColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                                width: 3,
+                                color: Theme.of(context).primaryColor),
+                            borderRadius: BorderRadius.circular(20)),
                       ))
                 : null);
   }

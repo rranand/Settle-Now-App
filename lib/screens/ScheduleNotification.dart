@@ -711,13 +711,17 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                         ),
                 ))),
         floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            showAddPopUp();
-          },
-          child: Icon(
-            Icons.add,
-            color: Colors.white,
-          ),
-        ));
+            onPressed: () async {
+              showAddPopUp();
+            },
+            child: Icon(
+              Icons.add,
+              color: Theme.of(context).primaryColor,
+            ),
+            backgroundColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+                side:
+                    BorderSide(width: 3, color: Theme.of(context).primaryColor),
+                borderRadius: BorderRadius.circular(20))));
   }
 }
