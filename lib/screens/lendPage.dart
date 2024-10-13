@@ -1954,10 +1954,11 @@ class _LendPageState extends State<LendPage> {
                         });
                       });
                 },
-                backgroundColor: Colors.transparent,
+                backgroundColor: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(
                     side: BorderSide(
-                        width: 3, color: Theme.of(context).primaryColor),
+                        width: 3,
+                        color: Theme.of(context).primaryColor.withOpacity(0.7)),
                     borderRadius: BorderRadius.circular(20)),
                 child: Icon(
                   Icons.add,
