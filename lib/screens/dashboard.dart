@@ -4442,25 +4442,182 @@ class _DashBoardState extends State<DashBoard> {
                           height: (MediaQuery.of(context).size.height - 220),
                           child: open == 0
                               ? quickSplitData.value.isEmpty
-                                  ? Scrollbar(
-                                      radius: Radius.circular(10.0),
-                                      thickness: 5.5,
-                                      child: SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height *
+                                  ? (quickSplitDataFetched
+                                      ? Scrollbar(
+                                          radius: Radius.circular(10.0),
+                                          thickness: 5.5,
+                                          child: SizedBox(
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
                                                 0.8,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        child: Center(
-                                          child: Text(
-                                            "No Transaction Found!",
-                                            style: TextStyle(
-                                              fontSize: 25,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: Center(
+                                              child: Text(
+                                                "No Transaction Found!",
+                                                style: TextStyle(
+                                                  fontSize: 25,
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    )
+                                        )
+                                      : SizedBox(
+                                          height: MediaQuery.of(context)
+                                              .size
+                                              .height,
+                                          child: Shimmer.fromColors(
+                                            baseColor:
+                                                Theme.of(context).cardColor,
+                                            highlightColor:
+                                                Theme.of(context).primaryColor,
+                                            child: Column(
+                                              children: [
+                                                SizedBox(
+                                                  height: 8,
+                                                ),
+                                                SizedBox(
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height -
+                                                      250,
+                                                  child: ListView.separated(
+                                                    padding:
+                                                        EdgeInsets.all(8.0),
+                                                    itemCount: 16,
+                                                    separatorBuilder:
+                                                        (context, index) =>
+                                                            SizedBox(
+                                                      height: 30,
+                                                    ),
+                                                    itemBuilder:
+                                                        (BuildContext context,
+                                                            int index) {
+                                                      return Container(
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                          height: 140,
+                                                          child: Padding(
+                                                            padding: EdgeInsets
+                                                                .fromLTRB(
+                                                                    8.0,
+                                                                    8.0,
+                                                                    0,
+                                                                    8.0),
+                                                            child: Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .spaceBetween,
+                                                                children: [
+                                                                  Expanded(
+                                                                      flex: 1,
+                                                                      child: SizedBox(
+                                                                          width: MediaQuery.of(context).size.width * 0.95,
+                                                                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                                            Container(
+                                                                              width: 200,
+                                                                              height: 24.0,
+                                                                              decoration: BoxDecoration(
+                                                                                  color: Colors.white,
+                                                                                  border: Border.all(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                  borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                                            ),
+                                                                            SizedBox(height: 10),
+                                                                            Container(
+                                                                              width: 150,
+                                                                              height: 20.0,
+                                                                              decoration: BoxDecoration(
+                                                                                  color: Colors.white,
+                                                                                  border: Border.all(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                  borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                                            ),
+                                                                            SizedBox(height: 10),
+                                                                            Container(
+                                                                              width: 250,
+                                                                              height: 20.0,
+                                                                              decoration: BoxDecoration(
+                                                                                  color: Colors.white,
+                                                                                  border: Border.all(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                  borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                                            ),
+                                                                            SizedBox(height: 10),
+                                                                            Container(
+                                                                              width: 220,
+                                                                              height: 20.0,
+                                                                              decoration: BoxDecoration(
+                                                                                  color: Colors.white,
+                                                                                  border: Border.all(
+                                                                                    color: Colors.white,
+                                                                                  ),
+                                                                                  borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                                            ),
+                                                                          ]))),
+                                                                  Column(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .center,
+                                                                      children: [
+                                                                        Expanded(
+                                                                            flex:
+                                                                                0,
+                                                                            child:
+                                                                                SizedBox(
+                                                                              width: MediaQuery.of(context).size.width * 0.25,
+                                                                              child: Column(
+                                                                                children: [
+                                                                                  Container(
+                                                                                    width: 90,
+                                                                                    height: 18.0,
+                                                                                    decoration: BoxDecoration(
+                                                                                        color: Colors.white,
+                                                                                        border: Border.all(
+                                                                                          color: Colors.white,
+                                                                                        ),
+                                                                                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: 4,
+                                                                                  ),
+                                                                                  Container(
+                                                                                    width: 110,
+                                                                                    height: 18.0,
+                                                                                    decoration: BoxDecoration(
+                                                                                        color: Colors.white,
+                                                                                        border: Border.all(
+                                                                                          color: Colors.white,
+                                                                                        ),
+                                                                                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                                                                                  )
+                                                                                ],
+                                                                              ),
+                                                                            ))
+                                                                      ]),
+                                                                ]),
+                                                          ));
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ))
                                   : Scrollbar(
                                       radius: Radius.circular(10.0),
                                       thickness: 5.5,
