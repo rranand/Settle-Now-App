@@ -3965,6 +3965,182 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
+  Widget splitRoomShimmerWidget() {
+    return Column(
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height - 250,
+          child: ListView.separated(
+            padding: EdgeInsets.all(8.0),
+            itemCount: 16,
+            separatorBuilder: (context, index) => SizedBox(
+              height: 30,
+            ),
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.white,
+                    ),
+                    borderRadius: BorderRadius.all(Radius.circular(20))),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 250,
+                        height: 18.0,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Colors.white,
+                            ),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(20))),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 28.0,
+                                height: 28.0,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/Images/unknown.jpeg'),
+                                      fit: BoxFit.cover),
+                                ),
+                              ),
+                              Positioned(
+                                left: 20,
+                                child: Container(
+                                  width: 28.0,
+                                  height: 28.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 40,
+                                child: Container(
+                                  width: 28.0,
+                                  height: 28.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                left: 60,
+                                child: Container(
+                                  width: 28.0,
+                                  height: 28.0,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    image: DecorationImage(
+                                        image: AssetImage(
+                                            'assets/Images/unknown.jpeg'),
+                                        fit: BoxFit.cover),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 150,
+                                  height: 14.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                ),
+                                SizedBox(
+                                  height: 6,
+                                ),
+                                Container(
+                                  width: 150,
+                                  height: 14.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                )
+                              ],
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  width: 150,
+                                  height: 14.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                ),
+                                SizedBox(
+                                  height: 6,
+                                ),
+                                Container(
+                                  width: 150,
+                                  height: 14.0,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget homeWidget(BuildContext context) {
     return RefreshIndicator(
         color: Theme.of(context).primaryColor,
@@ -4084,191 +4260,7 @@ class _DashBoardState extends State<DashBoard> {
                               ),
                             ],
                           ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height - 250,
-                            child: ListView.separated(
-                              padding: EdgeInsets.all(8.0),
-                              itemCount: 16,
-                              separatorBuilder: (context, index) => SizedBox(
-                                height: 30,
-                              ),
-                              itemBuilder: (BuildContext context, int index) {
-                                return Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: Colors.white,
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          width: 250,
-                                          height: 18.0,
-                                          decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              border: Border.all(
-                                                color: Colors.white,
-                                              ),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(20))),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child: SizedBox(
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            child: Stack(
-                                              children: [
-                                                Container(
-                                                  width: 28.0,
-                                                  height: 28.0,
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    image: DecorationImage(
-                                                        image: AssetImage(
-                                                            'assets/Images/unknown.jpeg'),
-                                                        fit: BoxFit.cover),
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  left: 20,
-                                                  child: Container(
-                                                    width: 28.0,
-                                                    height: 28.0,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: AssetImage(
-                                                              'assets/Images/unknown.jpeg'),
-                                                          fit: BoxFit.cover),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  left: 40,
-                                                  child: Container(
-                                                    width: 28.0,
-                                                    height: 28.0,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: AssetImage(
-                                                              'assets/Images/unknown.jpeg'),
-                                                          fit: BoxFit.cover),
-                                                    ),
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  left: 60,
-                                                  child: Container(
-                                                    width: 28.0,
-                                                    height: 28.0,
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      image: DecorationImage(
-                                                          image: AssetImage(
-                                                              'assets/Images/unknown.jpeg'),
-                                                          fit: BoxFit.cover),
-                                                    ),
-                                                  ),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 10.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    width: 150,
-                                                    height: 14.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 6,
-                                                  ),
-                                                  Container(
-                                                    width: 150,
-                                                    height: 14.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
-                                                  )
-                                                ],
-                                              ),
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    width: 150,
-                                                    height: 14.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 6,
-                                                  ),
-                                                  Container(
-                                                    width: 150,
-                                                    height: 14.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
-                                                  )
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
+                          splitRoomShimmerWidget()
                         ],
                       ),
                     ),
@@ -4631,27 +4623,40 @@ class _DashBoardState extends State<DashBoard> {
                                       ))
                               : open == 1
                                   ? RoomDataO.value.isEmpty
-                                      ? Scrollbar(
-                                          radius: Radius.circular(10.0),
-                                          thickness: 5.5,
-                                          child: SizedBox(
-                                            height: MediaQuery.of(context)
+                                      ? activeRoomDataFetched
+                                          ? Scrollbar(
+                                              radius: Radius.circular(10.0),
+                                              thickness: 5.5,
+                                              child: SizedBox(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.8,
+                                                width: MediaQuery.of(context)
                                                     .size
-                                                    .height *
-                                                0.8,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            child: Center(
-                                              child: Text(
-                                                "No Live Room Found!",
-                                                style: TextStyle(
-                                                  fontSize: 25,
+                                                    .width,
+                                                child: Center(
+                                                  child: Text(
+                                                    "No Live Room Found!",
+                                                    style: TextStyle(
+                                                      fontSize: 25,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        )
+                                            )
+                                          : SizedBox(
+                                              height: MediaQuery.of(context)
+                                                  .size
+                                                  .height,
+                                              child: Shimmer.fromColors(
+                                                  baseColor: Theme.of(context)
+                                                      .cardColor,
+                                                  highlightColor:
+                                                      Theme.of(context)
+                                                          .primaryColor,
+                                                  child:
+                                                      splitRoomShimmerWidget()))
                                       : Scrollbar(
                                           radius: Radius.circular(10.0),
                                           thickness: 5.5,
@@ -4675,27 +4680,40 @@ class _DashBoardState extends State<DashBoard> {
                                             membersData: membersData,
                                           ))
                                   : (RoomDataC.value.isEmpty
-                                      ? Scrollbar(
-                                          radius: Radius.circular(10.0),
-                                          thickness: 5.5,
-                                          child: SizedBox(
-                                            height: MediaQuery.of(context)
+                                      ? inActiveRoomDataFetched
+                                          ? Scrollbar(
+                                              radius: Radius.circular(10.0),
+                                              thickness: 5.5,
+                                              child: SizedBox(
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.8,
+                                                width: MediaQuery.of(context)
                                                     .size
-                                                    .height *
-                                                0.8,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            child: Center(
-                                              child: Text(
-                                                "No Closed Room Found!",
-                                                style: TextStyle(
-                                                  fontSize: 25,
+                                                    .width,
+                                                child: Center(
+                                                  child: Text(
+                                                    "No Closed Room Found!",
+                                                    style: TextStyle(
+                                                      fontSize: 25,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ),
-                                        )
+                                            )
+                                          : SizedBox(
+                                              height: MediaQuery.of(context)
+                                                  .size
+                                                  .height,
+                                              child: Shimmer.fromColors(
+                                                  baseColor: Theme.of(context)
+                                                      .cardColor,
+                                                  highlightColor:
+                                                      Theme.of(context)
+                                                          .primaryColor,
+                                                  child:
+                                                      splitRoomShimmerWidget()))
                                       : Scrollbar(
                                           radius: Radius.circular(10.0),
                                           thickness: 5.5,
