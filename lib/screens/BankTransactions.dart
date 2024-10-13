@@ -2836,6 +2836,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                     )),
                   )
                 : RefreshIndicator(
+                    color: Theme.of(context).primaryColor,
                     key: _refreshIndicatorKeyBankTrans,
                     onRefresh: executeParallel,
                     child: dataFetched

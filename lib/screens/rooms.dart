@@ -1900,6 +1900,7 @@ class _RoomExpenseState extends State<RoomExpense>
             ],
           )
         : RefreshIndicator(
+                    color: Theme.of(context).primaryColor,
             key: _refreshIndicatorKeyRooms,
             onRefresh: executeParallel,
             child: NestedScrollView(

@@ -1235,6 +1235,7 @@ class _LendPageState extends State<LendPage> {
             context.pop(isPreviousPageNeedToBeUpdated);
           }),
           child: RefreshIndicator(
+              color: Theme.of(context).primaryColor,
               key: _refreshIndicatorKeyLendPage,
               onRefresh: _initialization,
               child: SizedBox(

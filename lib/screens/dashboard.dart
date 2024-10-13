@@ -3277,6 +3277,7 @@ class _DashBoardState extends State<DashBoard> {
           )),
       body: requestType
           ? RefreshIndicator(
+              color: Theme.of(context).primaryColor,
               key: _requestIndicatorKey,
               onRefresh: getRoomRequest,
               child: RoomRequest.isEmpty
@@ -3618,6 +3619,7 @@ class _DashBoardState extends State<DashBoard> {
                     ),
             )
           : RefreshIndicator(
+              color: Theme.of(context).primaryColor,
               key: _sentrequestIndicatorKey,
               onRefresh: fetchSentRequest,
               child: sentRoomRequest.isEmpty
@@ -3965,6 +3967,7 @@ class _DashBoardState extends State<DashBoard> {
 
   Widget homeWidget(BuildContext context) {
     return RefreshIndicator(
+        color: Theme.of(context).primaryColor,
         key: _refreshIndicatorKey,
         onRefresh: _executeParallelRefresh,
         child: (RoomDataO.value.isEmpty &&

@@ -833,6 +833,7 @@ class _ExpensesState extends State<Expenses> {
             ),
           ),
           body: RefreshIndicator(
+                    color: Theme.of(context).primaryColor,
               key: _refreshIndicatorKey,
               onRefresh: _initialization,
               child: TransList.isEmpty

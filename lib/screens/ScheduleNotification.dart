@@ -545,6 +545,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
               context.pop(false);
             }),
             child: RefreshIndicator(
+                color: Theme.of(context).primaryColor,
                 key: _refreshIndicatorKeySchduledNotify,
                 onRefresh: _initialization,
                 child: SizedBox(

@@ -193,6 +193,7 @@ class _LendCreditState extends State<LendCredit> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: RefreshIndicator(
+          color: Theme.of(context).primaryColor,
           key: _refreshIndicatorKeyLendCredit,
           onRefresh: _initialization,
           child: SizedBox(
