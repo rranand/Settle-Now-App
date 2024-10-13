@@ -4760,6 +4760,18 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  bool isRefreshVisible() {
+    if (open == 0 && quickSplitDataFetched) {
+      return quickSplitData.value.isEmpty;
+    } else if (open == 1 && activeRoomDataFetched) {
+      return RoomDataO.value.isEmpty;
+    } else if (open == 2 && inActiveRoomDataFetched) {
+      return RoomDataC.value.isEmpty;
+    }
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
@@ -5381,25 +5393,27 @@ class _DashBoardState extends State<DashBoard> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          FloatingActionButton(
-                            onPressed: () async {
-                              _executeParallelRefresh();
-                            },
-                            child: Icon(
-                              Icons.refresh_outlined,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            backgroundColor: Theme.of(context).cardColor,
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    width: 3,
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.7)),
-                                borderRadius: BorderRadius.circular(20)),
-                          ),
+                          isRefreshVisible()
+                              ? FloatingActionButton(
+                                  onPressed: () async {
+                                    _executeParallelRefresh();
+                                  },
+                                  child: Icon(
+                                    Icons.refresh_outlined,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  backgroundColor: Theme.of(context).cardColor,
+                                  shape: RoundedRectangleBorder(
+                                      side: BorderSide(
+                                          width: 3,
+                                          color: Theme.of(context)
+                                              .primaryColor
+                                              .withOpacity(0.7)),
+                                      borderRadius: BorderRadius.circular(20)),
+                                )
+                              : SizedBox(),
                           SizedBox(
-                            height: 6,
+                            height: isRefreshVisible() ? 6 : 0,
                           ),
                           FloatingActionButton(
                             onPressed: () {
