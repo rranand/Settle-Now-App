@@ -1333,7 +1333,7 @@ class _DashBoardState extends State<DashBoard> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.65,
+              height: MediaQuery.of(context).size.height * 0.57,
               child: ListView.separated(
                   separatorBuilder: (context, index) => SizedBox(
                         height: 5,
@@ -1350,146 +1350,6 @@ class _DashBoardState extends State<DashBoard> {
                     }
                   }),
             ),
-            InkWell(
-              onTap: () {
-                final name = new TextEditingController();
-                GlobalKey<FormState> nameForm = GlobalKey<FormState>();
-                final themeProvider =
-                    Provider.of<ThemeProvider>(context, listen: false);
-                showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return StatefulBuilder(builder: (context, setState) {
-                        return Dialog(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0)),
-                            child: SizedBox(
-                              height: 165,
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Form(
-                                      key: nameForm,
-                                      child: TextFormField(
-                                        controller: name,
-                                        keyboardType: TextInputType.text,
-                                        maxLength: 100,
-                                        maxLines: 1,
-                                        style: const TextStyle(fontSize: 18),
-                                        autocorrect: false,
-                                        validator: (value) {
-                                          RegExp validateName =
-                                              RegExp(r'^[\w\s]{2,}$');
-                                          if (!validateName
-                                              .hasMatch(name.text)) {
-                                            return "Enter Valid Name";
-                                          }
-                                          return null;
-                                        },
-                                        decoration: const InputDecoration(
-                                          contentPadding: EdgeInsets.all(8.0),
-                                          hintText: "Enter Name",
-                                          counterText: "",
-                                          labelText: "Name",
-                                          errorStyle: TextStyle(fontSize: 15),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 15,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        SizedBox(
-                                          height: 43,
-                                          width: 100,
-                                          child: OutlinedButton(
-                                              style: OutlinedButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                side: BorderSide(
-                                                    color: Theme.of(context)
-                                                        .primaryColor),
-                                              ),
-                                              child: Text(
-                                                "Close",
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: themeProvider
-                                                            .isDarkTheme
-                                                        ? Colors.white
-                                                        : Colors.black),
-                                              ),
-                                              onPressed: () {
-                                                if (this.mounted) {
-                                                  context.pop();
-                                                }
-                                              }),
-                                        ),
-                                        SizedBox(
-                                          height: 43,
-                                          width: 100,
-                                          child: OutlinedButton(
-                                              style: OutlinedButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          10.0),
-                                                ),
-                                                side: BorderSide(
-                                                    color: Theme.of(context)
-                                                        .primaryColor),
-                                              ),
-                                              child: Text(
-                                                "Add",
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: themeProvider
-                                                            .isDarkTheme
-                                                        ? Colors.white
-                                                        : Colors.black),
-                                              ),
-                                              onPressed: () {
-                                                if (nameForm.currentState!
-                                                    .validate()) {
-                                                  aditionalMembers.add(
-                                                      FriendEach(
-                                                          name: name.text,
-                                                          email: "",
-                                                          status: "",
-                                                          pic: "",
-                                                          isGoogle: false,
-                                                          phoneNo: "",
-                                                          fromContact: false));
-                                                  if (this.mounted) {
-                                                    setState(() {});
-                                                    context.pop();
-                                                  }
-                                                }
-                                              }),
-                                        ),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ));
-                      });
-                    });
-              },
-              child: Text(
-                'Add Member Manually',
-                style: TextStyle(fontSize: 16),
-              ),
-            )
           ],
         ),
       );
@@ -1518,109 +1378,6 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Widget addFriendWidget(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Container(
-          width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width))
-              : MediaQuery.of(context).size.width,
-          child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Invite Member",
-                        style: TextStyle(fontSize: 22),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          context.pop();
-                        },
-                        child: Icon(Icons.cancel_outlined),
-                      )
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  loadFriendData
-                      ? friendData.isEmpty
-                          ? SizedBox(
-                              height: MediaQuery.of(context).size.height - 310,
-                              child: Center(
-                                child: Text(
-                                  "No User Found",
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              ),
-                            )
-                          : Column(
-                              children: [
-                                TextField(
-                                  controller: _searchFriend,
-                                  keyboardType: TextInputType.text,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 15),
-                                  autocorrect: false,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.all(8.0),
-                                    labelText: "Enter Name",
-                                    counterText: "",
-                                    errorStyle: const TextStyle(fontSize: 15),
-                                  ),
-                                  onChanged: (String s) {
-                                    _searchFriend.text = s;
-                                    _searchFriend.selection =
-                                        TextSelection.collapsed(
-                                            offset: _searchFriend.text.length);
-                                    SearchFriend();
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 13,
-                                ),
-                                SingleChildScrollView(
-                                  child: SizedBox(
-                                    height: MediaQuery.of(context).size.height *
-                                        0.7,
-                                    child: _searchFriend.text.isEmpty
-                                        ? friendListWidget(context, friendData)
-                                        : (friendDataSearched.isEmpty
-                                            ? Center(
-                                                child: Text(
-                                                  "No User Found",
-                                                  style:
-                                                      TextStyle(fontSize: 18),
-                                                ),
-                                              )
-                                            : friendListWidget(
-                                                context, friendDataSearched)),
-                                  ),
-                                ),
-                              ],
-                            )
-                      : SizedBox(
-                          height: MediaQuery.of(context).size.height - 310,
-                          child: Center(
-                            child: CircularProgressIndicator.adaptive(),
-                          ),
-                        )
-                ],
-              ))),
-    );
-  }
-
   Future<void> getFriendData() async {
     try {
       if (this.mounted) {
@@ -1641,7 +1398,10 @@ class _DashBoardState extends State<DashBoard> {
         loadFriendData = true;
         List<dynamic> tempData = data['data'];
         for (int i = 0; i < tempData.length; i++) {
-          friendData.add(FriendEach.fromJson(tempData[i]));
+          FriendEach friend = FriendEach.fromJson(tempData[i]);
+          if (friend.email != _email.text) {
+            friendData.add(friend);
+          }
         }
       } else {
         if (this.mounted) {
@@ -2221,10 +1981,331 @@ class _DashBoardState extends State<DashBoard> {
                                     onTap: () {
                                       if (this.mounted) {
                                         showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              addFriendWidget(context),
-                                        );
+                                            context: context,
+                                            builder:
+                                                (BuildContext context) =>
+                                                    StatefulBuilder(builder:
+                                                        (context, setState) {
+                                                      return Dialog(
+                                                        shape: RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12.0)),
+                                                        child: Container(
+                                                            width: kIsWeb
+                                                                ? max(
+                                                                    MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.5,
+                                                                    min(
+                                                                        400,
+                                                                        MediaQuery.of(context)
+                                                                            .size
+                                                                            .width))
+                                                                : MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width,
+                                                            child: Padding(
+                                                                padding:
+                                                                    const EdgeInsets
+                                                                        .all(
+                                                                        10.0),
+                                                                child: Column(
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Row(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceBetween,
+                                                                      children: [
+                                                                        Text(
+                                                                          "Invite Member",
+                                                                          style:
+                                                                              TextStyle(fontSize: 22),
+                                                                        ),
+                                                                        Row(
+                                                                          children: [
+                                                                            InkWell(
+                                                                              onTap: () async {
+                                                                                if (this.mounted) {
+                                                                                  setState(() {
+                                                                                    loadFriendData = false;
+                                                                                    friendData.clear();
+                                                                                  });
+                                                                                }
+                                                                                await getFriendData();
+                                                                                if (this.mounted) {
+                                                                                  setState(() {});
+                                                                                }
+                                                                              },
+                                                                              child: Icon(Icons.refresh, size: 26),
+                                                                            ),
+                                                                            SizedBox(
+                                                                              width: 6,
+                                                                            ),
+                                                                            InkWell(
+                                                                              onTap: () {
+                                                                                context.pop();
+                                                                              },
+                                                                              child: Icon(Icons.cancel_outlined, size: 26),
+                                                                            ),
+                                                                          ],
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          20,
+                                                                    ),
+                                                                    loadFriendData
+                                                                        ? friendData.isEmpty &&
+                                                                                aditionalMembers.isEmpty
+                                                                            ? SizedBox(
+                                                                                height: MediaQuery.of(context).size.height * 0.7,
+                                                                                child: Center(
+                                                                                  child: Text(
+                                                                                    "No User Found",
+                                                                                    style: TextStyle(fontSize: 20),
+                                                                                  ),
+                                                                                ),
+                                                                              )
+                                                                            : Column(
+                                                                                children: [
+                                                                                  TextField(
+                                                                                    controller: _searchFriend,
+                                                                                    keyboardType: TextInputType.text,
+                                                                                    maxLines: 1,
+                                                                                    style: const TextStyle(fontSize: 15),
+                                                                                    autocorrect: false,
+                                                                                    decoration: InputDecoration(
+                                                                                      contentPadding: const EdgeInsets.all(8.0),
+                                                                                      labelText: "Enter Name",
+                                                                                      counterText: "",
+                                                                                      errorStyle: const TextStyle(fontSize: 15),
+                                                                                    ),
+                                                                                    onChanged: (String s) {
+                                                                                      _searchFriend.text = s;
+                                                                                      _searchFriend.selection = TextSelection.collapsed(offset: _searchFriend.text.length);
+                                                                                      SearchFriend();
+                                                                                      if (this.mounted) {
+                                                                                        setState(() {});
+                                                                                      }
+                                                                                    },
+                                                                                  ),
+                                                                                  SizedBox(
+                                                                                    height: 13,
+                                                                                  ),
+                                                                                  SingleChildScrollView(
+                                                                                    child: SizedBox(
+                                                                                      height: MediaQuery.of(context).size.height * 0.57,
+                                                                                      child: _searchFriend.text.isEmpty
+                                                                                          ? friendListWidget(context, friendData)
+                                                                                          : (friendDataSearched.isEmpty
+                                                                                              ? Center(
+                                                                                                  child: Text(
+                                                                                                    "No User Found",
+                                                                                                    style: TextStyle(fontSize: 18),
+                                                                                                  ),
+                                                                                                )
+                                                                                              : friendListWidget(context, friendDataSearched)),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              )
+                                                                        : SizedBox(
+                                                                            height:
+                                                                                MediaQuery.of(context).size.height - 310,
+                                                                            child:
+                                                                                Center(
+                                                                              child: CircularProgressIndicator.adaptive(),
+                                                                            ),
+                                                                          ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          55,
+                                                                      width: MediaQuery.of(context)
+                                                                              .size
+                                                                              .width *
+                                                                          0.9,
+                                                                      child:
+                                                                          OutlinedButton(
+                                                                        style: OutlinedButton
+                                                                            .styleFrom(
+                                                                          shape:
+                                                                              RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(10.0),
+                                                                          ),
+                                                                          side:
+                                                                              BorderSide(color: Theme.of(context).primaryColor),
+                                                                        ),
+                                                                        onPressed:
+                                                                            () {
+                                                                          final name =
+                                                                              new TextEditingController();
+                                                                          GlobalKey<FormState>
+                                                                              nameForm =
+                                                                              GlobalKey<FormState>();
+                                                                          showDialog(
+                                                                              context: context,
+                                                                              barrierDismissible: false,
+                                                                              builder: (BuildContext context) {
+                                                                                return StatefulBuilder(builder: (context, setState) {
+                                                                                  return Dialog(
+                                                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+                                                                                      child: SizedBox(
+                                                                                        height: 165,
+                                                                                        child: Padding(
+                                                                                          padding: const EdgeInsets.all(10.0),
+                                                                                          child: Column(
+                                                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                                                            children: [
+                                                                                              Form(
+                                                                                                key: nameForm,
+                                                                                                child: TextFormField(
+                                                                                                  controller: name,
+                                                                                                  keyboardType: TextInputType.text,
+                                                                                                  maxLength: 100,
+                                                                                                  maxLines: 1,
+                                                                                                  style: const TextStyle(fontSize: 18),
+                                                                                                  autocorrect: false,
+                                                                                                  validator: (value) {
+                                                                                                    RegExp validateName = RegExp(r'^[\w\s]{2,}$');
+                                                                                                    if (!validateName.hasMatch(name.text)) {
+                                                                                                      return "Enter Valid Name";
+                                                                                                    }
+                                                                                                    return null;
+                                                                                                  },
+                                                                                                  decoration: const InputDecoration(
+                                                                                                    contentPadding: EdgeInsets.all(8.0),
+                                                                                                    hintText: "Enter Name",
+                                                                                                    counterText: "",
+                                                                                                    labelText: "Name",
+                                                                                                    errorStyle: TextStyle(fontSize: 15),
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ),
+                                                                                              SizedBox(
+                                                                                                height: 15,
+                                                                                              ),
+                                                                                              Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                children: [
+                                                                                                  SizedBox(
+                                                                                                    height: 43,
+                                                                                                    width: 100,
+                                                                                                    child: OutlinedButton(
+                                                                                                        style: OutlinedButton.styleFrom(
+                                                                                                          shape: RoundedRectangleBorder(
+                                                                                                            borderRadius: BorderRadius.circular(10.0),
+                                                                                                          ),
+                                                                                                          side: BorderSide(color: Theme.of(context).primaryColor),
+                                                                                                        ),
+                                                                                                        child: Text(
+                                                                                                          "Close",
+                                                                                                          style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
+                                                                                                        ),
+                                                                                                        onPressed: () {
+                                                                                                          if (this.mounted) {
+                                                                                                            context.pop();
+                                                                                                          }
+                                                                                                        }),
+                                                                                                  ),
+                                                                                                  SizedBox(
+                                                                                                    height: 43,
+                                                                                                    width: 100,
+                                                                                                    child: OutlinedButton(
+                                                                                                        style: OutlinedButton.styleFrom(
+                                                                                                          shape: RoundedRectangleBorder(
+                                                                                                            borderRadius: BorderRadius.circular(10.0),
+                                                                                                          ),
+                                                                                                          side: BorderSide(color: Theme.of(context).primaryColor),
+                                                                                                        ),
+                                                                                                        child: Text(
+                                                                                                          "Add",
+                                                                                                          style: TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
+                                                                                                        ),
+                                                                                                        onPressed: () {
+                                                                                                          if (nameForm.currentState!.validate()) {
+                                                                                                            aditionalMembers.add(FriendEach(name: name.text, email: "", status: "", pic: "", isGoogle: false, phoneNo: "", fromContact: false));
+                                                                                                            if (this.mounted) {
+                                                                                                              setState(() {});
+                                                                                                              context.pop();
+                                                                                                            }
+                                                                                                          }
+                                                                                                        }),
+                                                                                                  ),
+                                                                                                ],
+                                                                                              )
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                      ));
+                                                                                });
+                                                                              });
+                                                                        },
+                                                                        child:
+                                                                            Text(
+                                                                          "Add Member Manually",
+                                                                          style: TextStyle(
+                                                                              fontSize: 16,
+                                                                              color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 6,
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          55,
+                                                                      width: MediaQuery.of(context)
+                                                                              .size
+                                                                              .width *
+                                                                          0.9,
+                                                                      child:
+                                                                          OutlinedButton(
+                                                                        style: OutlinedButton
+                                                                            .styleFrom(
+                                                                          shape:
+                                                                              RoundedRectangleBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(10.0),
+                                                                          ),
+                                                                          side:
+                                                                              BorderSide(color: Theme.of(context).primaryColor),
+                                                                        ),
+                                                                        onPressed:
+                                                                            () {
+                                                                          if (this
+                                                                              .mounted) {
+                                                                            context.pop();
+                                                                          }
+                                                                        },
+                                                                        child:
+                                                                            Text(
+                                                                          "Done",
+                                                                          style: TextStyle(
+                                                                              fontSize: 16,
+                                                                              color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
+                                                                        ),
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ))),
+                                                      );
+                                                    }));
                                       }
                                     },
                                     child: Icon(

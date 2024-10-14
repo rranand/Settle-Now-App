@@ -155,7 +155,10 @@ class _LendPageState extends State<LendPage> {
         loadFriendData = true;
         List<dynamic> tempData = data['data'];
         for (int i = 0; i < tempData.length; i++) {
-          friendData.add(FriendEach.fromJson(tempData[i]));
+          FriendEach friend = FriendEach.fromJson(tempData[i]);
+          if (friend.email != _email) {
+            friendData.add(FriendEach.fromJson(tempData[i]));
+          }
         }
       } else {
         if (this.mounted) {
@@ -429,117 +432,6 @@ class _LendPageState extends State<LendPage> {
                         ]))));
           });
         });
-  }
-
-  Widget addFriendWidget(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Container(
-          width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width))
-              : MediaQuery.of(context).size.width,
-          child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Invite Member",
-                        style: TextStyle(fontSize: 22),
-                      ),
-                      kIsWeb
-                          ? SizedBox()
-                          : IconButton(
-                              onPressed: () async {
-                                await Share.share("Join " +
-                                    roomName.text +
-                                    " (Len-Den) " +
-                                    "\n" +
-                                    roomLink);
-                              },
-                              icon: Icon(
-                                Icons.send,
-                                size: 26,
-                              ))
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  loadFriendData
-                      ? friendData.isEmpty
-                          ? SizedBox(
-                              height: MediaQuery.of(context).size.height - 310,
-                              child: Center(
-                                child: Text(
-                                  "No User Found",
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              ),
-                            )
-                          : Column(
-                              children: [
-                                TextField(
-                                  controller: _searchFriend,
-                                  keyboardType: TextInputType.text,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 15),
-                                  autocorrect: false,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.all(8.0),
-                                    labelText: "Enter Name",
-                                    counterText: "",
-                                    errorStyle: const TextStyle(fontSize: 15),
-                                  ),
-                                  onChanged: (String s) {
-                                    _searchFriend.text = s;
-                                    _searchFriend.selection =
-                                        TextSelection.collapsed(
-                                            offset: _searchFriend.text.length);
-                                    SearchFriend();
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 13,
-                                ),
-                                SingleChildScrollView(
-                                  child: SizedBox(
-                                    height: MediaQuery.of(context).size.height -
-                                        310,
-                                    child: _searchFriend.text.isEmpty
-                                        ? friendListWidget(context, friendData)
-                                        : (friendDataSearched.isEmpty
-                                            ? Center(
-                                                child: Text(
-                                                  "No User Found",
-                                                  style:
-                                                      TextStyle(fontSize: 18),
-                                                ),
-                                              )
-                                            : friendListWidget(
-                                                context, friendDataSearched)),
-                                  ),
-                                ),
-                              ],
-                            )
-                      : SizedBox(
-                          height: MediaQuery.of(context).size.height - 310,
-                          child: Center(
-                            child: CircularProgressIndicator.adaptive(),
-                          ),
-                        )
-                ],
-              ))),
-    );
   }
 
   Widget friendListWidget(BuildContext context, List<FriendEach> data) {
@@ -1206,10 +1098,217 @@ class _LendPageState extends State<LendPage> {
                       : IconButton(
                           onPressed: () {
                             showDialog(
-                              context: context,
-                              builder: (BuildContext context) =>
-                                  addFriendWidget(context),
-                            );
+                                context: context,
+                                builder:
+                                    (BuildContext context) => StatefulBuilder(
+                                            builder: (context, setState) {
+                                          return Dialog(
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        12.0)),
+                                            child: Container(
+                                                width: kIsWeb
+                                                    ? max(
+                                                        MediaQuery.of(context)
+                                                                .size
+                                                                .width *
+                                                            0.5,
+                                                        min(
+                                                            400,
+                                                            MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .width))
+                                                    : MediaQuery.of(context)
+                                                        .size
+                                                        .width,
+                                                child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Column(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .start,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceBetween,
+                                                          children: [
+                                                            Text(
+                                                              "Invite Member",
+                                                              style: TextStyle(
+                                                                  fontSize: 22),
+                                                            ),
+                                                            Row(
+                                                              children: [
+                                                                kIsWeb
+                                                                    ? SizedBox()
+                                                                    : IconButton(
+                                                                        onPressed:
+                                                                            () async {
+                                                                          await Share.share("Join " +
+                                                                              roomName.text +
+                                                                              " (Len-Den) " +
+                                                                              "\n" +
+                                                                              roomLink);
+                                                                        },
+                                                                        icon:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .send,
+                                                                          size:
+                                                                              26,
+                                                                        )),
+                                                                IconButton(
+                                                                    onPressed:
+                                                                        () async {
+                                                                      if (this
+                                                                          .mounted) {
+                                                                        setState(
+                                                                            () {
+                                                                          loadFriendData =
+                                                                              false;
+                                                                          friendData
+                                                                              .clear();
+                                                                        });
+                                                                      }
+                                                                      await getFriendData();
+                                                                      if (this
+                                                                          .mounted) {
+                                                                        setState(
+                                                                            () {});
+                                                                      }
+                                                                    },
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .refresh_outlined,
+                                                                      size: 26,
+                                                                    )),
+                                                                IconButton(
+                                                                    onPressed:
+                                                                        () {
+                                                                      if (this
+                                                                          .mounted) {
+                                                                        context
+                                                                            .pop();
+                                                                      }
+                                                                    },
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .cancel_outlined,
+                                                                      size: 26,
+                                                                    ))
+                                                              ],
+                                                            )
+                                                          ],
+                                                        ),
+                                                        SizedBox(
+                                                          height: 20,
+                                                        ),
+                                                        loadFriendData
+                                                            ? friendData.isEmpty
+                                                                ? SizedBox(
+                                                                    height: MediaQuery.of(context)
+                                                                            .size
+                                                                            .height -
+                                                                        310,
+                                                                    child:
+                                                                        Center(
+                                                                      child:
+                                                                          Text(
+                                                                        "No User Found",
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20),
+                                                                      ),
+                                                                    ),
+                                                                  )
+                                                                : Column(
+                                                                    children: [
+                                                                      TextField(
+                                                                        controller:
+                                                                            _searchFriend,
+                                                                        keyboardType:
+                                                                            TextInputType.text,
+                                                                        maxLines:
+                                                                            1,
+                                                                        style: const TextStyle(
+                                                                            fontSize:
+                                                                                15),
+                                                                        autocorrect:
+                                                                            false,
+                                                                        decoration:
+                                                                            InputDecoration(
+                                                                          contentPadding: const EdgeInsets
+                                                                              .all(
+                                                                              8.0),
+                                                                          labelText:
+                                                                              "Enter Name",
+                                                                          counterText:
+                                                                              "",
+                                                                          errorStyle:
+                                                                              const TextStyle(fontSize: 15),
+                                                                        ),
+                                                                        onChanged:
+                                                                            (String
+                                                                                s) {
+                                                                          _searchFriend.text =
+                                                                              s;
+                                                                          _searchFriend.selection =
+                                                                              TextSelection.collapsed(offset: _searchFriend.text.length);
+                                                                          SearchFriend();
+                                                                          if (this
+                                                                              .mounted) {
+                                                                            setState(() {});
+                                                                          }
+                                                                        },
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height:
+                                                                            13,
+                                                                      ),
+                                                                      SingleChildScrollView(
+                                                                        child:
+                                                                            SizedBox(
+                                                                          height:
+                                                                              MediaQuery.of(context).size.height - 310,
+                                                                          child: _searchFriend.text.isEmpty
+                                                                              ? friendListWidget(context, friendData)
+                                                                              : (friendDataSearched.isEmpty
+                                                                                  ? Center(
+                                                                                      child: Text(
+                                                                                        "No User Found",
+                                                                                        style: TextStyle(fontSize: 18),
+                                                                                      ),
+                                                                                    )
+                                                                                  : friendListWidget(context, friendDataSearched)),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  )
+                                                            : SizedBox(
+                                                                height: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .height -
+                                                                    310,
+                                                                child: Center(
+                                                                  child: CircularProgressIndicator
+                                                                      .adaptive(),
+                                                                ),
+                                                              )
+                                                      ],
+                                                    ))),
+                                          );
+                                        }));
                           },
                           icon: Icon(Icons.person_add)),
                   isClosedByYou
