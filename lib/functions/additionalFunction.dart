@@ -134,13 +134,13 @@ showToast(BuildContext context, String show, IconData icon) {
     padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(25.0),
-      color: Colors.grey.shade700,
+      color: Theme.of(context).cardColor,
+      border: Border.all(color: Theme.of(context).primaryColor),
     ),
     child: Row(
       children: [
         Icon(
           icon,
-          color: Colors.white,
         ),
         SizedBox(
           width: 12.0,
@@ -148,7 +148,6 @@ showToast(BuildContext context, String show, IconData icon) {
         Expanded(
           child: Text(
             show,
-            style: TextStyle(color: Colors.white),
           ),
         ),
       ],
