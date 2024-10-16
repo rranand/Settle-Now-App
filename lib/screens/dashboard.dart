@@ -34,6 +34,7 @@ import 'package:settlenow/screens/analysis.dart';
 import 'package:settlenow/screens/expenses.dart';
 import 'package:settlenow/screens/lendCredit.dart';
 import 'package:settlenow/screens/summary.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -195,21 +196,35 @@ class _DashBoardState extends State<DashBoard> {
         isLogoutTriggered = true;
       });
       buildShowDialog(context);
+      final prefs = await SharedPreferences.getInstance();
       if (kIsWeb) {
         await Future.wait([
-          removePref(["token", "__token", "___token"]),
+          removePref([
+            "token",
+            "__token",
+            "___token",
+            "isGoogle",
+            "liveCategoryIndex"
+          ]),
           deleteToken(),
           logOutFromGoogle()
         ]);
       } else {
         await Future.wait([
           deleteDB(),
-          removePref(["token", "__token", "___token"]),
+          removePref([
+            "token",
+            "__token",
+            "___token",
+            "isGoogle",
+            "liveCategoryIndex"
+          ]),
           AwesomeNotifications().cancelAllSchedules(),
           deleteToken(),
           logOutFromGoogle()
         ]);
       }
+      await prefs.clear();
       if (this.mounted) {
         setState(() {
           isLogoutTriggered = false;
