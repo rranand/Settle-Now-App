@@ -233,6 +233,9 @@ class _DashBoardState extends State<DashBoard> {
       while (this.mounted && context.canPop()) {
         context.pop();
       }
+      while (this.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
       if (this.mounted) {
         context.push(AppRouteConstants.loginRouteName);
       }
