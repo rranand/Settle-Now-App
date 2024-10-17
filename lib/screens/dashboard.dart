@@ -4252,17 +4252,134 @@ class _DashBoardState extends State<DashBoard> {
                     physics: AlwaysScrollableScrollPhysics(),
                     children: [
                       SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.9,
-                        width: MediaQuery.of(context).size.width,
-                        child: Center(
-                          child: Text(
-                            "No Room Joined, Create One!",
-                            style: TextStyle(
-                              fontSize: 22,
+                        height: 50,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 40,
+                              decoration: open == 0
+                                  ? BoxDecoration(
+                                      border: Border.all(
+                                          color: Theme.of(context).primaryColor,
+                                          width: 2),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(13)))
+                                  : null,
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        open = 0;
+                                      });
+                                    },
+                                    child: Text(
+                                      "Quick Split",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Container(
+                              width: 80,
+                              height: 40,
+                              decoration: open == 1
+                                  ? BoxDecoration(
+                                      border: Border.all(
+                                          color: Theme.of(context).primaryColor,
+                                          width: 2),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(13)))
+                                  : null,
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: InkWell(
+                                    child: Text(
+                                      "Live",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        open = 1;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Container(
+                              height: 40,
+                              width: 80,
+                              decoration: open == 2
+                                  ? BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.red, width: 2),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(13)))
+                                  : null,
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: InkWell(
+                                    child: Text(
+                                      "Closed",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                    onTap: () {
+                                      setState(() {
+                                        open = 2;
+                                      });
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      )
+                      ),
+                      GestureDetector(
+                          onHorizontalDragEnd: (details) async {
+                            if (details.primaryVelocity! > 0) {
+                              setState(() {
+                                open = max(0, open - 1);
+                              });
+                            }
+
+                            if (details.primaryVelocity! < 0) {
+                              setState(() {
+                                open = min(2, open + 1);
+                              });
+                            }
+                          },
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.9,
+                            width: MediaQuery.of(context).size.width,
+                            child: Center(
+                              child: Text(
+                                "No Room Joined, Create One!",
+                                style: TextStyle(
+                                  fontSize: 22,
+                                ),
+                              ),
+                            ),
+                          ))
                     ],
                   )
                 : SizedBox(
