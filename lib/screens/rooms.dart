@@ -3640,7 +3640,7 @@ class _RoomExpenseState extends State<RoomExpense>
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
 
     return Scaffold(
         key: _scaffoldKey,

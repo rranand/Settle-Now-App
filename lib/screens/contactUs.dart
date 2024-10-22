@@ -36,7 +36,7 @@ class _ContactUsState extends State<ContactUs> {
 
   sendContactData(BuildContext context) async {
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
     if (!internetConnProvider.isDeviceConnected) {
       if (this.mounted) {
         context.pop();

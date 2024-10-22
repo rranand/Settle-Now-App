@@ -1078,7 +1078,7 @@ class _LendPageState extends State<LendPage> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
           title: Text(roomName.text),

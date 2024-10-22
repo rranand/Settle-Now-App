@@ -228,7 +228,7 @@ class _OtpNameState extends State<OtpName> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
     final height = MediaQuery.of(context).size.height;
 
     final defaultPinTheme = PinTheme(

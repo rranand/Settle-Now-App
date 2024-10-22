@@ -145,6 +145,12 @@ class _LoginPageState extends State<LoginPage> {
     internetProvider.toggleDeviceConnected(true);
 
     if (tempData == null) {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      while (this.mounted && Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
       if (kIsWeb) {
         await Future.wait([deleteTempData()]);
       } else {
@@ -260,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
 
     return importantUpdate
         ? updateWidget(context, updateData)

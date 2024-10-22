@@ -627,7 +627,7 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
 
     return Scaffold(
         appBar: AppBar(

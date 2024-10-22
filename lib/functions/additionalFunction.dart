@@ -388,7 +388,8 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
         reason: "API Error", info: ["createHTTPreq", url]);
   }
 
-  final internetChecker = Provider.of<InternetconnectivityProvider>(context);
+  final internetChecker =
+      Provider.of<InternetconnectivityProvider>(context, listen: false);
   return new Response(
       jsonEncode({
         "status": false,

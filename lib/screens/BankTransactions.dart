@@ -2202,7 +2202,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     int crossAxisCountFilter = (drawerWidth / 110).round();
     final themeProvider = Provider.of<ThemeProvider>(context);
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(

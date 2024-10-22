@@ -170,6 +170,7 @@ class _DashBoardState extends State<DashBoard> {
   List<Map> getContactsFromDB = [];
   final TextEditingController _searchFriend = TextEditingController();
   List<FriendEach> aditionalMembers = [];
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String appVersion = "Unknown";
 
   Future<void> getContactsFromLocal() async {
@@ -4992,265 +4993,243 @@ class _DashBoardState extends State<DashBoard> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final internetConnProvider =
-        Provider.of<InternetconnectivityProvider>(context);
+        Provider.of<InternetconnectivityProvider>(context, listen: false);
     return importantUpdate
         ? updateWidget(context, updateData)
-        : Scaffold(
-            appBar: dash == 0
-                ? AppBar(
-                    title: searchTrigger
-                        ? TextField(
-                            keyboardType: TextInputType.text,
-                            textInputAction: TextInputAction.search,
-                            maxLines: 1,
-                            decoration: const InputDecoration(
-                              counterText: "",
-                              contentPadding: EdgeInsets.all(8.0),
-                              hintText: "Search ...",
-                            ),
-                            onChanged: (String s) {
-                              setState(() {
-                                _search.text = s;
-                              });
-                              SearchData();
-                            },
-                          )
-                        : Text(
-                            "Settle Now",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                    actions: [
-                      IconButton(
-                          onPressed: () {
-                            setState(() {
-                              searchTrigger = !searchTrigger;
-                              DateChanged = false;
-                            });
-                          },
-                          icon: Icon(
-                            Icons.search,
-                            color: themeProvider.darkTheme
-                                ? Colors.white
-                                : Colors.black,
-                          )),
-                      (open == 1 || searchTrigger)
-                          ? IconButton(
+        : PopScope(
+            canPop: false,
+            onPopInvoked: (didPop) {
+              if (didPop) {
+                return;
+              }
+              if (dash == 0 && searchTrigger) {
+                if (this.mounted) {
+                  setState(() {
+                    searchTrigger = false;
+                  });
+                }
+              } else {
+                context.pop();
+              }
+            },
+            child: Scaffold(
+                key: _scaffoldKey,
+                appBar: dash == 0
+                    ? AppBar(
+                        title: searchTrigger
+                            ? TextField(
+                                keyboardType: TextInputType.text,
+                                textInputAction: TextInputAction.search,
+                                maxLines: 1,
+                                decoration: const InputDecoration(
+                                  counterText: "",
+                                  contentPadding: EdgeInsets.all(8.0),
+                                  hintText: "Search ...",
+                                ),
+                                onChanged: (String s) {
+                                  setState(() {
+                                    _search.text = s;
+                                  });
+                                  SearchData();
+                                },
+                              )
+                            : Text(
+                                "Settle Now",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                        actions: [
+                          IconButton(
                               onPressed: () {
-                                if (searchTrigger) {
-                                  buildFilterDialog(context);
-                                } else {
-                                  buildLiveFilterDialog(context);
-                                }
+                                setState(() {
+                                  searchTrigger = !searchTrigger;
+                                  DateChanged = false;
+                                });
                               },
                               icon: Icon(
-                                filterliveRoomCategoryIndex.length != 2
-                                    ? Icons.filter_alt_off
-                                    : Icons.filter_alt_outlined,
+                                Icons.search,
                                 color: themeProvider.darkTheme
                                     ? Colors.white
                                     : Colors.black,
-                              ))
-                          : SizedBox()
-                    ],
-                  )
-                : (dash == 1
-                    ? AppBar(
-                        title: Text(
-                          "Room Request",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                              )),
+                          (open == 1 || searchTrigger)
+                              ? IconButton(
+                                  onPressed: () {
+                                    if (searchTrigger) {
+                                      buildFilterDialog(context);
+                                    } else {
+                                      buildLiveFilterDialog(context);
+                                    }
+                                  },
+                                  icon: Icon(
+                                    filterliveRoomCategoryIndex.length != 2
+                                        ? Icons.filter_alt_off
+                                        : Icons.filter_alt_outlined,
+                                    color: themeProvider.darkTheme
+                                        ? Colors.white
+                                        : Colors.black,
+                                  ))
+                              : SizedBox()
+                        ],
                       )
-                    : (dash == 2
-                        ? null
-                        : (dash == 3
-                            ? AppBar(
-                                title: Text(
-                                  "Len-Den",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              )
-                            : (dash == 4
+                    : (dash == 1
+                        ? AppBar(
+                            title: Text(
+                              "Room Request",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        : (dash == 2
+                            ? null
+                            : (dash == 3
                                 ? AppBar(
                                     title: Text(
-                                      "Analysis",
+                                      "Len-Den",
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold),
                                     ),
                                   )
-                                : AppBar(
-                                    title: Text(
-                                      "Summary",
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ))))),
-            body: chooseFromBottomNavigator(dash),
-            bottomNavigationBar: internetConnProvider.isAlertSet
-                ? Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(6)),
-                      color: internetConnProvider.isDeviceConnected
-                          ? Colors.green
-                          : Colors.red,
-                    ),
-                    height: 40,
-                    width: MediaQuery.of(context).size.width,
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Center(
-                          child: Text(
-                        internetConnProvider.isDeviceConnected
-                            ? "You are connected to Internet"
-                            : "You aren't connected to Internet",
-                        style: TextStyle(fontSize: 17, color: Colors.white),
-                      )),
-                    ),
-                  )
-                : BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
-                    selectedItemColor: Theme.of(context).primaryColor,
-                    unselectedItemColor: Colors.grey,
-                    currentIndex: dash,
-                    onTap: (index) => setState(() {
-                      dash = index;
-                    }),
-                    items: [
-                      BottomNavigationBarItem(
-                        icon: Icon(
-                          Icons.home,
-                          size: 27,
-                        ),
-                        label: "",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Stack(children: [
-                          Icon(
-                            Icons.notifications_outlined,
-                            size: 27,
-                          ),
-                          RoomRequest.isNotEmpty
-                              ? Positioned(
-                                  right: 0,
-                                  child: new Container(
-                                    padding: EdgeInsets.all(1),
-                                    decoration: new BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    constraints: BoxConstraints(
-                                      minWidth: 12,
-                                      minHeight: 12,
-                                    ),
-                                    child: new Text(
-                                      RoomRequest.length.toString(),
-                                      style: new TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 8,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                )
-                              : SizedBox()
-                        ]),
-                        label: "",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(
-                          Icons.wallet,
-                          size: 27,
-                        ),
-                        label: "",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(
-                          Icons.account_balance_outlined,
-                          size: 27,
-                        ),
-                        label: "",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(
-                          Icons.assessment_outlined,
-                          size: 27,
-                        ),
-                        label: "",
-                      ),
-                      BottomNavigationBarItem(
-                        icon: Icon(
-                          Icons.assignment_outlined,
-                          size: 27,
-                        ),
-                        label: "",
-                      ),
-                    ],
-                  ),
-            drawer: Drawer(
-              child: ListView(
-                children: [
-                  _name.text.length == 0
-                      ? Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        )
-                      : UserAccountsDrawerHeader(
-                          decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .drawerTheme
-                                  .backgroundColor),
-                          margin: EdgeInsets.all(0),
-                          currentAccountPicture: Stack(
-                            children: [
-                              isGoogle
-                                  ? CachedNetworkImage(
-                                      httpHeaders: {
-                                        'Access-Control-Allow-Origin': '*'
-                                      },
-                                      imageUrl: (_currentUser != null
-                                          ? _currentUser!.photoUrl.toString()
-                                          : addCorsinImage(global.driveUrl +
-                                              global.unknown_avatar_id)),
-                                      progressIndicatorBuilder: (context, url,
-                                              downloadProgress) =>
-                                          CircularProgressIndicator(
-                                              value: downloadProgress.progress),
-                                      errorWidget: (context, url, error) =>
-                                          Container(
-                                        width: 120.0,
-                                        height: 120.0,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          image: DecorationImage(
-                                              image: AssetImage(
-                                                  'assets/Images/unknown.jpeg'),
-                                              fit: BoxFit.cover),
+                                : (dash == 4
+                                    ? AppBar(
+                                        title: Text(
+                                          "Analysis",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
                                         ),
-                                      ),
-                                      imageBuilder: (context, imageProvider) =>
-                                          Container(
-                                        width: 120.0,
-                                        height: 120.0,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          image: DecorationImage(
-                                              image: imageProvider,
-                                              fit: BoxFit.cover),
+                                      )
+                                    : AppBar(
+                                        title: Text(
+                                          "Summary",
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ))))),
+                body: chooseFromBottomNavigator(dash),
+                bottomNavigationBar: internetConnProvider.isAlertSet
+                    ? Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                          color: internetConnProvider.isDeviceConnected
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                        height: 40,
+                        width: MediaQuery.of(context).size.width,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Center(
+                              child: Text(
+                            internetConnProvider.isDeviceConnected
+                                ? "You are connected to Internet"
+                                : "You aren't connected to Internet",
+                            style: TextStyle(fontSize: 17, color: Colors.white),
+                          )),
+                        ),
+                      )
+                    : BottomNavigationBar(
+                        type: BottomNavigationBarType.fixed,
+                        selectedItemColor: Theme.of(context).primaryColor,
+                        unselectedItemColor: Colors.grey,
+                        currentIndex: dash,
+                        onTap: (index) => setState(() {
+                          dash = index;
+                        }),
+                        items: [
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              Icons.home,
+                              size: 27,
+                            ),
+                            label: "",
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Stack(children: [
+                              Icon(
+                                Icons.notifications_outlined,
+                                size: 27,
+                              ),
+                              RoomRequest.isNotEmpty
+                                  ? Positioned(
+                                      right: 0,
+                                      child: new Container(
+                                        padding: EdgeInsets.all(1),
+                                        decoration: new BoxDecoration(
+                                          color: Colors.red,
+                                          borderRadius:
+                                              BorderRadius.circular(6),
+                                        ),
+                                        constraints: BoxConstraints(
+                                          minWidth: 12,
+                                          minHeight: 12,
+                                        ),
+                                        child: new Text(
+                                          RoomRequest.length.toString(),
+                                          style: new TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 8,
+                                          ),
+                                          textAlign: TextAlign.center,
                                         ),
                                       ),
                                     )
-                                  : (imageUploading
-                                      ? Center(
-                                          child: CircularProgressIndicator
-                                              .adaptive(),
-                                        )
-                                      : CachedNetworkImage(
+                                  : SizedBox()
+                            ]),
+                            label: "",
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              Icons.wallet,
+                              size: 27,
+                            ),
+                            label: "",
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              Icons.account_balance_outlined,
+                              size: 27,
+                            ),
+                            label: "",
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              Icons.assessment_outlined,
+                              size: 27,
+                            ),
+                            label: "",
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              Icons.assignment_outlined,
+                              size: 27,
+                            ),
+                            label: "",
+                          ),
+                        ],
+                      ),
+                drawer: Drawer(
+                  child: ListView(
+                    children: [
+                      _name.text.length == 0
+                          ? Center(
+                              child: CircularProgressIndicator.adaptive(),
+                            )
+                          : UserAccountsDrawerHeader(
+                              decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .drawerTheme
+                                      .backgroundColor),
+                              margin: EdgeInsets.all(0),
+                              currentAccountPicture: Stack(
+                                children: [
+                                  isGoogle
+                                      ? CachedNetworkImage(
                                           httpHeaders: {
                                             'Access-Control-Allow-Origin': '*'
                                           },
-                                          imageUrl: addCorsinImage(
-                                              global.driveUrl +
-                                                  (_profilePicID.length == 0
-                                                      ? global.unknown_avatar_id
-                                                      : _profilePicID)),
+                                          imageUrl: (_currentUser != null
+                                              ? _currentUser!.photoUrl
+                                                  .toString()
+                                              : addCorsinImage(global.driveUrl +
+                                                  global.unknown_avatar_id)),
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>
                                               CircularProgressIndicator(
@@ -5280,521 +5259,452 @@ class _DashBoardState extends State<DashBoard> {
                                                   fit: BoxFit.cover),
                                             ),
                                           ),
-                                        )),
-                              isGoogle
-                                  ? SizedBox()
-                                  : Positioned(
-                                      left: 50,
-                                      top: 51,
-                                      child: Container(
-                                        width: 25,
-                                        height: 25,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: InkWell(
-                                            onTap: () async {
-                                              showModalBottomSheet<void>(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  return SizedBox(
-                                                    height: 120,
-                                                    child: Column(
-                                                      children: [
-                                                        ListTile(
-                                                          leading: Icon(
-                                                              Icons.camera),
-                                                          title: Text('Camera'),
-                                                          onTap: () {
-                                                            imageUpload(
-                                                                ImageSource
-                                                                    .camera);
-                                                            context.pop();
-                                                          },
-                                                        ),
-                                                        ListTile(
-                                                          leading:
-                                                              Icon(Icons.image),
-                                                          title:
-                                                              Text('Gallery'),
-                                                          onTap: () {
-                                                            imageUpload(
-                                                                ImageSource
-                                                                    .gallery);
-                                                            context.pop();
-                                                          },
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  );
-                                                },
-                                              );
-                                            },
-                                            child: Icon(
-                                              Icons.camera_alt,
-                                              size: 20,
-                                              color: Colors.blueGrey,
-                                            ),
-                                          ),
-                                        ),
-                                      ))
-                            ],
-                          ),
-                          accountName: Text(_name.text,
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white)),
-                          accountEmail: Text(_email.text,
-                              style:
-                                  TextStyle(fontSize: 15, color: Colors.white)),
-                        ),
-                  ListTile(
-                    onTap: () {
-                      if (this.mounted) {
-                        context.push(AppRouteConstants.profileRouteName);
-                      }
-                    },
-                    leading: Icon(
-                      Icons.person_2_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Profile",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
-                  kIsWeb || Platform.isIOS
-                      ? SizedBox()
-                      : ListTile(
-                          onTap: () async {
-                            if (this.mounted) {
-                              context.push(
-                                AppRouteConstants.bankTransactionRouteName,
-                              );
-
-                              if (this.mounted) {
-                                setState(() {});
-                              }
-                            }
-                          },
-                          leading: Icon(
-                            Icons.payments,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          title: Text(
-                            "Bank Transactions",
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                          trailing: Container(
-                              width: 55,
-                              height: 30,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  border: Border.all(
-                                    color: themeProvider.isDarkTheme
-                                        ? Theme.of(context).primaryColor
-                                        : Colors.white,
-                                  ),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(12))),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: Text("Beta",
-                                    style: TextStyle(
-                                        fontSize: 13, color: Colors.white)),
-                              )),
-                        ),
-                  kIsWeb
-                      ? SizedBox()
-                      : ListTile(
-                          onTap: () {
-                            if (this.mounted) {
-                              context.push(AppRouteConstants
-                                  .schduleNotificationRouteName);
-                            }
-                          },
-                          leading: Icon(
-                            Icons.notifications_outlined,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          title: Text(
-                            "Remainder",
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                        ),
-                  kIsWeb || isContactPermissionGranted
-                      ? SizedBox()
-                      : ListTile(
-                          onTap: () async {
-                            isContactPermissionGranted = await context.push(
-                                AppRouteConstants.inviteFriendsRouteName,
-                                extra: {"firstTime": false}) as bool;
-                            if (this.mounted) {
-                              setState(() {});
-                            }
-                          },
-                          leading: Icon(
-                            Icons.import_contacts_outlined,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          title: Text(
-                            "Import Contacts",
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                        ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.border_color,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Theme",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                    trailing: IconButton(
-                        onPressed: () async {
-                          final provider = Provider.of<ThemeProvider>(context,
-                              listen: false);
-                          provider.toggleTheme(!themeProvider.darkTheme);
-                          setBoolPrefs('darkTheme', themeProvider.darkTheme);
-                        },
-                        icon: Icon(
-                          Icons.brightness_2,
-                          color: themeProvider.darkTheme
-                              ? Colors.black87
-                              : Colors.white,
-                          size: 22,
-                        )),
-                  ),
-                  kIsWeb
-                      ? SizedBox()
-                      : ListTile(
-                          onTap: () async {
-                            await Share.share(shareMessage.title +
-                                "\n\n" +
-                                shareMessage.subject +
-                                "\n\n" +
-                                shareMessage.playstore);
-                          },
-                          leading: Icon(
-                            Icons.share,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          title: Text(
-                            "Share",
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                        ),
-                  ListTile(
-                    onTap: () {
-                      if (this.mounted) {
-                        context.push(AppRouteConstants.aboutRouteName);
-                      }
-                    },
-                    leading: Icon(
-                      Icons.book_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "About Us",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      if (this.mounted) {
-                        context.push(AppRouteConstants.contactUsRouteName);
-                      }
-                    },
-                    leading: Icon(
-                      Icons.rate_review_outlined,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Contact Us",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
-                  kIsWeb || Platform.isIOS
-                      ? SizedBox()
-                      : ListTile(
-                          onTap: rateUs,
-                          leading: Icon(
-                            Icons.star_border_outlined,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                          title: Text(
-                            "Rate Us",
-                            style: TextStyle(fontSize: 14, color: Colors.white),
-                          ),
-                        ),
-                  ListTile(
-                    onTap: () async {
-                      if (this.mounted) {
-                        await logout();
-                      }
-                    },
-                    leading: Icon(
-                      Icons.logout,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                    title: Text(
-                      "Log Out",
-                      style: TextStyle(fontSize: 14, color: Colors.white),
-                    ),
-                  ),
-                  ListTile(
-                    title: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Version " + appVersion,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: Colors.white),
-                        ),
-                        InkWell(
-                          onTap: () async {
-                            launchUrl(
-                              Uri.parse("https://settlenow.in/privacy-policy"),
-                              mode: LaunchMode.inAppWebView,
-                              webViewConfiguration: const WebViewConfiguration(
-                                  enableJavaScript: true),
-                            );
-                          },
-                          child: Text(
-                            "Privacy Policy",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  isItAndroidDevice
-                      ? InkWell(
-                          onTap: () async {
-                            launchUrl(
-                              Uri.parse(
-                                  "https://play.google.com/store/apps/details?id=com.rohit.settlenow"),
-                              mode: LaunchMode.externalApplication,
-                            );
-                          },
-                          child: Image(
-                            width: 250,
-                            height: 80,
-                            image: AssetImage('assets/Images/play_store.png'),
-                          ))
-                      : SizedBox()
-                ],
-              ),
-            ),
-            floatingActionButton: dash == 0
-                ? (searchTrigger
-                    ? null
-                    : Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          isRefreshVisible()
-                              ? FloatingActionButton(
-                                  onPressed: () async {
-                                    _executeParallelRefresh();
-                                  },
-                                  child: Icon(
-                                    Icons.refresh_outlined,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  backgroundColor: Theme.of(context).cardColor,
-                                  shape: RoundedRectangleBorder(
-                                      side: BorderSide(
-                                          width: 3,
-                                          color: Theme.of(context)
-                                              .primaryColor
-                                              .withOpacity(0.7)),
-                                      borderRadius: BorderRadius.circular(20)),
-                                )
-                              : SizedBox(),
-                          SizedBox(
-                            height: isRefreshVisible() ? 6 : 0,
-                          ),
-                          FloatingActionButton(
-                            onPressed: () {
-                              showModalBottomSheet<void>(
-                                context: context,
-                                isScrollControlled: true,
-                                builder: (BuildContext context) {
-                                  return Padding(
-                                    padding: MediaQuery.of(context).viewInsets,
-                                    child: SizedBox(
-                                      height: open == 0 ? 60 : 120,
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            ListTile(
-                                              leading: Icon(
-                                                Icons.add,
-                                                color: Theme.of(context)
-                                                    .primaryColor,
+                                        )
+                                      : (imageUploading
+                                          ? Center(
+                                              child: CircularProgressIndicator
+                                                  .adaptive(),
+                                            )
+                                          : CachedNetworkImage(
+                                              httpHeaders: {
+                                                'Access-Control-Allow-Origin':
+                                                    '*'
+                                              },
+                                              imageUrl: addCorsinImage(global
+                                                      .driveUrl +
+                                                  (_profilePicID.length == 0
+                                                      ? global.unknown_avatar_id
+                                                      : _profilePicID)),
+                                              progressIndicatorBuilder:
+                                                  (context, url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Container(
+                                                width: 120.0,
+                                                height: 120.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: AssetImage(
+                                                          'assets/Images/unknown.jpeg'),
+                                                      fit: BoxFit.cover),
+                                                ),
                                               ),
-                                              title: Text(open == 0
-                                                  ? "Create Expense"
-                                                  : "Create Room"),
-                                              onTap: () {
-                                                if (open == 0) {
-                                                  aditionalMembers.clear();
-                                                  addExpenseTo.clear();
-                                                  AddQuickSplitExpense();
-                                                } else {
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                width: 120.0,
+                                                height: 120.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                            )),
+                                  isGoogle
+                                      ? SizedBox()
+                                      : Positioned(
+                                          left: 50,
+                                          top: 51,
+                                          child: Container(
+                                            width: 25,
+                                            height: 25,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Center(
+                                              child: InkWell(
+                                                onTap: () async {
                                                   showModalBottomSheet<void>(
                                                     context: context,
                                                     isScrollControlled: true,
                                                     builder:
                                                         (BuildContext context) {
-                                                      return Padding(
-                                                        padding: MediaQuery.of(
-                                                                context)
-                                                            .viewInsets,
+                                                      return SizedBox(
+                                                        height: 120,
                                                         child: Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          mainAxisSize:
-                                                              MainAxisSize.min,
-                                                          children: <Widget>[
-                                                            Form(
-                                                              key: _CformKey,
-                                                              child:
-                                                                  TextFormField(
-                                                                controller:
-                                                                    _NRoom,
-                                                                keyboardType:
-                                                                    TextInputType
-                                                                        .text,
-                                                                maxLength: 70,
-                                                                maxLines: 1,
-                                                                style:
-                                                                    const TextStyle(
-                                                                        fontSize:
-                                                                            18),
-                                                                autocorrect:
-                                                                    false,
-                                                                validator:
-                                                                    (value) {
-                                                                  RegExp
-                                                                      validateText =
-                                                                      RegExp(
-                                                                          r'\b[\w]{4,}\b');
-                                                                  if (!validateText
-                                                                      .hasMatch(
-                                                                          _NRoom
-                                                                              .text)) {
-                                                                    return open ==
-                                                                            0
-                                                                        ? "Enter Valid Purpose"
-                                                                        : "Enter Valid Room Name";
-                                                                  }
-                                                                  return null;
-                                                                },
-                                                                decoration:
-                                                                    InputDecoration(
-                                                                  counterText:
-                                                                      "",
-                                                                  contentPadding:
-                                                                      EdgeInsets
-                                                                          .all(
-                                                                              8.0),
-                                                                  hintText: open ==
-                                                                          0
-                                                                      ? "Enter Valid Purpose"
-                                                                      : "Enter Room Name",
-                                                                  errorStyle:
-                                                                      TextStyle(
-                                                                          fontSize:
-                                                                              15),
-                                                                ),
-                                                              ),
+                                                          children: [
+                                                            ListTile(
+                                                              leading: Icon(
+                                                                  Icons.camera),
+                                                              title: Text(
+                                                                  'Camera'),
+                                                              onTap: () {
+                                                                imageUpload(
+                                                                    ImageSource
+                                                                        .camera);
+                                                                context.pop();
+                                                              },
                                                             ),
-                                                            SizedBox(
-                                                              height: 15,
+                                                            ListTile(
+                                                              leading: Icon(
+                                                                  Icons.image),
+                                                              title: Text(
+                                                                  'Gallery'),
+                                                              onTap: () {
+                                                                imageUpload(
+                                                                    ImageSource
+                                                                        .gallery);
+                                                                context.pop();
+                                                              },
                                                             ),
-                                                            SizedBox(
-                                                              height: 43,
-                                                              width: 100,
-                                                              child:
-                                                                  OutlinedButton(
-                                                                child: Text(
-                                                                  "Create",
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                          16,
-                                                                      color: themeProvider.isDarkTheme
-                                                                          ? Colors
-                                                                              .white
-                                                                          : Colors
-                                                                              .black),
-                                                                ),
-                                                                style: OutlinedButton
-                                                                    .styleFrom(
-                                                                  shape:
-                                                                      RoundedRectangleBorder(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            10.0),
-                                                                  ),
-                                                                  side: BorderSide(
-                                                                      color: Theme.of(
-                                                                              context)
-                                                                          .primaryColor),
-                                                                ),
-                                                                onPressed: () {
-                                                                  if (_CformKey
-                                                                      .currentState!
-                                                                      .validate()) {
-                                                                    SendingData(
-                                                                        true,
-                                                                        context);
-                                                                  }
-                                                                },
-                                                              ),
-                                                            ),
-                                                            SizedBox(
-                                                              height: 10,
-                                                            )
                                                           ],
                                                         ),
                                                       );
                                                     },
                                                   );
-                                                }
-                                              },
+                                                },
+                                                child: Icon(
+                                                  Icons.camera_alt,
+                                                  size: 20,
+                                                  color: Colors.blueGrey,
+                                                ),
+                                              ),
                                             ),
-                                            open == 0
-                                                ? SizedBox()
-                                                : ListTile(
-                                                    leading: Icon(
-                                                      Icons.edit,
-                                                      color: Theme.of(context)
-                                                          .primaryColor,
-                                                    ),
-                                                    title: Text("Join Room"),
-                                                    onTap: () {
+                                          ))
+                                ],
+                              ),
+                              accountName: Text(_name.text,
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white)),
+                              accountEmail: Text(_email.text,
+                                  style: TextStyle(
+                                      fontSize: 15, color: Colors.white)),
+                            ),
+                      ListTile(
+                        onTap: () {
+                          if (this.mounted) {
+                            context.push(AppRouteConstants.profileRouteName);
+                          }
+                        },
+                        leading: Icon(
+                          Icons.person_2_outlined,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        title: Text(
+                          "Profile",
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ),
+                      kIsWeb || Platform.isIOS
+                          ? SizedBox()
+                          : ListTile(
+                              onTap: () async {
+                                if (this.mounted) {
+                                  context.push(
+                                    AppRouteConstants.bankTransactionRouteName,
+                                  );
+
+                                  if (this.mounted) {
+                                    setState(() {});
+                                  }
+                                }
+                              },
+                              leading: Icon(
+                                Icons.payments,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              title: Text(
+                                "Bank Transactions",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                              ),
+                              trailing: Container(
+                                  width: 55,
+                                  height: 30,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      border: Border.all(
+                                        color: themeProvider.isDarkTheme
+                                            ? Theme.of(context).primaryColor
+                                            : Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(12))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text("Beta",
+                                        style: TextStyle(
+                                            fontSize: 13, color: Colors.white)),
+                                  )),
+                            ),
+                      kIsWeb
+                          ? SizedBox()
+                          : ListTile(
+                              onTap: () {
+                                if (this.mounted) {
+                                  context.push(AppRouteConstants
+                                      .schduleNotificationRouteName);
+                                }
+                              },
+                              leading: Icon(
+                                Icons.notifications_outlined,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              title: Text(
+                                "Remainder",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                              ),
+                            ),
+                      kIsWeb || isContactPermissionGranted
+                          ? SizedBox()
+                          : ListTile(
+                              onTap: () async {
+                                isContactPermissionGranted = await context.push(
+                                    AppRouteConstants.inviteFriendsRouteName,
+                                    extra: {"firstTime": false}) as bool;
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              leading: Icon(
+                                Icons.import_contacts_outlined,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              title: Text(
+                                "Import Contacts",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                              ),
+                            ),
+                      ListTile(
+                        leading: Icon(
+                          Icons.border_color,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        title: Text(
+                          "Theme",
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                        trailing: IconButton(
+                            onPressed: () async {
+                              final provider = Provider.of<ThemeProvider>(
+                                  context,
+                                  listen: false);
+                              provider.toggleTheme(!themeProvider.darkTheme);
+                              setBoolPrefs(
+                                  'darkTheme', themeProvider.darkTheme);
+                            },
+                            icon: Icon(
+                              Icons.brightness_2,
+                              color: themeProvider.darkTheme
+                                  ? Colors.black87
+                                  : Colors.white,
+                              size: 22,
+                            )),
+                      ),
+                      kIsWeb
+                          ? SizedBox()
+                          : ListTile(
+                              onTap: () async {
+                                await Share.share(shareMessage.title +
+                                    "\n\n" +
+                                    shareMessage.subject +
+                                    "\n\n" +
+                                    shareMessage.playstore);
+                              },
+                              leading: Icon(
+                                Icons.share,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              title: Text(
+                                "Share",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                              ),
+                            ),
+                      ListTile(
+                        onTap: () {
+                          if (this.mounted) {
+                            context.push(AppRouteConstants.aboutRouteName);
+                          }
+                        },
+                        leading: Icon(
+                          Icons.book_outlined,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        title: Text(
+                          "About Us",
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ),
+                      ListTile(
+                        onTap: () {
+                          if (this.mounted) {
+                            context.push(AppRouteConstants.contactUsRouteName);
+                          }
+                        },
+                        leading: Icon(
+                          Icons.rate_review_outlined,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        title: Text(
+                          "Contact Us",
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ),
+                      kIsWeb || Platform.isIOS
+                          ? SizedBox()
+                          : ListTile(
+                              onTap: rateUs,
+                              leading: Icon(
+                                Icons.star_border_outlined,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              title: Text(
+                                "Rate Us",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                              ),
+                            ),
+                      ListTile(
+                        onTap: () async {
+                          if (this.mounted) {
+                            await logout();
+                          }
+                        },
+                        leading: Icon(
+                          Icons.logout,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                        title: Text(
+                          "Log Out",
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                      ),
+                      ListTile(
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Version " + appVersion,
+                              textAlign: TextAlign.center,
+                              style:
+                                  TextStyle(fontSize: 12, color: Colors.white),
+                            ),
+                            InkWell(
+                              onTap: () async {
+                                launchUrl(
+                                  Uri.parse(
+                                      "https://settlenow.in/privacy-policy"),
+                                  mode: LaunchMode.inAppWebView,
+                                  webViewConfiguration:
+                                      const WebViewConfiguration(
+                                          enableJavaScript: true),
+                                );
+                              },
+                              child: Text(
+                                "Privacy Policy",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 12, color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      isItAndroidDevice
+                          ? InkWell(
+                              onTap: () async {
+                                launchUrl(
+                                  Uri.parse(
+                                      "https://play.google.com/store/apps/details?id=com.rohit.settlenow"),
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              },
+                              child: Image(
+                                width: 250,
+                                height: 80,
+                                image:
+                                    AssetImage('assets/Images/play_store.png'),
+                              ))
+                          : SizedBox()
+                    ],
+                  ),
+                ),
+                floatingActionButton: dash == 0
+                    ? (searchTrigger
+                        ? null
+                        : Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              isRefreshVisible()
+                                  ? FloatingActionButton(
+                                      onPressed: () async {
+                                        _executeParallelRefresh();
+                                      },
+                                      child: Icon(
+                                        Icons.refresh_outlined,
+                                        color: Theme.of(context).primaryColor,
+                                      ),
+                                      backgroundColor:
+                                          Theme.of(context).cardColor,
+                                      shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              width: 3,
+                                              color: Theme.of(context)
+                                                  .primaryColor
+                                                  .withOpacity(0.7)),
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                    )
+                                  : SizedBox(),
+                              SizedBox(
+                                height: isRefreshVisible() ? 6 : 0,
+                              ),
+                              FloatingActionButton(
+                                onPressed: () {
+                                  showModalBottomSheet<void>(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (BuildContext context) {
+                                      return Padding(
+                                        padding:
+                                            MediaQuery.of(context).viewInsets,
+                                        child: SizedBox(
+                                          height: open == 0 ? 60 : 120,
+                                          child: Center(
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: <Widget>[
+                                                ListTile(
+                                                  leading: Icon(
+                                                    Icons.add,
+                                                    color: Theme.of(context)
+                                                        .primaryColor,
+                                                  ),
+                                                  title: Text(open == 0
+                                                      ? "Create Expense"
+                                                      : "Create Room"),
+                                                  onTap: () {
+                                                    if (open == 0) {
+                                                      aditionalMembers.clear();
+                                                      addExpenseTo.clear();
+                                                      AddQuickSplitExpense();
+                                                    } else {
                                                       showModalBottomSheet<
                                                           void>(
                                                         context: context,
@@ -5817,7 +5727,7 @@ class _DashBoardState extends State<DashBoard> {
                                                               children: <Widget>[
                                                                 Form(
                                                                   key:
-                                                                      _JformKey,
+                                                                      _CformKey,
                                                                   child:
                                                                       TextFormField(
                                                                     controller:
@@ -5826,7 +5736,7 @@ class _DashBoardState extends State<DashBoard> {
                                                                         TextInputType
                                                                             .text,
                                                                     maxLength:
-                                                                        7,
+                                                                        70,
                                                                     maxLines: 1,
                                                                     style: const TextStyle(
                                                                         fontSize:
@@ -5838,14 +5748,14 @@ class _DashBoardState extends State<DashBoard> {
                                                                       RegExp
                                                                           validateText =
                                                                           RegExp(
-                                                                              r'\b[\w]{7}\b');
+                                                                              r'\b[\w]{4,}\b');
                                                                       if (!validateText
                                                                           .hasMatch(
                                                                               _NRoom.text)) {
                                                                         return open ==
                                                                                 0
-                                                                            ? "Enter Valid Transcation Key"
-                                                                            : "Enter Valid Room Key";
+                                                                            ? "Enter Valid Purpose"
+                                                                            : "Enter Valid Room Name";
                                                                       }
                                                                       return null;
                                                                     },
@@ -5858,12 +5768,8 @@ class _DashBoardState extends State<DashBoard> {
                                                                               8.0),
                                                                       hintText: open ==
                                                                               0
-                                                                          ? "Enter Valid Transaction Key"
-                                                                          : "Enter Room Key",
-                                                                      labelText: open ==
-                                                                              0
-                                                                          ? "Transaction Key"
-                                                                          : "Room Key",
+                                                                          ? "Enter Valid Purpose"
+                                                                          : "Enter Room Name",
                                                                       errorStyle:
                                                                           TextStyle(
                                                                               fontSize: 15),
@@ -5876,35 +5782,39 @@ class _DashBoardState extends State<DashBoard> {
                                                                 SizedBox(
                                                                   height: 43,
                                                                   width: 100,
-                                                                  child: OutlinedButton(
-                                                                      child: Text(
-                                                                        "Join",
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                16,
-                                                                            color: themeProvider.isDarkTheme
-                                                                                ? Colors.white
-                                                                                : Colors.black),
+                                                                  child:
+                                                                      OutlinedButton(
+                                                                    child: Text(
+                                                                      "Create",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              16,
+                                                                          color: themeProvider.isDarkTheme
+                                                                              ? Colors.white
+                                                                              : Colors.black),
+                                                                    ),
+                                                                    style: OutlinedButton
+                                                                        .styleFrom(
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(10.0),
                                                                       ),
-                                                                      style: OutlinedButton.styleFrom(
-                                                                        shape:
-                                                                            RoundedRectangleBorder(
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(10.0),
-                                                                        ),
-                                                                        side: BorderSide(
-                                                                            color:
-                                                                                Theme.of(context).primaryColor),
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        if (_JformKey
-                                                                            .currentState!
-                                                                            .validate()) {
-                                                                          SendingData(
-                                                                              false,
-                                                                              context);
-                                                                        }
-                                                                      }),
+                                                                      side: BorderSide(
+                                                                          color:
+                                                                              Theme.of(context).primaryColor),
+                                                                    ),
+                                                                    onPressed:
+                                                                        () {
+                                                                      if (_CformKey
+                                                                          .currentState!
+                                                                          .validate()) {
+                                                                        SendingData(
+                                                                            true,
+                                                                            context);
+                                                                      }
+                                                                    },
+                                                                  ),
                                                                 ),
                                                                 SizedBox(
                                                                   height: 10,
@@ -5914,32 +5824,154 @@ class _DashBoardState extends State<DashBoard> {
                                                           );
                                                         },
                                                       );
-                                                    },
-                                                  ),
-                                          ],
+                                                    }
+                                                  },
+                                                ),
+                                                open == 0
+                                                    ? SizedBox()
+                                                    : ListTile(
+                                                        leading: Icon(
+                                                          Icons.edit,
+                                                          color:
+                                                              Theme.of(context)
+                                                                  .primaryColor,
+                                                        ),
+                                                        title:
+                                                            Text("Join Room"),
+                                                        onTap: () {
+                                                          showModalBottomSheet<
+                                                              void>(
+                                                            context: context,
+                                                            isScrollControlled:
+                                                                true,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return Padding(
+                                                                padding: MediaQuery.of(
+                                                                        context)
+                                                                    .viewInsets,
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  mainAxisSize:
+                                                                      MainAxisSize
+                                                                          .min,
+                                                                  children: <Widget>[
+                                                                    Form(
+                                                                      key:
+                                                                          _JformKey,
+                                                                      child:
+                                                                          TextFormField(
+                                                                        controller:
+                                                                            _NRoom,
+                                                                        keyboardType:
+                                                                            TextInputType.text,
+                                                                        maxLength:
+                                                                            7,
+                                                                        maxLines:
+                                                                            1,
+                                                                        style: const TextStyle(
+                                                                            fontSize:
+                                                                                18),
+                                                                        autocorrect:
+                                                                            false,
+                                                                        validator:
+                                                                            (value) {
+                                                                          RegExp
+                                                                              validateText =
+                                                                              RegExp(r'\b[\w]{7}\b');
+                                                                          if (!validateText
+                                                                              .hasMatch(_NRoom.text)) {
+                                                                            return open == 0
+                                                                                ? "Enter Valid Transcation Key"
+                                                                                : "Enter Valid Room Key";
+                                                                          }
+                                                                          return null;
+                                                                        },
+                                                                        decoration:
+                                                                            InputDecoration(
+                                                                          counterText:
+                                                                              "",
+                                                                          contentPadding:
+                                                                              EdgeInsets.all(8.0),
+                                                                          hintText: open == 0
+                                                                              ? "Enter Valid Transaction Key"
+                                                                              : "Enter Room Key",
+                                                                          labelText: open == 0
+                                                                              ? "Transaction Key"
+                                                                              : "Room Key",
+                                                                          errorStyle:
+                                                                              TextStyle(fontSize: 15),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          15,
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          43,
+                                                                      width:
+                                                                          100,
+                                                                      child: OutlinedButton(
+                                                                          child: Text(
+                                                                            "Join",
+                                                                            style:
+                                                                                TextStyle(fontSize: 16, color: themeProvider.isDarkTheme ? Colors.white : Colors.black),
+                                                                          ),
+                                                                          style: OutlinedButton.styleFrom(
+                                                                            shape:
+                                                                                RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(10.0),
+                                                                            ),
+                                                                            side:
+                                                                                BorderSide(color: Theme.of(context).primaryColor),
+                                                                          ),
+                                                                          onPressed: () {
+                                                                            if (_JformKey.currentState!.validate()) {
+                                                                              SendingData(false, context);
+                                                                            }
+                                                                          }),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height:
+                                                                          10,
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                              );
+                                                            },
+                                                          );
+                                                        },
+                                                      ),
+                                              ],
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            },
-                            child: Icon(
-                              Icons.add,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            backgroundColor: Theme.of(context).cardColor,
-                            shape: RoundedRectangleBorder(
-                                side: BorderSide(
-                                    width: 3,
-                                    color: Theme.of(context)
-                                        .primaryColor
-                                        .withOpacity(0.7)),
-                                borderRadius: BorderRadius.circular(20)),
-                          ),
-                        ],
-                      ))
-                : null);
+                                child: Icon(
+                                  Icons.add,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                backgroundColor: Theme.of(context).cardColor,
+                                shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        width: 3,
+                                        color: Theme.of(context)
+                                            .primaryColor
+                                            .withOpacity(0.7)),
+                                    borderRadius: BorderRadius.circular(20)),
+                              ),
+                            ],
+                          ))
+                    : null),
+          );
   }
 }
 
