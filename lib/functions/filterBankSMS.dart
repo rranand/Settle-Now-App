@@ -260,16 +260,17 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> _messages) async {
         messageBody.contains("rasied by") ||
         messageBody.contains("mandate") ||
         messageBody.contains("requested") ||
-        messageBody.contains("due on")) {
+        messageBody.contains("due on") ||
+        messageBody.contains("withdrawal initiated")) {
       continue;
     }
     String bankName = getBankName(_messages[i].sender.toString().toLowerCase());
-
     if (bankName == "Unknown") {
       continue;
     }
     bool isDebited = messageBody.contains("debited") ||
         messageBody.contains("withdrawn") ||
+        messageBody.contains("withdrawal") ||
         messageBody.contains("spent");
     bool isCredited = messageBody.contains("credited");
 
