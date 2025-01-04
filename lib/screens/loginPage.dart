@@ -333,17 +333,25 @@ class _LoginPageState extends State<LoginPage> {
                             height: 15,
                           ),
                           SizedBox(
-                            width: 140,
-                            height: 50,
-                            child: ElevatedButton(
+                              width: 140,
+                              height: 50,
+                              child: OutlinedButton(
                                 child: Text(
                                   "Send OTP",
                                   style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 17,
-                                      color: Colors.white),
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 17),
                                 ),
-                                onPressed: () {
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                                onPressed: () async {
                                   if (this.mounted &&
                                       _formKeyLoginPage.currentState!
                                           .validate()) {
@@ -356,34 +364,55 @@ class _LoginPageState extends State<LoginPage> {
                                           "ipAddress": ipAddress,
                                         });
                                   }
-                                }),
-                          ),
+                                },
+                              )),
                           SizedBox(
                             height: 8,
                           ),
                           SizedBox(
                             width: 260,
                             height: 50,
-                            child: ElevatedButton(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      FaIcon(FontAwesomeIcons.google,
-                                          color: Colors.white),
-                                      SizedBox(
-                                        width: 9,
-                                      ),
-                                      Text(
-                                        "Sign In With Google",
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 17,
-                                            color: Colors.white),
-                                      )
-                                    ]),
+                            child: OutlinedButton(
+                              child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    FaIcon(FontAwesomeIcons.google,
+                                        color: Colors.white),
+                                    SizedBox(
+                                      width: 9,
+                                    ),
+                                    Text(
+                                      "Sign In With Google",
+                                      style: TextStyle(
+                                          fontSize: 17, color: Colors.white),
+                                    )
+                                  ]),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(25.0),
+                                ),
+                                side: BorderSide(
+                                    color: Theme.of(context).primaryColor),
                               ),
+                              // child: Padding(
+                              //   padding: const EdgeInsets.all(12.0),
+                              //   child: Row(
+                              //       mainAxisAlignment: MainAxisAlignment.center,
+                              //       children: [
+                              //         FaIcon(FontAwesomeIcons.google,
+                              //             color: Colors.white),
+                              //         SizedBox(
+                              //           width: 9,
+                              //         ),
+                              //         Text(
+                              //           "Sign In With Google",
+                              //           style: TextStyle(
+                              //               fontWeight: FontWeight.bold,
+                              //               fontSize: 17,
+                              //               color: Colors.white),
+                              //         )
+                              //       ]),
+                              // ),
                               onPressed: () async {
                                 try {
                                   final user = await GoogleSignIN.login();

@@ -60,6 +60,7 @@ class _ProfileState extends State<Profile> {
   String createdOn = "";
   bool isDataLoading = false;
   List<LoggedInEach> loggedInData = [];
+  bool hidePhoneNo = false;
 
   Future<void> logOutFromGoogle() async {
     if (isGoogle) {
@@ -167,6 +168,15 @@ class _ProfileState extends State<Profile> {
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
+        if (data['hidePhoneNo'] != null) {
+          var tempVal = crypto
+              .decrypt(data['hidePhoneNo'].toString())
+              .toUpperCase()
+              .compareTo("NO");
+          if (tempVal != 0) {
+            hidePhoneNo = true;
+          }
+        }
         for (int i = 0; i < data['data'].length; i++) {
           loggedInData.add(LoggedInEach.fromJson(data['data'][i]));
         }
@@ -289,6 +299,36 @@ class _ProfileState extends State<Profile> {
 
     if (this.mounted) {
       setState(() {});
+    }
+  }
+
+  Future<bool> verifyOTP() async {
+    try {
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        'phoneNo': crypto.encrypt(_phoneNo.text),
+        'otp': crypto.encrypt(_otp.text)
+      };
+
+      final response = await createHTTPreq(
+          'auth/verifyOTP', http.post, _token, jsonInputData, context);
+
+      if (response.statusCode == 200) {
+        havePhoneNo = true;
+        setStringPref("__token", crypto.encrypt(_phoneNo.text));
+        if (this.mounted) {
+          setState(() {});
+        }
+        return true;
+      } else {
+        return false;
+      }
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Profile->verifyOTP"]);
+      }
+      return false;
     }
   }
 
@@ -441,19 +481,20 @@ class _ProfileState extends State<Profile> {
                                 buildShowDialog(context);
                               }
                               try {
-                                PhoneAuthCredential credential =
-                                    PhoneAuthProvider.credential(
-                                        verificationId: verificationOTP,
-                                        smsCode: _otp.text);
+                                isVerificationSuccessful = await verifyOTP();
 
-                                await auth.signInWithCredential(credential);
-                                isVerificationSuccessful = true;
-                                await pushPhoneToDB(_phoneNo.text);
-                                if (this.mounted) {
-                                  context.pop();
+                                if (isVerificationSuccessful) {
+                                  await pushPhoneToDB(_phoneNo.text);
+                                  if (this.mounted) {
+                                    context.pop();
+                                  }
+                                  showToast(
+                                      context,
+                                      "OTP Verification Successful",
+                                      Icons.done);
+                                } else {
+                                  OTPverificationError = "Invalid OTP";
                                 }
-                                showToast(context,
-                                    "OTP Verification Successful", Icons.done);
                               } catch (e) {
                                 OTPverificationError = "Invalid OTP";
                               }
@@ -594,32 +635,40 @@ class _ProfileState extends State<Profile> {
 
   sendOTP(String phoneNo, ThemeProvider themeProvider,
       {bool isVerificationPageOpened = false}) async {
-    if (this.mounted) {
-      setState(() {
-        _otp.text = "";
-        OTPverificationError = "";
-      });
-    }
-    buildShowDialog(context);
+    try {
+      if (this.mounted) {
+        setState(() {
+          _otp.text = "";
+          OTPverificationError = "";
+        });
+      }
+      buildShowDialog(context);
 
-    await auth.verifyPhoneNumber(
-      phoneNumber: "+91" + phoneNo,
-      verificationCompleted: (PhoneAuthCredential credential) {
-        _otp.setText(credential.smsCode!);
-      },
-      verificationFailed: (FirebaseAuthException e) {},
-      codeSent: (String verificationId, int? resendToken) {
-        verificationOTP = verificationId;
-      },
-      timeout: Duration(seconds: 0),
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        'phoneNo': crypto.encrypt(phoneNo)
+      };
 
-    if (this.mounted) {
-      context.pop();
-    }
-    if (!isVerificationPageOpened) {
-      verifyOTPDialog(context, themeProvider);
+      final response = await createHTTPreq(
+          'auth/sendOTP', http.post, _token, jsonInputData, context);
+
+      if (this.mounted) {
+        context.pop();
+      }
+
+      if (response.statusCode == 200) {
+        if (!isVerificationPageOpened) {
+          verifyOTPDialog(context, themeProvider);
+        }
+      } else {
+        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
+            Icons.warning_rounded);
+      }
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Profile->sendOTP"]);
+      }
     }
   }
 
@@ -697,39 +746,47 @@ class _ProfileState extends State<Profile> {
                               counterText: "",
                             ),
                           ),
-                          Form(
-                            key: _formKeyLoginPage,
-                            child: AutofillGroup(
-                              child: TextFormField(
-                                readOnly:
-                                    (havePhoneNo || isVerificationSuccessful),
-                                style: TextStyle(fontSize: 16),
-                                controller: _phoneNo,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  labelText:
-                                      (havePhoneNo || isVerificationSuccessful)
-                                          ? "Phone No"
-                                          : "Enter Phone No",
-                                  counterText: "",
+                          hidePhoneNo
+                              ? SizedBox()
+                              : Form(
+                                  key: _formKeyLoginPage,
+                                  child: AutofillGroup(
+                                    child: TextFormField(
+                                      readOnly: (havePhoneNo ||
+                                          isVerificationSuccessful),
+                                      style: TextStyle(fontSize: 16),
+                                      controller: _phoneNo,
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        labelText: (havePhoneNo ||
+                                                isVerificationSuccessful)
+                                            ? "Phone No"
+                                            : "Enter Phone No",
+                                        counterText: "",
+                                      ),
+                                      maxLength: 10,
+                                      autofillHints: [
+                                        AutofillHints.telephoneNumber
+                                      ],
+                                      keyboardType: TextInputType.number,
+                                      validator: (value) {
+                                        RegExp validateEmail =
+                                            RegExp(r'^[\d]{10}');
+                                        if (!validateEmail
+                                            .hasMatch(_phoneNo.text)) {
+                                          return "Invalid Phone No";
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
                                 ),
-                                maxLength: 10,
-                                autofillHints: [AutofillHints.telephoneNumber],
-                                keyboardType: TextInputType.number,
-                                validator: (value) {
-                                  RegExp validateEmail = RegExp(r'^[\d]{10}');
-                                  if (!validateEmail.hasMatch(_phoneNo.text)) {
-                                    return "Invalid Phone No";
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
                           SizedBox(
-                            height: 15,
+                            height: hidePhoneNo ? 0 : 15,
                           ),
-                          !(havePhoneNo || isVerificationSuccessful)
+                          !(havePhoneNo ||
+                                  isVerificationSuccessful ||
+                                  hidePhoneNo)
                               ? SizedBox(
                                   width: 120,
                                   height: 45,
@@ -775,99 +832,132 @@ class _ProfileState extends State<Profile> {
                           ),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.9,
-                            height: MediaQuery.of(context).size.height * 0.3,
-                            child: ListView.builder(
-                              scrollDirection: Axis.vertical,
-                              itemCount: loggedInData.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: 100,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.85,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Card(
-                                      color: Theme.of(context)
-                                          .dialogBackgroundColor,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(
-                                            color: loggedInData[index]
-                                                        .id
-                                                        .length ==
-                                                    0
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context).cardColor),
-                                        borderRadius:
-                                            BorderRadius.circular(15.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(5.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding: EdgeInsets.fromLTRB(
-                                                      10, 0, 0, 0),
-                                                  child: Icon(
-                                                    loggedInData[index]
-                                                                .deviceType ==
-                                                            "Android"
-                                                        ? Icons
-                                                            .phone_android_outlined
-                                                        : Icons
-                                                            .desktop_mac_outlined,
-                                                    size: 35,
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  width: 15,
-                                                ),
-                                                Text(
-                                                  loggedInData[index].deviceType +
-                                                      "\n" +
-                                                      "Last Used : " +
-                                                      captalizeFirstLetter(
-                                                          DateFormat(global
-                                                                  .dateTimeFormat_new)
-                                                              .parse(
-                                                                  loggedInData[
-                                                                          index]
-                                                                      .lastUsed)
-                                                              .toMoment()
-                                                              .fromNow()),
-                                                  style: TextStyle(
-                                                    fontSize: 15,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            loggedInData[index].id.length > 0
-                                                ? ElevatedButton(
-                                                    child: Text(
-                                                      "Logout",
-                                                      style: TextStyle(
-                                                          fontSize: 17,
-                                                          color: Colors.white),
+                            height: MediaQuery.of(context).size.height *
+                                (hidePhoneNo ? 0.4 : 0.3),
+                            child: Scrollbar(
+                              thickness: kIsWeb ? 6 : 2,
+                              child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                itemCount: loggedInData.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    height: 100,
+                                    width: MediaQuery.of(context).size.width *
+                                        0.85,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Card(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: loggedInData[index]
+                                                          .id
+                                                          .length ==
+                                                      0
+                                                  ? Theme.of(context)
+                                                      .primaryColor
+                                                  : Theme.of(context)
+                                                      .cardColor),
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(5.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsets.fromLTRB(
+                                                            10, 0, 0, 0),
+                                                    child: Icon(
+                                                      loggedInData[index]
+                                                                  .deviceType ==
+                                                              "Android"
+                                                          ? Icons
+                                                              .phone_android_outlined
+                                                          : Icons
+                                                              .desktop_mac_outlined,
+                                                      size: 35,
                                                     ),
-                                                    onPressed: () async {
-                                                      await logoutSpecific(
-                                                          loggedInData[index]
-                                                              .id,
-                                                          index);
-                                                    })
-                                                : SizedBox()
-                                          ],
+                                                  ),
+                                                  SizedBox(
+                                                    width: 15,
+                                                  ),
+                                                  Text(
+                                                    loggedInData[index]
+                                                            .deviceType +
+                                                        "\n" +
+                                                        "Last Used : " +
+                                                        captalizeFirstLetter(
+                                                            DateFormat(global
+                                                                    .dateTimeFormat_new)
+                                                                .parse(loggedInData[
+                                                                        index]
+                                                                    .lastUsed)
+                                                                .toMoment()
+                                                                .fromNow()),
+                                                    style: TextStyle(
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              loggedInData[index].id.length > 0
+                                                  ? SizedBox(
+                                                      width: 110,
+                                                      height: 50,
+                                                      child: OutlinedButton(
+                                                        child: Text(
+                                                          "Logout",
+                                                          style: TextStyle(
+                                                              color: themeProvider
+                                                                      .isDarkTheme
+                                                                  ? Colors.white
+                                                                  : Colors
+                                                                      .black,
+                                                              fontSize: 19),
+                                                        ),
+                                                        style: OutlinedButton
+                                                            .styleFrom(
+                                                          shape:
+                                                              RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20.0),
+                                                          ),
+                                                          side: BorderSide(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColor
+                                                                  .withAlpha(
+                                                                      100)),
+                                                        ),
+                                                        onPressed: () async {
+                                                          await logoutSpecific(
+                                                              loggedInData[
+                                                                      index]
+                                                                  .id,
+                                                              index);
+                                                        },
+                                                      ),
+                                                    )
+                                                  : SizedBox()
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ],
