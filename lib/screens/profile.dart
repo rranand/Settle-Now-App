@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -56,7 +55,6 @@ class _ProfileState extends State<Profile> {
   String OTPverificationError = "";
   bool isVerificationSuccessful = false;
   bool havePhoneNo = false;
-  FirebaseAuth auth = FirebaseAuth.instance;
   String createdOn = "";
   bool isDataLoading = false;
   List<LoggedInEach> loggedInData = [];
