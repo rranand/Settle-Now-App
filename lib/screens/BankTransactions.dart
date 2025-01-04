@@ -2775,34 +2775,37 @@ class _BankTransactionsState extends State<BankTransactions> {
                           ),
                         ),
                         SizedBox(
-                          height: 25,
+                          height: 20,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             SizedBox(
                               height: 50,
-                              width: 140,
+                              width: 200,
                               child: OutlinedButton(
                                 child: Text(
-                                  "Open Setting",
+                                  "Allow SMS Read",
                                   style: TextStyle(
                                       color: themeProvider.isDarkTheme
                                           ? Colors.white
                                           : Colors.black,
-                                      fontSize: 16),
+                                      fontSize: 17),
                                 ),
                                 onPressed: () {
                                   openAppSettings();
                                 },
                                 style: OutlinedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
                                   side: BorderSide(
                                       color: Theme.of(context).primaryColor),
                                 ),
                               ),
+                            ),
+                            SizedBox(
+                              height: 12,
                             ),
                             SizedBox(
                               height: 50,
@@ -2814,7 +2817,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                       color: themeProvider.isDarkTheme
                                           ? Colors.white
                                           : Colors.black,
-                                      fontSize: 16),
+                                      fontSize: 17),
                                 ),
                                 onPressed: () {
                                   if (this.mounted) {
@@ -2823,10 +2826,9 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 },
                                 style: OutlinedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderRadius: BorderRadius.circular(15),
                                   ),
-                                  side: BorderSide(
-                                      color: Theme.of(context).primaryColor),
+                                  side: BorderSide(color: Colors.redAccent),
                                 ),
                               ),
                             )

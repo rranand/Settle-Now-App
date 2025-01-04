@@ -687,310 +687,318 @@ class _ProfileState extends State<Profile> {
               ? SizedBox(
                   child: CircularProgressIndicator.adaptive(),
                 )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 40,
-                    ),
-                    CachedNetworkImage(
-                      httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                      imageUrl: (isGoogle ? picUrl : addCorsinImage(picUrl)),
-                      progressIndicatorBuilder:
-                          (context, url, downloadProgress) =>
-                              CircularProgressIndicator(
-                                  value: downloadProgress.progress),
-                      errorWidget: (context, url, error) => Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              image: AssetImage('assets/Images/unknown.jpeg'),
-                              fit: BoxFit.cover),
-                        ),
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: 40,
                       ),
-                      imageBuilder: (context, imageProvider) => Container(
-                        width: 150,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              image: imageProvider, fit: BoxFit.cover),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 18,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        children: [
-                          TextField(
-                            style: TextStyle(fontSize: 16),
-                            readOnly: true,
-                            controller: TextEditingController(text: name),
-                            decoration: InputDecoration(
-                                border: InputBorder.none,
-                                labelText: "Name",
-                                counterText: ""),
+                      CachedNetworkImage(
+                        httpHeaders: {'Access-Control-Allow-Origin': '*'},
+                        imageUrl: (isGoogle ? picUrl : addCorsinImage(picUrl)),
+                        progressIndicatorBuilder:
+                            (context, url, downloadProgress) =>
+                                CircularProgressIndicator(
+                                    value: downloadProgress.progress),
+                        errorWidget: (context, url, error) => Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                image: AssetImage('assets/Images/unknown.jpeg'),
+                                fit: BoxFit.cover),
                           ),
-                          TextField(
-                            style: TextStyle(fontSize: 16),
-                            readOnly: true,
-                            controller: TextEditingController(text: _email),
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              labelText: "Email",
-                              counterText: "",
+                        ),
+                        imageBuilder: (context, imageProvider) => Container(
+                          width: 150,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                                image: imageProvider, fit: BoxFit.cover),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 18,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          children: [
+                            TextField(
+                              style: TextStyle(fontSize: 16),
+                              readOnly: true,
+                              controller: TextEditingController(text: name),
+                              decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  labelText: "Name",
+                                  counterText: ""),
                             ),
-                          ),
-                          hidePhoneNo
-                              ? SizedBox()
-                              : Form(
-                                  key: _formKeyLoginPage,
-                                  child: AutofillGroup(
-                                    child: TextFormField(
-                                      readOnly: (havePhoneNo ||
-                                          isVerificationSuccessful),
-                                      style: TextStyle(fontSize: 16),
-                                      controller: _phoneNo,
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        labelText: (havePhoneNo ||
-                                                isVerificationSuccessful)
-                                            ? "Phone No"
-                                            : "Enter Phone No",
-                                        counterText: "",
+                            TextField(
+                              style: TextStyle(fontSize: 16),
+                              readOnly: true,
+                              controller: TextEditingController(text: _email),
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                labelText: "Email",
+                                counterText: "",
+                              ),
+                            ),
+                            hidePhoneNo
+                                ? SizedBox()
+                                : Form(
+                                    key: _formKeyLoginPage,
+                                    child: AutofillGroup(
+                                      child: TextFormField(
+                                        readOnly: (havePhoneNo ||
+                                            isVerificationSuccessful),
+                                        style: TextStyle(fontSize: 16),
+                                        controller: _phoneNo,
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          labelText: (havePhoneNo ||
+                                                  isVerificationSuccessful)
+                                              ? "Phone No"
+                                              : "Enter Phone No",
+                                          counterText: "",
+                                        ),
+                                        maxLength: 10,
+                                        autofillHints: [
+                                          AutofillHints.telephoneNumber
+                                        ],
+                                        keyboardType: TextInputType.number,
+                                        validator: (value) {
+                                          RegExp validateEmail =
+                                              RegExp(r'^[\d]{10}');
+                                          if (!validateEmail
+                                              .hasMatch(_phoneNo.text)) {
+                                            return "Invalid Phone No";
+                                          }
+                                          return null;
+                                        },
                                       ),
-                                      maxLength: 10,
-                                      autofillHints: [
-                                        AutofillHints.telephoneNumber
-                                      ],
-                                      keyboardType: TextInputType.number,
-                                      validator: (value) {
-                                        RegExp validateEmail =
-                                            RegExp(r'^[\d]{10}');
-                                        if (!validateEmail
-                                            .hasMatch(_phoneNo.text)) {
-                                          return "Invalid Phone No";
+                                    ),
+                                  ),
+                            SizedBox(
+                              height: hidePhoneNo ? 0 : 15,
+                            ),
+                            !(havePhoneNo ||
+                                    isVerificationSuccessful ||
+                                    hidePhoneNo)
+                                ? SizedBox(
+                                    width: 120,
+                                    height: 45,
+                                    child: OutlinedButton(
+                                      child: Text(
+                                        "Verify",
+                                        style: TextStyle(
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      onPressed: () async {
+                                        if (_formKeyLoginPage.currentState!
+                                            .validate()) {
+                                          await sendOTP(
+                                              _phoneNo.text, themeProvider);
                                         }
-                                        return null;
                                       },
                                     ),
-                                  ),
-                                ),
-                          SizedBox(
-                            height: hidePhoneNo ? 0 : 15,
-                          ),
-                          !(havePhoneNo ||
-                                  isVerificationSuccessful ||
-                                  hidePhoneNo)
-                              ? SizedBox(
-                                  width: 120,
-                                  height: 45,
-                                  child: OutlinedButton(
-                                    child: Text(
-                                      "Verify",
-                                      style: TextStyle(
-                                          color: themeProvider.isDarkTheme
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontSize: 16),
-                                    ),
-                                    style: OutlinedButton.styleFrom(
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10.0),
-                                      ),
-                                      side: BorderSide(
-                                          color:
-                                              Theme.of(context).primaryColor),
-                                    ),
-                                    onPressed: () async {
-                                      if (_formKeyLoginPage.currentState!
-                                          .validate()) {
-                                        await sendOTP(
-                                            _phoneNo.text, themeProvider);
-                                      }
-                                    },
-                                  ),
-                                )
-                              : SizedBox(),
-                          SizedBox(
-                            height: 7,
-                          ),
-                          createdOn.length >= 12
-                              ? Text(
-                                  "Member Since " + createdOn.substring(0, 11),
-                                  style: TextStyle(fontSize: 16),
-                                )
-                              : SizedBox(),
-                          SizedBox(
-                            height: 15,
-                          ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            height: MediaQuery.of(context).size.height *
-                                (hidePhoneNo ? 0.4 : 0.3),
-                            child: Scrollbar(
-                              thickness: kIsWeb ? 6 : 2,
-                              child: ListView.builder(
-                                scrollDirection: Axis.vertical,
-                                itemCount: loggedInData.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return SizedBox(
-                                    height: 100,
-                                    width: MediaQuery.of(context).size.width *
-                                        0.85,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: Card(
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: loggedInData[index]
-                                                          .id
-                                                          .length ==
-                                                      0
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Theme.of(context)
-                                                      .cardColor),
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(5.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsets.fromLTRB(
-                                                            10, 0, 0, 0),
-                                                    child: Icon(
-                                                      loggedInData[index]
-                                                                  .deviceType ==
-                                                              "Android"
-                                                          ? Icons
-                                                              .phone_android_outlined
-                                                          : Icons
-                                                              .desktop_mac_outlined,
-                                                      size: 35,
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 15,
-                                                  ),
-                                                  Text(
-                                                    loggedInData[index]
-                                                            .deviceType +
-                                                        "\n" +
-                                                        "Last Used : " +
-                                                        captalizeFirstLetter(
-                                                            DateFormat(global
-                                                                    .dateTimeFormat_new)
-                                                                .parse(loggedInData[
-                                                                        index]
-                                                                    .lastUsed)
-                                                                .toMoment()
-                                                                .fromNow()),
-                                                    style: TextStyle(
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              loggedInData[index].id.length > 0
-                                                  ? SizedBox(
-                                                      width: 110,
-                                                      height: 50,
-                                                      child: OutlinedButton(
-                                                        child: Text(
-                                                          "Logout",
-                                                          style: TextStyle(
-                                                              color: themeProvider
-                                                                      .isDarkTheme
-                                                                  ? Colors.white
-                                                                  : Colors
-                                                                      .black,
-                                                              fontSize: 19),
-                                                        ),
-                                                        style: OutlinedButton
-                                                            .styleFrom(
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20.0),
-                                                          ),
-                                                          side: BorderSide(
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .primaryColor
-                                                                  .withAlpha(
-                                                                      100)),
-                                                        ),
-                                                        onPressed: () async {
-                                                          await logoutSpecific(
-                                                              loggedInData[
-                                                                      index]
-                                                                  .id,
-                                                              index);
-                                                        },
+                                  )
+                                : SizedBox(),
+                            SizedBox(
+                              height: 7,
+                            ),
+                            createdOn.length >= 12
+                                ? Text(
+                                    "Member Since " +
+                                        createdOn.substring(0, 11),
+                                    style: TextStyle(fontSize: 16),
+                                  )
+                                : SizedBox(),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.9,
+                              height: MediaQuery.of(context).size.height *
+                                  (hidePhoneNo ? 0.4 : 0.3),
+                              child: Scrollbar(
+                                thickness: kIsWeb ? 6 : 2,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  itemCount: loggedInData.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return SizedBox(
+                                      height: 100,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.85,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: Card(
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: loggedInData[index]
+                                                            .id
+                                                            .length ==
+                                                        0
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Theme.of(context)
+                                                        .cardColor),
+                                            borderRadius:
+                                                BorderRadius.circular(15.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(5.0),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          EdgeInsets.fromLTRB(
+                                                              10, 0, 0, 0),
+                                                      child: Icon(
+                                                        loggedInData[index]
+                                                                    .deviceType ==
+                                                                "Android"
+                                                            ? Icons
+                                                                .phone_android_outlined
+                                                            : Icons
+                                                                .desktop_mac_outlined,
+                                                        size: 35,
                                                       ),
-                                                    )
-                                                  : SizedBox()
-                                            ],
+                                                    ),
+                                                    SizedBox(
+                                                      width: 15,
+                                                    ),
+                                                    Text(
+                                                      loggedInData[index]
+                                                              .deviceType +
+                                                          "\n" +
+                                                          "Last Used : " +
+                                                          captalizeFirstLetter(
+                                                              DateFormat(global
+                                                                      .dateTimeFormat_new)
+                                                                  .parse(loggedInData[
+                                                                          index]
+                                                                      .lastUsed)
+                                                                  .toMoment()
+                                                                  .fromNow()),
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                loggedInData[index].id.length >
+                                                        0
+                                                    ? SizedBox(
+                                                        width: 110,
+                                                        height: 50,
+                                                        child: OutlinedButton(
+                                                          child: Text(
+                                                            "Logout",
+                                                            style: TextStyle(
+                                                                color: themeProvider
+                                                                        .isDarkTheme
+                                                                    ? Colors
+                                                                        .white
+                                                                    : Colors
+                                                                        .black,
+                                                                fontSize: 19),
+                                                          ),
+                                                          style: OutlinedButton
+                                                              .styleFrom(
+                                                            shape:
+                                                                RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20.0),
+                                                            ),
+                                                            side: BorderSide(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColor
+                                                                    .withAlpha(
+                                                                        100)),
+                                                          ),
+                                                          onPressed: () async {
+                                                            await logoutSpecific(
+                                                                loggedInData[
+                                                                        index]
+                                                                    .id,
+                                                                index);
+                                                          },
+                                                        ),
+                                                      )
+                                                    : SizedBox()
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                  );
-                                },
+                                    );
+                                  },
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(flex: 1, child: SizedBox()),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      height: 55,
-                      child: OutlinedButton(
-                        child: Text(
-                          "Delete Account",
-                          style: TextStyle(
-                              color: themeProvider.isDarkTheme
-                                  ? Colors.white
-                                  : Colors.black,
-                              fontSize: 19),
+                          ],
                         ),
-                        style: OutlinedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          side: BorderSide(color: Colors.redAccent),
-                        ),
-                        onPressed: () async {
-                          deleteDialog(context, themeProvider);
-                        },
                       ),
-                    ),
-                    SizedBox(
-                      height: 25,
-                    )
-                  ],
+                      Expanded(flex: 1, child: SizedBox()),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        height: 55,
+                        child: OutlinedButton(
+                          child: Text(
+                            "Delete Account",
+                            style: TextStyle(
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontSize: 19),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            side: BorderSide(color: Colors.redAccent),
+                          ),
+                          onPressed: () async {
+                            deleteDialog(context, themeProvider);
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        height: 25,
+                      )
+                    ],
+                  ),
                 ),
         ),
         bottomNavigationBar: internetConnProvider.isAlertSet
