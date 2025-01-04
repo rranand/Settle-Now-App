@@ -834,7 +834,7 @@ class _ProfileState extends State<Profile> {
                               height: 15,
                             ),
                             SizedBox(
-                              width: MediaQuery.of(context).size.width * 0.9,
+                              width: MediaQuery.of(context).size.width,
                               height: MediaQuery.of(context).size.height *
                                   (hidePhoneNo ? 0.4 : 0.3),
                               child: Scrollbar(
@@ -846,8 +846,7 @@ class _ProfileState extends State<Profile> {
                                       (BuildContext context, int index) {
                                     return SizedBox(
                                       height: 100,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.85,
+                                      width: MediaQuery.of(context).size.width,
                                       child: Padding(
                                         padding: EdgeInsets.all(8.0),
                                         child: Card(
