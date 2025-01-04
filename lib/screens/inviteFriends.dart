@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:auto_size_text/auto_size_text.dart';
-import 'package:contacts_service/contacts_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -95,19 +95,14 @@ class _InviteFriendsState extends State<InviteFriends> {
   getContacts() async {
     buildShowDialog(context);
     try {
-      List<Contact> contacts = await ContactsService.getContacts(
-          withThumbnails: false,
-          androidLocalizedLabels: false,
-          photoHighResolution: false);
+      List<Contact> contacts = await FlutterContacts.getContacts();
       List<String> allContacts = [];
-
       for (int i = 0; i < contacts.length; i++) {
-        Map<dynamic, dynamic> tempMap = contacts[i].toMap();
-        for (int j = 0; j < contacts[i].phones!.length; j++) {
-          allContacts.add(fixPhoneNumber(tempMap['phones'][j]['value']));
+        List<Phone> phoneList = contacts[i].phones;
+        for (int j = 0; j < phoneList.length; j++) {
+          allContacts.add(fixPhoneNumber(phoneList[j].number));
         }
       }
-
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email),
         'contacts': crypto.encrypt(allContacts.toString())
