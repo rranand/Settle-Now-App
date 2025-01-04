@@ -226,20 +226,13 @@ class _DashBoardState extends State<DashBoard> {
         ]);
       }
       await prefs.clear();
-      if (this.mounted) {
-        setState(() {
-          isLogoutTriggered = false;
-        });
-      }
       while (this.mounted && context.canPop()) {
         context.pop();
       }
       while (this.mounted && Navigator.of(context).canPop()) {
         Navigator.of(context).pop();
       }
-      if (this.mounted) {
-        context.push(AppRouteConstants.loginRouteName);
-      }
+      context.pushReplacement(AppRouteConstants.loginRouteName);
     }
   }
 
