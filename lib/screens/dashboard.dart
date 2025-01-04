@@ -135,6 +135,9 @@ class _DashBoardState extends State<DashBoard> {
       ValueNotifier(new Map());
   bool initalDataLoaded = false;
   bool isInvitePremissionProvided = false;
+  bool isNotificationPremissionProvided = false;
+  bool isInvitePremissionPoppedProvided = false;
+  bool isNotificationPremissionPoppedProvided = false;
   bool isSentRoomRequestLoaded = false;
   List<FriendEach> friendDataSearched = [];
   List<FriendEach> friendData = [];
@@ -526,7 +529,13 @@ class _DashBoardState extends State<DashBoard> {
 
     if (_email.text == "") {
       if (!kIsWeb) {
-        isInvitePremissionProvided = await getInvitePermissionStatus();
+        isInvitePremissionPoppedProvided =
+            await getInvitePermissionPoppedStatus();
+        isNotificationPremissionPoppedProvided =
+            await getNotificationPermissionPoppedStatus();
+        isInvitePremissionProvided = await Permission.contacts.isGranted;
+        isNotificationPremissionProvided =
+            await AwesomeNotifications().isNotificationAllowed();
       }
 
       isGoogle = await getBoolPrefs("isGoogle") ?? false;
@@ -558,9 +567,14 @@ class _DashBoardState extends State<DashBoard> {
         _token = jsonOutData["token"]!;
         initalDataLoaded = true;
 
-        if (!kIsWeb && !isInvitePremissionProvided) {
+        if (!kIsWeb && !isInvitePremissionPoppedProvided) {
           isContactPermissionGranted = await context.push(
               AppRouteConstants.inviteFriendsRouteName,
+              extra: {"firstTime": true}) as bool;
+        }
+        if (!kIsWeb && !isNotificationPremissionPoppedProvided) {
+          isNotificationPremissionProvided = await context.push(
+              AppRouteConstants.notificationPermissionRouteName,
               extra: {"firstTime": true}) as bool;
         }
       } else {
@@ -5470,6 +5484,30 @@ class _DashBoardState extends State<DashBoard> {
                               ),
                               title: Text(
                                 "Import Contacts",
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white),
+                              ),
+                            ),
+                      kIsWeb || isNotificationPremissionProvided
+                          ? SizedBox()
+                          : ListTile(
+                              onTap: () async {
+                                isNotificationPremissionProvided = await context
+                                    .push(
+                                        AppRouteConstants
+                                            .notificationPermissionRouteName,
+                                        extra: {"firstTime": false}) as bool;
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              leading: Icon(
+                                Icons.notifications_active_outlined,
+                                color: Colors.white,
+                                size: 22,
+                              ),
+                              title: Text(
+                                "Get Notified",
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.white),
                               ),

@@ -334,7 +334,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           SizedBox(
                               width: 140,
-                              height: 50,
+                              height: 47,
                               child: OutlinedButton(
                                 child: Text(
                                   "Send OTP",
@@ -394,25 +394,6 @@ class _LoginPageState extends State<LoginPage> {
                                 side: BorderSide(
                                     color: Theme.of(context).primaryColor),
                               ),
-                              // child: Padding(
-                              //   padding: const EdgeInsets.all(12.0),
-                              //   child: Row(
-                              //       mainAxisAlignment: MainAxisAlignment.center,
-                              //       children: [
-                              //         FaIcon(FontAwesomeIcons.google,
-                              //             color: Colors.white),
-                              //         SizedBox(
-                              //           width: 9,
-                              //         ),
-                              //         Text(
-                              //           "Sign In With Google",
-                              //           style: TextStyle(
-                              //               fontWeight: FontWeight.bold,
-                              //               fontSize: 17,
-                              //               color: Colors.white),
-                              //         )
-                              //       ]),
-                              // ),
                               onPressed: () async {
                                 try {
                                   final user = await GoogleSignIN.login();

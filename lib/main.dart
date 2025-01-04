@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_config.dart';
@@ -47,11 +46,6 @@ Future<void> main() async {
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
-    await Permission.notification.isDenied.then((value) {
-      if (value) {
-        Permission.notification.request();
-      }
-    });
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     AwesomeNotifications()

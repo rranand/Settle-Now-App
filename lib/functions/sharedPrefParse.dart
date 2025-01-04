@@ -42,14 +42,28 @@ Future<bool> getBoardingStatus() async {
   }
 }
 
-Future<bool> getInvitePermissionStatus() async {
+Future<bool> getInvitePermissionPoppedStatus() async {
   await getSharedPrefInstance();
-  var isInvitePremissionProvided =
-      await StaticVariables.prefs!.getBool('isInvitePremissionProvided');
-  if (isInvitePremissionProvided != null) {
-    return isInvitePremissionProvided;
+  var isInvitePremissionPoppedProvided =
+      await StaticVariables.prefs!.getBool('isInvitePremissionPoppedProvided');
+  if (isInvitePremissionPoppedProvided != null) {
+    return isInvitePremissionPoppedProvided;
   } else {
-    await StaticVariables.prefs!.setBool('isInvitePremissionProvided', false);
+    await StaticVariables.prefs!
+        .setBool('isInvitePremissionPoppedProvided', false);
+    return false;
+  }
+}
+
+Future<bool> getNotificationPermissionPoppedStatus() async {
+  await getSharedPrefInstance();
+  var isNotificationPremissionPoppedProvided = await StaticVariables.prefs!
+      .getBool('isNotificationPremissionPoppedProvided');
+  if (isNotificationPremissionPoppedProvided != null) {
+    return isNotificationPremissionPoppedProvided;
+  } else {
+    await StaticVariables.prefs!
+        .setBool('isNotificationPremissionPoppedProvided', false);
     return false;
   }
 }

@@ -29,7 +29,7 @@ class _InviteFriendsState extends State<InviteFriends> {
   String _token = "";
 
   initialization() async {
-    setBoolPrefs('isInvitePremissionProvided', true);
+    setBoolPrefs('isInvitePremissionPoppedProvided', true);
     var tokenData = await getStringPref('token');
 
     if (tokenData != null) {
@@ -219,6 +219,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                         height: 70,
                         child: Card(
                           elevation: 1.0,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           shadowColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
@@ -275,6 +276,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                         height: 70,
                         child: Card(
                           elevation: 1.0,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           shadowColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
@@ -302,7 +304,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                                     child: InkWell(
                                       onTap: () {},
                                       child: AutoSizeText(
-                                        "Asmee",
+                                        "Aditya",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontSize: 17),
                                         maxFontSize: 21,
@@ -331,6 +333,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                         height: 70,
                         child: Card(
                           elevation: 1.0,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           shadowColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
@@ -358,7 +361,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                                     child: InkWell(
                                       onTap: () {},
                                       child: AutoSizeText(
-                                        "Raveena",
+                                        "Suhani",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontSize: 17),
                                         maxFontSize: 21,
@@ -387,6 +390,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                         height: 70,
                         child: Card(
                           elevation: 1.0,
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           shadowColor: Theme.of(context).primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
@@ -414,7 +418,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                                     child: InkWell(
                                       onTap: () {},
                                       child: AutoSizeText(
-                                        "Anala",
+                                        "Ritika",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontSize: 17),
                                         maxFontSize: 21,
@@ -463,6 +467,9 @@ class _InviteFriendsState extends State<InviteFriends> {
                             openAppSettings();
                           } else {
                             await getContactPermission();
+                          }
+                          if (this.mounted) {
+                            context.pop(false);
                           }
                         },
                       ),

@@ -213,16 +213,6 @@ class _onBoardingState extends State<onBoarding> {
                                           child: Column(
                                             children: [
                                               data[i].widgets[index],
-                                              /*SizedBox(
-                                                height: 10,
-                                              ),
-                                              Text(
-                                                data[i].ImageText[index],
-                                                style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight:
-                                                        FontWeight.w400),
-                                              ),*/
                                               Expanded(
                                                 child: SizedBox(),
                                               ),
@@ -320,12 +310,12 @@ class _onBoardingState extends State<onBoarding> {
                   height: 60,
                   margin: EdgeInsets.all(40),
                   width: double.infinity,
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
+                  child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
+                          borderRadius: BorderRadius.circular(25.0),
                         ),
-                        elevation: 15.0,
+                        side: BorderSide(color: Theme.of(context).primaryColor),
                       ),
                       child: Text(
                         pageIndex == data.length - 1 ? "Get Started" : "Next",

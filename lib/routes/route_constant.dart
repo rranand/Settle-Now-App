@@ -16,6 +16,8 @@ class AppRouteConstants {
   static const String maintainRouteName = '/maintain';
   static const String contactUsRouteName = '/contact_us';
   static const String inviteFriendsRouteName = '/inviteFriends';
+  static const String notificationPermissionRouteName =
+      '/notificationPermission';
   static const String errorPageRouteName = '/404';
   static const String deepLinkJoinRoom = '/room';
   static const String deepLinkJoinLend = '/lend';

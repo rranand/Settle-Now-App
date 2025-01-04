@@ -13,6 +13,7 @@ import 'package:settlenow/screens/inviteFriends.dart';
 import 'package:settlenow/screens/lendPage.dart';
 import 'package:settlenow/screens/loginPage.dart';
 import 'package:settlenow/screens/maintain.dart';
+import 'package:settlenow/screens/notificationPermission.dart';
 import 'package:settlenow/screens/onBoarding.dart';
 import 'package:settlenow/screens/otpName.dart';
 import 'package:settlenow/screens/profile.dart';
@@ -144,6 +145,21 @@ class AppRouter {
                   );
                 }
                 return InviteFriends(
+                  firstTime: extra['firstTime'] as bool,
+                );
+              },
+            ),
+            GoRoute(
+              path: AppRouteConstants.notificationPermissionRouteName
+                  .substring(1),
+              builder: (context, state) {
+                final extra = state.extra as Map<String, dynamic>?;
+                if (extra == null) {
+                  return NotificationPermission(
+                    firstTime: false,
+                  );
+                }
+                return NotificationPermission(
                   firstTime: extra['firstTime'] as bool,
                 );
               },
