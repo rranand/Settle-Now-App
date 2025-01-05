@@ -95,9 +95,14 @@ class NotificationController {
             "/" +
             receivedAction.payload!["roomKey"]!);
       }
+    } else if (receivedAction.payload!["type"] == "account") {
+      context.push(AppRouteConstants.profileRouteName);
+    } else if (receivedAction.payload!["type"] == "quickSplit") {
+      context.push(AppRouteConstants.dashboardRouteName,
+          extra: {'dash': 0, 'firstTime': false});
     } else {
       context.push(AppRouteConstants.dashboardRouteName,
-          extra: {'dash': 1, 'firstTime': false});
+          extra: {'dash': 0, 'firstTime': false});
     }
   }
 }

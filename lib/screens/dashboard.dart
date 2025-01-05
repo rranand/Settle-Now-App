@@ -898,7 +898,18 @@ class _DashBoardState extends State<DashBoard> {
               title: message.notification!.title,
               body: message.notification!.body,
               payload: notificationData));
-    } else {
+    } else if (notificationFrom == "account") {
+      Map<String, String> notificationData =
+          await getDataFromNotification(message.data.toString());
+      AwesomeNotifications().createNotification(
+          content: NotificationContent(
+              id: id,
+              channelKey: 'accountID',
+              title: message.notification!.title,
+              body: message.notification!.body,
+              payload: notificationData));
+    } else if (notificationFrom == "RoomRequest" ||
+        notificationFrom == "LenDenRequest") {
       Map<String, String> notificationData =
           await getDataFromNotification(message.data.toString());
       AwesomeNotifications().createNotification(
@@ -912,6 +923,26 @@ class _DashBoardState extends State<DashBoard> {
             NotificationActionButton(key: 'JOIN', label: 'Join'),
             NotificationActionButton(key: 'CANCEL', label: 'Cancel'),
           ]);
+    } else if (notificationFrom == "quickSplit") {
+      Map<String, String> notificationData =
+          await getDataFromNotification(message.data.toString());
+      AwesomeNotifications().createNotification(
+          content: NotificationContent(
+              id: id,
+              channelKey: 'quickSplitID',
+              title: message.notification!.title,
+              body: message.notification!.body,
+              payload: notificationData));
+    } else {
+      Map<String, String> notificationData =
+          await getDataFromNotification(message.data.toString());
+      AwesomeNotifications().createNotification(
+          content: NotificationContent(
+              id: id,
+              channelKey: 'miscellaneousID',
+              title: message.notification!.title,
+              body: message.notification!.body,
+              payload: notificationData));
     }
   }
 
@@ -1015,6 +1046,11 @@ class _DashBoardState extends State<DashBoard> {
             channelKey: "remainderID",
             channelName: "Remainder",
             channelDescription: 'Notification channel for Remainders',
+            defaultColor: Colors.white),
+        NotificationChannel(
+            channelKey: "accountID",
+            channelName: "Account",
+            channelDescription: 'Notification channel for Account',
             defaultColor: Colors.white),
         NotificationChannel(
             channelKey: "miscellaneousID",

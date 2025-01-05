@@ -71,6 +71,11 @@ Future<void> main() async {
           channelDescription: 'Notification channel for Remainders',
           defaultColor: Colors.white),
       NotificationChannel(
+          channelKey: "accountID",
+          channelName: "Account",
+          channelDescription: 'Notification channel for Account',
+          defaultColor: Colors.white),
+      NotificationChannel(
           channelKey: "miscellaneousID",
           channelName: "Miscellaneous",
           channelDescription: 'Notification channel for Miscellaneous',
