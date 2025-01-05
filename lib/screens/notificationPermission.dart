@@ -21,6 +21,7 @@ class _NotificationPermissionState extends State<NotificationPermission> {
 
   initialization() async {
     setBoolPrefs('isNotificationPremissionPoppedProvided', true);
+    bool isPermanent = await AwesomeNotifications().isNotificationAllowed();
     var tokenData = await getStringPref('token');
 
     if (tokenData == null) {
@@ -31,6 +32,10 @@ class _NotificationPermissionState extends State<NotificationPermission> {
         context.go(AppRouteConstants.loginRouteName);
       }
       return;
+    }
+
+    if (isPermanent && this.mounted) {
+      context.pop(isPermanent);
     }
   }
 
@@ -49,8 +54,7 @@ class _NotificationPermissionState extends State<NotificationPermission> {
       Permission.accessNotificationPolicy.isPermanentlyDenied
     ]);
 
-    permissionGranted = flags[0] || flags[1];
-    permissionGranted = !permissionGranted;
+    permissionGranted = !(flags[0] || flags[1]);
 
     if (!permissionGranted) {
       permissionGranted =
@@ -137,9 +141,7 @@ class _NotificationPermissionState extends State<NotificationPermission> {
                         onPressed: () async {
                           bool isPermanent = await AwesomeNotifications()
                               .isNotificationAllowed();
-                          if (isPermanent) {
-                            openAppSettings();
-                          } else {
+                          if (!isPermanent) {
                             await getNotificationPermission();
                           }
                           if (this.mounted) {
