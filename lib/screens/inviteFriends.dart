@@ -95,14 +95,16 @@ class _InviteFriendsState extends State<InviteFriends> {
   getContacts() async {
     buildShowDialog(context);
     try {
-      List<Contact> contacts = await FlutterContacts.getContacts();
-      List<String> allContacts = [];
+      List<Contact> contacts =
+          await FlutterContacts.getContacts(withProperties: true);
+      Set<String> uniqueContact = new Set();
       for (int i = 0; i < contacts.length; i++) {
         List<Phone> phoneList = contacts[i].phones;
         for (int j = 0; j < phoneList.length; j++) {
-          allContacts.add(fixPhoneNumber(phoneList[j].number));
+          uniqueContact.add(fixPhoneNumber(phoneList[j].normalizedNumber));
         }
       }
+      List<String> allContacts = uniqueContact.toList();
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email),
         'contacts': crypto.encrypt(allContacts.toString())
@@ -131,9 +133,6 @@ class _InviteFriendsState extends State<InviteFriends> {
       }
     }
 
-    if (this.mounted) {
-      context.pop(contactPermissionGranted);
-    }
     if (this.mounted) {
       context.pop(contactPermissionGranted);
     }
@@ -469,7 +468,7 @@ class _InviteFriendsState extends State<InviteFriends> {
                             await getContactPermission();
                           }
                           if (this.mounted) {
-                            context.pop(false);
+                            context.pop(contactPermissionGranted);
                           }
                         },
                       ),
