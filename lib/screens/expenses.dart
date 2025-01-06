@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
@@ -55,6 +56,8 @@ class _ExpensesState extends State<Expenses> {
   DateTime expensedate = DateTime.now();
   List<dynamic> expenseCategory = [];
   List<List<dynamic>> subCategory = [];
+  bool searchTrigger = false;
+  TextEditingController _searchText = TextEditingController();
 
   @override
   void dispose() {
@@ -652,13 +655,21 @@ class _ExpensesState extends State<Expenses> {
       });
     }
 
-    if (filtercategoryIndex.isEmpty) {
+    if (filtercategoryIndex.isEmpty && _searchText.text.length == 0) {
       showFilterResult = false;
     } else {
       TransList.forEach((element) {
-        if (filtercategoryIndex.contains(
-            expenseCategory.indexOf(crypto.decrypt(element['type'])))) {
-          filterResult.add(element);
+        if ((_searchText.text.length > 0 &&
+                crypto
+                    .decrypt(element['purpose'])
+                    .toLowerCase()
+                    .contains(_searchText.text.toLowerCase())) ||
+            _searchText.text.length == 0) {
+          if (filtercategoryIndex.isEmpty ||
+              filtercategoryIndex.contains(
+                  expenseCategory.indexOf(crypto.decrypt(element['type'])))) {
+            filterResult.add(element);
+          }
         }
       });
     }
@@ -683,10 +694,43 @@ class _ExpensesState extends State<Expenses> {
         Provider.of<InternetconnectivityProvider>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
-          title: Text(title),
+          title: searchTrigger
+              ? TextField(
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.search,
+                  maxLines: 1,
+                  decoration: const InputDecoration(
+                    counterText: "",
+                    contentPadding: EdgeInsets.all(8.0),
+                    hintText: "Search ...",
+                  ),
+                  onChanged: (String s) {
+                    setState(() {
+                      _searchText.setText(s);
+                    });
+                    getFilterResult();
+                  },
+                )
+              : Text(title),
           actions: expenseCategory.length == 0
               ? []
               : [
+                  IconButton(
+                      onPressed: () {
+                        setState(() {
+                          searchTrigger = !searchTrigger;
+                        });
+                        if (!searchTrigger) {
+                          _searchText.setText("");
+                          getFilterResult();
+                        }
+                      },
+                      icon: Icon(
+                        Icons.search,
+                        color: themeProvider.darkTheme
+                            ? Colors.white
+                            : Colors.black,
+                      )),
                   IconButton(
                       onPressed: () {
                         filterDialog =
@@ -974,7 +1018,7 @@ class _ExpensesState extends State<Expenses> {
                     )
                   : Padding(
                       padding: EdgeInsets.all(10.0),
-                      child: showFilterResult
+                      child: (showFilterResult || searchTrigger)
                           ? (filterResult.isEmpty
                               ? SizedBox(
                                   height: MediaQuery.of(context).size.height,
@@ -2355,10 +2399,13 @@ class _ExpensesState extends State<Expenses> {
                       Icons.add,
                       color: Theme.of(context).primaryColor,
                     ),
-                            backgroundColor: Theme.of(context).cardColor,
+                    backgroundColor: Theme.of(context).cardColor,
                     shape: RoundedRectangleBorder(
                         side: BorderSide(
-                            width: 3, color: Theme.of(context).primaryColor.withOpacity(0.7)),
+                            width: 3,
+                            color: Theme.of(context)
+                                .primaryColor
+                                .withOpacity(0.7)),
                         borderRadius: BorderRadius.circular(20)),
                     onPressed: () {
                       expensedate = DateTime.now();
