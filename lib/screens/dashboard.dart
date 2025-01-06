@@ -106,6 +106,7 @@ class _DashBoardState extends State<DashBoard> {
   ValueNotifier<List<RoomEach>> RoomDataO = ValueNotifier([]);
   ValueNotifier<List<RoomEach>> RoomDataC = ValueNotifier([]);
   ValueNotifier<List<RoomEach>> SearchRoomData = ValueNotifier([]);
+  ValueNotifier<List<QuickSplitEach>> SearchQuickSplitData = ValueNotifier([]);
   GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   GlobalKey<RefreshIndicatorState> _requestIndicatorKey =
@@ -117,8 +118,6 @@ class _DashBoardState extends State<DashBoard> {
   bool isContactPermissionGranted = false;
   bool searchTrigger = false;
   bool searching = false;
-  bool dateIndex = true;
-  List<String> Year = [];
   bool isImageLoaded = false;
   bool isRoomRequestLoaded = false;
   bool gotInitialData = false;
@@ -142,11 +141,11 @@ class _DashBoardState extends State<DashBoard> {
   List<FriendEach> friendDataSearched = [];
   List<FriendEach> friendData = [];
   bool loadFriendData = false;
-  List<int> from = [];
-  List<int> to = [];
+  DateTimeRange dateRange = DateTimeRange(
+      start: new DateTime(DateTime.now().year, DateTime.now().month - 6),
+      end: DateTime.now());
   bool error = false;
   String errorText = "";
-  bool DateChanged = false;
   double heightSearched = 0;
   var updateData = null;
   List<String> roomStatus = ['All', 'Active', 'Closed'];
@@ -515,13 +514,6 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> initalDataLoad() async {
     dash = widget.dash;
-    var date = DateTime.now();
-    from = [0, date.month - 1, date.day - 1];
-    to = [0, date.month - 1, date.day - 1];
-
-    for (int i = date.year; i >= 2018; i--) {
-      Year.add(i.toString());
-    }
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(await getTheme(context));
 
@@ -2585,13 +2577,57 @@ class _DashBoardState extends State<DashBoard> {
         });
   }
 
+  void pickDateRange(Function fn) async {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final picked = await showDateRangePicker(
+        context: context,
+        initialDateRange: dateRange,
+        confirmText: "Ok",
+        helpText: "Select Date",
+        saveText: "Save",
+        firstDate: new DateTime(1999),
+        lastDate: DateTime.now(),
+        builder: (context, child) {
+          return Theme(
+            data: themeProvider.isDarkTheme
+                ? ThemeData.dark().copyWith(
+                    colorScheme: ColorScheme.dark(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                      onSurface: Colors.white,
+                    ),
+                    dialogBackgroundColor: Colors.white,
+                  )
+                : ThemeData.light().copyWith(
+                    colorScheme: ColorScheme.light(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                      onSurface: Colors.black,
+                    ),
+                    dialogBackgroundColor: Colors.white,
+                  ),
+            child: child!,
+          );
+        });
+    if (picked != null) {
+      if (this.mounted) {
+        setState(() {
+          dateRange = picked;
+        });
+        fn(() {
+          dateRange = picked;
+        });
+      }
+    }
+  }
+
   buildFilterDialog(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return StatefulBuilder(builder: (context, setState) {
+          return StatefulBuilder(builder: (context, setStat) {
             return Dialog(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.0)),
@@ -2607,313 +2643,88 @@ class _DashBoardState extends State<DashBoard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              decoration: dateIndex
-                                  ? BoxDecoration(
-                                      border: Border.symmetric(
-                                          horizontal: BorderSide(
-                                              width: 2,
-                                              color: Theme.of(context)
-                                                  .primaryColor)))
-                                  : null,
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: InkWell(
-                                  child: Text(
-                                    "From",
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      dateIndex = true;
-                                    });
-                                  },
-                                ),
-                              ),
+                            Text(
+                              "Date",
+                              style: TextStyle(
+                                  fontSize: 21, fontWeight: FontWeight.w600),
                             ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Container(
-                              decoration: dateIndex
-                                  ? null
-                                  : BoxDecoration(
-                                      border: Border.symmetric(
-                                          horizontal: BorderSide(
-                                              width: 2,
-                                              color: Theme.of(context)
-                                                  .primaryColor))),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4.0),
-                                child: InkWell(
-                                  child: Text(
-                                    "To",
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                    ),
-                                  ),
-                                  onTap: () {
-                                    setState(() {
-                                      dateIndex = false;
-                                    });
-                                  },
-                                ),
-                              ),
-                            ),
+                            IconButton(
+                                onPressed: () {
+                                  pickDateRange(setStat);
+                                  if (this.mounted) {
+                                    setState(() {});
+                                  }
+                                },
+                                icon: Icon(Icons.date_range)),
                           ],
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          "Year",
-                          style: TextStyle(
-                            fontSize: 22,
-                          ),
                         ),
                         SizedBox(
                           height: 10,
                         ),
-                        SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.9 - 50,
-                            height: 70,
-                            child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: Year.length,
-                                shrinkWrap: true,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return SizedBox(
-                                    height: 70,
-                                    width: 95,
-                                    child: Padding(
-                                      padding: EdgeInsets.all(8.0),
-                                      child: InkWell(
-                                        onTap: () {
-                                          setState(() {
-                                            if (dateIndex) {
-                                              from[0] = index;
-                                            } else {
-                                              to[0] = index;
-                                            }
-                                          });
-                                        },
-                                        child: Card(
-                                          elevation: 1.0,
-                                          shadowColor:
-                                              Theme.of(context).primaryColor,
-                                          color: dateIndex
-                                              ? (index == from[0]
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Theme.of(context)
-                                                      .dialogBackgroundColor)
-                                              : (index == to[0]
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Theme.of(context)
-                                                      .dialogBackgroundColor),
-                                          shape: RoundedRectangleBorder(
-                                            side: BorderSide(
-                                                color: Theme.of(context)
-                                                    .primaryColor),
-                                            borderRadius:
-                                                BorderRadius.circular(10.0),
-                                          ),
-                                          child: Center(
-                                            child: InkWell(
-                                              child: Text(
-                                                Year[index],
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.w500,
-                                                  color: dateIndex
-                                                      ? (index == from[0]
-                                                          ? Colors.white
-                                                          : themeProvider
-                                                                  .isDarkTheme
-                                                              ? Colors.white
-                                                              : Colors.black)
-                                                      : (index == to[0]
-                                                          ? Colors.white
-                                                          : themeProvider
-                                                                  .isDarkTheme
-                                                              ? Colors.white
-                                                              : Colors.black),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                })),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          "Month",
-                          style: TextStyle(
-                            fontSize: 22,
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9 - 50,
-                          height: 75,
-                          child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: global.Month.length,
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: 75,
-                                  width: 120,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                pickDateRange(setStat);
+                                if (this.mounted) {
+                                  setState(() {});
+                                }
+                              },
+                              child: Card(
+                                elevation: 1,
+                                color:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                shape: RoundedRectangleBorder(
+                                  side: BorderSide(
+                                      color: Theme.of(context).cardColor),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Center(
                                   child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          if (dateIndex) {
-                                            from[1] = index;
-                                          } else {
-                                            to[1] = index;
-                                          }
-                                        });
-                                      },
-                                      child: Card(
-                                        elevation: 1.0,
-                                        shadowColor:
-                                            Theme.of(context).primaryColor,
-                                        color: dateIndex
-                                            ? (index == from[1]
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .dialogBackgroundColor)
-                                            : (index == to[1]
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .dialogBackgroundColor),
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: Theme.of(context)
-                                                  .primaryColor),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Center(
-                                          child: InkWell(
-                                            child: Text(
-                                              global.Month[index],
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: dateIndex
-                                                    ? (index == from[1]
-                                                        ? Colors.white
-                                                        : themeProvider
-                                                                .isDarkTheme
-                                                            ? Colors.white
-                                                            : Colors.black)
-                                                    : (index == to[1]
-                                                        ? Colors.white
-                                                        : themeProvider
-                                                                .isDarkTheme
-                                                            ? Colors.white
-                                                            : Colors.black),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: Text(
+                                      DateFormat('dd MMM, yyyy')
+                                          .format(dateRange.start),
+                                      style: TextStyle(fontSize: 18),
                                     ),
                                   ),
-                                );
-                              }),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Text(
-                          "Day",
-                          style: TextStyle(
-                            fontSize: 22,
-                          ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9 - 50,
-                          height: 70,
-                          child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: global.Date.length,
-                              shrinkWrap: true,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: 70,
-                                  width: 70,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: InkWell(
-                                      onTap: () {
-                                        setState(() {
-                                          if (dateIndex) {
-                                            from[2] = index;
-                                          } else {
-                                            to[2] = index;
-                                          }
-                                        });
-                                      },
-                                      child: Card(
-                                        elevation: 1.0,
-                                        color: dateIndex
-                                            ? (index == from[2]
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .dialogBackgroundColor)
-                                            : (index == to[2]
-                                                ? Theme.of(context).primaryColor
-                                                : Theme.of(context)
-                                                    .dialogBackgroundColor),
-                                        shadowColor:
-                                            Theme.of(context).primaryColor,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: Theme.of(context)
-                                                  .primaryColor),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Center(
-                                          child: InkWell(
-                                            child: Text(
-                                              global.Date[index],
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: dateIndex
-                                                    ? (index == from[2]
-                                                        ? Colors.white
-                                                        : themeProvider
-                                                                .isDarkTheme
-                                                            ? Colors.white
-                                                            : Colors.black)
-                                                    : (index == to[2]
-                                                        ? Colors.white
-                                                        : themeProvider
-                                                                .isDarkTheme
-                                                            ? Colors.white
-                                                            : Colors.black),
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 35,
+                              child: Text("-", style: TextStyle(fontSize: 18)),
+                            ),
+                            Card(
+                              color: Theme.of(context).scaffoldBackgroundColor,
+                              elevation: 1,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: Theme.of(context).cardColor),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: InkWell(
+                                    onTap: () {
+                                      pickDateRange(setStat);
+                                      if (this.mounted) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    child: Text(
+                                        DateFormat('dd MMM, yyyy')
+                                            .format(dateRange.end),
+                                        style: TextStyle(fontSize: 18)),
                                   ),
-                                );
-                              }),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         SizedBox(
                           height: 20,
@@ -2940,6 +2751,9 @@ class _DashBoardState extends State<DashBoard> {
                                       child: InkWell(
                                         onTap: () {
                                           setState(() {
+                                            roomStatusIndex = index;
+                                          });
+                                          setStat(() {
                                             roomStatusIndex = index;
                                           });
                                         },
@@ -3035,6 +2849,49 @@ class _DashBoardState extends State<DashBoard> {
                               width: 100,
                               child: OutlinedButton(
                                 child: Text(
+                                  "Clear",
+                                  style: TextStyle(
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16),
+                                ),
+                                onPressed: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      roomStatusIndex = 0;
+                                      dateRange = DateTimeRange(
+                                          start: new DateTime(
+                                              DateTime.now().year,
+                                              DateTime.now().month - 6),
+                                          end: DateTime.now());
+                                    });
+                                    setStat(() {
+                                      roomStatusIndex = 0;
+                                      dateRange = DateTimeRange(
+                                          start: new DateTime(
+                                              DateTime.now().year,
+                                              DateTime.now().month - 6),
+                                          end: DateTime.now());
+                                    });
+                                  }
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(color: Colors.redAccent),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              width: 20,
+                            ),
+                            SizedBox(
+                              height: 45,
+                              width: 100,
+                              child: OutlinedButton(
+                                child: Text(
                                   "Apply",
                                   style: TextStyle(
                                       color: themeProvider.isDarkTheme
@@ -3050,62 +2907,13 @@ class _DashBoardState extends State<DashBoard> {
                                       color: Theme.of(context).primaryColor),
                                 ),
                                 onPressed: () {
-                                  setState(() {
-                                    DateChanged = false;
-                                    errorText = "";
-                                    error = false;
-                                  });
-
-                                  var validate_1 = DateTime(
-                                      int.parse(Year[from[0]]),
-                                      from[1] + 1,
-                                      from[2] + 1);
-                                  var validate_2 = DateTime(
-                                      int.parse(Year[to[0]]),
-                                      to[1] + 1,
-                                      to[2] + 1);
-                                  if (validate_1.month != from[1] + 1 ||
-                                      from[2] + 1 != validate_1.day ||
-                                      validate_1.year !=
-                                          int.parse(Year[from[0]])) {
-                                    errorText = "Wrong From Date";
-                                    error = true;
+                                  if (this.mounted) {
+                                    setState(() {});
+                                    setStat(() {});
                                   }
-
-                                  if (validate_2.month != to[1] + 1 ||
-                                      to[2] + 1 != validate_2.day ||
-                                      validate_2.year !=
-                                          int.parse(Year[to[0]])) {
-                                    if (errorText.length == 0) {
-                                      errorText = "Wrong To Date";
-                                    } else {
-                                      errorText = "Wrong From and To Date";
-                                    }
-                                    error = true;
+                                  if (this.mounted) {
+                                    context.pop();
                                   }
-
-                                  if (validate_1.isAfter(validate_2)) {
-                                    error = true;
-                                    if (errorText.length == 0) {
-                                      errorText =
-                                          "To Date Can't Before From Date";
-                                    }
-                                  }
-
-                                  if (validate_2.isAfter(DateTime.now())) {
-                                    error = true;
-                                    if (errorText.length == 0) {
-                                      errorText =
-                                          "To Date Can't After Current Date";
-                                    }
-                                  }
-                                  if (!error) {
-                                    DateChanged = true;
-                                    if (this.mounted) {
-                                      context.pop();
-                                    }
-                                  }
-                                  setState(() {});
                                 },
                               ),
                             )
@@ -3123,147 +2931,66 @@ class _DashBoardState extends State<DashBoard> {
     });
   }
 
-  bool getDate(String date) {
-    final dd = date.split(' ');
-    int mn = 0;
-    for (int i = 0; i < 12; i++) {
-      if (global.Month[i].contains(dd[0])) {
-        mn = i;
-      }
-    }
-    DateTime RD = DateTime(int.parse(dd[2]), mn + 1, int.parse(dd[1]));
-    DateTime FROMD =
-        DateTime(int.parse(Year[from[0]]), from[1] + 1, from[2] + 1);
-    DateTime TOD = DateTime(int.parse(Year[to[0]]), to[1] + 1, to[2] + 1);
-
-    if (TOD.isAtSameMomentAs(RD) || FROMD.isAtSameMomentAs(RD)) {
-      return true;
-    } else if (TOD.isAfter(RD) && FROMD.isBefore(RD)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  SearchData() {
+  SearchAndFilterRoomData() {
     if (this.mounted) {
       setState(() {
         searching = true;
         SearchRoomData.value.clear();
       });
     }
-
+    DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
     SearchRoomData.value.clear();
-
-    if (roomStatusIndex == 0) {
-      for (int i = 0; i < RoomDataC.value.length; i++) {
-        if (_search.text.length > 0 &&
-            RoomDataC.value[i].roomName
-                .toLowerCase()
-                .contains(_search.text.toLowerCase())) {
-          if (DateChanged) {
-            if (getDate(RoomDataC.value[i].date)) {
-              SearchRoomData.value.add(RoomDataC.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataC.value[i]);
-          }
-        } else if (_search.text.length == 7 &&
-            RoomDataC.value[i].roomKey == _search.text) {
-          if (DateChanged) {
-            if (getDate(RoomDataC.value[i].date)) {
-              SearchRoomData.value.add(RoomDataC.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataC.value[i]);
-          }
-        } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataC.value[i].date)) {
-            SearchRoomData.value.add(RoomDataC.value[i]);
-          }
+    for (int i = 0;
+        i < RoomDataC.value.length &&
+            (roomStatusIndex == 0 || roomStatusIndex == 2);
+        i++) {
+      DateTime transDate = dateFormat
+          .parse(RoomDataC.value[i].date.substring(0, 12) + "12:00 AM");
+      if (_search.text.length > 0 &&
+          RoomDataC.value[i].roomName
+              .toLowerCase()
+              .contains(_search.text.toLowerCase())) {
+        if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                dateRange.start.isBefore(transDate)) &&
+            (dateRange.end.isAtSameMomentAs(transDate) ||
+                dateRange.end.isAfter(transDate))) {
+          SearchRoomData.value.add(RoomDataC.value[i]);
+        }
+      } else if ((_search.text.length == 7 &&
+              RoomDataC.value[i].roomKey == _search.text) ||
+          _search.text.length == 0) {
+        if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                dateRange.start.isBefore(transDate)) &&
+            (dateRange.end.isAtSameMomentAs(transDate) ||
+                dateRange.end.isAfter(transDate))) {
+          SearchRoomData.value.add(RoomDataC.value[i]);
         }
       }
-      for (int i = 0; i < RoomDataO.value.length; i++) {
-        if (_search.text.length > 0 &&
-            RoomDataO.value[i].roomName
-                .toLowerCase()
-                .contains(_search.text.toLowerCase())) {
-          if (DateChanged) {
-            if (getDate(RoomDataO.value[i].date)) {
-              SearchRoomData.value.add(RoomDataO.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataO.value[i]);
-          }
-        } else if (_search.text.length == 7 &&
-            RoomDataO.value[i].roomKey == _search.text) {
-          if (DateChanged) {
-            if (getDate(RoomDataO.value[i].date)) {
-              SearchRoomData.value.add(RoomDataO.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataO.value[i]);
-          }
-        } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataO.value[i].date)) {
-            SearchRoomData.value.add(RoomDataO.value[i]);
-          }
+    }
+    for (int i = 0;
+        i < RoomDataO.value.length &&
+            (roomStatusIndex == 0 || roomStatusIndex == 1);
+        i++) {
+      DateTime transDate = dateFormat
+          .parse(RoomDataO.value[i].date.substring(0, 12) + "12:00 AM");
+      if (_search.text.length > 0 &&
+          RoomDataO.value[i].roomName
+              .toLowerCase()
+              .contains(_search.text.toLowerCase())) {
+        if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                dateRange.start.isBefore(transDate)) &&
+            (dateRange.end.isAtSameMomentAs(transDate) ||
+                dateRange.end.isAfter(transDate))) {
+          SearchRoomData.value.add(RoomDataO.value[i]);
         }
-      }
-    } else if (roomStatusIndex == 1) {
-      for (int i = 0; i < RoomDataO.value.length; i++) {
-        if (_search.text.length > 0 &&
-            RoomDataO.value[i].roomName
-                .toLowerCase()
-                .contains(_search.text.toLowerCase())) {
-          if (DateChanged) {
-            if (getDate(RoomDataO.value[i].date)) {
-              SearchRoomData.value.add(RoomDataO.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataO.value[i]);
-          }
-        } else if (_search.text.length == 7 &&
-            RoomDataO.value[i].roomKey == _search.text) {
-          if (DateChanged) {
-            if (getDate(RoomDataO.value[i].date)) {
-              SearchRoomData.value.add(RoomDataO.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataO.value[i]);
-          }
-        } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataO.value[i].date)) {
-            SearchRoomData.value.add(RoomDataO.value[i]);
-          }
-        }
-      }
-    } else {
-      for (int i = 0; i < RoomDataC.value.length; i++) {
-        if (_search.text.length > 0 &&
-            RoomDataC.value[i].roomName
-                .toLowerCase()
-                .contains(_search.text.toLowerCase())) {
-          if (DateChanged) {
-            if (getDate(RoomDataC.value[i].date)) {
-              SearchRoomData.value.add(RoomDataC.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataC.value[i]);
-          }
-        } else if (_search.text.length == 7 &&
-            RoomDataC.value[i].roomKey == _search.text) {
-          if (DateChanged) {
-            if (getDate(RoomDataC.value[i].date)) {
-              SearchRoomData.value.add(RoomDataC.value[i]);
-            }
-          } else {
-            SearchRoomData.value.add(RoomDataC.value[i]);
-          }
-        } else if (_search.text.length == 0) {
-          if (DateChanged && getDate(RoomDataC.value[i].date)) {
-            SearchRoomData.value.add(RoomDataC.value[i]);
-          }
+      } else if ((_search.text.length == 7 &&
+              RoomDataO.value[i].roomKey == _search.text) ||
+          _search.text.length == 0) {
+        if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                dateRange.start.isBefore(transDate)) &&
+            (dateRange.end.isAtSameMomentAs(transDate) ||
+                dateRange.end.isAfter(transDate))) {
+          SearchRoomData.value.add(RoomDataO.value[i]);
         }
       }
     }
@@ -3278,10 +3005,65 @@ class _DashBoardState extends State<DashBoard> {
 
     if (this.mounted) {
       setState(() {
-        heightSearched =
-            SearchRoomData.value.length * 115 + SearchRoomData.value.length * 5;
+        heightSearched = SearchRoomData.value.length * 120;
         searching = false;
       });
+    }
+  }
+
+  SearchAndFilterQuickSplitData() {
+    if (this.mounted) {
+      setState(() {
+        searching = true;
+        SearchQuickSplitData.value.clear();
+      });
+    }
+
+    SearchQuickSplitData.value.clear();
+    DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
+
+    for (int i = 0; i < quickSplitData.value.length; i++) {
+      DateTime transDate = dateFormat
+          .parse(quickSplitData.value[i].date.substring(0, 12) + "12:00 AM");
+      if ((quickSplitData.value[i].active && roomStatusIndex == 1) ||
+          (!quickSplitData.value[i].active && roomStatusIndex == 2) ||
+          roomStatusIndex == 0) {
+        if ((_search.text.length > 0 &&
+                quickSplitData.value[i].purpose
+                    .toLowerCase()
+                    .contains(_search.text.toLowerCase())) ||
+            _search.text.length == 0) {
+          if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                  dateRange.start.isBefore(transDate)) &&
+              (dateRange.end.isAtSameMomentAs(transDate) ||
+                  dateRange.end.isAfter(transDate))) {
+            SearchQuickSplitData.value.add(quickSplitData.value[i]);
+          }
+        }
+      }
+    }
+
+    SearchQuickSplitData.value.sort((b, a) {
+      DateTime tempDate_1 =
+          new DateFormat(global.dateTimeFormat_new).parse(a.date);
+      DateTime tempDate_2 =
+          new DateFormat(global.dateTimeFormat_new).parse(b.date);
+      return tempDate_1.compareTo(tempDate_2);
+    });
+
+    if (this.mounted) {
+      setState(() {
+        heightSearched = SearchQuickSplitData.value.length * 120;
+        searching = false;
+      });
+    }
+  }
+
+  SearchData() {
+    if (open == 0) {
+      SearchAndFilterQuickSplitData();
+    } else {
+      SearchAndFilterRoomData();
     }
   }
 
@@ -4292,8 +4074,8 @@ class _DashBoardState extends State<DashBoard> {
         child: (RoomDataO.value.isEmpty &&
                 RoomDataC.value.isEmpty &&
                 quickSplitData.value.isEmpty)
-            ? ((activeRoomDataFetched &&
-                    inActiveRoomDataFetched &&
+            ? ((activeRoomDataFetched ||
+                    inActiveRoomDataFetched ||
                     quickSplitDataFetched)
                 ? ListView(
                     physics: AlwaysScrollableScrollPhysics(),
@@ -4526,16 +4308,21 @@ class _DashBoardState extends State<DashBoard> {
                     ),
                   ))
             : (searchTrigger
-                ? _search.text.length == 0 && SearchRoomData.value.isEmpty
+                ? _search.text.length == 0 &&
+                        (SearchRoomData.value.isEmpty ||
+                            SearchQuickSplitData.value.isEmpty)
                     ? Center(
                         child: Text(
-                          "Search Rooms...",
+                          open == 0
+                              ? "Search QuickSplit..."
+                              : "Search Rooms...",
                           style: TextStyle(
                             fontSize: 22,
                           ),
                         ),
                       )
-                    : (SearchRoomData.value.isEmpty
+                    : (SearchRoomData.value.isEmpty ||
+                            SearchQuickSplitData.value.isEmpty
                         ? Center(
                             child: searching
                                 ? CircularProgressIndicator.adaptive()
@@ -4549,24 +4336,36 @@ class _DashBoardState extends State<DashBoard> {
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 15.0, vertical: 10.0),
-                                  child: Text(
-                                      SearchRoomData.value.length.toString() +
-                                          " Results Found"),
+                                  child: Text((open == 0
+                                              ? SearchQuickSplitData.value
+                                              : SearchRoomData.value)
+                                          .length
+                                          .toString() +
+                                      " Results Found"),
                                 ),
                                 SizedBox(
                                   height:
                                       MediaQuery.of(context).size.height - 180,
-                                  child: RoomWidget(
-                                    RoomData: SearchRoomData,
-                                    ClosedRoomData: RoomDataC,
-                                    email: _email.text,
-                                    flag: true,
-                                    token: _token,
-                                    hasMore: activeRoomHasMore,
-                                    roomType: 2,
-                                    membersData: membersData,
-                                    liveRoomType: 0,
-                                  ),
+                                  child: open == 0
+                                      ? QuickSplit(
+                                          RoomData: SearchQuickSplitData,
+                                          email: _email.text,
+                                          hasMore: ValueNotifier(false),
+                                          token: _token,
+                                          expenseCategory: expenseCategory,
+                                          subCategory: subCategory,
+                                        )
+                                      : RoomWidget(
+                                          RoomData: SearchRoomData,
+                                          ClosedRoomData: RoomDataC,
+                                          email: _email.text,
+                                          flag: true,
+                                          token: _token,
+                                          hasMore: ValueNotifier(false),
+                                          roomType: 2,
+                                          membersData: membersData,
+                                          liveRoomType: 0,
+                                        ),
                                 ),
                               ],
                             ),
@@ -5083,10 +4882,20 @@ class _DashBoardState extends State<DashBoard> {
                         actions: [
                           IconButton(
                               onPressed: () {
-                                setState(() {
-                                  searchTrigger = !searchTrigger;
-                                  DateChanged = false;
-                                });
+                                if (searchTrigger) {
+                                  _search.text = "";
+                                }
+                                searchTrigger = !searchTrigger;
+                                if (this.mounted) {
+                                  setState(() {
+                                    roomStatusIndex = 0;
+                                    dateRange = DateTimeRange(
+                                        start: new DateTime(DateTime.now().year,
+                                            DateTime.now().month - 6),
+                                        end: DateTime.now());
+                                  });
+                                }
+                                SearchData();
                               },
                               icon: Icon(
                                 Icons.search,
