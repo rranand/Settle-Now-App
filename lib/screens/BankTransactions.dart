@@ -82,10 +82,14 @@ class _BankTransactionsState extends State<BankTransactions> {
   Set<int> filtercategoryIndex = Set();
   bool dataFetched = false;
   DateTimeRange dateRange = DateTimeRange(
-      start: new DateTime(DateTime.now().year - 1, 1), end: DateTime.now());
+      start: new DateTime(DateTime.now().year, DateTime.now().month - 6),
+      end: DateTime.now());
 
   List<TransactionEach> filteredResult = [];
   bool isClosedany = false;
+
+  bool searchTrigger = false;
+  TextEditingController _searchText = TextEditingController();
 
   bool splitManually = false;
   bool noSplit = false;
@@ -253,7 +257,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     var permission = await Permission.sms.status;
     if (permission.isGranted) {
       final messages = await _query.querySms(
-        count: 3000,
+        count: 50,
         kinds: [SmsQueryKind.inbox],
       );
       _messages = messages;
@@ -2070,60 +2074,39 @@ class _BankTransactionsState extends State<BankTransactions> {
     DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
 
     allTransactions.forEach((element) {
-      DateTime transDate =
-          dateFormat.parse(element.date.substring(0, 12) + "12:00 AM");
-      if (allBanksIndex.isEmpty) {
-        if ((dateRange.start.isAtSameMomentAs(transDate) ||
-                dateRange.start.isBefore(transDate)) &&
-            (dateRange.end.isAtSameMomentAs(transDate) ||
-                dateRange.end.isAfter(transDate))) {
-          double amt = double.parse(element.amount);
-          if (amt >= int.parse(_amountRangeValues[0].text) &&
-              amt <= int.parse(_amountRangeValues[1].text)) {
-            transactionTypeIndex.forEach((ttIndex) {
-              String ttElement = transactionType[ttIndex];
-              if (ttElement == element.type) {
+      if ((_searchText.text.length > 0 &&
+              element.receiver
+                  .toLowerCase()
+                  .contains(_searchText.text.toLowerCase())) ||
+          _searchText.text.length == 0) {
+        DateTime transDate =
+            dateFormat.parse(element.date.substring(0, 12) + "12:00 AM");
+        if (allBanksIndex.isEmpty) {
+          if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                  dateRange.start.isBefore(transDate)) &&
+              (dateRange.end.isAtSameMomentAs(transDate) ||
+                  dateRange.end.isAfter(transDate))) {
+            double amt = double.parse(element.amount);
+            if (amt >= int.parse(_amountRangeValues[0].text) &&
+                amt <= int.parse(_amountRangeValues[1].text)) {
+              if (transactionTypeIndex.isEmpty &&
+                  transactionModeIndex.isEmpty) {
+                filteredResult.add(element);
+              } else if (transactionTypeIndex.isEmpty) {
                 transactionModeIndex.forEach((tmIndex) {
                   String tmElement = transactionMode[tmIndex];
                   if (tmElement == element.mode) {
                     filteredResult.add(element);
                   }
                 });
-              }
-            });
-
-            if (transactionTypeIndex.isEmpty && transactionModeIndex.isEmpty) {
-              filteredResult.add(element);
-            } else if (transactionTypeIndex.isEmpty) {
-              transactionModeIndex.forEach((tmIndex) {
-                String tmElement = transactionMode[tmIndex];
-                if (tmElement == element.mode) {
-                  filteredResult.add(element);
-                }
-              });
-            } else if (transactionModeIndex.isEmpty) {
-              transactionTypeIndex.forEach((ttIndex) {
-                String ttElement = transactionType[ttIndex];
-                if (ttElement == element.type) {
-                  filteredResult.add(element);
-                }
-              });
-            }
-          }
-        }
-      } else {
-        allBanksIndex.forEach((abElement) {
-          String bankName = bankNameFound[abElement];
-
-          if (bankName == element.bank) {
-            if ((dateRange.start.isAtSameMomentAs(transDate) ||
-                    dateRange.start.isBefore(transDate)) &&
-                (dateRange.end.isAtSameMomentAs(transDate) ||
-                    dateRange.end.isAfter(transDate))) {
-              double amt = double.parse(element.amount);
-
-              if (amt >= int.parse(_amountRangeValues[0].text) &&
-                  amt <= int.parse(_amountRangeValues[1].text)) {
+              } else if (transactionModeIndex.isEmpty) {
+                transactionTypeIndex.forEach((ttIndex) {
+                  String ttElement = transactionType[ttIndex];
+                  if (ttElement == element.type) {
+                    filteredResult.add(element);
+                  }
+                });
+              } else {
                 transactionTypeIndex.forEach((ttIndex) {
                   String ttElement = transactionType[ttIndex];
                   if (ttElement == element.type) {
@@ -2135,29 +2118,57 @@ class _BankTransactionsState extends State<BankTransactions> {
                     });
                   }
                 });
-
-                if (transactionTypeIndex.isEmpty &&
-                    transactionModeIndex.isEmpty) {
-                  filteredResult.add(element);
-                } else if (transactionTypeIndex.isEmpty) {
-                  transactionModeIndex.forEach((tmIndex) {
-                    String tmElement = transactionMode[tmIndex];
-                    if (tmElement == element.mode) {
-                      filteredResult.add(element);
-                    }
-                  });
-                } else if (transactionModeIndex.isEmpty) {
-                  transactionTypeIndex.forEach((ttIndex) {
-                    String ttElement = transactionType[ttIndex];
-                    if (ttElement == element.type) {
-                      filteredResult.add(element);
-                    }
-                  });
-                }
               }
             }
           }
-        });
+        } else {
+          allBanksIndex.forEach((abElement) {
+            String bankName = bankNameFound[abElement];
+
+            if (bankName == element.bank) {
+              if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                      dateRange.start.isBefore(transDate)) &&
+                  (dateRange.end.isAtSameMomentAs(transDate) ||
+                      dateRange.end.isAfter(transDate))) {
+                double amt = double.parse(element.amount);
+
+                if (amt >= int.parse(_amountRangeValues[0].text) &&
+                    amt <= int.parse(_amountRangeValues[1].text)) {
+                  if (transactionTypeIndex.isEmpty &&
+                      transactionModeIndex.isEmpty) {
+                    filteredResult.add(element);
+                  } else if (transactionTypeIndex.isEmpty) {
+                    transactionModeIndex.forEach((tmIndex) {
+                      String tmElement = transactionMode[tmIndex];
+                      if (tmElement == element.mode) {
+                        filteredResult.add(element);
+                      }
+                    });
+                  } else if (transactionModeIndex.isEmpty) {
+                    transactionTypeIndex.forEach((ttIndex) {
+                      String ttElement = transactionType[ttIndex];
+                      if (ttElement == element.type) {
+                        filteredResult.add(element);
+                      }
+                    });
+                  } else {
+                    transactionTypeIndex.forEach((ttIndex) {
+                      String ttElement = transactionType[ttIndex];
+                      if (ttElement == element.type) {
+                        transactionModeIndex.forEach((tmIndex) {
+                          String tmElement = transactionMode[tmIndex];
+                          if (tmElement == element.mode) {
+                            filteredResult.add(element);
+                          }
+                        });
+                      }
+                    });
+                  }
+                }
+              }
+            }
+          });
+        }
       }
     });
 
@@ -2206,10 +2217,41 @@ class _BankTransactionsState extends State<BankTransactions> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Bank Transactions"),
+        title: searchTrigger
+            ? TextField(
+                keyboardType: TextInputType.text,
+                textInputAction: TextInputAction.search,
+                maxLines: 1,
+                decoration: const InputDecoration(
+                  counterText: "",
+                  contentPadding: EdgeInsets.all(8.0),
+                  hintText: "Search ...",
+                ),
+                onChanged: (String s) {
+                  setState(() {
+                    _searchText.setText(s);
+                  });
+                  getFilterResult();
+                },
+              )
+            : Text("Bank Transactions"),
         actions: bankNameFound.isEmpty
             ? []
             : [
+                IconButton(
+                    onPressed: () {
+                      setState(() {
+                        searchTrigger = !searchTrigger;
+                      });
+                      if (!searchTrigger) {
+                        _searchText.setText("");
+                      }
+                    },
+                    icon: Icon(
+                      Icons.search,
+                      color:
+                          themeProvider.darkTheme ? Colors.white : Colors.black,
+                    )),
                 IconButton(
                     onPressed: () {
                       filterDialog =
@@ -2737,13 +2779,17 @@ class _BankTransactionsState extends State<BankTransactions> {
                             ),
                             onPressed: () {
                               showFilterResult = false;
+                              _currentAmountValues =
+                                  RangeValues(0, maxSpentAmount);
+                              allBanksIndex.clear();
                               transactionModeIndex.clear();
                               transactionTypeIndex.clear();
                               _amountRangeValues[0].text = "0";
-                              _amountRangeValues[1].text = "10000";
+                              _amountRangeValues[1].text =
+                                  maxSpentAmount.toInt().toString();
                               dateRange = DateTimeRange(
                                   start: new DateTime(DateTime.now().year,
-                                      DateTime.now().month),
+                                      DateTime.now().month - 6),
                                   end: DateTime.now());
                               if (this.mounted) {
                                 setState(() {});
@@ -2866,7 +2912,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 child: Scrollbar(
                                   radius: Radius.circular(10.0),
                                   thickness: 5.5,
-                                  child: showFilterResult
+                                  child: (showFilterResult || searchTrigger)
                                       ? filteredResult.isEmpty
                                           ? SizedBox(
                                               height: MediaQuery.of(context)
