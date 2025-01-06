@@ -117,11 +117,14 @@ class _RoomExpenseState extends State<RoomExpense>
   double maxSpentAmount = 10000;
   int curMemberIndex = -1;
   DateTimeRange dateRange = DateTimeRange(
-      start: new DateTime(DateTime.now().year - 1, 1), end: DateTime.now());
+      start: new DateTime(DateTime.now().year, DateTime.now().month - 6),
+      end: DateTime.now());
   List<TextEditingController> _amountRangeValues = [
     new TextEditingController(text: "0"),
     new TextEditingController(text: "100000")
   ];
+  bool searchTrigger = false;
+  TextEditingController _searchText = TextEditingController();
 
   @override
   void dispose() {
@@ -3597,35 +3600,40 @@ class _RoomExpenseState extends State<RoomExpense>
     double leftAmount = _currentAmountValues.start.round().toDouble();
     double rightAmount = _currentAmountValues.end.round().toDouble();
     TransList.clear();
-
     dataToBeFiltered.forEach((element) {
       DateTime transDate = dateFormat
           .parse(crypto.decrypt(element['Date']).substring(0, 12) + "00:00:00");
       double amt = double.parse(crypto.decrypt(element['Amount']));
-
-      if ((dateRange.start.isAtSameMomentAs(transDate) ||
-              dateRange.start.isBefore(transDate)) &&
-          (dateRange.end.isAtSameMomentAs(transDate) ||
-              dateRange.end.isAfter(transDate)) &&
-          amt >= leftAmount &&
-          amt <= rightAmount) {
-        if (filtercategoryIndex.isEmpty ||
-            filtercategoryIndex.contains(
-                expenseCategory.indexOf(crypto.decrypt(element['Type'])))) {
-          if (showExpenseYouAreIn) {
-            List<dynamic> partialExpense = element["members"];
-            if (partialExpense.isEmpty) {
-              TransList.add(element);
-            } else {
-              for (int i = 0; i < partialExpense.length; i++) {
-                if (crypto.decrypt(partialExpense[i]['Email']) == _email) {
-                  TransList.add(element);
-                  break;
+      if ((_searchText.text.length > 0 &&
+              crypto
+                  .decrypt(element['Purpose'])
+                  .toLowerCase()
+                  .contains(_searchText.text.toLowerCase())) ||
+          _searchText.text.length == 0) {
+        if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                dateRange.start.isBefore(transDate)) &&
+            (dateRange.end.isAtSameMomentAs(transDate) ||
+                dateRange.end.isAfter(transDate)) &&
+            amt >= leftAmount &&
+            amt <= rightAmount) {
+          if (filtercategoryIndex.isEmpty ||
+              filtercategoryIndex.contains(
+                  expenseCategory.indexOf(crypto.decrypt(element['Type'])))) {
+            if (showExpenseYouAreIn) {
+              List<dynamic> partialExpense = element["members"];
+              if (partialExpense.isEmpty) {
+                TransList.add(element);
+              } else {
+                for (int i = 0; i < partialExpense.length; i++) {
+                  if (crypto.decrypt(partialExpense[i]['Email']) == _email) {
+                    TransList.add(element);
+                    break;
+                  }
                 }
               }
+            } else {
+              TransList.add(element);
             }
-          } else {
-            TransList.add(element);
           }
         }
       }
@@ -3645,35 +3653,73 @@ class _RoomExpenseState extends State<RoomExpense>
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text(roomName.text),
+          title: searchTrigger
+              ? TextField(
+                  keyboardType: TextInputType.text,
+                  textInputAction: TextInputAction.search,
+                  maxLines: 1,
+                  decoration: const InputDecoration(
+                    counterText: "",
+                    contentPadding: EdgeInsets.all(8.0),
+                    hintText: "Search ...",
+                  ),
+                  onChanged: (String s) {
+                    setState(() {
+                      _searchText.setText(s);
+                    });
+                    getFilterResult();
+                  },
+                )
+              : Text(roomName.text),
           actions: loaded
               ? [
-                  isClear
-                      ? SizedBox()
-                      : InkWell(
-                          onTap: () async {
-                            await updateRoomNameDialog(context);
-                          },
-                          child: Icon(Icons.edit_outlined),
-                        ),
-                  SizedBox(
-                    width: 16,
+                  ...(!searchTrigger
+                      ? [
+                          isClear
+                              ? SizedBox()
+                              : InkWell(
+                                  onTap: () async {
+                                    await updateRoomNameDialog(context);
+                                  },
+                                  child: Icon(Icons.edit_outlined),
+                                ),
+                          SizedBox(
+                            width: 16,
+                          ),
+                          isRoomActive
+                              ? InkWell(
+                                  onTap: () async {
+                                    await Share.share("Join " +
+                                        roomName.text +
+                                        "\nRoom Key: " +
+                                        widget.roomKey +
+                                        "\n" +
+                                        roomLink);
+                                  },
+                                  child: Icon(Icons.share_outlined),
+                                )
+                              : SizedBox(),
+                          SizedBox(
+                            width: 12,
+                          ),
+                        ]
+                      : []),
+                  InkWell(
+                    onTap: () async {
+                      setState(() {
+                        searchTrigger = !searchTrigger;
+                      });
+                      if (!searchTrigger) {
+                        _searchText.setText("");
+                        getFilterResult();
+                      }
+                    },
+                    child: Icon(
+                      Icons.search,
+                    ),
                   ),
-                  isRoomActive
-                      ? InkWell(
-                          onTap: () async {
-                            await Share.share("Join " +
-                                roomName.text +
-                                "\nRoom Key: " +
-                                widget.roomKey +
-                                "\n" +
-                                roomLink);
-                          },
-                          child: Icon(Icons.share_outlined),
-                        )
-                      : SizedBox(),
                   SizedBox(
-                    width: 12,
+                    width: 8,
                   ),
                   InkWell(
                     onTap: () async {
@@ -3689,7 +3735,10 @@ class _RoomExpenseState extends State<RoomExpense>
                     child: Icon(showFilterResult
                         ? Icons.filter_alt_off
                         : Icons.filter_alt_outlined),
-                  )
+                  ),
+                  SizedBox(
+                    width: 4,
+                  ),
                 ]
               : [],
         ),
@@ -4088,9 +4137,16 @@ class _RoomExpenseState extends State<RoomExpense>
                       ),
                       onPressed: () {
                         filtercategoryIndex.clear();
+                        _amountRangeValues[0].text = "0";
+                        _amountRangeValues[1].text =
+                            maxSpentAmount.toInt().toString();
                         _currentAmountValues = RangeValues(0, maxSpentAmount);
                         showExpenseYouAreIn = false;
                         showFilterResult = false;
+                        dateRange = DateTimeRange(
+                            start: new DateTime(
+                                DateTime.now().year, DateTime.now().month - 6),
+                            end: DateTime.now());
                         TransList = [...allExpenseList];
                         if (this.mounted) {
                           setState(() {});
@@ -5041,10 +5097,13 @@ class _RoomExpenseState extends State<RoomExpense>
                       Icons.edit,
                       color: Theme.of(context).primaryColor,
                     ),
-                            backgroundColor: Theme.of(context).cardColor,
+                    backgroundColor: Theme.of(context).cardColor,
                     shape: RoundedRectangleBorder(
                         side: BorderSide(
-                            width: 3, color: Theme.of(context).primaryColor.withOpacity(0.7)),
+                            width: 3,
+                            color: Theme.of(context)
+                                .primaryColor
+                                .withOpacity(0.7)),
                         borderRadius: BorderRadius.circular(20)),
                   )
                 : null)

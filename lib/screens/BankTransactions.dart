@@ -2245,6 +2245,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                       });
                       if (!searchTrigger) {
                         _searchText.setText("");
+                        getFilterResult();
                       }
                     },
                     icon: Icon(
