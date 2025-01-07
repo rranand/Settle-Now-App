@@ -121,7 +121,14 @@ buildShowDialog(BuildContext context) {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return const Center(
-          child: CircularProgressIndicator.adaptive(),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CircularProgressIndicator.adaptive(),
+              Text("Loading...")
+            ],
+          ),
         );
       });
 }

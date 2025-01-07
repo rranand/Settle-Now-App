@@ -7267,6 +7267,9 @@ class _RoomWidgetState extends State<RoomWidget> {
 
   Future<void> _extractEmail(bool roomType) async {
     isDataLoading = true;
+    if (this.mounted) {
+      buildShowDialog(context);
+    }
     try {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(widget.email),
@@ -7307,13 +7310,11 @@ class _RoomWidgetState extends State<RoomWidget> {
     isDataLoading = false;
 
     if (this.mounted) {
+      context.pop();
+    }
+    if (this.mounted) {
       setState(() {});
     }
-  }
-
-  void fetchMore() {
-    if (widget.roomType == 0) {
-    } else if (widget.roomType == 1) {}
   }
 
   void _scrollListener() async {
