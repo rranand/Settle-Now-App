@@ -21,6 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pinput/pinput.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/manualUpdateWidget.dart';
@@ -89,14 +90,13 @@ class _DashBoardState extends State<DashBoard> {
   bool requestType = true;
   int dash = 0;
   bool isGoogle = false;
-  var now;
   final TextEditingController _amt = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
   String date = "";
   bool notificationSetupComplete = false;
   final TextEditingController _email = TextEditingController();
   final TextEditingController _name = TextEditingController();
-  final TextEditingController _search = TextEditingController();
+  final TextEditingController _search = TextEditingController(text: "");
   String _token = "";
   ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
   ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
@@ -141,9 +141,8 @@ class _DashBoardState extends State<DashBoard> {
   List<FriendEach> friendDataSearched = [];
   List<FriendEach> friendData = [];
   bool loadFriendData = false;
-  DateTimeRange dateRange = DateTimeRange(
-      start: new DateTime(DateTime.now().year, DateTime.now().month - 6),
-      end: DateTime.now());
+  DateTimeRange dateRange =
+      DateTimeRange(start: new DateTime(2018, 1), end: DateTime.now());
   bool error = false;
   String errorText = "";
   double heightSearched = 0;
@@ -377,8 +376,13 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> getInitialData() async {
-    now = DateTime.now();
-    date = (now.month - 1).toString() + now.year.toString();
+    var tempDate = DateTime.now();
+
+    if (this.mounted) {
+      setState(() {
+        date = (tempDate.month - 1).toString() + tempDate.year.toString();
+      });
+    }
     try {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email.text),
@@ -2861,17 +2865,13 @@ class _DashBoardState extends State<DashBoard> {
                                     setState(() {
                                       roomStatusIndex = 0;
                                       dateRange = DateTimeRange(
-                                          start: new DateTime(
-                                              DateTime.now().year,
-                                              DateTime.now().month - 6),
+                                          start: new DateTime(2018, 1),
                                           end: DateTime.now());
                                     });
                                     setStat(() {
                                       roomStatusIndex = 0;
                                       dateRange = DateTimeRange(
-                                          start: new DateTime(
-                                              DateTime.now().year,
-                                              DateTime.now().month - 6),
+                                          start: new DateTime(2018, 1),
                                           end: DateTime.now());
                                     });
                                   }
@@ -2927,7 +2927,11 @@ class _DashBoardState extends State<DashBoard> {
             );
           });
         }).then((val) {
-      SearchData();
+      if (open == 0) {
+        SearchAndFilterQuickSplitData();
+      } else {
+        SearchAndFilterRoomData();
+      }
     });
   }
 
@@ -2939,7 +2943,6 @@ class _DashBoardState extends State<DashBoard> {
       });
     }
     DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
-    SearchRoomData.value.clear();
     for (int i = 0;
         i < RoomDataC.value.length &&
             (roomStatusIndex == 0 || roomStatusIndex == 2);
@@ -3003,11 +3006,11 @@ class _DashBoardState extends State<DashBoard> {
       return tempDate_1.compareTo(tempDate_2);
     });
 
+    heightSearched = SearchRoomData.value.length * 120;
+    searching = false;
+
     if (this.mounted) {
-      setState(() {
-        heightSearched = SearchRoomData.value.length * 120;
-        searching = false;
-      });
+      setState(() {});
     }
   }
 
@@ -3018,8 +3021,6 @@ class _DashBoardState extends State<DashBoard> {
         SearchQuickSplitData.value.clear();
       });
     }
-
-    SearchQuickSplitData.value.clear();
     DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
 
     for (int i = 0; i < quickSplitData.value.length; i++) {
@@ -3051,19 +3052,11 @@ class _DashBoardState extends State<DashBoard> {
       return tempDate_1.compareTo(tempDate_2);
     });
 
-    if (this.mounted) {
-      setState(() {
-        heightSearched = SearchQuickSplitData.value.length * 120;
-        searching = false;
-      });
-    }
-  }
+    heightSearched = SearchQuickSplitData.value.length * 120;
+    searching = false;
 
-  SearchData() {
-    if (open == 0) {
-      SearchAndFilterQuickSplitData();
-    } else {
-      SearchAndFilterRoomData();
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -4321,7 +4314,7 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                         ),
                       )
-                    : (SearchRoomData.value.isEmpty ||
+                    : (SearchRoomData.value.isEmpty &&
                             SearchQuickSplitData.value.isEmpty
                         ? Center(
                             child: searching
@@ -4869,10 +4862,16 @@ class _DashBoardState extends State<DashBoard> {
                                   hintText: "Search ...",
                                 ),
                                 onChanged: (String s) {
-                                  setState(() {
-                                    _search.text = s;
-                                  });
-                                  SearchData();
+                                  if (this.mounted) {
+                                    setState(() {
+                                      _search.setText(s);
+                                    });
+                                  }
+                                  if (open == 0) {
+                                    SearchAndFilterQuickSplitData();
+                                  } else {
+                                    SearchAndFilterRoomData();
+                                  }
                                 },
                               )
                             : Text(
@@ -4882,20 +4881,21 @@ class _DashBoardState extends State<DashBoard> {
                         actions: [
                           IconButton(
                               onPressed: () {
-                                if (searchTrigger) {
-                                  _search.text = "";
-                                }
-                                searchTrigger = !searchTrigger;
                                 if (this.mounted) {
                                   setState(() {
+                                    _search.setText("");
+                                    searchTrigger = !searchTrigger;
                                     roomStatusIndex = 0;
                                     dateRange = DateTimeRange(
-                                        start: new DateTime(DateTime.now().year,
-                                            DateTime.now().month - 6),
+                                        start: new DateTime(2018, 1),
                                         end: DateTime.now());
                                   });
                                 }
-                                SearchData();
+                                if (open == 0) {
+                                  SearchAndFilterQuickSplitData();
+                                } else {
+                                  SearchAndFilterRoomData();
+                                }
                               },
                               icon: Icon(
                                 Icons.search,
@@ -4903,7 +4903,7 @@ class _DashBoardState extends State<DashBoard> {
                                     ? Colors.white
                                     : Colors.black,
                               )),
-                          (open == 1 || searchTrigger)
+                          (open > 0 || searchTrigger)
                               ? IconButton(
                                   onPressed: () {
                                     if (searchTrigger) {
