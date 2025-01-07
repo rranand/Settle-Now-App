@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
+import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
@@ -120,13 +121,27 @@ buildShowDialog(BuildContext context) {
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Center(
+        final themeProvider =
+            Provider.of<ThemeProvider>(context, listen: false);
+        return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               CircularProgressIndicator.adaptive(),
-              Text("Loading...")
+              SizedBox(
+                height: 4,
+              ),
+              Text(
+                "Loading...",
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.normal,
+                    decoration: TextDecoration.none,
+                    color: themeProvider.isDarkTheme
+                        ? Colors.white
+                        : Colors.black),
+              )
             ],
           ),
         );
