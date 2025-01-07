@@ -126,6 +126,9 @@ class _RoomExpenseState extends State<RoomExpense>
   bool searchTrigger = false;
   TextEditingController _searchText = TextEditingController();
 
+  List<String> graphs = ["Expense By Category", "Expense By User"];
+  int indexGraph = 0;
+
   @override
   void dispose() {
     super.dispose();
@@ -166,11 +169,12 @@ class _RoomExpenseState extends State<RoomExpense>
       totalAmount = 0;
       dataMap.clear();
       for (int i = 0; i < TransList.length; i++) {
-        tempMap[crypto.decrypt(TransList[i]["Type"])] =
-            (tempMap[crypto.decrypt(TransList[i]["Type"])]! +
-                double.parse(crypto.decrypt(TransList[i]["Amount"])));
+        if (tempMap.containsKey(crypto.decrypt(TransList[i]["Type"]))) {
+          tempMap[crypto.decrypt(TransList[i]["Type"])] =
+              tempMap[crypto.decrypt(TransList[i]["Type"])]! +
+                  double.parse(crypto.decrypt(TransList[i]["Amount"]));
+        }
       }
-
       for (int i = 0; i < expenseCategory.length; i++) {
         totalAmount += tempMap[expenseCategory[i]]!;
         dataMap.add(
@@ -2947,7 +2951,99 @@ class _RoomExpenseState extends State<RoomExpense>
     );
   }
 
+  Widget expenseByCategory() {
+    return Center(
+      child: dataMap.isEmpty
+          ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 3.3,
+              ),
+            )
+          : SizedBox(
+              height: 50 * expenseCategory.length * 1.0,
+              child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: SfCartesianChart(
+                      primaryXAxis: CategoryAxis(isVisible: false),
+                      primaryYAxis: NumericAxis(isVisible: false),
+                      tooltipBehavior: TooltipBehavior(
+                          enable: true,
+                          header: "",
+                          format: "point.x : ₹ point.y"),
+                      plotAreaBorderWidth: 0,
+                      series: <BarSeries<ChartData, String>>[
+                        BarSeries<ChartData, String>(
+                            dataSource: dataMap,
+                            borderRadius: BorderRadius.circular(20),
+                            xValueMapper: (ChartData data, _) => data.type,
+                            yValueMapper: (ChartData data, _) =>
+                                data.amount as num,
+                            isVisibleInLegend: true,
+                            width: 0.3,
+                            pointColorMapper: (ChartData data, _) =>
+                                global.colorsList[_],
+                            dataLabelMapper: (datum, index) =>
+                                datum.type +
+                                "\n₹ " +
+                                datum.amount.toStringAsFixed(2),
+                            dataLabelSettings:
+                                DataLabelSettings(isVisible: true))
+                      ])),
+            ),
+    );
+  }
+
+  Widget expenseByUser() {
+    return Center(
+      child: dataMapByUser.isEmpty
+          ? Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 3.3,
+              ),
+            )
+          : SizedBox(
+              height: 53 * membersListEmail.length * 1.0,
+              child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: SfCartesianChart(
+                      primaryXAxis: CategoryAxis(isVisible: false),
+                      primaryYAxis: NumericAxis(isVisible: false),
+                      tooltipBehavior: TooltipBehavior(
+                          enable: true,
+                          header: "",
+                          format: "point.x : ₹ point.y"),
+                      plotAreaBorderWidth: 0,
+                      series: <BarSeries<ChartData, String>>[
+                        BarSeries<ChartData, String>(
+                          dataSource: dataMapByUser,
+                          borderRadius: BorderRadius.circular(20),
+                          width: 0.3,
+                          xValueMapper: (ChartData data, _) => data.name,
+                          yValueMapper: (ChartData data, _) => data.amount,
+                          isVisibleInLegend: true,
+                          pointColorMapper: (ChartData data, _) =>
+                              global.colorsList[_],
+                          dataLabelMapper: (datum, index) =>
+                              datum.name +
+                              "\n₹ " +
+                              datum.amount.toStringAsFixed(2),
+                          dataLabelSettings: DataLabelSettings(isVisible: true),
+                        )
+                      ])),
+            ),
+    );
+  }
+
+  Widget expenseGraphByIndex() {
+    if (indexGraph == 0) {
+      return expenseByCategory();
+    } else {
+      return expenseByUser();
+    }
+  }
+
   Widget showChart() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: loaded
@@ -2961,130 +3057,53 @@ class _RoomExpenseState extends State<RoomExpense>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "Expense by Category",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      SingleChildScrollView(
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          height: 45,
+                          child: ListView.separated(
+                              separatorBuilder: (context, index) => SizedBox(
+                                    width: 8,
+                                  ),
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              physics: ScrollPhysics(),
+                              itemCount: graphs.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  height: 40,
+                                  child: OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(13.0),
+                                      ),
+                                      side: BorderSide(
+                                          color: indexGraph == index
+                                              ? Theme.of(context).primaryColor
+                                              : Colors.grey),
+                                    ),
+                                    onPressed: () {
+                                      if (this.mounted) {
+                                        setState(() {
+                                          indexGraph = index;
+                                        });
+                                      }
+                                    },
+                                    child: Text(
+                                      graphs[index],
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
+                                    ),
+                                  ),
+                                );
+                              }),
                         ),
                       ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Center(
-                        child: dataMap.isEmpty
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3.3,
-                                ),
-                              )
-                            : SizedBox(
-                                height: 50 * expenseCategory.length * 1.0,
-                                child: Padding(
-                                    padding: const EdgeInsets.all(6),
-                                    child: SfCartesianChart(
-                                        primaryXAxis:
-                                            CategoryAxis(isVisible: false),
-                                        primaryYAxis:
-                                            NumericAxis(isVisible: false),
-                                        tooltipBehavior: TooltipBehavior(
-                                            enable: true,
-                                            header: "",
-                                            format: "point.x : ₹ point.y"),
-                                        plotAreaBorderWidth: 0,
-                                        series: <BarSeries<ChartData, String>>[
-                                          BarSeries<ChartData, String>(
-                                              dataSource: dataMap,
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                              xValueMapper:
-                                                  (ChartData data, _) =>
-                                                      data.type,
-                                              yValueMapper:
-                                                  (ChartData data, _) =>
-                                                      data.amount as num,
-                                              isVisibleInLegend: true,
-                                              width: 0.8,
-                                              pointColorMapper:
-                                                  (ChartData data, _) =>
-                                                      global.colorsList[_],
-                                              dataLabelMapper: (datum, index) =>
-                                                  datum.type +
-                                                  "\n₹ " +
-                                                  datum.amount
-                                                      .toStringAsFixed(2),
-                                              dataLabelSettings:
-                                                  DataLabelSettings(
-                                                      isVisible: true))
-                                        ])),
-                              ),
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Divider(),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      Text(
-                        "Expense by User",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
-                      Center(
-                        child: dataMapByUser.isEmpty
-                            ? Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3.3,
-                                ),
-                              )
-                            : SizedBox(
-                                height: 53 * membersListEmail.length * 1.0,
-                                child: Padding(
-                                    padding: const EdgeInsets.all(6),
-                                    child: SfCartesianChart(
-                                        primaryXAxis:
-                                            CategoryAxis(isVisible: false),
-                                        primaryYAxis:
-                                            NumericAxis(isVisible: false),
-                                        tooltipBehavior: TooltipBehavior(
-                                            enable: true,
-                                            header: "",
-                                            format: "point.x : ₹ point.y"),
-                                        plotAreaBorderWidth: 0,
-                                        series: <BarSeries<ChartData, String>>[
-                                          BarSeries<ChartData, String>(
-                                            dataSource: dataMapByUser,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            width: 0.8,
-                                            xValueMapper: (ChartData data, _) =>
-                                                data.name,
-                                            yValueMapper: (ChartData data, _) =>
-                                                data.amount,
-                                            isVisibleInLegend: true,
-                                            pointColorMapper:
-                                                (ChartData data, _) =>
-                                                    global.colorsList[_],
-                                            dataLabelMapper: (datum, index) =>
-                                                datum.name +
-                                                "\n₹ " +
-                                                datum.amount.toStringAsFixed(2),
-                                            dataLabelSettings:
-                                                DataLabelSettings(
-                                                    isVisible: true),
-                                          )
-                                        ])),
-                              ),
-                      ),
+                      expenseGraphByIndex()
                     ],
                   ),
                 ),
