@@ -534,7 +534,7 @@ class _AnalysisState extends State<Analysis> {
                 )
               : (yearwiseSpend.isNotEmpty
                   ? RotatedBox(
-                      quarterTurns: 1,
+                      quarterTurns: kIsWeb ? 0 : 1,
                       child: SfCartesianChart(
                           primaryXAxis: CategoryAxis(
                             isVisible: true,
@@ -688,7 +688,7 @@ class _AnalysisState extends State<Analysis> {
                 )
               : (personalExpenseByYear.isNotEmpty
                   ? RotatedBox(
-                      quarterTurns: 1,
+                      quarterTurns: kIsWeb ? 0 : 1,
                       child: SfCartesianChart(
                           primaryXAxis: CategoryAxis(
                             isVisible: true,
@@ -965,7 +965,8 @@ class _AnalysisState extends State<Analysis> {
                                                           const EdgeInsets.all(
                                                               6),
                                                       child: RotatedBox(
-                                                        quarterTurns: 1,
+                                                        quarterTurns:
+                                                            kIsWeb ? 0 : 1,
                                                         child: SfCartesianChart(
                                                             enableAxisAnimation:
                                                                 true,
