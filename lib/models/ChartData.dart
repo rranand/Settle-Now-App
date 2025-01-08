@@ -26,12 +26,9 @@ class ChartData {
 
 class ChartStackedLineData {
   String type = "";
-  List<String> roomName = [];
   List<double> amount = [];
 
-  ChartStackedLineData.byRoom(
-      List<String> roomName, String type, List<double> amount) {
-    this.roomName = roomName;
+  ChartStackedLineData.byRoom(String type, List<double> amount) {
     this.type = type;
     this.amount = amount;
   }

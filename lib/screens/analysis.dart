@@ -13,10 +13,10 @@ import 'package:settlenow/models/PersonalExpenseEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import '../contents.dart' as global;
 
 import '../models/RoomEach.dart';
 import '../others/themes.dart';
+import '../contents.dart' as global;
 
 class Analysis extends StatefulWidget {
   final List<RoomEach> RoomDataO;
@@ -49,8 +49,9 @@ class _AnalysisState extends State<Analysis> {
   bool graphLoading = false;
   bool isRoom = true;
   List<RoomEach> RoomDataSearched = [];
-  List<StackedLineSeries<ChartData, String>> graphData = [];
+  List<StackedLineSeries<ChartStackedLineData, String>> graphData = [];
   bool isDataLoading = false;
+  List<int> tempSelectedRoom = [];
 
   List<String> personalExpGraph = [
     "Personal Expense By Year",
@@ -83,7 +84,7 @@ class _AnalysisState extends State<Analysis> {
     }
 
     allRooms = [...widget.RoomDataO, ...widget.RoomDataC];
-    for (int i = 0; i < widget.RoomDataO.length; i++) {
+    for (int i = 0; i < widget.RoomDataO.length && indexRoom.length < 3; i++) {
       if (!widget.RoomDataO[i].done) {
         indexRoom.add(i);
       }
@@ -107,7 +108,7 @@ class _AnalysisState extends State<Analysis> {
       }
       return;
     }
-    prepareRoomGraph(setState);
+    prepareRoomGraph();
     try {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email),
@@ -155,7 +156,10 @@ class _AnalysisState extends State<Analysis> {
   }
 
   Widget RoomListWidget(
-      BuildContext context, List<RoomEach> data, Function fn) {
+    BuildContext context,
+    List<RoomEach> data,
+    Function fn,
+  ) {
     return StatefulBuilder(builder: (context, _) {
       return Scrollbar(
         radius: Radius.circular(10.0),
@@ -176,7 +180,7 @@ class _AnalysisState extends State<Analysis> {
                       color: Theme.of(context).scaffoldBackgroundColor,
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
-                            color: indexRoom.contains(OGIndex)
+                            color: tempSelectedRoom.contains(OGIndex)
                                 ? Theme.of(context).primaryColor
                                 : Colors.grey.shade700),
                         borderRadius: BorderRadius.circular(15.0),
@@ -194,10 +198,10 @@ class _AnalysisState extends State<Analysis> {
                               ),
                               IconButton(
                                   onPressed: () async {
-                                    if (indexRoom.contains(OGIndex)) {
-                                      indexRoom.remove(OGIndex);
+                                    if (tempSelectedRoom.contains(OGIndex)) {
+                                      tempSelectedRoom.remove(OGIndex);
                                     } else {
-                                      indexRoom.add(OGIndex);
+                                      tempSelectedRoom.add(OGIndex);
                                     }
                                     if (this.mounted) {
                                       setState(() {});
@@ -205,7 +209,7 @@ class _AnalysisState extends State<Analysis> {
                                       fn(() {});
                                     }
                                   },
-                                  icon: Icon(!indexRoom.contains(OGIndex)
+                                  icon: Icon(!tempSelectedRoom.contains(OGIndex)
                                       ? Icons.add
                                       : Icons.cancel_outlined))
                             ]),
@@ -238,13 +242,9 @@ class _AnalysisState extends State<Analysis> {
     }
   }
 
-  Future<void> prepareRoomGraph(Function fn) async {
+  Future<void> prepareRoomGraph() async {
     if (this.mounted) {
       setState(() {
-        graphData.clear();
-        graphLoading = true;
-      });
-      fn(() {
         graphData.clear();
         graphLoading = true;
       });
@@ -253,39 +253,35 @@ class _AnalysisState extends State<Analysis> {
     for (int i = 0; i < indexRoom.length; i++) {
       roomKeys.add(allRooms[indexRoom[i]].roomKey);
     }
-    List<dynamic> roomData = await getRoomData(roomKeys);
-    List<List<ChartData>> tempGraphData = [];
 
-    for (int i = 0; i < roomData.length; i++) {
-      List<ChartData> temp = [];
-      for (int j = 0; j < widget.expenseCategory.length; j++) {
-        temp.add(ChartData.byRoom(
-            crypto.decrypt(roomData[i]["roomName"]),
-            widget.expenseCategory[j],
-            double.parse(crypto
-                .decrypt(roomData[i]["expense"][widget.expenseCategory[j]]))));
+    List<dynamic> roomData = await getRoomData(roomKeys);
+    List<ChartStackedLineData> tempGraphData = [];
+
+    for (int i = 0; i < widget.expenseCategory.length; i++) {
+      List<double> categoryWiseAmount = [];
+      for (int j = 0; j < roomData.length; j++) {
+        categoryWiseAmount.add(double.parse(
+            crypto.decrypt(roomData[j]["expense"][widget.expenseCategory[i]])));
       }
-      tempGraphData.add(temp);
+      tempGraphData.add(ChartStackedLineData.byRoom(
+          widget.expenseCategory[i], categoryWiseAmount));
     }
 
-    for (int i = 0; i < tempGraphData.length; i++) {
-      graphData.add(StackedLineSeries<ChartData, String>(
-        dataSource: tempGraphData[i],
-        width: 0.8,
-        xValueMapper: (ChartData data, _) => data.type,
-        yValueMapper: (ChartData data, _) => data.amount,
-        isVisibleInLegend: true,
-        dataLabelMapper: (datum, index) =>
-            datum.type + "\n₹ " + datum.amount.toStringAsFixed(2),
-        dataLabelSettings: DataLabelSettings(isVisible: false),
+    for (int i = 0; i < roomData.length; i++) {
+      graphData.add(StackedLineSeries<ChartStackedLineData, String>(
+        dataSource: tempGraphData,
+        xValueMapper: (ChartStackedLineData graphData, int index) =>
+            graphData.type,
+        yValueMapper: (ChartStackedLineData graphData, int index) =>
+            graphData.amount[i],
+        color: global.colorsList[i],
+        markerSettings: const MarkerSettings(isVisible: true),
+        name: crypto.decrypt(roomData[i]["roomName"]),
       ));
     }
 
     if (this.mounted) {
       setState(() {
-        graphLoading = false;
-      });
-      fn(() {
         graphLoading = false;
       });
     }
@@ -299,6 +295,7 @@ class _AnalysisState extends State<Analysis> {
 
   Widget addRoomWidget(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+
     return StatefulBuilder(builder: (context, setStat) {
       return Dialog(
         shape:
@@ -332,10 +329,10 @@ class _AnalysisState extends State<Analysis> {
                                 onPressed: () {
                                   if (this.mounted) {
                                     setState(() {
-                                      indexRoom.clear();
+                                      tempSelectedRoom.clear();
                                     });
                                     setStat(() {
-                                      indexRoom.clear();
+                                      tempSelectedRoom.clear();
                                     });
                                   }
                                 },
@@ -395,7 +392,10 @@ class _AnalysisState extends State<Analysis> {
                                       MediaQuery.of(context).size.height - 420,
                                   child: _searchRoom.text.isEmpty
                                       ? RoomListWidget(
-                                          context, allRooms, setStat)
+                                          context,
+                                          allRooms,
+                                          setStat,
+                                        )
                                       : (RoomDataSearched.isEmpty
                                           ? Center(
                                               child: Text(
@@ -403,8 +403,11 @@ class _AnalysisState extends State<Analysis> {
                                                 style: TextStyle(fontSize: 18),
                                               ),
                                             )
-                                          : RoomListWidget(context,
-                                              RoomDataSearched, setStat)),
+                                          : RoomListWidget(
+                                              context,
+                                              RoomDataSearched,
+                                              setStat,
+                                            )),
                                 ),
                               ),
                               Row(
@@ -431,10 +434,20 @@ class _AnalysisState extends State<Analysis> {
                                                 Theme.of(context).primaryColor),
                                       ),
                                       onPressed: () async {
-                                        if (this.mounted) {
-                                          context.pop();
+                                        if (tempSelectedRoom.length > 3) {
+                                          showToast(
+                                              context,
+                                              "A maximum of 3 rooms can be compared.",
+                                              Icons.warning);
+                                        } else {
+                                          indexRoom = [...tempSelectedRoom];
+                                          if (this.mounted) {
+                                            setState(() {});
+                                            setStat(() {});
+                                            context.pop();
+                                          }
+                                          await prepareRoomGraph();
                                         }
-                                        await prepareRoomGraph(setStat);
                                       },
                                     ),
                                   ),
@@ -503,7 +516,7 @@ class _AnalysisState extends State<Analysis> {
 
   Widget personalExpenseByYearGraph() {
     return SizedBox(
-      height: MediaQuery.of(context).size.height - 400,
+      height: MediaQuery.of(context).size.height - 210,
       child: Padding(
           padding: const EdgeInsets.all(6),
           child: isDataLoading
@@ -511,33 +524,37 @@ class _AnalysisState extends State<Analysis> {
                   child: CircularProgressIndicator.adaptive(),
                 )
               : (yearwiseSpend.isNotEmpty
-                  ? SfCartesianChart(
-                      primaryXAxis: CategoryAxis(
-                        isVisible: true,
-                      ),
-                      primaryYAxis: NumericAxis(
-                          labelFormat: "₹ {value}", isVisible: true),
-                      tooltipBehavior: TooltipBehavior(
-                          enable: true,
-                          header: "",
-                          format: "point.x : ₹ point.y"),
-                      plotAreaBorderWidth: 0,
-                      series: <CartesianSeries>[
-                          LineSeries<dynamic, String>(
-                              color: Theme.of(context).primaryColor,
-                              dataSource: yearwiseSpend,
-                              yValueMapper: (dynamic data, _) => data["amount"],
-                              xValueMapper: (dynamic data, _) =>
-                                  data["text"].toString(),
-                              dataLabelSettings:
-                                  DataLabelSettings(isVisible: true),
-                              dataLabelMapper: (datum, index) =>
-                                  "Year : " +
-                                  datum["text"].toString() +
-                                  "\n₹ " +
-                                  datum["amount"].toStringAsFixed(2),
-                              markerSettings: MarkerSettings(isVisible: true))
-                        ])
+                  ? RotatedBox(
+                      quarterTurns: 1,
+                      child: SfCartesianChart(
+                          primaryXAxis: CategoryAxis(
+                            isVisible: true,
+                          ),
+                          primaryYAxis: NumericAxis(
+                              labelFormat: "₹ {value}", isVisible: true),
+                          tooltipBehavior: TooltipBehavior(
+                              enable: true,
+                              header: "",
+                              format: "point.x : ₹ point.y"),
+                          plotAreaBorderWidth: 0,
+                          series: <CartesianSeries>[
+                            LineSeries<dynamic, String>(
+                                color: Theme.of(context).primaryColor,
+                                dataSource: yearwiseSpend,
+                                yValueMapper: (dynamic data, _) =>
+                                    data["amount"],
+                                xValueMapper: (dynamic data, _) =>
+                                    data["text"].toString(),
+                                dataLabelSettings:
+                                    DataLabelSettings(isVisible: true),
+                                dataLabelMapper: (datum, index) =>
+                                    "Year : " +
+                                    datum["text"].toString() +
+                                    "\n₹ " +
+                                    datum["amount"].toStringAsFixed(2),
+                                markerSettings: MarkerSettings(isVisible: true))
+                          ]),
+                    )
                   : Center(
                       child: Text(
                         "No Personal Expense Found",
@@ -659,39 +676,42 @@ class _AnalysisState extends State<Analysis> {
                   child: CircularProgressIndicator.adaptive(),
                 )
               : (personalExpenseByYear.isNotEmpty
-                  ? SfCartesianChart(
-                      primaryXAxis: CategoryAxis(
-                        initialVisibleMinimum: 0,
-                        initialVisibleMaximum: 5,
-                        isVisible: true,
-                      ),
-                      primaryYAxis: NumericAxis(
-                        labelFormat: "₹ {value}",
-                        isVisible: true,
-                      ),
-                      tooltipBehavior: TooltipBehavior(
-                          enable: true,
-                          header: "",
-                          format: "point.x : point.y"),
-                      zoomPanBehavior: ZoomPanBehavior(
-                        enablePanning: true,
-                      ),
-                      plotAreaBorderWidth: 0,
-                      series: <CartesianSeries>[
-                          LineSeries<PersonalExpenseEach, String>(
-                              color: Theme.of(context).primaryColor,
-                              dataSource: personalExpenseByYear,
-                              yValueMapper: (PersonalExpenseEach data, _) =>
-                                  data.Total,
-                              xValueMapper: (PersonalExpenseEach data, _) =>
-                                  data.Month + ",\n" + data.Year,
-                              dataLabelSettings: DataLabelSettings(
-                                isVisible: true,
-                              ),
-                              dataLabelMapper: (datum, index) =>
-                                  "₹ " + datum.Total.toStringAsFixed(2),
-                              markerSettings: MarkerSettings(isVisible: true))
-                        ])
+                  ? RotatedBox(
+                      quarterTurns: 1,
+                      child: SfCartesianChart(
+                          primaryXAxis: CategoryAxis(
+                            initialVisibleMinimum: 0,
+                            initialVisibleMaximum: 5,
+                            isVisible: true,
+                          ),
+                          primaryYAxis: NumericAxis(
+                            labelFormat: "₹ {value}",
+                            isVisible: true,
+                          ),
+                          tooltipBehavior: TooltipBehavior(
+                              enable: true,
+                              header: "",
+                              format: "point.x : point.y"),
+                          zoomPanBehavior: ZoomPanBehavior(
+                            enablePanning: true,
+                          ),
+                          plotAreaBorderWidth: 0,
+                          series: <CartesianSeries>[
+                            LineSeries<PersonalExpenseEach, String>(
+                                color: Theme.of(context).primaryColor,
+                                dataSource: personalExpenseByYear,
+                                yValueMapper: (PersonalExpenseEach data, _) =>
+                                    data.Total,
+                                xValueMapper: (PersonalExpenseEach data, _) =>
+                                    data.Month + ",\n" + data.Year,
+                                dataLabelSettings: DataLabelSettings(
+                                  isVisible: true,
+                                ),
+                                dataLabelMapper: (datum, index) =>
+                                    "₹ " + datum.Total.toStringAsFixed(2),
+                                markerSettings: MarkerSettings(isVisible: true))
+                          ]),
+                    )
                   : Center(
                       child: Text(
                         "No Personal Expense Found",
@@ -927,28 +947,59 @@ class _AnalysisState extends State<Analysis> {
                                                   width: MediaQuery.of(context)
                                                       .size
                                                       .width,
-                                                  child: SingleChildScrollView(
-                                                    child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(6),
+                                                  height: MediaQuery.of(context)
+                                                          .size
+                                                          .height -
+                                                      310,
+                                                  child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              6),
+                                                      child: RotatedBox(
+                                                        quarterTurns: 1,
                                                         child: SfCartesianChart(
                                                             enableAxisAnimation:
                                                                 true,
                                                             legend: Legend(
-                                                                isVisible:
+                                                                isVisible: true,
+                                                                isResponsive:
                                                                     true),
                                                             zoomPanBehavior:
                                                                 ZoomPanBehavior(
                                                                     enablePanning:
                                                                         true),
-                                                            primaryXAxis: CategoryAxis(isVisible: true),
-                                                            primaryYAxis: NumericAxis(isVisible: true),
-                                                            plotAreaBorderWidth: 0,
-                                                            series: <StackedLineSeries<ChartData, String>>[
-                                                              ...graphData
-                                                            ])),
-                                                  ),
+                                                            primaryXAxis:
+                                                                CategoryAxis(
+                                                              majorGridLines:
+                                                                  MajorGridLines(
+                                                                      width: 0),
+                                                              labelPlacement:
+                                                                  LabelPlacement
+                                                                      .onTicks,
+                                                            ),
+                                                            primaryYAxis:
+                                                                NumericAxis(
+                                                              isVisible: true,
+                                                              axisLine:
+                                                                  AxisLine(
+                                                                      width: 0),
+                                                              edgeLabelPlacement:
+                                                                  EdgeLabelPlacement
+                                                                      .shift,
+                                                              labelFormat:
+                                                                  'Rs {value}',
+                                                              majorTickLines:
+                                                                  MajorTickLines(
+                                                                      size: 0),
+                                                            ),
+                                                            tooltipBehavior:
+                                                                TooltipBehavior(
+                                                                    enable:
+                                                                        true),
+                                                            plotAreaBorderWidth:
+                                                                0,
+                                                            series: graphData),
+                                                      )),
                                                 )
                                               : Center(
                                                   child: Center(
@@ -977,6 +1028,11 @@ class _AnalysisState extends State<Analysis> {
                         color: Theme.of(context).primaryColor.withOpacity(0.7)),
                     borderRadius: BorderRadius.circular(20)),
                 onPressed: () {
+                  if (this.mounted) {
+                    setState(() {
+                      tempSelectedRoom = [...indexRoom];
+                    });
+                  }
                   showDialog(
                     context: context,
                     builder: (
