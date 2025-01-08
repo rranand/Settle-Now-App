@@ -124,6 +124,15 @@ class _AnalysisState extends State<Analysis> {
           personalExpense.add(PersonalExpenseEach.fromJson(element));
         });
 
+        personalExpense.sort((a, b) {
+          if (a.Year != b.Year) {
+            return int.parse(b.Year).compareTo(int.parse(a.Year));
+          } else {
+            return global.Month.indexOf(b.Month)
+                .compareTo(global.Month.indexOf(a.Month));
+          }
+        });
+
         Map<String, double> tempMap = {};
         personalExpenseByYear.addAll(personalExpense);
 
