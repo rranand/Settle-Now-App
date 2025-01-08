@@ -2329,7 +2329,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 height: 51.5 *
                                     (bankNameFound.length /
                                             crossAxisCountFilter)
-                                        .round(),
+                                        .ceil(),
                                 child: MasonryGridView.count(
                                     crossAxisCount: crossAxisCountFilter,
                                     itemCount: bankNameFound.length,
@@ -2458,7 +2458,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                 height: 51.5 *
                                     (transactionMode.length /
                                             crossAxisCountFilter)
-                                        .round(),
+                                        .ceil(),
                                 child: MasonryGridView.count(
                                     crossAxisCount: crossAxisCountFilter,
                                     itemCount: transactionMode.length,

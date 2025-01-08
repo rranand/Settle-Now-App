@@ -11,7 +11,7 @@ class AppRouteConstants {
   static const String lendRoomRouteName = '/lenden';
   static const String lendByTitleRouteName = '/lenden';
   static const String schduleNotificationRouteName = '/schduleNotification';
-  static const String summaryRouteName = '/summary';
+  static const String personalExpenseDashboard = '/personalExpenseDashboard';
   static const String onBoardingRouteName = '/onBoarding';
   static const String maintainRouteName = '/maintain';
   static const String contactUsRouteName = '/contact_us';

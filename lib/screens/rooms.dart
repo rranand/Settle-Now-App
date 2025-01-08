@@ -3081,7 +3081,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                       side: BorderSide(
                                           color: indexGraph == index
                                               ? Theme.of(context).primaryColor
-                                              : Colors.grey),
+                                              : Colors.grey.shade700),
                                     ),
                                     onPressed: () {
                                       if (this.mounted) {

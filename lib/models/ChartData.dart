@@ -23,3 +23,16 @@ class ChartData {
     this.amount = amount;
   }
 }
+
+class ChartStackedLineData {
+  String type = "";
+  List<String> roomName = [];
+  List<double> amount = [];
+
+  ChartStackedLineData.byRoom(
+      List<String> roomName, String type, List<double> amount) {
+    this.roomName = roomName;
+    this.type = type;
+    this.amount = amount;
+  }
+}

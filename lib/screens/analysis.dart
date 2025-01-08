@@ -48,10 +48,17 @@ class _AnalysisState extends State<Analysis> {
   bool isLiveRoom = true;
   bool graphLoading = false;
   bool isRoom = true;
-  Set<RoomEach> compareBetween = {};
   List<RoomEach> RoomDataSearched = [];
-  List<BarSeries<ChartData, String>> graphData = [];
+  List<StackedLineSeries<ChartData, String>> graphData = [];
   bool isDataLoading = false;
+
+  List<String> personalExpGraph = [
+    "Personal Expense By Year",
+    "Personal Expense By Month-Year"
+  ];
+  int indexPersonalGraph = 0;
+  List<RoomEach> allRooms = [];
+  List<int> indexRoom = [];
 
   @override
   void dispose() {
@@ -69,11 +76,18 @@ class _AnalysisState extends State<Analysis> {
         yearIndex = 0;
         personalExpenseByYear.clear();
         isLiveRoom = true;
-        compareBetween.clear();
         graphData.clear();
+        allRooms.clear();
+        indexRoom.clear();
       });
     }
 
+    allRooms = [...widget.RoomDataO, ...widget.RoomDataC];
+    for (int i = 0; i < widget.RoomDataO.length; i++) {
+      if (!widget.RoomDataO[i].done) {
+        indexRoom.add(i);
+      }
+    }
     var tokenData = await getStringPref('token');
 
     if (tokenData != null) {
@@ -93,7 +107,7 @@ class _AnalysisState extends State<Analysis> {
       }
       return;
     }
-
+    prepareRoomGraph(setState);
     try {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email),
@@ -115,7 +129,6 @@ class _AnalysisState extends State<Analysis> {
         for (int i = 0; i < personalExpense.length; i++) {
           totalPersonalExpense += personalExpense[i].Total;
           String year = personalExpense[i].Year;
-
           tempMap[year] = ((tempMap[year] == null ? 0 : tempMap[year])! +
               personalExpense[i].Total);
         }
@@ -141,7 +154,8 @@ class _AnalysisState extends State<Analysis> {
     }
   }
 
-  Widget RoomListWidget(BuildContext context, List<RoomEach> data) {
+  Widget RoomListWidget(
+      BuildContext context, List<RoomEach> data, Function fn) {
     return StatefulBuilder(builder: (context, _) {
       return Scrollbar(
         radius: Radius.circular(10.0),
@@ -154,17 +168,17 @@ class _AnalysisState extends State<Analysis> {
             physics: ScrollPhysics(),
             itemCount: data.length,
             itemBuilder: (BuildContext context, int index) {
+              int OGIndex = allRooms.indexOf(data[index]);
               return SizedBox(
                   height: 80,
                   child: Center(
                     child: Card(
-                      elevation: 1.0,
-                      shadowColor: Theme.of(context).primaryColor,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
-                            color: compareBetween.contains(data[index])
+                            color: indexRoom.contains(OGIndex)
                                 ? Theme.of(context).primaryColor
-                                : Theme.of(context).cardColor),
+                                : Colors.grey.shade700),
                         borderRadius: BorderRadius.circular(15.0),
                       ),
                       child: Padding(
@@ -180,20 +194,20 @@ class _AnalysisState extends State<Analysis> {
                               ),
                               IconButton(
                                   onPressed: () async {
-                                    if (compareBetween.contains(data[index])) {
-                                      compareBetween.remove(data[index]);
+                                    if (indexRoom.contains(OGIndex)) {
+                                      indexRoom.remove(OGIndex);
                                     } else {
-                                      compareBetween.add(data[index]);
+                                      indexRoom.add(OGIndex);
                                     }
                                     if (this.mounted) {
                                       setState(() {});
                                       _(() {});
+                                      fn(() {});
                                     }
                                   },
-                                  icon: Icon(
-                                      !compareBetween.contains(data[index])
-                                          ? Icons.add
-                                          : Icons.cancel_outlined))
+                                  icon: Icon(!indexRoom.contains(OGIndex)
+                                      ? Icons.add
+                                      : Icons.cancel_outlined))
                             ]),
                       ),
                     ),
@@ -210,24 +224,70 @@ class _AnalysisState extends State<Analysis> {
       });
     }
 
-    for (int i = 0; i < widget.RoomDataO.length; i++) {
-      if (widget.RoomDataO[i].roomName
+    for (int i = 0; i < allRooms.length; i++) {
+      if (allRooms[i]
+          .roomName
           .toLowerCase()
           .contains(_searchRoom.text.toLowerCase())) {
-        RoomDataSearched.add(widget.RoomDataO[i]);
-      }
-    }
-
-    for (int i = 0; i < widget.RoomDataC.length; i++) {
-      if (widget.RoomDataC[i].roomName
-          .toLowerCase()
-          .contains(_searchRoom.text.toLowerCase())) {
-        RoomDataSearched.add(widget.RoomDataC[i]);
+        RoomDataSearched.add(allRooms[i]);
       }
     }
 
     if (this.mounted) {
       setState(() {});
+    }
+  }
+
+  Future<void> prepareRoomGraph(Function fn) async {
+    if (this.mounted) {
+      setState(() {
+        graphData.clear();
+        graphLoading = true;
+      });
+      fn(() {
+        graphData.clear();
+        graphLoading = true;
+      });
+    }
+    List<String> roomKeys = [];
+    for (int i = 0; i < indexRoom.length; i++) {
+      roomKeys.add(allRooms[indexRoom[i]].roomKey);
+    }
+    List<dynamic> roomData = await getRoomData(roomKeys);
+    List<List<ChartData>> tempGraphData = [];
+
+    for (int i = 0; i < roomData.length; i++) {
+      List<ChartData> temp = [];
+      for (int j = 0; j < widget.expenseCategory.length; j++) {
+        temp.add(ChartData.byRoom(
+            crypto.decrypt(roomData[i]["roomName"]),
+            widget.expenseCategory[j],
+            double.parse(crypto
+                .decrypt(roomData[i]["expense"][widget.expenseCategory[j]]))));
+      }
+      tempGraphData.add(temp);
+    }
+
+    for (int i = 0; i < tempGraphData.length; i++) {
+      graphData.add(StackedLineSeries<ChartData, String>(
+        dataSource: tempGraphData[i],
+        width: 0.8,
+        xValueMapper: (ChartData data, _) => data.type,
+        yValueMapper: (ChartData data, _) => data.amount,
+        isVisibleInLegend: true,
+        dataLabelMapper: (datum, index) =>
+            datum.type + "\n₹ " + datum.amount.toStringAsFixed(2),
+        dataLabelSettings: DataLabelSettings(isVisible: false),
+      ));
+    }
+
+    if (this.mounted) {
+      setState(() {
+        graphLoading = false;
+      });
+      fn(() {
+        graphLoading = false;
+      });
     }
   }
 
@@ -238,98 +298,184 @@ class _AnalysisState extends State<Analysis> {
   }
 
   Widget addRoomWidget(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-      child: Container(
-          width: kIsWeb
-              ? max(MediaQuery.of(context).size.width * 0.5,
-                  min(400, MediaQuery.of(context).size.width))
-              : MediaQuery.of(context).size.width,
-          child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 8,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Select Room",
-                        style: TextStyle(fontSize: 22),
-                      ),
-                      IconButton(
-                          onPressed: () => context.pop(),
-                          icon: Icon(Icons.cancel_outlined))
-                    ],
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  (widget.RoomDataC.isEmpty && widget.RoomDataO.isEmpty)
-                      ? SizedBox(
-                          height: MediaQuery.of(context).size.height - 310,
-                          child: Center(
-                            child: Text(
-                              "No Room Found",
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
-                        )
-                      : Column(
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    return StatefulBuilder(builder: (context, setStat) {
+      return Dialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: Container(
+            width: kIsWeb
+                ? max(MediaQuery.of(context).size.width * 0.5,
+                    min(400, MediaQuery.of(context).size.width))
+                : MediaQuery.of(context).size.width,
+            child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Select Room",
+                          style: TextStyle(fontSize: 22),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            TextField(
-                              controller: _searchRoom,
-                              keyboardType: TextInputType.text,
-                              maxLines: 1,
-                              style: const TextStyle(fontSize: 15),
-                              autocorrect: false,
-                              decoration: InputDecoration(
-                                contentPadding: const EdgeInsets.all(8.0),
-                                labelText: "Enter Room Name",
-                                counterText: "",
-                                errorStyle: const TextStyle(fontSize: 15),
-                              ),
-                              onChanged: (String s) {
-                                _searchRoom.text = s;
-                                _searchRoom.selection = TextSelection.collapsed(
-                                    offset: _searchRoom.text.length);
-                                SearchRoom();
-                                if (this.mounted) {
-                                  setState(() {});
-                                }
-                              },
-                            ),
-                            SizedBox(
-                              height: 13,
-                            ),
-                            SingleChildScrollView(
-                              child: SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height - 310,
-                                child: _searchRoom.text.isEmpty
-                                    ? RoomListWidget(context,
-                                        widget.RoomDataO + widget.RoomDataC)
-                                    : (RoomDataSearched.isEmpty
-                                        ? Center(
-                                            child: Text(
-                                              "No Room Found",
-                                              style: TextStyle(fontSize: 18),
-                                            ),
-                                          )
-                                        : RoomListWidget(
-                                            context, RoomDataSearched)),
-                              ),
-                            ),
+                            IconButton(
+                                onPressed: () {
+                                  if (this.mounted) {
+                                    setState(() {
+                                      indexRoom.clear();
+                                    });
+                                    setStat(() {
+                                      indexRoom.clear();
+                                    });
+                                  }
+                                },
+                                icon: Icon(Icons.refresh_outlined)),
+                            IconButton(
+                                onPressed: () => context.pop(),
+                                icon: Icon(Icons.cancel_outlined)),
                           ],
                         )
-                ],
-              ))),
-    );
+                      ],
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    (allRooms.isEmpty)
+                        ? SizedBox(
+                            height: MediaQuery.of(context).size.height - 420,
+                            child: Center(
+                              child: Text(
+                                "No Room Found",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              TextField(
+                                controller: _searchRoom,
+                                keyboardType: TextInputType.text,
+                                maxLines: 1,
+                                style: const TextStyle(fontSize: 15),
+                                autocorrect: false,
+                                decoration: InputDecoration(
+                                  contentPadding: const EdgeInsets.all(8.0),
+                                  labelText: "Enter Room Name",
+                                  counterText: "",
+                                  errorStyle: const TextStyle(fontSize: 15),
+                                ),
+                                onChanged: (String s) {
+                                  _searchRoom.text = s;
+                                  _searchRoom.selection =
+                                      TextSelection.collapsed(
+                                          offset: _searchRoom.text.length);
+                                  SearchRoom();
+                                  if (this.mounted) {
+                                    setState(() {});
+                                    setStat(() {});
+                                  }
+                                },
+                              ),
+                              SizedBox(
+                                height: 13,
+                              ),
+                              SingleChildScrollView(
+                                child: SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height - 420,
+                                  child: _searchRoom.text.isEmpty
+                                      ? RoomListWidget(
+                                          context, allRooms, setStat)
+                                      : (RoomDataSearched.isEmpty
+                                          ? Center(
+                                              child: Text(
+                                                "No Room Found",
+                                                style: TextStyle(fontSize: 18),
+                                              ),
+                                            )
+                                          : RoomListWidget(context,
+                                              RoomDataSearched, setStat)),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  SizedBox(
+                                    height: 45,
+                                    child: OutlinedButton(
+                                      child: Text(
+                                        "Analyse",
+                                        style: TextStyle(
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      onPressed: () async {
+                                        if (this.mounted) {
+                                          context.pop();
+                                        }
+                                        await prepareRoomGraph(setStat);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 10,
+                                  ),
+                                  SizedBox(
+                                    height: 45,
+                                    child: OutlinedButton(
+                                      child: Text(
+                                        "Cancel",
+                                        style: TextStyle(
+                                            color: themeProvider.isDarkTheme
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                        ),
+                                        side:
+                                            BorderSide(color: Colors.redAccent),
+                                      ),
+                                      onPressed: () {
+                                        context.pop();
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 8,
+                                  ),
+                                ],
+                              )
+                            ],
+                          )
+                  ],
+                ))),
+      );
+    });
   }
 
   Future<List<dynamic>> getRoomData(List<String> roomKeys) async {
@@ -355,693 +501,491 @@ class _AnalysisState extends State<Analysis> {
     return RoomData;
   }
 
+  Widget personalExpenseByYearGraph() {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height - 400,
+      child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: isDataLoading
+              ? Center(
+                  child: CircularProgressIndicator.adaptive(),
+                )
+              : (yearwiseSpend.isNotEmpty
+                  ? SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        isVisible: true,
+                      ),
+                      primaryYAxis: NumericAxis(
+                          labelFormat: "₹ {value}", isVisible: true),
+                      tooltipBehavior: TooltipBehavior(
+                          enable: true,
+                          header: "",
+                          format: "point.x : ₹ point.y"),
+                      plotAreaBorderWidth: 0,
+                      series: <CartesianSeries>[
+                          LineSeries<dynamic, String>(
+                              color: Theme.of(context).primaryColor,
+                              dataSource: yearwiseSpend,
+                              yValueMapper: (dynamic data, _) => data["amount"],
+                              xValueMapper: (dynamic data, _) =>
+                                  data["text"].toString(),
+                              dataLabelSettings:
+                                  DataLabelSettings(isVisible: true),
+                              dataLabelMapper: (datum, index) =>
+                                  "Year : " +
+                                  datum["text"].toString() +
+                                  "\n₹ " +
+                                  datum["amount"].toStringAsFixed(2),
+                              markerSettings: MarkerSettings(isVisible: true))
+                        ])
+                  : Center(
+                      child: Text(
+                        "No Personal Expense Found",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ))),
+    );
+  }
+
+  Widget personalExpenseByMonthYearGraph() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: 65,
+          child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: years.length + 1,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int index) {
+                if (0 == index) {
+                  return SizedBox(
+                    width: 100,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InkWell(
+                          onTap: () {
+                            yearIndex = index;
+                            personalExpenseByYear.clear();
+                            personalExpenseByYear.addAll(personalExpense);
+                            if (this.mounted) {
+                              setState(() {});
+                            }
+                          },
+                          child: Card(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                  color: yearIndex == index
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade700),
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                "All",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: yearIndex == index
+                                      ? Colors.white
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .color,
+                                ),
+                              ),
+                            ),
+                          )),
+                    ),
+                  );
+                } else {
+                  return SizedBox(
+                    width: 100,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: InkWell(
+                          onTap: () {
+                            yearIndex = index;
+                            personalExpenseByYear.clear();
+                            personalExpense.forEach((element) {
+                              if (element.Year == years[index - 1]) {
+                                personalExpenseByYear.add(element);
+                              }
+                            });
+                            if (this.mounted) {
+                              setState(() {});
+                            }
+                          },
+                          child: Card(
+                            color: Theme.of(context).scaffoldBackgroundColor,
+                            shape: RoundedRectangleBorder(
+                              side: BorderSide(
+                                  color: yearIndex == index
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.grey.shade700),
+                              borderRadius: BorderRadius.circular(15.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                years[index - 1],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: yearIndex == index
+                                      ? Colors.white
+                                      : Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .color,
+                                ),
+                              ),
+                            ),
+                          )),
+                    ),
+                  );
+                }
+              }),
+        ),
+        SizedBox(
+          height: 5,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height - 400,
+          child: isDataLoading
+              ? Center(
+                  child: CircularProgressIndicator.adaptive(),
+                )
+              : (personalExpenseByYear.isNotEmpty
+                  ? SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        initialVisibleMinimum: 0,
+                        initialVisibleMaximum: 5,
+                        isVisible: true,
+                      ),
+                      primaryYAxis: NumericAxis(
+                        labelFormat: "₹ {value}",
+                        isVisible: true,
+                      ),
+                      tooltipBehavior: TooltipBehavior(
+                          enable: true,
+                          header: "",
+                          format: "point.x : point.y"),
+                      zoomPanBehavior: ZoomPanBehavior(
+                        enablePanning: true,
+                      ),
+                      plotAreaBorderWidth: 0,
+                      series: <CartesianSeries>[
+                          LineSeries<PersonalExpenseEach, String>(
+                              color: Theme.of(context).primaryColor,
+                              dataSource: personalExpenseByYear,
+                              yValueMapper: (PersonalExpenseEach data, _) =>
+                                  data.Total,
+                              xValueMapper: (PersonalExpenseEach data, _) =>
+                                  data.Month + ",\n" + data.Year,
+                              dataLabelSettings: DataLabelSettings(
+                                isVisible: true,
+                              ),
+                              dataLabelMapper: (datum, index) =>
+                                  "₹ " + datum.Total.toStringAsFixed(2),
+                              markerSettings: MarkerSettings(isVisible: true))
+                        ])
+                  : Center(
+                      child: Text(
+                        "No Personal Expense Found",
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    )),
+        ),
+      ],
+    );
+  }
+
+  Widget showPersonalGraph() {
+    if (indexPersonalGraph == 0) {
+      return personalExpenseByYearGraph();
+    } else {
+      return personalExpenseByMonthYearGraph();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     return Scaffold(
-      bottomNavigationBar: Container(
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          margin: EdgeInsets.symmetric(
-              horizontal: (MediaQuery.of(context).size.width - 250) * 0.5,
-              vertical: 16),
-          decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
-              borderRadius: BorderRadius.all(Radius.circular(24))),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              InkWell(
-                onTap: () {
-                  if (this.mounted) {
-                    setState(() {
-                      isRoom = true;
-                    });
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 0.0, horizontal: 8.0),
-                  child: Text(
-                    "Room",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: isRoom ? Theme.of(context).primaryColor : null,
-                        fontWeight: FontWeight.w600),
+        bottomNavigationBar: Container(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            margin: EdgeInsets.symmetric(
+                horizontal: (MediaQuery.of(context).size.width - 250) * 0.5,
+                vertical: 16),
+            decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                borderRadius: BorderRadius.all(Radius.circular(24))),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                InkWell(
+                  onTap: () {
+                    if (this.mounted) {
+                      setState(() {
+                        isRoom = true;
+                      });
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 0.0, horizontal: 8.0),
+                    child: Text(
+                      "Room",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: isRoom ? Theme.of(context).primaryColor : null,
+                          fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                "|",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w100),
-              ),
-              InkWell(
-                onTap: () {
-                  if (this.mounted) {
-                    setState(() {
-                      isRoom = false;
-                    });
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 0.0, horizontal: 8.0),
-                  child: Text(
-                    "Personal Expense",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: isRoom ? null : Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600),
+                Text(
+                  "|",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w100),
+                ),
+                InkWell(
+                  onTap: () {
+                    if (this.mounted) {
+                      setState(() {
+                        isRoom = false;
+                      });
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 0.0, horizontal: 8.0),
+                    child: Text(
+                      "Personal Expense",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: isRoom ? null : Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          )),
-      body: SizedBox(
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: SingleChildScrollView(
-          child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: !isRoom
-                  ? (yearwiseSpend.isEmpty
-                      ? SizedBox(
-                          height: MediaQuery.of(context).size.height - 200,
-                          child: Center(
-                            child: Text("No Personal Expense Found",
-                                style: TextStyle(fontSize: 20)),
-                          ),
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Personal Expense By Year",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
+              ],
+            )),
+        body: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: SingleChildScrollView(
+            child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: !isRoom
+                    ? (yearwiseSpend.isEmpty
+                        ? SizedBox(
+                            height: MediaQuery.of(context).size.height - 200,
+                            child: Center(
+                              child: Text("No Personal Expense Found",
+                                  style: TextStyle(fontSize: 20)),
                             ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            SizedBox(
-                              height: 400,
-                              child: Padding(
-                                  padding: const EdgeInsets.all(6),
-                                  child: isDataLoading
-                                      ? Center(
-                                          child: CircularProgressIndicator
-                                              .adaptive(),
-                                        )
-                                      : (yearwiseSpend.isNotEmpty
-                                          ? SfCartesianChart(
-                                              primaryXAxis: CategoryAxis(
-                                                isVisible: true,
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SingleChildScrollView(
+                                child: SizedBox(
+                                  width: MediaQuery.of(context).size.width,
+                                  height: 45,
+                                  child: ListView.separated(
+                                      separatorBuilder: (context, index) =>
+                                          SizedBox(
+                                            width: 8,
+                                          ),
+                                      scrollDirection: Axis.horizontal,
+                                      shrinkWrap: true,
+                                      physics: ScrollPhysics(),
+                                      itemCount: personalExpGraph.length,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return SizedBox(
+                                          height: 45,
+                                          child: OutlinedButton(
+                                            style: OutlinedButton.styleFrom(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(13.0),
                                               ),
-                                              primaryYAxis: NumericAxis(
-                                                  labelFormat: "₹ {value}",
-                                                  isVisible: false),
-                                              tooltipBehavior: TooltipBehavior(
-                                                  enable: true,
-                                                  header: "",
-                                                  format:
-                                                      "point.x : ₹ point.y"),
-                                              plotAreaBorderWidth: 0,
-                                              series: <CartesianSeries>[
-                                                  LineSeries<dynamic, String>(
-                                                      color: Theme.of(context)
-                                                          .primaryColor,
-                                                      dataSource: yearwiseSpend,
-                                                      yValueMapper:
-                                                          (dynamic data, _) =>
-                                                              data["amount"],
-                                                      xValueMapper:
-                                                          (dynamic data, _) =>
-                                                              data["text"]
-                                                                  .toString(),
-                                                      dataLabelSettings:
-                                                          DataLabelSettings(
-                                                              isVisible: true),
-                                                      dataLabelMapper: (datum,
-                                                              index) =>
-                                                          "Year : " +
-                                                          datum["text"]
-                                                              .toString() +
-                                                          "\n₹ " +
-                                                          datum["amount"]
-                                                              .toStringAsFixed(
-                                                                  2),
-                                                      markerSettings:
-                                                          MarkerSettings(
-                                                              isVisible: true))
-                                                ])
-                                          : Center(
-                                              child: Text(
-                                                "No Personal Expense Found",
-                                                style: TextStyle(fontSize: 20),
-                                              ),
-                                            ))),
-                            ),
-                            Divider(),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              "Personal Expense By Month-Year",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
+                                              side: BorderSide(
+                                                  color: indexPersonalGraph ==
+                                                          index
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : Colors.grey.shade700),
+                                            ),
+                                            onPressed: () {
+                                              if (this.mounted) {
+                                                setState(() {
+                                                  indexPersonalGraph = index;
+                                                });
+                                              }
+                                            },
+                                            child: Text(
+                                              personalExpGraph[index],
+                                              style: TextStyle(
+                                                  fontSize: 16,
+                                                  color:
+                                                      themeProvider.isDarkTheme
+                                                          ? Colors.white
+                                                          : Colors.black),
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                ),
                               ),
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            SizedBox(
+                              SizedBox(
+                                height: 10,
+                              ),
+                              showPersonalGraph()
+                            ],
+                          ))
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SingleChildScrollView(
+                            child: SizedBox(
                               width: MediaQuery.of(context).size.width,
-                              height: 65,
-                              child: ListView.builder(
+                              height: 45,
+                              child: ListView.separated(
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(
+                                        width: 8,
+                                      ),
                                   scrollDirection: Axis.horizontal,
-                                  itemCount: years.length + 1,
                                   shrinkWrap: true,
+                                  physics: ScrollPhysics(),
+                                  itemCount: indexRoom.length,
                                   itemBuilder:
                                       (BuildContext context, int index) {
-                                    if (0 == index) {
-                                      return SizedBox(
-                                        width: 100,
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: InkWell(
-                                              onTap: () {
-                                                yearIndex = index;
-                                                personalExpenseByYear.clear();
-                                                personalExpenseByYear
-                                                    .addAll(personalExpense);
-                                                if (this.mounted) {
-                                                  setState(() {});
-                                                }
-                                              },
-                                              child: Card(
-                                                elevation: 2.0,
-                                                shadowColor: Theme.of(context)
-                                                    .primaryColor,
-                                                color: yearIndex == index
-                                                    ? Theme.of(context)
-                                                        .primaryColor
-                                                    : Theme.of(context)
-                                                        .scaffoldBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: yearIndex == index
-                                                          ? Theme.of(context)
-                                                              .primaryColor
-                                                          : Theme.of(context)
-                                                              .cardColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    "All",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: yearIndex == index
-                                                          ? Colors.white
-                                                          : Theme.of(context)
-                                                              .textTheme
-                                                              .bodySmall!
-                                                              .color,
-                                                    ),
-                                                  ),
-                                                ),
-                                              )),
+                                    return SizedBox(
+                                      height: 40,
+                                      child: Card(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                              color: Theme.of(context)
+                                                  .primaryColor),
+                                          borderRadius:
+                                              BorderRadius.circular(15.0),
                                         ),
-                                      );
-                                    } else {
-                                      return SizedBox(
-                                        width: 100,
                                         child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: InkWell(
-                                              onTap: () {
-                                                yearIndex = index;
-                                                personalExpenseByYear.clear();
-                                                personalExpense
-                                                    .forEach((element) {
-                                                  if (element.Year ==
-                                                      years[index - 1]) {
-                                                    personalExpenseByYear
-                                                        .add(element);
-                                                  }
-                                                });
-                                                if (this.mounted) {
-                                                  setState(() {});
-                                                }
-                                              },
-                                              child: Card(
-                                                elevation: 2.0,
-                                                shadowColor: Theme.of(context)
-                                                    .primaryColor,
-                                                color: yearIndex == index
-                                                    ? Theme.of(context)
-                                                        .primaryColor
-                                                    : Theme.of(context)
-                                                        .scaffoldBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: yearIndex == index
-                                                          ? Theme.of(context)
-                                                              .primaryColor
-                                                          : Theme.of(context)
-                                                              .cardColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Center(
-                                                  child: Text(
-                                                    years[index - 1],
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: yearIndex == index
-                                                          ? Colors.white
-                                                          : Theme.of(context)
-                                                              .textTheme
-                                                              .bodySmall!
-                                                              .color,
-                                                    ),
-                                                  ),
-                                                ),
-                                              )),
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 8.0),
+                                          child: Center(
+                                            child: Text(
+                                              allRooms[indexRoom[index]]
+                                                  .roomName,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                      );
-                                    }
+                                      ),
+                                    );
                                   }),
                             ),
-                            SizedBox(
-                              height: 300,
-                              child: isDataLoading
-                                  ? Center(
-                                      child:
-                                          CircularProgressIndicator.adaptive(),
-                                    )
-                                  : (personalExpenseByYear.isNotEmpty
-                                      ? SfCartesianChart(
-                                          primaryXAxis: CategoryAxis(
-                                            initialVisibleMinimum: 0,
-                                            initialVisibleMaximum: 5,
-                                            isVisible: true,
-                                          ),
-                                          primaryYAxis: NumericAxis(
-                                            labelFormat: "₹ {value}",
-                                            isVisible: false,
-                                          ),
-                                          tooltipBehavior: TooltipBehavior(
-                                              enable: true,
-                                              header: "",
-                                              format: "point.x : point.y"),
-                                          zoomPanBehavior: ZoomPanBehavior(
-                                            enablePanning: true,
-                                          ),
-                                          plotAreaBorderWidth: 0,
-                                          series: <CartesianSeries>[
-                                              LineSeries<PersonalExpenseEach,
-                                                      String>(
-                                                  color: Theme.of(context)
-                                                      .primaryColor,
-                                                  dataSource:
-                                                      personalExpenseByYear,
-                                                  yValueMapper:
-                                                      (PersonalExpenseEach data,
-                                                              _) =>
-                                                          data.Total,
-                                                  xValueMapper:
-                                                      (PersonalExpenseEach data,
-                                                              _) =>
-                                                          data.Month +
-                                                          ",\n" +
-                                                          data.Year,
-                                                  dataLabelSettings:
-                                                      DataLabelSettings(
-                                                    isVisible: true,
-                                                  ),
-                                                  dataLabelMapper: (datum,
-                                                          index) =>
-                                                      "₹ " +
-                                                      datum.Total.toStringAsFixed(
-                                                          2),
-                                                  markerSettings:
-                                                      MarkerSettings(
-                                                          isVisible: true))
-                                            ])
-                                      : Center(
-                                          child: Text(
-                                            "No Personal Expense Found",
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                        )),
-                            ),
-                          ],
-                        ))
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Active Room Comparison",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
                           ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        widget.RoomDataO.isEmpty
-                            ? SizedBox(
-                                height: 200,
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text("No Active Room Found",
-                                        style: TextStyle(fontSize: 20)),
-                                  ),
-                                ))
-                            : SizedBox(
-                                height: 45 * widget.RoomDataO.length * 1.0,
-                                child: Padding(
-                                    padding: const EdgeInsets.all(6),
-                                    child: SfCartesianChart(
-                                        primaryXAxis:
-                                            CategoryAxis(isVisible: false),
-                                        primaryYAxis:
-                                            NumericAxis(isVisible: false),
-                                        tooltipBehavior: TooltipBehavior(
-                                            enable: true,
-                                            header: "",
-                                            format: "You spent ₹ point.y"),
-                                        plotAreaBorderWidth: 0,
-                                        series: <BarSeries<RoomEach, String>>[
-                                          BarSeries<RoomEach, String>(
-                                            dataSource: widget.RoomDataO,
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            xValueMapper: (RoomEach data, _) =>
-                                                data.roomName,
-                                            yValueMapper: (RoomEach data, _) =>
-                                                data.spend,
-                                            isVisibleInLegend: true,
-                                            width: 0.8,
-                                            pointColorMapper:
-                                                (RoomEach data, _) =>
-                                                    global.colorsList[_],
-                                            dataLabelMapper: (datum, index) =>
-                                                datum.roomName +
-                                                "\n₹ " +
-                                                datum.spend.toStringAsFixed(2),
-                                            dataLabelSettings:
-                                                DataLabelSettings(
-                                                    isVisible: true),
-                                          )
-                                        ])),
-                              ),
-                        Divider(),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "Room Comparison",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+                          SizedBox(
+                            height: 5,
                           ),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        widget.RoomDataC.isEmpty && widget.RoomDataO.isEmpty
-                            ? Column(
-                                children: [
-                                  SizedBox(
-                                    height: 100,
-                                  ),
-                                  Center(
-                                    child: Text("No Room Found",
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height - 300,
+                            width: MediaQuery.of(context).size.width,
+                            child: indexRoom.isEmpty
+                                ? Center(
+                                    child: Text(
+                                        allRooms.isEmpty
+                                            ? "No Room Found"
+                                            : "Choose Room To Compare",
                                         style: TextStyle(fontSize: 20)),
-                                  ),
-                                ],
-                              )
-                            : Column(
-                                children: [
-                                  compareBetween.isNotEmpty
-                                      ? SizedBox(
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          height: 50,
-                                          child: ListView.separated(
-                                              physics:
-                                                  AlwaysScrollableScrollPhysics(),
-                                              separatorBuilder:
-                                                  (context, index) => SizedBox(
-                                                        width: 5,
-                                                      ),
-                                              scrollDirection: Axis.horizontal,
-                                              shrinkWrap: true,
-                                              itemCount: compareBetween.length,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                RoomEach tempRoom =
-                                                    compareBetween
-                                                        .elementAt(index);
-                                                return Card(
-                                                  elevation: 1.0,
-                                                  shadowColor: Theme.of(context)
-                                                      .primaryColor,
-                                                  color: Theme.of(context)
-                                                      .scaffoldBackgroundColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: Theme.of(context)
-                                                            .primaryColor
-                                                            .withOpacity(0.6)),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15.0),
-                                                  ),
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            10.0),
-                                                    child: Center(
-                                                      child: InkWell(
-                                                        onTap: () async {
-                                                          compareBetween
-                                                              .remove(tempRoom);
-                                                          if (this.mounted) {
-                                                            setState(() {});
-                                                          }
-                                                        },
-                                                        child: Text(
-                                                          tempRoom.roomName,
-                                                          style:
-                                                              const TextStyle(
-                                                            fontSize: 17,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              }),
-                                        )
-                                      : SizedBox(),
-                                  compareBetween.isEmpty
-                                      ? SizedBox()
-                                      : SizedBox(
-                                          height: 15,
-                                        ),
-                                  SizedBox(
-                                    height: 45,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: OutlinedButton(
-                                      child: Text(
-                                        "Select Room",
-                                        style: TextStyle(
-                                            color: themeProvider.isDarkTheme
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontSize: 16),
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        side: BorderSide(
-                                            color:
-                                                Theme.of(context).primaryColor),
-                                      ),
-                                      onPressed: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) =>
-                                              addRoomWidget(context),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  SizedBox(
-                                    height: 45,
-                                    width: MediaQuery.of(context).size.width,
-                                    child: OutlinedButton(
-                                      child: Text(
-                                        "Analyse",
-                                        style: TextStyle(
-                                            color: themeProvider.isDarkTheme
-                                                ? Colors.white
-                                                : Colors.black,
-                                            fontSize: 16),
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        side: BorderSide(
-                                            color:
-                                                Theme.of(context).primaryColor),
-                                      ),
-                                      onPressed: () async {
-                                        graphData.clear();
-                                        graphLoading = true;
-                                        if (this.mounted) {
-                                          setState(() {});
-                                        }
-                                        List<String> roomKeys = [];
-                                        for (int i = 0;
-                                            i < compareBetween.length;
-                                            i++) {
-                                          RoomEach tempObj =
-                                              compareBetween.elementAt(i);
-                                          roomKeys.add(tempObj.roomKey);
-                                        }
-                                        List<dynamic> roomData =
-                                            await getRoomData(roomKeys);
-                                        List<List<ChartData>> tempGraphData =
-                                            [];
-
-                                        for (int i = 0;
-                                            i < roomData.length;
-                                            i++) {
-                                          List<ChartData> temp = [];
-                                          for (int j = 0;
-                                              j < widget.expenseCategory.length;
-                                              j++) {
-                                            temp.add(ChartData.byRoom(
-                                                crypto.decrypt(
-                                                    roomData[i]["roomName"]),
-                                                widget.expenseCategory[j],
-                                                double.parse(crypto.decrypt(
-                                                    roomData[i]["expense"][
-                                                        widget.expenseCategory[
-                                                            j]]))));
-                                          }
-                                          tempGraphData.add(temp);
-                                        }
-
-                                        for (int i = 0;
-                                            i < tempGraphData.length;
-                                            i++) {
-                                          graphData
-                                              .add(BarSeries<ChartData, String>(
-                                            dataSource: tempGraphData[i],
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            width: 0.8,
-                                            xValueMapper: (ChartData data, _) =>
-                                                data.type,
-                                            yValueMapper: (ChartData data, _) =>
-                                                data.amount,
-                                            isVisibleInLegend: true,
-                                            pointColorMapper:
-                                                (ChartData data, _) =>
-                                                    global.colorsList[_],
-                                            dataLabelMapper: (datum, index) =>
-                                                datum.name +
-                                                " (" +
-                                                datum.type +
-                                                ")" +
-                                                "\n₹ " +
-                                                datum.amount.toStringAsFixed(2),
-                                            dataLabelSettings:
-                                                DataLabelSettings(
-                                                    isVisible: true),
-                                          ));
-                                        }
-
-                                        graphLoading = false;
-                                        if (this.mounted) {
-                                          setState(() {});
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  graphLoading
-                                      ? SizedBox(
-                                          height: 200,
-                                          child: Center(
-                                            child: CircularProgressIndicator
-                                                .adaptive(),
-                                          ),
-                                        )
-                                      : (graphData.isNotEmpty
-                                          ? SizedBox(
-                                              height: 50 *
-                                                  graphData.length *
-                                                  widget
-                                                      .expenseCategory.length *
-                                                  1.0,
-                                              child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(6),
-                                                  child: SfCartesianChart(
-                                                      primaryXAxis:
-                                                          CategoryAxis(
-                                                              isVisible: false),
-                                                      primaryYAxis: NumericAxis(
-                                                          isVisible: false),
-                                                      tooltipBehavior:
-                                                          TooltipBehavior(
-                                                              enable: true,
-                                                              header: "",
-                                                              format:
-                                                                  "point.x : ₹ point.y"),
-                                                      plotAreaBorderWidth: 0,
-                                                      series: <BarSeries<ChartData, String>>[
-                                                        ...graphData
-                                                      ])),
+                                  )
+                                : Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      graphLoading
+                                          ? Center(
+                                              child: CircularProgressIndicator
+                                                  .adaptive(),
                                             )
-                                          : SizedBox(
-                                              height: 200,
-                                              child: Center(
-                                                  child: Text(
-                                                "Select Rooms To Analyse",
-                                                style: TextStyle(fontSize: 18),
-                                              )))),
-                                ],
-                              ),
-                      ],
-                    )),
+                                          : (graphData.isNotEmpty
+                                              ? SizedBox(
+                                                  width: MediaQuery.of(context)
+                                                      .size
+                                                      .width,
+                                                  child: SingleChildScrollView(
+                                                    child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(6),
+                                                        child: SfCartesianChart(
+                                                            enableAxisAnimation:
+                                                                true,
+                                                            legend: Legend(
+                                                                isVisible:
+                                                                    true),
+                                                            zoomPanBehavior:
+                                                                ZoomPanBehavior(
+                                                                    enablePanning:
+                                                                        true),
+                                                            primaryXAxis: CategoryAxis(isVisible: true),
+                                                            primaryYAxis: NumericAxis(isVisible: true),
+                                                            plotAreaBorderWidth: 0,
+                                                            series: <StackedLineSeries<ChartData, String>>[
+                                                              ...graphData
+                                                            ])),
+                                                  ),
+                                                )
+                                              : Center(
+                                                  child: Center(
+                                                      child: Text(
+                                                  "Select Rooms To Analyse",
+                                                  style:
+                                                      TextStyle(fontSize: 20),
+                                                )))),
+                                    ],
+                                  ),
+                          ),
+                        ],
+                      )),
+          ),
         ),
-      ),
-    );
+        floatingActionButton: isRoom
+            ? FloatingActionButton(
+                child: Icon(
+                  Icons.filter_alt_rounded,
+                  color: Theme.of(context).primaryColor,
+                ),
+                backgroundColor: Theme.of(context).cardColor,
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        width: 3,
+                        color: Theme.of(context).primaryColor.withOpacity(0.7)),
+                    borderRadius: BorderRadius.circular(20)),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (
+                      BuildContext context,
+                    ) =>
+                        addRoomWidget(context),
+                  );
+                },
+              )
+            : null);
   }
 }

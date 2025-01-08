@@ -32,9 +32,8 @@ import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:settlenow/screens/analysis.dart';
-import 'package:settlenow/screens/personalExpense.dart';
 import 'package:settlenow/screens/lendenDashboard.dart';
-import 'package:settlenow/screens/summary.dart';
+import 'package:settlenow/screens/personalExpDashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:sqflite/sqflite.dart';
@@ -4792,20 +4791,16 @@ class _DashBoardState extends State<DashBoard> {
     } else if (dash == 1) {
       return RequestWidget(context);
     } else if (dash == 2) {
-      return Expenses(
-        date: date,
-      );
-    } else if (dash == 3) {
-      return LendCredit();
-    } else if (dash == 4) {
-      return Analysis(
-        RoomDataC: RoomDataC.value,
-        RoomDataO: RoomDataO.value,
+      return PersonalExpenseDashBoard(
         expenseCategory: expenseCategory,
         subCategory: subCategory,
       );
+    } else if (dash == 3) {
+      return LendDenDashboard();
     } else {
-      return SummaryPage(
+      return Analysis(
+        RoomDataC: RoomDataC.value,
+        RoomDataO: RoomDataO.value,
         expenseCategory: expenseCategory,
         subCategory: subCategory,
       );
@@ -4931,7 +4926,12 @@ class _DashBoardState extends State<DashBoard> {
                             ),
                           )
                         : (dash == 2
-                            ? null
+                            ? AppBar(
+                                title: Text(
+                                  "Personal Expense",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              )
                             : (dash == 3
                                 ? AppBar(
                                     title: Text(
@@ -4940,21 +4940,13 @@ class _DashBoardState extends State<DashBoard> {
                                           fontWeight: FontWeight.bold),
                                     ),
                                   )
-                                : (dash == 4
-                                    ? AppBar(
-                                        title: Text(
-                                          "Analysis",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      )
-                                    : AppBar(
-                                        title: Text(
-                                          "Summary",
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold),
-                                        ),
-                                      ))))),
+                                : AppBar(
+                                    title: Text(
+                                      "Analysis",
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  )))),
                 body: chooseFromBottomNavigator(dash),
                 bottomNavigationBar: internetConnProvider.isAlertSet
                     ? Container(
@@ -5047,14 +5039,7 @@ class _DashBoardState extends State<DashBoard> {
                               size: 27,
                             ),
                             label: "",
-                          ),
-                          BottomNavigationBarItem(
-                            icon: Icon(
-                              Icons.assignment_outlined,
-                              size: 27,
-                            ),
-                            label: "",
-                          ),
+                          )
                         ],
                       ),
                 drawer: Drawer(

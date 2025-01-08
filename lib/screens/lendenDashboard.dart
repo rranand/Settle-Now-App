@@ -16,16 +16,16 @@ import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:settlenow/others/crypto.dart';
 
-class LendCredit extends StatefulWidget {
-  const LendCredit({
+class LendDenDashboard extends StatefulWidget {
+  const LendDenDashboard({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<LendCredit> createState() => _LendCreditState();
+  State<LendDenDashboard> createState() => _LendDenDashboardState();
 }
 
-class _LendCreditState extends State<LendCredit> {
+class _LendDenDashboardState extends State<LendDenDashboard> {
   String _email = "";
   String _token = "";
   List<dynamic> data = [];
@@ -34,7 +34,7 @@ class _LendCreditState extends State<LendCredit> {
   bool validateText = false;
   int indexLoading = -1;
   TextEditingController _name = TextEditingController();
-  GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyLendCredit =
+  GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyLendDenDashboard =
       new GlobalKey<RefreshIndicatorState>();
 
   bool searchTrigger = false;
@@ -68,7 +68,7 @@ class _LendCreditState extends State<LendCredit> {
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         onException(context, err, stackTrace,
-            reason: "Unknwon Error", info: ["LendCredit->createRoom"]);
+            reason: "Unknwon Error", info: ["LendDenDashboard->createRoom"]);
       }
     }
 
@@ -106,7 +106,7 @@ class _LendCreditState extends State<LendCredit> {
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         onException(context, err, stackTrace,
-            reason: "Unknwon Error", info: ["LendCredit->updateRoom"]);
+            reason: "Unknwon Error", info: ["LendDenDashboard->updateRoom"]);
       }
     }
 
@@ -175,7 +175,7 @@ class _LendCreditState extends State<LendCredit> {
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
-            reason: "Unknwon Error", info: ["LendCredit->_initialization"]);
+            reason: "Unknwon Error", info: ["LendDenDashboard->_initialization"]);
       }
     }
 
@@ -213,7 +213,7 @@ class _LendCreditState extends State<LendCredit> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback(
-        (_) => _refreshIndicatorKeyLendCredit.currentState?.show());
+        (_) => _refreshIndicatorKeyLendDenDashboard.currentState?.show());
   }
 
   @override
@@ -257,7 +257,7 @@ class _LendCreditState extends State<LendCredit> {
           : null,
       body: RefreshIndicator(
           color: Theme.of(context).primaryColor,
-          key: _refreshIndicatorKeyLendCredit,
+          key: _refreshIndicatorKeyLendDenDashboard,
           onRefresh: _initialization,
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
