@@ -531,7 +531,9 @@ class _AnalysisState extends State<Analysis> {
                             isVisible: true,
                           ),
                           primaryYAxis: NumericAxis(
-                              labelFormat: "₹ {value}", isVisible: true),
+                            labelFormat: "₹ {value}",
+                            isVisible: true,
+                          ),
                           tooltipBehavior: TooltipBehavior(
                               enable: true,
                               header: "",
@@ -670,7 +672,7 @@ class _AnalysisState extends State<Analysis> {
           height: 5,
         ),
         SizedBox(
-          height: MediaQuery.of(context).size.height - 400,
+          height: MediaQuery.of(context).size.height - 200,
           child: isDataLoading
               ? Center(
                   child: CircularProgressIndicator.adaptive(),
@@ -680,8 +682,6 @@ class _AnalysisState extends State<Analysis> {
                       quarterTurns: 1,
                       child: SfCartesianChart(
                           primaryXAxis: CategoryAxis(
-                            initialVisibleMinimum: 0,
-                            initialVisibleMaximum: 5,
                             isVisible: true,
                           ),
                           primaryYAxis: NumericAxis(
@@ -987,7 +987,7 @@ class _AnalysisState extends State<Analysis> {
                                                                   EdgeLabelPlacement
                                                                       .shift,
                                                               labelFormat:
-                                                                  'Rs {value}',
+                                                                  '₹ {value}',
                                                               majorTickLines:
                                                                   MajorTickLines(
                                                                       size: 0),
