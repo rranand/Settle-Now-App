@@ -380,12 +380,13 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
     Response res = await httpType(Uri.parse(global.url + url),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Auth': token,
-          'Access-Control-Allow-Origin': global.url
-        },
-        body: jsonEncode({"data": tokenization}));
+            headers: <String, String>{
+              'Content-Type': 'application/json; charset=UTF-8',
+              'Auth': token,
+              'Access-Control-Allow-Origin': global.url
+            },
+            body: jsonEncode({"data": tokenization}))
+        .timeout(Duration(seconds: 20));
 
     var resData = jsonDecode(res.body);
 
