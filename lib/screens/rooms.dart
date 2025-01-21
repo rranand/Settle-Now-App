@@ -3619,44 +3619,66 @@ class _RoomExpenseState extends State<RoomExpense>
     double leftAmount = _currentAmountValues.start.round().toDouble();
     double rightAmount = _currentAmountValues.end.round().toDouble();
     TransList.clear();
-    dataToBeFiltered.forEach((element) {
-      DateTime transDate = dateFormat
-          .parse(crypto.decrypt(element['Date']).substring(0, 12) + "00:00:00");
-      double amt = double.parse(crypto.decrypt(element['Amount']));
-      if ((_searchText.text.length > 0 &&
-              crypto
-                  .decrypt(element['Purpose'])
-                  .toLowerCase()
-                  .contains(_searchText.text.toLowerCase())) ||
-          _searchText.text.length == 0) {
-        if ((dateRange.start.isAtSameMomentAs(transDate) ||
-                dateRange.start.isBefore(transDate)) &&
-            (dateRange.end.isAtSameMomentAs(transDate) ||
-                dateRange.end.isAfter(transDate)) &&
-            amt >= leftAmount &&
-            amt <= rightAmount) {
-          if (filtercategoryIndex.isEmpty ||
-              filtercategoryIndex.contains(
-                  expenseCategory.indexOf(crypto.decrypt(element['Type'])))) {
-            if (showExpenseYouAreIn) {
-              List<dynamic> partialExpense = element["members"];
-              if (partialExpense.isEmpty) {
-                TransList.add(element);
-              } else {
-                for (int i = 0; i < partialExpense.length; i++) {
-                  if (crypto.decrypt(partialExpense[i]['Email']) == _email) {
-                    TransList.add(element);
-                    break;
+
+    if (showFilterResult) {
+      dataToBeFiltered.forEach((element) {
+        DateTime transDate = dateFormat.parse(
+            crypto.decrypt(element['Date']).substring(0, 12) + "00:00:00");
+        double amt = double.parse(crypto.decrypt(element['Amount']));
+        if ((_searchText.text.length > 0 &&
+                (crypto
+                        .decrypt(element['Purpose'])
+                        .toLowerCase()
+                        .contains(_searchText.text.toLowerCase()) ||
+                    crypto
+                        .decrypt(element["Amount"])
+                        .toLowerCase()
+                        .contains(_searchText.text.toLowerCase()))) ||
+            _searchText.text.length == 0) {
+          if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                  dateRange.start.isBefore(transDate)) &&
+              (dateRange.end.isAtSameMomentAs(transDate) ||
+                  dateRange.end.isAfter(transDate)) &&
+              amt >= leftAmount &&
+              amt <= rightAmount) {
+            if (filtercategoryIndex.isEmpty ||
+                filtercategoryIndex.contains(
+                    expenseCategory.indexOf(crypto.decrypt(element['Type'])))) {
+              if (showExpenseYouAreIn) {
+                List<dynamic> partialExpense = element["members"];
+                if (partialExpense.isEmpty) {
+                  TransList.add(element);
+                } else {
+                  for (int i = 0; i < partialExpense.length; i++) {
+                    if (crypto.decrypt(partialExpense[i]['Email']) == _email) {
+                      TransList.add(element);
+                      break;
+                    }
                   }
                 }
+              } else {
+                TransList.add(element);
               }
-            } else {
-              TransList.add(element);
             }
           }
         }
-      }
-    });
+      });
+    } else if (_searchText.text.isNotEmpty) {
+      dataToBeFiltered.forEach((element) {
+        if (crypto
+                .decrypt(element['Purpose'])
+                .toLowerCase()
+                .contains(_searchText.text.toLowerCase()) ||
+            crypto
+                .decrypt(element["Amount"])
+                .toLowerCase()
+                .contains(_searchText.text.toLowerCase())) {
+          TransList.add(element);
+        }
+      });
+    } else {
+      TransList = [...dataToBeFiltered];
+    }
 
     if (this.mounted) {
       setState(() {});
@@ -4167,6 +4189,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                 DateTime.now().year, DateTime.now().month - 6),
                             end: DateTime.now());
                         TransList = [...allExpenseList];
+                        getFilterResult();
                         if (this.mounted) {
                           setState(() {});
                         }
