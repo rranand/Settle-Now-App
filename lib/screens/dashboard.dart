@@ -6305,7 +6305,7 @@ class _QuickSplitState extends State<QuickSplit> {
                             ),
                             SizedBox(
                               height: 43,
-                              width: 100,
+                              width: 120,
                               child: OutlinedButton(
                                   child: Text(
                                     "Update",

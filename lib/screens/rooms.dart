@@ -5733,10 +5733,9 @@ class _ExpenseDataState extends State<ExpenseData> {
     roomExpenseCategoryIndex = widget.expenseCategory.indexOf(category);
     roomSubExpenseCategoryIndex =
         widget.subCategory[roomExpenseCategoryIndex].indexOf(subCategory);
-    return StatefulBuilder(builder: (context, setState) {
-      _purpose.text = purpose;
-      _amount.text = amount;
-
+    _purpose.text = purpose;
+    _amount.text = amount;
+    return StatefulBuilder(builder: (context, setState2) {
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
           shape:
@@ -5845,13 +5844,11 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         ),
                                       ),
                                       onTap: () {
+                                        roomExpenseCategoryIndex = index;
+                                        roomSubExpenseCategoryIndex = 0;
                                         if (this.mounted) {
-                                          setState(
-                                            () {
-                                              roomExpenseCategoryIndex = index;
-                                              roomSubExpenseCategoryIndex = 0;
-                                            },
-                                          );
+                                          setState(() {});
+                                          setState2(() {});
                                         }
                                       },
                                     ),
@@ -5911,13 +5908,11 @@ class _ExpenseDataState extends State<ExpenseData> {
                                               ),
                                             ),
                                             onTap: () {
+                                              roomSubExpenseCategoryIndex =
+                                                  index;
                                               if (this.mounted) {
-                                                setState(
-                                                  () {
-                                                    roomSubExpenseCategoryIndex =
-                                                        index;
-                                                  },
-                                                );
+                                                setState(() {});
+                                                setState2(() {});
                                               }
                                             },
                                           ),

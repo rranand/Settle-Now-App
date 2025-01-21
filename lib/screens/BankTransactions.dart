@@ -257,7 +257,7 @@ class _BankTransactionsState extends State<BankTransactions> {
     var permission = await Permission.sms.status;
     if (permission.isGranted) {
       final messages = await _query.querySms(
-        count: 50,
+        count: 2000,
         kinds: [SmsQueryKind.inbox],
       );
       _messages = messages;
@@ -2072,106 +2072,115 @@ class _BankTransactionsState extends State<BankTransactions> {
     }
 
     DateFormat dateFormat = DateFormat("MMM dd yyyy h:mm a");
-
-    allTransactions.forEach((element) {
-      if ((_searchText.text.length > 0 &&
-              element.receiver
-                  .toLowerCase()
-                  .contains(_searchText.text.toLowerCase())) ||
-          _searchText.text.length == 0) {
-        DateTime transDate =
-            dateFormat.parse(element.date.substring(0, 12) + "12:00 AM");
-        if (allBanksIndex.isEmpty) {
-          if ((dateRange.start.isAtSameMomentAs(transDate) ||
-                  dateRange.start.isBefore(transDate)) &&
-              (dateRange.end.isAtSameMomentAs(transDate) ||
-                  dateRange.end.isAfter(transDate))) {
-            double amt = double.parse(element.amount);
-            if (amt >= int.parse(_amountRangeValues[0].text) &&
-                amt <= int.parse(_amountRangeValues[1].text)) {
-              if (transactionTypeIndex.isEmpty &&
-                  transactionModeIndex.isEmpty) {
-                filteredResult.add(element);
-              } else if (transactionTypeIndex.isEmpty) {
-                transactionModeIndex.forEach((tmIndex) {
-                  String tmElement = transactionMode[tmIndex];
-                  if (tmElement == element.mode) {
-                    filteredResult.add(element);
-                  }
-                });
-              } else if (transactionModeIndex.isEmpty) {
-                transactionTypeIndex.forEach((ttIndex) {
-                  String ttElement = transactionType[ttIndex];
-                  if (ttElement == element.type) {
-                    filteredResult.add(element);
-                  }
-                });
-              } else {
-                transactionTypeIndex.forEach((ttIndex) {
-                  String ttElement = transactionType[ttIndex];
-                  if (ttElement == element.type) {
-                    transactionModeIndex.forEach((tmIndex) {
-                      String tmElement = transactionMode[tmIndex];
-                      if (tmElement == element.mode) {
-                        filteredResult.add(element);
-                      }
-                    });
-                  }
-                });
-              }
-            }
-          }
-        } else {
-          allBanksIndex.forEach((abElement) {
-            String bankName = bankNameFound[abElement];
-
-            if (bankName == element.bank) {
-              if ((dateRange.start.isAtSameMomentAs(transDate) ||
-                      dateRange.start.isBefore(transDate)) &&
-                  (dateRange.end.isAtSameMomentAs(transDate) ||
-                      dateRange.end.isAfter(transDate))) {
-                double amt = double.parse(element.amount);
-
-                if (amt >= int.parse(_amountRangeValues[0].text) &&
-                    amt <= int.parse(_amountRangeValues[1].text)) {
-                  if (transactionTypeIndex.isEmpty &&
-                      transactionModeIndex.isEmpty) {
-                    filteredResult.add(element);
-                  } else if (transactionTypeIndex.isEmpty) {
-                    transactionModeIndex.forEach((tmIndex) {
-                      String tmElement = transactionMode[tmIndex];
-                      if (tmElement == element.mode) {
-                        filteredResult.add(element);
-                      }
-                    });
-                  } else if (transactionModeIndex.isEmpty) {
-                    transactionTypeIndex.forEach((ttIndex) {
-                      String ttElement = transactionType[ttIndex];
-                      if (ttElement == element.type) {
-                        filteredResult.add(element);
-                      }
-                    });
-                  } else {
-                    transactionTypeIndex.forEach((ttIndex) {
-                      String ttElement = transactionType[ttIndex];
-                      if (ttElement == element.type) {
-                        transactionModeIndex.forEach((tmIndex) {
-                          String tmElement = transactionMode[tmIndex];
-                          if (tmElement == element.mode) {
-                            filteredResult.add(element);
-                          }
-                        });
-                      }
-                    });
-                  }
+    if (showFilterResult) {
+      allTransactions.forEach((element) {
+        if ((_searchText.text.length > 0 &&
+                element.receiver
+                    .toLowerCase()
+                    .contains(_searchText.text.toLowerCase())) ||
+            _searchText.text.length == 0) {
+          DateTime transDate =
+              dateFormat.parse(element.date.substring(0, 12) + "12:00 AM");
+          if (allBanksIndex.isEmpty) {
+            if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                    dateRange.start.isBefore(transDate)) &&
+                (dateRange.end.isAtSameMomentAs(transDate) ||
+                    dateRange.end.isAfter(transDate))) {
+              double amt = double.parse(element.amount);
+              if (amt >= int.parse(_amountRangeValues[0].text) &&
+                  amt <= int.parse(_amountRangeValues[1].text)) {
+                if (transactionTypeIndex.isEmpty &&
+                    transactionModeIndex.isEmpty) {
+                  filteredResult.add(element);
+                } else if (transactionTypeIndex.isEmpty) {
+                  transactionModeIndex.forEach((tmIndex) {
+                    String tmElement = transactionMode[tmIndex];
+                    if (tmElement == element.mode) {
+                      filteredResult.add(element);
+                    }
+                  });
+                } else if (transactionModeIndex.isEmpty) {
+                  transactionTypeIndex.forEach((ttIndex) {
+                    String ttElement = transactionType[ttIndex];
+                    if (ttElement == element.type) {
+                      filteredResult.add(element);
+                    }
+                  });
+                } else {
+                  transactionTypeIndex.forEach((ttIndex) {
+                    String ttElement = transactionType[ttIndex];
+                    if (ttElement == element.type) {
+                      transactionModeIndex.forEach((tmIndex) {
+                        String tmElement = transactionMode[tmIndex];
+                        if (tmElement == element.mode) {
+                          filteredResult.add(element);
+                        }
+                      });
+                    }
+                  });
                 }
               }
             }
-          });
-        }
-      }
-    });
+          } else {
+            allBanksIndex.forEach((abElement) {
+              String bankName = bankNameFound[abElement];
 
+              if (bankName == element.bank) {
+                if ((dateRange.start.isAtSameMomentAs(transDate) ||
+                        dateRange.start.isBefore(transDate)) &&
+                    (dateRange.end.isAtSameMomentAs(transDate) ||
+                        dateRange.end.isAfter(transDate))) {
+                  double amt = double.parse(element.amount);
+
+                  if (amt >= int.parse(_amountRangeValues[0].text) &&
+                      amt <= int.parse(_amountRangeValues[1].text)) {
+                    if (transactionTypeIndex.isEmpty &&
+                        transactionModeIndex.isEmpty) {
+                      filteredResult.add(element);
+                    } else if (transactionTypeIndex.isEmpty) {
+                      transactionModeIndex.forEach((tmIndex) {
+                        String tmElement = transactionMode[tmIndex];
+                        if (tmElement == element.mode) {
+                          filteredResult.add(element);
+                        }
+                      });
+                    } else if (transactionModeIndex.isEmpty) {
+                      transactionTypeIndex.forEach((ttIndex) {
+                        String ttElement = transactionType[ttIndex];
+                        if (ttElement == element.type) {
+                          filteredResult.add(element);
+                        }
+                      });
+                    } else {
+                      transactionTypeIndex.forEach((ttIndex) {
+                        String ttElement = transactionType[ttIndex];
+                        if (ttElement == element.type) {
+                          transactionModeIndex.forEach((tmIndex) {
+                            String tmElement = transactionMode[tmIndex];
+                            if (tmElement == element.mode) {
+                              filteredResult.add(element);
+                            }
+                          });
+                        }
+                      });
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+      });
+    } else if (_searchText.text.length > 0) {
+      allTransactions.forEach((element) {
+        if ((element.receiver
+                .toLowerCase()
+                .contains(_searchText.text.toLowerCase())) ||
+            _searchText.text.length == 0) {
+          filteredResult.add(element);
+        }
+      });
+    }
     if (this.mounted) {
       setState(() {});
     }
@@ -2792,6 +2801,7 @@ class _BankTransactionsState extends State<BankTransactions> {
                                   start: new DateTime(DateTime.now().year,
                                       DateTime.now().month - 6),
                                   end: DateTime.now());
+                              getFilterResult();
                               if (this.mounted) {
                                 setState(() {});
                               }
