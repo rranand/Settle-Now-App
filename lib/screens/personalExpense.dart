@@ -682,21 +682,36 @@ class _ExpensesState extends State<Expenses> {
       });
     }
 
-    if (filtercategoryIndex.isEmpty && _searchText.text.length == 0) {
-      showFilterResult = false;
-    } else {
+    if (showFilterResult) {
       TransList.forEach((element) {
         if ((_searchText.text.length > 0 &&
-                crypto
-                    .decrypt(element['purpose'])
-                    .toLowerCase()
-                    .contains(_searchText.text.toLowerCase())) ||
+                (crypto
+                        .decrypt(element['purpose'])
+                        .toLowerCase()
+                        .contains(_searchText.text.toLowerCase()) ||
+                    crypto
+                        .decrypt(element['amount'])
+                        .toLowerCase()
+                        .contains(_searchText.text.toLowerCase()))) ||
             _searchText.text.length == 0) {
           if (filtercategoryIndex.isEmpty ||
               filtercategoryIndex.contains(
                   expenseCategory.indexOf(crypto.decrypt(element['type'])))) {
             filterResult.add(element);
           }
+        }
+      });
+    } else if (_searchText.text.isNotEmpty) {
+      TransList.forEach((element) {
+        if ((crypto
+                .decrypt(element['purpose'])
+                .toLowerCase()
+                .contains(_searchText.text.toLowerCase()) ||
+            crypto
+                .decrypt(element['amount'])
+                .toLowerCase()
+                .contains(_searchText.text.toLowerCase()))) {
+          filterResult.add(element);
         }
       });
     }
@@ -933,6 +948,7 @@ class _ExpensesState extends State<Expenses> {
                       onPressed: () {
                         filtercategoryIndex.clear();
                         showFilterResult = false;
+                        getFilterResult();
                         if (this.mounted) {
                           setState(() {});
                         }
