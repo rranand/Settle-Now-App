@@ -2197,7 +2197,12 @@ class _BankTransactionsState extends State<BankTransactions> {
           _token = jsonOutData["token"]!;
         });
       }
-
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        "url": crypto.encrypt(AppRouteConstants.bankTransactionRouteName),
+        "creationDate": crypto.encrypt(DateTime.now().toString())
+      };
+      pushAnalytics(context, jsonInputData, _token);
       executeParallel();
     } else {
       while (this.mounted && context.canPop()) {

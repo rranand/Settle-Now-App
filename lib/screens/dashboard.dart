@@ -562,6 +562,14 @@ class _DashBoardState extends State<DashBoard> {
         _token = jsonOutData["token"]!;
         initalDataLoaded = true;
 
+        Map<String, dynamic> jsonInputData = {
+          'email': crypto.encrypt(_email.text),
+          "url": crypto
+              .encrypt(AppRouteConstants.dashboardRouteName + "Room/Active"),
+          "creationDate": crypto.encrypt(DateTime.now().toString())
+        };
+        pushAnalytics(context, jsonInputData, _token);
+
         if (!kIsWeb && !isInvitePremissionPoppedProvided) {
           isContactPermissionGranted = await context.push(
               AppRouteConstants.inviteFriendsRouteName,
@@ -3150,6 +3158,13 @@ class _DashBoardState extends State<DashBoard> {
                       requestType = true;
                     });
                   }
+                  Map<String, dynamic> jsonInputData = {
+                    'email': crypto.encrypt(_email.text),
+                    "url": crypto.encrypt(AppRouteConstants.dashboardRouteName +
+                        "Request/Receive"),
+                    "creationDate": crypto.encrypt(DateTime.now().toString())
+                  };
+                  pushAnalytics(context, jsonInputData, _token);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -3176,6 +3191,13 @@ class _DashBoardState extends State<DashBoard> {
                       requestType = false;
                     });
                   }
+                  Map<String, dynamic> jsonInputData = {
+                    'email': crypto.encrypt(_email.text),
+                    "url": crypto.encrypt(
+                        AppRouteConstants.dashboardRouteName + "Request/Sent"),
+                    "creationDate": crypto.encrypt(DateTime.now().toString())
+                  };
+                  pushAnalytics(context, jsonInputData, _token);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -4093,9 +4115,11 @@ class _DashBoardState extends State<DashBoard> {
                                   padding: const EdgeInsets.all(4.0),
                                   child: InkWell(
                                     onTap: () {
-                                      setState(() {
-                                        open = 0;
-                                      });
+                                      if (this.mounted) {
+                                        setState(() {
+                                          open = 0;
+                                        });
+                                      }
                                     },
                                     child: Text(
                                       "Quick Split",
@@ -4132,9 +4156,11 @@ class _DashBoardState extends State<DashBoard> {
                                       ),
                                     ),
                                     onTap: () {
-                                      setState(() {
-                                        open = 1;
-                                      });
+                                      if (this.mounted) {
+                                        setState(() {
+                                          open = 1;
+                                        });
+                                      }
                                     },
                                   ),
                                 ),
@@ -4164,9 +4190,11 @@ class _DashBoardState extends State<DashBoard> {
                                       ),
                                     ),
                                     onTap: () {
-                                      setState(() {
-                                        open = 2;
-                                      });
+                                      if (this.mounted) {
+                                        setState(() {
+                                          open = 2;
+                                        });
+                                      }
                                     },
                                   ),
                                 ),
@@ -4178,15 +4206,19 @@ class _DashBoardState extends State<DashBoard> {
                       GestureDetector(
                           onHorizontalDragEnd: (details) async {
                             if (details.primaryVelocity! > 0) {
-                              setState(() {
-                                open = max(0, open - 1);
-                              });
+                              if (this.mounted) {
+                                setState(() {
+                                  open = max(0, open - 1);
+                                });
+                              }
                             }
 
                             if (details.primaryVelocity! < 0) {
-                              setState(() {
-                                open = min(2, open + 1);
-                              });
+                              if (this.mounted) {
+                                setState(() {
+                                  open = min(2, open + 1);
+                                });
+                              }
                             }
                           },
                           child: SizedBox(
@@ -4385,9 +4417,21 @@ class _DashBoardState extends State<DashBoard> {
                                   padding: const EdgeInsets.all(4.0),
                                   child: InkWell(
                                     onTap: () {
-                                      setState(() {
-                                        open = 0;
-                                      });
+                                      if (this.mounted) {
+                                        setState(() {
+                                          open = 0;
+                                        });
+                                      }
+                                      Map<String, dynamic> jsonInputData = {
+                                        'email': crypto.encrypt(_email.text),
+                                        "url": crypto.encrypt(AppRouteConstants
+                                                .dashboardRouteName +
+                                            "Room/QuickSplit"),
+                                        "creationDate": crypto
+                                            .encrypt(DateTime.now().toString())
+                                      };
+                                      pushAnalytics(
+                                          context, jsonInputData, _token);
                                     },
                                     child: Text(
                                       "Quick Split",
@@ -4424,9 +4468,21 @@ class _DashBoardState extends State<DashBoard> {
                                       ),
                                     ),
                                     onTap: () {
-                                      setState(() {
-                                        open = 1;
-                                      });
+                                      Map<String, dynamic> jsonInputData = {
+                                        'email': crypto.encrypt(_email.text),
+                                        "url": crypto.encrypt(AppRouteConstants
+                                                .dashboardRouteName +
+                                            "Room/Active"),
+                                        "creationDate": crypto
+                                            .encrypt(DateTime.now().toString())
+                                      };
+                                      pushAnalytics(
+                                          context, jsonInputData, _token);
+                                      if (this.mounted) {
+                                        setState(() {
+                                          open = 1;
+                                        });
+                                      }
                                     },
                                   ),
                                 ),
@@ -4456,9 +4512,22 @@ class _DashBoardState extends State<DashBoard> {
                                       ),
                                     ),
                                     onTap: () {
-                                      setState(() {
-                                        open = 2;
-                                      });
+                                      if (this.mounted) {
+                                        setState(() {
+                                          open = 2;
+                                        });
+                                      }
+
+                                      Map<String, dynamic> jsonInputData = {
+                                        'email': crypto.encrypt(_email.text),
+                                        "url": crypto.encrypt(AppRouteConstants
+                                                .dashboardRouteName +
+                                            "Room/Closed"),
+                                        "creationDate": crypto
+                                            .encrypt(DateTime.now().toString())
+                                      };
+                                      pushAnalytics(
+                                          context, jsonInputData, _token);
                                     },
                                   ),
                                 ),
@@ -4470,15 +4539,36 @@ class _DashBoardState extends State<DashBoard> {
                       GestureDetector(
                         onHorizontalDragEnd: (details) async {
                           if (details.primaryVelocity! > 0) {
-                            setState(() {
-                              open = max(0, open - 1);
-                            });
+                            if (this.mounted) {
+                              setState(() {
+                                open = max(0, open - 1);
+                              });
+                            }
                           }
 
                           if (details.primaryVelocity! < 0) {
-                            setState(() {
-                              open = min(2, open + 1);
-                            });
+                            if (this.mounted) {
+                              setState(() {
+                                open = min(2, open + 1);
+                              });
+                            }
+                          }
+
+                          if (details.primaryVelocity! != 0) {
+                            Map<String, dynamic> jsonInputData = {
+                              'email': crypto.encrypt(_email.text),
+                              "url": crypto.encrypt(
+                                  AppRouteConstants.dashboardRouteName +
+                                      ("Room/" +
+                                          (open == 0
+                                              ? "QuickSplit"
+                                              : (open == 1
+                                                  ? "Active"
+                                                  : "Closed")))),
+                              "creationDate":
+                                  crypto.encrypt(DateTime.now().toString())
+                            };
+                            pushAnalytics(context, jsonInputData, _token);
                           }
                         },
                         child: SizedBox(
@@ -4974,9 +5064,32 @@ class _DashBoardState extends State<DashBoard> {
                         selectedItemColor: Theme.of(context).primaryColor,
                         unselectedItemColor: Colors.grey,
                         currentIndex: dash,
-                        onTap: (index) => setState(() {
-                          dash = index;
-                        }),
+                        onTap: (index) {
+                          if (dash != index && index <= 1) {
+                            Map<String, dynamic> jsonInputData = {
+                              'email': crypto.encrypt(_email.text),
+                              "url": crypto.encrypt(AppRouteConstants
+                                      .dashboardRouteName +
+                                  (index == 1
+                                      ? ("Request/" +
+                                          (requestType ? "Receive" : "Sent"))
+                                      : ("Room/" +
+                                          (open == 0
+                                              ? "QuickSplit"
+                                              : (open == 1
+                                                  ? "Active"
+                                                  : "Closed"))))),
+                              "creationDate":
+                                  crypto.encrypt(DateTime.now().toString())
+                            };
+                            pushAnalytics(context, jsonInputData, _token);
+                          }
+                          if (this.mounted) {
+                            setState(() {
+                              dash = index;
+                            });
+                          }
+                        },
                         items: [
                           BottomNavigationBarItem(
                             icon: Icon(

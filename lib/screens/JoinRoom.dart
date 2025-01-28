@@ -47,6 +47,17 @@ class _RoomJoinState extends State<RoomJoin> {
         String email = jsonOutData["email"]!;
         String _token = jsonOutData["token"]!;
 
+        Map<String, dynamic> jsonInputData = {
+          'email': crypto.encrypt(email),
+          "url": crypto.encrypt((widget.roomKey.length == 7
+                  ? AppRouteConstants.deepLinkJoinRoom
+                  : AppRouteConstants.deepLinkJoinLend) +
+              "/" +
+              widget.roomKey),
+          "creationDate": crypto.encrypt(DateTime.now().toString())
+        };
+        pushAnalytics(context, jsonInputData, _token);
+
         if (widget.roomKey.length == 7) {
           Map<String, String> jsonInputData = {
             'email': crypto.encrypt(email),

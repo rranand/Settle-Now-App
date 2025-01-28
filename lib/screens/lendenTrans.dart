@@ -873,6 +873,13 @@ class _LendPageState extends State<LendPage> {
             _token = jsonOutData["token"]!;
           });
         }
+        Map<String, dynamic> jsonInputData = {
+          'email': crypto.encrypt(_email),
+          "url": crypto.encrypt(
+              AppRouteConstants.lendByTitleRouteName + "/" + widget.roomkey),
+          "creationDate": crypto.encrypt(DateTime.now().toString())
+        };
+        pushAnalytics(context, jsonInputData, _token);
       } else {
         while (this.mounted && context.canPop()) {
           context.pop();

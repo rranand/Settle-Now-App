@@ -40,6 +40,13 @@ class _InviteFriendsState extends State<InviteFriends> {
           _token = jsonOutData["token"]!;
         });
       }
+
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        "url": crypto.encrypt(AppRouteConstants.inviteFriendsRouteName),
+        "creationDate": crypto.encrypt(DateTime.now().toString())
+      };
+      pushAnalytics(context, jsonInputData, _token);
     } else {
       while (this.mounted && context.canPop()) {
         context.pop();

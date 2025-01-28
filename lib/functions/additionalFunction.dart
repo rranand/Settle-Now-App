@@ -25,6 +25,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
+import 'package:http/http.dart' as http;
 
 Future<Map<String, dynamic>> initPlatformState() async {
   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -428,4 +429,10 @@ String captalizeFirstLetter(String str) {
     return "";
   }
   return str[0].toUpperCase() + str.substring(1);
+}
+
+Future<void> pushAnalytics(
+    BuildContext context, dynamic jsonInputData, String token) async {
+  jsonInputData["device"] = crypto.encrypt(kIsWeb ? "web" : "android");
+  await createHTTPreq('analytics', http.post, token, jsonInputData, context);
 }

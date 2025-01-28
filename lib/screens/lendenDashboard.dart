@@ -135,6 +135,12 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
             _token = jsonOutData["token"]!;
           });
         }
+        Map<String, dynamic> jsonInputData = {
+          'email': crypto.encrypt(_email),
+          "url": crypto.encrypt(AppRouteConstants.lendRoomRouteName),
+          "creationDate": crypto.encrypt(DateTime.now().toString())
+        };
+        pushAnalytics(context, jsonInputData, _token);
       } else {
         while (this.mounted && context.canPop()) {
           context.pop();
@@ -175,7 +181,8 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
       }
       if (this.mounted) {
         onException(context, err, stackTrace,
-            reason: "Unknwon Error", info: ["LendDenDashboard->_initialization"]);
+            reason: "Unknwon Error",
+            info: ["LendDenDashboard->_initialization"]);
       }
     }
 
