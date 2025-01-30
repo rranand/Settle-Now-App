@@ -736,7 +736,7 @@ class _ProfileState extends State<Profile> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       SizedBox(
-                        height: 40,
+                        height: 10,
                       ),
                       CachedNetworkImage(
                         httpHeaders: {'Access-Control-Allow-Origin': '*'},
@@ -771,6 +771,7 @@ class _ProfileState extends State<Profile> {
                       Padding(
                         padding: const EdgeInsets.all(12.0),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             TextField(
                               style: TextStyle(fontSize: 16),
@@ -867,10 +868,12 @@ class _ProfileState extends State<Profile> {
                               height: 7,
                             ),
                             createdOn.length >= 12
-                                ? Text(
-                                    "Member Since " +
-                                        createdOn.substring(0, 11),
-                                    style: TextStyle(fontSize: 16),
+                                ? Center(
+                                    child: Text(
+                                      "Member Since " +
+                                          createdOn.substring(0, 11),
+                                      style: TextStyle(fontSize: 16),
+                                    ),
                                   )
                                 : SizedBox(),
                             SizedBox(
@@ -937,12 +940,18 @@ class _ProfileState extends State<Profile> {
                             SizedBox(
                               height: 15,
                             ),
-                            Text(
-                              "Recent Login Activity",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w500,
+                            Padding(
+                              padding: EdgeInsets.only(left: 10.0),
+                              child: Text(
+                                "Recent Login Activity",
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
+                            ),
+                            SizedBox(
+                              height: 10,
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
