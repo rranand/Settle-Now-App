@@ -1029,9 +1029,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                     'Pic']
                                                                 .length ==
                                                             0
-                                                        ? global.driveUrl +
-                                                            global
-                                                                .unknown_avatar_id
+                                                        ? global
+                                                            .unknown_avatar_id
                                                         : manualSplitMembers[
                                                             key]!['Pic']),
                                                 progressIndicatorBuilder:
@@ -1574,9 +1573,8 @@ class _BankTransactionsState extends State<BankTransactions> {
                                                                       ['pic'])
                                                                   .length ==
                                                               0
-                                                          ? global.driveUrl +
-                                                              global
-                                                                  .unknown_avatar_id
+                                                          ? global
+                                                              .unknown_avatar_id
                                                           : crypto.decrypt(
                                                               roomMembers[
                                                                       index - 1]

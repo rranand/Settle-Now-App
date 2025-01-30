@@ -38,7 +38,7 @@ class FriendEach {
       fromContact: true,
       email: contactEach.containsKey('email') ? contactEach['email'] : '',
       status: 'NJ',
-      pic: global.driveUrl + global.unknown_avatar_id,
+      pic: global.unknown_avatar_id,
       isGoogle: false,
       phoneNo: contactEach.containsKey('phoneNo') ? contactEach['phoneNo'] : '',
     );
@@ -54,7 +54,7 @@ class FriendEach {
           ? crypto.decrypt(contactEach['email'])
           : '',
       status: 'NJ',
-      pic: global.driveUrl + global.unknown_avatar_id,
+      pic: global.unknown_avatar_id,
       isGoogle: false,
       phoneNo: contactEach.containsKey('phoneNo')
           ? crypto.decrypt(contactEach['phoneNo'])

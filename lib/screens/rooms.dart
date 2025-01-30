@@ -1204,8 +1204,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                   'Access-Control-Allow-Origin': '*'
                                 },
                                 imageUrl: data[index].pic.length == 0
-                                    ? addCorsinImage(global.driveUrl +
-                                        global.unknown_avatar_id)
+                                    ? addCorsinImage(global.unknown_avatar_id)
                                     : addCorsinImage(data[index].pic),
                                 progressIndicatorBuilder:
                                     (context, url, downloadProgress) =>
@@ -1319,12 +1318,11 @@ class _RoomExpenseState extends State<RoomExpense>
                         padding: const EdgeInsets.all(8.0),
                         child: CachedNetworkImage(
                           httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                          imageUrl: crypto.decrypt(list[index]['pic']).length ==
-                                  0
-                              ? addCorsinImage(
-                                  global.driveUrl + global.unknown_avatar_id)
-                              : addCorsinImage(
-                                  crypto.decrypt(list[index]['pic'])),
+                          imageUrl:
+                              crypto.decrypt(list[index]['pic']).length == 0
+                                  ? addCorsinImage(global.unknown_avatar_id)
+                                  : addCorsinImage(
+                                      crypto.decrypt(list[index]['pic'])),
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -1505,7 +1503,7 @@ class _RoomExpenseState extends State<RoomExpense>
               CachedNetworkImage(
                 httpHeaders: {'Access-Control-Allow-Origin': '*'},
                 imageUrl: crypto.decrypt(list[index]['pic']).length == 0
-                    ? addCorsinImage(global.driveUrl + global.unknown_avatar_id)
+                    ? addCorsinImage(global.unknown_avatar_id)
                     : addCorsinImage(crypto.decrypt(list[index]['pic'])),
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
@@ -2313,8 +2311,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                             .decrypt(list[index + 1]['pic'])
                                             .length ==
                                         0
-                                    ? addCorsinImage(global.driveUrl +
-                                        global.unknown_avatar_id)
+                                    ? addCorsinImage(global.unknown_avatar_id)
                                     : addCorsinImage(
                                         crypto.decrypt(list[index + 1]['pic'])),
                                 progressIndicatorBuilder:
@@ -2410,7 +2407,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                 .decrypt(list[index + 1]['pic'])
                                                 .length ==
                                             0
-                                        ? addCorsinImage(global.driveUrl +
+                                        ? addCorsinImage(
                                             global.unknown_avatar_id)
                                         : addCorsinImage(crypto
                                             .decrypt(list[index + 1]['pic'])),
@@ -3239,9 +3236,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                     'Pic']
                                                                 .length ==
                                                             0
-                                                        ? global.driveUrl +
-                                                            global
-                                                                .unknown_avatar_id
+                                                        ? global
+                                                            .unknown_avatar_id
                                                         : manualSplitMembers[
                                                             key]!['Pic']),
                                                 progressIndicatorBuilder:
@@ -4861,7 +4857,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                                 httpHeaders: {
                                                                                                                   'Access-Control-Allow-Origin': '*'
                                                                                                                 },
-                                                                                                                imageUrl: addCorsinImage(crypto.decrypt(list[index]['pic']).length == 0 ? global.driveUrl + global.unknown_avatar_id : crypto.decrypt(list[index]['pic'])),
+                                                                                                                imageUrl: addCorsinImage(crypto.decrypt(list[index]['pic']).length == 0 ? global.unknown_avatar_id : crypto.decrypt(list[index]['pic'])),
                                                                                                                 progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
                                                                                                                 errorWidget: (context, url, error) => Container(
                                                                                                                   width: 50.0,
@@ -5503,8 +5499,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                                   'pic'])
                                                           .length ==
                                                       0
-                                                  ? global.driveUrl +
-                                                      global.unknown_avatar_id
+                                                  ? global.unknown_avatar_id
                                                   : crypto.decrypt(
                                                       memberExpense[index]![
                                                           'pic'])),
@@ -6295,8 +6290,7 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                             ['pic'])
                                                     .length ==
                                                 0
-                                            ? global.driveUrl +
-                                                global.unknown_avatar_id
+                                            ? global.unknown_avatar_id
                                             : crypto.decrypt(
                                                 partialExpense[index]['pic'])),
                                         progressIndicatorBuilder: (context, url,

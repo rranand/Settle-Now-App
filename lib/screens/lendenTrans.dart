@@ -472,8 +472,7 @@ class _LendPageState extends State<LendPage> {
                                     'Access-Control-Allow-Origin': '*'
                                   },
                                   imageUrl: data[index].pic.length == 0
-                                      ? addCorsinImage(global.driveUrl +
-                                          global.unknown_avatar_id)
+                                      ? addCorsinImage(global.unknown_avatar_id)
                                       : addCorsinImage(data[index].pic),
                                   progressIndicatorBuilder:
                                       (context, url, downloadProgress) =>
@@ -1471,8 +1470,7 @@ class _LendPageState extends State<LendPage> {
                                                                                 'pic'])
                                                                             .length ==
                                                                         0
-                                                                    ? addCorsinImage(global
-                                                                            .driveUrl +
+                                                                    ? addCorsinImage(
                                                                         global
                                                                             .unknown_avatar_id)
                                                                     : addCorsinImage(
@@ -1529,8 +1527,7 @@ class _LendPageState extends State<LendPage> {
                                                                                 'pic'])
                                                                             .length ==
                                                                         0
-                                                                    ? addCorsinImage(global
-                                                                            .driveUrl +
+                                                                    ? addCorsinImage(
                                                                         global
                                                                             .unknown_avatar_id)
                                                                     : addCorsinImage(
@@ -1831,8 +1828,7 @@ class _LendPageState extends State<LendPage> {
                                                                                 'pic'])
                                                                             .length ==
                                                                         0
-                                                                    ? addCorsinImage(global
-                                                                            .driveUrl +
+                                                                    ? addCorsinImage(
                                                                         global
                                                                             .unknown_avatar_id)
                                                                     : addCorsinImage(
@@ -1889,8 +1885,7 @@ class _LendPageState extends State<LendPage> {
                                                                                 'pic'])
                                                                             .length ==
                                                                         0
-                                                                    ? addCorsinImage(global
-                                                                            .driveUrl +
+                                                                    ? addCorsinImage(
                                                                         global
                                                                             .unknown_avatar_id)
                                                                     : addCorsinImage(
@@ -2456,7 +2451,8 @@ class _LendPageState extends State<LendPage> {
                                                             16.0),
                                                   );
 
-                                                  if (this.mounted && dateTime != null) {
+                                                  if (this.mounted &&
+                                                      dateTime != null) {
                                                     setState(() {
                                                       expenseDate = dateTime;
                                                     });

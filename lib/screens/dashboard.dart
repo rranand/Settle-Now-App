@@ -1316,8 +1316,7 @@ class _DashBoardState extends State<DashBoard> {
                       child: CachedNetworkImage(
                         httpHeaders: {'Access-Control-Allow-Origin': '*'},
                         imageUrl: data[index].pic.length == 0
-                            ? addCorsinImage(
-                                global.driveUrl + global.unknown_avatar_id)
+                            ? addCorsinImage(global.unknown_avatar_id)
                             : addCorsinImage(data[index].pic),
                         progressIndicatorBuilder:
                             (context, url, downloadProgress) =>
@@ -1575,7 +1574,7 @@ class _DashBoardState extends State<DashBoard> {
               CachedNetworkImage(
                 httpHeaders: {'Access-Control-Allow-Origin': '*'},
                 imageUrl: addCorsinImage(data[index].pic.length == 0
-                    ? global.driveUrl + global.unknown_avatar_id
+                    ? global.unknown_avatar_id
                     : data[index].pic),
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
@@ -1731,10 +1730,7 @@ class _DashBoardState extends State<DashBoard> {
                                             name: _name.text,
                                             email: _email.text,
                                             status: "",
-                                            pic: isGoogle
-                                                ? _currentUser!.photoUrl
-                                                    .toString()
-                                                : _profilePicID,
+                                            pic: _profilePicID,
                                             isGoogle: isGoogle,
                                             phoneNo: "",
                                             fromContact: false)
@@ -3396,7 +3392,7 @@ class _DashBoardState extends State<DashBoard> {
                                                               ["pic"])
                                                       .length ==
                                                   0
-                                              ? addCorsinImage(global.driveUrl +
+                                              ? addCorsinImage(
                                                   global.unknown_avatar_id)
                                               : addCorsinImage(crypto.decrypt(
                                                   RoomRequest[index]["pic"])),
@@ -3758,7 +3754,7 @@ class _DashBoardState extends State<DashBoard> {
                                                               ["pic"])
                                                       .length ==
                                                   0
-                                              ? addCorsinImage(global.driveUrl +
+                                              ? addCorsinImage(
                                                   global.unknown_avatar_id)
                                               : addCorsinImage(crypto.decrypt(
                                                   sentRoomRequest[index]
@@ -5176,7 +5172,7 @@ class _DashBoardState extends State<DashBoard> {
                                           imageUrl: (_currentUser != null
                                               ? _currentUser!.photoUrl
                                                   .toString()
-                                              : addCorsinImage(global.driveUrl +
+                                              : addCorsinImage(
                                                   global.unknown_avatar_id)),
                                           progressIndicatorBuilder: (context,
                                                   url, downloadProgress) =>
@@ -5208,116 +5204,44 @@ class _DashBoardState extends State<DashBoard> {
                                             ),
                                           ),
                                         )
-                                      : (imageUploading
-                                          ? Center(
-                                              child: CircularProgressIndicator
-                                                  .adaptive(),
-                                            )
-                                          : CachedNetworkImage(
-                                              httpHeaders: {
-                                                'Access-Control-Allow-Origin':
-                                                    '*'
-                                              },
-                                              imageUrl: addCorsinImage(global
-                                                      .driveUrl +
-                                                  (_profilePicID.length == 0
-                                                      ? global.unknown_avatar_id
-                                                      : _profilePicID)),
-                                              progressIndicatorBuilder:
-                                                  (context, url,
-                                                          downloadProgress) =>
-                                                      CircularProgressIndicator(
-                                                          value:
-                                                              downloadProgress
-                                                                  .progress),
-                                              errorWidget:
-                                                  (context, url, error) =>
-                                                      Container(
-                                                width: 120.0,
-                                                height: 120.0,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  image: DecorationImage(
-                                                      image: AssetImage(
-                                                          'assets/Images/unknown.jpeg'),
-                                                      fit: BoxFit.cover),
-                                                ),
-                                              ),
-                                              imageBuilder:
-                                                  (context, imageProvider) =>
-                                                      Container(
-                                                width: 120.0,
-                                                height: 120.0,
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape.circle,
-                                                  image: DecorationImage(
-                                                      image: imageProvider,
-                                                      fit: BoxFit.cover),
-                                                ),
-                                              ),
-                                            )),
-                                  isGoogle
-                                      ? SizedBox()
-                                      : Positioned(
-                                          left: 50,
-                                          top: 51,
-                                          child: Container(
-                                            width: 25,
-                                            height: 25,
+                                      : CachedNetworkImage(
+                                          httpHeaders: {
+                                            'Access-Control-Allow-Origin': '*'
+                                          },
+                                          imageUrl: addCorsinImage(
+                                              (_profilePicID.length == 0
+                                                  ? global.unknown_avatar_id
+                                                  : _profilePicID)),
+                                          progressIndicatorBuilder: (context,
+                                                  url, downloadProgress) =>
+                                              CircularProgressIndicator(
+                                                  value: downloadProgress
+                                                      .progress),
+                                          errorWidget: (context, url, error) =>
+                                              Container(
+                                            width: 120.0,
+                                            height: 120.0,
                                             decoration: BoxDecoration(
-                                              color: Colors.white,
                                               shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: AssetImage(
+                                                      'assets/Images/unknown.jpeg'),
+                                                  fit: BoxFit.cover),
                                             ),
-                                            child: Center(
-                                              child: InkWell(
-                                                onTap: () async {
-                                                  showModalBottomSheet<void>(
-                                                    context: context,
-                                                    isScrollControlled: true,
-                                                    builder:
-                                                        (BuildContext context) {
-                                                      return SizedBox(
-                                                        height: 120,
-                                                        child: Column(
-                                                          children: [
-                                                            ListTile(
-                                                              leading: Icon(
-                                                                  Icons.camera),
-                                                              title: Text(
-                                                                  'Camera'),
-                                                              onTap: () {
-                                                                imageUpload(
-                                                                    ImageSource
-                                                                        .camera);
-                                                                context.pop();
-                                                              },
-                                                            ),
-                                                            ListTile(
-                                                              leading: Icon(
-                                                                  Icons.image),
-                                                              title: Text(
-                                                                  'Gallery'),
-                                                              onTap: () {
-                                                                imageUpload(
-                                                                    ImageSource
-                                                                        .gallery);
-                                                                context.pop();
-                                                              },
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                                child: Icon(
-                                                  Icons.camera_alt,
-                                                  size: 20,
-                                                  color: Colors.blueGrey,
-                                                ),
-                                              ),
+                                          ),
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            width: 120.0,
+                                            height: 120.0,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              image: DecorationImage(
+                                                  image: imageProvider,
+                                                  fit: BoxFit.cover),
                                             ),
-                                          ))
+                                          ),
+                                        ),
                                 ],
                               ),
                               accountName: Text(_name.text,
@@ -6236,8 +6160,7 @@ class _QuickSplitState extends State<QuickSplit> {
                                                               ['pic'])
                                                           .length ==
                                                       0
-                                                  ? global.driveUrl +
-                                                      global.unknown_avatar_id
+                                                  ? global.unknown_avatar_id
                                                   : crypto.decrypt(
                                                       memberExpense[index]
                                                           ['userData']['pic'])),
@@ -6811,8 +6734,7 @@ class _QuickSplitState extends State<QuickSplit> {
                                                               ['pic'])
                                                       .length ==
                                                   0
-                                              ? global.driveUrl +
-                                                  global.unknown_avatar_id
+                                              ? global.unknown_avatar_id
                                               : crypto.decrypt(
                                                   partialExpense[index]
                                                       ['userData']['pic'])),
@@ -7734,7 +7656,7 @@ class _RoomWidgetState extends State<RoomWidget> {
                                                         ['pic'])
                                                     .length ==
                                                 0
-                                            ? addCorsinImage(global.driveUrl +
+                                            ? addCorsinImage(
                                                 global.unknown_avatar_id)
                                             : addCorsinImage(crypto.decrypt(
                                                 snapshot.data![i]['pic'])),
@@ -7780,8 +7702,7 @@ class _RoomWidgetState extends State<RoomWidget> {
                                                             .data![i]['pic'])
                                                         .length ==
                                                     0
-                                                ? addCorsinImage(global
-                                                        .driveUrl +
+                                                ? addCorsinImage(
                                                     global.unknown_avatar_id)
                                                 : addCorsinImage(crypto.decrypt(
                                                     snapshot.data![i]['pic'])),

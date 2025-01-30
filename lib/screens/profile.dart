@@ -202,7 +202,7 @@ class _ProfileState extends State<Profile> {
         } else {
           if (this.mounted) {
             setState(() {
-              picUrl = addCorsinImage(global.driveUrl +
+              picUrl = addCorsinImage(
                   (picUrl.length == 0 ? global.unknown_avatar_id : picUrl));
             });
           }
