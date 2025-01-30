@@ -7112,37 +7112,53 @@ class _QuickSplitState extends State<QuickSplit> {
                                 ),
                               ),
                               Column(
-                                mainAxisAlignment:
-                                    widget.RoomData.value[index].isEdited
-                                        ? MainAxisAlignment.start
-                                        : MainAxisAlignment.center,
+                                mainAxisAlignment: (widget
+                                            .RoomData.value[index].isEdited ||
+                                        !(widget.RoomData.value[index].active &&
+                                            !isRoomOwnerClosed))
+                                    ? MainAxisAlignment.start
+                                    : MainAxisAlignment.center,
                                 children: [
-                                  widget.RoomData.value[index].isEdited
-                                      ? Container(
-                                          width: 55,
-                                          height: 30,
-                                          alignment: Alignment.center,
-                                          decoration: BoxDecoration(
-                                              color: Colors.transparent,
-                                              border: Border.all(
-                                                color: themeProvider.isDarkTheme
-                                                    ? (Theme.of(context)
-                                                        .primaryColor)
-                                                    : Colors.white,
-                                              ),
-                                              borderRadius: BorderRadius.all(
-                                                  Radius.circular(12))),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(4.0),
-                                            child: Text("Edited",
-                                                style: TextStyle(
-                                                    fontSize: 13,
-                                                    color: Colors.white)),
-                                          ))
-                                      : SizedBox(),
-                                  widget.RoomData.value[index].isEdited
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      widget.RoomData.value[index].isEdited
+                                          ? Card(
+                                              shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: Theme.of(context)
+                                                          .primaryColor),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          12)),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(5.0),
+                                                child: Text("Edited",
+                                                    style: TextStyle(
+                                                        fontSize: 13,
+                                                        color: themeProvider
+                                                                .isDarkTheme
+                                                            ? Colors.white
+                                                            : Colors.black)),
+                                              ))
+                                          : SizedBox(),
+                                      !(widget.RoomData.value[index].active &&
+                                              !isRoomOwnerClosed)
+                                          ? Icon(
+                                              Icons.lock_outline,
+                                              size: 24,
+                                            )
+                                          : SizedBox()
+                                    ],
+                                  ),
+                                  (widget.RoomData.value[index].isEdited ||
+                                          !(widget.RoomData.value[index]
+                                                  .active &&
+                                              !isRoomOwnerClosed))
                                       ? SizedBox(
-                                          height: 30,
+                                          height: 8,
                                         )
                                       : SizedBox(),
                                   Expanded(
