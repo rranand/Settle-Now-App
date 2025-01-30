@@ -1293,145 +1293,137 @@ class _RoomExpenseState extends State<RoomExpense>
               setState(() {});
             }
           },
-          child: Card(
-            elevation: 1.0,
-            shadowColor: Theme.of(context).primaryColor,
-            color: Theme.of(context).scaffoldBackgroundColor,
-            shape: list[index]['done']
-                ? RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.red),
-                    borderRadius: BorderRadius.circular(15.0),
-                  )
-                : RoundedRectangleBorder(
-                    side: BorderSide(
-                        color: Theme.of(context).primaryColor.withAlpha(90)),
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-            child: Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CachedNetworkImage(
-                      httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                      imageUrl: crypto.decrypt(list[index]['pic']).length == 0
-                          ? addCorsinImage(
-                              global.driveUrl + global.unknown_avatar_id)
-                          : addCorsinImage(crypto.decrypt(list[index]['pic'])),
-                      progressIndicatorBuilder:
-                          (context, url, downloadProgress) =>
-                              CircularProgressIndicator(
-                                  value: downloadProgress.progress),
-                      errorWidget: (context, url, error) => Container(
-                        width: 65.0,
-                        height: 65.0,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              image: AssetImage('assets/Images/unknown.jpeg'),
-                              fit: BoxFit.cover),
+          child: Stack(
+            children: [
+              Card(
+                elevation: 1.0,
+                shadowColor: Theme.of(context).primaryColor,
+                color: Theme.of(context).scaffoldBackgroundColor,
+                shape: list[index]['done']
+                    ? RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.red),
+                        borderRadius: BorderRadius.circular(15.0),
+                      )
+                    : RoundedRectangleBorder(
+                        side: BorderSide(
+                            color:
+                                Theme.of(context).primaryColor.withAlpha(90)),
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                child: Padding(
+                  padding: const EdgeInsets.all(6.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CachedNetworkImage(
+                          httpHeaders: {'Access-Control-Allow-Origin': '*'},
+                          imageUrl: crypto.decrypt(list[index]['pic']).length ==
+                                  0
+                              ? addCorsinImage(
+                                  global.driveUrl + global.unknown_avatar_id)
+                              : addCorsinImage(
+                                  crypto.decrypt(list[index]['pic'])),
+                          progressIndicatorBuilder:
+                              (context, url, downloadProgress) =>
+                                  CircularProgressIndicator(
+                                      value: downloadProgress.progress),
+                          errorWidget: (context, url, error) => Container(
+                            width: 65.0,
+                            height: 65.0,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  image:
+                                      AssetImage('assets/Images/unknown.jpeg'),
+                                  fit: BoxFit.cover),
+                            ),
+                          ),
+                          imageBuilder: (context, imageProvider) => Container(
+                            width: 65.0,
+                            height: 65.0,
+                            decoration: BoxDecoration(
+                              border: list[index]['own']
+                                  ? Border.all(
+                                      color: Theme.of(context).primaryColor,
+                                      width: 3.4)
+                                  : null,
+                              shape: BoxShape.circle,
+                              image: DecorationImage(
+                                  image: imageProvider, fit: BoxFit.cover),
+                            ),
+                          ),
                         ),
                       ),
-                      imageBuilder: (context, imageProvider) => Container(
-                        width: 65.0,
-                        height: 65.0,
-                        decoration: BoxDecoration(
-                          border: list[index]['own']
-                              ? Border.all(
-                                  color: Theme.of(context).primaryColor,
-                                  width: 3.4)
-                              : null,
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              image: imageProvider, fit: BoxFit.cover),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          InkWell(
-                            child: Text(
-                              crypto.decrypt(list[index]['Name']),
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 21,
-                                fontWeight: FontWeight.w500,
-                                foreground: kIsWeb
-                                    ? null
-                                    : (Paint()..shader = linearGradient_1),
+                      Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InkWell(
+                                child: Text(
+                                  crypto.decrypt(list[index]['Name']),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 21,
+                                    fontWeight: FontWeight.w500,
+                                    foreground: kIsWeb
+                                        ? null
+                                        : (Paint()..shader = linearGradient_1),
+                                  ),
+                                ),
+                                onTap: () => showToast(
+                                    context,
+                                    crypto.decrypt(list[index]['Name']),
+                                    Icons.check),
                               ),
-                            ),
-                            onTap: () => showToast(
-                                context,
-                                crypto.decrypt(list[index]['Name']),
-                                Icons.check),
-                          ),
-                          SizedBox(
-                            height: 4,
-                          ),
-                          Text(
-                            "Contribution : ₹ " +
-                                commaSeperator((double.parse(crypto
-                                            .decrypt(list[index]['Expense'])) +
-                                        double.parse(crypto.decrypt(
-                                            list[index]['TotalSplitExpense'])))
-                                    .toStringAsFixed(2)),
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              foreground: kIsWeb
-                                  ? null
-                                  : (Paint()..shader = linearGradient_2),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 3,
-                          ),
-                          Text(
-                              "Spent : ₹ " +
-                                  commaSeperator((double.parse(crypto
-                                          .decrypt(list[index]["yourExpense"])))
-                                      .toStringAsFixed(2)),
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                foreground: kIsWeb
-                                    ? null
-                                    : (Paint()..shader = linearGradient_2),
-                              )),
-                          SizedBox(
-                            height: 3,
-                          ),
-                          list[index]['done']
-                              ? SizedBox()
-                              : (double.parse(double.parse(crypto
-                                              .decrypt(list[index]["current"]))
-                                          .toStringAsFixed(2)) >
-                                      0
-                                  ? Text(
-                                      "Gain : ₹ " +
-                                          commaSeperator(double.parse(
-                                                  crypto.decrypt(
-                                                      list[index]["current"]))
-                                              .toStringAsFixed(2)),
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                        color: Colors.green,
-                                      ),
-                                    )
-                                  : double.parse(double.parse(crypto.decrypt(
+                              SizedBox(
+                                height: 4,
+                              ),
+                              Text(
+                                "Contribution : ₹ " +
+                                    commaSeperator((double.parse(crypto.decrypt(
+                                                list[index]['Expense'])) +
+                                            double.parse(crypto.decrypt(
+                                                list[index]
+                                                    ['TotalSplitExpense'])))
+                                        .toStringAsFixed(2)),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  foreground: kIsWeb
+                                      ? null
+                                      : (Paint()..shader = linearGradient_2),
+                                ),
+                              ),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              Text(
+                                  "Spent : ₹ " +
+                                      commaSeperator((double.parse(
+                                              crypto.decrypt(
+                                                  list[index]["yourExpense"])))
+                                          .toStringAsFixed(2)),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    foreground: kIsWeb
+                                        ? null
+                                        : (Paint()..shader = linearGradient_2),
+                                  )),
+                              SizedBox(
+                                height: 3,
+                              ),
+                              list[index]['done']
+                                  ? SizedBox()
+                                  : (double.parse(double.parse(crypto.decrypt(
                                                   list[index]["current"]))
-                                              .toStringAsFixed(2)) <
+                                              .toStringAsFixed(2)) >
                                           0
                                       ? Text(
-                                          "Owe : ₹ " +
+                                          "Gain : ₹ " +
                                               commaSeperator(double.parse(
                                                       crypto.decrypt(list[index]
                                                           ["current"]))
@@ -1439,15 +1431,44 @@ class _RoomExpenseState extends State<RoomExpense>
                                           style: TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
-                                            color: Colors.red,
+                                            color: Colors.green,
                                           ),
                                         )
-                                      : SizedBox()),
-                        ],
-                      ))
-                ],
+                                      : double.parse(double.parse(
+                                                      crypto.decrypt(list[index]
+                                                          ["current"]))
+                                                  .toStringAsFixed(2)) <
+                                              0
+                                          ? Text(
+                                              "Owe : ₹ " +
+                                                  commaSeperator(double.parse(
+                                                          crypto.decrypt(
+                                                              list[index]
+                                                                  ["current"]))
+                                                      .toStringAsFixed(2)),
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w500,
+                                                color: Colors.red,
+                                              ),
+                                            )
+                                          : SizedBox()),
+                            ],
+                          )),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              Positioned(
+                  right: 12.0,
+                  bottom: 12.0,
+                  child: list[index]['done']
+                      ? Icon(
+                          Icons.lock_outline,
+                          size: 26,
+                        )
+                      : SizedBox())
+            ],
           ),
         ),
       ),
