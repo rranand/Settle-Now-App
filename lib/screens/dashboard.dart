@@ -245,7 +245,7 @@ class _DashBoardState extends State<DashBoard> {
         };
 
         final response = await createHTTPreq(
-            'Reminder', http.post, _token, jsonInputData, context);
+            'reminder', http.post, _token, jsonInputData, context);
 
         if (response.statusCode == 200) {
           var tempData = jsonDecode(response.body);

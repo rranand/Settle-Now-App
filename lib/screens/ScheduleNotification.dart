@@ -96,7 +96,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       };
 
       final response = await createHTTPreq(
-          'Reminder', http.post, _token, jsonInputData, context);
+          'reminder', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body);
@@ -146,7 +146,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       };
 
       final response = await createHTTPreq(
-          'Reminder', http.delete, _token, jsonInputData, context);
+          'reminder', http.delete, _token, jsonInputData, context);
 
       if (this.mounted) {
         context.pop();
@@ -201,7 +201,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         };
 
         final response = await createHTTPreq(
-            'Reminder', http.patch, _token, jsonInputData, context);
+            'reminder', http.patch, _token, jsonInputData, context);
 
         _name.text = "";
         if (this.mounted) {
