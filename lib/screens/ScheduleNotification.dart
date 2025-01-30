@@ -96,7 +96,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       };
 
       final response = await createHTTPreq(
-          'remainder', http.post, _token, jsonInputData, context);
+          'Reminder', http.post, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var tempData = jsonDecode(response.body);
@@ -130,7 +130,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
     }
   }
 
-  Future _deleteRemainder(String id, int index, String notID) async {
+  Future _deleteReminder(String id, int index, String notID) async {
     notID = crypto.decrypt(notID);
     List<String> IDs = notID.substring(1, notID.length - 1).split(', ');
     if (this.mounted) {
@@ -146,7 +146,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       };
 
       final response = await createHTTPreq(
-          'remainder', http.delete, _token, jsonInputData, context);
+          'Reminder', http.delete, _token, jsonInputData, context);
 
       if (this.mounted) {
         context.pop();
@@ -158,7 +158,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
           await AwesomeNotifications().cancelSchedule(int.parse(IDs[i]));
         }
         data.removeAt(index);
-        showToast(context, "Remainder Deleted", Icons.check);
+        showToast(context, "Reminder Deleted", Icons.check);
       } else {
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
       }
@@ -177,7 +177,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
     }
   }
 
-  Future _addRemainder() async {
+  Future _addReminder() async {
     if (_formKeySchduledNotify.currentState!.validate()) {
       if (this.mounted) {
         if (this.mounted) {
@@ -201,7 +201,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         };
 
         final response = await createHTTPreq(
-            'remainder', http.patch, _token, jsonInputData, context);
+            'Reminder', http.patch, _token, jsonInputData, context);
 
         _name.text = "";
         if (this.mounted) {
@@ -218,8 +218,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
             await AwesomeNotifications().createNotification(
                 content: NotificationContent(
                     id: IDs[i],
-                    channelKey: 'remainderID',
-                    title: "Remainder",
+                    channelKey: 'reminderID',
+                    title: "Reminder",
                     body: crypto.decrypt(data.last['name']),
                     payload: null),
                 schedule: NotificationCalendar(
@@ -231,7 +231,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                     timeZone: "Asia/Kolkata"));
           }
 
-          showToast(context, "Remainder Created", Icons.check);
+          showToast(context, "Reminder Created", Icons.check);
         } else {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
@@ -239,7 +239,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         if (this.mounted) {
           onException(context, err, stackTrace,
               reason: "Unknwon Error",
-              info: ["ScheduleNotification->_addRemainder"]);
+              info: ["ScheduleNotification->_addReminder"]);
         }
       }
       if (this.mounted) {
@@ -300,7 +300,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                   width: 100,
                                   child: OutlinedButton(
                                     onPressed: () async {
-                                      await _deleteRemainder(id, index, notID);
+                                      await _deleteReminder(id, index, notID);
                                       if (this.mounted) {
                                         context.pop();
                                       }
@@ -392,7 +392,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                 height: 8,
                               ),
                               Text(
-                                "Add Remainder",
+                                "Add Reminder",
                                 style: TextStyle(fontSize: 24),
                               ),
                               SizedBox(
@@ -484,7 +484,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                 width: MediaQuery.of(context).size.width * 0.9,
                                 child: OutlinedButton(
                                   onPressed: () async {
-                                    await _addRemainder();
+                                    await _addReminder();
                                   },
                                   style: OutlinedButton.styleFrom(
                                     shape: RoundedRectangleBorder(
@@ -518,7 +518,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         Provider.of<InternetconnectivityProvider>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
-          title: Text("Remainder"),
+          title: Text("Reminder"),
         ),
         bottomNavigationBar: internetConnProvider.isAlertSet
             ? Container(
@@ -567,7 +567,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
                                       MediaQuery.of(context).size.height - 100,
                                   child: Center(
                                     child: Text(
-                                      "No Remainder",
+                                      "No Reminder",
                                       style: TextStyle(fontSize: 25),
                                     ),
                                   ),

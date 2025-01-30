@@ -245,7 +245,7 @@ class _DashBoardState extends State<DashBoard> {
         };
 
         final response = await createHTTPreq(
-            'remainder', http.post, _token, jsonInputData, context);
+            'Reminder', http.post, _token, jsonInputData, context);
 
         if (response.statusCode == 200) {
           var tempData = jsonDecode(response.body);
@@ -258,8 +258,8 @@ class _DashBoardState extends State<DashBoard> {
               await AwesomeNotifications().createNotification(
                   content: NotificationContent(
                       id: int.parse(IDs[j]),
-                      channelKey: 'remainderID',
-                      title: "Remainder",
+                      channelKey: 'reminderID',
+                      title: "Reminder",
                       body: crypto.decrypt(data[i]['name']),
                       payload: null),
                   schedule: NotificationCalendar(
@@ -1046,9 +1046,9 @@ class _DashBoardState extends State<DashBoard> {
             channelDescription: 'Notification channel for Room Request',
             defaultColor: Colors.white),
         NotificationChannel(
-            channelKey: "remainderID",
-            channelName: "Remainder",
-            channelDescription: 'Notification channel for Remainders',
+            channelKey: "reminderID",
+            channelName: "Reminder",
+            channelDescription: 'Notification channel for Reminders',
             defaultColor: Colors.white),
         NotificationChannel(
             channelKey: "accountID",
@@ -5402,7 +5402,7 @@ class _DashBoardState extends State<DashBoard> {
                                 size: 22,
                               ),
                               title: Text(
-                                "Remainder",
+                                "Reminder",
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.white),
                               ),
