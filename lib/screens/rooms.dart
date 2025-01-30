@@ -1460,7 +1460,7 @@ class _RoomExpenseState extends State<RoomExpense>
               Positioned(
                   right: 12.0,
                   bottom: 12.0,
-                  child: list[index]['done']
+                  child: (list[index]['done'] && isRoomActive)
                       ? Icon(
                           Icons.lock_outline,
                           size: 26,
@@ -3144,7 +3144,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Widget chooseFromBottomNavigator(int dash) {
-    if (isRoomActive && !isClosedany) {
+    if (isRoomActive) {
       if (dash == 0) {
         return homeWidget();
       } else if (dash == 1) {
@@ -4264,7 +4264,7 @@ class _RoomExpenseState extends State<RoomExpense>
                 onTap: (index) => setState(() {
                       dash = index;
                     }),
-                items: (isRoomActive && !isClosedany
+                items: (isRoomActive
                     ? [
                         BottomNavigationBarItem(
                           icon: Icon(
