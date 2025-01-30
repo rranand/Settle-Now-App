@@ -7636,15 +7636,28 @@ class _RoomWidgetState extends State<RoomWidget> {
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text(
-                            widget.RoomData.value[index].roomName,
-                            textScaler: TextScaler.linear(1.0),
-                            maxLines: 1,
-                            style: TextStyle(
-                                fontSize: 22, overflow: TextOverflow.ellipsis),
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: Text(
+                                widget.RoomData.value[index].roomName,
+                                textScaler: TextScaler.linear(1.0),
+                                maxLines: 1,
+                                style: TextStyle(
+                                    fontSize: 22,
+                                    overflow: TextOverflow.ellipsis),
+                              ),
+                            ),
+                            widget.RoomData.value[index].done
+                                ? Icon(
+                                    Icons.lock_outline,
+                                    size: 26,
+                                  )
+                                : SizedBox()
+                          ],
                         ),
                         SizedBox(
                           height: 5,
