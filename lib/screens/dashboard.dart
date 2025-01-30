@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_cropper/image_cropper.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart';
@@ -44,9 +43,6 @@ import '../notificationService/NotificationController.dart';
 import '../others/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:dio/dio.dart';
-import 'package:http_parser/http_parser.dart';
 
 class ShareMessage {
   final String title;
@@ -117,7 +113,6 @@ class _DashBoardState extends State<DashBoard> {
   bool isContactPermissionGranted = false;
   bool searchTrigger = false;
   bool searching = false;
-  bool isImageLoaded = false;
   bool isRoomRequestLoaded = false;
   bool gotInitialData = false;
   List<dynamic> expenseCategory = [];
@@ -148,7 +143,6 @@ class _DashBoardState extends State<DashBoard> {
   var updateData = null;
   List<String> roomStatus = ['All', 'Active', 'Closed'];
   int roomStatusIndex = 0;
-  bool imageUploading = false;
   int open = 1;
   String _profilePicID = "";
   List<dynamic> RoomRequest = [];
@@ -440,80 +434,6 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> rateUs() =>
       inAppReview.openStoreListing(appStoreId: 'com.rohit.settlenow');
-
-  Future imageUpload(ImageSource imageSource) async {
-    final ImagePicker _picker = ImagePicker();
-
-    final XFile? orgImage = await _picker.pickImage(
-      source: imageSource,
-      imageQuality: 50,
-    );
-
-    CroppedFile? image = await ImageCropper().cropImage(
-      sourcePath: orgImage!.path,
-      uiSettings: [
-        AndroidUiSettings(
-            toolbarTitle: 'Crop',
-            toolbarColor: Theme.of(context).primaryColor.withOpacity(0.9),
-            activeControlsWidgetColor:
-                Theme.of(context).primaryColor.withOpacity(0.9),
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.original,
-            lockAspectRatio: false),
-        WebUiSettings(
-          context: context,
-        ),
-      ],
-    );
-
-    Dio dio = new Dio();
-
-    if (image != null) {
-      double sz = (await image.readAsBytes()).lengthInBytes / (1024 * 1024);
-      if (sz > 10) {
-        showToast(context, "Image Size is too large", Icons.warning);
-        return;
-      }
-      if (this.mounted) {
-        setState(() {
-          imageUploading = true;
-        });
-      }
-
-      try {
-        String ext = image.path.split('.').last;
-
-        FormData formData = new FormData.fromMap({
-          "image": await MultipartFile.fromFile(image.path,
-              contentType: new MediaType('image', ext)),
-          "type": "image/" + ext,
-          "email": crypto.encrypt(_email.text),
-        });
-
-        final response = await dio.delete(global.url + 'login',
-            data: formData,
-            options: Options(headers: {
-              "Content-Type": "multipart/form-data",
-              'Auth': _token
-            }));
-
-        if (response.statusCode == 200) {
-          await _getImageID();
-          showToast(context, "Image Uploaded Successfully", Icons.check);
-        } else {
-          showToast(context, "Failed to Upload Image", Icons.close);
-        }
-      } on Exception catch (_) {
-        showToast(context, "Failed to Upload Image", Icons.close);
-      }
-
-      if (this.mounted) {
-        setState(() {
-          imageUploading = false;
-        });
-      }
-    }
-  }
 
   Future<void> initalDataLoad() async {
     dash = widget.dash;

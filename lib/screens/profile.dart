@@ -39,6 +39,7 @@ class _ProfileState extends State<Profile> {
   String _token = "";
   String picUrl = "";
   String name = "";
+  bool isGoogleConnected = false;
   bool isGoogle = false;
   GoogleSignInAccount? _currentUser;
   GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -183,29 +184,16 @@ class _ProfileState extends State<Profile> {
           setState(() {
             picUrl = crypto.decrypt(data['picUrl']);
             name = crypto.decrypt(data['name']);
-            isGoogle = crypto.decrypt(data['isGoogle']) == "true";
+            isGoogleConnected =
+                crypto.decrypt(data['isGoogleConnected']) == "true";
           });
         }
-        if (isGoogle) {
-          _googleSignIn.isSignedIn().then((value) {
-            if (value) {
-              _googleSignIn.signInSilently().then((value) {
-                if (value != null && this.mounted) {
-                  setState(() {
-                    _currentUser = value;
-                    picUrl = _currentUser!.photoUrl.toString();
-                  });
-                }
-              });
-            }
+        debugPrint("!#!isGoogleConnected -> " + isGoogleConnected.toString());
+        if (this.mounted) {
+          setState(() {
+            picUrl = addCorsinImage(
+                (picUrl.length == 0 ? global.unknown_avatar_id : picUrl));
           });
-        } else {
-          if (this.mounted) {
-            setState(() {
-              picUrl = addCorsinImage(
-                  (picUrl.length == 0 ? global.unknown_avatar_id : picUrl));
-            });
-          }
         }
       } else {
         showToast(context, responseMessage, Icons.warning_rounded);
@@ -229,6 +217,18 @@ class _ProfileState extends State<Profile> {
 
     if (tokenData != null) {
       Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      isGoogle = await getBoolPrefs("isGoogle") ?? false;
+      if (isGoogle) {
+        _googleSignIn.isSignedIn().then((value) {
+          if (value) {
+            _googleSignIn.signInSilently().then((value) {
+              if (value != null) {
+                _currentUser = value;
+              }
+            });
+          }
+        });
+      }
       if (this.mounted) {
         setState(() {
           _email = jsonOutData["email"]!;
@@ -676,6 +676,45 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  Future<void> linkWithGoogle() async {
+    try {
+      buildShowDialog(context);
+
+      Map<String, String> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        'profilePic': crypto.encrypt(_currentUser!.photoUrl.toString())
+      };
+
+      final response = await createHTTPreq(
+          'profile/google', http.post, _token, jsonInputData, context);
+
+      if (response.statusCode == 200) {
+        await setBoolPrefs("isGoogle", true);
+        if (this.mounted) {
+          setState(() {
+            isGoogle = true;
+            isGoogleConnected = true;
+            picUrl = _currentUser!.photoUrl.toString();
+          });
+        }
+        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
+            Icons.check);
+      } else {
+        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
+            Icons.warning_rounded);
+      }
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(context, err, stackTrace,
+            reason: "Unknwon Error", info: ["Profile->linkWithGoogle"]);
+      }
+    } finally {
+      if (this.mounted) {
+        context.pop();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
@@ -701,7 +740,7 @@ class _ProfileState extends State<Profile> {
                       ),
                       CachedNetworkImage(
                         httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                        imageUrl: (isGoogle ? picUrl : addCorsinImage(picUrl)),
+                        imageUrl: addCorsinImage(picUrl),
                         progressIndicatorBuilder:
                             (context, url, downloadProgress) =>
                                 CircularProgressIndicator(
@@ -835,7 +874,75 @@ class _ProfileState extends State<Profile> {
                                   )
                                 : SizedBox(),
                             SizedBox(
+                              height: isGoogleConnected ? 0 : 15,
+                            ),
+                            isGoogleConnected
+                                ? SizedBox()
+                                : SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.9,
+                                    height: 50,
+                                    child: OutlinedButton(
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Image.asset(
+                                                'assets/icon/google.png',
+                                                height: 30,
+                                                width: 30),
+                                            SizedBox(
+                                              width: 9,
+                                            ),
+                                            Text(
+                                              "Link with Google",
+                                              style: TextStyle(
+                                                  fontSize: 17,
+                                                  color:
+                                                      themeProvider.isDarkTheme
+                                                          ? Colors.white
+                                                          : Colors.black),
+                                            )
+                                          ]),
+                                      style: OutlinedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(25.0),
+                                        ),
+                                        side: BorderSide(
+                                            color:
+                                                Theme.of(context).primaryColor),
+                                      ),
+                                      onPressed: () async {
+                                        try {
+                                          final user =
+                                              await GoogleSignIN.login();
+                                          if (user != null) {
+                                            _currentUser = user;
+                                            await linkWithGoogle();
+                                          }
+                                        } on Exception catch (err, stackTrace) {
+                                          if (this.mounted) {
+                                            onException(
+                                                context, err, stackTrace,
+                                                reason: "Unknwon Error",
+                                                info: [
+                                                  "ProfilePage->LinkWithGoogle"
+                                                ]);
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  ),
+                            SizedBox(
                               height: 15,
+                            ),
+                            Text(
+                              "Recent Login Activity",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                             SizedBox(
                               width: MediaQuery.of(context).size.width,
