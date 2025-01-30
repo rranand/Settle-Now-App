@@ -2456,12 +2456,10 @@ class _LendPageState extends State<LendPage> {
                                                             16.0),
                                                   );
 
-                                                  if (dateTime != null) {
-                                                    if (this.mounted) {
-                                                      setState(() {
-                                                        expenseDate = dateTime;
-                                                      });
-                                                    }
+                                                  if (this.mounted && dateTime != null) {
+                                                    setState(() {
+                                                      expenseDate = dateTime;
+                                                    });
                                                   }
                                                 },
                                                 child: Icon(

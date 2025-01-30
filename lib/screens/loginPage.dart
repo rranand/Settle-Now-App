@@ -7,7 +7,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -376,15 +375,18 @@ class _LoginPageState extends State<LoginPage> {
                               child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    FaIcon(FontAwesomeIcons.google,
-                                        color: Colors.white),
+                                    Image.asset('assets/icon/google.png',
+                                        height: 30, width: 30),
                                     SizedBox(
                                       width: 9,
                                     ),
                                     Text(
-                                      "Sign In With Google",
+                                      "Sign in with Google",
                                       style: TextStyle(
-                                          fontSize: 17, color: Colors.white),
+                                          fontSize: 17,
+                                          color: themeProvider.isDarkTheme
+                                              ? Colors.white
+                                              : Colors.black),
                                     )
                                   ]),
                               style: OutlinedButton.styleFrom(

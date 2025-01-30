@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:settlenow/sampleWidget/room.dart';
 
@@ -110,6 +112,7 @@ class _onBoardingState extends State<onBoarding> {
   Widget build(BuildContext context) {
     data.clear();
     contextBuilder(context);
+    final themeProvider = Provider.of<ThemeProvider>(context);
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -320,9 +323,10 @@ class _onBoardingState extends State<onBoarding> {
                       child: Text(
                         pageIndex == data.length - 1 ? "Get Started" : "Next",
                         style: TextStyle(
-                            fontWeight: FontWeight.bold,
                             fontSize: 17,
-                            color: Colors.white),
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black),
                       ),
                       onPressed: () {
                         if (pageIndex == data.length - 1) {

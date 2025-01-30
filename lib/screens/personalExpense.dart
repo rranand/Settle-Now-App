@@ -2760,12 +2760,11 @@ class _ExpensesState extends State<Expenses> {
                                                           16.0),
                                                 );
 
-                                                if (dateTime != null) {
-                                                  if (this.mounted) {
-                                                    setState(() {
-                                                      expensedate = dateTime;
-                                                    });
-                                                  }
+                                                if (this.mounted &&
+                                                    dateTime != null) {
+                                                  setState(() {
+                                                    expensedate = dateTime;
+                                                  });
                                                 }
                                               },
                                               child: Icon(

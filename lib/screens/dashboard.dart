@@ -2445,12 +2445,10 @@ class _DashBoardState extends State<DashBoard> {
                                               BorderRadius.circular(16.0),
                                         );
 
-                                        if (dateTime != null) {
-                                          if (this.mounted) {
-                                            setState(() {
-                                              expenseDate = dateTime;
-                                            });
-                                          }
+                                        if (this.mounted) {
+                                          setState(() {
+                                            expenseDate = dateTime!;
+                                          });
                                         }
                                       },
                                       child: Icon(

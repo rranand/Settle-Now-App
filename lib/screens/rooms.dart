@@ -5024,12 +5024,10 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                   borderRadius: BorderRadius.circular(16.0),
                                                                                                 );
 
-                                                                                                if (dateTime != null) {
-                                                                                                  if (this.mounted) {
-                                                                                                    setState(() {
-                                                                                                      expenseDate = dateTime;
-                                                                                                    });
-                                                                                                  }
+                                                                                                if (this.mounted && dateTime != null) {
+                                                                                                  setState(() {
+                                                                                                    expenseDate = dateTime;
+                                                                                                  });
                                                                                                 }
                                                                                               },
                                                                                               child: Icon(
