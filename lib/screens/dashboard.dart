@@ -4843,7 +4843,7 @@ class _DashBoardState extends State<DashBoard> {
                   });
                 }
               } else {
-                context.pop();
+                SystemNavigator.pop();
               }
             },
             child: Scaffold(

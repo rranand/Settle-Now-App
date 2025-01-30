@@ -188,7 +188,6 @@ class _ProfileState extends State<Profile> {
                 crypto.decrypt(data['isGoogleConnected']) == "true";
           });
         }
-        debugPrint("!#!isGoogleConnected -> " + isGoogleConnected.toString());
         if (this.mounted) {
           setState(() {
             picUrl = addCorsinImage(
