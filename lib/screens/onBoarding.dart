@@ -281,11 +281,7 @@ class _onBoardingState extends State<onBoarding> {
                                   label: "",
                                 ),
                                 BottomNavigationBarItem(
-                                  icon: Icon(Icons.analytics_outlined),
-                                  label: "",
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: Icon(Icons.person),
+                                  icon: Icon(Icons.assessment_outlined),
                                   label: "",
                                 ),
                               ],
