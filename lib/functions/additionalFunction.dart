@@ -436,3 +436,7 @@ Future<void> pushAnalytics(
   jsonInputData["device"] = crypto.encrypt(kIsWeb ? "web" : "android");
   await createHTTPreq('analytics', http.post, token, jsonInputData, context);
 }
+
+String parseFirstName(String name) {
+  return name.split(" ").first;
+}
