@@ -1647,6 +1647,7 @@ class _DashBoardState extends State<DashBoard> {
                                     } else {
                                       return eachMemberManualSplitCard([
                                         FriendEach(
+                                            requestID: "",
                                             name: _name.text,
                                             email: _email.text,
                                             status: "",
@@ -2219,7 +2220,7 @@ class _DashBoardState extends State<DashBoard> {
                                                                                                         ),
                                                                                                         onPressed: () {
                                                                                                           if (nameForm.currentState!.validate()) {
-                                                                                                            aditionalMembers.add(FriendEach(name: name.text, email: "", status: "", pic: "", isGoogle: false, phoneNo: "", fromContact: false));
+                                                                                                            aditionalMembers.add(FriendEach(requestID: "", name: name.text, email: "", status: "", pic: "", isGoogle: false, phoneNo: "", fromContact: false));
                                                                                                             if (this.mounted) {
                                                                                                               setState(() {});
                                                                                                               context.pop();

@@ -2,6 +2,7 @@ import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
 
 class FriendEach {
+  String requestID;
   String name;
   String email;
   String status;
@@ -11,7 +12,8 @@ class FriendEach {
   bool fromContact;
 
   FriendEach(
-      {required this.name,
+      {required this.requestID,
+      required this.name,
       required this.email,
       required this.status,
       required this.pic,
@@ -21,6 +23,9 @@ class FriendEach {
 
   factory FriendEach.fromJson(Map<String, dynamic> json) {
     return FriendEach(
+      requestID: json.containsKey('requestID')
+          ? crypto.decrypt(json['requestID'])
+          : '',
       name: json.containsKey('name') ? crypto.decrypt(json['name']) : '',
       fromContact: false,
       email: json.containsKey('email') ? crypto.decrypt(json['email']) : '',
@@ -34,6 +39,7 @@ class FriendEach {
 
   factory FriendEach.fromLocal(Map<dynamic, dynamic> contactEach) {
     return FriendEach(
+      requestID: "",
       name: contactEach.containsKey('name') ? contactEach['name'] : '',
       fromContact: true,
       email: contactEach.containsKey('email') ? contactEach['email'] : '',
@@ -46,6 +52,7 @@ class FriendEach {
 
   factory FriendEach.forLocal(Map<dynamic, dynamic> contactEach) {
     return FriendEach(
+      requestID: "",
       name: contactEach.containsKey('name')
           ? crypto.decrypt(contactEach['name'])
           : '',

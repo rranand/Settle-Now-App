@@ -267,7 +267,11 @@ class _LendPageState extends State<LendPage> {
           'friend/lend', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
-      friendData[index].fromContact = false;
+      if (response.statusCode == 200) {
+        friendData[index].requestID = crypto.decrypt(data['requestID']);
+        friendData[index].status = "S";
+        friendData[index].fromContact = false;
+      }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -280,7 +284,7 @@ class _LendPageState extends State<LendPage> {
     }
   }
 
-  cancelJoinRequest(String email, String id) async {
+  cancelJoinRequest(String email, String id, int index) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
@@ -289,6 +293,7 @@ class _LendPageState extends State<LendPage> {
       Map<String, String> jsonInputData = {
         'id': crypto.encrypt(id),
         'email': crypto.encrypt(email),
+        'roomKey': crypto.encrypt(widget.roomkey),
         'confirm': crypto.encrypt("0")
       };
 
@@ -296,6 +301,10 @@ class _LendPageState extends State<LendPage> {
           'friend/lend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        friendData[index].requestID = "";
+        friendData[index].status = "NJ";
+      }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -526,11 +535,9 @@ class _LendPageState extends State<LendPage> {
                                     if (data[index].status == "NJ") {
                                       await sendJoinRequest(data[index].email,
                                           data[index].fromContact, index);
-                                      data[index].status = "S";
                                     } else {
-                                      await cancelJoinRequest(
-                                          data[index].email, widget.roomkey);
-                                      data[index].status = "NJ";
+                                      await cancelJoinRequest(data[index].email,
+                                          data[index].requestID, index);
                                     }
                                     if (this.mounted) {
                                       setState(() {});

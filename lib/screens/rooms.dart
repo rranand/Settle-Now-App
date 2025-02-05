@@ -1138,7 +1138,12 @@ class _RoomExpenseState extends State<RoomExpense>
           'friend', http.post, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
-      friendData[index].fromContact = false;
+      if (response.statusCode == 200) {
+        friendData[index].fromContact = false;
+        friendData[index].status = "S";
+        friendData[index].requestID = crypto.decrypt(data['requestID']);
+      }
+
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       onException(context, err, stackTrace,
@@ -1149,7 +1154,7 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
-  cancelJoinRequest(String email) async {
+  cancelJoinRequest(String email, String requestID, int index) async {
     if (this.mounted) {
       buildShowDialog(context);
     }
@@ -1157,13 +1162,19 @@ class _RoomExpenseState extends State<RoomExpense>
       Map<String, String> jsonInputData = {
         'roomKey': crypto.encrypt(widget.roomKey),
         'email': crypto.encrypt(email),
-        'confirm': crypto.encrypt("0")
+        'confirm': crypto.encrypt("0"),
+        'id': crypto.encrypt(requestID)
       };
 
       final response = await createHTTPreq(
           'friend', http.put, _token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        friendData[index].status = "NJ";
+        friendData[index].requestID = "";
+      }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       onException(context, err, stackTrace,
@@ -1276,11 +1287,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                     if (data[index].status == "NJ") {
                                       await sendJoinRequest(data[index].email,
                                           data[index].fromContact, index);
-                                      data[index].status = "S";
                                     } else {
-                                      await cancelJoinRequest(
-                                          data[index].email);
-                                      data[index].status = "NJ";
+                                      await cancelJoinRequest(data[index].email,
+                                          data[index].requestID, index);
                                     }
 
                                     if (this.mounted) {
