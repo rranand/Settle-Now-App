@@ -88,10 +88,10 @@ android {
 
     productFlavors {
         prod {
-            resValue "string", "app_name", "Settle Now"
+            dimension "default"
         }
         dev {
-            resValue "string", "app_name", "Settle Now Dev"
+            dimension "default"
             applicationIdSuffix ".dev"
         }
     }
