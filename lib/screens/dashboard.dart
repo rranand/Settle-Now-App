@@ -6,7 +6,6 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +38,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
 import '../models/FriendEach.dart';
-import '../notificationService/NotificationController.dart';
 import '../others/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -796,82 +794,6 @@ class _DashBoardState extends State<DashBoard> {
     await _sentrequestIndicatorKey.currentState?.show();
   }
 
-  notificationProcessor(message) async {
-    final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-    String notificationFrom = "";
-
-    if (message.data.isNotEmpty) {
-      notificationFrom = crypto.decrypt(message.data["type"]);
-    }
-
-    if (notificationFrom == "room") {
-      Map<String, String> notificationData =
-          await getDataFromNotification(message.data.toString());
-      AwesomeNotifications().createNotification(
-          content: NotificationContent(
-              id: id,
-              channelKey: 'roomID',
-              title: message.notification!.title,
-              body: message.notification!.body,
-              payload: notificationData));
-    } else if (notificationFrom == "lend") {
-      Map<String, String> notificationData =
-          await getDataFromNotification(message.data.toString());
-      AwesomeNotifications().createNotification(
-          content: NotificationContent(
-              id: id,
-              channelKey: 'lendenID',
-              title: message.notification!.title,
-              body: message.notification!.body,
-              payload: notificationData));
-    } else if (notificationFrom == "account") {
-      Map<String, String> notificationData =
-          await getDataFromNotification(message.data.toString());
-      AwesomeNotifications().createNotification(
-          content: NotificationContent(
-              id: id,
-              channelKey: 'accountID',
-              title: message.notification!.title,
-              body: message.notification!.body,
-              payload: notificationData));
-    } else if (notificationFrom == "RoomRequest" ||
-        notificationFrom == "LenDenRequest") {
-      Map<String, String> notificationData =
-          await getDataFromNotification(message.data.toString());
-      AwesomeNotifications().createNotification(
-          content: NotificationContent(
-              id: id,
-              channelKey: 'requestID',
-              title: message.notification!.title,
-              body: message.notification!.body,
-              payload: notificationData),
-          actionButtons: [
-            NotificationActionButton(key: 'JOIN', label: 'Join'),
-            NotificationActionButton(key: 'CANCEL', label: 'Cancel'),
-          ]);
-    } else if (notificationFrom == "quickSplit") {
-      Map<String, String> notificationData =
-          await getDataFromNotification(message.data.toString());
-      AwesomeNotifications().createNotification(
-          content: NotificationContent(
-              id: id,
-              channelKey: 'quickSplitID',
-              title: message.notification!.title,
-              body: message.notification!.body,
-              payload: notificationData));
-    } else {
-      Map<String, String> notificationData =
-          await getDataFromNotification(message.data.toString());
-      AwesomeNotifications().createNotification(
-          content: NotificationContent(
-              id: id,
-              channelKey: 'miscellaneousID',
-              title: message.notification!.title,
-              body: message.notification!.body,
-              payload: notificationData));
-    }
-  }
-
   Future<void> getQuickSplitExpenses() async {
     try {
       if (this.mounted) {
@@ -948,93 +870,6 @@ class _DashBoardState extends State<DashBoard> {
   void initState() {
     super.initState();
     executeParallel();
-
-    if (!kIsWeb) {
-      AwesomeNotifications()
-          .initialize('resource://drawable/ic_notification_icon', [
-        NotificationChannel(
-          channelKey: "roomID",
-          channelName: "Room",
-          channelDescription: 'Notification channel for Room',
-          defaultColor: Colors.white,
-        ),
-        NotificationChannel(
-            channelKey: "lendenID",
-            channelName: "Len-Den",
-            channelDescription: 'Notification channel for Len-Den',
-            defaultColor: Colors.white),
-        NotificationChannel(
-            channelKey: "requestID",
-            channelName: "Room Request",
-            channelDescription: 'Notification channel for Room Request',
-            defaultColor: Colors.white),
-        NotificationChannel(
-            channelKey: "reminderID",
-            channelName: "Reminder",
-            channelDescription: 'Notification channel for Reminders',
-            defaultColor: Colors.white),
-        NotificationChannel(
-            channelKey: "accountID",
-            channelName: "Account",
-            channelDescription: 'Notification channel for Account',
-            defaultColor: Colors.white),
-        NotificationChannel(
-            channelKey: "miscellaneousID",
-            channelName: "Miscellaneous",
-            channelDescription: 'Notification channel for Miscellaneous',
-            defaultColor: Colors.white),
-        NotificationChannel(
-            channelKey: "quickSplitID",
-            channelName: "Quick Split",
-            channelDescription: 'Notification channel for Quick Split',
-            defaultColor: Colors.white),
-      ]);
-
-      FirebaseMessaging.instance.getInitialMessage().then(
-        (message) async {
-          if (message != null) {
-            await notificationProcessor(message);
-          }
-        },
-      );
-
-      FirebaseMessaging.onMessage.listen(
-        (message) async {
-          if (message.notification != null) {
-            await notificationProcessor(message);
-          }
-        },
-      );
-
-      FirebaseMessaging.onMessageOpenedApp.listen(
-        (message) async {
-          if (message.notification != null) {
-            await notificationProcessor(message);
-          }
-        },
-      );
-
-      AwesomeNotifications().setListeners(
-        onActionReceivedMethod: (ReceivedAction receivedAction) async {
-          NotificationController.onActionReceivedMethod(
-              context, receivedAction);
-        },
-        onNotificationCreatedMethod:
-            (ReceivedNotification receivedNotification) async {
-          NotificationController.onNotificationCreatedMethod(
-              context, receivedNotification);
-        },
-        onNotificationDisplayedMethod:
-            (ReceivedNotification receivedNotification) async {
-          NotificationController.onNotificationDisplayedMethod(
-              context, receivedNotification);
-        },
-        onDismissActionReceivedMethod: (ReceivedAction receivedAction) async {
-          NotificationController.onDismissActionReceivedMethod(
-              context, receivedAction);
-        },
-      );
-    }
   }
 
   Future<void> logOutFromGoogle() async {

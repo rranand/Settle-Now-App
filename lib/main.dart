@@ -8,6 +8,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_config.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -26,6 +28,82 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   AwesomeNotifications().createNotificationFromJsonData(message.data);
+}
+
+Future<void> notificationProcessor(message) async {
+  final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  String notificationFrom = "";
+
+  if (message.data.isNotEmpty) {
+    notificationFrom = crypto.decrypt(message.data["type"]);
+  }
+
+  if (notificationFrom == "room") {
+    Map<String, String> notificationData =
+        await getDataFromNotification(message.data.toString());
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: id,
+            channelKey: 'roomID',
+            title: message.notification!.title,
+            body: message.notification!.body,
+            payload: notificationData));
+  } else if (notificationFrom == "lend") {
+    Map<String, String> notificationData =
+        await getDataFromNotification(message.data.toString());
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: id,
+            channelKey: 'lendenID',
+            title: message.notification!.title,
+            body: message.notification!.body,
+            payload: notificationData));
+  } else if (notificationFrom == "account") {
+    Map<String, String> notificationData =
+        await getDataFromNotification(message.data.toString());
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: id,
+            channelKey: 'accountID',
+            title: message.notification!.title,
+            body: message.notification!.body,
+            payload: notificationData));
+  } else if (notificationFrom == "RoomRequest" ||
+      notificationFrom == "LenDenRequest") {
+    Map<String, String> notificationData =
+        await getDataFromNotification(message.data.toString());
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: id,
+            channelKey: 'requestID',
+            title: message.notification!.title,
+            body: message.notification!.body,
+            payload: notificationData),
+        actionButtons: [
+          NotificationActionButton(key: 'JOIN', label: 'Join'),
+          NotificationActionButton(key: 'CANCEL', label: 'Cancel'),
+        ]);
+  } else if (notificationFrom == "quickSplit") {
+    Map<String, String> notificationData =
+        await getDataFromNotification(message.data.toString());
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: id,
+            channelKey: 'quickSplitID',
+            title: message.notification!.title,
+            body: message.notification!.body,
+            payload: notificationData));
+  } else {
+    Map<String, String> notificationData =
+        await getDataFromNotification(message.data.toString());
+    AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: id,
+            channelKey: 'miscellaneousID',
+            title: message.notification!.title,
+            body: message.notification!.body,
+            payload: notificationData));
+  }
 }
 
 Future<void> main() async {
@@ -86,6 +164,30 @@ Future<void> main() async {
           channelDescription: 'Notification channel for Quick Split',
           defaultColor: Colors.white),
     ]);
+
+    FirebaseMessaging.instance.getInitialMessage().then(
+      (message) async {
+        if (message != null) {
+          await notificationProcessor(message);
+        }
+      },
+    );
+
+    FirebaseMessaging.onMessage.listen(
+      (message) async {
+        if (message.notification != null) {
+          await notificationProcessor(message);
+        }
+      },
+    );
+
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) async {
+        if (message.notification != null) {
+          await notificationProcessor(message);
+        }
+      },
+    );
   }
 
   if (!kIsWeb) {
