@@ -23,24 +23,17 @@ class NotificationController {
   static Future<void> onActionReceivedMethod(
       BuildContext context, ReceivedAction receivedAction) async {
     if (receivedAction.payload!["type"] == "RoomRequest") {
-      if (receivedAction.buttonKeyPressed == "JOIN") {
+      if (receivedAction.buttonKeyPressed == "JOIN" ||
+          receivedAction.buttonKeyPressed == "CANCEL") {
+        String confirm = "0";
+        if (receivedAction.buttonKeyPressed == "JOIN") {
+          confirm = "1";
+        }
         Map<String, dynamic> jsonInputData = {
           'roomKey': crypto.encrypt(receivedAction.payload!["key"].toString()),
           'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
-          'confirm': crypto.encrypt("1")
-        };
-
-        await createHTTPreq(
-            'friend',
-            http.put,
-            receivedAction.payload!["token"].toString(),
-            jsonInputData,
-            context);
-      } else if (receivedAction.buttonKeyPressed == "CANCEL") {
-        Map<String, dynamic> jsonInputData = {
-          'roomKey': crypto.encrypt(receivedAction.payload!["key"].toString()),
-          'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
-          'confirm': crypto.encrypt("0")
+          'id': crypto.encrypt(receivedAction.payload!["requestID"].toString()),
+          'confirm': crypto.encrypt(confirm)
         };
 
         await createHTTPreq(
@@ -54,24 +47,17 @@ class NotificationController {
             extra: {'dash': 1, 'firstTime': false});
       }
     } else if (receivedAction.payload!["type"] == "LenDenRequest") {
-      if (receivedAction.buttonKeyPressed == "JOIN") {
+      if (receivedAction.buttonKeyPressed == "JOIN" ||
+          receivedAction.buttonKeyPressed == "CANCEL") {
+        String confirm = "0";
+        if (receivedAction.buttonKeyPressed == "JOIN") {
+          confirm = "1";
+        }
         Map<String, dynamic> jsonInputData = {
           'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
           'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
-          'confirm': crypto.encrypt("1")
-        };
-
-        await createHTTPreq(
-            'friend/lend',
-            http.put,
-            receivedAction.payload!["token"].toString(),
-            jsonInputData,
-            context);
-      } else if (receivedAction.buttonKeyPressed == "CANCEL") {
-        Map<String, dynamic> jsonInputData = {
-          'id': crypto.encrypt(receivedAction.payload!["key"].toString()),
-          'email': crypto.encrypt(receivedAction.payload!["email"].toString()),
-          'confirm': crypto.encrypt("0")
+          'id': crypto.encrypt(receivedAction.payload!["requestID"].toString()),
+          'confirm': crypto.encrypt(confirm)
         };
 
         await createHTTPreq(
