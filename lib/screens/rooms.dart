@@ -5620,8 +5620,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             SizedBox(
-                              height: 43,
-                              width: 100,
+                              height: 45,
+                              width: 120,
                               child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
                                     shape: RoundedRectangleBorder(
@@ -5645,8 +5645,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                   }),
                             ),
                             SizedBox(
-                              height: 43,
-                              width: 100,
+                              height: 45,
+                              width: 120,
                               child: OutlinedButton(
                                   child: Text(
                                     "Update",
