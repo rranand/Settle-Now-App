@@ -25,10 +25,9 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
       };
 }
 
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  if (message.notification != null) {
-    await notificationProcessor(message);
-  }
+  await notificationProcessor(message);
 }
 
 Future<void> main() async {
