@@ -64,11 +64,6 @@
                 <data android:scheme="https" android:host="settlenow.in" />
             </intent-filter>
         </activity>
-
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2748051594366591~5715829404"
-        />
             
         <meta-data
             android:name="flutterEmbedding"
