@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,8 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/manualUpdateWidget.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/RoomEach.dart';
+import 'package:settlenow/notificationService/NotificationController.dart';
+import 'package:settlenow/notificationService/notificationProcessor.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
@@ -870,6 +873,53 @@ class _DashBoardState extends State<DashBoard> {
   void initState() {
     super.initState();
     executeParallel();
+
+    if (!kIsWeb) {
+      FirebaseMessaging.instance.getInitialMessage().then(
+        (message) async {
+          if (message != null) {
+            await notificationProcessor(message);
+          }
+        },
+      );
+
+      FirebaseMessaging.onMessage.listen(
+        (message) async {
+          if (message.notification != null) {
+            await notificationProcessor(message);
+          }
+        },
+      );
+
+      FirebaseMessaging.onMessageOpenedApp.listen(
+        (message) async {
+          if (message.notification != null) {
+            await notificationProcessor(message);
+          }
+        },
+      );
+
+      AwesomeNotifications().setListeners(
+        onActionReceivedMethod: (ReceivedAction receivedAction) async {
+          NotificationController.onActionReceivedMethod(
+              context, receivedAction);
+        },
+        onNotificationCreatedMethod:
+            (ReceivedNotification receivedNotification) async {
+          NotificationController.onNotificationCreatedMethod(
+              context, receivedNotification);
+        },
+        onNotificationDisplayedMethod:
+            (ReceivedNotification receivedNotification) async {
+          NotificationController.onNotificationDisplayedMethod(
+              context, receivedNotification);
+        },
+        onDismissActionReceivedMethod: (ReceivedAction receivedAction) async {
+          NotificationController.onDismissActionReceivedMethod(
+              context, receivedAction);
+        },
+      );
+    }
   }
 
   Future<void> logOutFromGoogle() async {

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -8,8 +7,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow/functions/additionalFunction.dart';
-import 'package:settlenow/others/crypto.dart';
+import 'package:settlenow/notificationService/InitializeChannels.dart';
+import 'package:settlenow/notificationService/notificationProcessor.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_config.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -27,82 +26,8 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  AwesomeNotifications().createNotificationFromJsonData(message.data);
-}
-
-Future<void> notificationProcessor(message) async {
-  final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
-  String notificationFrom = "";
-
-  if (message.data.isNotEmpty) {
-    notificationFrom = crypto.decrypt(message.data["type"]);
-  }
-
-  if (notificationFrom == "room") {
-    Map<String, String> notificationData =
-        await getDataFromNotification(message.data.toString());
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: id,
-            channelKey: 'roomID',
-            title: message.notification!.title,
-            body: message.notification!.body,
-            payload: notificationData));
-  } else if (notificationFrom == "lend") {
-    Map<String, String> notificationData =
-        await getDataFromNotification(message.data.toString());
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: id,
-            channelKey: 'lendenID',
-            title: message.notification!.title,
-            body: message.notification!.body,
-            payload: notificationData));
-  } else if (notificationFrom == "account") {
-    Map<String, String> notificationData =
-        await getDataFromNotification(message.data.toString());
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: id,
-            channelKey: 'accountID',
-            title: message.notification!.title,
-            body: message.notification!.body,
-            payload: notificationData));
-  } else if (notificationFrom == "RoomRequest" ||
-      notificationFrom == "LenDenRequest") {
-    Map<String, String> notificationData =
-        await getDataFromNotification(message.data.toString());
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: id,
-            channelKey: 'requestID',
-            title: message.notification!.title,
-            body: message.notification!.body,
-            payload: notificationData),
-        actionButtons: [
-          NotificationActionButton(key: 'JOIN', label: 'Join'),
-          NotificationActionButton(key: 'CANCEL', label: 'Cancel'),
-        ]);
-  } else if (notificationFrom == "quickSplit") {
-    Map<String, String> notificationData =
-        await getDataFromNotification(message.data.toString());
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: id,
-            channelKey: 'quickSplitID',
-            title: message.notification!.title,
-            body: message.notification!.body,
-            payload: notificationData));
-  } else {
-    Map<String, String> notificationData =
-        await getDataFromNotification(message.data.toString());
-    AwesomeNotifications().createNotification(
-        content: NotificationContent(
-            id: id,
-            channelKey: 'miscellaneousID',
-            title: message.notification!.title,
-            body: message.notification!.body,
-            payload: notificationData));
+  if (message.notification != null) {
+    await notificationProcessor(message);
   }
 }
 
@@ -125,69 +50,7 @@ Future<void> main() async {
     usePathUrlStrategy();
   } else {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-    AwesomeNotifications()
-        .initialize('resource://drawable/ic_notification_icon', [
-      NotificationChannel(
-          channelKey: "roomID",
-          channelName: "Room",
-          channelDescription: 'Notification channel for Room',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "lendenID",
-          channelName: "Len-Den",
-          channelDescription: 'Notification channel for Len-Den',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "requestID",
-          channelName: "Room Request",
-          channelDescription: 'Notification channel for Room Request',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "reminderID",
-          channelName: "Reminder",
-          channelDescription: 'Notification channel for Reminders',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "accountID",
-          channelName: "Account",
-          channelDescription: 'Notification channel for Account',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "miscellaneousID",
-          channelName: "Miscellaneous",
-          channelDescription: 'Notification channel for Miscellaneous',
-          defaultColor: Colors.white),
-      NotificationChannel(
-          channelKey: "quickSplitID",
-          channelName: "Quick Split",
-          channelDescription: 'Notification channel for Quick Split',
-          defaultColor: Colors.white),
-    ]);
-
-    FirebaseMessaging.instance.getInitialMessage().then(
-      (message) async {
-        if (message != null) {
-          await notificationProcessor(message);
-        }
-      },
-    );
-
-    FirebaseMessaging.onMessage.listen(
-      (message) async {
-        if (message.notification != null) {
-          await notificationProcessor(message);
-        }
-      },
-    );
-
-    FirebaseMessaging.onMessageOpenedApp.listen(
-      (message) async {
-        if (message.notification != null) {
-          await notificationProcessor(message);
-        }
-      },
-    );
+    await initializeChannels();
   }
 
   if (!kIsWeb) {
