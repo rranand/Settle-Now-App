@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/firebaseFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
@@ -87,17 +87,19 @@ class _OtpNameState extends State<OtpName> {
         context.push(AppRouteConstants.loginRouteName);
       }
     }
+
     Map<String, String> jsonInputData = {
       'email': crypto.encrypt(widget.email),
     };
 
     List<dynamic> fwaitTemp = await Future.wait([
       initPlatformState(),
-      getDeviceTokenToSendNotification(),
+      generateFCMToken(),
       createHTTPreq('login', http.post, token, jsonInputData, context)
     ]);
 
     _deviceData = fwaitTemp[0];
+    deviceToken = fwaitTemp[1];
     final response = fwaitTemp[2];
 
     token = crypto.encrypt(widget.email +
@@ -131,14 +133,6 @@ class _OtpNameState extends State<OtpName> {
     }
 
     isOnBoardingCompleted = await getBoardingStatus();
-  }
-
-  Future<void> getDeviceTokenToSendNotification() async {
-    if (!kIsWeb) {
-      final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-      final token = await _fcm.getToken();
-      deviceToken = token.toString();
-    }
   }
 
   verifyStatus(String name, String otp, BuildContext context) async {

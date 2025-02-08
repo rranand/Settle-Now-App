@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/notificationService/InitializeChannels.dart';
-import 'package:settlenow/notificationService/notificationProcessor.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_config.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -27,7 +26,7 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await notificationProcessor(message);
+  //await notificationProcessor(message);
 }
 
 Future<void> main() async {

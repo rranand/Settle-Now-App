@@ -438,6 +438,7 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> initalDataLoad() async {
     dash = widget.dash;
+    final FirebaseMessaging _fcm = FirebaseMessaging.instance;
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(await getTheme(context));
 
@@ -489,6 +490,16 @@ class _DashBoardState extends State<DashBoard> {
               .encrypt(AppRouteConstants.dashboardRouteName + "Room/Active"),
           "creationDate": crypto.encrypt(DateTime.now().toString())
         };
+        if (!kIsWeb) {
+          _fcm.onTokenRefresh.listen((newToken) {
+            Map<String, dynamic> jsonInputData = {
+              'email': crypto.encrypt(_email.text),
+              "fcmToken": crypto.encrypt(newToken)
+            };
+            createHTTPreq('profile/refreshFCM', http.post, _token,
+                jsonInputData, context);
+          });
+        }
         pushAnalytics(context, jsonInputData, _token);
 
         if (!kIsWeb && !isInvitePremissionPoppedProvided) {
@@ -876,12 +887,8 @@ class _DashBoardState extends State<DashBoard> {
 
     if (!kIsWeb) {
       FirebaseMessaging.instance.getInitialMessage().then(
-        (message) async {
-          if (message != null) {
-            await notificationProcessor(message);
-          }
-        },
-      );
+            (message) async {},
+          );
 
       FirebaseMessaging.onMessage.listen(
         (message) async {
@@ -893,8 +900,28 @@ class _DashBoardState extends State<DashBoard> {
 
       FirebaseMessaging.onMessageOpenedApp.listen(
         (message) async {
-          if (message.notification != null) {
-            await notificationProcessor(message);
+          Map<String, String> notificationData =
+              await getDataFromNotification(message.data.toString());
+          if (notificationData["type"] == "RoomRequest" ||
+              notificationData["type"] == "LenDenRequest") {
+            context.push(AppRouteConstants.dashboardRouteName,
+                extra: {'dash': 1, 'firstTime': false});
+          } else if ((notificationData["type"]!) == "room") {
+            context.push(AppRouteConstants.roomRouteName +
+                "/" +
+                notificationData["roomKey"]!);
+          } else if (notificationData["type"] == "lend") {
+            context.push(AppRouteConstants.lendByTitleRouteName +
+                "/" +
+                notificationData["roomKey"]!);
+          } else if (notificationData["type"] == "account") {
+            context.push(AppRouteConstants.profileRouteName);
+          } else if (notificationData["type"] == "quickSplit") {
+            context.push(AppRouteConstants.dashboardRouteName,
+                extra: {'dash': 0, 'firstTime': false});
+          } else {
+            context.push(AppRouteConstants.dashboardRouteName,
+                extra: {'dash': 0, 'firstTime': false});
           }
         },
       );

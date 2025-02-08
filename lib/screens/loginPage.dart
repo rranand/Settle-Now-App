@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import 'package:in_app_update/in_app_update.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
+import 'package:settlenow/functions/firebaseFunction.dart';
 import 'package:settlenow/functions/manualUpdateWidget.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -130,6 +130,7 @@ class _LoginPageState extends State<LoginPage> {
       getTheme(context),
       getBoardingStatus(),
       getStringPref('token'),
+      generateFCMToken()
     ]);
 
     version = futureOut[0] as String;
@@ -138,6 +139,7 @@ class _LoginPageState extends State<LoginPage> {
     darkTheme = futureOut[3] as bool;
     isOnBoardingCompleted = futureOut[4] as bool;
     var tempData = futureOut[5] as String?;
+    deviceToken = futureOut[6] as String;
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.toggleTheme(darkTheme);
     final internetProvider =
@@ -220,44 +222,9 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> getDeviceTokenToSendNotification() async {
-    if (kIsWeb) {
-      return;
-    }
-    final FirebaseMessaging _fcm = FirebaseMessaging.instance;
-    final token = await _fcm.getToken();
-    deviceToken = token.toString();
-  }
-
   @override
   void initState() {
     super.initState();
-    // if (!kIsWeb) {
-    //   subscription = InternetConnectionChecker.createInstance(
-    //     checkInterval: Duration(seconds: 30),
-    //     customCheckOptions: [
-    //       AddressCheckOption(uri: Uri.parse('https://1.1.1.1')),
-    //     ],
-    //     useDefaultOptions: false,
-    //   ).onStatusChange.listen(
-    //     (InternetConnectionStatus status) {
-    //       final provider =
-    //           Provider.of<InternetconnectivityProvider>(context, listen: false);
-    //       bool isDeviceConnected =
-    //           (status == InternetConnectionStatus.connected);
-    //       if (isDeviceConnected != provider.isDeviceConnected) {
-    //         provider.toggleDeviceConnected(isDeviceConnected);
-    //       }
-    //       if (!isDeviceConnected && provider.isAlertSet == false) {
-    //         provider.toggleAlertSet(true);
-    //       } else if (isDeviceConnected && provider.isAlertSet == true) {
-    //         Future.delayed(Duration(seconds: 1), () {
-    //           provider.toggleAlertSet(false);
-    //         });
-    //       }
-    //     },
-    //   );
-    // }
     fetchIP();
     _extractEmail();
   }
@@ -433,7 +400,6 @@ class _LoginPageState extends State<LoginPage> {
                                       ]);
 
                                       var resp = null;
-                                      await getDeviceTokenToSendNotification();
 
                                       jsonInputData = {
                                         'email': crypto
