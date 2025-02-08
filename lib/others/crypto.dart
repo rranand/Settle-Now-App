@@ -1,5 +1,4 @@
 import 'package:encrypt/encrypt.dart';
-import 'package:settlenow/functions/additionalFunction.dart';
 import '../contents.dart' as global;
 
 class crypto {
@@ -8,21 +7,13 @@ class crypto {
 
   static final encrypter = Encrypter(AES(_key, mode: AESMode.cbc));
 
-  static String encrypt(String text) {
-    try {
-      final encrypted = encrypter.encrypt(text, iv: _iv);
-      return encrypted.base64;
-    } on Exception catch (err, stackTrace) {
-      onException(err, stackTrace,
-          reason: "Unknwon Error", info: ["Crypto->encrypt"]);
-    } finally {
-      return "";
-    }
+  static String encrypt(String Text) {
+    final encrypted = encrypter.encrypt(Text, iv: _iv);
+    return encrypted.base64;
   }
 
-  static String decrypt(String text) {
-    final decrypted = encrypter.decrypt64(text, iv: _iv);
-
+  static String decrypt(String Text) {
+    final decrypted = encrypter.decrypt64(Text, iv: _iv);
     return decrypted;
   }
 }
