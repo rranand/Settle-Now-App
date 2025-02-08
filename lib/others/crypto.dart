@@ -7,13 +7,13 @@ class crypto {
 
   static final encrypter = Encrypter(AES(_key, mode: AESMode.cbc));
 
-  static String encrypt(String Text) {
-    final encrypted = encrypter.encrypt(Text, iv: _iv);
+  static String encrypt(String text) {
+    final encrypted = encrypter.encrypt(text, iv: _iv);
     return encrypted.base64;
   }
 
-  static String decrypt(String Text) {
-    final decrypted = encrypter.decrypt64(Text, iv: _iv);
+  static String decrypt(String text) {
+    final decrypted = encrypter.decrypt64(text, iv: _iv);
     return decrypted;
   }
 }
