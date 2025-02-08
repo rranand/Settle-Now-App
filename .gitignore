@@ -10,7 +10,6 @@
 .history
 .svn/
 key.properties
-crypto.dart
 contents.dart
 firebase_options.dart
 .firebase/

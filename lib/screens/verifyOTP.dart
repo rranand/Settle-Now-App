@@ -64,7 +64,7 @@ class _OtpNameState extends State<OtpName> {
       await createHTTPreq('login', http.post, "", jsonInputData, context);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["OTPName->resendOTP"]);
       }
       setState(() {
@@ -206,7 +206,7 @@ class _OtpNameState extends State<OtpName> {
       }
 
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["OTPName->verifyStatus"]);
       }
     }

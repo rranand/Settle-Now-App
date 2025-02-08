@@ -106,7 +106,7 @@ class _ProfileState extends State<Profile> {
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         context.pop();
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->deleteAccount"]);
       }
     }
@@ -147,7 +147,7 @@ class _ProfileState extends State<Profile> {
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         context.pop();
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->logoutSpecific"]);
       }
     }
@@ -199,7 +199,7 @@ class _ProfileState extends State<Profile> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->fetchBasicInfo"]);
       }
     }
@@ -295,7 +295,7 @@ class _ProfileState extends State<Profile> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->pushPhoneToDB"]);
       }
     }
@@ -328,7 +328,7 @@ class _ProfileState extends State<Profile> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->verifyOTP"]);
       }
       return false;
@@ -669,7 +669,7 @@ class _ProfileState extends State<Profile> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->sendOTP"]);
       }
     }
@@ -704,7 +704,7 @@ class _ProfileState extends State<Profile> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Profile->linkWithGoogle"]);
       }
     } finally {
@@ -925,8 +925,7 @@ class _ProfileState extends State<Profile> {
                                           }
                                         } on Exception catch (err, stackTrace) {
                                           if (this.mounted) {
-                                            onException(
-                                                context, err, stackTrace,
+                                            onException(err, stackTrace,
                                                 reason: "Unknwon Error",
                                                 info: [
                                                   "ProfilePage->LinkWithGoogle"

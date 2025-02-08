@@ -74,7 +74,7 @@ class _ContactUsState extends State<ContactUs> {
         }
 
         if (this.mounted) {
-          onException(context, err, stackTrace,
+          onException(err, stackTrace,
               reason: "Unknwon Error", info: ["ContactUs->sendContactData"]);
         }
       }

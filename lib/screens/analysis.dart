@@ -159,7 +159,7 @@ class _AnalysisState extends State<Analysis> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Analysis->_initialisation"]);
       }
     }
@@ -522,7 +522,7 @@ class _AnalysisState extends State<Analysis> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Analysis->getRoomData"]);
       }
     }

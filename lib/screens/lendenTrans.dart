@@ -64,7 +64,7 @@ class _LendPageState extends State<LendPage> {
           await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->getContactsFromLocal"]);
       }
     }
@@ -131,7 +131,7 @@ class _LendPageState extends State<LendPage> {
         }
 
         if (this.mounted) {
-          onException(context, err, stackTrace,
+          onException(err, stackTrace,
               reason: "Unknwon Error", info: ["LendPage->addLoan"]);
         }
       }
@@ -171,7 +171,7 @@ class _LendPageState extends State<LendPage> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->getFriendData"]);
       }
     }
@@ -220,7 +220,7 @@ class _LendPageState extends State<LendPage> {
       }
 
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->updateRoomName"]);
       }
     }
@@ -275,7 +275,7 @@ class _LendPageState extends State<LendPage> {
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->sendJoinRequest"]);
       }
     }
@@ -308,7 +308,7 @@ class _LendPageState extends State<LendPage> {
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->cancelJoinRequest"]);
       }
     }
@@ -576,7 +576,7 @@ class _LendPageState extends State<LendPage> {
       _refreshIndicatorKeyLendPage.currentState?.show();
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->_updateTransaction"]);
       }
     }
@@ -959,7 +959,7 @@ class _LendPageState extends State<LendPage> {
         context.pop();
       }
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->_initialization"]);
       }
     }
@@ -1019,7 +1019,7 @@ class _LendPageState extends State<LendPage> {
         context.pop();
       }
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->_initialization"]);
       }
     }

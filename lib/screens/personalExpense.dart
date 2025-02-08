@@ -88,7 +88,7 @@ class _ExpensesState extends State<Expenses> {
         });
       }
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Expenses->getExpenseCategory"]);
     }
 
@@ -208,7 +208,7 @@ class _ExpensesState extends State<Expenses> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Expenses->_initialization"]);
       }
     }
@@ -235,7 +235,7 @@ class _ExpensesState extends State<Expenses> {
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Expenses->removeRoomTransaction"]);
       }
     }
@@ -273,7 +273,7 @@ class _ExpensesState extends State<Expenses> {
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error",
             info: ["Expenses->updatePersonalTransaction"]);
       }
@@ -669,7 +669,7 @@ class _ExpensesState extends State<Expenses> {
         context.pop();
       }
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Expenses->AddExpense"]);
       }
     }

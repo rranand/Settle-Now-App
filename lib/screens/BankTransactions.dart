@@ -121,7 +121,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         });
       }
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Expenses->getExpenseCategory"]);
     }
 
@@ -150,7 +150,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["BankTransaction->getLenDenData"]);
       }
     }
@@ -173,7 +173,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["BankTransaction->getActiveRooms"]);
       }
     }
@@ -224,7 +224,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["BankTransaction->getMembers"]);
       }
     }
@@ -335,7 +335,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         context.pop();
       }
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["BankTransaction->AddExpense"]);
       }
     }
@@ -571,7 +571,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error",
             info: ["BankTransaction->createLenDenRoom"]);
       }
@@ -630,7 +630,7 @@ class _BankTransactionsState extends State<BankTransactions> {
       }
 
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error",
             info: ["BankTransaction->AddExpenseManual"]);
       }
@@ -674,7 +674,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          onException(context, err, stackTrace,
+          onException(err, stackTrace,
               reason: "Unknwon Error", info: ["BankTransaction->AddLenDen"]);
         }
       }
@@ -731,7 +731,7 @@ class _BankTransactionsState extends State<BankTransactions> {
         }
 
         if (this.mounted) {
-          onException(context, err, stackTrace,
+          onException(err, stackTrace,
               reason: "Unknwon Error",
               info: ["BankTransaction->AddRoomExpense"]);
         }

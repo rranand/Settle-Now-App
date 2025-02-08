@@ -118,7 +118,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       }
 
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error",
             info: ["ScheduleNotification->_initialization"]);
       }
@@ -167,7 +167,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         context.pop();
       }
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error",
             info: ["ScheduleNotification->_initialization"]);
       }
@@ -237,7 +237,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
-          onException(context, err, stackTrace,
+          onException(err, stackTrace,
               reason: "Unknwon Error",
               info: ["ScheduleNotification->_addReminder"]);
         }

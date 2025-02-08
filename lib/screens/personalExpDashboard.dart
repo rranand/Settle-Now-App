@@ -107,7 +107,7 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Summary->fetchPersonalExp"]);
       }
     }
@@ -190,7 +190,7 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["Summary->updatePieChart"]);
       }
     }

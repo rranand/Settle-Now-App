@@ -67,7 +67,7 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendDenDashboard->createRoom"]);
       }
     }
@@ -105,7 +105,7 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendDenDashboard->updateRoom"]);
       }
     }
@@ -180,7 +180,7 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
         context.pop();
       }
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error",
             info: ["LendDenDashboard->_initialization"]);
       }

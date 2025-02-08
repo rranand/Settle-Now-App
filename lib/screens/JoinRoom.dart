@@ -107,7 +107,7 @@ class _RoomJoinState extends State<RoomJoin> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["JoinRoom->_roomJoin"]);
       }
 

@@ -74,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["LoginPage->manualUpdateCheck"]);
     }
     if (this.mounted) {
@@ -203,6 +203,75 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> googleLogin() async {
+    try {
+      final user = await GoogleSignIN.login();
+      if (user != null) {
+        if (this.mounted) {
+          buildShowDialog(context);
+        }
+        String token = crypto.encrypt((user.email).toString() +
+            "#" +
+            _deviceData['id'] +
+            "#" +
+            DateTime.now().toString());
+        Map<String, String> jsonInputData = {
+          "email": (user.email).toString(),
+          "name": (user.displayName).toString(),
+          "token": token
+        };
+        String jwToken =
+            await createJWT((user.email).toString(), jsonEncode(jsonInputData));
+
+        var resp = null;
+
+        jsonInputData = {
+          'email': crypto.encrypt((user.email).toString()),
+          'name': crypto.encrypt((user.displayName).toString()),
+          'profilePic': crypto.encrypt((user.photoUrl).toString()),
+          'ip': crypto.encrypt(ipAddress),
+          'device': crypto.encrypt(_deviceData['device']),
+          'deviceToken': crypto.encrypt(kIsWeb ? "web" : deviceToken),
+          "token": crypto.encrypt(token),
+          'userAgent': crypto.encrypt(_deviceData['userAgent']),
+        };
+
+        resp = await createHTTPreq(
+            'login/google', http.post, "", jsonInputData, context);
+
+        var remainingData = jsonDecode(resp.body)['data'];
+
+        if (resp.statusCode == 200) {
+          await Future.wait([
+            setStringPref('token', jwToken),
+            setBoolPrefs('isGoogle', true),
+            setStringPref('___token', remainingData['createdOn']),
+            setStringPref('__token', remainingData['phoneNo'])
+          ]);
+          if (this.mounted) {
+            while (context.canPop()) {
+              context.pop();
+            }
+          }
+          if (this.mounted) {
+            isOnBoardingCompleted
+                ? context.go(AppRouteConstants.dashboardRouteName,
+                    extra: {"version": version, "firstTime": true})
+                : context.go(AppRouteConstants.onBoardingRouteName,
+                    extra: {"version": version});
+          }
+        }
+      } else {
+        await user?.clearAuthCache();
+      }
+    } on Exception catch (err, stackTrace) {
+      if (this.mounted) {
+        onException(err, stackTrace,
+            reason: "Unknwon Error", info: ["LoginPage->SignInWithGoogle"]);
+      }
+    }
+  }
+
   Future<void> fetchIP() async {
     try {
       final ipAddressReq = await http.get(Uri.parse('https://api64.ipify.org'));
@@ -216,7 +285,7 @@ class _LoginPageState extends State<LoginPage> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LoginPage->fetchIP"]);
       }
     }
@@ -226,6 +295,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
     fetchIP();
+    crypto.encrypt("");
     _extractEmail();
   }
 
@@ -373,107 +443,7 @@ class _LoginPageState extends State<LoginPage> {
                                       color: Theme.of(context).primaryColor),
                                 ),
                                 onPressed: () async {
-                                  try {
-                                    final user = await GoogleSignIN.login();
-                                    if (user != null) {
-                                      if (this.mounted) {
-                                        buildShowDialog(context);
-                                      }
-                                      String token = crypto.encrypt(
-                                          (user.email).toString() +
-                                              "#" +
-                                              _deviceData['id'] +
-                                              "#" +
-                                              DateTime.now().toString());
-                                      Map<String, String> jsonInputData = {
-                                        "email": (user.email).toString(),
-                                        "name": (user.displayName).toString(),
-                                        "token": token
-                                      };
-                                      String jwToken = await createJWT(
-                                          (user.email).toString(),
-                                          jsonEncode(jsonInputData));
-
-                                      await Future.wait([
-                                        setStringPref('token', jwToken),
-                                        setBoolPrefs('isGoogle', true),
-                                      ]);
-
-                                      var resp = null;
-
-                                      jsonInputData = {
-                                        'email': crypto
-                                            .encrypt((user.email).toString()),
-                                        'name': crypto.encrypt(
-                                            (user.displayName).toString()),
-                                        'profilePic': crypto.encrypt(
-                                            (user.photoUrl).toString()),
-                                        'ip': crypto.encrypt(ipAddress),
-                                        'device': crypto
-                                            .encrypt(_deviceData['device']),
-                                        'deviceToken': crypto.encrypt(
-                                            kIsWeb ? "web" : deviceToken),
-                                        "token": crypto.encrypt(token),
-                                        'userAgent': crypto
-                                            .encrypt(_deviceData['userAgent']),
-                                      };
-
-                                      resp = await createHTTPreq(
-                                          'login/google',
-                                          http.post,
-                                          "",
-                                          jsonInputData,
-                                          context);
-
-                                      var remainingData =
-                                          jsonDecode(resp.body)['data'];
-
-                                      if (resp.statusCode == 200) {
-                                        await Future.wait([
-                                          setStringPref('___token',
-                                              remainingData['createdOn']),
-                                          setStringPref('__token',
-                                              remainingData['phoneNo'])
-                                        ]);
-                                      } else {
-                                        await Future.wait([
-                                          setStringPref(
-                                              '___token', crypto.encrypt("")),
-                                          setStringPref(
-                                              '__token', crypto.encrypt(""))
-                                        ]);
-                                      }
-
-                                      if (this.mounted) {
-                                        while (context.canPop()) {
-                                          context.pop();
-                                        }
-                                      }
-
-                                      if (this.mounted) {
-                                        isOnBoardingCompleted
-                                            ? context.go(
-                                                AppRouteConstants
-                                                    .dashboardRouteName,
-                                                extra: {
-                                                    "version": version,
-                                                    "firstTime": true
-                                                  })
-                                            : context.go(
-                                                AppRouteConstants
-                                                    .onBoardingRouteName,
-                                                extra: {"version": version});
-                                      }
-                                    }
-                                  } on Exception catch (err, stackTrace) {
-                                    if (this.mounted) {
-                                      onException(context, err, stackTrace,
-                                          reason: "Unknwon Error",
-                                          info: [
-                                            "LoginPage->SignInWithGoogle"
-                                          ]);
-                                    }
-                                  }
+                                  await googleLogin();
                                 },
                               ),
                             ),

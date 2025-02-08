@@ -75,7 +75,7 @@ class _InviteFriendsState extends State<InviteFriends> {
               ]);
         } on Exception catch (err, stackTrace) {
           if (this.mounted) {
-            onException(context, err, stackTrace,
+            onException(err, stackTrace,
                 reason: "Unknwon Error",
                 info: ["InviteFriends->pushToDB->allContactsData"]);
           }
@@ -88,7 +88,7 @@ class _InviteFriendsState extends State<InviteFriends> {
               [allContacts[i]]);
         } on Exception catch (err, stackTrace) {
           if (this.mounted) {
-            onException(context, err, stackTrace,
+            onException(err, stackTrace,
                 reason: "Unknwon Error",
                 info: ["InviteFriends->pushToDB->allContacts"]);
           }
@@ -135,7 +135,7 @@ class _InviteFriendsState extends State<InviteFriends> {
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
-        onException(context, err, stackTrace,
+        onException(err, stackTrace,
             reason: "Unknwon Error", info: ["InviteFriends->getContacts"]);
       }
     }

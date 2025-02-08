@@ -236,10 +236,9 @@ Future<bool> checkAndroidInsideWeb() async {
   return false;
 }
 
-onException(BuildContext context, Exception err, StackTrace stackTrace,
+onException(Exception err, StackTrace stackTrace,
     {String reason = "", List<String>? info}) async {
   pushCrashDataToFirebase(err, stackTrace, reason: reason, info: info);
-  showToast(context, "Server Error Try Again", Icons.warning_rounded);
 }
 
 commaSeperator(String amount) {

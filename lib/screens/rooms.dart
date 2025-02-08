@@ -158,7 +158,7 @@ class _RoomExpenseState extends State<RoomExpense>
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_updatePayToMember"]);
     }
   }
@@ -213,7 +213,7 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_getPaymentData"]);
     }
 
@@ -343,7 +343,7 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_initialisation"]);
     }
   }
@@ -379,7 +379,7 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->getFriendData"]);
     }
 
@@ -449,7 +449,7 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(TransData["Message"]), Icons.close);
       }
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_extractExpenseData"]);
     }
     firstTimeLoad = false;
@@ -509,7 +509,7 @@ class _RoomExpenseState extends State<RoomExpense>
       if (this.mounted) {
         context.pop();
       }
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->AddExpenseManual"]);
     }
     if (this.mounted) {
@@ -551,7 +551,7 @@ class _RoomExpenseState extends State<RoomExpense>
       if (this.mounted) {
         context.pop();
       }
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->updateRoomName"]);
     }
     if (this.mounted) {
@@ -609,7 +609,7 @@ class _RoomExpenseState extends State<RoomExpense>
           context.pop();
         }
         if (this.mounted) {
-          onException(context, err, stackTrace,
+          onException(err, stackTrace,
               reason: "Unknwon Error", info: ["Rooms->AddExpense"]);
         }
       }
@@ -659,7 +659,7 @@ class _RoomExpenseState extends State<RoomExpense>
           context.pop();
         }
         if (this.mounted) {
-          onException(context, err, stackTrace,
+          onException(err, stackTrace,
               reason: "Unknwon Error", info: ["Rooms->PayToMember"]);
         }
       }
@@ -707,7 +707,7 @@ class _RoomExpenseState extends State<RoomExpense>
       if (this.mounted) {
         context.pop();
       }
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->retrievePaymentData"]);
     }
     if (this.mounted) {
@@ -747,7 +747,7 @@ class _RoomExpenseState extends State<RoomExpense>
       if (this.mounted) {
         context.pop();
       }
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->CloseRoom"]);
     }
 
@@ -845,7 +845,7 @@ class _RoomExpenseState extends State<RoomExpense>
       getContactsFromDB =
           await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->getContactsFromLocal"]);
     }
   }
@@ -1146,7 +1146,7 @@ class _RoomExpenseState extends State<RoomExpense>
 
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->sendJoinRequest"]);
     }
     if (this.mounted) {
@@ -1177,7 +1177,7 @@ class _RoomExpenseState extends State<RoomExpense>
       }
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->cancelJoinRequest"]);
     }
     if (this.mounted) {
@@ -1198,7 +1198,7 @@ class _RoomExpenseState extends State<RoomExpense>
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->closeRoomRequest"]);
     }
   }
@@ -5242,7 +5242,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       widget.isPreviousPageNeedToBeUpdated.value = true;
       widget.refreshIndicatorKeyExpenseData.currentState?.show();
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->updateExpenseManual"]);
     }
   }
@@ -5733,7 +5733,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       widget.isPreviousPageNeedToBeUpdated.value = true;
       widget.refreshIndicatorKeyExpenseData.currentState?.show();
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_updateTransaction"]);
     }
   }
@@ -6033,7 +6033,7 @@ class _ExpenseDataState extends State<ExpenseData> {
       var data = jsonDecode(response.body);
       showToast(context, crypto.decrypt(data["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
-      onException(context, err, stackTrace,
+      onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->addToPersonalExpense"]);
     }
     if (this.mounted) {
