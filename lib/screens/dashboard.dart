@@ -94,6 +94,7 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController(text: "");
   String _token = "";
+  String localTimeZone = "";
   ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
   ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
   ValueNotifier<bool> quickSplitDataHasMore = ValueNotifier(true);
@@ -232,13 +233,14 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> checkforScheduledNotifications() async {
-    if (widget.firstTime && !notificationSetupComplete) {
+    if (!notificationSetupComplete) {
       List<dynamic> data = [];
       try {
         Map<String, String> jsonInputData = {
           "email": crypto.encrypt(_email.text),
         };
-
+        localTimeZone =
+            await AwesomeNotifications().getLocalTimeZoneIdentifier();
         final response = await createHTTPreq(
             'reminder', http.post, _token, jsonInputData, context);
 
@@ -259,11 +261,11 @@ class _DashBoardState extends State<DashBoard> {
                       payload: null),
                   schedule: NotificationCalendar(
                       day: int.parse(crypto.decrypt(data[i]["dates"])),
-                      hour: 7 + (j * 4),
+                      hour: 0,
                       minute: 0,
-                      second: 0,
+                      second: 30,
                       allowWhileIdle: true,
-                      timeZone: "Asia/Kolkata"));
+                      timeZone: localTimeZone));
             }
           }
         }

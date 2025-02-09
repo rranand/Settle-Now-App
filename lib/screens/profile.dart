@@ -252,10 +252,8 @@ class _ProfileState extends State<Profile> {
 
     await fetchBasicInfo();
 
-    _phoneNo.text =
-        crypto.decrypt(await getStringPref("__token") ?? crypto.encrypt(""));
-    createdOn =
-        crypto.decrypt(await getStringPref("___token") ?? crypto.encrypt(""));
+    _phoneNo.text = crypto.decrypt(await getStringPref("__token") ?? "");
+    createdOn = crypto.decrypt(await getStringPref("___token") ?? "");
 
     if (_phoneNo.text.isNotEmpty) {
       havePhoneNo = true;
