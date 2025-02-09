@@ -22,7 +22,6 @@ import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:settlenow/others/crypto.dart';
 import '../contents.dart' as global;
 
@@ -53,21 +52,6 @@ class _LendPageState extends State<LendPage> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  Future<void> getContactsFromLocal() async {
-    try {
-      String path = await getDBFilePath('contact_data.db');
-
-      Database database = await openDatabase(path);
-      getContactsFromDB =
-          await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
-    } on Exception catch (err, stackTrace) {
-      if (this.mounted) {
-        onException(err, stackTrace,
-            reason: "Unknwon Error", info: ["LendPage->getContactsFromLocal"]);
-      }
-    }
   }
 
   final TextEditingController _purpose = TextEditingController();
@@ -886,6 +870,10 @@ class _LendPageState extends State<LendPage> {
           "creationDate": crypto.encrypt(DateTime.now().toString())
         };
         pushAnalytics(context, jsonInputData, _token);
+
+        if (!kIsWeb) {
+          getContactsFromDB = await getContactsFromLocal();
+        }
       } else {
         while (this.mounted && context.canPop()) {
           context.pop();

@@ -37,7 +37,6 @@ import 'package:settlenow/screens/lendenDashboard.dart';
 import 'package:settlenow/screens/personalExpDashboard.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../contents.dart' as global;
 import '../models/FriendEach.dart';
@@ -168,19 +167,6 @@ class _DashBoardState extends State<DashBoard> {
   List<FriendEach> aditionalMembers = [];
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String appVersion = "Unknown";
-
-  Future<void> getContactsFromLocal() async {
-    try {
-      String path = await getDBFilePath('contact_data.db');
-
-      Database database = await openDatabase(path);
-      getContactsFromDB =
-          await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
-    } on Exception catch (err, stackTrace) {
-      onException(err, stackTrace,
-          reason: "Unknwon Error", info: ["DashBoard->getContactsFromLocal"]);
-    }
-  }
 
   @override
   void dispose() {
@@ -379,11 +365,15 @@ class _DashBoardState extends State<DashBoard> {
         date = (tempDate.month - 1).toString() + tempDate.year.toString();
       });
     }
+
     try {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email.text),
       };
 
+      if (!kIsWeb) {
+        getContactsFromDB = await getContactsFromLocal();
+      }
       final response = await createHTTPreq(
           'profile', http.patch, _token, jsonInputData, context);
 
@@ -5168,6 +5158,25 @@ class _DashBoardState extends State<DashBoard> {
                                 style: TextStyle(
                                     fontSize: 14, color: Colors.white),
                               ),
+                              trailing: Container(
+                                  width: 55,
+                                  height: 30,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      border: Border.all(
+                                        color: themeProvider.isDarkTheme
+                                            ? Theme.of(context).primaryColor
+                                            : Colors.white,
+                                      ),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(12))),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(4.0),
+                                    child: Text("Beta",
+                                        style: TextStyle(
+                                            fontSize: 13, color: Colors.white)),
+                                  )),
                             ),
                       kIsWeb || isContactPermissionGranted
                           ? SizedBox()

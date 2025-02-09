@@ -12,7 +12,6 @@ import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
-import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:sqflite/sqflite.dart';
@@ -337,6 +336,22 @@ List<FriendEach> getUnionOfContacts(
   return fromDB;
 }
 
+Future<List<Map>> getContactsFromLocal() async {
+  List<Map> getContactsFromDB = [];
+  try {
+    String path = await getDBFilePath('contact_data.db');
+
+    Database database = await openDatabase(path);
+    getContactsFromDB =
+        await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
+  } on Exception catch (err, stackTrace) {
+    onException(err, stackTrace,
+        reason: "Unknwon Error", info: ["DashBoard->getContactsFromLocal"]);
+  } finally {
+    return getContactsFromDB;
+  }
+}
+
 createJSONDataTOJWT(dynamic data) {
   final jwt = JWT(data);
 
@@ -409,18 +424,14 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
   } on Exception catch (err, stackTrace) {
     pushCrashDataToFirebase(err, stackTrace,
         reason: "API Error", info: ["createHTTPreq", url]);
+  } finally {
+    return new Response(
+        jsonEncode({
+          "status": false,
+          "Message": crypto.encrypt("Something went wrong!"),
+        }),
+        422);
   }
-
-  final internetChecker =
-      Provider.of<InternetconnectivityProvider>(context, listen: false);
-  return new Response(
-      jsonEncode({
-        "status": false,
-        "Message": crypto.encrypt(internetChecker.isDeviceConnected
-            ? "Server Error, Try Again!"
-            : "No Internet Connection!"),
-      }),
-      422);
 }
 
 String captalizeFirstLetter(String str) {

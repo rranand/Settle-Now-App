@@ -24,7 +24,6 @@ import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
 import '../models/ChartData.dart';
@@ -837,19 +836,6 @@ class _RoomExpenseState extends State<RoomExpense>
                 ))));
   }
 
-  Future<void> getContactsFromLocal() async {
-    try {
-      String path = await getDBFilePath('contact_data.db');
-
-      Database database = await openDatabase(path);
-      getContactsFromDB =
-          await database.rawQuery('SELECT * FROM ContactHasAccountOnSN');
-    } on Exception catch (err, stackTrace) {
-      onException(err, stackTrace,
-          reason: "Unknwon Error", info: ["Rooms->getContactsFromLocal"]);
-    }
-  }
-
   Future<void> executeParallel() async {
     var tokenData = await getStringPref('token');
 
@@ -871,6 +857,9 @@ class _RoomExpenseState extends State<RoomExpense>
       _initialisation();
       _extractExpenseData();
       _getPaymentData();
+      if (!kIsWeb) {
+        getContactsFromDB = await getContactsFromLocal();
+      }
     } else {
       while (this.mounted && context.canPop()) {
         context.pop();
@@ -885,9 +874,6 @@ class _RoomExpenseState extends State<RoomExpense>
   @override
   void initState() {
     super.initState();
-    if (!kIsWeb) {
-      getContactsFromLocal();
-    }
     executeParallel();
   }
 
