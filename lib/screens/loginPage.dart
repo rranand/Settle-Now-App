@@ -260,6 +260,10 @@ class _LoginPageState extends State<LoginPage> {
                 : context.go(AppRouteConstants.onBoardingRouteName,
                     extra: {"version": version});
           }
+        } else {
+          context.pop();
+          showToast(context, crypto.decrypt(remainingData['Message']),
+              Icons.warning_amber);
         }
       } else {
         await user?.clearAuthCache();

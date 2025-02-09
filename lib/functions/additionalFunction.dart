@@ -390,8 +390,14 @@ pushCrashDataToFirebase(Exception err, StackTrace stackTrace,
       information: additionalData['information']);
 }
 
-Future<dynamic> createHTTPreq(String url, Function httpType, String token,
+Future<Response> createHTTPreq(String url, Function httpType, String token,
     dynamic JSONData, BuildContext context) async {
+  Response newRes = new Response(
+      jsonEncode({
+        "status": false,
+        "Message": crypto.encrypt("Something went wrong!"),
+      }),
+      422);
   try {
     String tokenization = createJSONDataTOJWT(JSONData);
     Response res = await httpType(Uri.parse(global.url + url),
@@ -418,19 +424,13 @@ Future<dynamic> createHTTPreq(String url, Function httpType, String token,
           context.go(AppRouteConstants.loginRouteName);
         }
       }
-      final newRes = new Response(responseBody, res.statusCode);
-      return newRes;
+      newRes = new Response(responseBody, res.statusCode);
     }
   } on Exception catch (err, stackTrace) {
     pushCrashDataToFirebase(err, stackTrace,
         reason: "API Error", info: ["createHTTPreq", url]);
   } finally {
-    return new Response(
-        jsonEncode({
-          "status": false,
-          "Message": crypto.encrypt("Something went wrong!"),
-        }),
-        422);
+    return newRes;
   }
 }
 
