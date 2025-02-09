@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/notificationService/InitializeChannels.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
@@ -186,7 +187,7 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
       }
 
       List<int> IDs = [];
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 5; i++) {
         IDs.add(
             DateTime.now().add(Duration(hours: i * 4)).millisecondsSinceEpoch ~/
                 1000);
@@ -214,23 +215,8 @@ class _ScheduleNotificationState extends State<ScheduleNotification> {
         var Tdata = jsonDecode(response.body);
         if (response.statusCode == 200) {
           data.add(Tdata['data']);
-          for (int i = 0; i < IDs.length; i++) {
-            await AwesomeNotifications().createNotification(
-                content: NotificationContent(
-                    id: IDs[i],
-                    channelKey: 'reminderID',
-                    title: "Reminder",
-                    body: crypto.decrypt(data.last['name']),
-                    payload: null),
-                schedule: NotificationCalendar(
-                    day: int.parse(dates[currentDateIndex]),
-                    hour: 7 + (i * 4),
-                    minute: 0,
-                    second: 0,
-                    allowWhileIdle: true,
-                    timeZone: "Asia/Kolkata"));
-          }
-
+          createScheduledNotification(int.parse(dates[currentDateIndex]),
+              crypto.decrypt(data.last['name']), IDs);
           showToast(context, "Reminder Created", Icons.check);
         } else {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);

@@ -26,6 +26,7 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/manualUpdateWidget.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/RoomEach.dart';
+import 'package:settlenow/notificationService/InitializeChannels.dart';
 import 'package:settlenow/notificationService/NotificationController.dart';
 import 'package:settlenow/notificationService/notificationProcessor.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
@@ -93,7 +94,6 @@ class _DashBoardState extends State<DashBoard> {
   final TextEditingController _name = TextEditingController();
   final TextEditingController _search = TextEditingController(text: "");
   String _token = "";
-  String localTimeZone = "";
   ValueNotifier<bool> activeRoomHasMore = ValueNotifier(true);
   ValueNotifier<bool> inActiveRoomHasMore = ValueNotifier(true);
   ValueNotifier<bool> quickSplitDataHasMore = ValueNotifier(true);
@@ -219,14 +219,12 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> checkforScheduledNotifications() async {
-    if (!notificationSetupComplete) {
+    if (!notificationSetupComplete && widget.firstTime) {
       List<dynamic> data = [];
       try {
         Map<String, String> jsonInputData = {
           "email": crypto.encrypt(_email.text),
         };
-        localTimeZone =
-            await AwesomeNotifications().getLocalTimeZoneIdentifier();
         final response = await createHTTPreq(
             'reminder', http.post, _token, jsonInputData, context);
 
@@ -236,23 +234,20 @@ class _DashBoardState extends State<DashBoard> {
 
           for (int i = 0; i < data.length; i++) {
             String notID = crypto.decrypt(data[i]["notID"]);
-            List<String> IDs = notID.substring(1, notID.length - 1).split(', ');
-            for (int j = 0; j < IDs.length; j++) {
-              await AwesomeNotifications().createNotification(
-                  content: NotificationContent(
-                      id: int.parse(IDs[j]),
-                      channelKey: 'reminderID',
-                      title: "Reminder",
-                      body: crypto.decrypt(data[i]['name']),
-                      payload: null),
-                  schedule: NotificationCalendar(
-                      day: int.parse(crypto.decrypt(data[i]["dates"])),
-                      hour: 0,
-                      minute: 0,
-                      second: 30,
-                      allowWhileIdle: true,
-                      timeZone: localTimeZone));
-            }
+            List<int> IDs = notID
+                .substring(1, notID.length - 1)
+                .split(', ')
+                .map((ele) => int.parse(ele))
+                .toList();
+
+            createScheduledNotification(
+                int.parse(crypto.decrypt(data[i]["dates"])),
+                crypto.decrypt(data[i]['name']),
+                IDs);
+          }
+
+          if (data.length > 0) {
+            showToast(context, "Reminders Synced!", Icons.check);
           }
         }
       } on Exception catch (err, stackTrace) {
@@ -879,8 +874,34 @@ class _DashBoardState extends State<DashBoard> {
 
     if (!kIsWeb) {
       FirebaseMessaging.instance.getInitialMessage().then(
-            (message) async {},
-          );
+        (message) async {
+          if (message != null) {
+            Map<String, String> notificationData =
+                await getDataFromNotification(message.data.toString());
+            if (notificationData["type"] == "RoomRequest" ||
+                notificationData["type"] == "LenDenRequest") {
+              context.push(AppRouteConstants.dashboardRouteName,
+                  extra: {'dash': 1, 'firstTime': false});
+            } else if ((notificationData["type"]!) == "room") {
+              context.push(AppRouteConstants.roomRouteName +
+                  "/" +
+                  notificationData["roomKey"]!);
+            } else if (notificationData["type"] == "lend") {
+              context.push(AppRouteConstants.lendByTitleRouteName +
+                  "/" +
+                  notificationData["roomKey"]!);
+            } else if (notificationData["type"] == "account") {
+              context.push(AppRouteConstants.profileRouteName);
+            } else if (notificationData["type"] == "quickSplit") {
+              context.push(AppRouteConstants.dashboardRouteName,
+                  extra: {'dash': 0, 'firstTime': false});
+            } else {
+              context.push(AppRouteConstants.dashboardRouteName,
+                  extra: {'dash': 0, 'firstTime': false});
+            }
+          }
+        },
+      );
 
       FirebaseMessaging.onMessage.listen(
         (message) async {

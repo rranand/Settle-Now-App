@@ -92,8 +92,8 @@ class _onBoardingState extends State<onBoarding> {
     while (context.canPop()) {
       context.pop();
     }
-    context.push(AppRouteConstants.dashboardRouteName,
-        extra: {"firstTime": false});
+    context
+        .push(AppRouteConstants.dashboardRouteName, extra: {"firstTime": true});
   }
 
   Container buildDot(int index, BuildContext context) {

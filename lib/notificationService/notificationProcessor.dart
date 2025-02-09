@@ -3,7 +3,6 @@ import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/others/crypto.dart';
 
 Future<void> notificationProcessor(message) async {
-  final id = DateTime.now().millisecondsSinceEpoch ~/ 1000;
   String notificationFrom = "";
 
   if (message.data.isNotEmpty) {
@@ -15,7 +14,7 @@ Future<void> notificationProcessor(message) async {
         await getDataFromNotification(message.data.toString());
     AwesomeNotifications().createNotification(
         content: NotificationContent(
-            id: id,
+            id: -1,
             channelKey: 'roomID',
             title: message.notification!.title,
             body: message.notification!.body,
@@ -25,7 +24,7 @@ Future<void> notificationProcessor(message) async {
         await getDataFromNotification(message.data.toString());
     AwesomeNotifications().createNotification(
         content: NotificationContent(
-            id: id,
+            id: -1,
             channelKey: 'lendenID',
             title: message.notification!.title,
             body: message.notification!.body,
@@ -35,7 +34,7 @@ Future<void> notificationProcessor(message) async {
         await getDataFromNotification(message.data.toString());
     AwesomeNotifications().createNotification(
         content: NotificationContent(
-            id: id,
+            id: -1,
             channelKey: 'accountID',
             title: message.notification!.title,
             body: message.notification!.body,
@@ -46,7 +45,7 @@ Future<void> notificationProcessor(message) async {
         await getDataFromNotification(message.data.toString());
     AwesomeNotifications().createNotification(
         content: NotificationContent(
-            id: id,
+            id: -1,
             channelKey: 'requestID',
             title: message.notification!.title,
             body: message.notification!.body,
@@ -60,7 +59,7 @@ Future<void> notificationProcessor(message) async {
         await getDataFromNotification(message.data.toString());
     AwesomeNotifications().createNotification(
         content: NotificationContent(
-            id: id,
+            id: -1,
             channelKey: 'quickSplitID',
             title: message.notification!.title,
             body: message.notification!.body,
@@ -70,7 +69,7 @@ Future<void> notificationProcessor(message) async {
         await getDataFromNotification(message.data.toString());
     AwesomeNotifications().createNotification(
         content: NotificationContent(
-            id: id,
+            id: -1,
             channelKey: 'miscellaneousID',
             title: message.notification!.title,
             body: message.notification!.body,

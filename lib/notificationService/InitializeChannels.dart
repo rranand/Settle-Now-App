@@ -41,3 +41,19 @@ Future<void> initializeChannels() async {
         defaultColor: Colors.white),
   ]);
 }
+
+Future<void> createScheduledNotification(
+    int day, String name, List<int> IDs) async {
+  for (int i = 0; i < IDs.length; i++) {
+    await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+            id: IDs[i],
+            channelKey: 'reminderID',
+            title: "Reminder",
+            body: name,
+            payload: {"type": "reminder"}),
+        schedule: NotificationAndroidCrontab.monthly(
+            referenceDateTime: DateTime(2017, 9, day, 7 + (i * 4), 0),
+            allowWhileIdle: true));
+  }
+}

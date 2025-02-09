@@ -86,6 +86,8 @@ class NotificationController {
     } else if (receivedAction.payload!["type"] == "quickSplit") {
       context.push(AppRouteConstants.dashboardRouteName,
           extra: {'dash': 0, 'firstTime': false});
+    } else if (receivedAction.payload!["type"] == "reminder") {
+      context.push(AppRouteConstants.schduleNotificationRouteName);
     } else {
       context.push(AppRouteConstants.dashboardRouteName,
           extra: {'dash': 0, 'firstTime': false});
