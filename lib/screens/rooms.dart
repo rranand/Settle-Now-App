@@ -618,7 +618,7 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
-  PayToMember(BuildContext context, String amountPaid) async {
+  PayToMember(BuildContext context, String amountPaid, bool closeRoom) async {
     if (_formKeyRooms.currentState!.validate()) {
       var Tdata = null;
       if (this.mounted) {
@@ -630,6 +630,7 @@ class _RoomExpenseState extends State<RoomExpense>
           'emailS': crypto.encrypt(_email),
           'emailR': crypto.encrypt(membersListEmail[membersListIndex]),
           'roomKey': crypto.encrypt(widget.roomKey),
+          'closeRoom': crypto.encrypt(closeRoom.toString()),
           'amt': crypto.encrypt(amountPaid),
         };
 
@@ -637,7 +638,7 @@ class _RoomExpenseState extends State<RoomExpense>
             'data', http.put, _token, jsonInputData, context);
         Tdata = jsonDecode(response.body);
         _amountPaid.text = "";
-        for (int i = 0; i < 3 && context.canPop(); i++) {
+        for (int i = 0; i < 4 && context.canPop(); i++) {
           if (this.mounted) {
             context.pop();
           }
@@ -654,8 +655,10 @@ class _RoomExpenseState extends State<RoomExpense>
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
       } on Exception catch (err, stackTrace) {
-        if (this.mounted) {
-          context.pop();
+        for (int i = 0; i < 2 && context.canPop(); i++) {
+          if (this.mounted) {
+            context.pop();
+          }
         }
         if (this.mounted) {
           onException(err, stackTrace,
@@ -3573,6 +3576,86 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
+  Widget _askToCloseRoom(BuildContext context, String amount) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    return StatefulBuilder(builder: (context, setState) {
+      return Dialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        child: Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Do you want to close room?",
+                      style: TextStyle(
+                        fontSize: 20,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            height: 43,
+                            width: 100,
+                            child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                                child: Text(
+                                  "Yes",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                                onPressed: () async {
+                                  await PayToMember(context, amount, true);
+                                }),
+                          ),
+                          SizedBox(
+                            height: 43,
+                            width: 100,
+                            child: OutlinedButton(
+                                child: Text(
+                                  "No",
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      color: themeProvider.isDarkTheme
+                                          ? Colors.white
+                                          : Colors.black),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  side: BorderSide(
+                                      color: Theme.of(context).primaryColor),
+                                ),
+                                onPressed: () async {
+                                  await PayToMember(context, amount, false);
+                                }),
+                          ),
+                        ]),
+                  ]),
+            )),
+      );
+    });
+  }
+
   Widget _buildSettleExpenseDialog(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     bool isInGain =
@@ -3758,8 +3841,35 @@ class _RoomExpenseState extends State<RoomExpense>
                         onPressed: () async {
                           _formKeyRooms.currentState!.save();
                           if (_formKeyRooms.currentState!.validate()) {
-                            await PayToMember(context,
-                                (isInGain ? "-" : "") + _amountPaid.text);
+                            String isAmountFull = (!isInGain
+                                    ? min(
+                                        -double.parse(crypto.decrypt(
+                                            list[selfIndex]["current"])),
+                                        double.parse(crypto.decrypt(
+                                            list[membersListIndex + 1]
+                                                ["current"])))
+                                    : min(
+                                        double.parse(crypto.decrypt(
+                                            list[selfIndex]["current"])),
+                                        -double.parse(crypto.decrypt(
+                                            list[membersListIndex + 1]["current"]))))
+                                .toStringAsFixed(2);
+                            if (isAmountFull.split(".").first ==
+                                _amountPaid.text.split(".").first) {
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return _askToCloseRoom(
+                                        context,
+                                        (isInGain ? "-" : "") +
+                                            _amountPaid.text);
+                                  });
+                            } else {
+                              await PayToMember(
+                                  context,
+                                  (isInGain ? "-" : "") + _amountPaid.text,
+                                  false);
+                            }
                           }
                         },
                         style: OutlinedButton.styleFrom(
