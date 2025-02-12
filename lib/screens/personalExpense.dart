@@ -135,7 +135,7 @@ class _ExpensesState extends State<Expenses> {
       setState(() {});
     }
 
-    await getExpenseCategory();
+    getExpenseCategory();
     var now = DateTime.now();
     Curdate = (now.month - 1).toString() + now.year.toString();
 
