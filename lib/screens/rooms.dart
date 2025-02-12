@@ -854,12 +854,12 @@ class _RoomExpenseState extends State<RoomExpense>
         "creationDate": crypto.encrypt(DateTime.now().toString())
       };
       pushAnalytics(context, jsonInputData, _token);
-      _initialisation();
-      _extractExpenseData();
-      _getPaymentData();
       if (!kIsWeb) {
         getContactsFromDB = await getContactsFromLocal();
       }
+      _initialisation();
+      _extractExpenseData();
+      _getPaymentData();
     } else {
       while (this.mounted && context.canPop()) {
         context.pop();
