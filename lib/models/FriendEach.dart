@@ -69,23 +69,3 @@ class FriendEach {
     );
   }
 }
-
-class TransactionEach {
-  String amount;
-  String date;
-  String transactionID;
-  String receiver;
-  String type;
-  String bank;
-  String mode;
-
-  TransactionEach({
-    required this.amount,
-    required this.date,
-    required this.transactionID,
-    required this.receiver,
-    required this.type,
-    required this.bank,
-    required this.mode,
-  });
-}

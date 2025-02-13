@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
 import 'package:intl/intl.dart';
 
-import '../models/FriendEach.dart';
+import '../models/TranscationEach.dart';
 import '../contents.dart' as global;
 
 String getAmount(String message) {
@@ -303,6 +303,7 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> _messages) async {
     receiver = receiver.length == 0 ? getTransferTo(messageBody) : receiver;
 
     Transactions.add(TransactionEach(
+        id: _messages[i].id.toString(),
         amount: amount,
         date: timeStrap,
         transactionID: transactionID,
@@ -310,7 +311,8 @@ Future<List<dynamic>> filterSMS(List<SmsMessage> _messages) async {
             paymentMode == "ATM" ? "Self" : capitalizeFirstLetter(receiver),
         type: transactionType,
         bank: bankName,
-        mode: paymentMode));
+        mode: paymentMode,
+        transactionConsumed: false));
   }
 
   return [Transactions, bankNameFound.toList(), paymentModeFound.toList()];

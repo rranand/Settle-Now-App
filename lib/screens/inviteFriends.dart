@@ -63,38 +63,36 @@ class _InviteFriendsState extends State<InviteFriends> {
 
     Database database = await openDatabase(path, version: 1);
 
-    await database.transaction((txn) async {
-      for (int i = 0; i < allContactsData.length; i++) {
-        try {
-          await txn.rawInsert(
-              'INSERT INTO ContactHasAccountOnSN(phoneNo, name, email) VALUES(?, ?, ?)',
-              [
-                allContactsData[i].phoneNo,
-                allContactsData[i].name,
-                allContactsData[i].email
-              ]);
-        } on Exception catch (err, stackTrace) {
-          if (this.mounted) {
-            onException(err, stackTrace,
-                reason: "Unknwon Error",
-                info: ["InviteFriends->pushToDB->allContactsData"]);
-          }
+    for (int i = 0; i < allContactsData.length; i++) {
+      try {
+        await database.execute(
+            'INSERT INTO ContactHasAccountOnSN(phoneNo, name, email) VALUES(?, ?, ?)',
+            [
+              allContactsData[i].phoneNo,
+              allContactsData[i].name,
+              allContactsData[i].email
+            ]);
+      } on Exception catch (err, stackTrace) {
+        if (this.mounted) {
+          onException(err, stackTrace,
+              reason: "Unknwon Error",
+              info: ["InviteFriends->pushToDB->allContactsData"]);
         }
       }
-      for (int i = 0; i < allContacts.length; i++) {
-        try {
-          await txn.rawInsert(
-              'INSERT INTO ContactHasNoAccountOnSN(phoneNo) VALUES(?)',
-              [allContacts[i]]);
-        } on Exception catch (err, stackTrace) {
-          if (this.mounted) {
-            onException(err, stackTrace,
-                reason: "Unknwon Error",
-                info: ["InviteFriends->pushToDB->allContacts"]);
-          }
+    }
+    for (int i = 0; i < allContacts.length; i++) {
+      try {
+        await database.execute(
+            'INSERT INTO ContactHasNoAccountOnSN(phoneNo) VALUES(?)',
+            [allContacts[i]]);
+      } on Exception catch (err, stackTrace) {
+        if (this.mounted) {
+          onException(err, stackTrace,
+              reason: "Unknwon Error",
+              info: ["InviteFriends->pushToDB->allContacts"]);
         }
       }
-    });
+    }
 
     await database.close();
   }

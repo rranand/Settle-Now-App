@@ -13,13 +13,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
-import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:http/http.dart' as http;
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
+import '../models/TranscationEach.dart';
 import '../contents.dart' as global;
 
 import '../functions/additionalFunction.dart';
