@@ -355,8 +355,8 @@ Future<List<Map>> getContactsFromLocal() async {
 createJSONDataTOJWT(dynamic data) {
   final jwt = JWT(data);
 
-  return crypto.encrypt(
-      jwt.sign(SecretKey(global.jwtToken), expiresIn: Duration(seconds: 100)));
+  return crypto.encrypt(jwt.sign(SecretKey(global.jwtToken),
+      expiresIn: kDebugMode ? null : Duration(seconds: 100)));
 }
 
 extractJSONfromJWT(String data) async {
