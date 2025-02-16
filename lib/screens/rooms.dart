@@ -20,6 +20,7 @@ import 'package:settlenow/functions/gradient.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
 import 'package:settlenow/models/PaymendData.dart';
+import 'package:settlenow/models/RoomEach.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
@@ -47,7 +48,8 @@ class _RoomExpenseState extends State<RoomExpense>
   String roomLink = "";
   bool isRoomActive = false;
   String objID = "";
-  List<dynamic> list = [];
+  List<RoomMemberEach> roomMembers = [];
+  String createdOn = "";
   final roomName = TextEditingController();
   List<dynamic> allExpenseList = [];
   List<dynamic> TransList = [];
@@ -85,7 +87,7 @@ class _RoomExpenseState extends State<RoomExpense>
   int membersListIndex = -1;
   int membersListIndexS = -1;
   int membersListIndexR = -1;
-  int selfIndex = 0;
+  int selfIndex = -1;
   bool defaultPage = true;
   double paymentTotal = 0;
   bool loadingFilteredPaymentData = false;
@@ -138,7 +140,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   _updatePayToMember(BuildContext context, String objID, String deleteFlag,
-      String amount) async {
+      String amount, PaymentDataEach payDataOG) async {
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email),
@@ -152,7 +154,22 @@ class _RoomExpenseState extends State<RoomExpense>
           'data/updatePayMember', http.put, _token, jsonInputData, context);
 
       if (response.statusCode == 200) {
-        await _getPaymentData();
+        double oldAmt = payDataOG.amount;
+        payDataOG.amount = double.parse(amount);
+        double remainingAmt = roomMembers[selfIndex].current;
+        debugPrint(
+            "OldAmount ${oldAmt} amount ${payDataOG.amount} remainingAmt ${remainingAmt}");
+        //isInGain selfIndex
+        roomMembers[selfIndex].current =
+            remainingAmt - oldAmt + payDataOG.amount;
+        // if (isInGain) {
+        //   list[selfIndex]["current"] = crypto.decrypt(remainingAmt - oldAmt + payDataOG.amount);
+        // } else {
+        //   list[selfIndex]["current"] = remainingAmt - oldAmt + payDataOG.amount;
+        // }
+        if (this.mounted) {
+          setState(() {});
+        }
       }
       var updateMessage = jsonDecode(response.body);
       showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
@@ -232,7 +249,7 @@ class _RoomExpenseState extends State<RoomExpense>
         loaded = false;
         allExpenseList.clear();
         TransList.clear();
-        list.clear();
+        roomMembers.clear();
         expenseCategory.clear();
         subCategory.clear();
         membersListName.clear();
@@ -257,7 +274,6 @@ class _RoomExpenseState extends State<RoomExpense>
         roomLink = crypto.decrypt(data['roomLink']);
         isRoomActive = crypto.decrypt(data['isRoomActive']) == "true";
         objID = crypto.decrypt(data['objID']);
-        list = data['data'];
 
         if (isRoomActive) {
           getFriendData();
@@ -269,51 +285,53 @@ class _RoomExpenseState extends State<RoomExpense>
           subCategory.add(value);
         });
 
-        isClear = list[0]["done"];
+        isClear = data['data'][0]["done"];
+        createdOn = formatDateTime(crypto.decrypt(data['data'][0]["date"]));
+
         bool isInGain = false;
         int initIndexGain = -1;
         int initIndexLoss = -1;
+        List<dynamic> tempData = data['data'];
 
-        for (int i = 1; i < list.length; i++) {
-          isClosedany = isClosedany || list[i]["done"];
-          if (list[i]["done"]) {
+        for (int i = 1; i < tempData.length; i++) {
+          RoomMemberEach eachMember = RoomMemberEach.fromJson(tempData[i]);
+          roomMembers.add(eachMember);
+
+          isClosedany = isClosedany || eachMember.done;
+          if (eachMember.done) {
             expenseSplitWithExistingMembers = true;
             roomClosedCount++;
-          } else if (crypto.decrypt(list[i]["email"]) != _email &&
-              !list[i]["done"] &&
-              double.parse(crypto.decrypt(list[i]["current"])).abs() > 0.1) {
-            if (initIndexGain == -1 &&
-                double.parse(crypto.decrypt(list[i]["current"])) > 0) {
+          } else if (eachMember.email != _email &&
+              !eachMember.done &&
+              eachMember.current.abs() > 0.1) {
+            if (initIndexGain == -1 && eachMember.current > 0) {
               initIndexGain = i - 1;
             }
-            if (initIndexLoss == -1 &&
-                double.parse(crypto.decrypt(list[i]["current"])) < 0) {
+            if (initIndexLoss == -1 && eachMember.current < 0) {
               initIndexLoss = i - 1;
             }
-            activeMembersEmail.add(crypto.decrypt(list[i]["email"]));
+            activeMembersEmail.add(eachMember.email);
           }
-          if (!list[i]["done"]) {
-            manualSplitMembers[crypto.decrypt(list[i]["email"])] = {
-              "Name": crypto.decrypt(list[i]["Name"]),
-              "Email": crypto.decrypt(list[i]["email"]),
-              "Pic": crypto.decrypt(list[i]["pic"]),
+          if (!eachMember.done) {
+            manualSplitMembers[eachMember.email] = {
+              "Name": eachMember.name,
+              "Email": eachMember.email,
+              "Pic": eachMember.pic,
+              "index": i - 1
             };
           }
 
-          membersListName.add(crypto.decrypt(list[i]["Name"]));
-          membersListEmail.add(crypto.decrypt(list[i]["email"]));
-          dataMapByUser.add(ChartData.byUser(
-              crypto.decrypt(list[i]["Name"]),
-              crypto.decrypt(list[i]["email"]),
-              crypto.decrypt(list[i]["pic"]),
-              double.parse(crypto.decrypt(list[i]["yourExpense"]))));
-          if (crypto.decrypt(list[i]["email"]) == _email) {
-            selfIndex = i;
-            yourExpense = crypto.decrypt(list[i]["yourExpense"]);
-            if (double.parse(crypto.decrypt(list[i]["current"])) > 0) {
+          membersListName.add(eachMember.name);
+          membersListEmail.add(eachMember.email);
+          dataMapByUser.add(ChartData.byUser(eachMember.name, eachMember.email,
+              eachMember.pic, eachMember.yourExpense));
+          if (eachMember.email == _email) {
+            selfIndex = i - 1;
+            yourExpense = eachMember.yourExpense.toStringAsFixed(2);
+            if (eachMember.current > 0) {
               isInGain = true;
             }
-            if (list[i]["done"]) {
+            if (eachMember.done) {
               locked = true;
             }
           }
@@ -323,7 +341,6 @@ class _RoomExpenseState extends State<RoomExpense>
         } else {
           membersListIndex = initIndexGain;
         }
-
         if (this.mounted) {
           setState(() {});
         }
@@ -653,7 +670,7 @@ class _RoomExpenseState extends State<RoomExpense>
             });
           }
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
-          await executeParallel();
+          //await executeParallel();
         } else {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
@@ -1308,7 +1325,7 @@ class _RoomExpenseState extends State<RoomExpense>
         padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
         child: InkWell(
           onTap: () async {
-            expenseTitle = crypto.decrypt(list[index]['Name']) + "\'s Expense";
+            expenseTitle = roomMembers[index].name + "\'s Expense";
             curMemberIndex = index;
             getFilterResult();
             if (this.mounted) {
@@ -1321,7 +1338,7 @@ class _RoomExpenseState extends State<RoomExpense>
                 elevation: 1.0,
                 shadowColor: Theme.of(context).primaryColor,
                 color: Theme.of(context).scaffoldBackgroundColor,
-                shape: list[index]['done']
+                shape: roomMembers[index].done
                     ? RoundedRectangleBorder(
                         side: BorderSide(color: Colors.red),
                         borderRadius: BorderRadius.circular(15.0),
@@ -1341,11 +1358,9 @@ class _RoomExpenseState extends State<RoomExpense>
                         padding: const EdgeInsets.all(8.0),
                         child: CachedNetworkImage(
                           httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                          imageUrl:
-                              crypto.decrypt(list[index]['pic']).length == 0
-                                  ? addCorsinImage(global.unknown_avatar_id)
-                                  : addCorsinImage(
-                                      crypto.decrypt(list[index]['pic'])),
+                          imageUrl: roomMembers[index].pic.length == 0
+                              ? addCorsinImage(global.unknown_avatar_id)
+                              : addCorsinImage(roomMembers[index].pic),
                           progressIndicatorBuilder:
                               (context, url, downloadProgress) =>
                                   CircularProgressIndicator(
@@ -1365,7 +1380,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             width: 65.0,
                             height: 65.0,
                             decoration: BoxDecoration(
-                              border: list[index]['own']
+                              border: roomMembers[index].own
                                   ? Border.all(
                                       color: Theme.of(context).primaryColor,
                                       width: 3.4)
@@ -1384,7 +1399,7 @@ class _RoomExpenseState extends State<RoomExpense>
                             children: [
                               InkWell(
                                 child: Text(
-                                  crypto.decrypt(list[index]['Name']),
+                                  roomMembers[index].name,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 21,
@@ -1394,21 +1409,17 @@ class _RoomExpenseState extends State<RoomExpense>
                                         : (Paint()..shader = linearGradient_1),
                                   ),
                                 ),
-                                onTap: () => showToast(
-                                    context,
-                                    crypto.decrypt(list[index]['Name']),
-                                    Icons.check),
+                                onTap: () => showToast(context,
+                                    roomMembers[index].name, Icons.check),
                               ),
                               SizedBox(
                                 height: 4,
                               ),
                               Text(
                                 "Contribution : ₹ " +
-                                    commaSeperator((double.parse(crypto.decrypt(
-                                                list[index]['Expense'])) +
-                                            double.parse(crypto.decrypt(
-                                                list[index]
-                                                    ['TotalSplitExpense'])))
+                                    commaSeperator((roomMembers[index].expense +
+                                            roomMembers[index]
+                                                .totalSplitExpense)
                                         .toStringAsFixed(2)),
                                 style: TextStyle(
                                   fontSize: 16,
@@ -1423,9 +1434,8 @@ class _RoomExpenseState extends State<RoomExpense>
                               ),
                               Text(
                                   "Spent : ₹ " +
-                                      commaSeperator((double.parse(
-                                              crypto.decrypt(
-                                                  list[index]["yourExpense"])))
+                                      commaSeperator(roomMembers[index]
+                                          .yourExpense
                                           .toStringAsFixed(2)),
                                   style: TextStyle(
                                     fontSize: 16,
@@ -1437,20 +1447,17 @@ class _RoomExpenseState extends State<RoomExpense>
                               SizedBox(
                                 height: 3,
                               ),
-                              list[index]['done'] ||
-                                      double.parse(crypto.decrypt(list[index]["current"]))
-                                              .abs() <
-                                          0.1
+                              roomMembers[index].done ||
+                                      roomMembers[index].current.abs() < 0.1
                                   ? SizedBox()
-                                  : (double.parse(double.parse(crypto.decrypt(
-                                                  list[index]["current"]))
+                                  : (double.parse(roomMembers[index]
+                                              .current
                                               .toStringAsFixed(2)) >
                                           0
                                       ? Text(
                                           "Gain : ₹ " +
-                                              commaSeperator(double.parse(
-                                                      crypto.decrypt(list[index]
-                                                          ["current"]))
+                                              commaSeperator(roomMembers[index]
+                                                  .current
                                                   .toStringAsFixed(2)),
                                           style: TextStyle(
                                             fontSize: 16,
@@ -1458,18 +1465,16 @@ class _RoomExpenseState extends State<RoomExpense>
                                             color: Colors.green,
                                           ),
                                         )
-                                      : double.parse(double.parse(
-                                                      crypto.decrypt(list[index]
-                                                          ["current"]))
+                                      : double.parse(roomMembers[index]
+                                                  .current
                                                   .toStringAsFixed(2)) <
                                               0
                                           ? Text(
                                               "Owe : ₹ " +
-                                                  commaSeperator(double.parse(
-                                                          crypto.decrypt(
-                                                              list[index]
-                                                                  ["current"]))
-                                                      .toStringAsFixed(2)),
+                                                  commaSeperator(
+                                                      roomMembers[index]
+                                                          .current
+                                                          .toStringAsFixed(2)),
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w500,
@@ -1486,7 +1491,7 @@ class _RoomExpenseState extends State<RoomExpense>
               Positioned(
                   right: 12.0,
                   bottom: 12.0,
-                  child: (list[index]['done'] && isRoomActive)
+                  child: (roomMembers[index].done && isRoomActive)
                       ? Icon(
                           Icons.lock_outline,
                           size: 26,
@@ -1516,7 +1521,7 @@ class _RoomExpenseState extends State<RoomExpense>
         color: Theme.of(context).bottomSheetTheme.modalBackgroundColor,
         shape: RoundedRectangleBorder(
           side: BorderSide(
-              color: (membersListIndex + 1) == index
+              color: membersListIndex == index
                   ? Theme.of(context).primaryColor
                   : Theme.of(context).cardColor),
           borderRadius: BorderRadius.circular(15.0),
@@ -1528,9 +1533,9 @@ class _RoomExpenseState extends State<RoomExpense>
             children: [
               CachedNetworkImage(
                 httpHeaders: {'Access-Control-Allow-Origin': '*'},
-                imageUrl: crypto.decrypt(list[index]['pic']).length == 0
+                imageUrl: roomMembers[index].pic.length == 0
                     ? addCorsinImage(global.unknown_avatar_id)
-                    : addCorsinImage(crypto.decrypt(list[index]['pic'])),
+                    : addCorsinImage(roomMembers[index].pic),
                 progressIndicatorBuilder: (context, url, downloadProgress) =>
                     CircularProgressIndicator(value: downloadProgress.progress),
                 errorWidget: (context, url, error) => Container(
@@ -1555,7 +1560,7 @@ class _RoomExpenseState extends State<RoomExpense>
               ),
               SizedBox(width: 8),
               Text(
-                crypto.decrypt(list[index]['Name']),
+                roomMembers[index].name,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 16,
@@ -1572,7 +1577,7 @@ class _RoomExpenseState extends State<RoomExpense>
   Widget homeWidget() {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
-    return list.isEmpty
+    return roomMembers.isEmpty
         ? ListView(
             physics: AlwaysScrollableScrollPhysics(),
             children: [
@@ -1991,16 +1996,14 @@ class _RoomExpenseState extends State<RoomExpense>
                   SliverToBoxAdapter(
                     child: ListTile(
                       title: const Text("Members"),
-                      trailing: Text(crypto.decrypt(list[0]["cnt"]),
+                      trailing: Text(roomMembers.length.toString(),
                           style: TextStyle(fontSize: 14)),
                     ),
                   ),
                   SliverToBoxAdapter(
                     child: ListTile(
                       title: const Text("Created On"),
-                      trailing: Text(
-                          formatDateTime(crypto.decrypt(list[0]["date"])),
-                          style: TextStyle(fontSize: 14)),
+                      trailing: Text(createdOn, style: TextStyle(fontSize: 14)),
                     ),
                   ),
                   SliverToBoxAdapter(
@@ -2063,13 +2066,9 @@ class _RoomExpenseState extends State<RoomExpense>
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               shrinkWrap: true,
-                              itemCount: list.length,
+                              itemCount: roomMembers.length,
                               itemBuilder: (BuildContext context, int index) {
-                                if (index == 0) {
-                                  return SizedBox();
-                                } else {
-                                  return memberCard(context, index);
-                                }
+                                return memberCard(context, index);
                               },
                             ),
                           ),
@@ -2252,7 +2251,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                           data.objID,
                                           "0",
                                           (isNegative ? "-" : "") +
-                                              _paytoMemberAmt.text);
+                                              _paytoMemberAmt.text,
+                                          data);
                                       if (this.mounted) {
                                         context.pop();
                                       }
@@ -2288,7 +2288,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                         data.objID,
                                         "1",
                                         (isNegative ? "-" : "") +
-                                            _paytoMemberAmt.text);
+                                            _paytoMemberAmt.text,
+                                        data);
                                     if (this.mounted) {
                                       context.pop();
                                     }
@@ -2360,7 +2361,8 @@ class _RoomExpenseState extends State<RoomExpense>
             )));
   }
 
-  Widget _showPaymentData(BuildContext context, PaymentDataEach eachPayment) {
+  Widget _showPaymentData(
+      BuildContext context, PaymentDataEach eachPayment, int index) {
     bool isNegative = eachPayment.amount < 0;
     return InkWell(
       onTap: () async {
@@ -2475,7 +2477,7 @@ class _RoomExpenseState extends State<RoomExpense>
                 height: 65,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  itemCount: list.length,
+                  itemCount: roomMembers.length,
                   itemBuilder: (BuildContext context, int index) {
                     if (index == 0) {
                       return InkWell(
@@ -2531,13 +2533,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                   httpHeaders: {
                                     'Access-Control-Allow-Origin': '*'
                                   },
-                                  imageUrl: crypto
-                                              .decrypt(list[index]['pic'])
-                                              .length ==
-                                          0
+                                  imageUrl: roomMembers[index].pic.length == 0
                                       ? addCorsinImage(global.unknown_avatar_id)
-                                      : addCorsinImage(
-                                          crypto.decrypt(list[index]['pic'])),
+                                      : addCorsinImage(roomMembers[index].pic),
                                   progressIndicatorBuilder:
                                       (context, url, downloadProgress) =>
                                           CircularProgressIndicator(
@@ -2567,7 +2565,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                   ),
                                 ),
                                 Text(
-                                  crypto.decrypt(list[index]['Name']),
+                                  roomMembers[index].name,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 18,
@@ -2606,7 +2604,7 @@ class _RoomExpenseState extends State<RoomExpense>
                   height: 65,
                   child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: list.length,
+                      itemCount: roomMembers.length,
                       itemBuilder: (BuildContext context, int index) {
                         if (index == 0) {
                           return InkWell(
@@ -2665,14 +2663,12 @@ class _RoomExpenseState extends State<RoomExpense>
                                       httpHeaders: {
                                         'Access-Control-Allow-Origin': '*'
                                       },
-                                      imageUrl: crypto
-                                                  .decrypt(list[index]['pic'])
-                                                  .length ==
-                                              0
-                                          ? addCorsinImage(
-                                              global.unknown_avatar_id)
-                                          : addCorsinImage(crypto
-                                              .decrypt(list[index]['pic'])),
+                                      imageUrl:
+                                          roomMembers[index].pic.length == 0
+                                              ? addCorsinImage(
+                                                  global.unknown_avatar_id)
+                                              : addCorsinImage(
+                                                  roomMembers[index].pic),
                                       progressIndicatorBuilder: (context, url,
                                               downloadProgress) =>
                                           CircularProgressIndicator(
@@ -2702,7 +2698,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                       ),
                                     ),
                                     Text(
-                                      crypto.decrypt(list[index]['Name']),
+                                      roomMembers[index].name,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         fontSize: 18,
@@ -2790,10 +2786,12 @@ class _RoomExpenseState extends State<RoomExpense>
                                         shrinkWrap: true,
                                         physics: ScrollPhysics(),
                                         itemCount: allTransactionData.length,
-                                        itemBuilder:
-                                            (BuildContext context, int index) {
-                                          return _showPaymentData(context,
-                                              allTransactionData[index]);
+                                        itemBuilder: (BuildContext context,
+                                            int payIndex) {
+                                          return _showPaymentData(
+                                              context,
+                                              allTransactionData[payIndex],
+                                              payIndex);
                                         }),
                                   ),
                                 ),
@@ -2835,8 +2833,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                           itemCount: paymentData.length,
                                           itemBuilder: (BuildContext context,
                                               int index) {
-                                            return _showPaymentData(
-                                                context, paymentData[index]);
+                                            return _showPaymentData(context,
+                                                paymentData[index], index);
                                           }),
                                     ),
                                   ),
@@ -3504,7 +3502,7 @@ class _RoomExpenseState extends State<RoomExpense>
     } else {
       TransList.clear();
       allExpenseList.forEach((element) {
-        if (crypto.decrypt(list[curMemberIndex]['email']) ==
+        if (roomMembers[curMemberIndex].email ==
             crypto.decrypt(element['Email'])) {
           TransList.add(element);
         }
@@ -3665,8 +3663,7 @@ class _RoomExpenseState extends State<RoomExpense>
 
   Widget _buildSettleExpenseDialog(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-    bool isInGain =
-        double.parse(crypto.decrypt(list[selfIndex]["current"])) > 0;
+    bool isInGain = roomMembers[selfIndex].current > 0;
     return StatefulBuilder(builder: (context, setState) {
       return Padding(
         padding: MediaQuery.of(context).viewInsets,
@@ -3696,22 +3693,18 @@ class _RoomExpenseState extends State<RoomExpense>
                         height: 80,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: list.length - 1,
+                          itemCount: roomMembers.length,
                           itemBuilder: (BuildContext context, int index) {
-                            bool isMemberIngain = double.parse(crypto
-                                    .decrypt(list[index + 1]["current"])) >
-                                0;
+                            bool isMemberIngain =
+                                roomMembers[index].current > 0;
                             if (membersListEmail[index] == _email ||
-                                list[index + 1]['done'] ||
+                                roomMembers[index].done ||
                                 isMemberIngain == isInGain ||
-                                double.parse(crypto.decrypt(
-                                            list[index + 1]["current"]))
-                                        .abs() <
-                                    0.1) {
+                                roomMembers[index].current.abs() < 0.1) {
                               return SizedBox();
                             } else {
                               return InkWell(
-                                child: memberExpenseCard(context, index + 1),
+                                child: memberExpenseCard(context, index),
                                 onTap: () {
                                   if (this.mounted) {
                                     setState(
@@ -3731,17 +3724,14 @@ class _RoomExpenseState extends State<RoomExpense>
                           isInGain
                               ? ("Member can pay you ₹ " +
                                   commaSeperator(min(
-                                          double.parse(crypto.decrypt(
-                                              list[selfIndex]["current"])),
-                                          -double.parse(crypto.decrypt(
-                                              list[membersListIndex + 1]
-                                                  ["current"])))
+                                          roomMembers[selfIndex].current,
+                                          -roomMembers[membersListIndex]
+                                              .current)
                                       .toStringAsFixed(2)))
                               : ("You can pay ₹ " +
                                   commaSeperator(min(
-                                          -double.parse(
-                                              crypto.decrypt(list[selfIndex]["current"])),
-                                          double.parse(crypto.decrypt(list[membersListIndex + 1]["current"])))
+                                          -roomMembers[selfIndex].current,
+                                          roomMembers[membersListIndex].current)
                                       .toStringAsFixed(2))),
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -3759,18 +3749,10 @@ class _RoomExpenseState extends State<RoomExpense>
                         autocorrect: false,
                         onSaved: (str) {
                           String isAmountFull = (!isInGain
-                                  ? min(
-                                      -double.parse(crypto
-                                          .decrypt(list[selfIndex]["current"])),
-                                      double.parse(crypto.decrypt(
-                                          list[membersListIndex + 1]
-                                              ["current"])))
-                                  : min(
-                                      double.parse(crypto
-                                          .decrypt(list[selfIndex]["current"])),
-                                      -double.parse(crypto.decrypt(
-                                          list[membersListIndex + 1]
-                                              ["current"]))))
+                                  ? min(-roomMembers[selfIndex].current,
+                                      roomMembers[membersListIndex].current)
+                                  : min(roomMembers[selfIndex].current,
+                                      -roomMembers[membersListIndex].current))
                               .toStringAsFixed(2);
                           if (double.parse(isAmountFull) -
                                   double.parse(_amountPaid.text) <
@@ -3794,23 +3776,15 @@ class _RoomExpenseState extends State<RoomExpense>
                             return "Amount can't be zero";
                           }
                           if (isInGain) {
-                            if (double.parse(crypto
-                                        .decrypt(list[selfIndex]["current"])) <
-                                    parsedAmt ||
+                            if (roomMembers[selfIndex].current < parsedAmt ||
                                 parsedAmt >
-                                    -double.parse(crypto.decrypt(
-                                        list[membersListIndex + 1]
-                                            ["current"]))) {
+                                    -roomMembers[membersListIndex].current) {
                               return "Amount paid exceeds the amount owed";
                             }
                           } else {
-                            if (-double.parse(crypto
-                                        .decrypt(list[selfIndex]["current"])) <
-                                    parsedAmt ||
+                            if (-roomMembers[selfIndex].current < parsedAmt ||
                                 parsedAmt >
-                                    double.parse(crypto.decrypt(
-                                        list[membersListIndex + 1]
-                                            ["current"]))) {
+                                    roomMembers[membersListIndex].current) {
                               return "Amount paid is greater than what you owe";
                             }
                           }
@@ -3850,23 +3824,15 @@ class _RoomExpenseState extends State<RoomExpense>
                           _formKeyRooms.currentState!.save();
                           if (_formKeyRooms.currentState!.validate()) {
                             String isAmountFull = (!isInGain
-                                    ? min(
-                                        -double.parse(crypto.decrypt(
-                                            list[selfIndex]["current"])),
-                                        double.parse(crypto.decrypt(
-                                            list[membersListIndex + 1]
-                                                ["current"])))
-                                    : min(
-                                        double.parse(crypto.decrypt(
-                                            list[selfIndex]["current"])),
-                                        -double.parse(crypto.decrypt(
-                                            list[membersListIndex + 1]["current"]))))
+                                    ? min(-roomMembers[selfIndex].current,
+                                        roomMembers[membersListIndex].current)
+                                    : min(roomMembers[selfIndex].current,
+                                        -roomMembers[membersListIndex].current))
                                 .toStringAsFixed(2);
                             if (double.parse(isAmountFull) -
                                         double.parse(_amountPaid.text) <
                                     0.1 &&
-                                double.parse(crypto.decrypt(
-                                                list[selfIndex]["current"])) *
+                                roomMembers[selfIndex].current *
                                             (!isInGain ? -1 : 1) -
                                         double.parse(_amountPaid.text) <
                                     0.1) {
@@ -4882,7 +4848,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                             height: 80,
                                                                                             child: ListView.builder(
                                                                                               scrollDirection: Axis.horizontal,
-                                                                                              itemCount: list.length,
+                                                                                              itemCount: roomMembers.length + 1,
                                                                                               itemBuilder: (BuildContext context, int index) {
                                                                                                 if (index == 0) {
                                                                                                   return InkWell(
@@ -4914,7 +4880,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                       }
                                                                                                     },
                                                                                                   );
-                                                                                                } else if (list[index]['done'] || membersListEmail[index - 1] == _email) {
+                                                                                                } else if (roomMembers[index - 1].done || membersListEmail[index - 1] == _email) {
                                                                                                   return SizedBox();
                                                                                                 } else {
                                                                                                   return InkWell(
@@ -4923,7 +4889,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                       child: Card(
                                                                                                         color: Theme.of(context).dialogBackgroundColor,
                                                                                                         shape: RoundedRectangleBorder(
-                                                                                                          side: BorderSide(color: findElement(addExpenseTo, membersListEmail[index - 1]) ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
+                                                                                                          side: BorderSide(color: findElement(addExpenseTo, roomMembers[index - 1].email) ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
                                                                                                           borderRadius: BorderRadius.circular(15.0),
                                                                                                         ),
                                                                                                         child: Padding(
@@ -4935,7 +4901,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                                 httpHeaders: {
                                                                                                                   'Access-Control-Allow-Origin': '*'
                                                                                                                 },
-                                                                                                                imageUrl: addCorsinImage(crypto.decrypt(list[index]['pic']).length == 0 ? global.unknown_avatar_id : crypto.decrypt(list[index]['pic'])),
+                                                                                                                imageUrl: addCorsinImage(roomMembers[index - 1].pic.length == 0 ? global.unknown_avatar_id : roomMembers[index - 1].pic),
                                                                                                                 progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
                                                                                                                 errorWidget: (context, url, error) => Container(
                                                                                                                   width: 50.0,
@@ -4955,7 +4921,7 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                                 ),
                                                                                                               ),
                                                                                                               Text(
-                                                                                                                crypto.decrypt(list[index]['Name']),
+                                                                                                                roomMembers[index - 1].name,
                                                                                                                 overflow: TextOverflow.ellipsis,
                                                                                                                 style: TextStyle(
                                                                                                                   fontSize: 18,
@@ -4968,12 +4934,12 @@ class _RoomExpenseState extends State<RoomExpense>
                                                                                                       ),
                                                                                                     ),
                                                                                                     onTap: () {
-                                                                                                      if (findElement(addExpenseTo, membersListEmail[index - 1])) {
-                                                                                                        addExpenseTo.remove(membersListEmail[index - 1]);
+                                                                                                      if (findElement(addExpenseTo, roomMembers[index - 1].email)) {
+                                                                                                        addExpenseTo.remove(roomMembers[index - 1].email);
                                                                                                       } else {
-                                                                                                        addExpenseTo.add(membersListEmail[index - 1]);
+                                                                                                        addExpenseTo.add(roomMembers[index - 1].email);
 
-                                                                                                        if (addExpenseTo.length == membersListEmail.length - roomClosedCount - 1) {
+                                                                                                        if (addExpenseTo.length == roomMembers.length - roomClosedCount - 1) {
                                                                                                           addExpenseTo.clear();
                                                                                                         }
                                                                                                       }

@@ -40,6 +40,43 @@ class RoomEach {
   }
 }
 
+class RoomMemberEach {
+  String name;
+  double expense;
+  double totalSplitExpense;
+  double current;
+  double yourExpense;
+  bool own;
+  String email;
+  String pic;
+  bool done;
+
+  RoomMemberEach(
+      {required this.name,
+      required this.expense,
+      required this.totalSplitExpense,
+      required this.current,
+      required this.yourExpense,
+      required this.done,
+      required this.own,
+      required this.email,
+      required this.pic});
+
+  factory RoomMemberEach.fromJson(Map<String, dynamic> json) {
+    return RoomMemberEach(
+        name: crypto.decrypt(json['Name']),
+        expense: double.parse(crypto.decrypt(json['Expense'])),
+        totalSplitExpense:
+            double.parse(crypto.decrypt(json['TotalSplitExpense'])),
+        current: double.parse(crypto.decrypt(json['current'])),
+        done: json['done'],
+        yourExpense: double.parse(crypto.decrypt(json['yourExpense'])),
+        own: json['own'],
+        email: crypto.decrypt(json['email']),
+        pic: crypto.decrypt(json['pic']));
+  }
+}
+
 class QuickSplitEach {
   final double amount;
   final String roomKey;

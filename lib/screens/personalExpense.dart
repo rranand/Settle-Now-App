@@ -1165,7 +1165,7 @@ class _ExpensesState extends State<Expenses> {
                                                   );
                                                 },
                                                 child: SizedBox(
-                                                  height: 135,
+                                                  height: 150,
                                                   child: Card(
                                                     elevation: 2.0,
                                                     shadowColor:
@@ -1396,7 +1396,7 @@ class _ExpensesState extends State<Expenses> {
                                                   );
                                                 },
                                                 child: SizedBox(
-                                                  height: 135,
+                                                  height: 150,
                                                   child: Card(
                                                     elevation: 2.0,
                                                     shadowColor:
@@ -1847,7 +1847,7 @@ class _ExpensesState extends State<Expenses> {
                                               );
                                             },
                                             child: SizedBox(
-                                              height: 135,
+                                              height: 150,
                                               child: Card(
                                                 elevation: 1.0,
                                                 shadowColor: Theme.of(context)
@@ -2067,7 +2067,7 @@ class _ExpensesState extends State<Expenses> {
                                               );
                                             },
                                             child: SizedBox(
-                                              height: 135,
+                                              height: 150,
                                               child: Card(
                                                 elevation: 1.0,
                                                 shadowColor: Theme.of(context)
