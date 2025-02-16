@@ -118,7 +118,7 @@ class _AnalysisState extends State<Analysis> {
     try {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email),
-        'alreadyHave': crypto.encrypt("-1")
+        'alreadyHave': crypto.encrypt("0")
       };
 
       final response = await createHTTPreq(

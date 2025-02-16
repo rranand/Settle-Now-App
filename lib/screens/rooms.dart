@@ -638,7 +638,7 @@ class _RoomExpenseState extends State<RoomExpense>
             'data', http.put, _token, jsonInputData, context);
         Tdata = jsonDecode(response.body);
         _amountPaid.text = "";
-        for (int i = 0; i < 4 && context.canPop(); i++) {
+        for (int i = 0; i < (closeRoom ? 4 : 3) && context.canPop(); i++) {
           if (this.mounted) {
             context.pop();
           }
@@ -655,7 +655,7 @@ class _RoomExpenseState extends State<RoomExpense>
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
       } on Exception catch (err, stackTrace) {
-        for (int i = 0; i < 2 && context.canPop(); i++) {
+        for (int i = 0; i < (closeRoom ? 2 : 1) && context.canPop(); i++) {
           if (this.mounted) {
             context.pop();
           }
