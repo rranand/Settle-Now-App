@@ -16,10 +16,7 @@ import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 import '../contents.dart' as global;
-
-import '../models/ChartData.dart';
 
 class PersonalExpenseDashBoard extends StatefulWidget {
   final List<dynamic> expenseCategory;
@@ -42,7 +39,6 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
   double totalPersonalExpense = 0;
   bool showfilterResult = false;
   bool openDrawer = false;
-  bool openGraph = false;
   bool hasMore = true;
   Set<int> monthIndex = Set();
   Set<int> yearIndex = Set();
@@ -53,7 +49,6 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
   bool loadFirstTime = true;
 
   List<String> Year = [];
-  List<ChartData> dataMap = [];
   Map<String, double> yearwiseSpend = {};
   List<PersonalExpenseEach> filterResult = [];
 
@@ -154,47 +149,10 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
     if (this.mounted) {
       setState(() {});
     }
-    updatePieChart();
+
     await fetchPersonalExp(0);
     isLoadingData = false;
     loadFirstTime = false;
-    if (this.mounted) {
-      setState(() {});
-    }
-  }
-
-  Future<void> updatePieChart() async {
-    if (this.mounted) {
-      setState(() {
-        dataMap.clear();
-      });
-    }
-    try {
-      Map<String, String> jsonInputData = {
-        'email': crypto.encrypt(_email),
-        'date': crypto.encrypt("all"),
-      };
-
-      final response = await createHTTPreq(
-          'ptransaction', http.delete, _token, jsonInputData, context);
-
-      if (response.statusCode == 200) {
-        var tempData = jsonDecode(response.body)['data'];
-        for (int i = 0; i < category.length; i++) {
-          dataMap.add(ChartData.byType(category[i],
-              double.parse(crypto.decrypt(tempData[category[i]]))));
-        }
-      } else {
-        showToast(context, crypto.decrypt(jsonDecode(response.body)["Message"]),
-            Icons.close);
-      }
-    } on Exception catch (err, stackTrace) {
-      if (this.mounted) {
-        onException(err, stackTrace,
-            reason: "Unknwon Error", info: ["Summary->updatePieChart"]);
-      }
-    }
-
     if (this.mounted) {
       setState(() {});
     }
@@ -281,680 +239,595 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
     }
   }
 
-  Widget personalExpenseGraphByCategory() {
-    return dataMap.isEmpty
-        ? Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 3.3,
-            ),
-          )
-        : SizedBox(
-            height: 50 * category.length * 1.0,
-            child: Padding(
-                padding: const EdgeInsets.all(6),
-                child: SfCartesianChart(
-                    primaryXAxis: CategoryAxis(isVisible: false),
-                    primaryYAxis: NumericAxis(minimum: 0, isVisible: false),
-                    tooltipBehavior: TooltipBehavior(
-                        enable: true,
-                        header: "",
-                        format: "point.x : ₹ point.y"),
-                    plotAreaBorderWidth: 0,
-                    series: <BarSeries<ChartData, String>>[
-                      BarSeries<ChartData, String>(
-                          dataSource: dataMap,
-                          borderRadius: BorderRadius.circular(20),
-                          xValueMapper: (ChartData data, _) => data.type,
-                          yValueMapper: (ChartData data, _) => data.amount,
-                          isVisibleInLegend: true,
-                          width: 0.3,
-                          pointColorMapper: (ChartData data, _) =>
-                              global.colorsList[_],
-                          dataLabelMapper: (datum, index) =>
-                              datum.type +
-                              "\n₹ " +
-                              datum.amount.toStringAsFixed(2),
-                          dataLabelSettings: DataLabelSettings(
-                            isVisible: true,
-                          ))
-                    ])),
-          );
-  }
-
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     double drawerWidth = MediaQuery.of(context).size.width * 0.75;
     int crossAxisCountFilter = (drawerWidth / 110).round();
     return Scaffold(
-      key: _scaffoldKeyPersonalExp,
-      endDrawer: openDrawer
-          ? Drawer(
-              width: MediaQuery.of(context).size.width * 0.75,
-              backgroundColor: themeProvider.isDarkTheme
-                  ? Theme.of(context).scaffoldBackgroundColor
-                  : Colors.white,
-              child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: ListView(shrinkWrap: true, children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "Month",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w500,
-                              color: themeProvider.isDarkTheme
-                                  ? Colors.white
-                                  : Colors.black,
+        key: _scaffoldKeyPersonalExp,
+        endDrawer: openDrawer
+            ? Drawer(
+                width: MediaQuery.of(context).size.width * 0.75,
+                backgroundColor: themeProvider.isDarkTheme
+                    ? Theme.of(context).scaffoldBackgroundColor
+                    : Colors.white,
+                child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        child: ListView(shrinkWrap: true, children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "Month",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w500,
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: (global.Month.length / crossAxisCountFilter)
-                                  .ceil() *
-                              65,
-                          child: MasonryGridView.count(
-                              crossAxisCount: crossAxisCountFilter,
-                              itemCount: global.Month.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: 65,
-                                  width: 110,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: InkWell(
-                                      onTap: () {
-                                        if (monthIndex.contains(index)) {
-                                          monthIndex.remove(index);
-                                        } else {
-                                          monthIndex.add(index);
-                                        }
-                                        if (this.mounted) {
-                                          setState(() {});
-                                        }
-                                      },
-                                      child: Card(
-                                        elevation: 1.0,
-                                        color: themeProvider.isDarkTheme
-                                            ? Theme.of(context)
-                                                .scaffoldBackgroundColor
-                                            : Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: monthIndex.contains(index)
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Colors.grey.shade700),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Center(
-                                          child: InkWell(
-                                            child: Text(
-                                              global.Month[index],
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: themeProvider.isDarkTheme
-                                                    ? Colors.white
-                                                    : Colors.black,
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height: (global.Month.length / crossAxisCountFilter)
+                                    .ceil() *
+                                65,
+                            child: MasonryGridView.count(
+                                crossAxisCount: crossAxisCountFilter,
+                                itemCount: global.Month.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    height: 65,
+                                    width: 110,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          if (monthIndex.contains(index)) {
+                                            monthIndex.remove(index);
+                                          } else {
+                                            monthIndex.add(index);
+                                          }
+                                          if (this.mounted) {
+                                            setState(() {});
+                                          }
+                                        },
+                                        child: Card(
+                                          elevation: 1.0,
+                                          color: themeProvider.isDarkTheme
+                                              ? Theme.of(context)
+                                                  .scaffoldBackgroundColor
+                                              : Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color:
+                                                    monthIndex.contains(index)
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Colors.grey.shade700),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Center(
+                                            child: InkWell(
+                                              child: Text(
+                                                global.Month[index],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color:
+                                                      themeProvider.isDarkTheme
+                                                          ? Colors.white
+                                                          : Colors.black,
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              }),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "Year",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w500,
-                              color: themeProvider.isDarkTheme
-                                  ? Colors.white
-                                  : Colors.black,
+                                  );
+                                }),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              "Year",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.w500,
+                                color: themeProvider.isDarkTheme
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height:
-                              (Year.length / crossAxisCountFilter).ceil() * 70,
-                          child: MasonryGridView.count(
-                              crossAxisCount: crossAxisCountFilter,
-                              itemCount: Year.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return SizedBox(
-                                  height: 65,
-                                  width: 100,
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: InkWell(
-                                      onTap: () {
-                                        if (yearIndex.contains(index)) {
-                                          yearIndex.remove(index);
-                                        } else {
-                                          yearIndex.add(index);
-                                        }
-                                        if (this.mounted) {
-                                          setState(() {});
-                                        }
-                                      },
-                                      child: Card(
-                                        elevation: 1.0,
-                                        color: themeProvider.isDarkTheme
-                                            ? Theme.of(context)
-                                                .scaffoldBackgroundColor
-                                            : Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          side: BorderSide(
-                                              color: yearIndex.contains(index)
-                                                  ? Theme.of(context)
-                                                      .primaryColor
-                                                  : Colors.grey.shade700),
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                        child: Center(
-                                          child: InkWell(
-                                            child: Text(
-                                              Year[index],
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w500,
-                                                color: themeProvider.isDarkTheme
-                                                    ? Colors.white
-                                                    : Colors.black,
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width,
+                            height:
+                                (Year.length / crossAxisCountFilter).ceil() *
+                                    70,
+                            child: MasonryGridView.count(
+                                crossAxisCount: crossAxisCountFilter,
+                                itemCount: Year.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return SizedBox(
+                                    height: 65,
+                                    width: 100,
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: InkWell(
+                                        onTap: () {
+                                          if (yearIndex.contains(index)) {
+                                            yearIndex.remove(index);
+                                          } else {
+                                            yearIndex.add(index);
+                                          }
+                                          if (this.mounted) {
+                                            setState(() {});
+                                          }
+                                        },
+                                        child: Card(
+                                          elevation: 1.0,
+                                          color: themeProvider.isDarkTheme
+                                              ? Theme.of(context)
+                                                  .scaffoldBackgroundColor
+                                              : Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            side: BorderSide(
+                                                color: yearIndex.contains(index)
+                                                    ? Theme.of(context)
+                                                        .primaryColor
+                                                    : Colors.grey.shade700),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                          child: Center(
+                                            child: InkWell(
+                                              child: Text(
+                                                Year[index],
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w500,
+                                                  color:
+                                                      themeProvider.isDarkTheme
+                                                          ? Colors.white
+                                                          : Colors.black,
+                                                ),
                                               ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
+                                  );
+                                }),
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                SizedBox(
+                                  height: 45,
+                                  width: 90,
+                                  child: OutlinedButton(
+                                    child: Text(
+                                      "Apply",
+                                      style: TextStyle(
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      showfilterResult = true;
+                                      getFilterResult();
+                                      if (this.mounted) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(13.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
                                   ),
-                                );
-                              }),
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                ),
+                                SizedBox(
+                                  height: 45,
+                                  child: OutlinedButton(
+                                    child: Text(
+                                      "Clear Filter",
+                                      style: TextStyle(
+                                        color: themeProvider.isDarkTheme
+                                            ? Colors.white
+                                            : Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      monthIndex.clear();
+                                      yearIndex.clear();
+                                      showfilterResult = false;
+                                      if (this.mounted) {
+                                        setState(() {});
+                                      }
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(13.0),
+                                      ),
+                                      side: BorderSide(
+                                          color:
+                                              Theme.of(context).primaryColor),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ]))))
+            : null,
+        body: RefreshIndicator(
+          color: Theme.of(context).primaryColor,
+          key: _refreshIndicatorKey,
+          onRefresh: _initialisation,
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height - 50,
+                child: personalExpense.isEmpty
+                    ? Center(
+                        child: !isLoadingData
+                            ? ListView(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                children: [
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height -
+                                        200,
+                                    child: Center(
+                                      child: Text(
+                                        "No Personal Expense Found",
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : Shimmer.fromColors(
+                                baseColor: Theme.of(context).cardColor,
+                                highlightColor: Theme.of(context).primaryColor,
+                                child: GridView.builder(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount:
+                                        (MediaQuery.of(context).size.width /
+                                                250)
+                                            .round(),
+                                    childAspectRatio: 1.5,
+                                  ),
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  itemCount: 16,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        height: 150,
+                                        width: 150,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.white,
+                                            ),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(20))),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Column(
+                                            children: [
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Container(
+                                                width: 150,
+                                                height: 20.0,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                      color: Colors.white,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
+                                              ),
+                                              SizedBox(
+                                                height: 8,
+                                              ),
+                                              Container(
+                                                width: 100,
+                                                height: 20.0,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                      color: Colors.white,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
+                                              ),
+                                              SizedBox(
+                                                height: 10,
+                                              ),
+                                              Container(
+                                                width: 150,
+                                                height: 25,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    border: Border.all(
+                                                      color: Colors.white,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.all(
+                                                            Radius.circular(
+                                                                20))),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                      )
+                    : (showfilterResult
+                        ? (filterResult.isNotEmpty
+                            ? GridView.builder(
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount:
+                                      (MediaQuery.of(context).size.width / 250)
+                                          .round(),
+                                  childAspectRatio: 1.5,
+                                ),
+                                physics: AlwaysScrollableScrollPhysics(),
+                                itemCount: filterResult.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return ConstrainedBox(
+                                    constraints: new BoxConstraints(
+                                      minWidth: 150.0,
+                                    ),
+                                    child: SizedBox(
+                                      height: 150,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(8.0),
+                                        child: InkWell(
+                                          onTap: () {
+                                            if (this.mounted) {
+                                              context.push(
+                                                AppRouteConstants
+                                                        .personalExpenseRouteName +
+                                                    "/" +
+                                                    filterResult[index].Date,
+                                              );
+                                            }
+                                          },
+                                          child: Card(
+                                            elevation: 1.0,
+                                            shadowColor:
+                                                Theme.of(context).primaryColor,
+                                            color: Theme.of(context)
+                                                .scaffoldBackgroundColor,
+                                            shape: RoundedRectangleBorder(
+                                              side: BorderSide(
+                                                  color: personalExpense[0]
+                                                              .Date ==
+                                                          filterResult[index]
+                                                              .Date
+                                                      ? Theme.of(context)
+                                                          .primaryColor
+                                                      : Theme.of(context)
+                                                          .cardColor),
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                textWidget(
+                                                  filterResult[index].Month +
+                                                      ",",
+                                                  linearGradient_1,
+                                                ),
+                                                textWidget(
+                                                  filterResult[index].Year,
+                                                  linearGradient_1,
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: textWidget(
+                                                      "₹ " +
+                                                          commaSeperator(
+                                                              filterResult[
+                                                                      index]
+                                                                  .Total
+                                                                  .toStringAsFixed(
+                                                                      2)),
+                                                      linearGradient_2),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              )
+                            : Center(
+                                child: Text(
+                                  "No Data Found",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ))
+                        : Column(
                             children: [
                               SizedBox(
-                                height: 45,
-                                width: 90,
-                                child: OutlinedButton(
-                                  child: Text(
-                                    "Apply",
-                                    style: TextStyle(
-                                      color: themeProvider.isDarkTheme
-                                          ? Colors.white
-                                          : Colors.black,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                height:
+                                    MediaQuery.of(context).size.height - 210,
+                                child: GridView.builder(
+                                  controller: scrollController,
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount:
+                                        (MediaQuery.of(context).size.width /
+                                                250)
+                                            .round(),
+                                    childAspectRatio: 1.5,
                                   ),
-                                  onPressed: () {
-                                    showfilterResult = true;
-                                    getFilterResult();
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(13.0),
-                                    ),
-                                    side: BorderSide(
-                                        color: Theme.of(context).primaryColor),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 45,
-                                child: OutlinedButton(
-                                  child: Text(
-                                    "Clear Filter",
-                                    style: TextStyle(
-                                      color: themeProvider.isDarkTheme
-                                          ? Colors.white
-                                          : Colors.black,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  onPressed: () {
-                                    monthIndex.clear();
-                                    yearIndex.clear();
-                                    showfilterResult = false;
-                                    if (this.mounted) {
-                                      setState(() {});
-                                    }
-                                  },
-                                  style: OutlinedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(13.0),
-                                    ),
-                                    side: BorderSide(
-                                        color: Theme.of(context).primaryColor),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ]))))
-          : null,
-      body: openGraph
-          ? personalExpenseGraphByCategory()
-          : RefreshIndicator(
-              color: Theme.of(context).primaryColor,
-              key: _refreshIndicatorKey,
-              onRefresh: _initialisation,
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height - 50,
-                    child: personalExpense.isEmpty
-                        ? Center(
-                            child: !isLoadingData
-                                ? ListView(
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    children: [
-                                      SizedBox(
-                                        height:
-                                            MediaQuery.of(context).size.height -
-                                                200,
-                                        child: Center(
-                                          child: Text(
-                                            "No Personal Expense Found",
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                        ),
+                                  physics: AlwaysScrollableScrollPhysics(),
+                                  itemCount: personalExpense.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return ConstrainedBox(
+                                      constraints: new BoxConstraints(
+                                        minWidth: 150.0,
                                       ),
-                                    ],
-                                  )
-                                : Shimmer.fromColors(
-                                    baseColor: Theme.of(context).cardColor,
-                                    highlightColor:
-                                        Theme.of(context).primaryColor,
-                                    child: GridView.builder(
-                                      gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount:
-                                            (MediaQuery.of(context).size.width /
-                                                    250)
-                                                .round(),
-                                        childAspectRatio: 1.5,
-                                      ),
-                                      physics: AlwaysScrollableScrollPhysics(),
-                                      itemCount: 16,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                            height: 150,
-                                            width: 150,
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color: Colors.white,
-                                                ),
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(20))),
-                                            child: Padding(
-                                              padding: EdgeInsets.all(8.0),
+                                      child: SizedBox(
+                                        height: 150,
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: InkWell(
+                                            onTap: () {
+                                              if (this.mounted) {
+                                                context.push(
+                                                  AppRouteConstants
+                                                          .personalExpenseRouteName +
+                                                      "/" +
+                                                      personalExpense[index]
+                                                          .Date,
+                                                );
+                                              }
+                                            },
+                                            child: Card(
+                                              elevation: 1.0,
+                                              shadowColor: Theme.of(context)
+                                                  .primaryColor,
+                                              color: Theme.of(context)
+                                                  .scaffoldBackgroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: index == 0
+                                                        ? Theme.of(context)
+                                                            .primaryColor
+                                                        : Theme.of(context)
+                                                            .cardColor),
+                                                borderRadius:
+                                                    BorderRadius.circular(15.0),
+                                              ),
                                               child: Column(
                                                 children: [
                                                   SizedBox(
                                                     height: 10,
                                                   ),
-                                                  Container(
-                                                    width: 150,
-                                                    height: 20.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
+                                                  textWidget(
+                                                    personalExpense[index]
+                                                            .Month +
+                                                        ",",
+                                                    linearGradient_1,
                                                   ),
-                                                  SizedBox(
-                                                    height: 8,
-                                                  ),
-                                                  Container(
-                                                    width: 100,
-                                                    height: 20.0,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
+                                                  textWidget(
+                                                    personalExpense[index].Year,
+                                                    linearGradient_1,
                                                   ),
                                                   SizedBox(
                                                     height: 10,
                                                   ),
-                                                  Container(
-                                                    width: 150,
-                                                    height: 25,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: textWidget(
+                                                        "₹ " +
+                                                            commaSeperator(
+                                                                personalExpense[
+                                                                        index]
+                                                                    .Total
+                                                                    .toStringAsFixed(
+                                                                        2)),
+                                                        linearGradient_4),
                                                   )
                                                 ],
                                               ),
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                          )
-                        : (showfilterResult
-                            ? (filterResult.isNotEmpty
-                                ? GridView.builder(
-                                    gridDelegate:
-                                        SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount:
-                                          (MediaQuery.of(context).size.width /
-                                                  250)
-                                              .round(),
-                                      childAspectRatio: 1.5,
-                                    ),
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    itemCount: filterResult.length,
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return ConstrainedBox(
-                                        constraints: new BoxConstraints(
-                                          minWidth: 150.0,
                                         ),
-                                        child: SizedBox(
-                                          height: 150,
-                                          child: Padding(
-                                            padding: EdgeInsets.all(8.0),
-                                            child: InkWell(
-                                              onTap: () {
-                                                if (this.mounted) {
-                                                  context.push(
-                                                    AppRouteConstants
-                                                            .personalExpenseRouteName +
-                                                        "/" +
-                                                        filterResult[index]
-                                                            .Date,
-                                                  );
-                                                }
-                                              },
-                                              child: Card(
-                                                elevation: 1.0,
-                                                shadowColor: Theme.of(context)
-                                                    .primaryColor,
-                                                color: Theme.of(context)
-                                                    .scaffoldBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: personalExpense[0]
-                                                                  .Date ==
-                                                              filterResult[
-                                                                      index]
-                                                                  .Date
-                                                          ? Theme.of(context)
-                                                              .primaryColor
-                                                          : Theme.of(context)
-                                                              .cardColor),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Column(
-                                                  children: [
-                                                    SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    textWidget(
-                                                      filterResult[index]
-                                                              .Month +
-                                                          ",",
-                                                      linearGradient_1,
-                                                    ),
-                                                    textWidget(
-                                                      filterResult[index].Year,
-                                                      linearGradient_1,
-                                                    ),
-                                                    SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: textWidget(
-                                                          "₹ " +
-                                                              commaSeperator(
-                                                                  filterResult[
-                                                                          index]
-                                                                      .Total
-                                                                      .toStringAsFixed(
-                                                                          2)),
-                                                          linearGradient_2),
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : Center(
-                                    child: Text(
-                                      "No Data Found",
-                                      style: TextStyle(fontSize: 20),
-                                    ),
-                                  ))
-                            : Column(
-                                children: [
-                                  SizedBox(
-                                    height: MediaQuery.of(context).size.height -
-                                        210,
-                                    child: GridView.builder(
-                                      controller: scrollController,
-                                      gridDelegate:
-                                          SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount:
-                                            (MediaQuery.of(context).size.width /
-                                                    250)
-                                                .round(),
-                                        childAspectRatio: 1.5,
                                       ),
-                                      physics: AlwaysScrollableScrollPhysics(),
-                                      itemCount: personalExpense.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        return ConstrainedBox(
-                                          constraints: new BoxConstraints(
-                                            minWidth: 150.0,
-                                          ),
-                                          child: SizedBox(
-                                            height: 150,
-                                            child: Padding(
-                                              padding: EdgeInsets.all(8.0),
-                                              child: InkWell(
-                                                onTap: () {
-                                                  if (this.mounted) {
-                                                    context.push(
-                                                      AppRouteConstants
-                                                              .personalExpenseRouteName +
-                                                          "/" +
-                                                          personalExpense[index]
-                                                              .Date,
-                                                    );
-                                                  }
-                                                },
-                                                child: Card(
-                                                  elevation: 1.0,
-                                                  shadowColor: Theme.of(context)
-                                                      .primaryColor,
-                                                  color: Theme.of(context)
-                                                      .scaffoldBackgroundColor,
-                                                  shape: RoundedRectangleBorder(
-                                                    side: BorderSide(
-                                                        color: index == 0
-                                                            ? Theme.of(context)
-                                                                .primaryColor
-                                                            : Theme.of(context)
-                                                                .cardColor),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15.0),
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                      textWidget(
-                                                        personalExpense[index]
-                                                                .Month +
-                                                            ",",
-                                                        linearGradient_1,
-                                                      ),
-                                                      textWidget(
-                                                        personalExpense[index]
-                                                            .Year,
-                                                        linearGradient_1,
-                                                      ),
-                                                      SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: textWidget(
-                                                            "₹ " +
-                                                                commaSeperator(
-                                                                    personalExpense[
-                                                                            index]
-                                                                        .Total
-                                                                        .toStringAsFixed(
-                                                                            2)),
-                                                            linearGradient_4),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  fetchingData
-                                      ? CupertinoActivityIndicator(
-                                          color: Theme.of(context).primaryColor,
-                                        )
-                                      : SizedBox()
-                                ],
-                              )),
-                  ),
-                ),
+                                    );
+                                  },
+                                ),
+                              ),
+                              fetchingData
+                                  ? CupertinoActivityIndicator(
+                                      color: Theme.of(context).primaryColor,
+                                    )
+                                  : SizedBox()
+                            ],
+                          )),
               ),
             ),
-      floatingActionButton: personalExpense.isEmpty
-          ? null
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                FloatingActionButton(
-                  child: Icon(
-                    openGraph
-                        ? Icons.description_outlined
-                        : Icons.bar_chart_outlined,
-                    color: Theme.of(context).primaryColor,
-                  ),
-                  backgroundColor: Theme.of(context).cardColor,
-                  shape: RoundedRectangleBorder(
-                      side: BorderSide(
-                          width: 3,
-                          color:
-                              Theme.of(context).primaryColor.withOpacity(0.7)),
-                      borderRadius: BorderRadius.circular(20)),
-                  onPressed: () {
-                    if (this.mounted) {
-                      setState(() {
-                        openGraph = !openGraph;
-                      });
-                    }
-                  },
+          ),
+        ),
+        floatingActionButton: personalExpense.isEmpty
+            ? null
+            : FloatingActionButton(
+                child: Icon(
+                  showfilterResult ? Icons.filter_alt_off : Icons.filter_alt,
+                  color: Theme.of(context).primaryColor,
                 ),
-                SizedBox(
-                  height: openGraph ? 0 : 8,
-                ),
-                openGraph
-                    ? SizedBox()
-                    : FloatingActionButton(
-                        child: Icon(
-                          showfilterResult
-                              ? Icons.filter_alt_off
-                              : Icons.filter_alt,
-                          color: Theme.of(context).primaryColor,
-                        ),
-                        backgroundColor: Theme.of(context).cardColor,
-                        shape: RoundedRectangleBorder(
-                            side: BorderSide(
-                                width: 3,
-                                color: Theme.of(context)
-                                    .primaryColor
-                                    .withOpacity(0.7)),
-                            borderRadius: BorderRadius.circular(20)),
-                        onPressed: () {
-                          openDrawer = _scaffoldKeyPersonalExp
-                              .currentState!.isEndDrawerOpen;
-                          openDrawer = !openDrawer;
+                backgroundColor: Theme.of(context).cardColor,
+                shape: RoundedRectangleBorder(
+                    side: BorderSide(
+                        width: 3,
+                        color: Theme.of(context).primaryColor.withOpacity(0.7)),
+                    borderRadius: BorderRadius.circular(20)),
+                onPressed: () {
+                  openDrawer =
+                      _scaffoldKeyPersonalExp.currentState!.isEndDrawerOpen;
+                  openDrawer = !openDrawer;
 
-                          if (openDrawer) {
-                            _scaffoldKeyPersonalExp.currentState!
-                                .openEndDrawer();
-                          } else {
-                            _scaffoldKeyPersonalExp.currentState!
-                                .closeEndDrawer();
-                          }
-                        },
-                      ),
-              ],
-            ),
-    );
+                  if (openDrawer) {
+                    _scaffoldKeyPersonalExp.currentState!.openEndDrawer();
+                  } else {
+                    _scaffoldKeyPersonalExp.currentState!.closeEndDrawer();
+                  }
+                },
+              ));
   }
 }

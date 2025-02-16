@@ -618,7 +618,8 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
-  PayToMember(BuildContext context, String amountPaid, bool closeRoom) async {
+  PayToMember(BuildContext context, String amountPaid, bool closeRoom,
+      bool fromCloseWidget) async {
     if (_formKeyRooms.currentState!.validate()) {
       var Tdata = null;
       if (this.mounted) {
@@ -638,7 +639,9 @@ class _RoomExpenseState extends State<RoomExpense>
             'data', http.put, _token, jsonInputData, context);
         Tdata = jsonDecode(response.body);
         _amountPaid.text = "";
-        for (int i = 0; i < (closeRoom ? 4 : 3) && context.canPop(); i++) {
+        for (int i = 0;
+            i < (fromCloseWidget ? 4 : 3) && context.canPop();
+            i++) {
           if (this.mounted) {
             context.pop();
           }
@@ -655,7 +658,9 @@ class _RoomExpenseState extends State<RoomExpense>
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
       } on Exception catch (err, stackTrace) {
-        for (int i = 0; i < (closeRoom ? 2 : 1) && context.canPop(); i++) {
+        for (int i = 0;
+            i < (fromCloseWidget ? 2 : 1) && context.canPop();
+            i++) {
           if (this.mounted) {
             context.pop();
           }
@@ -3623,7 +3628,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                           : Colors.black),
                                 ),
                                 onPressed: () async {
-                                  await PayToMember(context, amount, true);
+                                  await PayToMember(
+                                      context, amount, true, true);
                                 }),
                           ),
                           SizedBox(
@@ -3646,7 +3652,8 @@ class _RoomExpenseState extends State<RoomExpense>
                                       color: Theme.of(context).primaryColor),
                                 ),
                                 onPressed: () async {
-                                  await PayToMember(context, amount, false);
+                                  await PayToMember(
+                                      context, amount, false, true);
                                 }),
                           ),
                         ]),
@@ -3765,8 +3772,9 @@ class _RoomExpenseState extends State<RoomExpense>
                                           list[membersListIndex + 1]
                                               ["current"]))))
                               .toStringAsFixed(2);
-                          if (isAmountFull.split(".").first ==
-                              _amountPaid.text.split(".").first) {
+                          if (double.parse(isAmountFull) -
+                                  double.parse(_amountPaid.text) <
+                              0.1) {
                             _amountPaid.text = isAmountFull;
                             showToast(
                                 context,
@@ -3854,8 +3862,14 @@ class _RoomExpenseState extends State<RoomExpense>
                                         -double.parse(crypto.decrypt(
                                             list[membersListIndex + 1]["current"]))))
                                 .toStringAsFixed(2);
-                            if (isAmountFull.split(".").first ==
-                                _amountPaid.text.split(".").first) {
+                            if (double.parse(isAmountFull) -
+                                        double.parse(_amountPaid.text) <
+                                    0.1 &&
+                                double.parse(crypto.decrypt(
+                                                list[selfIndex]["current"])) *
+                                            (!isInGain ? -1 : 1) -
+                                        double.parse(_amountPaid.text) <
+                                    0.1) {
                               showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
@@ -3868,6 +3882,7 @@ class _RoomExpenseState extends State<RoomExpense>
                               await PayToMember(
                                   context,
                                   (isInGain ? "-" : "") + _amountPaid.text,
+                                  false,
                                   false);
                             }
                           }
