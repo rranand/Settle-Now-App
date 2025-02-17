@@ -1,4 +1,4 @@
-// FIXME: Do not call Trans Fetch API on transaction addition
+// FIXME: Do not call Trans Fetch API on transaction addition (_extractExpenseData)
 
 import 'dart:async';
 import 'dart:convert';
@@ -251,10 +251,6 @@ class _RoomExpenseState extends State<RoomExpense>
         roomClosedCount = 0;
         activeMembersEmail.clear();
         isClosedany = false;
-        heightExpense = 0;
-        loaded = false;
-        allExpenseList.clear();
-        TransList.clear();
         roomMembers.clear();
         expenseCategory.clear();
         subCategory.clear();
@@ -434,7 +430,15 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> _extractExpenseData() async {
-    scrollToExpense = -1;
+    if (this.mounted) {
+      setState(() {
+        scrollToExpense = -1;
+        heightExpense = 0;
+        loaded = false;
+        allExpenseList.clear();
+        TransList.clear();
+      });
+    }
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email),
