@@ -1,3 +1,5 @@
+// FIXME : QuickSplit amount is not added in total amount (Feb 2025)
+
 import 'dart:async';
 import 'dart:convert';
 

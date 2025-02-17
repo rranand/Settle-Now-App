@@ -155,20 +155,20 @@ class _RoomExpenseState extends State<RoomExpense>
 
       if (response.statusCode == 200) {
         double oldAmt = payDataOG.amount;
-        payDataOG.amount = double.parse(amount);
-        double remainingAmt = roomMembers[selfIndex].current;
-        debugPrint(
-            "OldAmount ${oldAmt} amount ${payDataOG.amount} remainingAmt ${remainingAmt}");
-        //isInGain selfIndex
-        roomMembers[selfIndex].current =
-            remainingAmt - oldAmt + payDataOG.amount;
-        // if (isInGain) {
-        //   list[selfIndex]["current"] = crypto.decrypt(remainingAmt - oldAmt + payDataOG.amount);
-        // } else {
-        //   list[selfIndex]["current"] = remainingAmt - oldAmt + payDataOG.amount;
-        // }
-        if (this.mounted) {
-          setState(() {});
+        int otherUserIndex =
+            manualSplitMembers[payDataOG.receiverEmail]!["index"];
+        if (deleteFlag == "1") {
+          allTransactionData.remove(payDataOG);
+          roomMembers[selfIndex].current -= oldAmt;
+          roomMembers[otherUserIndex].current += oldAmt;
+        } else {
+          double newAmt = double.parse(amount);
+          payDataOG.amount = newAmt;
+          double remainingAmt_1 = roomMembers[selfIndex].current;
+          double remainingAmt_2 = roomMembers[otherUserIndex].current;
+          roomMembers[selfIndex].current = remainingAmt_1 - oldAmt + newAmt;
+          roomMembers[otherUserIndex].current =
+              remainingAmt_2 + oldAmt - newAmt;
         }
       }
       var updateMessage = jsonDecode(response.body);
@@ -176,6 +176,9 @@ class _RoomExpenseState extends State<RoomExpense>
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_updatePayToMember"]);
+    }
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -664,16 +667,24 @@ class _RoomExpenseState extends State<RoomExpense>
           }
         }
         if (response.statusCode == 200) {
-          if (this.mounted) {
-            setState(() {
-              membersListIndex = -1;
-            });
+          allTransactionData.insert(0, PaymentDataEach.fromJson(Tdata['data']));
+          roomMembers[selfIndex].current += double.parse(amountPaid);
+          roomMembers[membersListIndex].current -= double.parse(amountPaid);
+
+          membersListIndex = -1;
+          bool isInGain = roomMembers[selfIndex].current > 0;
+          for (int i = 0; i < roomMembers.length; i++) {
+            bool isMemberIngain = roomMembers[i].current > 0;
+            if (!(selfIndex == i ||
+                roomMembers[i].done ||
+                isMemberIngain == isInGain ||
+                roomMembers[i].current.abs() < 0.1)) {
+              membersListIndex = i;
+              break;
+            }
           }
-          showToast(context, crypto.decrypt(Tdata["Message"]), Icons.check);
-          //await executeParallel();
-        } else {
-          showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         }
+        showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
       } on Exception catch (err, stackTrace) {
         for (int i = 0;
             i < (fromCloseWidget ? 2 : 1) && context.canPop();
