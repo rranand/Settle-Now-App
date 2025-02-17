@@ -1,3 +1,5 @@
+// FIXME: Do not call Trans Fetch API on transaction addition
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -765,21 +767,25 @@ class _RoomExpenseState extends State<RoomExpense>
 
       final response = await createHTTPreq(
           'room', http.delete, _token, jsonInputData, context);
-
-      isClear = true;
       CloseData = jsonDecode(response.body);
+
       if (response.statusCode == 200) {
+        roomMembers[selfIndex].done = true;
+        roomClosedCount++;
+        isClosedany = true;
+        locked = true;
+        manualSplitMembers.remove(_email);
+        isClear = true;
         isRoomActive = !CloseData["isRoomClosed"];
+        isPreviousPageNeedToBeUpdated.value = true;
       }
-      isPreviousPageNeedToBeUpdated.value = true;
-      showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
       for (int i = 0; i < 2 && context.canPop(); i++) {
         if (this.mounted) {
           context.pop();
         }
       }
-      _initialisation();
-      _extractExpenseData();
+      showToast(context, crypto.decrypt(CloseData["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         context.pop();

@@ -35,6 +35,8 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
+  bool isPreviousPageNeedToBeUpdated = false;
+  double totalExp = 0;
   String dateFromUrl = "";
   String _email = "";
   String _token = "";
@@ -181,6 +183,7 @@ class _ExpensesState extends State<Expenses> {
           tempMap[expenseCategory[i]] = 0;
         }
         for (int i = 0; i < TransList.length; i++) {
+          totalExp += double.parse(crypto.decrypt(TransList[i]["amount"]));
           if (tempMap.containsKey(crypto.decrypt(TransList[i]["type"]))) {
             tempMap[crypto.decrypt(TransList[i]["type"])] =
                 tempMap[crypto.decrypt(TransList[i]["type"])]! +
@@ -230,6 +233,8 @@ class _ExpensesState extends State<Expenses> {
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        totalExp -= double.parse(crypto.decrypt(TransList[index]["amount"]));
+        isPreviousPageNeedToBeUpdated = true;
         TransList.removeAt(index);
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
@@ -260,9 +265,13 @@ class _ExpensesState extends State<Expenses> {
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        isPreviousPageNeedToBeUpdated = true;
         if (flag == "1") {
+          totalExp -= double.parse(crypto.decrypt(TransList[index]["amount"]));
           TransList.removeAt(index);
         } else {
+          totalExp += double.parse(amount) -
+              double.parse(crypto.decrypt(TransList[index]["amount"]));
           TransList[index]['amount'] = crypto.encrypt(amount);
           TransList[index]['purpose'] = crypto.encrypt(purpose);
           TransList[index]['isEdited'] = true;
@@ -657,7 +666,9 @@ class _ExpensesState extends State<Expenses> {
       }
 
       if (response.statusCode == 200) {
+        isPreviousPageNeedToBeUpdated = true;
         TransList.insert(0, Tdata['data']);
+        totalExp += double.parse(crypto.decrypt(TransList[0]["amount"]));
       }
       _refreshIndicatorKey.currentState?.show();
 
@@ -837,819 +848,373 @@ class _ExpensesState extends State<Expenses> {
                           : Icons.filter_alt_outlined))
                 ],
         ),
-        body: Scaffold(
-          key: _scaffoldKey,
-          endDrawer: Drawer(
-            backgroundColor: themeProvider.isDarkTheme
-                ? Theme.of(context).scaffoldBackgroundColor
-                : Colors.white,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView(
-                children: [
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "Filter by Category",
-                    style: TextStyle(fontSize: 21, fontWeight: FontWeight.w600),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  SizedBox(
-                    height: 53 *
-                        (expenseCategory.length / 2 +
-                            expenseCategory.length % 2),
-                    child: MasonryGridView.count(
-                      physics: ScrollPhysics(),
-                      shrinkWrap: true,
-                      crossAxisCount: 2,
-                      itemCount: expenseCategory.length,
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                            if (filtercategoryIndex.contains(index)) {
-                              filtercategoryIndex.remove(index);
-                            } else {
-                              filtercategoryIndex.add(index);
-                            }
+        body: PopScope(
+          canPop: false,
+          onPopInvoked: ((didPop) {
+            if (didPop) {
+              return;
+            }
+            context.pop(totalExp);
+          }),
+          child: Scaffold(
+            key: _scaffoldKey,
+            endDrawer: Drawer(
+              backgroundColor: themeProvider.isDarkTheme
+                  ? Theme.of(context).scaffoldBackgroundColor
+                  : Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ListView(
+                  children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Filter by Category",
+                      style:
+                          TextStyle(fontSize: 21, fontWeight: FontWeight.w600),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      height: 53 *
+                          (expenseCategory.length / 2 +
+                              expenseCategory.length % 2),
+                      child: MasonryGridView.count(
+                        physics: ScrollPhysics(),
+                        shrinkWrap: true,
+                        crossAxisCount: 2,
+                        itemCount: expenseCategory.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              if (filtercategoryIndex.contains(index)) {
+                                filtercategoryIndex.remove(index);
+                              } else {
+                                filtercategoryIndex.add(index);
+                              }
 
-                            if (this.mounted) {
-                              setState(() {});
-                            }
-                          },
-                          child: Card(
-                            color: themeProvider.isDarkTheme
-                                ? Theme.of(context).scaffoldBackgroundColor
-                                : Colors.white,
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(
-                                  color: filtercategoryIndex.contains(index)
-                                      ? Theme.of(context).primaryColor
-                                      : Theme.of(context).cardColor),
-                              borderRadius: BorderRadius.circular(15.0),
-                            ),
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Text(expenseCategory[index]),
+                              if (this.mounted) {
+                                setState(() {});
+                              }
+                            },
+                            child: Card(
+                              color: themeProvider.isDarkTheme
+                                  ? Theme.of(context).scaffoldBackgroundColor
+                                  : Colors.white,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(
+                                    color: filtercategoryIndex.contains(index)
+                                        ? Theme.of(context).primaryColor
+                                        : Theme.of(context).cardColor),
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              child: Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(12.0),
+                                  child: Text(expenseCategory[index]),
+                                ),
                               ),
                             ),
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: 45,
+                      child: OutlinedButton(
+                        child: Text(
+                          "Apply",
+                          style: TextStyle(
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    height: 45,
-                    child: OutlinedButton(
-                      child: Text(
-                        "Apply",
-                        style: TextStyle(
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
                         ),
-                      ),
-                      onPressed: () {
-                        showFilterResult = true;
-                        getFilterResult();
-                        _scaffoldKey.currentState!.closeEndDrawer();
-                        if (this.mounted) {
-                          setState(() {});
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13.0),
+                        onPressed: () {
+                          showFilterResult = true;
+                          getFilterResult();
+                          _scaffoldKey.currentState!.closeEndDrawer();
+                          if (this.mounted) {
+                            setState(() {});
+                          }
+                        },
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(13.0),
+                          ),
+                          side:
+                              BorderSide(color: Theme.of(context).primaryColor),
                         ),
-                        side: BorderSide(color: Theme.of(context).primaryColor),
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  SizedBox(
-                    height: 45,
-                    child: OutlinedButton(
-                      child: Text(
-                        "Clear Filter",
-                        style: TextStyle(
-                          color: themeProvider.isDarkTheme
-                              ? Colors.white
-                              : Colors.black,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(13.0),
-                        ),
-                        side: BorderSide(color: Theme.of(context).primaryColor),
-                      ),
-                      onPressed: () {
-                        filtercategoryIndex.clear();
-                        showFilterResult = false;
-                        getFilterResult();
-                        if (this.mounted) {
-                          setState(() {});
-                        }
-                      },
+                    SizedBox(
+                      height: 15,
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      height: 45,
+                      child: OutlinedButton(
+                        child: Text(
+                          "Clear Filter",
+                          style: TextStyle(
+                            color: themeProvider.isDarkTheme
+                                ? Colors.white
+                                : Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(13.0),
+                          ),
+                          side:
+                              BorderSide(color: Theme.of(context).primaryColor),
+                        ),
+                        onPressed: () {
+                          filtercategoryIndex.clear();
+                          showFilterResult = false;
+                          getFilterResult();
+                          if (this.mounted) {
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          body: openGraph
-              ? personalExpenseGraphByCategory()
-              : RefreshIndicator(
-                  color: Theme.of(context).primaryColor,
-                  key: _refreshIndicatorKey,
-                  onRefresh: _initialization,
-                  child: TransList.isEmpty
-                      ? ListView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                                height: MediaQuery.of(context).size.height,
-                                width: MediaQuery.of(context).size.width,
-                                child: (Center(
-                                  child: loaded
-                                      ? Text("No Expense Found",
-                                          style: TextStyle(
-                                            fontSize: 23,
-                                          ))
-                                      : Shimmer.fromColors(
-                                          baseColor:
-                                              Theme.of(context).cardColor,
-                                          highlightColor:
-                                              Theme.of(context).primaryColor,
-                                          child: ListView.separated(
-                                              separatorBuilder:
-                                                  (context, index) => SizedBox(
-                                                        height: 5,
-                                                      ),
-                                              shrinkWrap: true,
-                                              itemCount: 16,
-                                              itemBuilder:
-                                                  (BuildContext context,
-                                                      int index) {
-                                                return Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Container(
-                                                    decoration: BoxDecoration(
-                                                        border: Border.all(
-                                                          color: Colors.white,
-                                                        ),
-                                                        borderRadius:
-                                                            BorderRadius.all(
-                                                                Radius.circular(
-                                                                    20))),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              12.0),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Container(
-                                                                width: 240,
-                                                                height: 20.0,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        border: Border
-                                                                            .all(
-                                                                          color:
-                                                                              Colors.white,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(Radius.circular(20))),
-                                                              ),
-                                                              SizedBox(
-                                                                height: 12,
-                                                              ),
-                                                              Container(
-                                                                width: 150,
-                                                                height: 15.0,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        border: Border
-                                                                            .all(
-                                                                          color:
-                                                                              Colors.white,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(Radius.circular(20))),
-                                                              ),
-                                                              SizedBox(
-                                                                height: 12,
-                                                              ),
-                                                              Container(
-                                                                width: 280,
-                                                                height: 15.0,
-                                                                decoration:
-                                                                    BoxDecoration(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        border: Border
-                                                                            .all(
-                                                                          color:
-                                                                              Colors.white,
-                                                                        ),
-                                                                        borderRadius:
-                                                                            BorderRadius.all(Radius.circular(20))),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                          Container(
-                                                            width: 70,
-                                                            height: 35.0,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                                    color: Colors
-                                                                        .white,
-                                                                    border:
-                                                                        Border
-                                                                            .all(
-                                                                      color: Colors
-                                                                          .white,
-                                                                    ),
-                                                                    borderRadius:
-                                                                        BorderRadius.all(
-                                                                            Radius.circular(20))),
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                );
-                                              })),
-                                )))
-                          ],
-                        )
-                      : Padding(
-                          padding: EdgeInsets.all(10.0),
-                          child: (showFilterResult || searchTrigger)
-                              ? (filterResult.isEmpty
-                                  ? SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.height,
-                                      width: MediaQuery.of(context).size.width,
-                                      child: Center(
-                                        child: Text("No Expense Found",
+            body: openGraph
+                ? personalExpenseGraphByCategory()
+                : RefreshIndicator(
+                    color: Theme.of(context).primaryColor,
+                    key: _refreshIndicatorKey,
+                    onRefresh: _initialization,
+                    child: TransList.isEmpty
+                        ? ListView(
+                            physics: AlwaysScrollableScrollPhysics(),
+                            children: [
+                              SizedBox(
+                                  height: MediaQuery.of(context).size.height,
+                                  width: MediaQuery.of(context).size.width,
+                                  child: (Center(
+                                    child: loaded
+                                        ? Text("No Expense Found",
                                             style: TextStyle(
                                               fontSize: 23,
-                                            )),
-                                      ),
-                                    )
-                                  : Scrollbar(
-                                      radius: Radius.circular(10.0),
-                                      thickness: 5.5,
-                                      child: ListView.separated(
-                                          separatorBuilder: (context, index) =>
-                                              SizedBox(
-                                                height: 5,
-                                              ),
-                                          shrinkWrap: true,
-                                          itemCount: filterResult.length,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            if (filterResult[index]
-                                                ['quickSplit']) {
-                                              return InkWell(
-                                                onTap: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext context) => _buildPopupDialog(
-                                                        context,
-                                                        index,
-                                                        crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["purpose"]),
-                                                        "Quick Split",
-                                                        (crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["date"])),
-                                                        "₹ " +
-                                                            commaSeperator(crypto.decrypt(
-                                                                filterResult[index][
-                                                                    "amount"])),
-                                                        filterResult[index]
-                                                            ["room"],
-                                                        filterResult[index]
-                                                            ["quickSplit"],
-                                                        crypto.decrypt(
-                                                            filterResult[index]["id"]),
-                                                        crypto.decrypt(filterResult[index]["type"]),
-                                                        crypto.decrypt(filterResult[index]["subType"]),
-                                                        filterResult[index]["isEdited"],
-                                                        crypto.decrypt(filterResult[index]["lastModDate"])),
-                                                  );
-                                                },
-                                                child: SizedBox(
-                                                  height: 150,
-                                                  child: Card(
-                                                    elevation: 2.0,
-                                                    shadowColor:
-                                                        Theme.of(context)
-                                                            .primaryColor,
-                                                    color: Theme.of(context)
-                                                        .scaffoldBackgroundColor,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      side: BorderSide(
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .primaryColor
-                                                              .withAlpha(95)),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15.0),
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              10.0),
-                                                      child: Row(
+                                            ))
+                                        : Shimmer.fromColors(
+                                            baseColor:
+                                                Theme.of(context).cardColor,
+                                            highlightColor:
+                                                Theme.of(context).primaryColor,
+                                            child: ListView.separated(
+                                                separatorBuilder:
+                                                    (context, index) =>
+                                                        SizedBox(
+                                                          height: 5,
+                                                        ),
+                                                shrinkWrap: true,
+                                                itemCount: 16,
+                                                itemBuilder:
+                                                    (BuildContext context,
+                                                        int index) {
+                                                  return Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            8.0),
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                          border: Border.all(
+                                                            color: Colors.white,
+                                                          ),
+                                                          borderRadius:
+                                                              BorderRadius.all(
+                                                                  Radius
+                                                                      .circular(
+                                                                          20))),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(12.0),
+                                                        child: Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment
                                                                   .spaceBetween,
                                                           children: [
-                                                            Expanded(
-                                                              flex: 1,
-                                                              child: SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.80,
-                                                                child: Column(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Text(
-                                                                        crypto.decrypt(filterResult[index]
-                                                                            [
-                                                                            "purpose"]),
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
-                                                                        maxLines:
-                                                                            5,
-                                                                        style: const TextStyle(
-                                                                            fontSize:
-                                                                                23,
-                                                                            fontWeight:
-                                                                                FontWeight.w500),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Opacity(
-                                                                        opacity:
-                                                                            0.8,
-                                                                        child:
-                                                                            Text(
-                                                                          crypto.decrypt(filterResult[index]["type"]) +
-                                                                              (crypto.decrypt(filterResult[index]["subType"]).length > 0 ? ' (${crypto.decrypt(filterResult[index]["subType"])})' : ""),
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            fontSize:
-                                                                                17,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Opacity(
-                                                                        opacity:
-                                                                            0.8,
-                                                                        child:
-                                                                            Text(
-                                                                          "Quick Spilt",
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            fontSize:
-                                                                                17,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Opacity(
-                                                                        opacity:
-                                                                            0.8,
-                                                                        child:
-                                                                            Text(
-                                                                          formatDateTime(crypto.decrypt(filterResult[index]
-                                                                              [
-                                                                              "date"])),
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            fontSize:
-                                                                                17,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ]),
-                                                              ),
-                                                            ),
                                                             Column(
-                                                              mainAxisAlignment: filterResult[
-                                                                          index]
-                                                                      [
-                                                                      "isEdited"]
-                                                                  ? MainAxisAlignment
-                                                                      .start
-                                                                  : MainAxisAlignment
-                                                                      .center,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
                                                               children: [
-                                                                filterResult[
-                                                                            index]
-                                                                        [
-                                                                        "isEdited"]
-                                                                    ? SizedBox(
-                                                                        height:
-                                                                            8,
-                                                                      )
-                                                                    : SizedBox(),
-                                                                filterResult[
-                                                                            index]
-                                                                        [
-                                                                        "isEdited"]
-                                                                    ? Container(
-                                                                        width:
-                                                                            55,
-                                                                        height:
-                                                                            30,
-                                                                        alignment:
-                                                                            Alignment.center,
-                                                                        decoration: BoxDecoration(
-                                                                            color: Colors.transparent,
-                                                                            border: Border.all(
-                                                                              color: themeProvider.isDarkTheme ? Theme.of(context).primaryColor : Colors.white,
-                                                                            ),
-                                                                            borderRadius: BorderRadius.all(Radius.circular(12))),
-                                                                        child: Padding(
-                                                                          padding: const EdgeInsets
+                                                                Container(
+                                                                  width: 240,
+                                                                  height: 20.0,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          border: Border
                                                                               .all(
-                                                                              4.0),
-                                                                          child: Text(
-                                                                              "Edited",
-                                                                              style: TextStyle(fontSize: 13, color: Colors.white)),
-                                                                        ))
-                                                                    : SizedBox(),
-                                                                filterResult[
-                                                                            index]
-                                                                        [
-                                                                        "isEdited"]
-                                                                    ? SizedBox(
-                                                                        height:
-                                                                            30,
-                                                                      )
-                                                                    : SizedBox(),
-                                                                Expanded(
-                                                                  flex: 0,
-                                                                  child:
-                                                                      SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.2,
-                                                                    child: Text(
-                                                                      "₹ " +
-                                                                          commaSeperator(crypto.decrypt(filterResult[index]
-                                                                              [
-                                                                              "amount"])),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            18,
-                                                                      ),
-                                                                    ),
-                                                                  ),
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(20))),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 12,
+                                                                ),
+                                                                Container(
+                                                                  width: 150,
+                                                                  height: 15.0,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          border: Border
+                                                                              .all(
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(20))),
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 12,
+                                                                ),
+                                                                Container(
+                                                                  width: 280,
+                                                                  height: 15.0,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          border: Border
+                                                                              .all(
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(20))),
                                                                 ),
                                                               ],
-                                                            )
-                                                          ]),
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            } else if (filterResult[index]
-                                                ["room"]) {
-                                              return InkWell(
-                                                onTap: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext context) => _buildPopupDialog(
-                                                        context,
-                                                        index,
-                                                        crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["purpose"]),
-                                                        crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["roomName"]),
-                                                        (crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["date"])),
-                                                        "₹ " +
-                                                            commaSeperator(
-                                                                crypto.decrypt(
-                                                                    filterResult[index]
-                                                                        ["amount"])),
-                                                        filterResult[index]["room"],
-                                                        filterResult[index]["quickSplit"],
-                                                        crypto.decrypt(filterResult[index]["id"]),
-                                                        crypto.decrypt(filterResult[index]["type"]),
-                                                        crypto.decrypt(filterResult[index]["subType"]),
-                                                        filterResult[index]["isEdited"],
-                                                        crypto.decrypt(filterResult[index]["lastModDate"])),
-                                                  );
-                                                },
-                                                child: SizedBox(
-                                                  height: 150,
-                                                  child: Card(
-                                                    elevation: 2.0,
-                                                    shadowColor:
-                                                        Theme.of(context)
-                                                            .primaryColor,
-                                                    color: Theme.of(context)
-                                                        .scaffoldBackgroundColor,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      side: BorderSide(
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .primaryColor
-                                                              .withAlpha(95)),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15.0),
-                                                    ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              10.0),
-                                                      child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Expanded(
-                                                              flex: 1,
-                                                              child: SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.80,
-                                                                child: Column(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Text(
-                                                                        crypto.decrypt(filterResult[index]
-                                                                            [
-                                                                            "purpose"]),
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
-                                                                        maxLines:
-                                                                            5,
-                                                                        style: const TextStyle(
-                                                                            fontSize:
-                                                                                23,
-                                                                            fontWeight:
-                                                                                FontWeight.w500),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Opacity(
-                                                                        opacity:
-                                                                            0.8,
-                                                                        child:
-                                                                            Text(
-                                                                          crypto.decrypt(filterResult[index]["type"]) +
-                                                                              (crypto.decrypt(filterResult[index]["subType"]).length > 0 ? ' (${crypto.decrypt(filterResult[index]["subType"])})' : ""),
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            fontSize:
-                                                                                17,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Opacity(
-                                                                        opacity:
-                                                                            0.8,
-                                                                        child:
-                                                                            Text(
-                                                                          crypto.decrypt(filterResult[index]["roomName"]) +
-                                                                              " (Room)",
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            fontSize:
-                                                                                17,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            4,
-                                                                      ),
-                                                                      Opacity(
-                                                                        opacity:
-                                                                            0.8,
-                                                                        child:
-                                                                            Text(
-                                                                          formatDateTime(crypto.decrypt(filterResult[index]
-                                                                              [
-                                                                              "date"])),
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            fontSize:
-                                                                                17,
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                    ]),
-                                                              ),
                                                             ),
-                                                            Column(
-                                                              mainAxisAlignment: filterResult[
-                                                                          index]
-                                                                      [
-                                                                      "isEdited"]
-                                                                  ? MainAxisAlignment
-                                                                      .start
-                                                                  : MainAxisAlignment
-                                                                      .center,
-                                                              children: [
-                                                                filterResult[
-                                                                            index]
-                                                                        [
-                                                                        "isEdited"]
-                                                                    ? SizedBox(
-                                                                        height:
-                                                                            8,
-                                                                      )
-                                                                    : SizedBox(),
-                                                                filterResult[
-                                                                            index]
-                                                                        [
-                                                                        "isEdited"]
-                                                                    ? Container(
-                                                                        width:
-                                                                            55,
-                                                                        height:
-                                                                            30,
-                                                                        alignment:
-                                                                            Alignment.center,
-                                                                        decoration: BoxDecoration(
-                                                                            color: Colors.transparent,
-                                                                            border: Border.all(
-                                                                              color: themeProvider.isDarkTheme ? Theme.of(context).primaryColor : Colors.white,
-                                                                            ),
-                                                                            borderRadius: BorderRadius.all(Radius.circular(12))),
-                                                                        child: Padding(
-                                                                          padding: const EdgeInsets
+                                                            Container(
+                                                              width: 70,
+                                                              height: 35.0,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      border:
+                                                                          Border
                                                                               .all(
-                                                                              4.0),
-                                                                          child: Text(
-                                                                              "Edited",
-                                                                              style: TextStyle(fontSize: 13, color: Colors.white)),
-                                                                        ))
-                                                                    : SizedBox(),
-                                                                filterResult[
-                                                                            index]
-                                                                        [
-                                                                        "isEdited"]
-                                                                    ? SizedBox(
-                                                                        height:
-                                                                            30,
-                                                                      )
-                                                                    : SizedBox(),
-                                                                Expanded(
-                                                                  flex: 0,
-                                                                  child:
-                                                                      SizedBox(
-                                                                    width: MediaQuery.of(context)
-                                                                            .size
-                                                                            .width *
-                                                                        0.2,
-                                                                    child: Text(
-                                                                      "₹ " +
-                                                                          commaSeperator(crypto.decrypt(filterResult[index]
-                                                                              [
-                                                                              "amount"])),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            18,
+                                                                        color: Colors
+                                                                            .white,
                                                                       ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
+                                                                      borderRadius:
+                                                                          BorderRadius.all(
+                                                                              Radius.circular(20))),
                                                             )
-                                                          ]),
+                                                          ],
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ),
-                                                ),
-                                              );
-                                            } else {
-                                              return InkWell(
-                                                onTap: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext context) => _buildPopupDialog(
-                                                        context,
-                                                        index,
-                                                        crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["purpose"]),
-                                                        "",
-                                                        (crypto.decrypt(
-                                                            filterResult[index]
-                                                                ["date"])),
-                                                        "₹ " +
-                                                            commaSeperator(crypto.decrypt(
-                                                                filterResult[index][
-                                                                    "amount"])),
-                                                        filterResult[index]
-                                                            ["room"],
-                                                        filterResult[index]
-                                                            ["quickSplit"],
-                                                        crypto.decrypt(
-                                                            filterResult[index]["id"]),
-                                                        crypto.decrypt(filterResult[index]["type"]),
-                                                        crypto.decrypt(filterResult[index]["subType"]),
-                                                        filterResult[index]["isEdited"],
-                                                        crypto.decrypt(filterResult[index]["lastModDate"])),
                                                   );
-                                                },
-                                                child: SizedBox(
-                                                  child: Card(
-                                                    elevation: 1.0,
-                                                    shadowColor:
-                                                        Theme.of(context)
-                                                            .primaryColor,
-                                                    color: Theme.of(context)
-                                                        .scaffoldBackgroundColor,
-                                                    shape:
-                                                        RoundedRectangleBorder(
-                                                      side: BorderSide(
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .primaryColor
-                                                              .withAlpha(95)),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15.0),
+                                                })),
+                                  )))
+                            ],
+                          )
+                        : Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: (showFilterResult || searchTrigger)
+                                ? (filterResult.isEmpty
+                                    ? SizedBox(
+                                        height:
+                                            MediaQuery.of(context).size.height,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        child: Center(
+                                          child: Text("No Expense Found",
+                                              style: TextStyle(
+                                                fontSize: 23,
+                                              )),
+                                        ),
+                                      )
+                                    : Scrollbar(
+                                        radius: Radius.circular(10.0),
+                                        thickness: 5.5,
+                                        child: ListView.separated(
+                                            separatorBuilder:
+                                                (context, index) => SizedBox(
+                                                      height: 5,
                                                     ),
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              10.0),
-                                                      child: Center(
+                                            shrinkWrap: true,
+                                            itemCount: filterResult.length,
+                                            itemBuilder: (BuildContext context,
+                                                int index) {
+                                              if (filterResult[index]
+                                                  ['quickSplit']) {
+                                                return InkWell(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) => _buildPopupDialog(
+                                                          context,
+                                                          index,
+                                                          crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["purpose"]),
+                                                          "Quick Split",
+                                                          (crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["date"])),
+                                                          "₹ " +
+                                                              commaSeperator(
+                                                                  crypto.decrypt(
+                                                                      filterResult[index][
+                                                                          "amount"])),
+                                                          filterResult[index]
+                                                              ["room"],
+                                                          filterResult[index]
+                                                              ["quickSplit"],
+                                                          crypto.decrypt(
+                                                              filterResult[index]["id"]),
+                                                          crypto.decrypt(filterResult[index]["type"]),
+                                                          crypto.decrypt(filterResult[index]["subType"]),
+                                                          filterResult[index]["isEdited"],
+                                                          crypto.decrypt(filterResult[index]["lastModDate"])),
+                                                    );
+                                                  },
+                                                  child: SizedBox(
+                                                    height: 150,
+                                                    child: Card(
+                                                      elevation: 2.0,
+                                                      shadowColor:
+                                                          Theme.of(context)
+                                                              .primaryColor,
+                                                      color: Theme.of(context)
+                                                          .scaffoldBackgroundColor,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        side: BorderSide(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor
+                                                                .withAlpha(95)),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.0),
+                                                      ),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10.0),
                                                         child: Row(
                                                             mainAxisAlignment:
                                                                 MainAxisAlignment
@@ -1670,7 +1235,7 @@ class _ExpensesState extends State<Expenses> {
                                                                       children: [
                                                                         SizedBox(
                                                                           height:
-                                                                              10,
+                                                                              4,
                                                                         ),
                                                                         Text(
                                                                           crypto.decrypt(filterResult[index]
@@ -1695,6 +1260,22 @@ class _ExpensesState extends State<Expenses> {
                                                                               Text(
                                                                             crypto.decrypt(filterResult[index]["type"]) +
                                                                                 (crypto.decrypt(filterResult[index]["subType"]).length > 0 ? ' (${crypto.decrypt(filterResult[index]["subType"])})' : ""),
+                                                                            style:
+                                                                                const TextStyle(
+                                                                              fontSize: 17,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              4,
+                                                                        ),
+                                                                        Opacity(
+                                                                          opacity:
+                                                                              0.8,
+                                                                          child:
+                                                                              Text(
+                                                                            "Quick Spilt",
                                                                             style:
                                                                                 const TextStyle(
                                                                               fontSize: 17,
@@ -1769,7 +1350,7 @@ class _ExpensesState extends State<Expenses> {
                                                                           "isEdited"]
                                                                       ? SizedBox(
                                                                           height:
-                                                                              20,
+                                                                              30,
                                                                         )
                                                                       : SizedBox(),
                                                                   Expanded(
@@ -1793,679 +1374,1094 @@ class _ExpensesState extends State<Expenses> {
                                                                     ),
                                                                   ),
                                                                 ],
-                                                              ),
+                                                              )
                                                             ]),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              );
-                                            }
-                                          }),
-                                    ))
-                              : Scrollbar(
-                                  radius: Radius.circular(10.0),
-                                  thickness: 5.5,
-                                  child: ListView.separated(
-                                      separatorBuilder: (context, index) =>
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                      shrinkWrap: true,
-                                      itemCount: TransList.length,
-                                      itemBuilder:
-                                          (BuildContext context, int index) {
-                                        if (TransList[index]["quickSplit"]) {
-                                          return InkWell(
-                                            onTap: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (BuildContext context) => _buildPopupDialog(
-                                                    context,
-                                                    index,
-                                                    crypto.decrypt(
-                                                        TransList[index]
-                                                            ["purpose"]),
-                                                    "Quick Split",
-                                                    (crypto.decrypt(
-                                                        TransList[index]
-                                                            ["date"])),
-                                                    "₹ " +
-                                                        commaSeperator(crypto.decrypt(
-                                                            TransList[index]
-                                                                ["amount"])),
-                                                    TransList[index]["room"],
-                                                    TransList[index]
-                                                        ["quickSplit"],
-                                                    crypto.decrypt(
-                                                        TransList[index]["id"]),
-                                                    crypto.decrypt(
-                                                        TransList[index]["type"]),
-                                                    crypto.decrypt(TransList[index]["subType"]),
-                                                    TransList[index]["isEdited"],
-                                                    crypto.decrypt(TransList[index]["lastModDate"])),
-                                              );
-                                            },
-                                            child: SizedBox(
-                                              height: 150,
-                                              child: Card(
-                                                elevation: 1.0,
-                                                shadowColor: Theme.of(context)
-                                                    .primaryColor,
-                                                color: Theme.of(context)
-                                                    .scaffoldBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
+                                                );
+                                              } else if (filterResult[index]
+                                                  ["room"]) {
+                                                return InkWell(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) => _buildPopupDialog(
+                                                          context,
+                                                          index,
+                                                          crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["purpose"]),
+                                                          crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["roomName"]),
+                                                          (crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["date"])),
+                                                          "₹ " +
+                                                              commaSeperator(
+                                                                  crypto.decrypt(
+                                                                      filterResult[index]
+                                                                          ["amount"])),
+                                                          filterResult[index]["room"],
+                                                          filterResult[index]["quickSplit"],
+                                                          crypto.decrypt(filterResult[index]["id"]),
+                                                          crypto.decrypt(filterResult[index]["type"]),
+                                                          crypto.decrypt(filterResult[index]["subType"]),
+                                                          filterResult[index]["isEdited"],
+                                                          crypto.decrypt(filterResult[index]["lastModDate"])),
+                                                    );
+                                                  },
+                                                  child: SizedBox(
+                                                    height: 150,
+                                                    child: Card(
+                                                      elevation: 2.0,
+                                                      shadowColor:
+                                                          Theme.of(context)
+                                                              .primaryColor,
                                                       color: Theme.of(context)
-                                                          .primaryColor
-                                                          .withAlpha(95)),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      10.0),
-                                                  child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: SizedBox(
-                                                            width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.80,
-                                                            child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Text(
-                                                                    crypto.decrypt(
-                                                                        TransList[index]
-                                                                            [
-                                                                            "purpose"]),
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    maxLines: 5,
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            23,
-                                                                        fontWeight:
-                                                                            FontWeight.w500),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      crypto.decrypt(TransList[index]
-                                                                              [
-                                                                              "type"]) +
-                                                                          (crypto.decrypt(TransList[index]["subType"]).length > 0
-                                                                              ? ' (${crypto.decrypt(TransList[index]["subType"])})'
-                                                                              : ""),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      "Quick Split",
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      formatDateTime(crypto.decrypt(
-                                                                          TransList[index]
-                                                                              [
-                                                                              "date"])),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ]),
-                                                          ),
-                                                        ),
-                                                        Column(
-                                                          mainAxisAlignment: TransList[
-                                                                      index]
-                                                                  ["isEdited"]
-                                                              ? MainAxisAlignment
-                                                                  .start
-                                                              : MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            TransList[index]
-                                                                    ["isEdited"]
-                                                                ? SizedBox(
-                                                                    height: 8,
-                                                                  )
-                                                                : SizedBox(),
-                                                            TransList[index]
-                                                                    ["isEdited"]
-                                                                ? Container(
-                                                                    width: 55,
-                                                                    height: 30,
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    decoration: BoxDecoration(
-                                                                        color: Colors.transparent,
-                                                                        border: Border.all(
-                                                                          color: themeProvider.isDarkTheme
-                                                                              ? Theme.of(context).primaryColor
-                                                                              : Colors.white,
+                                                          .scaffoldBackgroundColor,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        side: BorderSide(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor
+                                                                .withAlpha(95)),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.0),
+                                                      ),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10.0),
+                                                        child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              Expanded(
+                                                                flex: 1,
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.80,
+                                                                  child: Column(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        SizedBox(
+                                                                          height:
+                                                                              4,
                                                                         ),
-                                                                        borderRadius: BorderRadius.all(Radius.circular(12))),
-                                                                    child: Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .all(
-                                                                          4.0),
-                                                                      child: Text(
-                                                                          "Edited",
-                                                                          style: TextStyle(
-                                                                              fontSize: 13,
-                                                                              color: Colors.white)),
-                                                                    ))
-                                                                : SizedBox(),
-                                                            TransList[index]
-                                                                    ["isEdited"]
-                                                                ? SizedBox(
-                                                                    height: 30,
-                                                                  )
-                                                                : SizedBox(),
-                                                            Expanded(
-                                                              flex: 0,
-                                                              child: SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.2,
-                                                                child: Text(
-                                                                  "₹ " +
-                                                                      commaSeperator(crypto.decrypt(
+                                                                        Text(
+                                                                          crypto.decrypt(filterResult[index]
+                                                                              [
+                                                                              "purpose"]),
+                                                                          overflow:
+                                                                              TextOverflow.ellipsis,
+                                                                          maxLines:
+                                                                              5,
+                                                                          style: const TextStyle(
+                                                                              fontSize: 23,
+                                                                              fontWeight: FontWeight.w500),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              4,
+                                                                        ),
+                                                                        Opacity(
+                                                                          opacity:
+                                                                              0.8,
+                                                                          child:
+                                                                              Text(
+                                                                            crypto.decrypt(filterResult[index]["type"]) +
+                                                                                (crypto.decrypt(filterResult[index]["subType"]).length > 0 ? ' (${crypto.decrypt(filterResult[index]["subType"])})' : ""),
+                                                                            style:
+                                                                                const TextStyle(
+                                                                              fontSize: 17,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              4,
+                                                                        ),
+                                                                        Opacity(
+                                                                          opacity:
+                                                                              0.8,
+                                                                          child:
+                                                                              Text(
+                                                                            crypto.decrypt(filterResult[index]["roomName"]) +
+                                                                                " (Room)",
+                                                                            style:
+                                                                                const TextStyle(
+                                                                              fontSize: 17,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          height:
+                                                                              4,
+                                                                        ),
+                                                                        Opacity(
+                                                                          opacity:
+                                                                              0.8,
+                                                                          child:
+                                                                              Text(
+                                                                            formatDateTime(crypto.decrypt(filterResult[index]["date"])),
+                                                                            style:
+                                                                                const TextStyle(
+                                                                              fontSize: 17,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ]),
+                                                                ),
+                                                              ),
+                                                              Column(
+                                                                mainAxisAlignment: filterResult[
+                                                                            index]
+                                                                        [
+                                                                        "isEdited"]
+                                                                    ? MainAxisAlignment
+                                                                        .start
+                                                                    : MainAxisAlignment
+                                                                        .center,
+                                                                children: [
+                                                                  filterResult[
+                                                                              index]
+                                                                          [
+                                                                          "isEdited"]
+                                                                      ? SizedBox(
+                                                                          height:
+                                                                              8,
+                                                                        )
+                                                                      : SizedBox(),
+                                                                  filterResult[
+                                                                              index]
+                                                                          [
+                                                                          "isEdited"]
+                                                                      ? Container(
+                                                                          width:
+                                                                              55,
+                                                                          height:
+                                                                              30,
+                                                                          alignment:
+                                                                              Alignment.center,
+                                                                          decoration: BoxDecoration(
+                                                                              color: Colors.transparent,
+                                                                              border: Border.all(
+                                                                                color: themeProvider.isDarkTheme ? Theme.of(context).primaryColor : Colors.white,
+                                                                              ),
+                                                                              borderRadius: BorderRadius.all(Radius.circular(12))),
+                                                                          child: Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(4.0),
+                                                                            child:
+                                                                                Text("Edited", style: TextStyle(fontSize: 13, color: Colors.white)),
+                                                                          ))
+                                                                      : SizedBox(),
+                                                                  filterResult[
+                                                                              index]
+                                                                          [
+                                                                          "isEdited"]
+                                                                      ? SizedBox(
+                                                                          height:
+                                                                              30,
+                                                                        )
+                                                                      : SizedBox(),
+                                                                  Expanded(
+                                                                    flex: 0,
+                                                                    child:
+                                                                        SizedBox(
+                                                                      width: MediaQuery.of(context)
+                                                                              .size
+                                                                              .width *
+                                                                          0.2,
+                                                                      child:
+                                                                          Text(
+                                                                        "₹ " +
+                                                                            commaSeperator(crypto.decrypt(filterResult[index]["amount"])),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ]),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              } else {
+                                                return InkWell(
+                                                  onTap: () {
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) => _buildPopupDialog(
+                                                          context,
+                                                          index,
+                                                          crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["purpose"]),
+                                                          "",
+                                                          (crypto.decrypt(
+                                                              filterResult[index]
+                                                                  ["date"])),
+                                                          "₹ " +
+                                                              commaSeperator(
+                                                                  crypto.decrypt(
+                                                                      filterResult[index][
+                                                                          "amount"])),
+                                                          filterResult[index]
+                                                              ["room"],
+                                                          filterResult[index]
+                                                              ["quickSplit"],
+                                                          crypto.decrypt(
+                                                              filterResult[index]["id"]),
+                                                          crypto.decrypt(filterResult[index]["type"]),
+                                                          crypto.decrypt(filterResult[index]["subType"]),
+                                                          filterResult[index]["isEdited"],
+                                                          crypto.decrypt(filterResult[index]["lastModDate"])),
+                                                    );
+                                                  },
+                                                  child: SizedBox(
+                                                    child: Card(
+                                                      elevation: 1.0,
+                                                      shadowColor:
+                                                          Theme.of(context)
+                                                              .primaryColor,
+                                                      color: Theme.of(context)
+                                                          .scaffoldBackgroundColor,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        side: BorderSide(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColor
+                                                                .withAlpha(95)),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(15.0),
+                                                      ),
+                                                      child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(10.0),
+                                                        child: Center(
+                                                          child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Expanded(
+                                                                  flex: 1,
+                                                                  child:
+                                                                      SizedBox(
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.80,
+                                                                    child: Column(
+                                                                        crossAxisAlignment:
+                                                                            CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          SizedBox(
+                                                                            height:
+                                                                                10,
+                                                                          ),
+                                                                          Text(
+                                                                            crypto.decrypt(filterResult[index]["purpose"]),
+                                                                            overflow:
+                                                                                TextOverflow.ellipsis,
+                                                                            maxLines:
+                                                                                5,
+                                                                            style:
+                                                                                const TextStyle(fontSize: 23, fontWeight: FontWeight.w500),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height:
+                                                                                4,
+                                                                          ),
+                                                                          Opacity(
+                                                                            opacity:
+                                                                                0.8,
+                                                                            child:
+                                                                                Text(
+                                                                              crypto.decrypt(filterResult[index]["type"]) + (crypto.decrypt(filterResult[index]["subType"]).length > 0 ? ' (${crypto.decrypt(filterResult[index]["subType"])})' : ""),
+                                                                              style: const TextStyle(
+                                                                                fontSize: 17,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height:
+                                                                                4,
+                                                                          ),
+                                                                          Opacity(
+                                                                            opacity:
+                                                                                0.8,
+                                                                            child:
+                                                                                Text(
+                                                                              formatDateTime(crypto.decrypt(filterResult[index]["date"])),
+                                                                              style: const TextStyle(
+                                                                                fontSize: 17,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ]),
+                                                                  ),
+                                                                ),
+                                                                Column(
+                                                                  mainAxisAlignment: filterResult[
+                                                                              index]
+                                                                          [
+                                                                          "isEdited"]
+                                                                      ? MainAxisAlignment
+                                                                          .start
+                                                                      : MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    filterResult[index]
+                                                                            [
+                                                                            "isEdited"]
+                                                                        ? SizedBox(
+                                                                            height:
+                                                                                8,
+                                                                          )
+                                                                        : SizedBox(),
+                                                                    filterResult[index]
+                                                                            [
+                                                                            "isEdited"]
+                                                                        ? Container(
+                                                                            width:
+                                                                                55,
+                                                                            height:
+                                                                                30,
+                                                                            alignment:
+                                                                                Alignment.center,
+                                                                            decoration: BoxDecoration(
+                                                                                color: Colors.transparent,
+                                                                                border: Border.all(
+                                                                                  color: themeProvider.isDarkTheme ? Theme.of(context).primaryColor : Colors.white,
+                                                                                ),
+                                                                                borderRadius: BorderRadius.all(Radius.circular(12))),
+                                                                            child: Padding(
+                                                                              padding: const EdgeInsets.all(4.0),
+                                                                              child: Text("Edited", style: TextStyle(fontSize: 13, color: Colors.white)),
+                                                                            ))
+                                                                        : SizedBox(),
+                                                                    filterResult[index]
+                                                                            [
+                                                                            "isEdited"]
+                                                                        ? SizedBox(
+                                                                            height:
+                                                                                20,
+                                                                          )
+                                                                        : SizedBox(),
+                                                                    Expanded(
+                                                                      flex: 0,
+                                                                      child:
+                                                                          SizedBox(
+                                                                        width: MediaQuery.of(context).size.width *
+                                                                            0.2,
+                                                                        child:
+                                                                            Text(
+                                                                          "₹ " +
+                                                                              commaSeperator(crypto.decrypt(filterResult[index]["amount"])),
+                                                                          style:
+                                                                              const TextStyle(
+                                                                            fontSize:
+                                                                                18,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ]),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            }),
+                                      ))
+                                : Scrollbar(
+                                    radius: Radius.circular(10.0),
+                                    thickness: 5.5,
+                                    child: ListView.separated(
+                                        separatorBuilder: (context, index) =>
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                        shrinkWrap: true,
+                                        itemCount: TransList.length,
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          if (TransList[index]["quickSplit"]) {
+                                            return InkWell(
+                                              onTap: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) => _buildPopupDialog(
+                                                      context,
+                                                      index,
+                                                      crypto.decrypt(TransList[index]
+                                                          ["purpose"]),
+                                                      "Quick Split",
+                                                      (crypto.decrypt(
+                                                          TransList[index]
+                                                              ["date"])),
+                                                      "₹ " +
+                                                          commaSeperator(crypto.decrypt(
+                                                              TransList[index]
+                                                                  ["amount"])),
+                                                      TransList[index]["room"],
+                                                      TransList[index]
+                                                          ["quickSplit"],
+                                                      crypto.decrypt(TransList[index]
+                                                          ["id"]),
+                                                      crypto.decrypt(
+                                                          TransList[index]["type"]),
+                                                      crypto.decrypt(TransList[index]["subType"]),
+                                                      TransList[index]["isEdited"],
+                                                      crypto.decrypt(TransList[index]["lastModDate"])),
+                                                );
+                                              },
+                                              child: SizedBox(
+                                                height: 150,
+                                                child: Card(
+                                                  elevation: 1.0,
+                                                  shadowColor: Theme.of(context)
+                                                      .primaryColor,
+                                                  color: Theme.of(context)
+                                                      .scaffoldBackgroundColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(95)),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Expanded(
+                                                            flex: 1,
+                                                            child: SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.80,
+                                                              child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Text(
+                                                                      crypto.decrypt(
                                                                           TransList[index]
                                                                               [
-                                                                              "amount"])),
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontSize:
-                                                                        18,
+                                                                              "purpose"]),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          5,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              23,
+                                                                          fontWeight:
+                                                                              FontWeight.w500),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        crypto.decrypt(TransList[index]["type"]) +
+                                                                            (crypto.decrypt(TransList[index]["subType"]).length > 0
+                                                                                ? ' (${crypto.decrypt(TransList[index]["subType"])})'
+                                                                                : ""),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        "Quick Split",
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        formatDateTime(crypto.decrypt(TransList[index]
+                                                                            [
+                                                                            "date"])),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ]),
+                                                            ),
+                                                          ),
+                                                          Column(
+                                                            mainAxisAlignment: TransList[
+                                                                        index]
+                                                                    ["isEdited"]
+                                                                ? MainAxisAlignment
+                                                                    .start
+                                                                : MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? SizedBox(
+                                                                      height: 8,
+                                                                    )
+                                                                  : SizedBox(),
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? Container(
+                                                                      width: 55,
+                                                                      height:
+                                                                          30,
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      decoration: BoxDecoration(
+                                                                          color: Colors.transparent,
+                                                                          border: Border.all(
+                                                                            color: themeProvider.isDarkTheme
+                                                                                ? Theme.of(context).primaryColor
+                                                                                : Colors.white,
+                                                                          ),
+                                                                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                                                                      child: Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .all(
+                                                                            4.0),
+                                                                        child: Text(
+                                                                            "Edited",
+                                                                            style:
+                                                                                TextStyle(fontSize: 13, color: Colors.white)),
+                                                                      ))
+                                                                  : SizedBox(),
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? SizedBox(
+                                                                      height:
+                                                                          30,
+                                                                    )
+                                                                  : SizedBox(),
+                                                              Expanded(
+                                                                flex: 0,
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.2,
+                                                                  child: Text(
+                                                                    "₹ " +
+                                                                        commaSeperator(crypto.decrypt(TransList[index]
+                                                                            [
+                                                                            "amount"])),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          18,
+                                                                    ),
                                                                   ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ]),
+                                                            ],
+                                                          ),
+                                                        ]),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        } else if (TransList[index]["room"]) {
-                                          return InkWell(
-                                            onTap: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (BuildContext context) => _buildPopupDialog(
-                                                    context,
-                                                    index,
-                                                    crypto.decrypt(
-                                                        TransList[index]
-                                                            ["purpose"]),
-                                                    crypto.decrypt(
-                                                        TransList[index]
-                                                            ["roomName"]),
-                                                    (crypto.decrypt(
-                                                        TransList[index]
-                                                            ["date"])),
-                                                    "₹ " +
-                                                        commaSeperator(
-                                                            crypto.decrypt(
-                                                                TransList[index]
-                                                                    ["amount"])),
-                                                    TransList[index]["room"],
-                                                    TransList[index]["quickSplit"],
-                                                    crypto.decrypt(TransList[index]["id"]),
-                                                    crypto.decrypt(TransList[index]["type"]),
-                                                    crypto.decrypt(TransList[index]["subType"]),
-                                                    TransList[index]["isEdited"],
-                                                    crypto.decrypt(TransList[index]["lastModDate"])),
-                                              );
-                                            },
-                                            child: SizedBox(
-                                              height: 150,
-                                              child: Card(
-                                                elevation: 1.0,
-                                                shadowColor: Theme.of(context)
-                                                    .primaryColor,
-                                                color: Theme.of(context)
-                                                    .scaffoldBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: Theme.of(context)
-                                                          .primaryColor
-                                                          .withAlpha(95)),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      10.0),
-                                                  child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: SizedBox(
-                                                            width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.80,
-                                                            child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Text(
-                                                                    crypto.decrypt(
-                                                                        TransList[index]
-                                                                            [
-                                                                            "purpose"]),
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    maxLines: 5,
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            23,
-                                                                        fontWeight:
-                                                                            FontWeight.w500),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      crypto.decrypt(TransList[index]
-                                                                              [
-                                                                              "type"]) +
-                                                                          (crypto.decrypt(TransList[index]["subType"]).length > 0
-                                                                              ? ' (${crypto.decrypt(TransList[index]["subType"])})'
-                                                                              : ""),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
+                                            );
+                                          } else if (TransList[index]["room"]) {
+                                            return InkWell(
+                                              onTap: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) => _buildPopupDialog(
+                                                      context,
+                                                      index,
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["purpose"]),
+                                                      crypto.decrypt(
+                                                          TransList[index]
+                                                              ["roomName"]),
+                                                      (crypto.decrypt(
+                                                          TransList[index]
+                                                              ["date"])),
+                                                      "₹ " +
+                                                          commaSeperator(crypto.decrypt(
+                                                              TransList[index]
+                                                                  ["amount"])),
+                                                      TransList[index]["room"],
+                                                      TransList[index]
+                                                          ["quickSplit"],
+                                                      crypto.decrypt(TransList[index]["id"]),
+                                                      crypto.decrypt(TransList[index]["type"]),
+                                                      crypto.decrypt(TransList[index]["subType"]),
+                                                      TransList[index]["isEdited"],
+                                                      crypto.decrypt(TransList[index]["lastModDate"])),
+                                                );
+                                              },
+                                              child: SizedBox(
+                                                height: 150,
+                                                child: Card(
+                                                  elevation: 1.0,
+                                                  shadowColor: Theme.of(context)
+                                                      .primaryColor,
+                                                  color: Theme.of(context)
+                                                      .scaffoldBackgroundColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(95)),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Expanded(
+                                                            flex: 1,
+                                                            child: SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.80,
+                                                              child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    SizedBox(
+                                                                      height: 4,
                                                                     ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      crypto.decrypt(TransList[index]
-                                                                              [
-                                                                              "roomName"]) +
-                                                                          " (Room)",
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      formatDateTime(crypto.decrypt(
+                                                                    Text(
+                                                                      crypto.decrypt(
                                                                           TransList[index]
                                                                               [
-                                                                              "date"])),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
+                                                                              "purpose"]),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          5,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              23,
+                                                                          fontWeight:
+                                                                              FontWeight.w500),
                                                                     ),
-                                                                  ),
-                                                                ]),
-                                                          ),
-                                                        ),
-                                                        Column(
-                                                          mainAxisAlignment: TransList[
-                                                                      index]
-                                                                  ["isEdited"]
-                                                              ? MainAxisAlignment
-                                                                  .start
-                                                              : MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            TransList[index]
-                                                                    ["isEdited"]
-                                                                ? SizedBox(
-                                                                    height: 8,
-                                                                  )
-                                                                : SizedBox(),
-                                                            TransList[index]
-                                                                    ["isEdited"]
-                                                                ? Container(
-                                                                    width: 55,
-                                                                    height: 30,
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    decoration: BoxDecoration(
-                                                                        color: Colors.transparent,
-                                                                        border: Border.all(
-                                                                          color: themeProvider.isDarkTheme
-                                                                              ? Theme.of(context).primaryColor
-                                                                              : Colors.white,
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        crypto.decrypt(TransList[index]["type"]) +
+                                                                            (crypto.decrypt(TransList[index]["subType"]).length > 0
+                                                                                ? ' (${crypto.decrypt(TransList[index]["subType"])})'
+                                                                                : ""),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
                                                                         ),
-                                                                        borderRadius: BorderRadius.all(Radius.circular(12))),
-                                                                    child: Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .all(
-                                                                          4.0),
-                                                                      child: Text(
-                                                                          "Edited",
-                                                                          style: TextStyle(
-                                                                              fontSize: 13,
-                                                                              color: Colors.white)),
-                                                                    ))
-                                                                : SizedBox(),
-                                                            TransList[index]
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        crypto.decrypt(TransList[index]["roomName"]) +
+                                                                            " (Room)",
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        formatDateTime(crypto.decrypt(TransList[index]
+                                                                            [
+                                                                            "date"])),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ]),
+                                                            ),
+                                                          ),
+                                                          Column(
+                                                            mainAxisAlignment: TransList[
+                                                                        index]
                                                                     ["isEdited"]
-                                                                ? SizedBox(
-                                                                    height: 30,
-                                                                  )
-                                                                : SizedBox(),
-                                                            Expanded(
-                                                              flex: 0,
-                                                              child: SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.2,
-                                                                child: Text(
-                                                                  "₹ " +
-                                                                      commaSeperator(crypto.decrypt(
-                                                                          TransList[index]
-                                                                              [
-                                                                              "amount"])),
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontSize:
-                                                                        18,
+                                                                ? MainAxisAlignment
+                                                                    .start
+                                                                : MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? SizedBox(
+                                                                      height: 8,
+                                                                    )
+                                                                  : SizedBox(),
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? Container(
+                                                                      width: 55,
+                                                                      height:
+                                                                          30,
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      decoration: BoxDecoration(
+                                                                          color: Colors.transparent,
+                                                                          border: Border.all(
+                                                                            color: themeProvider.isDarkTheme
+                                                                                ? Theme.of(context).primaryColor
+                                                                                : Colors.white,
+                                                                          ),
+                                                                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                                                                      child: Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .all(
+                                                                            4.0),
+                                                                        child: Text(
+                                                                            "Edited",
+                                                                            style:
+                                                                                TextStyle(fontSize: 13, color: Colors.white)),
+                                                                      ))
+                                                                  : SizedBox(),
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? SizedBox(
+                                                                      height:
+                                                                          30,
+                                                                    )
+                                                                  : SizedBox(),
+                                                              Expanded(
+                                                                flex: 0,
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.2,
+                                                                  child: Text(
+                                                                    "₹ " +
+                                                                        commaSeperator(crypto.decrypt(TransList[index]
+                                                                            [
+                                                                            "amount"])),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          18,
+                                                                    ),
                                                                   ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ]),
+                                                            ],
+                                                          ),
+                                                        ]),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        } else {
-                                          return InkWell(
-                                            onTap: () {
-                                              showDialog(
-                                                context: context,
-                                                builder: (BuildContext context) => _buildPopupDialog(
-                                                    context,
-                                                    index,
-                                                    crypto.decrypt(
-                                                        TransList[index]
-                                                            ["purpose"]),
-                                                    "",
-                                                    (crypto.decrypt(
-                                                        TransList[index]
-                                                            ["date"])),
-                                                    "₹ " +
-                                                        commaSeperator(crypto.decrypt(
-                                                            TransList[index]
-                                                                ["amount"])),
-                                                    TransList[index]["room"],
-                                                    TransList[index]
-                                                        ["quickSplit"],
-                                                    crypto.decrypt(
-                                                        TransList[index]["id"]),
-                                                    crypto.decrypt(
-                                                        TransList[index]["type"]),
-                                                    crypto.decrypt(TransList[index]["subType"]),
-                                                    TransList[index]["isEdited"],
-                                                    crypto.decrypt(TransList[index]["lastModDate"])),
-                                              );
-                                            },
-                                            child: SizedBox(
-                                              child: Card(
-                                                elevation: 2.0,
-                                                shadowColor: Theme.of(context)
-                                                    .primaryColor,
-                                                color: Theme.of(context)
-                                                    .scaffoldBackgroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: Theme.of(context)
-                                                          .primaryColor
-                                                          .withAlpha(95)),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          15.0),
-                                                ),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      10.0),
-                                                  child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Expanded(
-                                                          flex: 1,
-                                                          child: SizedBox(
-                                                            width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width *
-                                                                0.80,
-                                                            child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Text(
-                                                                    crypto.decrypt(
-                                                                        TransList[index]
-                                                                            [
-                                                                            "purpose"]),
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
-                                                                    maxLines: 5,
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            23,
-                                                                        fontWeight:
-                                                                            FontWeight.w500),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      crypto.decrypt(TransList[index]
-                                                                              [
-                                                                              "type"]) +
-                                                                          (crypto.decrypt(TransList[index]["subType"]).length > 0
-                                                                              ? ' (${crypto.decrypt(TransList[index]["subType"])})'
-                                                                              : ""),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
+                                            );
+                                          } else {
+                                            return InkWell(
+                                              onTap: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder: (BuildContext context) => _buildPopupDialog(
+                                                      context,
+                                                      index,
+                                                      crypto.decrypt(TransList[index]
+                                                          ["purpose"]),
+                                                      "",
+                                                      (crypto.decrypt(
+                                                          TransList[index]
+                                                              ["date"])),
+                                                      "₹ " +
+                                                          commaSeperator(crypto.decrypt(
+                                                              TransList[index]
+                                                                  ["amount"])),
+                                                      TransList[index]["room"],
+                                                      TransList[index]
+                                                          ["quickSplit"],
+                                                      crypto.decrypt(TransList[index]
+                                                          ["id"]),
+                                                      crypto.decrypt(
+                                                          TransList[index]["type"]),
+                                                      crypto.decrypt(TransList[index]["subType"]),
+                                                      TransList[index]["isEdited"],
+                                                      crypto.decrypt(TransList[index]["lastModDate"])),
+                                                );
+                                              },
+                                              child: SizedBox(
+                                                child: Card(
+                                                  elevation: 2.0,
+                                                  shadowColor: Theme.of(context)
+                                                      .primaryColor,
+                                                  color: Theme.of(context)
+                                                      .scaffoldBackgroundColor,
+                                                  shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        color: Theme.of(context)
+                                                            .primaryColor
+                                                            .withAlpha(95)),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: [
+                                                          Expanded(
+                                                            flex: 1,
+                                                            child: SizedBox(
+                                                              width: MediaQuery.of(
+                                                                          context)
+                                                                      .size
+                                                                      .width *
+                                                                  0.80,
+                                                              child: Column(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    SizedBox(
+                                                                      height: 4,
                                                                     ),
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,
-                                                                  ),
-                                                                  Opacity(
-                                                                    opacity:
-                                                                        0.8,
-                                                                    child: Text(
-                                                                      formatDateTime(crypto.decrypt(
+                                                                    Text(
+                                                                      crypto.decrypt(
                                                                           TransList[index]
                                                                               [
-                                                                              "date"])),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        fontSize:
-                                                                            17,
-                                                                      ),
+                                                                              "purpose"]),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          5,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              23,
+                                                                          fontWeight:
+                                                                              FontWeight.w500),
                                                                     ),
-                                                                  ),
-                                                                ]),
-                                                          ),
-                                                        ),
-                                                        Column(
-                                                          mainAxisAlignment: TransList[
-                                                                      index]
-                                                                  ["isEdited"]
-                                                              ? MainAxisAlignment
-                                                                  .start
-                                                              : MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            TransList[index]
-                                                                    ["isEdited"]
-                                                                ? SizedBox(
-                                                                    height: 8,
-                                                                  )
-                                                                : SizedBox(),
-                                                            TransList[index]
-                                                                    ["isEdited"]
-                                                                ? Container(
-                                                                    width: 55,
-                                                                    height: 30,
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    decoration: BoxDecoration(
-                                                                        color: Colors.transparent,
-                                                                        border: Border.all(
-                                                                          color: themeProvider.isDarkTheme
-                                                                              ? Theme.of(context).primaryColor
-                                                                              : Colors.white,
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        crypto.decrypt(TransList[index]["type"]) +
+                                                                            (crypto.decrypt(TransList[index]["subType"]).length > 0
+                                                                                ? ' (${crypto.decrypt(TransList[index]["subType"])})'
+                                                                                : ""),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
                                                                         ),
-                                                                        borderRadius: BorderRadius.all(Radius.circular(12))),
-                                                                    child: Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .all(
-                                                                          4.0),
-                                                                      child: Text(
-                                                                          "Edited",
-                                                                          style: TextStyle(
-                                                                              fontSize: 13,
-                                                                              color: Colors.white)),
-                                                                    ))
-                                                                : SizedBox(),
-                                                            TransList[index]
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      height: 4,
+                                                                    ),
+                                                                    Opacity(
+                                                                      opacity:
+                                                                          0.8,
+                                                                      child:
+                                                                          Text(
+                                                                        formatDateTime(crypto.decrypt(TransList[index]
+                                                                            [
+                                                                            "date"])),
+                                                                        style:
+                                                                            const TextStyle(
+                                                                          fontSize:
+                                                                              17,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ]),
+                                                            ),
+                                                          ),
+                                                          Column(
+                                                            mainAxisAlignment: TransList[
+                                                                        index]
                                                                     ["isEdited"]
-                                                                ? SizedBox(
-                                                                    height: 20,
-                                                                  )
-                                                                : SizedBox(),
-                                                            Expanded(
-                                                              flex: 0,
-                                                              child: SizedBox(
-                                                                width: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .width *
-                                                                    0.2,
-                                                                child: Text(
-                                                                  "₹ " +
-                                                                      commaSeperator(crypto.decrypt(
-                                                                          TransList[index]
-                                                                              [
-                                                                              "amount"])),
-                                                                  style:
-                                                                      const TextStyle(
-                                                                    fontSize:
-                                                                        18,
+                                                                ? MainAxisAlignment
+                                                                    .start
+                                                                : MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? SizedBox(
+                                                                      height: 8,
+                                                                    )
+                                                                  : SizedBox(),
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? Container(
+                                                                      width: 55,
+                                                                      height:
+                                                                          30,
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .center,
+                                                                      decoration: BoxDecoration(
+                                                                          color: Colors.transparent,
+                                                                          border: Border.all(
+                                                                            color: themeProvider.isDarkTheme
+                                                                                ? Theme.of(context).primaryColor
+                                                                                : Colors.white,
+                                                                          ),
+                                                                          borderRadius: BorderRadius.all(Radius.circular(12))),
+                                                                      child: Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .all(
+                                                                            4.0),
+                                                                        child: Text(
+                                                                            "Edited",
+                                                                            style:
+                                                                                TextStyle(fontSize: 13, color: Colors.white)),
+                                                                      ))
+                                                                  : SizedBox(),
+                                                              TransList[index][
+                                                                      "isEdited"]
+                                                                  ? SizedBox(
+                                                                      height:
+                                                                          20,
+                                                                    )
+                                                                  : SizedBox(),
+                                                              Expanded(
+                                                                flex: 0,
+                                                                child: SizedBox(
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.2,
+                                                                  child: Text(
+                                                                    "₹ " +
+                                                                        commaSeperator(crypto.decrypt(TransList[index]
+                                                                            [
+                                                                            "amount"])),
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontSize:
+                                                                          18,
+                                                                    ),
                                                                   ),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                      ]),
+                                                            ],
+                                                          ),
+                                                        ]),
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        }
-                                      }),
-                                ),
-                        )),
+                                            );
+                                          }
+                                        }),
+                                  ),
+                          )),
+          ),
         ),
         floatingActionButton: Column(
           crossAxisAlignment: CrossAxisAlignment.end,

@@ -1,5 +1,3 @@
-// FIXME : QuickSplit amount is not added in total amount (Feb 2025)
-
 import 'dart:async';
 import 'dart:convert';
 
@@ -624,14 +622,19 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
                                       child: Padding(
                                         padding: EdgeInsets.all(8.0),
                                         child: InkWell(
-                                          onTap: () {
+                                          onTap: () async {
                                             if (this.mounted) {
-                                              context.push(
+                                              final totalExp =
+                                                  await context.push(
                                                 AppRouteConstants
                                                         .personalExpenseRouteName +
                                                     "/" +
                                                     filterResult[index].Date,
-                                              );
+                                              ) as double;
+                                              setState(() {
+                                                filterResult[index].Total =
+                                                    totalExp;
+                                              });
                                             }
                                           },
                                           child: Card(
@@ -726,15 +729,20 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
                                         child: Padding(
                                           padding: EdgeInsets.all(8.0),
                                           child: InkWell(
-                                            onTap: () {
+                                            onTap: () async {
                                               if (this.mounted) {
-                                                context.push(
+                                                final totalExp =
+                                                    await context.push(
                                                   AppRouteConstants
                                                           .personalExpenseRouteName +
                                                       "/" +
                                                       personalExpense[index]
                                                           .Date,
-                                                );
+                                                ) as double;
+                                                setState(() {
+                                                  personalExpense[index].Total =
+                                                      totalExp;
+                                                });
                                               }
                                             },
                                             child: Card(
@@ -809,6 +817,7 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
         floatingActionButton: personalExpense.isEmpty
             ? null
             : FloatingActionButton(
+                heroTag: UniqueKey(),
                 child: Icon(
                   showfilterResult ? Icons.filter_alt_off : Icons.filter_alt,
                   color: Theme.of(context).primaryColor,
