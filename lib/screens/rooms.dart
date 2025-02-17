@@ -172,7 +172,8 @@ class _RoomExpenseState extends State<RoomExpense>
         }
       }
       var updateMessage = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
+      showToast(context, crypto.decrypt(updateMessage["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_updatePayToMember"]);
@@ -684,7 +685,8 @@ class _RoomExpenseState extends State<RoomExpense>
             }
           }
         }
-        showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
+        showToast(context, crypto.decrypt(Tdata["Message"]),
+            response.statusCode == 200 ? Icons.check : Icons.close);
       } on Exception catch (err, stackTrace) {
         for (int i = 0;
             i < (fromCloseWidget ? 2 : 1) && context.canPop();
