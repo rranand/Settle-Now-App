@@ -627,8 +627,9 @@ class _RoomExpenseState extends State<RoomExpense>
         if (response.statusCode == 422) {
           showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
         } else {
+          TransList.insert(0, Tdata["data"]);
+          allExpenseList.insert(0, Tdata["data"]);
           _initialisation();
-          _extractExpenseData();
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
