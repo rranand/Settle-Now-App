@@ -1,5 +1,3 @@
-// FIXME: Do not call Trans Fetch API on transaction addition (_extractExpenseData)
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -529,7 +527,8 @@ class _RoomExpenseState extends State<RoomExpense>
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
       } else {
         _initialisation();
-        _extractExpenseData();
+        TransList.insert(0, Tdata["data"]);
+        allExpenseList.insert(0, Tdata["data"]);
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
