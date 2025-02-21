@@ -5277,8 +5277,6 @@ class _ExpenseDataState extends State<ExpenseData> {
   int roomSubExpenseCategoryIndex = -1;
   GlobalKey<FormState> _updateExpenseRoom = GlobalKey<FormState>();
   AutoScrollController controller = AutoScrollController();
-  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
-  DateFormat dateFormat_new = DateFormat("MMM dd yyyy HH:mm:ss");
 
   @override
   void initState() {
@@ -5347,10 +5345,6 @@ class _ExpenseDataState extends State<ExpenseData> {
       if (response.statusCode == 200) {
         widget.refreshMemberTrans();
         if (type == "0") {
-          var curDateTime = DateTime.now().toString();
-          DateTime dateTime = dateFormat.parse(curDateTime);
-          String dateTimeFormatted = dateFormat_new.format(dateTime);
-
           widget.TransList[index]["members"] = memberExpense;
           widget.TransList[index]["Amount"] =
               crypto.encrypt(updatedTotalAmount.toStringAsFixed(2));
@@ -5358,8 +5352,8 @@ class _ExpenseDataState extends State<ExpenseData> {
           widget.TransList[index]["Type"] = jsonInputData['typeCat'];
           widget.TransList[index]["subType"] = jsonInputData['subType'];
           widget.TransList[index]["isEdited"] = true;
-          widget.TransList[index]["lastModDate"] =
-              crypto.encrypt(dateTimeFormatted);
+          widget.TransList[index]["lastModDate"] = crypto.encrypt(
+              DateFormat(global.dateTimeFormat).format(DateTime.now()));
         } else {
           widget.TransList.removeAt(index);
         }
@@ -5863,17 +5857,13 @@ class _ExpenseDataState extends State<ExpenseData> {
       if (response.statusCode == 200) {
         widget.refreshMemberTrans();
         if (flag == "0") {
-          var curDateTime = DateTime.now().toString();
-          DateTime dateTime = dateFormat.parse(curDateTime);
-          String dateTimeFormatted = dateFormat_new.format(dateTime);
-
           widget.TransList[index]["Purpose"] = jsonInputData['purpose'];
           widget.TransList[index]["Amount"] = jsonInputData['amount'];
           widget.TransList[index]["Type"] = jsonInputData['type'];
           widget.TransList[index]["subType"] = jsonInputData['subType'];
           widget.TransList[index]["isEdited"] = true;
-          widget.TransList[index]["lastModDate"] =
-              crypto.encrypt(dateTimeFormatted);
+          widget.TransList[index]["lastModDate"] = crypto.encrypt(
+              DateFormat(global.dateTimeFormat).format(DateTime.now()));
         } else {
           widget.TransList.removeAt(index);
         }

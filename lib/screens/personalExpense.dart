@@ -1,5 +1,3 @@
-// FIXME : Fix Add/Update Transaction API Call
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -52,6 +50,7 @@ class _ExpensesState extends State<Expenses> {
   GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
+  bool expenseCategoryLoaded = false;
   String title = "Personal Expense";
   Set<int> filtercategoryIndex = Set();
   int categoryIndex = 0;
@@ -90,6 +89,7 @@ class _ExpensesState extends State<Expenses> {
           expenseCategory.add(key);
           subCategory.add(value);
         });
+        expenseCategoryLoaded = true;
       }
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
@@ -139,7 +139,9 @@ class _ExpensesState extends State<Expenses> {
       setState(() {});
     }
 
-    getExpenseCategory();
+    if (!expenseCategoryLoaded) {
+      getExpenseCategory();
+    }
     var now = DateTime.now();
     Curdate = (now.month - 1).toString() + now.year.toString();
 
@@ -672,7 +674,6 @@ class _ExpensesState extends State<Expenses> {
         TransList.insert(0, Tdata['data']);
         totalExp += double.parse(crypto.decrypt(TransList[0]["amount"]));
       }
-      _refreshIndicatorKey.currentState?.show();
 
       if (response.statusCode == 422) {
         showToast(context, crypto.decrypt(Tdata["Message"]), Icons.close);
