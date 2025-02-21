@@ -59,8 +59,6 @@ class _RoomExpenseState extends State<RoomExpense>
   bool splitManually = false;
   int dash = 0;
   bool locked = false;
-  final ValueNotifier<bool> isPreviousPageNeedToBeUpdated =
-      ValueNotifier(false);
   final TextEditingController _amt = TextEditingController();
   final TextEditingController _searchFriend = TextEditingController();
   final TextEditingController _purpose = TextEditingController();
@@ -184,7 +182,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> initChart() async {
-    if (isPreviousPageNeedToBeUpdated.value || dataMap.isEmpty) {
+    if (dataMap.isEmpty) {
       Map<String, double> tempMap = {};
       for (int i = 0; i < expenseCategory.length; i++) {
         tempMap[expenseCategory[i]] = 0;
@@ -507,7 +505,6 @@ class _RoomExpenseState extends State<RoomExpense>
       _amt.text = "";
       _purpose.text = "";
       Tdata = jsonDecode(response.body);
-      isPreviousPageNeedToBeUpdated.value = true;
 
       for (int i = 0; i < 3 && context.canPop(); i++) {
         if (this.mounted) {
@@ -554,7 +551,6 @@ class _RoomExpenseState extends State<RoomExpense>
           'updateRoomName/room', http.post, _token, jsonInputData, context);
 
       Tdata = jsonDecode(response.body);
-      isPreviousPageNeedToBeUpdated.value = true;
 
       for (int i = 0; i < 2 && context.canPop(); i++) {
         if (this.mounted) {
@@ -612,7 +608,6 @@ class _RoomExpenseState extends State<RoomExpense>
         _amt.text = "";
         _purpose.text = "";
         Tdata = jsonDecode(response.body);
-        isPreviousPageNeedToBeUpdated.value = true;
         for (int i = 0; i < 3 && context.canPop(); i++) {
           if (this.mounted) {
             context.pop();
@@ -777,7 +772,6 @@ class _RoomExpenseState extends State<RoomExpense>
         manualSplitMembers.remove(_email);
         isClear = true;
         isRoomActive = !CloseData["isRoomClosed"];
-        isPreviousPageNeedToBeUpdated.value = true;
       }
       for (int i = 0; i < 2 && context.canPop(); i++) {
         if (this.mounted) {
@@ -2166,8 +2160,6 @@ class _RoomExpenseState extends State<RoomExpense>
                           Token: _token,
                           refreshMemberTrans: _initialisation,
                           locked: locked,
-                          isPreviousPageNeedToBeUpdated:
-                              isPreviousPageNeedToBeUpdated,
                           expenseCategory: expenseCategory,
                           subCategory: subCategory,
                           index: scrollToExpense,
@@ -4474,7 +4466,16 @@ class _RoomExpenseState extends State<RoomExpense>
               if (didPop) {
                 return;
               }
-              context.pop(isPreviousPageNeedToBeUpdated.value);
+              Map<String, dynamic> objectToBeReturned = {};
+              objectToBeReturned["contribution"] =
+                  roomMembers[selfIndex].expense +
+                      roomMembers[selfIndex].totalSplitExpense;
+              objectToBeReturned["isClosed"] = isRoomActive;
+              objectToBeReturned["isDone"] = roomMembers[selfIndex].done;
+              objectToBeReturned["spent"] = roomMembers[selfIndex].yourExpense;
+              objectToBeReturned["member"] = roomMembers.length;
+              objectToBeReturned["roomName"] = roomName.text;
+              context.pop(objectToBeReturned);
             }),
             child: SizedBox(
                 height: MediaQuery.of(context).size.height,
@@ -5248,7 +5249,6 @@ class ExpenseData extends StatefulWidget {
   final List<dynamic> expenseCategory;
   final List<List<dynamic>> subCategory;
   final Function refreshMemberTrans;
-  final ValueNotifier isPreviousPageNeedToBeUpdated;
   final int index;
   final ScrollController scrollController;
   ExpenseData(
@@ -5259,7 +5259,6 @@ class ExpenseData extends StatefulWidget {
       required this.Token,
       required this.refreshMemberTrans,
       required this.locked,
-      required this.isPreviousPageNeedToBeUpdated,
       required this.expenseCategory,
       required this.subCategory,
       required this.index,

@@ -7117,7 +7117,6 @@ class _RoomWidgetState extends State<RoomWidget> {
       Color.fromARGB(255, 252, 0, 255)
     ],
   ).createShader(Rect.fromLTWH(0.0, 0.0, 200.0, 70.0));
-  int indexLoading = -1;
   bool isDataLoading = false;
   bool fetchingData = false;
 
@@ -7241,53 +7240,20 @@ class _RoomWidgetState extends State<RoomWidget> {
     }
   }
 
-  Future updateRoom(BuildContext context, int index, String roomID) async {
-    if (this.mounted) {
-      setState(() {
-        indexLoading = index;
-      });
-    }
-    try {
-      Map<String, dynamic> jsonInputData = {
-        "email": crypto.encrypt(widget.email),
-        "roomKey": crypto.encrypt(roomID)
-      };
-
-      final response = await createHTTPreq(
-          'update/room', http.post, widget.token, jsonInputData, context);
-
-      if (response.statusCode == 200) {
-        RoomEach tempData =
-            RoomEach.fromJson(jsonDecode(response.body)["data"]);
-        if (tempData.active) {
-          widget.RoomData.value[index] = tempData;
-        } else {
-          widget.RoomData.value.removeAt(index);
-          widget.ClosedRoomData.value.insert(0, tempData);
-        }
-      } else {
-        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
-            Icons.close);
-      }
-    } on Exception catch (err, stackTrace) {
-      if (this.mounted) {
-        onException(err, stackTrace,
-            reason: "Unknwon Error", info: ["DashBoard->updateRoom"]);
-      }
-    }
-
-    indexLoading = -1;
-    if (this.mounted) {
-      setState(() {});
-    }
-  }
-
   _MoveToNext(BuildContext context, int index) async {
     final dataFrom = await context.push(AppRouteConstants.roomRouteName +
         "/" +
-        widget.RoomData.value[index].roomKey) as bool;
-    if (dataFrom) {
-      await updateRoom(context, index, widget.RoomData.value[index].roomKey);
+        widget.RoomData.value[index].roomKey) as Map<String, dynamic>;
+
+    widget.RoomData.value[index].total = dataFrom["contribution"];
+    widget.RoomData.value[index].members = dataFrom["member"];
+    widget.RoomData.value[index].done = dataFrom["isDone"];
+    widget.RoomData.value[index].spend = dataFrom["spent"];
+    widget.RoomData.value[index].roomName = dataFrom["roomName"];
+    widget.RoomData.value[index].active = dataFrom["isClosed"];
+    if (!widget.RoomData.value[index].active) {
+      widget.ClosedRoomData.value.insert(0, widget.RoomData.value[index]);
+      widget.RoomData.value.removeAt(index);
     }
   }
 
@@ -7336,215 +7302,94 @@ class _RoomWidgetState extends State<RoomWidget> {
                     : Theme.of(context).primaryColor.withAlpha(95)),
             borderRadius: BorderRadius.circular(15.0),
           ),
-          child: indexLoading == index
-              ? Shimmer.fromColors(
-                  baseColor: Theme.of(context).cardColor,
-                  highlightColor: Theme.of(context).primaryColor,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.white,
-                        ),
-                        borderRadius: BorderRadius.all(Radius.circular(20))),
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 250,
-                            height: 18.0,
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: Colors.white,
-                                ),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(20))),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    width: 28.0,
-                                    height: 28.0,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      image: DecorationImage(
-                                          image: AssetImage(
-                                              'assets/Images/unknown.jpeg'),
-                                          fit: BoxFit.cover),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 20,
-                                    child: Container(
-                                      width: 28.0,
-                                      height: 28.0,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                'assets/Images/unknown.jpeg'),
-                                            fit: BoxFit.cover),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 40,
-                                    child: Container(
-                                      width: 28.0,
-                                      height: 28.0,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                'assets/Images/unknown.jpeg'),
-                                            fit: BoxFit.cover),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    left: 60,
-                                    child: Container(
-                                      width: 28.0,
-                                      height: 28.0,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        image: DecorationImage(
-                                            image: AssetImage(
-                                                'assets/Images/unknown.jpeg'),
-                                            fit: BoxFit.cover),
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 10.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 150,
-                                      height: 14.0,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                    ),
-                                    SizedBox(
-                                      height: 6,
-                                    ),
-                                    Container(
-                                      width: 150,
-                                      height: 14.0,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                    )
-                                  ],
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 150,
-                                      height: 14.0,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                    ),
-                                    SizedBox(
-                                      height: 6,
-                                    ),
-                                    Container(
-                                      width: 150,
-                                      height: 14.0,
-                                      decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                          ),
-                                          borderRadius: BorderRadius.all(
-                                              Radius.circular(20))),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+          child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Text(
-                                widget.RoomData.value[index].roomName,
-                                textScaler: TextScaler.linear(1.0),
-                                maxLines: 1,
-                                style: TextStyle(
-                                    fontSize: 22,
-                                    overflow: TextOverflow.ellipsis),
-                              ),
-                            ),
-                            widget.RoomData.value[index].done
-                                ? Icon(
-                                    Icons.lock_outline,
-                                    size: 26,
-                                  )
-                                : SizedBox()
-                          ],
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: FutureBuilder<List<dynamic>>(
-                              builder: (context,
-                                  AsyncSnapshot<List<dynamic>> snapshot) {
-                                List<Widget> allImages = [];
-                                if (snapshot.hasData) {
-                                  int length = min(4, snapshot.data!.length);
-                                  int leftMembers =
-                                      (snapshot.data!.length - length + 1);
-                                  for (int i = 0; i < length; i++) {
-                                    if (i == 0) {
-                                      allImages.add(CachedNetworkImage(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text(
+                            widget.RoomData.value[index].roomName,
+                            textScaler: TextScaler.linear(1.0),
+                            maxLines: 1,
+                            style: TextStyle(
+                                fontSize: 22, overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                        widget.RoomData.value[index].done
+                            ? Icon(
+                                Icons.lock_outline,
+                                size: 26,
+                              )
+                            : SizedBox()
+                      ],
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        child: FutureBuilder<List<dynamic>>(
+                          builder:
+                              (context, AsyncSnapshot<List<dynamic>> snapshot) {
+                            List<Widget> allImages = [];
+                            if (snapshot.hasData) {
+                              int length = min(4, snapshot.data!.length);
+                              int leftMembers =
+                                  (snapshot.data!.length - length + 1);
+                              for (int i = 0; i < length; i++) {
+                                if (i == 0) {
+                                  allImages.add(CachedNetworkImage(
+                                    httpHeaders: {
+                                      'Access-Control-Allow-Origin': '*'
+                                    },
+                                    imageUrl: crypto
+                                                .decrypt(
+                                                    snapshot.data![i]['pic'])
+                                                .length ==
+                                            0
+                                        ? addCorsinImage(
+                                            global.unknown_avatar_id)
+                                        : addCorsinImage(crypto
+                                            .decrypt(snapshot.data![i]['pic'])),
+                                    progressIndicatorBuilder: (context, url,
+                                            downloadProgress) =>
+                                        CircularProgressIndicator(
+                                            value: downloadProgress.progress),
+                                    errorWidget: (context, url, error) =>
+                                        Container(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                'assets/Images/unknown.jpeg'),
+                                            fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                    imageBuilder: (context, imageProvider) =>
+                                        Container(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: imageProvider,
+                                            fit: BoxFit.cover),
+                                      ),
+                                    ),
+                                  ));
+                                } else {
+                                  allImages.add(Positioned(
+                                      left: i * 20,
+                                      child: CachedNetworkImage(
                                         httpHeaders: {
                                           'Access-Control-Allow-Origin': '*'
                                         },
@@ -7586,222 +7431,170 @@ class _RoomWidgetState extends State<RoomWidget> {
                                                 fit: BoxFit.cover),
                                           ),
                                         ),
-                                      ));
-                                    } else {
-                                      allImages.add(Positioned(
-                                          left: i * 20,
-                                          child: CachedNetworkImage(
-                                            httpHeaders: {
-                                              'Access-Control-Allow-Origin': '*'
-                                            },
-                                            imageUrl: crypto
-                                                        .decrypt(snapshot
-                                                            .data![i]['pic'])
-                                                        .length ==
-                                                    0
-                                                ? addCorsinImage(
-                                                    global.unknown_avatar_id)
-                                                : addCorsinImage(crypto.decrypt(
-                                                    snapshot.data![i]['pic'])),
-                                            progressIndicatorBuilder: (context,
-                                                    url, downloadProgress) =>
-                                                CircularProgressIndicator(
-                                                    value: downloadProgress
-                                                        .progress),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    Container(
-                                              width: 28.0,
-                                              height: 28.0,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                    image: AssetImage(
-                                                        'assets/Images/unknown.jpeg'),
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                            imageBuilder:
-                                                (context, imageProvider) =>
-                                                    Container(
-                                              width: 28.0,
-                                              height: 28.0,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                image: DecorationImage(
-                                                    image: imageProvider,
-                                                    fit: BoxFit.cover),
-                                              ),
-                                            ),
-                                          )));
-                                    }
-                                    if (leftMembers > 1) {
-                                      allImages.add(Positioned(
-                                          left: 60,
-                                          child: Container(
-                                            width: 28.0,
-                                            height: 28.0,
-                                            decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.white),
-                                            child: Stack(
-                                              alignment: AlignmentDirectional
-                                                  .centerStart,
-                                              children: [
-                                                Positioned(
-                                                  left: leftMembers > 9
-                                                      ? -0.2
-                                                      : 2.5,
-                                                  child: Icon(
-                                                    Icons.add,
-                                                    color: Colors.black,
-                                                    size: 15,
-                                                  ),
-                                                ),
-                                                Positioned(
-                                                  bottom: 6.5,
-                                                  left:
-                                                      leftMembers > 9 ? 11 : 15,
-                                                  child: Text(
-                                                    leftMembers.toString(),
-                                                    style: TextStyle(
-                                                      color: Colors.black,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          )));
-                                    }
-                                  }
-                                } else if (snapshot.hasError) {
-                                  for (int i = 0;
-                                      i < widget.RoomData.value[index].members;
-                                      i++) {
-                                    if (i == 0) {
-                                      allImages.add(Container(
+                                      )));
+                                }
+                                if (leftMembers > 1) {
+                                  allImages.add(Positioned(
+                                      left: 60,
+                                      child: Container(
                                         width: 28.0,
                                         height: 28.0,
                                         decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          image: DecorationImage(
-                                              image: AssetImage(
-                                                  'assets/Images/unknown.jpeg'),
-                                              fit: BoxFit.cover),
-                                        ),
-                                      ));
-                                    } else {
-                                      allImages.add(Positioned(
-                                        left: i * 20,
-                                        child: Container(
-                                          width: 28.0,
-                                          height: 28.0,
-                                          decoration: BoxDecoration(
                                             shape: BoxShape.circle,
-                                            image: DecorationImage(
-                                                image: AssetImage(
-                                                    'assets/Images/unknown.jpeg'),
-                                                fit: BoxFit.cover),
-                                          ),
+                                            color: Colors.white),
+                                        child: Stack(
+                                          alignment:
+                                              AlignmentDirectional.centerStart,
+                                          children: [
+                                            Positioned(
+                                              left:
+                                                  leftMembers > 9 ? -0.2 : 2.5,
+                                              child: Icon(
+                                                Icons.add,
+                                                color: Colors.black,
+                                                size: 15,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              bottom: 6.5,
+                                              left: leftMembers > 9 ? 11 : 15,
+                                              child: Text(
+                                                leftMembers.toString(),
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ));
-                                    }
-                                  }
-                                } else {
-                                  return Center(
-                                    child: CircularProgressIndicator.adaptive(),
-                                  );
+                                      )));
                                 }
-                                return Stack(
-                                  children: allImages,
-                                );
-                              },
-                              future: getMembers(index),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Members: " +
-                                        widget.RoomData.value[index].members
-                                            .toString(),
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 13,
+                              }
+                            } else if (snapshot.hasError) {
+                              for (int i = 0;
+                                  i < widget.RoomData.value[index].members;
+                                  i++) {
+                                if (i == 0) {
+                                  allImages.add(Container(
+                                    width: 28.0,
+                                    height: 28.0,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      image: DecorationImage(
+                                          image: AssetImage(
+                                              'assets/Images/unknown.jpeg'),
+                                          fit: BoxFit.cover),
                                     ),
-                                  ),
-                                  InkWell(
-                                    onTap: () async {
-                                      if (!kIsWeb) {
-                                        await Share.share("Join " +
-                                            widget.RoomData.value[index]
-                                                .roomName +
-                                            "\nRoom Key: " +
-                                            widget
-                                                .RoomData.value[index].roomKey +
-                                            "\n" +
-                                            widget.RoomData.value[index]
-                                                .roomLink);
-                                      }
-                                    },
-                                    onLongPress: () async {
-                                      Clipboard.setData(ClipboardData(
-                                          text: widget
-                                              .RoomData.value[index].roomKey));
-                                      showToast(context, "Join Key Copied",
-                                          Icons.check);
-                                    },
-                                    child: Text(
-                                      "Room Key: " +
-                                          widget.RoomData.value[index].roomKey,
-                                      textScaler: TextScaler.linear(1.0),
-                                      style: TextStyle(
-                                        color: Theme.of(context).primaryColor,
-                                        fontSize: 13,
+                                  ));
+                                } else {
+                                  allImages.add(Positioned(
+                                    left: i * 20,
+                                    child: Container(
+                                      width: 28.0,
+                                      height: 28.0,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: AssetImage(
+                                                'assets/Images/unknown.jpeg'),
+                                            fit: BoxFit.cover),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ));
+                                }
+                              }
+                            } else {
+                              return Center(
+                                child: CircularProgressIndicator.adaptive(),
+                              );
+                            }
+                            return Stack(
+                              children: allImages,
+                            );
+                          },
+                          future: getMembers(index),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Members: " +
+                                    widget.RoomData.value[index].members
+                                        .toString(),
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                                ),
                               ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Contribution: ₹ " +
-                                        commaSeperator(widget
-                                            .RoomData.value[index].total
-                                            .toString()),
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 13,
-                                    ),
+                              InkWell(
+                                onTap: () async {
+                                  if (!kIsWeb) {
+                                    await Share.share("Join " +
+                                        widget.RoomData.value[index].roomName +
+                                        "\nRoom Key: " +
+                                        widget.RoomData.value[index].roomKey +
+                                        "\n" +
+                                        widget.RoomData.value[index].roomLink);
+                                  }
+                                },
+                                onLongPress: () async {
+                                  Clipboard.setData(ClipboardData(
+                                      text: widget
+                                          .RoomData.value[index].roomKey));
+                                  showToast(
+                                      context, "Join Key Copied", Icons.check);
+                                },
+                                child: Text(
+                                  "Room Key: " +
+                                      widget.RoomData.value[index].roomKey,
+                                  textScaler: TextScaler.linear(1.0),
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 13,
                                   ),
-                                  Text(
-                                    "Spent: ₹ " +
-                                        commaSeperator(widget
-                                            .RoomData.value[index].spend
-                                            .toString()),
-                                    style: TextStyle(
-                                      color: Theme.of(context).primaryColor,
-                                      fontSize: 13,
-                                    ),
-                                  )
-                                ],
-                              )
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                      ])),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Contribution: ₹ " +
+                                    commaSeperator(widget
+                                        .RoomData.value[index].total
+                                        .toString()),
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                "Spent: ₹ " +
+                                    commaSeperator(widget
+                                        .RoomData.value[index].spend
+                                        .toString()),
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 13,
+                                ),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ])),
         ),
       ),
       onTap: () async {

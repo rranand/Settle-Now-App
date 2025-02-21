@@ -2,15 +2,15 @@ import 'package:settlenow/others/crypto.dart';
 import '../functions/additionalFunction.dart';
 
 class RoomEach {
-  final String roomName;
-  final int members;
+  String roomName;
+  int members;
   final String roomKey;
-  final bool active;
-  final double total;
-  final double spend;
+  bool active;
+  double total;
+  double spend;
   final String date;
   final String roomLink;
-  final bool done;
+  bool done;
   final String roomID;
 
   RoomEach(
