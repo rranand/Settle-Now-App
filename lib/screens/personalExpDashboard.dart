@@ -47,6 +47,8 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
   bool fetchingData = false;
   bool isLoadingData = false;
   bool loadFirstTime = true;
+  String curPersonalExpDate =
+      (DateTime.now().month - 1).toString() + DateTime.now().year.toString();
 
   List<String> Year = [];
   Map<String, double> yearwiseSpend = {};
@@ -84,6 +86,16 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
           personalExpense.add(PersonalExpenseEach.fromJson(element));
         });
 
+        if (personalExpense.length == 0 ||
+            personalExpense[0].Date != curPersonalExpDate) {
+          personalExpense.insert(
+              0,
+              PersonalExpenseEach(
+                  Date: curPersonalExpDate,
+                  Total: 0,
+                  Month: global.Month[DateTime.now().month - 1],
+                  Year: DateTime.now().year.toString()));
+        }
         if (this.mounted) {
           setState(() {});
         }
@@ -645,8 +657,7 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
                                                 .scaffoldBackgroundColor,
                                             shape: RoundedRectangleBorder(
                                               side: BorderSide(
-                                                  color: personalExpense[0]
-                                                              .Date ==
+                                                  color: curPersonalExpDate ==
                                                           filterResult[index]
                                                               .Date
                                                       ? Theme.of(context)
@@ -753,7 +764,10 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
                                                   .scaffoldBackgroundColor,
                                               shape: RoundedRectangleBorder(
                                                 side: BorderSide(
-                                                    color: index == 0
+                                                    color: curPersonalExpDate ==
+                                                            personalExpense[
+                                                                    index]
+                                                                .Date
                                                         ? Theme.of(context)
                                                             .primaryColor
                                                         : Theme.of(context)

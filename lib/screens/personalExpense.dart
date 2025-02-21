@@ -35,7 +35,6 @@ class Expenses extends StatefulWidget {
 }
 
 class _ExpensesState extends State<Expenses> {
-  bool isPreviousPageNeedToBeUpdated = false;
   double totalExp = 0;
   String dateFromUrl = "";
   String _email = "";
@@ -242,7 +241,6 @@ class _ExpensesState extends State<Expenses> {
         int tempCategorIndex =
             expenseCategory.indexOf(crypto.decrypt(TransList[index]['type']));
         totalExp -= oldAmt;
-        isPreviousPageNeedToBeUpdated = true;
         TransList.removeAt(index);
         dataMap[tempCategorIndex].amount -= oldAmt;
       }
@@ -275,7 +273,6 @@ class _ExpensesState extends State<Expenses> {
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        isPreviousPageNeedToBeUpdated = true;
         double oldAmt =
             double.parse(crypto.decrypt(TransList[index]["amount"]));
         double curAmt = 0;
@@ -682,7 +679,6 @@ class _ExpensesState extends State<Expenses> {
       }
 
       if (response.statusCode == 200) {
-        isPreviousPageNeedToBeUpdated = true;
         TransList.insert(0, Tdata['data']);
         double curAmt = double.parse(crypto.decrypt(TransList[0]["amount"]));
         totalExp += curAmt;
