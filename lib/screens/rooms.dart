@@ -666,6 +666,7 @@ class _RoomExpenseState extends State<RoomExpense>
         }
         if (response.statusCode == 200) {
           allTransactionData.insert(0, PaymentDataEach.fromJson(Tdata['data']));
+          roomMembers[selfIndex].done = Tdata["roomClosed"];
           roomMembers[selfIndex].current += double.parse(amountPaid);
           roomMembers[membersListIndex].current -= double.parse(amountPaid);
 
