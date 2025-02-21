@@ -239,12 +239,11 @@ class _ExpensesState extends State<Expenses> {
       if (response.statusCode == 200) {
         double oldAmt =
             double.parse(crypto.decrypt(TransList[index]["amount"]));
+        int tempCategorIndex =
+            expenseCategory.indexOf(crypto.decrypt(TransList[index]['type']));
         totalExp -= oldAmt;
         isPreviousPageNeedToBeUpdated = true;
         TransList.removeAt(index);
-
-        int tempCategorIndex =
-            expenseCategory.indexOf(crypto.decrypt(TransList[index]['type']));
         dataMap[tempCategorIndex].amount -= oldAmt;
       }
       showToast(context, crypto.decrypt(TransData["Message"]),
