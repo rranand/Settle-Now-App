@@ -46,10 +46,10 @@ class _LendPageState extends State<LendPage> {
   final roomName = TextEditingController();
   List<dynamic> data = [];
   bool load = false;
-  bool isPreviousPageNeedToBeUpdated = false;
   int expenseIndex = -1;
   bool firstTimeLoad = true;
   List<Map> getContactsFromDB = [];
+  double totalExp = 0;
 
   @override
   void dispose() {
@@ -96,20 +96,18 @@ class _LendPageState extends State<LendPage> {
 
         final response = await createHTTPreq(
             'lend', http.delete, _token, jsonInputData, context);
-
+        final tempResData = jsonDecode(response.body);
         if (response.statusCode == 200) {
-          isPreviousPageNeedToBeUpdated = true;
+          data.insert(0, tempResData['data']);
+          totalExp += double.parse(crypto.decrypt(jsonInputData["amount"]!));
           _purpose.text = "";
           _amount.text = "";
           if (this.mounted) {
             context.pop();
           }
-          _refreshIndicatorKeyLendPage.currentState?.show();
         } else {
           showToast(
-              context,
-              crypto.decrypt(jsonDecode(response.body)["Message"]),
-              Icons.close);
+              context, crypto.decrypt(tempResData["Message"]), Icons.close);
         }
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {
@@ -120,6 +118,9 @@ class _LendPageState extends State<LendPage> {
           onException(err, stackTrace,
               reason: "Unknwon Error", info: ["LendPage->addLoan"]);
         }
+      }
+      if (this.mounted) {
+        setState(() {});
       }
     }
   }
@@ -185,7 +186,6 @@ class _LendPageState extends State<LendPage> {
           'updateRoomName/lendRoom', http.post, _token, jsonInputData, context);
 
       Tdata = jsonDecode(response.body);
-      isPreviousPageNeedToBeUpdated = true;
 
       if (this.mounted) {
         context.pop();
@@ -542,7 +542,7 @@ class _LendPageState extends State<LendPage> {
   }
 
   _updateTransaction(BuildContext context, String purpose, String id,
-      String amount, String flag) async {
+      String amount, String flag, int index) async {
     try {
       Map<String, String> jsonInputData = {
         "roomID": crypto.encrypt(widget.roomkey),
@@ -557,14 +557,29 @@ class _LendPageState extends State<LendPage> {
           'lend/transaction', http.delete, _token, jsonInputData, context);
 
       var updateMessage = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
-      isPreviousPageNeedToBeUpdated = true;
-      _refreshIndicatorKeyLendPage.currentState?.show();
+      if (response.statusCode == 200) {
+        totalExp -= double.parse(crypto.decrypt(data[index]["amount"]));
+        if (flag == "0") {
+          totalExp += double.parse(amount);
+          data[index]["amount"] = jsonInputData["amount"];
+          data[index]["purpose"] = jsonInputData["purpose"];
+          data[index]["isEdited"] = true;
+          data[index]["lastModDate"] = crypto.encrypt(
+              DateFormat(global.dateTimeFormat).format(DateTime.now()));
+        } else {
+          data.removeAt(index);
+        }
+      }
+      showToast(context, crypto.decrypt(updateMessage["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LendPage->_updateTransaction"]);
       }
+    }
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -591,15 +606,14 @@ class _LendPageState extends State<LendPage> {
     }
   }
 
-  Widget _buildUpdateDialog(
-      BuildContext context, String id, String purpose, String amount) {
+  Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
+      String amount, int index) {
     if (amount.isNotEmpty && amount[0] != "-") {
       EgaveMoney = true;
     }
+    _Epurpose.text = purpose;
+    _Eamount.text = amount.replaceAll("-", "");
     return StatefulBuilder(builder: (context, setState) {
-      _Epurpose.text = purpose;
-      _Eamount.text = amount.replaceAll("-", "");
-
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
           shape:
@@ -762,7 +776,8 @@ class _LendPageState extends State<LendPage> {
                                             id,
                                             (EgaveMoney ? "" : "-") +
                                                 _Eamount.text,
-                                            "0");
+                                            "0",
+                                            index);
                                         if (this.mounted) {
                                           context.pop();
                                         }
@@ -807,7 +822,8 @@ class _LendPageState extends State<LendPage> {
                                             id,
                                             (EgaveMoney ? "" : "-") +
                                                 _Eamount.text,
-                                            "1");
+                                            "1",
+                                            index);
                                         if (this.mounted) {
                                           context.pop();
                                         }
@@ -903,16 +919,13 @@ class _LendPageState extends State<LendPage> {
       var resData = jsonDecode(response.body);
       if (response.statusCode == 200) {
         data = resData['data'];
+        data = data.reversed.toList();
+        for (int i = 0; i < data.length; i++) {
+          totalExp += double.parse(crypto.decrypt(data[i]["amount"]));
+        }
         roomName.setText(crypto.decrypt(resData['name']));
         roomLink = crypto.decrypt(resData['roomLink']);
         objID = crypto.decrypt(resData['key']);
-        data.sort((b, a) {
-          DateTime tempDate_1 = new DateFormat(global.dateTimeFormat)
-              .parse(crypto.decrypt(a["date"]));
-          DateTime tempDate_2 = new DateFormat(global.dateTimeFormat)
-              .parse(crypto.decrypt(b["date"]));
-          return tempDate_1.compareTo(tempDate_2);
-        });
         if (firstTimeLoad) {
           expenseIndex = data
               .indexWhere((element) => crypto.decrypt(element['_id']) == objID);
@@ -996,14 +1009,17 @@ class _LendPageState extends State<LendPage> {
           'lend/delete', http.post, _token, jsonInputData, context);
 
       CloseData = jsonDecode(response.body);
-      isPreviousPageNeedToBeUpdated = true;
+      if (response.statusCode == 200) {
+        isClosedByYou = closed = true;
+      }
       for (int i = 0; i < 2 && context.canPop(); i++) {
         if (this.mounted) {
           context.pop();
         }
       }
-      context.pop(isPreviousPageNeedToBeUpdated);
-      showToast(context, crypto.decrypt(CloseData["Message"]), Icons.check);
+
+      showToast(context, crypto.decrypt(CloseData["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         context.pop();
@@ -1363,7 +1379,11 @@ class _LendPageState extends State<LendPage> {
             if (didPop) {
               return;
             }
-            context.pop(isPreviousPageNeedToBeUpdated);
+            Map<String, dynamic> objectToBeReturned = {};
+            objectToBeReturned["totalExp"] = totalExp;
+            objectToBeReturned["isClosed"] = closed;
+            objectToBeReturned["roomName"] = roomName.text;
+            context.pop(objectToBeReturned);
           }),
           child: RefreshIndicator(
               color: Theme.of(context).primaryColor,
@@ -1646,7 +1666,8 @@ class _LendPageState extends State<LendPage> {
                                                                             "purpose"]),
                                                                         crypto.decrypt(filteredResult[index]
                                                                             [
-                                                                            "amount"])),
+                                                                            "amount"]),
+                                                                        index),
                                                                   );
                                                                 },
                                                                 icon: Icon(
@@ -2003,7 +2024,8 @@ class _LendPageState extends State<LendPage> {
                                                                             "purpose"]),
                                                                         crypto.decrypt(data[index]
                                                                             [
-                                                                            "amount"])),
+                                                                            "amount"]),
+                                                                        index),
                                                                   );
                                                                 },
                                                                 icon: Icon(

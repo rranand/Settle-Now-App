@@ -32,7 +32,6 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
   List<dynamic> filteredResult = [];
   bool load = false;
   bool validateText = false;
-  int indexLoading = -1;
   TextEditingController _name = TextEditingController();
   GlobalKey<RefreshIndicatorState> _refreshIndicatorKeyLendDenDashboard =
       new GlobalKey<RefreshIndicatorState>();
@@ -72,45 +71,6 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
       }
     }
 
-    if (this.mounted) {
-      setState(() {});
-    }
-  }
-
-  Future updateRoom(BuildContext context, int index, String roomID) async {
-    if (this.mounted) {
-      setState(() {
-        indexLoading = index;
-      });
-    }
-    try {
-      Map<String, String> jsonInputData = {
-        "email": crypto.encrypt(_email),
-        "roomKey": roomID
-      };
-
-      final response = await createHTTPreq(
-          'update/lend', http.post, _token, jsonInputData, context);
-
-      if (response.statusCode == 200) {
-        bool isDeleted = jsonDecode(response.body)["isDeleted"];
-        if (isDeleted) {
-          data.removeAt(index);
-        } else {
-          data[index] = jsonDecode(response.body)["data"];
-        }
-      } else {
-        showToast(context, crypto.decrypt(jsonDecode(response.body)['Message']),
-            Icons.close);
-      }
-    } on Exception catch (err, stackTrace) {
-      if (this.mounted) {
-        onException(err, stackTrace,
-            reason: "Unknwon Error", info: ["LendDenDashboard->updateRoom"]);
-      }
-    }
-
-    indexLoading = -1;
     if (this.mounted) {
       setState(() {});
     }
@@ -310,10 +270,16 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
                                               "/" +
                                               crypto.decrypt(
                                                   filteredResult[index]["key"]),
-                                        ) as bool;
-                                        if (dataFrom) {
-                                          await updateRoom(context, index,
-                                              filteredResult[index]["key"]);
+                                        ) as Map<String, dynamic>;
+                                        filteredResult[index]["total"] =
+                                            crypto.encrypt(dataFrom["totalExp"]
+                                                .toStringAsFixed(2));
+                                        filteredResult[index]["name"] = crypto
+                                            .encrypt(dataFrom["roomName"]);
+                                        filteredResult[index]["isClosedByYou"] =
+                                            dataFrom["isClosed"];
+                                        if (this.mounted) {
+                                          setState(() {});
                                         }
                                       }
                                     },
@@ -332,130 +298,58 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
                                         borderRadius:
                                             BorderRadius.circular(15.0),
                                       ),
-                                      child: indexLoading == index
-                                          ? Shimmer.fromColors(
-                                              baseColor:
-                                                  Theme.of(context).cardColor,
-                                              highlightColor: Theme.of(context)
-                                                  .primaryColor,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Container(
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            12.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 180,
-                                                          height: 20,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  border: Border
-                                                                      .all(
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                  borderRadius:
-                                                                      BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              20))),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 20,
-                                                        ),
-                                                        Container(
-                                                          width: 110,
-                                                          height: 20,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  border: Border
-                                                                      .all(
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                  borderRadius:
-                                                                      BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              20))),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            InkWell(
+                                              child: Text(
+                                                crypto.decrypt(
+                                                    filteredResult[index]
+                                                        ["name"]),
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w500,
+                                                  foreground: kIsWeb
+                                                      ? null
+                                                      : (Paint()
+                                                        ..shader =
+                                                            linearGradient_1),
                                                 ),
                                               ),
-                                            )
-                                          : Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                  InkWell(
-                                                    child: Text(
-                                                      crypto.decrypt(
-                                                          filteredResult[index]
-                                                              ["name"]),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        foreground: kIsWeb
-                                                            ? null
-                                                            : (Paint()
-                                                              ..shader =
-                                                                  linearGradient_1),
-                                                      ),
-                                                    ),
-                                                    onTap: () async {
-                                                      showToast(
-                                                          context,
-                                                          crypto.decrypt(
-                                                              filteredResult[
-                                                                      index]
-                                                                  ["name"]),
-                                                          Icons.check);
-                                                    },
-                                                  ),
-                                                  SizedBox(
-                                                    height: 20,
-                                                  ),
-                                                  Text(
-                                                    "₹ " +
-                                                        commaSeperator(crypto
-                                                            .decrypt(
-                                                                filteredResult[
-                                                                        index]
-                                                                    ["total"])),
-                                                    style: TextStyle(
-                                                      fontSize: 18,
-                                                      color: crypto.decrypt(
-                                                                  filteredResult[
-                                                                          index]
-                                                                      [
-                                                                      "total"])[0] ==
-                                                              '-'
-                                                          ? Colors.red
-                                                          : Colors.green,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ]),
+                                              onTap: () async {
+                                                showToast(
+                                                    context,
+                                                    crypto.decrypt(
+                                                        filteredResult[index]
+                                                            ["name"]),
+                                                    Icons.check);
+                                              },
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                            ),
+                                            Text(
+                                              "₹ " +
+                                                  commaSeperator(crypto.decrypt(
+                                                      filteredResult[index]
+                                                          ["total"])),
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                color: crypto.decrypt(
+                                                            filteredResult[
+                                                                    index]
+                                                                ["total"])[0] ==
+                                                        '-'
+                                                    ? Colors.red
+                                                    : Colors.green,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ]),
                                     ),
                                   ),
                                 );
@@ -501,10 +395,16 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
                                               "/" +
                                               crypto
                                                   .decrypt(data[index]["key"]),
-                                        ) as bool;
-                                        if (dataFrom) {
-                                          await updateRoom(context, index,
-                                              data[index]["key"]);
+                                        ) as Map<String, dynamic>;
+                                        data[index]["total"] = crypto.encrypt(
+                                            dataFrom["totalExp"]
+                                                .toStringAsFixed(2));
+                                        data[index]["name"] = crypto
+                                            .encrypt(dataFrom["roomName"]);
+                                        data[index]["isClosedByYou"] =
+                                            dataFrom["isClosed"];
+                                        if (this.mounted) {
+                                          setState(() {});
                                         }
                                       }
                                     },
@@ -522,126 +422,54 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
                                         borderRadius:
                                             BorderRadius.circular(15.0),
                                       ),
-                                      child: indexLoading == index
-                                          ? Shimmer.fromColors(
-                                              baseColor:
-                                                  Theme.of(context).cardColor,
-                                              highlightColor: Theme.of(context)
-                                                  .primaryColor,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8.0),
-                                                child: Container(
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            12.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .center,
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: [
-                                                        Container(
-                                                          width: 180,
-                                                          height: 20,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  border: Border
-                                                                      .all(
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                  borderRadius:
-                                                                      BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              20))),
-                                                        ),
-                                                        SizedBox(
-                                                          height: 20,
-                                                        ),
-                                                        Container(
-                                                          width: 110,
-                                                          height: 20,
-                                                          decoration:
-                                                              BoxDecoration(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  border: Border
-                                                                      .all(
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                  borderRadius:
-                                                                      BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              20))),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            InkWell(
+                                              child: Text(
+                                                crypto.decrypt(
+                                                    data[index]["name"]),
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.w500,
+                                                  foreground: kIsWeb
+                                                      ? null
+                                                      : (Paint()
+                                                        ..shader =
+                                                            linearGradient_1),
                                                 ),
                                               ),
-                                            )
-                                          : Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                  InkWell(
-                                                    child: Text(
-                                                      crypto.decrypt(
-                                                          data[index]["name"]),
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        foreground: kIsWeb
-                                                            ? null
-                                                            : (Paint()
-                                                              ..shader =
-                                                                  linearGradient_1),
-                                                      ),
-                                                    ),
-                                                    onTap: () async {
-                                                      showToast(
-                                                          context,
-                                                          crypto.decrypt(
-                                                              data[index]
-                                                                  ["name"]),
-                                                          Icons.check);
-                                                    },
-                                                  ),
-                                                  SizedBox(
-                                                    height: 20,
-                                                  ),
-                                                  Text(
-                                                    "₹ " +
-                                                        commaSeperator(crypto
-                                                            .decrypt(data[index]
-                                                                ["total"])),
-                                                    style: TextStyle(
-                                                      fontSize: 18,
-                                                      color: crypto.decrypt(data[
-                                                                          index]
-                                                                      [
-                                                                      "total"])[
-                                                                  0] ==
-                                                              '-'
-                                                          ? Colors.red
-                                                          : Colors.green,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                    ),
-                                                  ),
-                                                ]),
+                                              onTap: () async {
+                                                showToast(
+                                                    context,
+                                                    crypto.decrypt(
+                                                        data[index]["name"]),
+                                                    Icons.check);
+                                              },
+                                            ),
+                                            SizedBox(
+                                              height: 20,
+                                            ),
+                                            Text(
+                                              "₹ " +
+                                                  commaSeperator(crypto.decrypt(
+                                                      data[index]["total"])),
+                                              style: TextStyle(
+                                                fontSize: 18,
+                                                color: crypto.decrypt(
+                                                            data[index]
+                                                                ["total"])[0] ==
+                                                        '-'
+                                                    ? Colors.red
+                                                    : Colors.green,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ]),
                                     ),
                                   ),
                                 );
