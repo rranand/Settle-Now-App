@@ -275,10 +275,6 @@ class _RoomExpenseState extends State<RoomExpense>
         isRoomActive = crypto.decrypt(data['isRoomActive']) == "true";
         objID = crypto.decrypt(data['objID']);
 
-        if (isRoomActive) {
-          getFriendData();
-        }
-
         Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
         categoryMap.forEach((key, value) {
           expenseCategory.add(key);
@@ -906,6 +902,9 @@ class _RoomExpenseState extends State<RoomExpense>
         getContactsFromDB = await getContactsFromLocal();
       }
       _initialisation();
+      if (isRoomActive) {
+        getFriendData();
+      }
       _extractExpenseData();
       _getPaymentData();
     } else {
@@ -2165,8 +2164,7 @@ class _RoomExpenseState extends State<RoomExpense>
                           RoomKey: widget.roomKey,
                           Email: _email,
                           Token: _token,
-                          refreshIndicatorKeyExpenseData:
-                              _refreshIndicatorKeyRooms,
+                          refreshMemberTrans: _initialisation,
                           locked: locked,
                           isPreviousPageNeedToBeUpdated:
                               isPreviousPageNeedToBeUpdated,
@@ -5249,7 +5247,7 @@ class ExpenseData extends StatefulWidget {
   final bool locked;
   final List<dynamic> expenseCategory;
   final List<List<dynamic>> subCategory;
-  final GlobalKey<RefreshIndicatorState> refreshIndicatorKeyExpenseData;
+  final Function refreshMemberTrans;
   final ValueNotifier isPreviousPageNeedToBeUpdated;
   final int index;
   final ScrollController scrollController;
@@ -5259,7 +5257,7 @@ class ExpenseData extends StatefulWidget {
       required this.RoomKey,
       required this.Email,
       required this.Token,
-      required this.refreshIndicatorKeyExpenseData,
+      required this.refreshMemberTrans,
       required this.locked,
       required this.isPreviousPageNeedToBeUpdated,
       required this.expenseCategory,
@@ -5279,6 +5277,8 @@ class _ExpenseDataState extends State<ExpenseData> {
   int roomSubExpenseCategoryIndex = -1;
   GlobalKey<FormState> _updateExpenseRoom = GlobalKey<FormState>();
   AutoScrollController controller = AutoScrollController();
+  DateFormat dateFormat = DateFormat("yyyy-MM-dd HH:mm:ss");
+  DateFormat dateFormat_new = DateFormat("MMM dd yyyy HH:mm:ss");
 
   @override
   void initState() {
@@ -5306,10 +5306,14 @@ class _ExpenseDataState extends State<ExpenseData> {
   }
 
   updateExpenseManual(List<dynamic> memberExpense, String id, String type,
-      int typeCat, int subType) async {
+      int typeCat, int subType, int index) async {
     try {
       Map<String, String> splitMember = {};
+      double updatedTotalAmount = 0;
+
       for (int i = 0; i < memberExpense.length; i++) {
+        updatedTotalAmount += double.parse(crypto.decrypt(
+            memberExpense[i]['amt'].toString().replaceFirst(".0", "")));
         splitMember[crypto.decrypt(memberExpense[i]['Email'])] = crypto
             .decrypt(memberExpense[i]['amt'].toString().replaceFirst(".0", ""));
       }
@@ -5338,12 +5342,34 @@ class _ExpenseDataState extends State<ExpenseData> {
           'manualSplit', http.put, widget.Token, jsonInputData, context);
 
       var updateMessage = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
-      widget.isPreviousPageNeedToBeUpdated.value = true;
-      widget.refreshIndicatorKeyExpenseData.currentState?.show();
+      showToast(context, crypto.decrypt(updateMessage["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
+      if (response.statusCode == 200) {
+        widget.refreshMemberTrans();
+        if (type == "0") {
+          var curDateTime = DateTime.now().toString();
+          DateTime dateTime = dateFormat.parse(curDateTime);
+          String dateTimeFormatted = dateFormat_new.format(dateTime);
+
+          widget.TransList[index]["members"] = memberExpense;
+          widget.TransList[index]["Amount"] =
+              crypto.encrypt(updatedTotalAmount.toStringAsFixed(2));
+          widget.TransList[index]["Purpose"] = jsonInputData['purpose'];
+          widget.TransList[index]["Type"] = jsonInputData['typeCat'];
+          widget.TransList[index]["subType"] = jsonInputData['subType'];
+          widget.TransList[index]["isEdited"] = true;
+          widget.TransList[index]["lastModDate"] =
+              crypto.encrypt(dateTimeFormatted);
+        } else {
+          widget.TransList.removeAt(index);
+        }
+      }
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->updateExpenseManual"]);
+    }
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -5353,7 +5379,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       String purpose,
       String id,
       int roomExpenseCategory,
-      int roomsubExpenseCategory) {
+      int roomsubExpenseCategory,
+      int index) {
     List<dynamic> memberExpense = memberExpenseOG.toList();
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     GlobalKey<FormState> _manualSplitKeysplitManuallyWidget =
@@ -5775,7 +5802,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           id,
                                           "0",
                                           roomExpenseCategory,
-                                          roomsubExpenseCategory);
+                                          roomsubExpenseCategory,
+                                          index);
                                       for (int i = 0;
                                           i < 3 && context.canPop();
                                           i++) {
@@ -5808,7 +5836,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       String flag,
       String split,
       int roomExpenseTypeIndex,
-      int roomSubExpenseTypeIndex) async {
+      int roomSubExpenseTypeIndex,
+      int index) async {
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(widget.Email),
@@ -5829,17 +5858,44 @@ class _ExpenseDataState extends State<ExpenseData> {
           'transaction', http.patch, widget.Token, jsonInputData, context);
 
       var updateMessage = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(updateMessage["Message"]), Icons.check);
-      widget.isPreviousPageNeedToBeUpdated.value = true;
-      widget.refreshIndicatorKeyExpenseData.currentState?.show();
+      showToast(context, crypto.decrypt(updateMessage["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
+      if (response.statusCode == 200) {
+        widget.refreshMemberTrans();
+        if (flag == "0") {
+          var curDateTime = DateTime.now().toString();
+          DateTime dateTime = dateFormat.parse(curDateTime);
+          String dateTimeFormatted = dateFormat_new.format(dateTime);
+
+          widget.TransList[index]["Purpose"] = jsonInputData['purpose'];
+          widget.TransList[index]["Amount"] = jsonInputData['amount'];
+          widget.TransList[index]["Type"] = jsonInputData['type'];
+          widget.TransList[index]["subType"] = jsonInputData['subType'];
+          widget.TransList[index]["isEdited"] = true;
+          widget.TransList[index]["lastModDate"] =
+              crypto.encrypt(dateTimeFormatted);
+        } else {
+          widget.TransList.removeAt(index);
+        }
+      }
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_updateTransaction"]);
     }
+    if (this.mounted) {
+      setState(() {});
+    }
   }
 
-  Widget _buildUpdateDialog(BuildContext context, String id, String purpose,
-      String amount, String split, String category, String subCategory) {
+  Widget _buildUpdateDialog(
+      BuildContext context,
+      String id,
+      String purpose,
+      String amount,
+      String split,
+      String category,
+      String subCategory,
+      int index) {
     roomExpenseCategoryIndex = widget.expenseCategory.indexOf(category);
     roomSubExpenseCategoryIndex =
         widget.subCategory[roomExpenseCategoryIndex].indexOf(subCategory);
@@ -6068,7 +6124,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                         "0",
                                         split,
                                         roomExpenseCategoryIndex,
-                                        roomSubExpenseCategoryIndex);
+                                        roomSubExpenseCategoryIndex,
+                                        index);
                                     if (this.mounted) {
                                       context.pop();
                                     }
@@ -6131,7 +6188,8 @@ class _ExpenseDataState extends State<ExpenseData> {
           http.post, widget.Token, jsonInputData, context);
 
       var data = jsonDecode(response.body);
-      showToast(context, crypto.decrypt(data["Message"]), Icons.check);
+      showToast(context, crypto.decrypt(data["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->addToPersonalExpense"]);
@@ -6165,7 +6223,8 @@ class _ExpenseDataState extends State<ExpenseData> {
       String subType,
       bool isEdited,
       String lastModDate,
-      bool manualSplit) {
+      bool manualSplit,
+      int index) {
     return StatefulBuilder(builder: (context, setState) {
       final themeProvider = Provider.of<ThemeProvider>(context);
       return Dialog(
@@ -6206,7 +6265,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           widget.subCategory[widget
                                                   .expenseCategory
                                                   .indexOf(type)]
-                                              .indexOf(subType));
+                                              .indexOf(subType),
+                                          index);
                                     } else {
                                       await _updateTransaction(
                                           context,
@@ -6219,7 +6279,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                           widget.subCategory[widget
                                                   .expenseCategory
                                                   .indexOf(type)]
-                                              .indexOf(subType));
+                                              .indexOf(subType),
+                                          index);
                                     }
 
                                     if (this.mounted) {
@@ -6247,7 +6308,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                       widget.subCategory[widget
                                                               .expenseCategory
                                                               .indexOf(type)]
-                                                          .indexOf(subType))
+                                                          .indexOf(subType),
+                                                      index)
                                                   : _buildUpdateDialog(
                                                       context,
                                                       id,
@@ -6257,7 +6319,8 @@ class _ExpenseDataState extends State<ExpenseData> {
                                                           ? "0"
                                                           : "1",
                                                       type,
-                                                      subType),
+                                                      subType,
+                                                      index),
                                     );
                                   },
                                   icon: Icon(Icons.edit)),
@@ -6534,24 +6597,25 @@ class _ExpenseDataState extends State<ExpenseData> {
                   _amount.text =
                       crypto.decrypt(widget.TransList[index]["Amount"]);
                   showDialog(
-                    context: context,
-                    builder: (BuildContext context) => _buildPopupDialog(
-                        context,
-                        crypto.decrypt(widget.TransList[index]["Name"]),
-                        formatDateTime(
-                            crypto.decrypt(widget.TransList[index]["Date"])),
-                        crypto.decrypt(widget.TransList[index]["Email"]),
-                        crypto.decrypt(widget.TransList[index]["id"]),
-                        crypto.decrypt(widget.TransList[index]["Purpose"]),
-                        crypto.decrypt(widget.TransList[index]["Amount"]),
-                        widget.locked,
-                        partialExpense,
-                        crypto.decrypt(widget.TransList[index]["Type"]),
-                        crypto.decrypt(widget.TransList[index]["subType"]),
-                        widget.TransList[index]["isEdited"],
-                        crypto.decrypt(widget.TransList[index]["lastModDate"]),
-                        widget.TransList[index]["isManualSplit"]),
-                  );
+                      context: context,
+                      builder: (BuildContext context) => _buildPopupDialog(
+                          context,
+                          crypto.decrypt(widget.TransList[index]["Name"]),
+                          formatDateTime(
+                              crypto.decrypt(widget.TransList[index]["Date"])),
+                          crypto.decrypt(widget.TransList[index]["Email"]),
+                          crypto.decrypt(widget.TransList[index]["id"]),
+                          crypto.decrypt(widget.TransList[index]["Purpose"]),
+                          crypto.decrypt(widget.TransList[index]["Amount"]),
+                          widget.locked,
+                          partialExpense,
+                          crypto.decrypt(widget.TransList[index]["Type"]),
+                          crypto.decrypt(widget.TransList[index]["subType"]),
+                          widget.TransList[index]["isEdited"],
+                          crypto
+                              .decrypt(widget.TransList[index]["lastModDate"]),
+                          widget.TransList[index]["isManualSplit"],
+                          index));
                 },
                 child: SizedBox(
                     height: 185,
