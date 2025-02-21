@@ -237,11 +237,18 @@ class _ExpensesState extends State<Expenses> {
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        totalExp -= double.parse(crypto.decrypt(TransList[index]["amount"]));
+        double oldAmt =
+            double.parse(crypto.decrypt(TransList[index]["amount"]));
+        totalExp -= oldAmt;
         isPreviousPageNeedToBeUpdated = true;
         TransList.removeAt(index);
+
+        int tempCategorIndex =
+            expenseCategory.indexOf(crypto.decrypt(TransList[index]['type']));
+        dataMap[tempCategorIndex].amount -= oldAmt;
       }
-      showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
+      showToast(context, crypto.decrypt(TransData["Message"]),
+          response.statusCode == 200 ? Icons.check : Icons.close);
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
         onException(err, stackTrace,
@@ -270,18 +277,24 @@ class _ExpensesState extends State<Expenses> {
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
         isPreviousPageNeedToBeUpdated = true;
+        double oldAmt =
+            double.parse(crypto.decrypt(TransList[index]["amount"]));
+        double curAmt = 0;
         if (flag == "1") {
-          totalExp -= double.parse(crypto.decrypt(TransList[index]["amount"]));
+          totalExp -= oldAmt;
           TransList.removeAt(index);
         } else {
-          totalExp += double.parse(amount) -
-              double.parse(crypto.decrypt(TransList[index]["amount"]));
+          curAmt = double.parse(amount);
+          totalExp += curAmt - oldAmt;
           TransList[index]['amount'] = crypto.encrypt(amount);
           TransList[index]['purpose'] = crypto.encrypt(purpose);
           TransList[index]['isEdited'] = true;
           TransList[index]['lastModDate'] = crypto.encrypt(
               DateFormat(global.dateTimeFormat).format(DateTime.now()));
         }
+        int tempCategorIndex =
+            expenseCategory.indexOf(crypto.decrypt(TransList[index]['type']));
+        dataMap[tempCategorIndex].amount += curAmt - oldAmt;
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
     } on Exception catch (err, stackTrace) {
@@ -302,7 +315,7 @@ class _ExpensesState extends State<Expenses> {
     TextEditingController _updateamount = TextEditingController();
 
     return StatefulBuilder(builder: (context, setState) {
-      _updateamount.text = amount.substring(2);
+      _updateamount.text = amount.substring(2).replaceAll(",", "");
       _updatepurpose.text = purpose;
 
       final themeProvider = Provider.of<ThemeProvider>(context);
@@ -672,7 +685,9 @@ class _ExpensesState extends State<Expenses> {
       if (response.statusCode == 200) {
         isPreviousPageNeedToBeUpdated = true;
         TransList.insert(0, Tdata['data']);
-        totalExp += double.parse(crypto.decrypt(TransList[0]["amount"]));
+        double curAmt = double.parse(crypto.decrypt(TransList[0]["amount"]));
+        totalExp += curAmt;
+        dataMap[categoryIndex].amount += curAmt;
       }
 
       if (response.statusCode == 422) {
