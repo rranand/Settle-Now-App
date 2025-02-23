@@ -67,7 +67,7 @@ class _RoomExpenseState extends State<RoomExpense>
       new GlobalKey<RefreshIndicatorState>();
   bool isClear = false;
   bool loaded = false;
-  bool loadFriendData = false;
+  ValueNotifier<bool> loadFriendData = new ValueNotifier(false);
   double heightExpense = 0;
   String paymentTotalALL = "";
   bool loadingPaymentData = false;
@@ -273,6 +273,10 @@ class _RoomExpenseState extends State<RoomExpense>
         isRoomActive = crypto.decrypt(data['isRoomActive']) == "true";
         objID = crypto.decrypt(data['objID']);
 
+        if (isRoomActive) {
+          getFriendData();
+        }
+
         Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
         categoryMap.forEach((key, value) {
           expenseCategory.add(key);
@@ -359,14 +363,10 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Future<void> getFriendData() async {
-    if (!isRoomActive) {
-      return null;
-    }
-
     try {
       if (this.mounted) {
         setState(() {
-          loadFriendData = false;
+          loadFriendData.value = false;
           friendData.clear();
         });
       }
@@ -384,7 +384,6 @@ class _RoomExpenseState extends State<RoomExpense>
         for (int i = 0; i < tempData.length; i++) {
           friendData.add(FriendEach.fromJson(tempData[i]));
         }
-        loadFriendData = true;
       } else {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       }
@@ -394,6 +393,8 @@ class _RoomExpenseState extends State<RoomExpense>
     }
 
     friendData = getUnionOfContacts(getContactsFromDB, friendData);
+    loadFriendData.value = true;
+
     if (this.mounted) {
       setState(() {});
     }
@@ -897,9 +898,6 @@ class _RoomExpenseState extends State<RoomExpense>
         getContactsFromDB = await getContactsFromLocal();
       }
       _initialisation();
-      if (isRoomActive) {
-        getFriendData();
-      }
       _extractExpenseData();
       _getPaymentData();
     } else {
@@ -920,234 +918,262 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Widget addFriendWidget() {
-    return Container(
-        width: MediaQuery.of(context).size.width,
-        child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Invite Member",
-                      style: TextStyle(fontSize: 22),
-                    ),
-                    Row(
+    if (this.mounted) {
+      setState(() {});
+    }
+    return StatefulBuilder(builder: (context, setState_1) {
+      return ValueListenableBuilder(
+          valueListenable: loadFriendData,
+          builder: (BuildContext context, bool loadFriendData, Widget? child) {
+            return Container(
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                            onPressed: () async {
-                              if (this.mounted) {
-                                setState(() {
-                                  loadFriendData = false;
-                                });
-                                await getFriendData();
-                                setState(() {
-                                  loadFriendData = true;
-                                });
-                              }
-                            },
-                            icon: Icon(
-                              Icons.refresh_outlined,
-                              size: 26,
-                            )),
-                        kIsWeb
-                            ? SizedBox()
-                            : IconButton(
-                                onPressed: () async {
-                                  await Share.share("Join " +
-                                      roomName.text +
-                                      "\nRoom Key: " +
-                                      widget.roomKey +
-                                      "\n" +
-                                      roomLink);
-                                },
-                                icon: Icon(
-                                  Icons.send,
-                                  size: 26,
-                                )),
-                      ],
-                    )
-                  ],
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                loadFriendData
-                    ? friendData.isEmpty
-                        ? SizedBox(
-                            height: MediaQuery.of(context).size.height - 310,
-                            child: Center(
-                              child: Text(
-                                "No User Found",
-                                style: TextStyle(fontSize: 20),
-                              ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Invite Member",
+                              style: TextStyle(fontSize: 22),
                             ),
-                          )
-                        : Column(
-                            children: [
-                              TextField(
-                                controller: _searchFriend,
-                                keyboardType: TextInputType.text,
-                                maxLines: 1,
-                                style: const TextStyle(fontSize: 15),
-                                autocorrect: false,
-                                decoration: InputDecoration(
-                                  contentPadding: const EdgeInsets.all(8.0),
-                                  labelText: "Enter Name",
-                                  counterText: "",
-                                  errorStyle: const TextStyle(fontSize: 15),
-                                ),
-                                onChanged: (String s) {
-                                  if (this.mounted) {
-                                    setState(() {
-                                      _searchFriend.text = s;
-                                      _searchFriend.selection =
-                                          TextSelection.collapsed(
-                                              offset:
-                                                  _searchFriend.text.length);
-                                    });
-                                  }
-                                  SearchFriend();
-                                },
-                              ),
-                              SizedBox(
-                                height: 13,
-                              ),
-                              SingleChildScrollView(
-                                child: SizedBox(
-                                  height:
-                                      MediaQuery.of(context).size.height - 335,
-                                  child: _searchFriend.text.isEmpty
-                                      ? friendListWidget(context, friendData)
-                                      : (friendDataSearched.isEmpty
-                                          ? Center(
-                                              child: Text(
-                                                "No User Found",
-                                                style: TextStyle(fontSize: 18),
-                                              ),
-                                            )
-                                          : friendListWidget(
-                                              context, friendDataSearched)),
-                                ),
-                              ),
-                            ],
-                          )
-                    : SizedBox(
-                        height: MediaQuery.of(context).size.height - 310,
-                        child: Shimmer.fromColors(
-                            baseColor: Theme.of(context).cardColor,
-                            highlightColor: Theme.of(context).primaryColor,
-                            child: Column(
+                            Row(
                               children: [
-                                TextField(
-                                  controller: _searchFriend,
-                                  keyboardType: TextInputType.text,
-                                  maxLines: 1,
-                                  style: const TextStyle(fontSize: 15),
-                                  autocorrect: false,
-                                  decoration: InputDecoration(
-                                    contentPadding: const EdgeInsets.all(8.0),
-                                    labelText: "Enter Name",
-                                    counterText: "",
-                                    errorStyle: const TextStyle(fontSize: 15),
-                                  ),
-                                  onChanged: (String s) {
-                                    if (this.mounted) {
-                                      setState(() {
-                                        _searchFriend.text = s;
-                                        _searchFriend.selection =
-                                            TextSelection.collapsed(
-                                                offset:
-                                                    _searchFriend.text.length);
-                                      });
-                                    }
-                                    SearchFriend();
-                                  },
-                                ),
-                                SizedBox(
-                                  height: 13,
-                                ),
-                                SingleChildScrollView(
-                                  child: SizedBox(
-                                      height: 500,
-                                      child: ListView.separated(
-                                          separatorBuilder: (context, index) =>
-                                              SizedBox(
-                                                height: 5,
-                                              ),
-                                          shrinkWrap: true,
-                                          itemCount: 16,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            return Padding(
-                                              padding:
-                                                  const EdgeInsets.all(12.0),
-                                              child: Container(
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                                height: 75,
-                                                decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                      color: Colors.white,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                            Radius.circular(
-                                                                20))),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(
-                                                      12.0),
-                                                  child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceBetween,
-                                                      children: [
-                                                        Container(
-                                                            width: 45,
-                                                            height: 45,
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              shape: BoxShape
-                                                                  .circle,
-                                                              image: DecorationImage(
-                                                                  image: AssetImage(
-                                                                      'assets/Images/unknown.jpeg'),
-                                                                  fit: BoxFit
-                                                                      .cover),
-                                                            )),
-                                                        Container(
-                                                          width: 200,
-                                                          height: 15.0,
-                                                          decoration:
-                                                              BoxDecoration(
+                                IconButton(
+                                    onPressed: () async {
+                                      if (this.mounted) {
+                                        setState_1(() {
+                                          loadFriendData = false;
+                                        });
+                                        await getFriendData();
+                                        setState_1(() {
+                                          loadFriendData = true;
+                                        });
+                                      }
+                                    },
+                                    icon: Icon(
+                                      Icons.refresh_outlined,
+                                      size: 26,
+                                    )),
+                                kIsWeb
+                                    ? SizedBox()
+                                    : IconButton(
+                                        onPressed: () async {
+                                          await Share.share("Join " +
+                                              roomName.text +
+                                              "\nRoom Key: " +
+                                              widget.roomKey +
+                                              "\n" +
+                                              roomLink);
+                                        },
+                                        icon: Icon(
+                                          Icons.send,
+                                          size: 26,
+                                        )),
+                              ],
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        loadFriendData
+                            ? friendData.isEmpty
+                                ? SizedBox(
+                                    height: MediaQuery.of(context).size.height -
+                                        310,
+                                    child: Center(
+                                      child: Text(
+                                        "No User Found",
+                                        style: TextStyle(fontSize: 20),
+                                      ),
+                                    ),
+                                  )
+                                : Column(
+                                    children: [
+                                      TextField(
+                                        controller: _searchFriend,
+                                        keyboardType: TextInputType.text,
+                                        maxLines: 1,
+                                        style: const TextStyle(fontSize: 15),
+                                        autocorrect: false,
+                                        decoration: InputDecoration(
+                                          contentPadding:
+                                              const EdgeInsets.all(8.0),
+                                          labelText: "Enter Name",
+                                          counterText: "",
+                                          errorStyle:
+                                              const TextStyle(fontSize: 15),
+                                        ),
+                                        onChanged: (String s) {
+                                          if (this.mounted) {
+                                            setState(() {
+                                              _searchFriend.text = s;
+                                              _searchFriend.selection =
+                                                  TextSelection.collapsed(
+                                                      offset: _searchFriend
+                                                          .text.length);
+                                            });
+                                          }
+                                          SearchFriend();
+                                        },
+                                      ),
+                                      SizedBox(
+                                        height: 13,
+                                      ),
+                                      SingleChildScrollView(
+                                        child: SizedBox(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height -
+                                              360,
+                                          child: _searchFriend.text.isEmpty
+                                              ? friendListWidget(
+                                                  context, friendData)
+                                              : (friendDataSearched.isEmpty
+                                                  ? Center(
+                                                      child: Text(
+                                                        "No User Found",
+                                                        style: TextStyle(
+                                                            fontSize: 18),
+                                                      ),
+                                                    )
+                                                  : friendListWidget(context,
+                                                      friendDataSearched)),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                            : SizedBox(
+                                child: Shimmer.fromColors(
+                                    baseColor: Theme.of(context).cardColor,
+                                    highlightColor:
+                                        Theme.of(context).primaryColor,
+                                    child: Column(
+                                      children: [
+                                        TextField(
+                                          controller: _searchFriend,
+                                          keyboardType: TextInputType.text,
+                                          maxLines: 1,
+                                          style: const TextStyle(fontSize: 15),
+                                          autocorrect: false,
+                                          decoration: InputDecoration(
+                                            contentPadding:
+                                                const EdgeInsets.all(8.0),
+                                            labelText: "Enter Name",
+                                            counterText: "",
+                                            errorStyle:
+                                                const TextStyle(fontSize: 15),
+                                          ),
+                                          onChanged: (String s) {
+                                            if (this.mounted) {
+                                              setState(() {
+                                                _searchFriend.text = s;
+                                                _searchFriend.selection =
+                                                    TextSelection.collapsed(
+                                                        offset: _searchFriend
+                                                            .text.length);
+                                              });
+                                            }
+                                            SearchFriend();
+                                          },
+                                        ),
+                                        SizedBox(
+                                          height: 13,
+                                        ),
+                                        SingleChildScrollView(
+                                          child: SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height -
+                                                  360,
+                                              child: ListView.separated(
+                                                  separatorBuilder:
+                                                      (context, index) =>
+                                                          SizedBox(
+                                                            height: 5,
+                                                          ),
+                                                  shrinkWrap: true,
+                                                  itemCount: 16,
+                                                  itemBuilder:
+                                                      (BuildContext context,
+                                                          int index) {
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              12.0),
+                                                      child: Container(
+                                                        width: MediaQuery.of(
+                                                                context)
+                                                            .size
+                                                            .width,
+                                                        height: 75,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                                border:
+                                                                    Border.all(
                                                                   color: Colors
                                                                       .white,
-                                                                  border: Border
-                                                                      .all(
-                                                                    color: Colors
-                                                                        .white,
-                                                                  ),
-                                                                  borderRadius:
-                                                                      BorderRadius.all(
-                                                                          Radius.circular(
-                                                                              20))),
+                                                                ),
+                                                                borderRadius: BorderRadius
+                                                                    .all(Radius
+                                                                        .circular(
+                                                                            20))),
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(12.0),
+                                                          child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Container(
+                                                                    width: 45,
+                                                                    height: 45,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                      image: DecorationImage(
+                                                                          image: AssetImage(
+                                                                              'assets/Images/unknown.jpeg'),
+                                                                          fit: BoxFit
+                                                                              .cover),
+                                                                    )),
+                                                                Container(
+                                                                  width: 200,
+                                                                  height: 15.0,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          border: Border
+                                                                              .all(
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(20))),
+                                                                ),
+                                                                Icon(Icons
+                                                                    .person_add)
+                                                              ]),
                                                         ),
-                                                        Icon(Icons.person_add)
-                                                      ]),
-                                                ),
-                                              ),
-                                            );
-                                          })),
-                                ),
-                              ],
-                            )))
-              ],
-            )));
+                                                      ),
+                                                    );
+                                                  })),
+                                        ),
+                                      ],
+                                    )))
+                      ],
+                    )));
+          });
+    });
   }
 
   sendJoinRequest(String email, bool isFromContact, int index) async {
