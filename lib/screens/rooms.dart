@@ -939,6 +939,7 @@ class _RoomExpenseState extends State<RoomExpense>
   }
 
   Widget addFriendWidget() {
+    cleanupFriendData();
     if (this.mounted) {
       setState(() {});
     }

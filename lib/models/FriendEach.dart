@@ -44,8 +44,14 @@ class FriendEach {
       fromContact: true,
       email: contactEach.containsKey('email') ? contactEach['email'] : '',
       status: 'NJ',
-      pic: global.unknown_avatar_id,
-      isGoogle: false,
+      pic: contactEach.containsKey('pic')
+          ? contactEach['pic']
+          : global.unknown_avatar_id,
+      isGoogle: contactEach.containsKey('isGoogle')
+          ? (contactEach['isGoogle'].toString().toLowerCase() == "false"
+              ? false
+              : true)
+          : false,
       phoneNo: contactEach.containsKey('phoneNo') ? contactEach['phoneNo'] : '',
     );
   }

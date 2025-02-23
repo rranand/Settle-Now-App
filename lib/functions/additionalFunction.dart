@@ -323,7 +323,9 @@ List<FriendEach> getUnionOfContacts(
     List<Map> fromPhone, List<FriendEach> fromDB,
     {List<String>? email}) {
   Set<String> st = new Set();
-  st.addAll(email!);
+  if (email != null) {
+    st.addAll(email);
+  }
   for (int i = 0; i < fromDB.length; i++) {
     st.add(fromDB[i].email);
   }

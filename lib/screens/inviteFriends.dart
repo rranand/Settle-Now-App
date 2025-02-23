@@ -66,11 +66,13 @@ class _InviteFriendsState extends State<InviteFriends> {
     for (int i = 0; i < allContactsData.length; i++) {
       try {
         await database.execute(
-            'INSERT INTO ContactHasAccountOnSN(phoneNo, name, email) VALUES(?, ?, ?)',
+            'INSERT INTO ContactHasAccountOnSN(phoneNo, name, email, pic, isGoogle) VALUES(?, ?, ?, ?, ?)',
             [
               allContactsData[i].phoneNo,
               allContactsData[i].name,
-              allContactsData[i].email
+              allContactsData[i].email,
+              allContactsData[i].pic,
+              allContactsData[i].isGoogle.toString()
             ]);
       } on Exception catch (err, stackTrace) {
         if (this.mounted) {

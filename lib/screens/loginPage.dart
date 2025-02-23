@@ -93,7 +93,7 @@ class _LoginPageState extends State<LoginPage> {
           db.execute(
               'CREATE TABLE ContactHasNoAccountOnSN (phoneNo TEXT PRIMARY KEY)'),
           db.execute(
-              'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT)')
+              'CREATE TABLE ContactHasAccountOnSN (phoneNo TEXT PRIMARY KEY, name TEXT, email TEXT, pic TEXT, isGoogle TEXT)')
         ]);
       });
 
