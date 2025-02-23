@@ -497,7 +497,6 @@ class _LendPageState extends State<LendPage> {
                                 ),
                               ),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width - 250,
                                 child: InkWell(
                                   onTap: () {
                                     showToast(context, data[index].name,
