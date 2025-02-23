@@ -401,7 +401,7 @@ Future<Response> createHTTPreq(String url, Function httpType, String token,
   try {
     String host = global.prodUrl;
     if (kDebugMode) {
-      host = global.prodUrl;
+      host = global.devUrl;
     }
 
     String tokenization = createJSONDataTOJWT(JSONData);
