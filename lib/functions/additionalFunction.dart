@@ -399,12 +399,17 @@ Future<Response> createHTTPreq(String url, Function httpType, String token,
       }),
       422);
   try {
+    String host = global.prodUrl;
+    if (kDebugMode) {
+      host = global.prodUrl;
+    }
+
     String tokenization = createJSONDataTOJWT(JSONData);
-    Response res = await httpType(Uri.parse(global.url + url),
+    Response res = await httpType(Uri.parse(host + url),
             headers: <String, String>{
               'Content-Type': 'application/json; charset=UTF-8',
               'Auth': token,
-              'Access-Control-Allow-Origin': global.url
+              'Access-Control-Allow-Origin': host
             },
             body: jsonEncode({"data": tokenization}))
         .timeout(Duration(seconds: 20));
