@@ -867,7 +867,11 @@ class _ExpensesState extends State<Expenses> {
             if (didPop) {
               return;
             }
-            context.pop(totalExp);
+            Map<String, dynamic> objectToBeReturned = {};
+            if (loaded) {
+              objectToBeReturned["totalExp"] = totalExp;
+            }
+            context.pop(objectToBeReturned);
           }),
           child: Scaffold(
             key: _scaffoldKey,

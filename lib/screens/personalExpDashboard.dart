@@ -642,11 +642,13 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
                                                         .personalExpenseRouteName +
                                                     "/" +
                                                     filterResult[index].Date,
-                                              ) as double;
-                                              setState(() {
-                                                filterResult[index].Total =
-                                                    totalExp;
-                                              });
+                                              ) as Map<String, dynamic>;
+                                              if (totalExp.isNotEmpty) {
+                                                setState(() {
+                                                  filterResult[index].Total =
+                                                      totalExp["totalExp"];
+                                                });
+                                              }
                                             }
                                           },
                                           child: Card(
@@ -749,11 +751,14 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
                                                       "/" +
                                                       personalExpense[index]
                                                           .Date,
-                                                ) as double;
-                                                setState(() {
-                                                  personalExpense[index].Total =
-                                                      totalExp;
-                                                });
+                                                ) as Map<String, dynamic>;
+                                                if (totalExp.isNotEmpty) {
+                                                  setState(() {
+                                                    personalExpense[index]
+                                                            .Total =
+                                                        totalExp["totalExp"];
+                                                  });
+                                                }
                                               }
                                             },
                                             child: Card(

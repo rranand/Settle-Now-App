@@ -271,15 +271,19 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
                                               crypto.decrypt(
                                                   filteredResult[index]["key"]),
                                         ) as Map<String, dynamic>;
-                                        filteredResult[index]["total"] =
-                                            crypto.encrypt(dataFrom["totalExp"]
-                                                .toStringAsFixed(2));
-                                        filteredResult[index]["name"] = crypto
-                                            .encrypt(dataFrom["roomName"]);
-                                        filteredResult[index]["isClosedByYou"] =
-                                            dataFrom["isClosed"];
-                                        if (this.mounted) {
-                                          setState(() {});
+                                        if (dataFrom.isNotEmpty) {
+                                          filteredResult[index]["total"] =
+                                              crypto.encrypt(
+                                                  dataFrom["totalExp"]
+                                                      .toStringAsFixed(2));
+                                          filteredResult[index]["name"] = crypto
+                                              .encrypt(dataFrom["roomName"]);
+                                          filteredResult[index]
+                                                  ["isClosedByYou"] =
+                                              dataFrom["isClosed"];
+                                          if (this.mounted) {
+                                            setState(() {});
+                                          }
                                         }
                                       }
                                     },
@@ -396,15 +400,17 @@ class _LendDenDashboardState extends State<LendDenDashboard> {
                                               crypto
                                                   .decrypt(data[index]["key"]),
                                         ) as Map<String, dynamic>;
-                                        data[index]["total"] = crypto.encrypt(
-                                            dataFrom["totalExp"]
-                                                .toStringAsFixed(2));
-                                        data[index]["name"] = crypto
-                                            .encrypt(dataFrom["roomName"]);
-                                        data[index]["isClosedByYou"] =
-                                            dataFrom["isClosed"];
-                                        if (this.mounted) {
-                                          setState(() {});
+                                        if (dataFrom.isNotEmpty) {
+                                          data[index]["total"] = crypto.encrypt(
+                                              dataFrom["totalExp"]
+                                                  .toStringAsFixed(2));
+                                          data[index]["name"] = crypto
+                                              .encrypt(dataFrom["roomName"]);
+                                          data[index]["isClosedByYou"] =
+                                              dataFrom["isClosed"];
+                                          if (this.mounted) {
+                                            setState(() {});
+                                          }
                                         }
                                       }
                                     },

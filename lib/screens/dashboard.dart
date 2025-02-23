@@ -7244,16 +7244,17 @@ class _RoomWidgetState extends State<RoomWidget> {
     final dataFrom = await context.push(AppRouteConstants.roomRouteName +
         "/" +
         widget.RoomData.value[index].roomKey) as Map<String, dynamic>;
-
-    widget.RoomData.value[index].total = dataFrom["contribution"];
-    widget.RoomData.value[index].members = dataFrom["member"];
-    widget.RoomData.value[index].done = dataFrom["isDone"];
-    widget.RoomData.value[index].spend = dataFrom["spent"];
-    widget.RoomData.value[index].roomName = dataFrom["roomName"];
-    widget.RoomData.value[index].active = dataFrom["isClosed"];
-    if (!widget.RoomData.value[index].active) {
-      widget.ClosedRoomData.value.insert(0, widget.RoomData.value[index]);
-      widget.RoomData.value.removeAt(index);
+    if (dataFrom.isNotEmpty) {
+      widget.RoomData.value[index].total = dataFrom["contribution"];
+      widget.RoomData.value[index].members = dataFrom["member"];
+      widget.RoomData.value[index].done = dataFrom["isDone"];
+      widget.RoomData.value[index].spend = dataFrom["spent"];
+      widget.RoomData.value[index].roomName = dataFrom["roomName"];
+      widget.RoomData.value[index].active = dataFrom["isClosed"];
+      if (!widget.RoomData.value[index].active) {
+        widget.ClosedRoomData.value.insert(0, widget.RoomData.value[index]);
+        widget.RoomData.value.removeAt(index);
+      }
     }
   }
 

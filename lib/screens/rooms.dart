@@ -4468,14 +4468,17 @@ class _RoomExpenseState extends State<RoomExpense>
                 return;
               }
               Map<String, dynamic> objectToBeReturned = {};
-              objectToBeReturned["contribution"] =
-                  roomMembers[selfIndex].expense +
-                      roomMembers[selfIndex].totalSplitExpense;
-              objectToBeReturned["isClosed"] = isRoomActive;
-              objectToBeReturned["isDone"] = roomMembers[selfIndex].done;
-              objectToBeReturned["spent"] = roomMembers[selfIndex].yourExpense;
-              objectToBeReturned["member"] = roomMembers.length;
-              objectToBeReturned["roomName"] = roomName.text;
+              if (roomMembers.length > 0 && selfIndex != -1) {
+                objectToBeReturned["contribution"] =
+                    roomMembers[selfIndex].expense +
+                        roomMembers[selfIndex].totalSplitExpense;
+                objectToBeReturned["isDone"] = roomMembers[selfIndex].done;
+                objectToBeReturned["spent"] =
+                    roomMembers[selfIndex].yourExpense;
+                objectToBeReturned["member"] = roomMembers.length;
+                objectToBeReturned["isClosed"] = isRoomActive;
+                objectToBeReturned["roomName"] = roomName.text;
+              }
               context.pop(objectToBeReturned);
             }),
             child: SizedBox(

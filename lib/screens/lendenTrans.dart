@@ -916,6 +916,7 @@ class _LendPageState extends State<LendPage> {
 
       var resData = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        load = true;
         data = resData['data'];
         data = data.reversed.toList();
         for (int i = 0; i < data.length; i++) {
@@ -965,7 +966,6 @@ class _LendPageState extends State<LendPage> {
       }
     }
 
-    load = true;
     if (this.mounted) {
       setState(() {});
     }
@@ -1378,9 +1378,11 @@ class _LendPageState extends State<LendPage> {
               return;
             }
             Map<String, dynamic> objectToBeReturned = {};
-            objectToBeReturned["totalExp"] = totalExp;
-            objectToBeReturned["isClosed"] = closed;
-            objectToBeReturned["roomName"] = roomName.text;
+            if (load) {
+              objectToBeReturned["totalExp"] = totalExp;
+              objectToBeReturned["isClosed"] = closed;
+              objectToBeReturned["roomName"] = roomName.text;
+            }
             context.pop(objectToBeReturned);
           }),
           child: RefreshIndicator(
