@@ -210,23 +210,23 @@ class _LoginPageState extends State<LoginPage> {
         if (this.mounted) {
           buildShowDialog(context);
         }
-        String token = crypto.encrypt((user.email).toString() +
+        String token = crypto.encrypt((user.email.toLowerCase()).toString() +
             "#" +
             _deviceData['id'] +
             "#" +
             DateTime.now().toString());
         Map<String, String> jsonInputData = {
-          "email": (user.email).toString(),
+          "email": (user.email.toLowerCase()).toString(),
           "name": (user.displayName).toString(),
           "token": token
         };
-        String jwToken =
-            await createJWT((user.email).toString(), jsonEncode(jsonInputData));
+        String jwToken = await createJWT(
+            (user.email.toLowerCase()).toString(), jsonEncode(jsonInputData));
 
         var resp = null;
 
         jsonInputData = {
-          'email': crypto.encrypt((user.email).toString()),
+          'email': crypto.encrypt((user.email.toLowerCase()).toString()),
           'name': crypto.encrypt((user.displayName).toString()),
           'profilePic': crypto.encrypt((user.photoUrl).toString()),
           'ip': crypto.encrypt(ipAddress),
@@ -408,7 +408,8 @@ class _LoginPageState extends State<LoginPage> {
                                               AppRouteConstants.verifyRouteName,
                                           extra: {
                                             "version": version,
-                                            "email": _emailId.text,
+                                            "email":
+                                                _emailId.text.toLowerCase(),
                                             "ipAddress": ipAddress,
                                           });
                                     }
