@@ -320,9 +320,10 @@ Future<String> getDBFilePath(String dbName) async {
 }
 
 List<FriendEach> getUnionOfContacts(
-    List<Map> fromPhone, List<FriendEach> fromDB) {
+    List<Map> fromPhone, List<FriendEach> fromDB,
+    {List<String>? email}) {
   Set<String> st = new Set();
-
+  st.addAll(email!);
   for (int i = 0; i < fromDB.length; i++) {
     st.add(fromDB[i].email);
   }

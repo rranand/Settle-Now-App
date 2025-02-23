@@ -240,6 +240,25 @@ class _RoomExpenseState extends State<RoomExpense>
     }
   }
 
+  void cleanupFriendData() {
+    if (friendData.isNotEmpty) {
+      loadFriendData.value = false;
+      int friendTempInd = -1;
+      for (int j = 0; j < membersListEmail.length; j++) {
+        for (int i = 0; i < friendData.length; i++) {
+          if (friendData[i].email == membersListEmail[j]) {
+            friendTempInd = i;
+            break;
+          }
+        }
+      }
+      if (friendTempInd != -1) {
+        friendData.removeAt(friendTempInd);
+      }
+      loadFriendData.value = true;
+    }
+  }
+
   Future _initialisation() async {
     if (this.mounted) {
       setState(() {
@@ -360,6 +379,7 @@ class _RoomExpenseState extends State<RoomExpense>
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Rooms->_initialisation"]);
     }
+    cleanupFriendData();
   }
 
   Future<void> getFriendData() async {
@@ -392,7 +412,8 @@ class _RoomExpenseState extends State<RoomExpense>
           reason: "Unknwon Error", info: ["Rooms->getFriendData"]);
     }
 
-    friendData = getUnionOfContacts(getContactsFromDB, friendData);
+    friendData = getUnionOfContacts(getContactsFromDB, friendData,
+        email: membersListEmail);
     loadFriendData.value = true;
 
     if (this.mounted) {
