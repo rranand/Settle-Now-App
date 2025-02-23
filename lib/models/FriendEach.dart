@@ -61,8 +61,11 @@ class FriendEach {
           ? crypto.decrypt(contactEach['email'])
           : '',
       status: 'NJ',
-      pic: global.unknown_avatar_id,
-      isGoogle: false,
+      pic: contactEach.containsKey('pic')
+          ? crypto.decrypt(contactEach['pic'])
+          : global.unknown_avatar_id,
+      isGoogle:
+          contactEach.containsKey('isGoogle') ? contactEach['isGoogle'] : false,
       phoneNo: contactEach.containsKey('phoneNo')
           ? crypto.decrypt(contactEach['phoneNo'])
           : '',
