@@ -3,7 +3,7 @@ description: A Finance Management App
 
 publish_to: 'none'
 
-version: 1.8.7+190
+version: 1.8.8+191
 
 environment:
   sdk: ">=2.16.0-134.0.dev <3.0.0"
@@ -58,6 +58,7 @@ dependencies:
   firebase_core: ^3.3.0
   firebase_messaging: ^15.2.2
   moment_dart: ^2.2.1+beta.0
+  device_preview: ^1.2.0
 
 dev_dependencies:
   flutter_test:

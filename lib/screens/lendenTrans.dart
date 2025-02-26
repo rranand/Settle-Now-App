@@ -44,6 +44,7 @@ class _LendPageState extends State<LendPage> {
   final roomName = TextEditingController();
   List<dynamic> data = [];
   bool load = false;
+  bool isDataLoadedActually = false;
   int expenseIndex = -1;
   bool firstTimeLoad = true;
   List<Map> getContactsFromDB = [];
@@ -866,42 +867,46 @@ class _LendPageState extends State<LendPage> {
     });
   }
 
+  Future<void> loadInitalData() async {
+    var tokenData = await getStringPref('token');
+
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
+      }
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        "url": crypto.encrypt(
+            AppRouteConstants.lendByTitleRouteName + "/" + widget.roomkey),
+        "creationDate": crypto.encrypt(DateTime.now().toString())
+      };
+      pushAnalytics(context, jsonInputData, _token);
+      _initialization();
+      if (!kIsWeb) {
+        getContactsFromDB = await getContactsFromLocal();
+      }
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
+    }
+  }
+
   Future _initialization() async {
     try {
-      var tokenData = await getStringPref('token');
-
-      if (tokenData != null) {
-        Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
-        if (this.mounted) {
-          setState(() {
-            _email = jsonOutData["email"]!;
-            _token = jsonOutData["token"]!;
-          });
-        }
-        Map<String, dynamic> jsonInputData = {
-          'email': crypto.encrypt(_email),
-          "url": crypto.encrypt(
-              AppRouteConstants.lendByTitleRouteName + "/" + widget.roomkey),
-          "creationDate": crypto.encrypt(DateTime.now().toString())
-        };
-        pushAnalytics(context, jsonInputData, _token);
-
-        if (!kIsWeb) {
-          getContactsFromDB = await getContactsFromLocal();
-        }
-      } else {
-        while (this.mounted && context.canPop()) {
-          context.pop();
-        }
-        if (this.mounted) {
-          context.go(AppRouteConstants.loginRouteName);
-        }
-        return;
-      }
       if (this.mounted) {
         setState(() {
           expenseIndex = -1;
           load = false;
+          isDataLoadedActually = false;
           data.clear();
         });
       }
@@ -934,6 +939,7 @@ class _LendPageState extends State<LendPage> {
           }
         }
         firstTimeLoad = false;
+        isDataLoadedActually = true;
         userData = jsonDecode(response.body)['user'];
         otherUserData = jsonDecode(response.body)['otherUser'];
         closed = jsonDecode(response.body)['closed'] ||
@@ -983,7 +989,7 @@ class _LendPageState extends State<LendPage> {
   void initState() {
     super.initState();
     getContactsFromLocal();
-    _initialization();
+    loadInitalData();
     controller = AutoScrollController(
         viewportBoundaryGetter: () =>
             Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
@@ -1360,7 +1366,7 @@ class _LendPageState extends State<LendPage> {
               return;
             }
             Map<String, dynamic> objectToBeReturned = {};
-            if (load) {
+            if (isDataLoadedActually) {
               objectToBeReturned["totalExp"] = totalExp;
               objectToBeReturned["isClosed"] = closed;
               objectToBeReturned["roomName"] = roomName.text;

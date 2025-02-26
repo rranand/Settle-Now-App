@@ -49,6 +49,7 @@ class _ExpensesState extends State<Expenses> {
   GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
   bool loaded = false;
+  bool isDataLoadedActually = false;
   bool expenseCategoryLoaded = false;
   String title = "Personal Expense";
   Set<int> filtercategoryIndex = Set();
@@ -100,42 +101,32 @@ class _ExpensesState extends State<Expenses> {
     }
   }
 
-  Future _initialization() async {
-    loaded = false;
-    TransList.clear();
-    dataMap.clear();
+  Future<void> initalDataLoad() async {
+    var tokenData = await getStringPref('token');
 
-    if (_email.length == 0 && _token.length == 0) {
-      var tokenData = await getStringPref('token');
-
-      if (tokenData != null) {
-        Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
-        if (this.mounted) {
-          setState(() {
-            _email = jsonOutData["email"]!;
-            _token = jsonOutData["token"]!;
-          });
-        }
-        Map<String, dynamic> jsonInputData = {
-          'email': crypto.encrypt(_email),
-          "url": crypto.encrypt(
-              AppRouteConstants.personalExpenseRouteName + "/" + widget.date),
-          "creationDate": crypto.encrypt(DateTime.now().toString())
-        };
-        pushAnalytics(context, jsonInputData, _token);
-      } else {
-        while (this.mounted && context.canPop()) {
-          context.pop();
-        }
-        if (this.mounted) {
-          context.go(AppRouteConstants.loginRouteName);
-        }
-        return;
+    if (tokenData != null) {
+      Map<String, dynamic> jsonOutData = parseJWT(tokenData.toString());
+      if (this.mounted) {
+        setState(() {
+          _email = jsonOutData["email"]!;
+          _token = jsonOutData["token"]!;
+        });
       }
-    }
-
-    if (this.mounted) {
-      setState(() {});
+      Map<String, dynamic> jsonInputData = {
+        'email': crypto.encrypt(_email),
+        "url": crypto.encrypt(
+            AppRouteConstants.personalExpenseRouteName + "/" + widget.date),
+        "creationDate": crypto.encrypt(DateTime.now().toString())
+      };
+      pushAnalytics(context, jsonInputData, _token);
+    } else {
+      while (this.mounted && context.canPop()) {
+        context.pop();
+      }
+      if (this.mounted) {
+        context.go(AppRouteConstants.loginRouteName);
+      }
+      return;
     }
 
     if (!expenseCategoryLoaded) {
@@ -168,6 +159,20 @@ class _ExpensesState extends State<Expenses> {
       setState(() {});
     }
 
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+  }
+
+  Future _initialization() async {
+    if (this.mounted) {
+      setState(() {
+        loaded = false;
+        TransList.clear();
+        dataMap.clear();
+        isDataLoadedActually = false;
+      });
+    }
+
     try {
       Map<String, String> jsonInputData = {
         'email': crypto.encrypt(_email),
@@ -179,7 +184,6 @@ class _ExpensesState extends State<Expenses> {
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        loaded = true;
         TransList = jsonDecode(response.body)['data'];
         Map<String, double> tempMap = {};
         for (int i = 0; i < expenseCategory.length; i++) {
@@ -197,6 +201,7 @@ class _ExpensesState extends State<Expenses> {
           dataMap.add(ChartData.byType(
               expenseCategory[i], tempMap[expenseCategory[i]]!));
         }
+        isDataLoadedActually = true;
       } else if (response.statusCode == 503) {
         while (context.canPop()) {
           if (this.mounted) {
@@ -218,6 +223,7 @@ class _ExpensesState extends State<Expenses> {
             reason: "Unknwon Error", info: ["Expenses->_initialization"]);
       }
     }
+    loaded = true;
     if (this.mounted) {
       setState(() {});
     }
@@ -796,8 +802,7 @@ class _ExpensesState extends State<Expenses> {
   void initState() {
     super.initState();
     dateFromUrl = widget.date;
-    WidgetsBinding.instance
-        .addPostFrameCallback((_) => _refreshIndicatorKey.currentState?.show());
+    initalDataLoad();
   }
 
   @override
@@ -868,7 +873,7 @@ class _ExpensesState extends State<Expenses> {
               return;
             }
             Map<String, dynamic> objectToBeReturned = {};
-            if (loaded) {
+            if (isDataLoadedActually) {
               objectToBeReturned["totalExp"] = totalExp;
             }
             context.pop(objectToBeReturned);

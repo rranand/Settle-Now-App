@@ -276,7 +276,10 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> fetchIP() async {
+  Future<void> fetchIP({int attempt = 0}) async {
+    if (attempt == 5) {
+      return null;
+    }
     try {
       final ipAddressReq = await http.get(Uri.parse('https://api64.ipify.org'));
 
@@ -288,6 +291,7 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     } on Exception catch (err, stackTrace) {
+      fetchIP(attempt: attempt + 1);
       if (this.mounted) {
         onException(err, stackTrace,
             reason: "Unknwon Error", info: ["LoginPage->fetchIP"]);
