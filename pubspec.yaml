@@ -59,6 +59,7 @@ dependencies:
   firebase_messaging: ^15.2.2
   moment_dart: ^2.2.1+beta.0
   device_preview: ^1.2.0
+  firebase_remote_config: ^5.4.2
 
 dev_dependencies:
   flutter_test:

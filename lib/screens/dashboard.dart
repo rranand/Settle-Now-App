@@ -114,7 +114,8 @@ class _DashBoardState extends State<DashBoard> {
   bool isContactPermissionGranted = false;
   bool searchTrigger = false;
   bool searching = false;
-  bool isRoomRequestLoaded = false;
+  ValueNotifier<bool> isRoomRequestLoaded = new ValueNotifier(false);
+  bool firstTimeisRoomRequestLoaded = false;
   bool gotInitialData = false;
   List<dynamic> expenseCategory = [];
   List<List<dynamic>> subCategory = [];
@@ -122,6 +123,8 @@ class _DashBoardState extends State<DashBoard> {
   bool activeRoomDataFetched = false;
   bool inActiveRoomDataFetched = false;
   bool quickSplitDataFetched = false;
+  bool firstTimeinActiveRoomDataFetched = false;
+  bool firstTimequickSplitDataFetched = false;
   int roomExpenseCategoryIndex = 0;
   int roomsubExpenseCategoryIndex = 0;
   bool isItAndroidDevice = false;
@@ -132,7 +135,8 @@ class _DashBoardState extends State<DashBoard> {
   bool isNotificationPremissionProvided = false;
   bool isInvitePremissionPoppedProvided = false;
   bool isNotificationPremissionPoppedProvided = false;
-  bool isSentRoomRequestLoaded = false;
+  ValueNotifier<bool> isSentRoomRequestLoaded = new ValueNotifier(false);
+  bool firstTimeisSentRoomRequestLoaded = false;
   List<FriendEach> friendDataSearched = [];
   List<FriendEach> friendData = [];
   bool loadFriendData = false;
@@ -289,11 +293,10 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  Future<void> getMembersData(int roomType) async {
+  Future<void> getMembersData() async {
     try {
       Map<String, dynamic> jsonInputData = {
         "email": crypto.encrypt(_email.text),
-        "roomType": roomType == 1,
         'hasAlready': crypto.encrypt("0")
       };
 
@@ -522,7 +525,9 @@ class _DashBoardState extends State<DashBoard> {
       await getQuickSplitExpenses();
     } else {
       _extractEmail(open);
-      getMembersData(open);
+      if (membersData.value.length == 0) {
+        getMembersData();
+      }
     }
   }
 
@@ -531,11 +536,10 @@ class _DashBoardState extends State<DashBoard> {
       activeRoomDataFetched = false;
       RoomDataO.value.clear();
     } else {
+      firstTimeinActiveRoomDataFetched = true;
       inActiveRoomDataFetched = false;
       RoomDataC.value.clear();
     }
-
-    appVersion = await getAppVersion();
 
     if (this.mounted) {
       setState(() {});
@@ -569,12 +573,6 @@ class _DashBoardState extends State<DashBoard> {
           }
         }
 
-        if (roomType == 1) {
-          activeRoomDataFetched = true;
-        } else {
-          inActiveRoomDataFetched = true;
-        }
-
         if (this.mounted) {
           setState(() {});
         }
@@ -601,7 +599,11 @@ class _DashBoardState extends State<DashBoard> {
             reason: "Unknwon Error", info: ["DashBoard->_extractEmail"]);
       }
     }
-
+    if (roomType == 1) {
+      activeRoomDataFetched = true;
+    } else {
+      inActiveRoomDataFetched = true;
+    }
     if (this.mounted) {
       setState(() {});
     }
@@ -611,7 +613,8 @@ class _DashBoardState extends State<DashBoard> {
     try {
       if (this.mounted) {
         setState(() {
-          isRoomRequestLoaded = false;
+          firstTimeisRoomRequestLoaded = true;
+          isRoomRequestLoaded.value = false;
           RoomRequest.clear();
         });
       }
@@ -642,7 +645,7 @@ class _DashBoardState extends State<DashBoard> {
       }
     }
 
-    isRoomRequestLoaded = true;
+    isRoomRequestLoaded.value = true;
     if (this.mounted) {
       setState(() {});
     }
@@ -730,7 +733,8 @@ class _DashBoardState extends State<DashBoard> {
     try {
       if (this.mounted) {
         setState(() {
-          isSentRoomRequestLoaded = false;
+          firstTimeisSentRoomRequestLoaded = true;
+          isSentRoomRequestLoaded.value = false;
           sentRoomRequest.clear();
         });
       }
@@ -759,7 +763,7 @@ class _DashBoardState extends State<DashBoard> {
             reason: "Unknwon Error", info: ["DashBoard->fetchSentRequest"]);
       }
     }
-    isSentRoomRequestLoaded = true;
+    isSentRoomRequestLoaded.value = true;
 
     if (this.mounted) {
       setState(() {});
@@ -799,6 +803,7 @@ class _DashBoardState extends State<DashBoard> {
     try {
       if (this.mounted) {
         setState(() {
+          firstTimequickSplitDataFetched = true;
           quickSplitData.value.clear();
           quickSplitDataFetched = false;
         });
@@ -816,6 +821,9 @@ class _DashBoardState extends State<DashBoard> {
       if (response.statusCode != 200) {
         showToast(context, crypto.decrypt(data["Message"]), Icons.close);
       } else {
+        if (friendData.length == 0) {
+          getFriendData();
+        }
         var tempArr = data["data"];
         for (int i = 0; i < tempArr.length; i++) {
           quickSplitData.value.add(QuickSplitEach.fromJson(tempArr[i]));
@@ -835,35 +843,20 @@ class _DashBoardState extends State<DashBoard> {
 
   executeParallel() async {
     do {
-      await initalDataLoad();
+      final res = await Future.wait([getAppVersion(), initalDataLoad()]);
+      appVersion = res[0] as String;
     } while (!initalDataLoaded);
 
-    if (kIsWeb) {
-      getInitialData();
-      _extractEmail(1);
-      _extractEmail(2);
-      _getImageID();
-      getMembersData(1);
-      getMembersData(2);
-      getQuickSplitExpenses();
-      getRoomRequest();
-      fetchSentRequest();
-      getFriendData();
-    } else if (Platform.isAndroid) {
-      getInitialData();
+    getInitialData();
+    _extractEmail(1);
+    _getImageID();
+    getMembersData();
+
+    if (Platform.isAndroid) {
       manualUpdateCheck();
-      _extractEmail(1);
-      _extractEmail(2);
-      _getImageID();
-      getMembersData(1);
-      getMembersData(2);
-      getQuickSplitExpenses();
       checkforScheduledNotifications();
       ContactPermissionGranted();
       checkForUpdate();
-      getRoomRequest();
-      fetchSentRequest();
-      getFriendData();
     }
   }
 
@@ -2930,7 +2923,7 @@ class _DashBoardState extends State<DashBoard> {
       if (flag == "1") {
         _extractEmail(1);
         getRoomRequest();
-        getMembersData(1);
+        getMembersData();
       } else {
         await _requestIndicatorKey.currentState?.show();
       }
@@ -2980,6 +2973,17 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  void changeNotificationWidget(bool isSent) {
+    if (!isSent && !firstTimeisSentRoomRequestLoaded) {
+      fetchSentRequest();
+    }
+    if (this.mounted) {
+      setState(() {
+        requestType = isSent;
+      });
+    }
+  }
+
   Widget RequestWidget(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: Container(
@@ -2996,11 +3000,7 @@ class _DashBoardState extends State<DashBoard> {
             children: [
               InkWell(
                 onTap: () {
-                  if (this.mounted) {
-                    setState(() {
-                      requestType = true;
-                    });
-                  }
+                  changeNotificationWidget(true);
                   Map<String, dynamic> jsonInputData = {
                     'email': crypto.encrypt(_email.text),
                     "url": crypto.encrypt(AppRouteConstants.dashboardRouteName +
@@ -3029,11 +3029,7 @@ class _DashBoardState extends State<DashBoard> {
               ),
               InkWell(
                 onTap: () {
-                  if (this.mounted) {
-                    setState(() {
-                      requestType = false;
-                    });
-                  }
+                  changeNotificationWidget(false);
                   Map<String, dynamic> jsonInputData = {
                     'email': crypto.encrypt(_email.text),
                     "url": crypto.encrypt(
@@ -3062,56 +3058,222 @@ class _DashBoardState extends State<DashBoard> {
               color: Theme.of(context).primaryColor,
               key: _requestIndicatorKey,
               onRefresh: getRoomRequest,
-              child: RoomRequest.isEmpty
-                  ? isRoomRequestLoaded
-                      ? (ListView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.85,
-                                width: MediaQuery.of(context).size.width,
-                                child: Center(
-                                  child: Text(
-                                    "No Request Found",
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                    ),
-                                  ),
-                                ))
-                          ],
-                        ))
-                      : SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          child: Shimmer.fromColors(
-                              baseColor: Theme.of(context).cardColor,
-                              highlightColor: Theme.of(context).primaryColor,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListView.separated(
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    padding: EdgeInsets.all(8.0),
-                                    itemCount: 16,
-                                    separatorBuilder: (context, index) =>
-                                        SizedBox(
-                                          height: 8,
+              child: ValueListenableBuilder(
+                valueListenable: isRoomRequestLoaded,
+                builder: (BuildContext context, bool isRoomRequestLoade,
+                    Widget? child) {
+                  return RoomRequest.isEmpty
+                      ? isRoomRequestLoaded.value
+                          ? (ListView(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.85,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Center(
+                                      child: Text(
+                                        "No Request Found",
+                                        style: TextStyle(
+                                          fontSize: 22,
                                         ),
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Colors.white,
+                                      ),
+                                    ))
+                              ],
+                            ))
+                          : SizedBox(
+                              height: MediaQuery.of(context).size.height,
+                              child: Shimmer.fromColors(
+                                  baseColor: Theme.of(context).cardColor,
+                                  highlightColor:
+                                      Theme.of(context).primaryColor,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: ListView.separated(
+                                        physics:
+                                            AlwaysScrollableScrollPhysics(),
+                                        padding: EdgeInsets.all(8.0),
+                                        itemCount: 16,
+                                        separatorBuilder: (context, index) =>
+                                            SizedBox(
+                                              height: 8,
                                             ),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(20))),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Container(
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return Container(
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.white,
+                                                ),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    width: 65.0,
+                                                    height: 65.0,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                          image: AssetImage(
+                                                              'assets/Images/unknown.jpeg'),
+                                                          fit: BoxFit.cover),
+                                                    ),
+                                                  ),
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Container(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width -
+                                                              170,
+                                                          height: 15.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 8,
+                                                        ),
+                                                        Container(
+                                                          width: 200,
+                                                          height: 15.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 8,
+                                                        ),
+                                                        SizedBox(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width -
+                                                              140,
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceAround,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .max,
+                                                            children: [
+                                                              Icon(
+                                                                Icons
+                                                                    .cancel_sharp,
+                                                                size: 30,
+                                                              ),
+                                                              Icon(
+                                                                Icons.check,
+                                                                size: 30,
+                                                              )
+                                                            ],
+                                                          ),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                  )),
+                            )
+                      : Scrollbar(
+                          radius: Radius.circular(10.0),
+                          thickness: 5.5,
+                          child: ListView.separated(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.all(8.0),
+                              itemCount: RoomRequest.length,
+                              separatorBuilder: (context, index) => SizedBox(
+                                    height: 5,
+                                  ),
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  child: Card(
+                                      elevation: 1.0,
+                                      clipBehavior: Clip.antiAlias,
+                                      shadowColor:
+                                          Theme.of(context).primaryColor,
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: Theme.of(context)
+                                                .primaryColor
+                                                .withAlpha(95)),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: CachedNetworkImage(
+                                              httpHeaders: {
+                                                'Access-Control-Allow-Origin':
+                                                    '*'
+                                              },
+                                              imageUrl: crypto
+                                                          .decrypt(
+                                                              RoomRequest[index]
+                                                                  ["pic"])
+                                                          .length ==
+                                                      0
+                                                  ? addCorsinImage(
+                                                      global.unknown_avatar_id)
+                                                  : addCorsinImage(
+                                                      crypto.decrypt(
+                                                          RoomRequest[index]
+                                                              ["pic"])),
+                                              progressIndicatorBuilder:
+                                                  (context, url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Container(
                                                 width: 65.0,
                                                 height: 65.0,
                                                 decoration: BoxDecoration(
@@ -3122,47 +3284,59 @@ class _DashBoardState extends State<DashBoard> {
                                                       fit: BoxFit.cover),
                                                 ),
                                               ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Column(
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                width: 65.0,
+                                                height: 65.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  const EdgeInsets.all(10.0),
+                                              child: Column(
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Container(
+                                                    SizedBox(
                                                       width:
                                                           MediaQuery.of(context)
                                                                   .size
                                                                   .width -
-                                                              170,
-                                                      height: 15.0,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.white,
-                                                          border: Border.all(
-                                                            color: Colors.white,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          20))),
-                                                    ),
-                                                    SizedBox(
-                                                      height: 8,
-                                                    ),
-                                                    Container(
-                                                      width: 200,
-                                                      height: 15.0,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.white,
-                                                          border: Border.all(
-                                                            color: Colors.white,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          20))),
+                                                              140,
+                                                      child: Text(
+                                                        crypto.decrypt(
+                                                                RoomRequest[
+                                                                        index]
+                                                                    ["by"]) +
+                                                            (RoomRequest[index][
+                                                                    "selfInvite"]
+                                                                ? " requested to join "
+                                                                : " invited to join ") +
+                                                            crypto.decrypt(
+                                                                RoomRequest[
+                                                                        index]
+                                                                    ["name"]) +
+                                                            (crypto.decrypt(RoomRequest[
+                                                                            index]
+                                                                        [
+                                                                        "type"]) ==
+                                                                    "Room"
+                                                                ? ""
+                                                                : " (Len-Den)"),
+                                                        style: TextStyle(
+                                                          overflow:
+                                                              TextOverflow.clip,
+                                                          fontSize: 20,
+                                                        ),
+                                                      ),
                                                     ),
                                                     SizedBox(
                                                       height: 8,
@@ -3180,280 +3354,329 @@ class _DashBoardState extends State<DashBoard> {
                                                         mainAxisSize:
                                                             MainAxisSize.max,
                                                         children: [
-                                                          Icon(
-                                                            Icons.cancel_sharp,
-                                                            size: 30,
-                                                          ),
-                                                          Icon(
-                                                            Icons.check,
-                                                            size: 30,
-                                                          )
+                                                          IconButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                if ((crypto.decrypt(
+                                                                        RoomRequest[index]
+                                                                            [
+                                                                            "type"]) ==
+                                                                    "Room")) {
+                                                                  await JoinRequest(
+                                                                      "0",
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "key"],
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "id"]);
+                                                                } else {
+                                                                  await JoinRequestLend(
+                                                                      "0",
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "key"],
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "id"]);
+                                                                }
+                                                              },
+                                                              icon: Icon(
+                                                                Icons
+                                                                    .cancel_sharp,
+                                                                size: 30,
+                                                                color:
+                                                                    Colors.red,
+                                                              )),
+                                                          IconButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                if ((crypto.decrypt(
+                                                                        RoomRequest[index]
+                                                                            [
+                                                                            "type"]) ==
+                                                                    "Room")) {
+                                                                  await JoinRequest(
+                                                                      "1",
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "key"],
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "id"]);
+                                                                } else {
+                                                                  await JoinRequestLend(
+                                                                      "1",
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "key"],
+                                                                      RoomRequest[
+                                                                              index]
+                                                                          [
+                                                                          "id"]);
+                                                                }
+                                                              },
+                                                              icon: Icon(
+                                                                  Icons.check,
+                                                                  size: 30,
+                                                                  color: Colors
+                                                                      .greenAccent)),
                                                         ],
                                                       ),
                                                     )
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                              )),
-                        )
-                  : Scrollbar(
-                      radius: Radius.circular(10.0),
-                      thickness: 5.5,
-                      child: ListView.separated(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.all(8.0),
-                          itemCount: RoomRequest.length,
-                          separatorBuilder: (context, index) => SizedBox(
-                                height: 5,
-                              ),
-                          itemBuilder: (BuildContext context, int index) {
-                            return SizedBox(
-                              child: Card(
-                                  elevation: 1.0,
-                                  clipBehavior: Clip.antiAlias,
-                                  shadowColor: Theme.of(context).primaryColor,
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                        color: Theme.of(context)
-                                            .primaryColor
-                                            .withAlpha(95)),
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: CachedNetworkImage(
-                                          httpHeaders: {
-                                            'Access-Control-Allow-Origin': '*'
-                                          },
-                                          imageUrl: crypto
-                                                      .decrypt(
-                                                          RoomRequest[index]
-                                                              ["pic"])
-                                                      .length ==
-                                                  0
-                                              ? addCorsinImage(
-                                                  global.unknown_avatar_id)
-                                              : addCorsinImage(crypto.decrypt(
-                                                  RoomRequest[index]["pic"])),
-                                          progressIndicatorBuilder: (context,
-                                                  url, downloadProgress) =>
-                                              CircularProgressIndicator(
-                                                  value: downloadProgress
-                                                      .progress),
-                                          errorWidget: (context, url, error) =>
-                                              Container(
-                                            width: 65.0,
-                                            height: 65.0,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                  image: AssetImage(
-                                                      'assets/Images/unknown.jpeg'),
-                                                  fit: BoxFit.cover),
-                                            ),
-                                          ),
-                                          imageBuilder:
-                                              (context, imageProvider) =>
-                                                  Container(
-                                            width: 65.0,
-                                            height: 65.0,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                  image: imageProvider,
-                                                  fit: BoxFit.cover),
-                                            ),
-                                          ),
+                                                  ])),
+                                        ],
+                                      )),
+                                );
+                              }),
+                        );
+                },
+              ),
+            )
+          : ValueListenableBuilder(
+              valueListenable: isSentRoomRequestLoaded,
+              builder: (BuildContext context, bool isSentRoomRequestLoaded,
+                  Widget? child) {
+                return RefreshIndicator(
+                  color: Theme.of(context).primaryColor,
+                  key: _sentrequestIndicatorKey,
+                  onRefresh: fetchSentRequest,
+                  child: sentRoomRequest.isEmpty
+                      ? isSentRoomRequestLoaded
+                          ? ListView(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.85,
+                                    width: MediaQuery.of(context).size.width,
+                                    child: Center(
+                                      child: Text(
+                                        "No Request Found",
+                                        style: TextStyle(
+                                          fontSize: 22,
                                         ),
                                       ),
-                                      Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width -
-                                                      140,
-                                                  child: Text(
-                                                    crypto.decrypt(
-                                                            RoomRequest[index]
-                                                                ["by"]) +
-                                                        (RoomRequest[index]
-                                                                ["selfInvite"]
-                                                            ? " requested to join "
-                                                            : " invited to join ") +
-                                                        crypto.decrypt(
-                                                            RoomRequest[index]
-                                                                ["name"]) +
-                                                        (crypto.decrypt(RoomRequest[
-                                                                        index]
-                                                                    ["type"]) ==
-                                                                "Room"
-                                                            ? ""
-                                                            : " (Len-Den)"),
-                                                    style: TextStyle(
-                                                      overflow:
-                                                          TextOverflow.clip,
-                                                      fontSize: 20,
+                                    ))
+                              ],
+                            )
+                          : SizedBox(
+                              height: MediaQuery.of(context).size.height,
+                              child: Shimmer.fromColors(
+                                  baseColor: Theme.of(context).cardColor,
+                                  highlightColor:
+                                      Theme.of(context).primaryColor,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: ListView.separated(
+                                        physics:
+                                            AlwaysScrollableScrollPhysics(),
+                                        padding: EdgeInsets.all(8.0),
+                                        itemCount: 16,
+                                        separatorBuilder: (context, index) =>
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                        itemBuilder:
+                                            (BuildContext context, int index) {
+                                          return Container(
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: Colors.white,
+                                                ),
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(20))),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    width: 65.0,
+                                                    height: 65.0,
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      image: DecorationImage(
+                                                          image: AssetImage(
+                                                              'assets/Images/unknown.jpeg'),
+                                                          fit: BoxFit.cover),
                                                     ),
                                                   ),
-                                                ),
-                                                SizedBox(
-                                                  height: 8,
-                                                ),
-                                                SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width -
-                                                      140,
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceAround,
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    children: [
-                                                      IconButton(
-                                                          onPressed: () async {
-                                                            if ((crypto.decrypt(
-                                                                    RoomRequest[
-                                                                            index]
-                                                                        [
-                                                                        "type"]) ==
-                                                                "Room")) {
-                                                              await JoinRequest(
-                                                                  "0",
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["key"],
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["id"]);
-                                                            } else {
-                                                              await JoinRequestLend(
-                                                                  "0",
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["key"],
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["id"]);
-                                                            }
-                                                          },
-                                                          icon: Icon(
-                                                            Icons.cancel_sharp,
-                                                            size: 30,
-                                                            color: Colors.red,
-                                                          )),
-                                                      IconButton(
-                                                          onPressed: () async {
-                                                            if ((crypto.decrypt(
-                                                                    RoomRequest[
-                                                                            index]
-                                                                        [
-                                                                        "type"]) ==
-                                                                "Room")) {
-                                                              await JoinRequest(
-                                                                  "1",
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["key"],
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["id"]);
-                                                            } else {
-                                                              await JoinRequestLend(
-                                                                  "1",
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["key"],
-                                                                  RoomRequest[
-                                                                          index]
-                                                                      ["id"]);
-                                                            }
-                                                          },
-                                                          icon: Icon(
-                                                              Icons.check,
-                                                              size: 30,
-                                                              color: Colors
-                                                                  .greenAccent)),
-                                                    ],
-                                                  ),
-                                                )
-                                              ])),
-                                    ],
-                                  )),
-                            );
-                          }),
-                    ),
-            )
-          : RefreshIndicator(
-              color: Theme.of(context).primaryColor,
-              key: _sentrequestIndicatorKey,
-              onRefresh: fetchSentRequest,
-              child: sentRoomRequest.isEmpty
-                  ? isSentRoomRequestLoaded
-                      ? ListView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          children: [
-                            SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.85,
-                                width: MediaQuery.of(context).size.width,
-                                child: Center(
-                                  child: Text(
-                                    "No Request Found",
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                    ),
-                                  ),
-                                ))
-                          ],
-                        )
-                      : SizedBox(
-                          height: MediaQuery.of(context).size.height,
-                          child: Shimmer.fromColors(
-                              baseColor: Theme.of(context).cardColor,
-                              highlightColor: Theme.of(context).primaryColor,
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: ListView.separated(
-                                    physics: AlwaysScrollableScrollPhysics(),
-                                    padding: EdgeInsets.all(8.0),
-                                    itemCount: 16,
-                                    separatorBuilder: (context, index) =>
-                                        SizedBox(
-                                          height: 5,
-                                        ),
-                                    itemBuilder:
-                                        (BuildContext context, int index) {
-                                      return Container(
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: Colors.white,
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            10.0),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Container(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width -
+                                                              160,
+                                                          height: 15.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 8,
+                                                        ),
+                                                        Container(
+                                                          width: 200,
+                                                          height: 15.0,
+                                                          decoration:
+                                                              BoxDecoration(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  border: Border
+                                                                      .all(
+                                                                    color: Colors
+                                                                        .white,
+                                                                  ),
+                                                                  borderRadius:
+                                                                      BorderRadius.all(
+                                                                          Radius.circular(
+                                                                              20))),
+                                                        ),
+                                                        SizedBox(
+                                                          height: 8,
+                                                        ),
+                                                        SizedBox(
+                                                            width: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width -
+                                                                140,
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .end,
+                                                              children: [
+                                                                Container(
+                                                                  height: 42,
+                                                                  width: 90,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                          border: Border
+                                                                              .all(
+                                                                            color:
+                                                                                Colors.white,
+                                                                          ),
+                                                                          borderRadius:
+                                                                              BorderRadius.all(Radius.circular(10))),
+                                                                  child: Center(
+                                                                    child:
+                                                                        Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .all(
+                                                                          12.0),
+                                                                      child:
+                                                                          Text(
+                                                                        "Cancel",
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                15,
+                                                                            fontWeight:
+                                                                                FontWeight.w500),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              ],
+                                                            ))
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
                                             ),
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(20))),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.start,
-                                            children: [
-                                              Container(
+                                          );
+                                        }),
+                                  )),
+                            )
+                      : Scrollbar(
+                          radius: Radius.circular(10.0),
+                          thickness: 5.5,
+                          child: ListView.separated(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              padding: EdgeInsets.all(8.0),
+                              itemCount: sentRoomRequest.length,
+                              separatorBuilder: (context, index) => SizedBox(
+                                    height: 5,
+                                  ),
+                              itemBuilder: (BuildContext context, int index) {
+                                return SizedBox(
+                                  child: Card(
+                                      elevation: 1.0,
+                                      clipBehavior: Clip.antiAlias,
+                                      shadowColor:
+                                          Theme.of(context).primaryColor,
+                                      color: Theme.of(context)
+                                          .scaffoldBackgroundColor,
+                                      shape: RoundedRectangleBorder(
+                                        side: BorderSide(
+                                            color: Theme.of(context)
+                                                .primaryColor
+                                                .withAlpha(95)),
+                                        borderRadius:
+                                            BorderRadius.circular(15.0),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: CachedNetworkImage(
+                                              httpHeaders: {
+                                                'Access-Control-Allow-Origin':
+                                                    '*'
+                                              },
+                                              imageUrl: crypto
+                                                          .decrypt(
+                                                              sentRoomRequest[
+                                                                  index]["pic"])
+                                                          .length ==
+                                                      0
+                                                  ? addCorsinImage(
+                                                      global.unknown_avatar_id)
+                                                  : addCorsinImage(
+                                                      crypto.decrypt(
+                                                          sentRoomRequest[index]
+                                                              ["pic"])),
+                                              progressIndicatorBuilder:
+                                                  (context, url,
+                                                          downloadProgress) =>
+                                                      CircularProgressIndicator(
+                                                          value:
+                                                              downloadProgress
+                                                                  .progress),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Container(
                                                 width: 65.0,
                                                 height: 65.0,
                                                 decoration: BoxDecoration(
@@ -3464,77 +3687,103 @@ class _DashBoardState extends State<DashBoard> {
                                                       fit: BoxFit.cover),
                                                 ),
                                               ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(10.0),
-                                                child: Column(
+                                              imageBuilder:
+                                                  (context, imageProvider) =>
+                                                      Container(
+                                                width: 65.0,
+                                                height: 65.0,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  image: DecorationImage(
+                                                      image: imageProvider,
+                                                      fit: BoxFit.cover),
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  const EdgeInsets.all(10.0),
+                                              child: Column(
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Container(
+                                                    SizedBox(
                                                       width:
                                                           MediaQuery.of(context)
                                                                   .size
                                                                   .width -
-                                                              160,
-                                                      height: 15.0,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.white,
-                                                          border: Border.all(
-                                                            color: Colors.white,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          20))),
+                                                              140,
+                                                      child: Text(
+                                                        (sentRoomRequest[index]
+                                                                ["selfInvite"])
+                                                            ? ("You requested to join " +
+                                                                crypto.decrypt(
+                                                                    sentRoomRequest[index]
+                                                                        [
+                                                                        "name"]))
+                                                            : ("You invited " +
+                                                                crypto.decrypt(
+                                                                    sentRoomRequest[index]
+                                                                        [
+                                                                        "by"]) +
+                                                                " to join " +
+                                                                crypto.decrypt(
+                                                                    sentRoomRequest[index]
+                                                                        [
+                                                                        "name"]) +
+                                                                (crypto.decrypt(
+                                                                            sentRoomRequest[index]["type"]) ==
+                                                                        "Room"
+                                                                    ? ""
+                                                                    : " (Len-Den)")),
+                                                        style: TextStyle(
+                                                          overflow:
+                                                              TextOverflow.clip,
+                                                          fontSize: 20,
+                                                        ),
+                                                      ),
                                                     ),
                                                     SizedBox(
                                                       height: 8,
                                                     ),
-                                                    Container(
-                                                      width: 200,
-                                                      height: 15.0,
-                                                      decoration: BoxDecoration(
-                                                          color: Colors.white,
-                                                          border: Border.all(
-                                                            color: Colors.white,
-                                                          ),
-                                                          borderRadius:
-                                                              BorderRadius.all(
-                                                                  Radius
-                                                                      .circular(
-                                                                          20))),
-                                                    ),
                                                     SizedBox(
-                                                      height: 8,
-                                                    ),
-                                                    SizedBox(
-                                                        width: MediaQuery.of(
-                                                                    context)
-                                                                .size
-                                                                .width -
-                                                            140,
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .end,
-                                                          children: [
-                                                            Container(
-                                                              height: 42,
-                                                              width: 90,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                      border:
-                                                                          Border
-                                                                              .all(
-                                                                        color: Colors
-                                                                            .white,
-                                                                      ),
-                                                                      borderRadius:
-                                                                          BorderRadius.all(
-                                                                              Radius.circular(10))),
-                                                              child: Center(
+                                                      width:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width -
+                                                              140,
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          InkWell(
+                                                            onTap: () async {
+                                                              buildShowDialog(
+                                                                  context);
+                                                              cancelSentRequest(
+                                                                  sentRoomRequest[
+                                                                          index]
+                                                                      ["key"],
+                                                                  sentRoomRequest[
+                                                                          index]
+                                                                      ["type"]);
+                                                              context.pop();
+                                                            },
+                                                            child: SizedBox(
+                                                              child: Card(
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  side: BorderSide(
+                                                                      color: Theme.of(
+                                                                              context)
+                                                                          .primaryColor),
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              10.0),
+                                                                ),
                                                                 child: Padding(
                                                                   padding:
                                                                       const EdgeInsets
@@ -3550,200 +3799,19 @@ class _DashBoardState extends State<DashBoard> {
                                                                   ),
                                                                 ),
                                                               ),
-                                                            )
-                                                          ],
-                                                        ))
-                                                  ],
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }),
-                              )),
-                        )
-                  : Scrollbar(
-                      radius: Radius.circular(10.0),
-                      thickness: 5.5,
-                      child: ListView.separated(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          padding: EdgeInsets.all(8.0),
-                          itemCount: sentRoomRequest.length,
-                          separatorBuilder: (context, index) => SizedBox(
-                                height: 5,
-                              ),
-                          itemBuilder: (BuildContext context, int index) {
-                            return SizedBox(
-                              child: Card(
-                                  elevation: 1.0,
-                                  clipBehavior: Clip.antiAlias,
-                                  shadowColor: Theme.of(context).primaryColor,
-                                  color:
-                                      Theme.of(context).scaffoldBackgroundColor,
-                                  shape: RoundedRectangleBorder(
-                                    side: BorderSide(
-                                        color: Theme.of(context)
-                                            .primaryColor
-                                            .withAlpha(95)),
-                                    borderRadius: BorderRadius.circular(15.0),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: CachedNetworkImage(
-                                          httpHeaders: {
-                                            'Access-Control-Allow-Origin': '*'
-                                          },
-                                          imageUrl: crypto
-                                                      .decrypt(
-                                                          sentRoomRequest[index]
-                                                              ["pic"])
-                                                      .length ==
-                                                  0
-                                              ? addCorsinImage(
-                                                  global.unknown_avatar_id)
-                                              : addCorsinImage(crypto.decrypt(
-                                                  sentRoomRequest[index]
-                                                      ["pic"])),
-                                          progressIndicatorBuilder: (context,
-                                                  url, downloadProgress) =>
-                                              CircularProgressIndicator(
-                                                  value: downloadProgress
-                                                      .progress),
-                                          errorWidget: (context, url, error) =>
-                                              Container(
-                                            width: 65.0,
-                                            height: 65.0,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                  image: AssetImage(
-                                                      'assets/Images/unknown.jpeg'),
-                                                  fit: BoxFit.cover),
-                                            ),
-                                          ),
-                                          imageBuilder:
-                                              (context, imageProvider) =>
-                                                  Container(
-                                            width: 65.0,
-                                            height: 65.0,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              image: DecorationImage(
-                                                  image: imageProvider,
-                                                  fit: BoxFit.cover),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                          padding: const EdgeInsets.all(10.0),
-                                          child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width -
-                                                      140,
-                                                  child: Text(
-                                                    (sentRoomRequest[index]
-                                                            ["selfInvite"])
-                                                        ? ("You requested to join " +
-                                                            crypto.decrypt(
-                                                                sentRoomRequest[index]
-                                                                    ["name"]))
-                                                        : ("You invited " +
-                                                            crypto.decrypt(
-                                                                sentRoomRequest[
-                                                                        index]
-                                                                    ["by"]) +
-                                                            " to join " +
-                                                            crypto.decrypt(
-                                                                sentRoomRequest[
-                                                                        index]
-                                                                    ["name"]) +
-                                                            (crypto.decrypt(sentRoomRequest[index]
-                                                                        ["type"]) ==
-                                                                    "Room"
-                                                                ? ""
-                                                                : " (Len-Den)")),
-                                                    style: TextStyle(
-                                                      overflow:
-                                                          TextOverflow.clip,
-                                                      fontSize: 20,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(
-                                                  height: 8,
-                                                ),
-                                                SizedBox(
-                                                  width: MediaQuery.of(context)
-                                                          .size
-                                                          .width -
-                                                      140,
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment.end,
-                                                    children: [
-                                                      InkWell(
-                                                        onTap: () async {
-                                                          buildShowDialog(
-                                                              context);
-                                                          cancelSentRequest(
-                                                              sentRoomRequest[
-                                                                  index]["key"],
-                                                              sentRoomRequest[
-                                                                      index]
-                                                                  ["type"]);
-                                                          context.pop();
-                                                        },
-                                                        child: SizedBox(
-                                                          child: Card(
-                                                            shape:
-                                                                RoundedRectangleBorder(
-                                                              side: BorderSide(
-                                                                  color: Theme.of(
-                                                                          context)
-                                                                      .primaryColor),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          10.0),
-                                                            ),
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(
-                                                                      12.0),
-                                                              child: Text(
-                                                                "Cancel",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        15,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w500),
-                                                              ),
                                                             ),
                                                           ),
-                                                        ),
+                                                        ],
                                                       ),
-                                                    ],
-                                                  ),
-                                                )
-                                              ])),
-                                    ],
-                                  )),
-                            );
-                          }),
-                    ),
-            ),
+                                                    )
+                                                  ])),
+                                        ],
+                                      )),
+                                );
+                              }),
+                        ),
+                );
+              }),
     );
   }
 
@@ -4722,6 +4790,9 @@ class _DashBoardState extends State<DashBoard> {
     if (dash == 0) {
       return homeWidget(context);
     } else if (dash == 1) {
+      if (!firstTimeisRoomRequestLoaded) {
+        getRoomRequest();
+      }
       return RequestWidget(context);
     } else if (dash == 2) {
       return PersonalExpenseDashBoard(
@@ -4747,6 +4818,11 @@ class _DashBoardState extends State<DashBoard> {
       return RoomDataO.value.isEmpty;
     } else if (open == 2 && inActiveRoomDataFetched) {
       return RoomDataC.value.isEmpty;
+    }
+
+    if ((open == 0 && !firstTimequickSplitDataFetched) ||
+        (open == 2 && !firstTimeinActiveRoomDataFetched)) {
+      _executeParallelRefresh();
     }
 
     return false;
@@ -7134,14 +7210,15 @@ class _RoomWidgetState extends State<RoomWidget> {
 
   Future _executeParallelRefresh(bool roomType) async {
     _extractEmail(roomType);
-    getMembersData(roomType);
+    if (widget.membersData.value.length == 0) {
+      getMembersData();
+    }
   }
 
-  Future<void> getMembersData(bool roomType) async {
+  Future<void> getMembersData() async {
     try {
       Map<String, dynamic> jsonInputData = {
         "email": crypto.encrypt(widget.email),
-        "roomType": roomType,
         'hasAlready': crypto.encrypt(widget.RoomData.value.length.toString())
       };
 
@@ -7274,8 +7351,8 @@ class _RoomWidgetState extends State<RoomWidget> {
         'roomKey': crypto.encrypt(widget.RoomData.value[index].roomKey)
       };
 
-      final response = await createHTTPreq('room/roomSplitMembers', http.post,
-          widget.token, jsonInputData, context);
+      final response = await createHTTPreq('room/roomSpecificMembers',
+          http.post, widget.token, jsonInputData, context);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
