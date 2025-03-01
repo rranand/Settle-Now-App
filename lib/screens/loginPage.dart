@@ -11,11 +11,14 @@ import 'package:go_router/go_router.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/firebaseFunction.dart';
 import 'package:settlenow/functions/manualUpdateWidget.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
+import 'package:settlenow/models/VersionInfo.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
+import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
@@ -43,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
   bool isItAndroidDevice = false;
   String ipAddress = "";
   bool importantUpdate = false;
-  dynamic updateData = null;
+  late VersionInfo versionInfo;
   AppUpdateInfo? _updateInfo;
   // ignore: unused_field
   bool _flexibleUpdateAvailable = false;
@@ -58,20 +61,13 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> manualUpdateCheck() async {
     try {
-      Map<String, dynamic> jsonInputData = {};
-
-      final response =
-          await createHTTPreq('login', http.patch, "", jsonInputData, context);
-
-      if (response.statusCode == 200) {
-        updateData = jsonDecode(response.body);
-        PackageInfo packageInfo = await PackageInfo.fromPlatform();
-        int currentVerionCode = int.parse(await packageInfo.buildNumber);
-        int updatedVersionCode =
-            int.parse(crypto.decrypt(updateData['Version']).split('+').last);
-        if (updatedVersionCode > currentVerionCode) {
-          importantUpdate = true;
-        }
+      versionInfo = VersionInfo.fromJson(RemoteConfigService.getJSON(
+          RemoteConfigConstant.VERSION_INFO_CONSTANT));
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      int currentVerionCode = int.parse(await packageInfo.buildNumber);
+      int updatedVersionCode = int.parse(versionInfo.version.split('+').last);
+      if (updatedVersionCode > currentVerionCode) {
+        importantUpdate = true;
       }
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
@@ -304,6 +300,12 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     fetchIP();
     _extractEmail();
+    if (!kIsWeb) {
+      RemoteConfigService.remoteConfig.onConfigUpdated.listen((event) async {
+        await RemoteConfigService.remoteConfig.activate();
+        manualUpdateCheck();
+      });
+    }
   }
 
   @override
@@ -313,7 +315,7 @@ class _LoginPageState extends State<LoginPage> {
         Provider.of<InternetconnectivityProvider>(context, listen: false);
 
     return importantUpdate
-        ? updateWidget(context, updateData)
+        ? updateWidget(context, versionInfo)
         : Scaffold(
             body: PopScope(
               canPop: false,

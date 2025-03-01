@@ -1,0 +1,6 @@
+class RemoteConfigConstant {
+  static String SHARE_MESSAGE_CONSTANT = "SHARE_MESSAGE";
+  static String EXPENSE_CATEGORY_CONSTANT = "EXPENSE_CATEGORY";
+  static String VERSION_INFO_CONSTANT = "VERSION_INFO";
+  static String HIDE_PHONE_NO_CONSTANT = "HIDE_PHONE_NO";
+}

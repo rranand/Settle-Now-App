@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/notificationService/InitializeChannels.dart';
+import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_config.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -43,6 +44,8 @@ Future<void> main() async {
   } else {
     Firebase.app(firebaseProjectName);
   }
+
+  await RemoteConfigService.initRemoteConfig();
 
   if (kIsWeb) {
     usePathUrlStrategy();

@@ -11,9 +11,11 @@ import 'package:intl/intl.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/ChartData.dart';
+import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/others/themes.dart';
@@ -73,24 +75,15 @@ class _ExpensesState extends State<Expenses> {
 
   Future<void> getExpenseCategory() async {
     try {
-      Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email),
-      };
-
-      final response = await createHTTPreq(
-          'profile', http.patch, _token, jsonInputData, context);
-
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        expenseCategory.clear();
-        subCategory.clear();
-        Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
-        categoryMap.forEach((key, value) {
-          expenseCategory.add(key);
-          subCategory.add(value);
-        });
-        expenseCategoryLoaded = true;
-      }
+      expenseCategory.clear();
+      subCategory.clear();
+      Map<dynamic, dynamic> categoryMap = RemoteConfigService.getJSON(
+          RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT);
+      categoryMap.forEach((key, value) {
+        expenseCategory.add(key);
+        subCategory.add(value);
+      });
+      expenseCategoryLoaded = true;
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["Expenses->getExpenseCategory"]);

@@ -10,8 +10,10 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 import 'package:moment_dart/moment_dart.dart';
 import 'package:pinput/pinput.dart';
+import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/LoggedInEach.dart';
+import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:timer_count_down/timer_controller.dart';
@@ -167,15 +169,6 @@ class _ProfileState extends State<Profile> {
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
-        if (data['hidePhoneNo'] != null) {
-          var tempVal = crypto
-              .decrypt(data['hidePhoneNo'].toString())
-              .toUpperCase()
-              .compareTo("NO");
-          if (tempVal != 0) {
-            hidePhoneNo = true;
-          }
-        }
         for (int i = 0; i < data['data'].length; i++) {
           loggedInData.add(LoggedInEach.fromJson(data['data'][i]));
         }
@@ -234,6 +227,8 @@ class _ProfileState extends State<Profile> {
           _token = jsonOutData["token"]!;
         });
       }
+      hidePhoneNo = RemoteConfigService.getBool(
+          RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT);
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email),
         "url": crypto.encrypt(AppRouteConstants.profileRouteName),

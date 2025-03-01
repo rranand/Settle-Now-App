@@ -22,14 +22,18 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pinput/pinput.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/manualUpdateWidget.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/RoomEach.dart';
+import 'package:settlenow/models/ShareMessage.dart';
+import 'package:settlenow/models/VersionInfo.dart';
 import 'package:settlenow/notificationService/InitializeChannels.dart';
 import 'package:settlenow/notificationService/NotificationController.dart';
 import 'package:settlenow/notificationService/notificationProcessor.dart';
 import 'package:settlenow/others/GoogleSignIN.dart';
+import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
@@ -44,31 +48,6 @@ import '../models/FriendEach.dart';
 import '../others/themes.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-
-class ShareMessage {
-  final String title;
-  final String subject;
-  final String photo;
-  final String web;
-  final String playstore;
-
-  ShareMessage(
-      {required this.title,
-      required this.subject,
-      required this.photo,
-      required this.web,
-      required this.playstore});
-
-  factory ShareMessage.fromJson(Map<String, dynamic> json) {
-    return ShareMessage(
-      title: crypto.decrypt(json['title']),
-      subject: crypto.decrypt(json['subject']),
-      photo: crypto.decrypt(json['photo']),
-      web: crypto.decrypt(json['web']),
-      playstore: crypto.decrypt(json['playstore']),
-    );
-  }
-}
 
 class DashBoard extends StatefulWidget {
   final int dash;
@@ -145,7 +124,7 @@ class _DashBoardState extends State<DashBoard> {
   bool error = false;
   String errorText = "";
   double heightSearched = 0;
-  var updateData = null;
+  late VersionInfo versionInfo;
   List<String> roomStatus = ['All', 'Active', 'Closed'];
   int roomStatusIndex = 0;
   int open = 1;
@@ -365,28 +344,20 @@ class _DashBoardState extends State<DashBoard> {
     }
 
     try {
-      Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email.text),
-      };
-
       if (!kIsWeb) {
         getContactsFromDB = await getContactsFromLocal();
       }
-      final response = await createHTTPreq(
-          'profile', http.patch, _token, jsonInputData, context);
-
-      if (response.statusCode == 200) {
-        gotInitialData = true;
-        var data = jsonDecode(response.body);
-        expenseCategory.clear();
-        subCategory.clear();
-        Map<dynamic, dynamic> categoryMap = data['expenseCategory'];
-        categoryMap.forEach((key, value) {
-          expenseCategory.add(key);
-          subCategory.add(value);
-        });
-        shareMessage = ShareMessage.fromJson(data['shareMessage']);
-      }
+      expenseCategory.clear();
+      subCategory.clear();
+      Map<dynamic, dynamic> categoryMap = RemoteConfigService.getJSON(
+          RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT);
+      categoryMap.forEach((key, value) {
+        expenseCategory.add(key);
+        subCategory.add(value);
+      });
+      shareMessage = ShareMessage.fromJson(RemoteConfigService.getJSON(
+          RemoteConfigConstant.SHARE_MESSAGE_CONSTANT));
+      gotInitialData = true;
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
           reason: "Unknwon Error", info: ["DashBoard->getInitialData"]);
@@ -399,20 +370,14 @@ class _DashBoardState extends State<DashBoard> {
 
   Future<void> manualUpdateCheck() async {
     try {
-      Map<String, dynamic> jsonInputData = {};
+      versionInfo = VersionInfo.fromJson(RemoteConfigService.getJSON(
+          RemoteConfigConstant.VERSION_INFO_CONSTANT));
 
-      final response =
-          await createHTTPreq('login', http.patch, "", jsonInputData, context);
-
-      if (response.statusCode == 200) {
-        updateData = jsonDecode(response.body);
-        PackageInfo packageInfo = await PackageInfo.fromPlatform();
-        int currentVerionCode = int.parse(await packageInfo.buildNumber);
-        int updatedVersionCode =
-            int.parse(crypto.decrypt(updateData['Version']).split('+').last);
-        if (updatedVersionCode > currentVerionCode) {
-          importantUpdate = true;
-        }
+      PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      int currentVerionCode = int.parse(await packageInfo.buildNumber);
+      int updatedVersionCode = int.parse(versionInfo.version.split('+').last);
+      if (updatedVersionCode > currentVerionCode) {
+        importantUpdate = true;
       }
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,
@@ -952,6 +917,11 @@ class _DashBoardState extends State<DashBoard> {
               context, receivedAction);
         },
       );
+
+      RemoteConfigService.remoteConfig.onConfigUpdated.listen((event) async {
+        await RemoteConfigService.remoteConfig.activate();
+        manualUpdateCheck();
+      });
     }
   }
 
@@ -4834,7 +4804,7 @@ class _DashBoardState extends State<DashBoard> {
     final internetConnProvider =
         Provider.of<InternetconnectivityProvider>(context, listen: false);
     return importantUpdate
-        ? updateWidget(context, updateData)
+        ? updateWidget(context, versionInfo)
         : PopScope(
             canPop: false,
             onPopInvoked: (didPop) {
