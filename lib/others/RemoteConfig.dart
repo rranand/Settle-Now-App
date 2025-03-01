@@ -16,7 +16,8 @@ class RemoteConfigService {
       RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT: true,
       RemoteConfigConstant.SHARE_MESSAGE_CONSTANT: "{}",
       RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT: "{}",
-      RemoteConfigConstant.VERSION_INFO_CONSTANT: "{}"
+      RemoteConfigConstant.VERSION_INFO_CONSTANT: "{}",
+      RemoteConfigConstant.COLLECT_FRONTEND_ANALYTICS_CONSTANT: false
     });
     await remoteConfig.fetchAndActivate();
   }

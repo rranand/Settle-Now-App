@@ -229,12 +229,8 @@ class _ProfileState extends State<Profile> {
       }
       hidePhoneNo = RemoteConfigService.getBool(
           RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT);
-      Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email),
-        "url": crypto.encrypt(AppRouteConstants.profileRouteName),
-        "creationDate": crypto.encrypt(DateTime.now().toString())
-      };
-      pushAnalytics(context, jsonInputData, _token);
+      pushAnalytics(
+          context, _email, AppRouteConstants.profileRouteName, _token);
     } else {
       while (this.mounted && context.canPop()) {
         context.pop();

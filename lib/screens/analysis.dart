@@ -99,12 +99,9 @@ class _AnalysisState extends State<Analysis> {
           _token = jsonOutData["token"]!;
         });
       }
-      Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email),
-        "url": crypto.encrypt(AppRouteConstants.analysisRouteName + "/Room"),
-        "creationDate": crypto.encrypt(DateTime.now().toString())
-      };
-      pushAnalytics(context, jsonInputData, _token);
+
+      pushAnalytics(context, _email,
+          AppRouteConstants.analysisRouteName + "/Room", _token);
     } else {
       while (this.mounted && context.canPop()) {
         context.pop();
@@ -769,13 +766,8 @@ class _AnalysisState extends State<Analysis> {
                         isRoom = true;
                       });
                     }
-                    Map<String, dynamic> jsonInputData = {
-                      'email': crypto.encrypt(_email),
-                      "url": crypto.encrypt(
-                          AppRouteConstants.analysisRouteName + "/Room"),
-                      "creationDate": crypto.encrypt(DateTime.now().toString())
-                    };
-                    pushAnalytics(context, jsonInputData, _token);
+                    pushAnalytics(context, _email,
+                        AppRouteConstants.analysisRouteName + "/Room", _token);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -800,14 +792,12 @@ class _AnalysisState extends State<Analysis> {
                         isRoom = false;
                       });
                     }
-                    Map<String, dynamic> jsonInputData = {
-                      'email': crypto.encrypt(_email),
-                      "url": crypto.encrypt(
-                          AppRouteConstants.analysisRouteName +
-                              "/PersonalExpense"),
-                      "creationDate": crypto.encrypt(DateTime.now().toString())
-                    };
-                    pushAnalytics(context, jsonInputData, _token);
+                    pushAnalytics(
+                        context,
+                        _email,
+                        AppRouteConstants.analysisRouteName +
+                            "/PersonalExpense",
+                        _token);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

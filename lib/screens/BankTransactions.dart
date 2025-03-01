@@ -107,8 +107,8 @@ class _BankTransactionsState extends State<BankTransactions> {
     try {
       expenseCategory.clear();
       subCategory.clear();
-      Map<dynamic, dynamic> categoryMap =
-          RemoteConfigService.getJSON(RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT);
+      Map<dynamic, dynamic> categoryMap = RemoteConfigService.getJSON(
+          RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT);
       categoryMap.forEach((key, value) {
         expenseCategory.add(key);
         subCategory.add(value);
@@ -2188,12 +2188,8 @@ class _BankTransactionsState extends State<BankTransactions> {
           _token = jsonOutData["token"]!;
         });
       }
-      Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email),
-        "url": crypto.encrypt(AppRouteConstants.bankTransactionRouteName),
-        "creationDate": crypto.encrypt(DateTime.now().toString())
-      };
-      pushAnalytics(context, jsonInputData, _token);
+      pushAnalytics(
+          context, _email, AppRouteConstants.bankTransactionRouteName, _token);
       executeParallel();
     } else {
       while (this.mounted && context.canPop()) {

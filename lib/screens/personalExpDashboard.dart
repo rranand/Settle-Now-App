@@ -142,12 +142,8 @@ class _PersonalExpenseDashBoardState extends State<PersonalExpenseDashBoard> {
             _token = jsonOutData["token"]!;
           });
         }
-        Map<String, dynamic> jsonInputData = {
-          'email': crypto.encrypt(_email),
-          "url": crypto.encrypt(AppRouteConstants.personalExpenseDashboard),
-          "creationDate": crypto.encrypt(DateTime.now().toString())
-        };
-        pushAnalytics(context, jsonInputData, _token);
+        pushAnalytics(context, _email,
+            AppRouteConstants.personalExpenseDashboard, _token);
       } else {
         while (this.mounted && context.canPop()) {
           context.pop();

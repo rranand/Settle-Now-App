@@ -96,13 +96,8 @@ class _ContactUsState extends State<ContactUs> {
           _token = jsonOutData["token"]!;
         });
       }
-
-      Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email),
-        "url": crypto.encrypt(AppRouteConstants.contactUsRouteName),
-        "creationDate": crypto.encrypt(DateTime.now().toString())
-      };
-      pushAnalytics(context, jsonInputData, _token);
+      pushAnalytics(
+          context, _email, AppRouteConstants.contactUsRouteName, _token);
     } else {
       while (this.mounted && context.canPop()) {
         context.pop();

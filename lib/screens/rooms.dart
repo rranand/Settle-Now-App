@@ -908,13 +908,8 @@ class _RoomExpenseState extends State<RoomExpense>
           _token = jsonOutData["token"]!;
         });
       }
-      Map<String, dynamic> jsonInputData = {
-        'email': crypto.encrypt(_email),
-        "url": crypto
-            .encrypt(AppRouteConstants.roomRouteName + "/" + widget.roomKey),
-        "creationDate": crypto.encrypt(DateTime.now().toString())
-      };
-      pushAnalytics(context, jsonInputData, _token);
+      pushAnalytics(context, _email,
+          AppRouteConstants.roomRouteName + "/" + widget.roomKey, _token);
       if (!kIsWeb) {
         getContactsFromDB = await getContactsFromLocal();
       }

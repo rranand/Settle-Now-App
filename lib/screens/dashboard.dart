@@ -441,12 +441,6 @@ class _DashBoardState extends State<DashBoard> {
         _token = jsonOutData["token"]!;
         initalDataLoaded = true;
 
-        Map<String, dynamic> jsonInputData = {
-          'email': crypto.encrypt(_email.text),
-          "url": crypto
-              .encrypt(AppRouteConstants.dashboardRouteName + "Room/Active"),
-          "creationDate": crypto.encrypt(DateTime.now().toString())
-        };
         if (!kIsWeb) {
           _fcm.onTokenRefresh.listen((newToken) {
             Map<String, dynamic> jsonInputData = {
@@ -457,7 +451,8 @@ class _DashBoardState extends State<DashBoard> {
                 jsonInputData, context);
           });
         }
-        pushAnalytics(context, jsonInputData, _token);
+        pushAnalytics(context, _email.text,
+            AppRouteConstants.dashboardRouteName + "Room/Active", _token);
 
         if (!kIsWeb && !isInvitePremissionPoppedProvided) {
           isContactPermissionGranted = await context.push(
@@ -2975,13 +2970,11 @@ class _DashBoardState extends State<DashBoard> {
               InkWell(
                 onTap: () {
                   changeNotificationWidget(true);
-                  Map<String, dynamic> jsonInputData = {
-                    'email': crypto.encrypt(_email.text),
-                    "url": crypto.encrypt(AppRouteConstants.dashboardRouteName +
-                        "Request/Receive"),
-                    "creationDate": crypto.encrypt(DateTime.now().toString())
-                  };
-                  pushAnalytics(context, jsonInputData, _token);
+                  pushAnalytics(
+                      context,
+                      _email.text,
+                      AppRouteConstants.dashboardRouteName + "Request/Receive",
+                      _token);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -3004,13 +2997,11 @@ class _DashBoardState extends State<DashBoard> {
               InkWell(
                 onTap: () {
                   changeNotificationWidget(false);
-                  Map<String, dynamic> jsonInputData = {
-                    'email': crypto.encrypt(_email.text),
-                    "url": crypto.encrypt(
-                        AppRouteConstants.dashboardRouteName + "Request/Sent"),
-                    "creationDate": crypto.encrypt(DateTime.now().toString())
-                  };
-                  pushAnalytics(context, jsonInputData, _token);
+                  pushAnalytics(
+                      context,
+                      _email.text,
+                      AppRouteConstants.dashboardRouteName + "Request/Sent",
+                      _token);
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -4307,16 +4298,12 @@ class _DashBoardState extends State<DashBoard> {
                                           open = 0;
                                         });
                                       }
-                                      Map<String, dynamic> jsonInputData = {
-                                        'email': crypto.encrypt(_email.text),
-                                        "url": crypto.encrypt(AppRouteConstants
-                                                .dashboardRouteName +
-                                            "Room/QuickSplit"),
-                                        "creationDate": crypto
-                                            .encrypt(DateTime.now().toString())
-                                      };
                                       pushAnalytics(
-                                          context, jsonInputData, _token);
+                                          context,
+                                          _email.text,
+                                          AppRouteConstants.dashboardRouteName +
+                                              "Room/QuickSplit",
+                                          _token);
                                     },
                                     child: Text(
                                       "Quick Split",
@@ -4353,16 +4340,12 @@ class _DashBoardState extends State<DashBoard> {
                                       ),
                                     ),
                                     onTap: () {
-                                      Map<String, dynamic> jsonInputData = {
-                                        'email': crypto.encrypt(_email.text),
-                                        "url": crypto.encrypt(AppRouteConstants
-                                                .dashboardRouteName +
-                                            "Room/Active"),
-                                        "creationDate": crypto
-                                            .encrypt(DateTime.now().toString())
-                                      };
                                       pushAnalytics(
-                                          context, jsonInputData, _token);
+                                          context,
+                                          _email.text,
+                                          AppRouteConstants.dashboardRouteName +
+                                              "Room/Active",
+                                          _token);
                                       if (this.mounted) {
                                         setState(() {
                                           open = 1;
@@ -4402,17 +4385,12 @@ class _DashBoardState extends State<DashBoard> {
                                           open = 2;
                                         });
                                       }
-
-                                      Map<String, dynamic> jsonInputData = {
-                                        'email': crypto.encrypt(_email.text),
-                                        "url": crypto.encrypt(AppRouteConstants
-                                                .dashboardRouteName +
-                                            "Room/Closed"),
-                                        "creationDate": crypto
-                                            .encrypt(DateTime.now().toString())
-                                      };
                                       pushAnalytics(
-                                          context, jsonInputData, _token);
+                                          context,
+                                          _email.text,
+                                          AppRouteConstants.dashboardRouteName +
+                                              "Room/Closed",
+                                          _token);
                                     },
                                   ),
                                 ),
@@ -4440,20 +4418,17 @@ class _DashBoardState extends State<DashBoard> {
                           }
 
                           if (details.primaryVelocity! != 0) {
-                            Map<String, dynamic> jsonInputData = {
-                              'email': crypto.encrypt(_email.text),
-                              "url": crypto.encrypt(
-                                  AppRouteConstants.dashboardRouteName +
-                                      ("Room/" +
-                                          (open == 0
-                                              ? "QuickSplit"
-                                              : (open == 1
-                                                  ? "Active"
-                                                  : "Closed")))),
-                              "creationDate":
-                                  crypto.encrypt(DateTime.now().toString())
-                            };
-                            pushAnalytics(context, jsonInputData, _token);
+                            pushAnalytics(
+                                context,
+                                _email.text,
+                                AppRouteConstants.dashboardRouteName +
+                                    ("Room/" +
+                                        (open == 0
+                                            ? "QuickSplit"
+                                            : (open == 1
+                                                ? "Active"
+                                                : "Closed"))),
+                                _token);
                           }
                         },
                         child: SizedBox(
@@ -4959,23 +4934,20 @@ class _DashBoardState extends State<DashBoard> {
                         currentIndex: dash,
                         onTap: (index) {
                           if (dash != index && index <= 1) {
-                            Map<String, dynamic> jsonInputData = {
-                              'email': crypto.encrypt(_email.text),
-                              "url": crypto.encrypt(AppRouteConstants
-                                      .dashboardRouteName +
-                                  (index == 1
-                                      ? ("Request/" +
-                                          (requestType ? "Receive" : "Sent"))
-                                      : ("Room/" +
-                                          (open == 0
-                                              ? "QuickSplit"
-                                              : (open == 1
-                                                  ? "Active"
-                                                  : "Closed"))))),
-                              "creationDate":
-                                  crypto.encrypt(DateTime.now().toString())
-                            };
-                            pushAnalytics(context, jsonInputData, _token);
+                            pushAnalytics(
+                                context,
+                                _email.text,
+                                AppRouteConstants.dashboardRouteName +
+                                    (index == 1
+                                        ? ("Request/" +
+                                            (requestType ? "Receive" : "Sent"))
+                                        : ("Room/" +
+                                            (open == 0
+                                                ? "QuickSplit"
+                                                : (open == 1
+                                                    ? "Active"
+                                                    : "Closed")))),
+                                _token);
                           }
                           if (this.mounted) {
                             setState(() {

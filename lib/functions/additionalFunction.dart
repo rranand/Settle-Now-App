@@ -10,8 +10,10 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/FriendEach.dart';
+import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/themes.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:sqflite/sqflite.dart';
@@ -450,9 +452,18 @@ String captalizeFirstLetter(String str) {
 }
 
 Future<void> pushAnalytics(
-    BuildContext context, dynamic jsonInputData, String token) async {
-  jsonInputData["device"] = crypto.encrypt(kIsWeb ? "web" : "android");
-  await createHTTPreq('analytics', http.post, token, jsonInputData, context);
+    BuildContext context, String email, String route, String token) async {
+  bool collectAnalytics = RemoteConfigService.getBool(
+      RemoteConfigConstant.COLLECT_FRONTEND_ANALYTICS_CONSTANT);
+  if (collectAnalytics) {
+    Map<String, dynamic> jsonInputData = {
+      'email': crypto.encrypt(email),
+      "url": crypto.encrypt(route),
+      "creationDate": crypto.encrypt(DateTime.now().toString()),
+      "device": crypto.encrypt(kIsWeb ? "web" : "android")
+    };
+    await createHTTPreq('analytics', http.post, token, jsonInputData, context);
+  }
 }
 
 String parseFirstName(String name) {
