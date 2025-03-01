@@ -50,12 +50,14 @@ class _LoginPageState extends State<LoginPage> {
   AppUpdateInfo? _updateInfo;
   // ignore: unused_field
   bool _flexibleUpdateAvailable = false;
+  StreamSubscription? _remoteConfigSubscription;
   // final connectionChecker = InternetConnectionChecker();
   // late StreamSubscription<InternetConnectionStatus> subscription;
 
   @override
   void dispose() {
     // subscription.cancel();
+    _remoteConfigSubscription?.cancel();
     super.dispose();
   }
 
@@ -301,7 +303,9 @@ class _LoginPageState extends State<LoginPage> {
     fetchIP();
     _extractEmail();
     if (!kIsWeb) {
-      RemoteConfigService.remoteConfig.onConfigUpdated.listen((event) async {
+      _remoteConfigSubscription = RemoteConfigService
+          .remoteConfig.onConfigUpdated
+          .listen((event) async {
         await RemoteConfigService.remoteConfig.activate();
         manualUpdateCheck();
       });

@@ -150,9 +150,11 @@ class _DashBoardState extends State<DashBoard> {
   List<FriendEach> aditionalMembers = [];
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String appVersion = "Unknown";
+  StreamSubscription? _remoteConfigSubscription;
 
   @override
   void dispose() {
+    _remoteConfigSubscription!.cancel();
     super.dispose();
   }
 
@@ -374,7 +376,7 @@ class _DashBoardState extends State<DashBoard> {
           RemoteConfigConstant.VERSION_INFO_CONSTANT));
 
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
-      int currentVerionCode = int.parse(await packageInfo.buildNumber);
+      int currentVerionCode = int.parse(packageInfo.buildNumber);
       int updatedVersionCode = int.parse(versionInfo.version.split('+').last);
       if (updatedVersionCode > currentVerionCode) {
         importantUpdate = true;
@@ -918,7 +920,9 @@ class _DashBoardState extends State<DashBoard> {
         },
       );
 
-      RemoteConfigService.remoteConfig.onConfigUpdated.listen((event) async {
+      _remoteConfigSubscription = RemoteConfigService
+          .remoteConfig.onConfigUpdated
+          .listen((event) async {
         await RemoteConfigService.remoteConfig.activate();
         manualUpdateCheck();
       });
