@@ -270,6 +270,8 @@ class _ExpensesState extends State<Expenses> {
 
       var TransData = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        int tempCategorIndex =
+            expenseCategory.indexOf(crypto.decrypt(TransList[index]['type']));
         double oldAmt =
             double.parse(crypto.decrypt(TransList[index]["amount"]));
         double curAmt = 0;
@@ -285,8 +287,6 @@ class _ExpensesState extends State<Expenses> {
           TransList[index]['lastModDate'] = crypto.encrypt(
               DateFormat(global.dateTimeFormat).format(DateTime.now()));
         }
-        int tempCategorIndex =
-            expenseCategory.indexOf(crypto.decrypt(TransList[index]['type']));
         dataMap[tempCategorIndex].amount += curAmt - oldAmt;
       }
       showToast(context, crypto.decrypt(TransData["Message"]), Icons.check);
