@@ -7,7 +7,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/notificationService/InitializeChannels.dart';
 import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
@@ -28,24 +27,20 @@ class MyCustomScrollBehavior extends MaterialScrollBehavior {
 }
 
 @pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  //await notificationProcessor(message);
-}
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
   String firebaseProjectName = 'settle-now-340017';
-  // if (kDebugMode) {
-  //   firebaseProjectName = 'SettleNow-Dev';
-  // }
-  // await Firebase.initializeApp(
-  //     name: firebaseProjectName,
-  //     options: kDebugMode
-  //         ? FIREBASE_DEV.DefaultFirebaseOptions.currentPlatform
-  //         : FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
-  // await Firebase.initializeApp(
-  //     options: FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
+  if (kDebugMode) {
+    firebaseProjectName = 'settlenow-dev';
+  }
+  await Firebase.initializeApp(
+      name: firebaseProjectName,
+      options: kDebugMode
+          ? FIREBASE_DEV.DefaultFirebaseOptions.currentPlatform
+          : FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
 
   if (kIsWeb) {
     usePathUrlStrategy();
@@ -54,19 +49,16 @@ Future<void> main() async {
     await initializeChannels();
   }
 
-  if (!kIsWeb) {
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+  FlutterError.onError = (errorDetails) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+  };
 
-    await RemoteConfigService.initRemoteConfig();
-    debugPrint(
-        RemoteConfigService.getString(RemoteConfigConstant.ENV_CONSTANT));
-  }
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  RemoteConfigService.initRemoteConfig();
 
   runApp(
     MyApp(),
