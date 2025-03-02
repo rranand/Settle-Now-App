@@ -241,7 +241,7 @@ class _ProfileState extends State<Profile> {
       return;
     }
 
-    await fetchBasicInfo();
+    fetchBasicInfo();
 
     _phoneNo.text = crypto.decrypt(await getStringPref("__token") ?? "");
     createdOn = crypto.decrypt(await getStringPref("___token") ?? "");
