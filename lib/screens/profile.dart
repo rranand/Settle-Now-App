@@ -227,8 +227,6 @@ class _ProfileState extends State<Profile> {
           _token = jsonOutData["token"]!;
         });
       }
-      hidePhoneNo = RemoteConfigService.getBool(
-          RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT);
       pushAnalytics(
           context, _email, AppRouteConstants.profileRouteName, _token);
     } else {
@@ -249,6 +247,9 @@ class _ProfileState extends State<Profile> {
     if (_phoneNo.text.isNotEmpty) {
       havePhoneNo = true;
     }
+
+    hidePhoneNo = RemoteConfigService.getBool(
+        RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT);
 
     if (this.mounted) {
       setState(() {

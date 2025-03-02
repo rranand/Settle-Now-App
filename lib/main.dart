@@ -32,15 +32,22 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
-  String firebaseProjectName = 'settle-now-340017';
+  String firebaseProjectName = '[DEFAULT]';
   if (kDebugMode) {
     firebaseProjectName = 'settlenow-dev';
   }
-  await Firebase.initializeApp(
-      name: firebaseProjectName,
-      options: kDebugMode
-          ? FIREBASE_DEV.DefaultFirebaseOptions.currentPlatform
-          : FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+        options: kDebugMode
+            ? FIREBASE_DEV.DefaultFirebaseOptions.currentPlatform
+            : FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
+  } else {
+    await Firebase.initializeApp(
+        name: firebaseProjectName,
+        options: kDebugMode
+            ? FIREBASE_DEV.DefaultFirebaseOptions.currentPlatform
+            : FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
+  }
 
   if (kIsWeb) {
     usePathUrlStrategy();
