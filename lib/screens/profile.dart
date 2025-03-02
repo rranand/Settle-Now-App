@@ -164,11 +164,9 @@ class _ProfileState extends State<Profile> {
       final response = await createHTTPreq(
           'profile/basic_info', http.post, _token, jsonInputData, context);
 
-      String responseMessage =
-          crypto.decrypt(jsonDecode(response.body)['Message']);
+      var data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
         for (int i = 0; i < data['data'].length; i++) {
           loggedInData.add(LoggedInEach.fromJson(data['data'][i]));
         }
@@ -188,6 +186,7 @@ class _ProfileState extends State<Profile> {
           });
         }
       } else {
+        String responseMessage = crypto.decrypt(data['Message']);
         showToast(context, responseMessage, Icons.warning_rounded);
       }
     } on Exception catch (err, stackTrace) {
@@ -247,14 +246,16 @@ class _ProfileState extends State<Profile> {
     if (_phoneNo.text.isNotEmpty) {
       havePhoneNo = true;
     }
-
-    hidePhoneNo = RemoteConfigService.getBool(
-        RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT);
-
     if (this.mounted) {
       setState(() {
         isDataLoading = false;
       });
+    }
+    hidePhoneNo = RemoteConfigService.getBool(
+        RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT);
+
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
