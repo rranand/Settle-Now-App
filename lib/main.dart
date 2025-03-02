@@ -7,12 +7,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/notificationService/InitializeChannels.dart';
 import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_config.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
-import 'firebase_options.dart';
+import 'firebase_options.dart' as FIREBASE_PROD;
+import 'firebase_options_dev.dart' as FIREBASE_DEV;
 import 'others/themes.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -33,19 +35,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
-  String firebaseProjectName = '[DEFAULT]';
-  if (!kIsWeb && kDebugMode) {
-    firebaseProjectName = 'SettleNow-Dev';
-  }
-  if (kIsWeb || Firebase.apps.length == 0) {
-    await Firebase.initializeApp(
-        name: firebaseProjectName,
-        options: DefaultFirebaseOptions.currentPlatform);
-  } else {
-    Firebase.app(firebaseProjectName);
-  }
-
-  await RemoteConfigService.initRemoteConfig();
+  String firebaseProjectName = 'settle-now-340017';
+  // if (kDebugMode) {
+  //   firebaseProjectName = 'SettleNow-Dev';
+  // }
+  // await Firebase.initializeApp(
+  //     name: firebaseProjectName,
+  //     options: kDebugMode
+  //         ? FIREBASE_DEV.DefaultFirebaseOptions.currentPlatform
+  //         : FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
+  // await Firebase.initializeApp(
+  //     options: FIREBASE_PROD.DefaultFirebaseOptions.currentPlatform);
 
   if (kIsWeb) {
     usePathUrlStrategy();
@@ -62,6 +62,10 @@ Future<void> main() async {
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
+
+    await RemoteConfigService.initRemoteConfig();
+    debugPrint(
+        RemoteConfigService.getString(RemoteConfigConstant.ENV_CONSTANT));
   }
 
   runApp(

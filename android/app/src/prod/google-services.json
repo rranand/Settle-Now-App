@@ -31,6 +31,22 @@
           }
         },
         {
+          "client_id": "950526449356-ndq3hrjt2qnb26qoo1gq045chk61dkic.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.settlenow",
+            "certificate_hash": "02a7f4f1f910de594cb893be855f4e7158c62af0"
+          }
+        },
+        {
+          "client_id": "950526449356-v4uhb330is7chohav9vreqkimtvjjnh7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rohit.settlenow",
+            "certificate_hash": "88aed719d872baebc4b20b4075c23c5e88447b43"
+          }
+        },
+        {
           "client_id": "950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com",
           "client_type": 3
         }

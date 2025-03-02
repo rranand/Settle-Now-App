@@ -12,9 +12,12 @@
 key.properties
 contents.dart
 firebase_options.dart
+firebase_options_dev.dart
 .firebase/
 .github/
 public/
+
+/node_modules/
 firebase.json
 .firebaserc
 
