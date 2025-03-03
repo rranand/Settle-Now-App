@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
-import 'package:flutter/foundation.dart';
 import 'package:settlenow/constant/RemoteConfigConstant.dart';
 
 class RemoteConfigService {
@@ -9,12 +8,10 @@ class RemoteConfigService {
 
   static Future<void> initRemoteConfig() async {
     remoteConfig = FirebaseRemoteConfig.instance;
-    if (!kIsWeb) {
-      await remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: Duration(seconds: 10),
-        minimumFetchInterval: Duration(hours: 1),
-      ));
-    }
+    await remoteConfig.setConfigSettings(RemoteConfigSettings(
+      fetchTimeout: Duration(seconds: 10),
+      minimumFetchInterval: Duration(hours: 1),
+    ));
 
     await remoteConfig.setDefaults({
       RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT: true,

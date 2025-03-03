@@ -22,6 +22,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pinput/pinput.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:settlenow/Notifier/CollectAnalytics.dart';
 import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/manualUpdateWidget.dart';
@@ -349,16 +350,34 @@ class _DashBoardState extends State<DashBoard> {
       if (!kIsWeb) {
         getContactsFromDB = await getContactsFromLocal();
       }
-      expenseCategory.clear();
-      subCategory.clear();
-      Map<dynamic, dynamic> categoryMap = RemoteConfigService.getJSON(
-          RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT);
-      categoryMap.forEach((key, value) {
-        expenseCategory.add(key);
-        subCategory.add(value);
-      });
-      shareMessage = ShareMessage.fromJson(RemoteConfigService.getJSON(
-          RemoteConfigConstant.SHARE_MESSAGE_CONSTANT));
+      List<String> keys = [
+        RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT,
+        RemoteConfigConstant.SHARE_MESSAGE_CONSTANT,
+        RemoteConfigConstant.COLLECT_FRONTEND_ANALYTICS_CONSTANT
+      ];
+      Map<String, dynamic> jsonInputData = {
+        'keys': crypto.encrypt(keys.toString()),
+      };
+
+      final response = await createHTTPreq(
+          'profile', http.patch, _token, jsonInputData, context);
+      var data = jsonDecode(response.body)['data'];
+      if (response.statusCode == 200) {
+        expenseCategory.clear();
+        subCategory.clear();
+        Map<dynamic, dynamic> categoryMap =
+            jsonDecode(data[RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT]);
+        categoryMap.forEach((key, value) {
+          expenseCategory.add(key);
+          subCategory.add(value);
+        });
+        shareMessage = ShareMessage.fromJson(
+            jsonDecode(data[RemoteConfigConstant.SHARE_MESSAGE_CONSTANT]));
+        final provider = Provider.of<CollectAnalytics>(context, listen: false);
+        provider.toggleCollectAnalytics(
+            data[RemoteConfigConstant.COLLECT_FRONTEND_ANALYTICS_CONSTANT] ==
+                "true");
+      }
       gotInitialData = true;
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,

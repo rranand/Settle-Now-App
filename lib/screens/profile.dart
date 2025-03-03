@@ -10,10 +10,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:intl/intl.dart';
 import 'package:moment_dart/moment_dart.dart';
 import 'package:pinput/pinput.dart';
-import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/LoggedInEach.dart';
-import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/routes/route_constant.dart';
 import 'package:timer_count_down/timer_controller.dart';
@@ -177,6 +175,7 @@ class _ProfileState extends State<Profile> {
             name = crypto.decrypt(data['name']);
             isGoogleConnected =
                 crypto.decrypt(data['isGoogleConnected']) == "true";
+            hidePhoneNo = data['hidePhoneNo'] == "true";
           });
         }
         if (this.mounted) {
@@ -238,7 +237,7 @@ class _ProfileState extends State<Profile> {
       return;
     }
 
-    fetchBasicInfo();
+    await fetchBasicInfo();
 
     _phoneNo.text = crypto.decrypt(await getStringPref("__token") ?? "");
     createdOn = crypto.decrypt(await getStringPref("___token") ?? "");
@@ -250,12 +249,6 @@ class _ProfileState extends State<Profile> {
       setState(() {
         isDataLoading = false;
       });
-    }
-    hidePhoneNo = RemoteConfigService.getBool(
-        RemoteConfigConstant.HIDE_PHONE_NO_CONSTANT);
-
-    if (this.mounted) {
-      setState(() {});
     }
   }
 

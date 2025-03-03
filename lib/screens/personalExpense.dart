@@ -15,7 +15,6 @@ import 'package:settlenow/constant/RemoteConfigConstant.dart';
 import 'package:settlenow/functions/additionalFunction.dart';
 import 'package:settlenow/functions/sharedPrefParse.dart';
 import 'package:settlenow/models/ChartData.dart';
-import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/crypto.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
 import 'package:settlenow/others/themes.dart';
@@ -75,14 +74,25 @@ class _ExpensesState extends State<Expenses> {
 
   Future<void> getExpenseCategory() async {
     try {
-      expenseCategory.clear();
-      subCategory.clear();
-      Map<dynamic, dynamic> categoryMap = RemoteConfigService.getJSON(
-          RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT);
-      categoryMap.forEach((key, value) {
-        expenseCategory.add(key);
-        subCategory.add(value);
-      });
+      List<String> keys = [RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT];
+      Map<String, dynamic> jsonInputData = {
+        'keys': crypto.encrypt(keys.toString()),
+      };
+
+      final response = await createHTTPreq(
+          'profile', http.patch, _token, jsonInputData, context);
+      var data = jsonDecode(response.body)['data'];
+      if (response.statusCode == 200) {
+        expenseCategory.clear();
+        subCategory.clear();
+        Map<dynamic, dynamic> categoryMap =
+            jsonDecode(data[RemoteConfigConstant.EXPENSE_CATEGORY_CONSTANT]);
+        categoryMap.forEach((key, value) {
+          expenseCategory.add(key);
+          subCategory.add(value);
+        });
+      }
+      ;
       expenseCategoryLoaded = true;
     } on Exception catch (err, stackTrace) {
       onException(err, stackTrace,

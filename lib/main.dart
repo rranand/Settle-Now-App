@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/Notifier/CollectAnalytics.dart';
 import 'package:settlenow/notificationService/InitializeChannels.dart';
 import 'package:settlenow/others/RemoteConfig.dart';
 import 'package:settlenow/others/internetConnectivity.dart';
@@ -52,6 +53,7 @@ Future<void> main() async {
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
+    RemoteConfigService.initRemoteConfig();
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     await initializeChannels();
   }
@@ -64,8 +66,6 @@ Future<void> main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
-
-  RemoteConfigService.initRemoteConfig();
 
   runApp(
     MyApp(),
@@ -108,30 +108,33 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-        create: (context) => InternetconnectivityProvider(),
-        builder: (context, __) {
-          return ChangeNotifierProvider(
-              create: (context) => ThemeProvider(),
-              builder: (context, _) {
-                final themeProvider = Provider.of<ThemeProvider>(context);
-                return MaterialApp.router(
-                  routerConfig: AppRouter.router,
-                  builder: (context, child) {
-                    return MediaQuery(
-                      data: MediaQuery.of(context)
-                          .copyWith(textScaler: TextScaler.linear(1.0)),
-                      child: child!,
-                    );
-                  },
-                  themeMode: themeProvider.darkTheme
-                      ? ThemeMode.dark
-                      : ThemeMode.light,
-                  theme: MyTheme.lightTheme(context),
-                  darkTheme: MyTheme.darkTheme(context),
-                  title: "Settle Now",
-                  scrollBehavior: kIsWeb ? MyCustomScrollBehavior() : null,
-                );
-              });
-        });
+      create: (context) => InternetconnectivityProvider(),
+      child: ChangeNotifierProvider(
+          create: (context) => CollectAnalytics(),
+          builder: (context, __) {
+            return ChangeNotifierProvider(
+                create: (context) => ThemeProvider(),
+                builder: (context, _) {
+                  final themeProvider = Provider.of<ThemeProvider>(context);
+                  return MaterialApp.router(
+                    routerConfig: AppRouter.router,
+                    builder: (context, child) {
+                      return MediaQuery(
+                        data: MediaQuery.of(context)
+                            .copyWith(textScaler: TextScaler.linear(1.0)),
+                        child: child!,
+                      );
+                    },
+                    themeMode: themeProvider.darkTheme
+                        ? ThemeMode.dark
+                        : ThemeMode.light,
+                    theme: MyTheme.lightTheme(context),
+                    darkTheme: MyTheme.darkTheme(context),
+                    title: "Settle Now",
+                    scrollBehavior: kIsWeb ? MyCustomScrollBehavior() : null,
+                  );
+                });
+          }),
+    );
   }
 }
