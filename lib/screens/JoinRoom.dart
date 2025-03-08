@@ -46,6 +46,7 @@ class _RoomJoinState extends State<RoomJoin> {
 
         String email = jsonOutData["email"]!;
         String _token = jsonOutData["token"]!;
+        int responseCode = 200;
 
         pushAnalytics(
             context,
@@ -66,6 +67,8 @@ class _RoomJoinState extends State<RoomJoin> {
           final response = await createHTTPreq(
               'room', http.put, _token, jsonInputData, context);
 
+          responseCode = response.statusCode;
+
           if (this.mounted) {
             setState(() {
               message = crypto.decrypt(jsonDecode(response.body)['Message']);
@@ -80,6 +83,8 @@ class _RoomJoinState extends State<RoomJoin> {
           final response = await createHTTPreq(
               'lend/addPerson', http.post, _token, jsonInputData, context);
 
+          responseCode = response.statusCode;
+
           if (this.mounted) {
             setState(() {
               message = crypto.decrypt(jsonDecode(response.body)['Message']);
@@ -87,21 +92,22 @@ class _RoomJoinState extends State<RoomJoin> {
           }
         }
 
-        Future.delayed(const Duration(milliseconds: 1000), () {
+        Future.delayed(const Duration(milliseconds: 500), () {
           if (this.mounted) {
             while (context.canPop()) {
               context.pop();
             }
           }
-          context.go(AppRouteConstants.dashboardRouteName,
-              extra: {"firstTime": false});
+          if (responseCode == 200) {
+            context.go(AppRouteConstants.dashboardRouteName,
+                extra: {"firstTime": false});
+          } else {
+            context.go(AppRouteConstants.loginRouteName);
+          }
         });
       } else {
         if (this.mounted) {
-          while (context.canPop()) {
-            context.pop();
-          }
-          context.push(AppRouteConstants.loginRouteName);
+          context.go(AppRouteConstants.loginRouteName);
         }
       }
     } on Exception catch (err, stackTrace) {
@@ -109,14 +115,7 @@ class _RoomJoinState extends State<RoomJoin> {
         onException(err, stackTrace,
             reason: "Unknwon Error", info: ["JoinRoom->_roomJoin"]);
       }
-
-      if (this.mounted) {
-        while (context.canPop()) {
-          context.pop();
-        }
-      }
-      context.go(AppRouteConstants.dashboardRouteName,
-          extra: {"firstTime": false});
+      context.go(AppRouteConstants.loginRouteName);
     }
   }
 
