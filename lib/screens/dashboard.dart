@@ -152,6 +152,7 @@ class _DashBoardState extends State<DashBoard> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String appVersion = "Unknown";
   StreamSubscription? _remoteConfigSubscription;
+  int pendingRequest = 0;
 
   @override
   void dispose() {
@@ -304,10 +305,6 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   Future<void> _getImageID() async {
-    if (isGoogle) {
-      return;
-    }
-
     try {
       Map<String, dynamic> jsonInputData = {
         'email': crypto.encrypt(_email.text),
@@ -324,6 +321,7 @@ class _DashBoardState extends State<DashBoard> {
         } else {
           _profilePicID = global.unknown_avatar_id;
         }
+        pendingRequest = int.parse(crypto.decrypt(imgData["pendingRequest"]));
       }
     } on Exception catch (err, stackTrace) {
       if (this.mounted) {
@@ -4988,12 +4986,14 @@ class _DashBoardState extends State<DashBoard> {
                                 Icons.notifications_outlined,
                                 size: 27,
                               ),
-                              RoomRequest.isNotEmpty
+                              (pendingRequest > 0 ||
+                                      RoomRequest.isNotEmpty ||
+                                      sentRoomRequest.isNotEmpty)
                                   ? Positioned(
                                       right: 0,
-                                      child: new Container(
+                                      child: Container(
                                         padding: EdgeInsets.all(1),
-                                        decoration: new BoxDecoration(
+                                        decoration: BoxDecoration(
                                           color: Colors.red,
                                           borderRadius:
                                               BorderRadius.circular(6),
@@ -5002,12 +5002,17 @@ class _DashBoardState extends State<DashBoard> {
                                           minWidth: 12,
                                           minHeight: 12,
                                         ),
-                                        child: new Text(
-                                          RoomRequest.length.toString(),
-                                          style: new TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 8,
-                                          ),
+                                        child: Text(
+                                          ((firstTimeisSentRoomRequestLoaded &&
+                                                      firstTimeisRoomRequestLoaded)
+                                                  ? (RoomRequest.length +
+                                                      sentRoomRequest.length)
+                                                  : pendingRequest)
+                                              .toString(),
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.w500),
                                           textAlign: TextAlign.center,
                                         ),
                                       ),
