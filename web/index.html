@@ -71,6 +71,7 @@ By using the Settle Now, we can efficiently manage all costs per individual, tra
 		<script type="module">
 			import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
 			import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+			import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "firebase/app-check";
 
 			const firebaseConfig = {
 			  apiKey: "AIzaSyApNchuFZfvl0tDGIFv89xonkbwzLfXDz4",
@@ -82,9 +83,14 @@ By using the Settle Now, we can efficiently manage all costs per individual, tra
 			  appId: "1:950526449356:web:e9234a8e96ab3296305469",
 			  measurementId: "G-DF7HQKPVDS"
 			};
-		  
+
 			const app = initializeApp(firebaseConfig);
 			const analytics = getAnalytics(app);
+
+			const appCheck = initializeAppCheck(app, {
+				provider: new ReCaptchaEnterpriseProvider('6LcI-OgnAAAAAI-V0bHmauAorcKlh1W3wDvfmN40'),
+				isTokenAutoRefreshEnabled: true
+			});
 		  </script>
 	</body>
 </html>
