@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Settle Now">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <title>Settle Now</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="google-signin-client_id"
+    content="950526449356-doog0pf9reuu509ojduglv8dogllanl2.apps.googleusercontent.com" />
+</head>
+
+<body>
+  <script src="flutter_bootstrap.js" async></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-analytics.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app-check.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyApNchuFZfvl0tDGIFv89xonkbwzLfXDz4",
+      authDomain: "settle-now-340017.firebaseapp.com",
+      databaseURL: "https://settle-now-340017-default-rtdb.firebaseio.com",
+      projectId: "settle-now-340017",
+      storageBucket: "settle-now-340017.appspot.com",
+      messagingSenderId: "950526449356",
+      appId: "1:950526449356:web:e9234a8e96ab3296305469",
+      measurementId: "G-DF7HQKPVDS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+
+    const appCheck = initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider('6LcI-OgnAAAAAI-V0bHmauAorcKlh1W3wDvfmN40'),
+      isTokenAutoRefreshEnabled: true
+    });
+  </script>
+</body>
+
+</html>

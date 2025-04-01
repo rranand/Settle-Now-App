@@ -1,0 +1,70 @@
+name: settlenow_v2
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  firebase_core: ^3.12.0
+  firebase_messaging: ^15.2.3
+  go_router: ^14.8.0
+  email_validator: ^3.0.0
+  iconsax: ^0.0.8
+  auto_size_text: ^3.0.0
+  cached_network_image: ^3.4.1
+  shared_preferences: ^2.3.3
+  omni_datetime_picker: ^2.1.1
+  http: ^1.3.0
+  intl: ^0.19.0
+  url_launcher: ^6.3.1
+  shimmer: ^3.0.0
+  provider: ^6.1.2
+  moment_dart: ^4.0.1
+  flutter_bloc: ^9.1.0
+  bloc: ^9.0.0
+  google_sign_in: ^6.3.0
+  device_preview: ^1.2.0
+  firebase_analytics: ^11.4.5
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.14.3
+  change_app_package_name: ^1.4.0
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - "assets/icon/"
+    - "assets/Images/"
+    - "assets/sn/"
+    - "assets/socialmedia/"
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/sn/SN_WBG.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/sn/SN_WBG.png"
+    background_color: "#00FFFFFF"
+    theme_color: "#00FFFFFF"
+  windows:
+    generate: true
+    image_path: "assets/sn/SN_WBG.png"
+    icon_size: 48
+  macos:
+    generate: true
+    image_path: "assets/sn/SN_WBG.png"
