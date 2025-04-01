@@ -1,0 +1,2 @@
+/Users/rohitanand/Projects/SettleNow/Settle_Now/settlenow/android/app/.cxx/Debug/6f47124l/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/rohitanand/Projects/SettleNow/Settle_Now/settlenow/android/app/.cxx/Debug/6f47124l/armeabi-v7a/CMakeFiles/rebuild_cache.dir
