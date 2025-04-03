@@ -63,127 +63,144 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ],
         forceMaterialTransparency: true,
       ),
-      body: SingleChildScrollView(
-        padding: _mainScreenPadding,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Image.asset(
-                'assets/sn/SN_WBG.png',
-                height: 150,
-                width: 150,
-                color: Colors.black87,
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, Object? result) async {
+          if (didPop) {
+            return;
+          }
+          SystemNavigator.pop();
+        },
+        child: SingleChildScrollView(
+          padding: _mainScreenPadding,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/sn/SN_WBG.png',
+                  height: 150,
+                  width: 150,
+                  color: Colors.black87,
+                ),
               ),
-            ),
-            SizedBox(height: UiConstant.spaceBetweenSection),
-            const Text(
-              'Welcome !',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
-            ),
-            SizedBox(height: UiConstant.spaceBetweenSection),
-            const Text(
-              'Sign Up to contiue',
-              style: TextStyle(fontWeight: FontWeight.w900),
-            ),
-            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-            Form(
-              key: _signupFormKey,
-              child: Column(
-                children: [
-                  Form(
-                    key: _subSignupFormKey,
-                    child: Column(
-                      children: [
-                        CustomFormField.textFormFieldWithAutoFillGroup(
-                          _nameController,
-                          autofillHints: [AutofillHints.name],
-                          hintText: 'Name',
-                          labelText: 'Your Name',
-                          validator: CustomValidator.validateName,
-                          inputDecoration: TextFormFieldInputBorder.underLine,
-                        ),
-                        SizedBox(height: UiConstant.spaceBetweenSection),
-                        CustomFormField.textFormFieldWithAutoFillGroup(
-                          _emailController,
-                          autofillHints: [AutofillHints.email],
-                          hintText: 'Email',
-                          labelText: 'Your Email',
-                          validator: CustomValidator.validateEmail,
-                          inputDecoration: TextFormFieldInputBorder.underLine,
-                        ),
-                      ],
-                    ),
-                  ),
-                  ValueListenableBuilder(
-                    valueListenable: isOTPSent,
-                    builder: (BuildContext context, bool value, Widget? child) {
-                      return Visibility(visible: value, child: child as Widget);
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: UiConstant.spaceBetweenSection,
-                      ),
+              SizedBox(height: UiConstant.spaceBetweenSection),
+              const Text(
+                'Welcome !',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+              ),
+              SizedBox(height: UiConstant.spaceBetweenSection),
+              const Text(
+                'Sign Up to contiue',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
+              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+              Form(
+                key: _signupFormKey,
+                child: Column(
+                  children: [
+                    Form(
+                      key: _subSignupFormKey,
                       child: Column(
                         children: [
-                          CustomFormField.textFormField(
-                            _otpController,
-                            textInputType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            hintText: 'OTP',
-                            labelText: 'Enter OTP',
-                            validator: CustomValidator.validateOTP,
+                          CustomFormField.textFormFieldWithAutoFillGroup(
+                            _nameController,
+                            autofillHints: [AutofillHints.name],
+                            hintText: 'Name',
+                            labelText: 'Your Name',
+                            validator: CustomValidator.validateName,
                             inputDecoration: TextFormFieldInputBorder.underLine,
-                            maxLength: 6,
                           ),
-                          Align(
-                            alignment: Alignment.topRight,
-                            child: Padding(
-                              padding: EdgeInsets.only(top: 8.0),
-                              child: TimerButton(onPressed: () {}),
-                            ),
+                          SizedBox(height: UiConstant.spaceBetweenSection),
+                          CustomFormField.textFormFieldWithAutoFillGroup(
+                            _emailController,
+                            autofillHints: [AutofillHints.email],
+                            hintText: 'Email',
+                            labelText: 'Your Email',
+                            validator: CustomValidator.validateEmail,
+                            inputDecoration: TextFormFieldInputBorder.underLine,
                           ),
                         ],
                       ),
                     ),
+                    ValueListenableBuilder(
+                      valueListenable: isOTPSent,
+                      builder: (
+                        BuildContext context,
+                        bool value,
+                        Widget? child,
+                      ) {
+                        return Visibility(
+                          visible: value,
+                          child: child as Widget,
+                        );
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: UiConstant.spaceBetweenSection,
+                        ),
+                        child: Column(
+                          children: [
+                            CustomFormField.textFormField(
+                              _otpController,
+                              textInputType: TextInputType.number,
+                              inputFormatters: [
+                                FilteringTextInputFormatter.digitsOnly,
+                              ],
+                              hintText: 'OTP',
+                              labelText: 'Enter OTP',
+                              validator: CustomValidator.validateOTP,
+                              inputDecoration:
+                                  TextFormFieldInputBorder.underLine,
+                              maxLength: 6,
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: Padding(
+                                padding: EdgeInsets.only(top: 8.0),
+                                child: TimerButton(onPressed: () {}),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+              ValueListenableBuilder(
+                valueListenable: isOTPSent,
+                builder: (BuildContext context, bool value, Widget? child) {
+                  return CustomButton.customElevatedButton(
+                    value ? "Sign Up" : "Send OTP",
+                    onPressed: _handleSignUpSubmit,
+                    elevation: 8,
+                    buttonHeight: 50,
+                    borderRadius: 100,
+                    borderColor: Colors.black87,
+                    backgroundColor: Colors.black87,
+                  );
+                },
+              ),
+              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+              const Center(child: Text('Or sign up with social account')),
+              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CustomButton.socialButton(
+                    context,
+                    'assets/socialmedia/google.png',
+                    onPressed: () {},
                   ),
                 ],
               ),
-            ),
-            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-            ValueListenableBuilder(
-              valueListenable: isOTPSent,
-              builder: (BuildContext context, bool value, Widget? child) {
-                return CustomButton.customElevatedButton(
-                  value ? "Sign Up" : "Send OTP",
-                  onPressed: _handleSignUpSubmit,
-                  elevation: 8,
-                  buttonHeight: 50,
-                  borderRadius: 100,
-                  borderColor: Colors.black87,
-                  backgroundColor: Colors.black87,
-                );
-              },
-            ),
-            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-            const Center(child: Text('Or sign up with social account')),
-            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomButton.socialButton(
-                  context,
-                  'assets/socialmedia/google.png',
-                  onPressed: () {},
-                ),
-              ],
-            ),
 
-            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-          ],
+              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: Padding(
