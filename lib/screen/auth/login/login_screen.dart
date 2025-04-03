@@ -7,10 +7,9 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
-import 'package:settlenow_v2/util/widgets/screen_size.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/timer_button.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// TODO : Add Resend Timer OTP functionality
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       if (_loginEmailFormKey.currentState!.validate()) {
         isOTPSent.value = true;
+        showSnackbar(context, "OTP Sent Successful");
       }
     }
   }
@@ -58,159 +58,153 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
       body: SingleChildScrollView(
         padding: _mainScreenPadding,
-        child: SizedBox(
-          height: getScreenHeightWithoutAppBar(context),
-          child: Column(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: UiConstant.spaceBetweenSection),
-                    const Text(
-                      'Log in',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                      ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Image.asset(
+                'assets/sn/SN_WBG.png',
+                height: 150,
+                width: 150,
+                color: Colors.black87,
+              ),
+            ),
+            SizedBox(height: UiConstant.spaceBetweenSection),
+            const Text(
+              'Welcome Back !',
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+            ),
+            SizedBox(height: UiConstant.spaceBetweenSection),
+            const Text(
+              'Sign In to Continue',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
+            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+            Form(
+              key: _loginFormKey,
+              child: Column(
+                children: [
+                  Form(
+                    key: _loginEmailFormKey,
+                    child: CustomFormField.textFormFieldWithAutoFillGroup(
+                      emailController,
+                      autofillHints: [AutofillHints.email],
+                      hintText: 'Email',
+                      labelText: 'Your Email',
+                      validator: CustomValidator.validateEmail,
+                      inputDecoration: TextFormFieldInputBorder.underLine,
                     ),
-                    SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                    Form(
-                      key: _loginFormKey,
+                  ),
+                  ValueListenableBuilder(
+                    valueListenable: isOTPSent,
+                    builder: (BuildContext context, bool value, Widget? child) {
+                      return Visibility(visible: value, child: child as Widget);
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: UiConstant.spaceBetweenSection,
+                      ),
                       child: Column(
                         children: [
-                          Form(
-                            key: _loginEmailFormKey,
-                            child:
-                                CustomFormField.textFormFieldWithAutoFillGroup(
-                                  emailController,
-                                  autofillHints: [AutofillHints.email],
-                                  hintText: 'Email',
-                                  labelText: 'Your Email',
-                                  validator: CustomValidator.validateEmail,
-                                  inputDecoration:
-                                      TextFormFieldInputBorder.underLine,
-                                ),
+                          CustomFormField.textFormField(
+                            otpController,
+                            textInputType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            hintText: 'OTP',
+                            labelText: 'Enter OTP',
+                            validator: CustomValidator.validateOTP,
+                            inputDecoration: TextFormFieldInputBorder.underLine,
+                            maxLength: 6,
                           ),
-                          ValueListenableBuilder(
-                            valueListenable: isOTPSent,
-                            builder: (
-                              BuildContext context,
-                              bool value,
-                              Widget? child,
-                            ) {
-                              return Visibility(
-                                visible: value,
-                                child: child as Widget,
-                              );
-                            },
+                          Align(
+                            alignment: Alignment.topRight,
                             child: Padding(
-                              padding: const EdgeInsets.only(
-                                top: UiConstant.spaceBetweenSection,
-                              ),
-                              child: CustomFormField.textFormField(
-                                otpController,
-                                textInputType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                readOnly: true,
-                                hintText: 'OTP',
-                                labelText: 'Enter OTP',
-                                validator: CustomValidator.validateOTP,
-                                inputDecoration:
-                                    TextFormFieldInputBorder.underLine,
-                              ),
+                              padding: EdgeInsets.only(top: 8.0),
+                              child: TimerButton(onPressed: () {}),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                    CustomButton.customElevatedButton(
-                      "Send OTP",
-                      onPressed: _handleLoginSubmit,
-                      elevation: 8,
-                      buttonHeight: 50,
-                      borderRadius: 100,
-                      borderColor: Colors.black87,
-                      backgroundColor: Colors.black87,
-                    ),
-                    SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                    const Center(child: Text('Or sign up with social account')),
-                    SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomButton.customOutlinedButton(
-                          "Google",
-                          onPressed: () {},
-                          buttonHeight: 50,
-                          buttonWidth: 175,
-                          buttonTextSize: 16,
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.transparent,
-                            child: Image.asset(
-                              'assets/socialmedia/google.png',
-                              height: 24,
-                              width: 24,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                  bottom: 2 * UiConstant.spaceBetweenSection,
-                ),
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    text: 'By signing in, You agree to the ',
-                    children: [
-                      TextSpan(
-                        text: 'Terms of Use',
-                        style: TextStyle(decoration: TextDecoration.underline),
-                        recognizer:
-                            TapGestureRecognizer()
-                              ..onTap = () async {
-                                launchUrl(
-                                  Uri.parse(
-                                    "https://settlenow.in/privacy-policy",
-                                  ),
-                                  mode: LaunchMode.inAppWebView,
-                                  webViewConfiguration:
-                                      const WebViewConfiguration(
-                                        enableJavaScript: true,
-                                      ),
-                                );
-                              },
-                      ),
-                      TextSpan(text: ' and '),
-                      TextSpan(
-                        text: 'Privacy Policy',
-                        style: TextStyle(decoration: TextDecoration.underline),
-                        recognizer:
-                            TapGestureRecognizer()
-                              ..onTap = () async {
-                                launchUrl(
-                                  Uri.parse(
-                                    "https://settlenow.in/privacy-policy",
-                                  ),
-                                  mode: LaunchMode.inAppWebView,
-                                  webViewConfiguration:
-                                      const WebViewConfiguration(
-                                        enableJavaScript: true,
-                                      ),
-                                );
-                              },
-                      ),
-                    ],
                   ),
+                ],
+              ),
+            ),
+            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+            ValueListenableBuilder(
+              valueListenable: isOTPSent,
+              builder: (BuildContext context, bool value, Widget? child) {
+                return CustomButton.customElevatedButton(
+                  value ? "Login" : "Send OTP",
+                  onPressed: _handleLoginSubmit,
+                  elevation: 8,
+                  buttonHeight: 50,
+                  borderRadius: 100,
+                  borderColor: Colors.black87,
+                  backgroundColor: Colors.black87,
+                );
+              },
+            ),
+            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+            const Center(child: Text('Or sign up with social account')),
+            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CustomButton.socialButton(
+                  context,
+                  'assets/socialmedia/google.png',
+                  onPressed: () {},
                 ),
+              ],
+            ),
+
+            SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(
+          bottom: 2 * UiConstant.spaceBetweenSection,
+        ),
+        child: RichText(
+          textAlign: TextAlign.center,
+          text: TextSpan(
+            text: 'By signing in, You agree to the ',
+            children: [
+              TextSpan(
+                text: 'Terms of Use',
+                style: TextStyle(decoration: TextDecoration.underline),
+                recognizer:
+                    TapGestureRecognizer()
+                      ..onTap = () async {
+                        launchUrl(
+                          Uri.parse("https://settlenow.in/privacy-policy"),
+                          mode: LaunchMode.inAppWebView,
+                          webViewConfiguration: const WebViewConfiguration(
+                            enableJavaScript: true,
+                          ),
+                        );
+                      },
+              ),
+              TextSpan(text: ' and '),
+              TextSpan(
+                text: 'Privacy Policy',
+                style: TextStyle(decoration: TextDecoration.underline),
+                recognizer:
+                    TapGestureRecognizer()
+                      ..onTap = () async {
+                        launchUrl(
+                          Uri.parse("https://settlenow.in/privacy-policy"),
+                          mode: LaunchMode.inAppWebView,
+                          webViewConfiguration: const WebViewConfiguration(
+                            enableJavaScript: true,
+                          ),
+                        );
+                      },
               ),
             ],
           ),

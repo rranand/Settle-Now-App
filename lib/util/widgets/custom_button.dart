@@ -106,7 +106,7 @@ class CustomButton {
     double? iconRadius,
     Color? iconBorderColor,
   }) {
-    iconRadius ??= 12;
+    iconRadius ??= 20;
     iconBorderColor ??= Colors.black26;
 
     return InkWell(

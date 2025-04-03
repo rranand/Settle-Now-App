@@ -50,6 +50,7 @@ class CustomFormField {
     Widget? suffixIcon,
     Widget? prefixIcon,
     bool isPassword = false,
+    int? maxLength,
   }) {
     return TextFormField(
       readOnly: readOnly,
@@ -65,6 +66,7 @@ class CustomFormField {
       style: style,
       onChanged: onChanged,
       onTap: onTap,
+      maxLength: maxLength,
       decoration: InputDecoration(
         isDense: true,
         focusedBorder: _inputBorder(inputDecoration, borderRadius, borderColor),
@@ -85,6 +87,7 @@ class CustomFormField {
         filled: filled,
         hoverColor: hoverColor,
         fillColor: fillColor,
+        counterText: "",
       ),
     );
   }
@@ -113,6 +116,7 @@ class CustomFormField {
     Widget? suffixIcon,
     Widget? prefixIcon,
     bool isPassword = false,
+    int? maxLength,
   }) {
     return AutofillGroup(
       child: textFormField(
@@ -137,6 +141,7 @@ class CustomFormField {
         fillColor: fillColor,
         style: style,
         isPassword: isPassword,
+        maxLength: maxLength,
       ),
     );
   }

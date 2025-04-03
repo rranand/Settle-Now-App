@@ -12,9 +12,9 @@ class CustomValidator {
   }
 
   static String? validateOTP(String? value) {
-    if (value == null || value.trim().isEmpty || value.trim().length != 6) {
+    if (value == null || value.trim().isEmpty) {
       return 'Please enter OTP';
-    } else if (int.tryParse(value.trim()) == null) {
+    } else if (value.trim().length != 6 || int.tryParse(value.trim()) == null) {
       return 'Please enter valid OTP';
     }
     return null;
