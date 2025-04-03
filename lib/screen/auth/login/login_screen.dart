@@ -2,8 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
@@ -19,22 +21,26 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController otpController = TextEditingController();
-  final ValueNotifier<bool> isOTPSent = ValueNotifier(false);
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _otpController = TextEditingController();
+  final ValueNotifier<bool> _isOTPSent = ValueNotifier(false);
   final _loginFormKey = GlobalKey<FormState>();
   final _loginEmailFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   void _handleLoginSubmit() {
-    if (isOTPSent.value) {
+    if (_isOTPSent.value) {
       if (_loginFormKey.currentState!.validate()) {}
     } else {
       if (_loginEmailFormKey.currentState!.validate()) {
-        isOTPSent.value = true;
+        _isOTPSent.value = true;
         showSnackbar(context, "OTP Sent Successful");
       }
     }
+  }
+
+  void _handleOnSignUp() {
+    context.go(RouterConstants.signupRouteName);
   }
 
   @override
@@ -51,7 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          CustomButton.customTextButton("Sign Up"),
+          CustomButton.customTextButton("Sign Up", onPressed: _handleOnSignUp),
           SizedBox(width: _mainScreenPadding.left),
         ],
         forceMaterialTransparency: true,
@@ -88,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Form(
                     key: _loginEmailFormKey,
                     child: CustomFormField.textFormFieldWithAutoFillGroup(
-                      emailController,
+                      _emailController,
                       autofillHints: [AutofillHints.email],
                       hintText: 'Email',
                       labelText: 'Your Email',
@@ -97,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   ValueListenableBuilder(
-                    valueListenable: isOTPSent,
+                    valueListenable: _isOTPSent,
                     builder: (BuildContext context, bool value, Widget? child) {
                       return Visibility(visible: value, child: child as Widget);
                     },
@@ -108,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         children: [
                           CustomFormField.textFormField(
-                            otpController,
+                            _otpController,
                             textInputType: TextInputType.number,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
@@ -135,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 2 * UiConstant.spaceBetweenSection),
             ValueListenableBuilder(
-              valueListenable: isOTPSent,
+              valueListenable: _isOTPSent,
               builder: (BuildContext context, bool value, Widget? child) {
                 return CustomButton.customElevatedButton(
                   value ? "Login" : "Send OTP",
@@ -149,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
               },
             ),
             SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-            const Center(child: Text('Or sign up with social account')),
+            const Center(child: Text('Or sign in with social account')),
             SizedBox(height: 2 * UiConstant.spaceBetweenSection),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -167,8 +173,10 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(
+        padding: EdgeInsets.only(
           bottom: 2 * UiConstant.spaceBetweenSection,
+          left: _mainScreenPadding.left,
+          right: _mainScreenPadding.right,
         ),
         child: RichText(
           textAlign: TextAlign.center,

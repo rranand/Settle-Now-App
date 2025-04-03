@@ -19,4 +19,15 @@ class CustomValidator {
     }
     return null;
   }
+
+  static String? validateName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Name is required';
+    } else if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    } else if (!RegExp(r"^[a-zA-Z\s'-]+$").hasMatch(value)) {
+      return 'Invalid name format';
+    }
+    return null;
+  }
 }

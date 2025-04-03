@@ -7,6 +7,7 @@ class RouterConstants {
   static const String roomRouteName = '/splitroom';
   static const String personalExpenseRouteName = '/personalExpense';
   static const String loginRouteName = '/login';
+  static const String signupRouteName = '/signup';
   static const String verifyRouteName = '/verify';
   static const String lendRoomRouteName = '/lenden';
   static const String lendByTitleRouteName = '/lenden';

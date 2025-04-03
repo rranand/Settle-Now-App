@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
+import 'package:settlenow_v2/screen/auth/signup/sigup_screen.dart';
 
 class AppRouterConfig {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -169,13 +170,19 @@ class AppRouterConfig {
           return LoginScreen();
         },
       ),
+      GoRoute(
+        path: RouterConstants.signupRouteName,
+        builder: (context, state) {
+          return SignUpScreen();
+        },
+      ),
     ];
     return allRoutes;
   }
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: RouterConstants.loginRouteName,
+    initialLocation: RouterConstants.signupRouteName,
     observers: [observer],
     //errorBuilder: (context, state) => ErrorPage(),
   );

@@ -83,8 +83,7 @@ class CustomButton {
   }) {
     return InkWell(
       hoverColor: Colors.red.withAlpha(51),
-      borderRadius:
-          borderRadius == null ? null : BorderRadius.circular(borderRadius),
+      borderRadius: BorderRadius.circular(borderRadius ?? 16),
       onTap: onPressed,
       child: Padding(
         padding: EdgeInsets.symmetric(
