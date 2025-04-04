@@ -4,7 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -103,12 +103,16 @@ class MyApp extends StatelessWidget {
         return MaterialApp.router(
           routerConfig: AppRouterConfig.router(context),
           title: 'Settle Now',
-          locale: DevicePreview.locale(context),
-          builder: DevicePreview.appBuilder,
           themeMode:
               themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
           theme: CustomTheme.lightTheme(context),
           darkTheme: CustomTheme.darkTheme(context),
+          locale: Locale('en', 'IN'),
+          supportedLocales: [Locale('en', 'IN')],
+          localizationsDelegates: [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
         );
       },
     );
