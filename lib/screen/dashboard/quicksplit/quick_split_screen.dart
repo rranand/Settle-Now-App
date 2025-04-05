@@ -3,19 +3,19 @@ import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/util/card/transaction_card.dart';
+import 'package:settlenow_v2/util/card/quick_split_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 
-class QuicksplitScreen extends StatefulWidget {
+class QuickSplitScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
-  const QuicksplitScreen({super.key, required this.isSearchEnabled});
+  const QuickSplitScreen({super.key, required this.isSearchEnabled});
 
   @override
-  State<QuicksplitScreen> createState() => _QuicksplitScreenState();
+  State<QuickSplitScreen> createState() => _QuickSplitScreenState();
 }
 
-class _QuicksplitScreenState extends State<QuicksplitScreen> {
+class _QuickSplitScreenState extends State<QuickSplitScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 
@@ -53,7 +53,7 @@ class _QuicksplitScreenState extends State<QuicksplitScreen> {
                           index == 19 ? 2 * UiConstant.spaceBetweenSection : 0,
                       top: index == 0 ? UiConstant.spaceBetweenSection : 0,
                     ),
-                    child: TransactionCard(),
+                    child: QuickSplitCard(),
                   );
                 },
                 separatorBuilder:
