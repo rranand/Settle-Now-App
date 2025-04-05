@@ -10,6 +10,6 @@ class BankTranactionScreen extends StatefulWidget {
 class _BankTranactionScreenState extends State<BankTranactionScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Placeholder();
   }
 }
