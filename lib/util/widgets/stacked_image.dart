@@ -4,9 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
-const double _nextImageOffset = 22;
-const double _imageRadius = 30;
-
 Widget profileimageWidgetForCachedNetworkimage(
   ImageProvider? imgProvider,
   bool isLast,
@@ -33,11 +30,17 @@ Widget profileimageWidgetForCachedNetworkimage(
   }
 }
 
-Widget eachUserImageBuilder(String eachUser, int index, bool isLast) {
+Widget eachUserImageBuilder(
+  String eachUser,
+  int index,
+  bool isLast, {
+  double nextImageOffset = 22,
+  double imageRadius = 30,
+}) {
   Widget profileImage = CachedNetworkImage(
     imageUrl: eachUser.isEmpty ? "" : eachUser,
-    width: _imageRadius,
-    height: _imageRadius,
+    width: imageRadius,
+    height: imageRadius,
     progressIndicatorBuilder:
         (context, url, downloadProgress) =>
             profileimageWidgetForCachedNetworkimage(null, isLast),
@@ -52,7 +55,7 @@ Widget eachUserImageBuilder(String eachUser, int index, bool isLast) {
   );
   if (index > 0) {
     profileImage = Positioned(
-      left: index * _nextImageOffset,
+      left: index * nextImageOffset,
       child: profileImage,
     );
   }
@@ -64,6 +67,8 @@ Widget overlapUserImageWidget(
   List<String> users,
   int maxProfileImageToShow, {
   int? totalUsers,
+  double nextImageOffset = 22,
+  double imageRadius = 30,
 }) {
   if (users.isEmpty) {
     return SizedBox();
@@ -71,29 +76,32 @@ Widget overlapUserImageWidget(
   totalUsers ??= users.length;
 
   bool isUserMoreThan = totalUsers > maxProfileImageToShow;
+  int imagesToShow = min(users.length, maxProfileImageToShow);
   List<Widget> allUsersImage = List.generate(
-    min(users.length, maxProfileImageToShow),
+    imagesToShow,
     (index) => eachUserImageBuilder(
       users[index],
       index,
       (index == maxProfileImageToShow - 1) && isUserMoreThan,
+      imageRadius: imageRadius,
+      nextImageOffset: nextImageOffset,
     ),
   );
 
   if (isUserMoreThan) {
     allUsersImage.add(
       Positioned(
-        left: (allUsersImage.length - 1) * _nextImageOffset,
+        left: (allUsersImage.length - 1) * nextImageOffset,
         child: Container(
-          width: _imageRadius,
-          height: _imageRadius,
+          width: imageRadius,
+          height: imageRadius,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             color: Colors.transparent,
           ),
           child: Center(
             child: Text(
-              "+${totalUsers - min(users.length, maxProfileImageToShow)}",
+              "+${totalUsers - imagesToShow}",
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -103,8 +111,10 @@ Widget overlapUserImageWidget(
   }
 
   return SizedBox(
-    width: MediaQuery.of(context).size.width,
-    height: _imageRadius,
+    width:
+        imagesToShow * imageRadius +
+        (imagesToShow - 1) * (nextImageOffset - imageRadius),
+    height: imageRadius,
     child: Stack(alignment: Alignment.topLeft, children: allUsersImage),
   );
 }

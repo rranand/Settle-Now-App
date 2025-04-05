@@ -94,7 +94,7 @@ class _RoomScreenState extends State<RoomScreen> {
                 child: Column(
                   children: [
                     CustomFormField.searchBar(
-                      "Search Groups...",
+                      "Search Groups",
                       widget.isSearchEnabled,
                       _searchController,
                       (value) {

@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/util/card/transaction_card.dart';
+import 'package:settlenow_v2/util/card/lenden_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 
-class QuicksplitScreen extends StatefulWidget {
+class LendenScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
-  const QuicksplitScreen({super.key, required this.isSearchEnabled});
+  const LendenScreen({super.key, required this.isSearchEnabled});
 
   @override
-  State<QuicksplitScreen> createState() => _QuicksplitScreenState();
+  State<LendenScreen> createState() => _LendenScreenState();
 }
 
-class _QuicksplitScreenState extends State<QuicksplitScreen> {
+class _LendenScreenState extends State<LendenScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 
@@ -36,7 +36,7 @@ class _QuicksplitScreenState extends State<QuicksplitScreen> {
         child: Column(
           children: [
             CustomFormField.searchBar(
-              "Search Transaction",
+              "Search Len-Den",
               widget.isSearchEnabled,
               _searchController,
               (value) {
@@ -45,25 +45,24 @@ class _QuicksplitScreenState extends State<QuicksplitScreen> {
             ),
             Expanded(
               child: ListView.separated(
+                padding: EdgeInsets.only(
+                  top: UiConstant.spaceBetweenSection,
+                  bottom: 2 * UiConstant.spaceBetweenSection,
+                ),
                 shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      bottom:
-                          index == 19 ? 2 * UiConstant.spaceBetweenSection : 0,
-                      top: index == 0 ? UiConstant.spaceBetweenSection : 0,
-                    ),
-                    child: TransactionCard(),
-                  );
-                },
-                separatorBuilder:
-                    (context, index) => const SizedBox(height: 10),
                 itemCount: 20,
+                itemBuilder: (context, index) {
+                  return LendenCard();
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  return SizedBox(height: .5 * UiConstant.spaceBetweenSection);
+                },
               ),
             ),
           ],
         ),
       ),
+
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,
         () {},

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
+import 'package:settlenow_v2/screen/dashboard/lenden/lenden_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/quicksplit/quicksplit_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/room_screen.dart';
@@ -15,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
-  int _selectedIndex = 2;
+  int _selectedIndex = 3;
 
   void _onItemTapped(int index) {
     if (mounted) {
@@ -148,6 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
         return QuicksplitScreen(isSearchEnabled: _isSearchEnabled);
       case 2:
         return PersonalExpenseScreen(isSearchEnabled: _isSearchEnabled);
+      case 3:
+        return LendenScreen(isSearchEnabled: _isSearchEnabled);
       default:
         return Placeholder();
     }
@@ -178,6 +181,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ];
         break;
       case 2:
+        appBarActions = [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              _isSearchEnabled.value = !_isSearchEnabled.value;
+            },
+          ),
+        ];
+        break;
+      case 3:
         appBarActions = [
           IconButton(
             icon: Icon(Icons.search),
