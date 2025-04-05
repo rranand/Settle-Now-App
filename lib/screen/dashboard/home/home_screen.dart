@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
-import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/screen/bank_transactions/bank_transaction_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/room/room_screen.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+  final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
@@ -139,31 +137,41 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
-    if (mounted) {
-      setState(() {});
+  Widget _bottomNavigatorBodyHandler(index) {
+    switch (index) {
+      case 0:
+        return RoomScreen(isSearchEnabled: _isSearchEnabled);
+      default:
+        return Placeholder();
     }
+  }
+
+  PreferredSizeWidget? _bottomNavigatorAppBarHandler(index) {
+    List<Widget> appBarActions = [];
+
+    switch (index) {
+      case 0:
+        appBarActions = [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              _isSearchEnabled.value = !_isSearchEnabled.value;
+            },
+          ),
+        ];
+        break;
+      default:
+        appBarActions = [];
+    }
+
+    return AppBar(title: Text("Settle Now"), actions: appBarActions);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Settle Now")),
-      body: Padding(
-        padding: _mainScreenPadding,
-        child: ListView.separated(
-          itemBuilder: (BuildContext context, int index) {
-            return BankTranactionScreen();
-          },
-          itemCount: 10,
-          separatorBuilder: (BuildContext context, int index) {
-            return SizedBox(height: 8);
-          },
-        ),
-      ),
+      appBar: _bottomNavigatorAppBarHandler(_selectedIndex),
+      body: _bottomNavigatorBodyHandler(_selectedIndex),
       bottomNavigationBar: _bottomNavigationBarWidget(),
       drawer: _drawerWidget(),
     );

@@ -31,12 +31,14 @@ const List<IconData> drawerIcon = [
 
 const List<String> bottomNavigationButtonText = [
   "Home",
+  "Quick Split",
   "Personal",
   "Len-Den",
   "Analysis",
 ];
 const List<IconData> bottomNavigationButtonIcon = [
   Iconsax.home,
+  Iconsax.flash_11,
   Iconsax.wallet_1,
   Iconsax.money_change,
   Iconsax.graph,

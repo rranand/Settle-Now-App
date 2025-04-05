@@ -12,12 +12,12 @@ class CustomFormField {
     switch (inputDecoration) {
       case (TextFormFieldInputBorder.underLine):
         return UnderlineInputBorder(
-          borderSide: BorderSide(color: borderColor ?? Colors.black),
+          borderSide: BorderSide(color: borderColor ?? Colors.transparent),
         );
 
       case (TextFormFieldInputBorder.outlineInputBorder):
         return OutlineInputBorder(
-          borderSide: BorderSide(color: borderColor ?? Colors.black),
+          borderSide: BorderSide(color: borderColor ?? Colors.transparent),
           borderRadius: BorderRadius.circular(borderRadius ?? 12),
         );
 

@@ -108,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Your Email',
                         validator: CustomValidator.validateEmail,
                         inputDecoration: TextFormFieldInputBorder.underLine,
+                        borderColor: Colors.black87,
                       ),
                     ),
                     ValueListenableBuilder(
@@ -139,6 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               validator: CustomValidator.validateOTP,
                               inputDecoration:
                                   TextFormFieldInputBorder.underLine,
+                              borderColor: Colors.black87,
                               maxLength: 6,
                             ),
                             Align(

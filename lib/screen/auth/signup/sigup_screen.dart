@@ -111,6 +111,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             labelText: 'Your Name',
                             validator: CustomValidator.validateName,
                             inputDecoration: TextFormFieldInputBorder.underLine,
+                            borderColor: Colors.black87,
                           ),
                           SizedBox(height: UiConstant.spaceBetweenSection),
                           CustomFormField.textFormFieldWithAutoFillGroup(
@@ -120,6 +121,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             labelText: 'Your Email',
                             validator: CustomValidator.validateEmail,
                             inputDecoration: TextFormFieldInputBorder.underLine,
+                            borderColor: Colors.black87,
                           ),
                         ],
                       ),
@@ -153,6 +155,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               validator: CustomValidator.validateOTP,
                               inputDecoration:
                                   TextFormFieldInputBorder.underLine,
+                              borderColor: Colors.black87,
                               maxLength: 6,
                             ),
                             Align(

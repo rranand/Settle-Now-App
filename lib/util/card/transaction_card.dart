@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/util/widgets/category_parser.dart';
 
-class TransactionWidget extends StatefulWidget {
-  const TransactionWidget({super.key});
+class TransactionCard extends StatefulWidget {
+  const TransactionCard({super.key});
 
   @override
-  State<TransactionWidget> createState() => _TransactionWidgetState();
+  State<TransactionCard> createState() => _TransactionCardState();
 }
 
-class _TransactionWidgetState extends State<TransactionWidget> {
+class _TransactionCardState extends State<TransactionCard> {
   Widget subTextWidget(String text) {
     return Text(
       text,
