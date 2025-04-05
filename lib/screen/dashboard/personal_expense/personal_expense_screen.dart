@@ -17,6 +17,27 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 
+  List<Color> colors = [
+    Colors.red.shade50,
+    Colors.green.shade50,
+    Colors.blue.shade50,
+    Colors.yellow.shade50,
+    Colors.orange.shade50,
+    Colors.purple.shade50,
+    Colors.teal.shade50,
+    Colors.pink.shade50,
+    Colors.brown.shade50,
+    Colors.grey.shade50,
+    Colors.indigo.shade50,
+    Colors.lime.shade50,
+    Colors.cyan.shade50,
+    Colors.amber.shade50,
+    Colors.deepOrange.shade50,
+    Colors.deepPurple.shade50,
+    Colors.lightGreen.shade50,
+    Colors.lightBlue.shade50,
+  ];
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -58,7 +79,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                   return Container(
                     padding: EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colors[index % colors.length],
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.black.withAlpha(51)),
                       boxShadow: [
@@ -75,7 +96,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                         textAlign: TextAlign.center,
                         TextSpan(
                           text: 'December',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
                           children: [
                             TextSpan(text: '\n2023'),
                             TextSpan(text: '\n\n'),
