@@ -12,48 +12,56 @@ class LendenCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4,
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "Trip to Bhushan",
-              style: const TextStyle(
-                fontSize: UiConstant.cardTitleTextSize,
-                fontWeight: FontWeight.bold,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.all(10.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: const Border(
+              left: BorderSide(
+                color: Color(0xFF14B8A6), // Your strip color
+                width: 5,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              "${amount < 0 ? "-" : "+"} ${formatCurrency(amount.abs(), context)}",
-              style: TextStyle(
-                color: amount < 0 ? Colors.red : Colors.green,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                overlapUserImageWidget(
-                  context,
-                  UiConstant.memberAvatars.sublist(0, 2),
-                  UiConstant.memberAvatars.sublist(0, 2).length,
-                  totalUsers: UiConstant.memberAvatars.sublist(0, 2).length,
-                  imageRadius: 30,
-                  nextImageOffset: 24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Trip to Bhushan",
+                style: const TextStyle(
+                  fontSize: UiConstant.cardTitleTextSize,
+                  fontWeight: FontWeight.bold,
                 ),
-                dateOnCard("March 15, 2023"),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "${amount < 0 ? "-" : "+"} ${formatCurrency(amount.abs(), context)}",
+                style: TextStyle(
+                  color: amount < 0 ? Colors.red : Colors.green,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  overlapUserImageWidget(
+                    context,
+                    UiConstant.memberAvatars.sublist(0, 2),
+                    UiConstant.memberAvatars.sublist(0, 2).length,
+                    totalUsers: UiConstant.memberAvatars.sublist(0, 2).length,
+                    imageRadius: 30,
+                    nextImageOffset: 24,
+                  ),
+                  dateOnCard("March 15, 2023"),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
