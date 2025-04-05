@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -142,6 +143,10 @@ class _RoomScreenState extends State<RoomScreen> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: CustomButton.customFloatingButton(
+        Iconsax.add,
+        () {},
       ),
     );
   }

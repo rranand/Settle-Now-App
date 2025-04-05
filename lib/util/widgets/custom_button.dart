@@ -131,4 +131,14 @@ class CustomButton {
       ),
     );
   }
+
+  static Widget customFloatingButton(IconData icon, VoidCallback? onPressed) {
+    return FloatingActionButton(
+      onPressed: onPressed,
+      elevation: 1,
+      backgroundColor: Colors.deepPurpleAccent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+      child: Icon(icon, size: 24, color: Colors.white),
+    );
+  }
 }
