@@ -19,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     if (mounted) {
       _selectedIndex = index;
+      _isSearchEnabled.value = false;
       setState(() {});
     }
   }
@@ -154,6 +155,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     switch (index) {
       case 0:
+        appBarActions = [
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              _isSearchEnabled.value = !_isSearchEnabled.value;
+            },
+          ),
+        ];
+        break;
+      case 1:
         appBarActions = [
           IconButton(
             icon: Icon(Icons.search),

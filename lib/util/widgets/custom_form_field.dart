@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
 
 enum TextFormFieldInputBorder { underLine, outlineInputBorder, none }
 
@@ -142,6 +143,36 @@ class CustomFormField {
         style: style,
         isPassword: isPassword,
         maxLength: maxLength,
+      ),
+    );
+  }
+
+  static Widget searchBar(
+    String hintText,
+    ValueNotifier<bool> isSearchEnabled,
+    TextEditingController searchController,
+    void Function(String?)? onChanged,
+  ) {
+    return ValueListenableBuilder(
+      valueListenable: isSearchEnabled,
+      builder: (BuildContext context, bool value, Widget? child) {
+        return Visibility(visible: isSearchEnabled.value, child: child!);
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          vertical: .5 * UiConstant.spaceBetweenSection,
+        ),
+        child: CustomFormField.textFormField(
+          searchController,
+          hintText: hintText,
+          prefixIcon: Icon(Icons.search),
+          inputDecoration: TextFormFieldInputBorder.outlineInputBorder,
+          borderColor: Colors.black12,
+          borderRadius: 30,
+          filled: true,
+          fillColor: Colors.black.withAlpha(10),
+          onChanged: onChanged,
+        ),
       ),
     );
   }

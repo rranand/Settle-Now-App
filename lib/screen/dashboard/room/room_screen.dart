@@ -50,16 +50,15 @@ class _RoomScreenState extends State<RoomScreen> {
                     children: [
                       CustomButton.customTextButton(
                         "Live",
-                        backgroundColor: Colors.transparent,
-                        borderColor:
+                        backgroundColor:
                             value
                                 ? Colors.deepPurpleAccent
-                                : Colors.black.withAlpha(51),
+                                : Colors.transparent,
+                        borderColor: Colors.deepPurpleAccent,
                         borderRadius: 30,
                         buttonHeight: 40,
                         buttonWidth: 100,
-                        buttonTextColor:
-                            value ? Colors.deepPurpleAccent : Colors.black,
+                        buttonTextColor: value ? Colors.white : Colors.black,
                         onPressed: () {
                           _isLiveRoomSelected.value = true;
                         },
@@ -67,16 +66,15 @@ class _RoomScreenState extends State<RoomScreen> {
                       SizedBox(width: UiConstant.spaceBetweenRowSection),
                       CustomButton.customTextButton(
                         "Closed",
-                        backgroundColor: Colors.transparent,
-                        borderColor:
+                        backgroundColor:
                             !value
                                 ? Colors.deepPurpleAccent
-                                : Colors.black.withAlpha(51),
+                                : Colors.transparent,
+                        borderColor: Colors.deepPurpleAccent,
                         borderRadius: 30,
                         buttonHeight: 40,
                         buttonWidth: 100,
-                        buttonTextColor:
-                            !value ? Colors.deepPurpleAccent : Colors.black,
+                        buttonTextColor: !value ? Colors.white : Colors.black,
                         onPressed: () {
                           _isLiveRoomSelected.value = false;
                         },
@@ -90,40 +88,18 @@ class _RoomScreenState extends State<RoomScreen> {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) => Padding(
-                padding: _mainScreenPadding,
+                padding: _mainScreenPadding.add(
+                  EdgeInsets.only(bottom: 2 * UiConstant.spaceBetweenSection),
+                ),
                 child: Column(
                   children: [
-                    ValueListenableBuilder(
-                      valueListenable: widget.isSearchEnabled,
-                      builder: (
-                        BuildContext context,
-                        bool value,
-                        Widget? child,
-                      ) {
-                        return Visibility(
-                          visible: widget.isSearchEnabled.value,
-                          child: child!,
-                        );
+                    CustomFormField.searchBar(
+                      "Search Groups...",
+                      widget.isSearchEnabled,
+                      _searchController,
+                      (value) {
+                        // Add filter logic if needed
                       },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: .5 * UiConstant.spaceBetweenSection,
-                        ),
-                        child: CustomFormField.textFormField(
-                          _searchController,
-                          hintText: "Search groups...",
-                          prefixIcon: Icon(Icons.search),
-                          inputDecoration:
-                              TextFormFieldInputBorder.outlineInputBorder,
-                          borderColor: Colors.black12,
-                          borderRadius: 30,
-                          filled: true,
-                          fillColor: Colors.black.withAlpha(10),
-                          onChanged: (value) {
-                            // Add filter logic if needed
-                          },
-                        ),
-                      ),
                     ),
                     ListView.separated(
                       shrinkWrap: true,
@@ -135,7 +111,6 @@ class _RoomScreenState extends State<RoomScreen> {
                         return SizedBox(height: 8);
                       },
                     ),
-                    SizedBox(height: 2 * UiConstant.spaceBetweenSection),
                   ],
                 ),
               ),
