@@ -36,7 +36,7 @@ class _QuicksplitScreenState extends State<QuicksplitScreen> {
         child: Column(
           children: [
             CustomFormField.searchBar(
-              "Search Groups...",
+              "Search Transaction...",
               widget.isSearchEnabled,
               _searchController,
               (value) {
