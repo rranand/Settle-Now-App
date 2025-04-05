@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 class UiConstant {
   static const double cardTitleTextSize = 18;
   static const double cardBorderLeftSideStripWidth = 6;
-  static const double cardBorderRadius = 16;
+  static const double cardBorderRadius = 12;
+  static const double cardSpaceBetweenSubText = 4;
+  static const double cardSpaceAfterSubText = 12;
 
   static const double spaceBetweenSection = 20;
   static const double spaceBetweenRowSection = 8;

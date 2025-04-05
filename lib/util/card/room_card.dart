@@ -59,9 +59,9 @@ class RoomCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
             dateOnCard("March 15, 2023"),
-            const SizedBox(height: 12),
+            const SizedBox(height: UiConstant.cardSpaceAfterSubText),
             overlapUserImageWidget(
               context,
               UiConstant.memberAvatars,

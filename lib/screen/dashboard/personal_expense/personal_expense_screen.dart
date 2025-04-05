@@ -50,7 +50,8 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                 shrinkWrap: true,
                 itemCount: 20,
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 150,
+                  childAspectRatio: 1.2,
+                  maxCrossAxisExtent: 200,
                   mainAxisSpacing: 20,
                   crossAxisSpacing: 12,
                 ),

@@ -1,28 +1,115 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/internationalization/currency.dart';
 
 class PersonalExpenseCard extends StatelessWidget {
   final int index;
-  const PersonalExpenseCard({super.key, required this.index});
+  PersonalExpenseCard({super.key, required this.index});
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: UiConstant.colors[index % UiConstant.colors.length],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black.withAlpha(51)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withAlpha(51),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 3),
+  Widget textWidget(String text, {bool isCurrency = false}) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.bold,
+        color: isCurrency ? Colors.green : null,
+      ),
+    );
+  }
+
+  final expenses = [1200, 1450, 900, 1600, 1800, 1700, 2000];
+
+  Widget linerChartForPersonalExpenseDashBoard(BuildContext context) {
+    return LineChart(
+      LineChartData(
+        titlesData: FlTitlesData(
+          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        lineTouchData: LineTouchData(
+          touchTooltipData: LineTouchTooltipData(
+            maxContentWidth: 100,
+            getTooltipColor: (touchedSpot) => Colors.black,
+            getTooltipItems: (touchedSpots) {
+              return touchedSpots.map((LineBarSpot touchedSpot) {
+                final textStyle = TextStyle(
+                  color:
+                      touchedSpot.bar.gradient?.colors[0] ??
+                      touchedSpot.bar.color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                );
+                return LineTooltipItem(
+                  formatCurrency(touchedSpot.y, context),
+                  textStyle,
+                );
+              }).toList();
+            },
+          ),
+          handleBuiltInTouches: true,
+          getTouchLineStart: (data, index) => 0,
+        ),
+        borderData: FlBorderData(show: false),
+        gridData: FlGridData(show: false),
+        lineBarsData: [
+          LineChartBarData(
+            spots: List.generate(
+              expenses.length,
+              (i) => FlSpot(i.toDouble(), expenses[i].toDouble()),
+            ),
+            isCurved: true,
+            color: Colors.green.shade50,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF14b8a6), Color(0xFF0f766e)],
+            ),
+            dotData: FlDotData(show: true),
+            barWidth: 2,
           ),
         ],
       ),
-      child: Column(children: [Text("December 2025")]),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4,
+      child: Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          border: Border.all(color: Colors.black.withAlpha(51)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            textWidget("December 2024"),
+            const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+            textWidget(formatCurrency(2000, context), isCurrency: true),
+            const SizedBox(height: UiConstant.cardSpaceAfterSubText),
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: linerChartForPersonalExpenseDashBoard(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

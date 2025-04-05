@@ -13,15 +13,15 @@ class LendenCard extends StatelessWidget {
     return Card(
       elevation: 4,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
         child: Container(
           padding: const EdgeInsets.all(10.0),
           decoration: BoxDecoration(
             color: Colors.white,
             border: const Border(
               left: BorderSide(
-                color: Color(0xFF14B8A6), // Your strip color
-                width: 5,
+                color: Color(0xFF14B8A6),
+                width: UiConstant.cardBorderLeftSideStripWidth,
               ),
             ),
           ),
@@ -36,7 +36,7 @@ class LendenCard extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
               Text(
                 "${amount < 0 ? "-" : "+"} ${formatCurrency(amount.abs(), context)}",
                 style: TextStyle(
@@ -45,7 +45,7 @@ class LendenCard extends StatelessWidget {
                   fontSize: 20,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: UiConstant.cardSpaceAfterSubText),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
