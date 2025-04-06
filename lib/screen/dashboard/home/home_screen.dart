@@ -18,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
-  int _selectedIndex = 3;
+  int _selectedIndex = 0;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   @override

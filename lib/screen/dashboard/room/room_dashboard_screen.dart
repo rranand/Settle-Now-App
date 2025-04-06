@@ -6,6 +6,7 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/room_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
+import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 
 class RoomDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -16,7 +17,7 @@ class RoomDashboardScreen extends StatefulWidget {
 }
 
 class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
-  final ValueNotifier<bool> _isLiveRoomSelected = ValueNotifier(true);
+  final ValueNotifier<int> _navBarIndex = ValueNotifier(0);
   final TextEditingController _searchController = TextEditingController();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
@@ -43,43 +44,12 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.symmetric(vertical: 8),
               title: ValueListenableBuilder(
-                valueListenable: _isLiveRoomSelected,
-                builder: (BuildContext context, bool value, Widget? child) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CustomButton.customTextButton(
-                        "Live",
-                        backgroundColor:
-                            value
-                                ? Colors.deepPurpleAccent
-                                : Colors.transparent,
-                        borderColor: Colors.deepPurpleAccent,
-                        borderRadius: 30,
-                        buttonHeight: 40,
-                        buttonWidth: 100,
-                        buttonTextColor: value ? Colors.white : Colors.black,
-                        onPressed: () {
-                          _isLiveRoomSelected.value = true;
-                        },
-                      ),
-                      SizedBox(width: UiConstant.spaceBetweenRowSection),
-                      CustomButton.customTextButton(
-                        "Closed",
-                        backgroundColor:
-                            !value
-                                ? Colors.deepPurpleAccent
-                                : Colors.transparent,
-                        borderColor: Colors.deepPurpleAccent,
-                        borderRadius: 30,
-                        buttonHeight: 40,
-                        buttonWidth: 100,
-                        buttonTextColor: !value ? Colors.white : Colors.black,
-                        onPressed: () {
-                          _isLiveRoomSelected.value = false;
-                        },
-                      ),
-                    ],
+                valueListenable: _navBarIndex,
+                builder: (BuildContext context, int value, Widget? child) {
+                  return NavBarCard(
+                    headerTitle: ["Live", "Close"],
+                    selectedIndex: _navBarIndex,
+                    width: MediaQuery.of(context).size.width,
                   );
                 },
               ),
@@ -113,7 +83,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                       return SingleChildScrollView(
                         padding: _mainScreenPadding.add(
                           EdgeInsets.only(
-                            top: UiConstant.spaceBetweenSection,
                             bottom: 2 * UiConstant.spaceBetweenSection,
                           ),
                         ),

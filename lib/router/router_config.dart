@@ -79,8 +79,8 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: "${RouterConstants.dashboardRouteName}",
-    //initialLocation: "${RouterConstants.personalExpenseRouteName}/:id",
+    //initialLocation: RouterConstants.dashboardRouteName,
+    initialLocation: "${RouterConstants.personalExpenseRouteName}/id",
     observers: [observer],
   );
 
