@@ -7,15 +7,15 @@ import 'package:settlenow_v2/util/card/lenden_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 
-class LendenScreen extends StatefulWidget {
+class LendenDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
-  const LendenScreen({super.key, required this.isSearchEnabled});
+  const LendenDashboardScreen({super.key, required this.isSearchEnabled});
 
   @override
-  State<LendenScreen> createState() => _LendenScreenState();
+  State<LendenDashboardScreen> createState() => _LendenDashboardScreenState();
 }
 
-class _LendenScreenState extends State<LendenScreen> {
+class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 

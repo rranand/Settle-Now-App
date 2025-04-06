@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/screen/dashboard/lenden/lenden_screen.dart';
-import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_screen.dart';
-import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_screen.dart';
-import 'package:settlenow_v2/screen/dashboard/room/room_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/lenden/lenden_dashboard_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_dashboard_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/room/room_dashboard_screen.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -156,13 +156,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _bottomNavigatorBodyHandler(index) {
     switch (index) {
       case 0:
-        return RoomScreen(isSearchEnabled: _isSearchEnabled);
+        return RoomDashboardScreen(isSearchEnabled: _isSearchEnabled);
       case 1:
-        return QuickSplitScreen(isSearchEnabled: _isSearchEnabled);
+        return QuickSplitDashboardScreen(isSearchEnabled: _isSearchEnabled);
       case 2:
-        return PersonalExpenseScreen(isSearchEnabled: _isSearchEnabled);
+        return PersonalExpenseDashboardScreen(
+          isSearchEnabled: _isSearchEnabled,
+        );
       case 3:
-        return LendenScreen(isSearchEnabled: _isSearchEnabled);
+        return LendenDashboardScreen(isSearchEnabled: _isSearchEnabled);
       default:
         return Placeholder();
     }

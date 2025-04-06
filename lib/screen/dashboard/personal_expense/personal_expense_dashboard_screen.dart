@@ -5,15 +5,15 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/personal_expense_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 
-class PersonalExpenseScreen extends StatefulWidget {
+class PersonalExpenseDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
-  const PersonalExpenseScreen({super.key, required this.isSearchEnabled});
+  const PersonalExpenseDashboardScreen({super.key, required this.isSearchEnabled});
 
   @override
-  State<PersonalExpenseScreen> createState() => _PersonalExpenseScreenState();
+  State<PersonalExpenseDashboardScreen> createState() => _PersonalExpenseDashboardScreenState();
 }
 
-class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
+class _PersonalExpenseDashboardScreenState extends State<PersonalExpenseDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 

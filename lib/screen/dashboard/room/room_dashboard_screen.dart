@@ -7,15 +7,15 @@ import 'package:settlenow_v2/util/card/room_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 
-class RoomScreen extends StatefulWidget {
+class RoomDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
-  const RoomScreen({super.key, required this.isSearchEnabled});
+  const RoomDashboardScreen({super.key, required this.isSearchEnabled});
 
   @override
-  State<RoomScreen> createState() => _RoomScreenState();
+  State<RoomDashboardScreen> createState() => _RoomDashboardScreenState();
 }
 
-class _RoomScreenState extends State<RoomScreen> {
+class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   final ValueNotifier<bool> _isLiveRoomSelected = ValueNotifier(true);
   final TextEditingController _searchController = TextEditingController();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;

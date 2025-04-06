@@ -7,15 +7,15 @@ import 'package:settlenow_v2/util/card/quick_split_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 
-class QuickSplitScreen extends StatefulWidget {
+class QuickSplitDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
-  const QuickSplitScreen({super.key, required this.isSearchEnabled});
+  const QuickSplitDashboardScreen({super.key, required this.isSearchEnabled});
 
   @override
-  State<QuickSplitScreen> createState() => _QuickSplitScreenState();
+  State<QuickSplitDashboardScreen> createState() => _QuickSplitDashboardScreenState();
 }
 
-class _QuickSplitScreenState extends State<QuickSplitScreen> {
+class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 
