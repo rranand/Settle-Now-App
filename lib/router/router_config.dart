@@ -65,7 +65,6 @@ class AppRouterConfig {
     routes: _allRoutes(),
     initialLocation: RouterConstants.dashboardRouteName,
     observers: [observer],
-    //errorBuilder: (context, state) => ErrorPage(),
   );
 
   static GoRouter router(BuildContext context) {

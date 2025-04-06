@@ -40,3 +40,22 @@ Widget colouredIcon(Icon icon, Color color, {double radius = 50}) {
     child: icon,
   );
 }
+
+Widget tagOnCard(
+  String text, {
+  Color textColor = Colors.deepPurple,
+  Color? backgroundColor,
+}) {
+  return Container(
+    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+    decoration: BoxDecoration(
+      color: backgroundColor ?? Colors.deepPurple.shade50,
+      borderRadius: BorderRadius.circular(100),
+    ),
+    child: subTextOnCard(
+      text,
+      textColor: textColor,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+}
