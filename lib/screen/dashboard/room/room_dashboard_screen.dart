@@ -100,20 +100,34 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                       },
                     ),
                   ),
-                  ListView.separated(
-                    padding: _mainScreenPadding.add(
-                      EdgeInsets.only(
-                        bottom: 2 * UiConstant.spaceBetweenSection,
-                      ),
-                    ),
-                    shrinkWrap: true,
-                    itemBuilder: (BuildContext context, int index) {
-                      return RoomCard(status: statusList[index % 3]);
-                    },
-                    itemCount: 10,
-                    separatorBuilder: (BuildContext context, int index) {
-                      return SizedBox(
-                        height: .5 * UiConstant.spaceBetweenSection,
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isWide =
+                          constraints.maxWidth >= UiConstant.maxWidth;
+                      final cardWidth =
+                          isWide
+                              ? (constraints.maxWidth / 2) -
+                                  UiConstant.spaceBetweenCard -
+                                  _mainScreenPadding.left
+                              : constraints.maxWidth;
+                      return SingleChildScrollView(
+                        padding: _mainScreenPadding.add(
+                          EdgeInsets.only(
+                            top: UiConstant.spaceBetweenSection,
+                            bottom: 2 * UiConstant.spaceBetweenSection,
+                          ),
+                        ),
+                        child: Wrap(
+                          spacing: UiConstant.spaceBetweenCard,
+                          runSpacing: UiConstant.spaceBetweenCard,
+                          children: List.generate(
+                            11,
+                            (index) => SizedBox(
+                              width: cardWidth,
+                              child: RoomCard(status: statusList[index % 3]),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),

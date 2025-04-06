@@ -35,6 +35,7 @@ class CustomTheme {
         labelStyle: TextStyle(color: Colors.black),
       ),
       scrollbarTheme: ScrollbarThemeData(
+        thickness: WidgetStateProperty.all(4),
         thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
       ),
       sliderTheme: SliderThemeData(
@@ -74,6 +75,7 @@ class CustomTheme {
       backgroundColor: Colors.greenAccent,
     ),
     scrollbarTheme: ScrollbarThemeData(
+      thickness: WidgetStateProperty.all(4),
       thumbColor: WidgetStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
     ),
     textSelectionTheme: TextSelectionThemeData(

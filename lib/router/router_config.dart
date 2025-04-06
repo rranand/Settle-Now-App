@@ -5,6 +5,7 @@ import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/sigup_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/home/home_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_screen.dart';
 import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
@@ -55,6 +56,21 @@ class AppRouterConfig {
               ),
             ],
           ),
+          GoRoute(
+            path: "${RouterConstants.personalExpenseRouteName}/:id",
+            builder: (context, state) {
+              return PersonalExpenseScreen(id: state.pathParameters["id"]!);
+            },
+            redirect: (context, state) {
+              Map<String, String> param = state.pathParameters;
+
+              if (param.isEmpty) {
+                return RouterConstants.dashboardRouteName;
+              } else {
+                return null;
+              }
+            },
+          ),
         ],
       ),
     ];
@@ -63,7 +79,8 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: RouterConstants.dashboardRouteName,
+    initialLocation: "${RouterConstants.dashboardRouteName}",
+    //initialLocation: "${RouterConstants.personalExpenseRouteName}/:id",
     observers: [observer],
   );
 

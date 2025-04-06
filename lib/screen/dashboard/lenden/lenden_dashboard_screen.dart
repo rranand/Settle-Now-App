@@ -31,38 +31,56 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding: _mainScreenPadding,
-            child: CustomFormField.searchBar(
-              "Search Len-Den",
-              widget.isSearchEnabled,
-              _searchController,
-              (value) {
-                // Add filter logic if needed
-              },
-            ),
-          ),
-          Expanded(
-            child: ListView.separated(
-              padding: _mainScreenPadding.add(
-                EdgeInsets.only(
-                  top: UiConstant.spaceBetweenSection,
-                  bottom: 2 * UiConstant.spaceBetweenSection,
-                ),
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          children: [
+            Padding(
+              padding: _mainScreenPadding,
+              child: CustomFormField.searchBar(
+                "Search Len-Den",
+                widget.isSearchEnabled,
+                _searchController,
+                (value) {
+                  // Add filter logic if needed
+                },
               ),
-              shrinkWrap: true,
-              itemCount: 20,
-              itemBuilder: (context, index) {
-                return LendenCard();
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return SizedBox(height: .5 * UiConstant.spaceBetweenSection);
-              },
             ),
-          ),
-        ],
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final isWide = constraints.maxWidth >= UiConstant.maxWidth;
+                  final cardWidth =
+                      isWide
+                          ? (constraints.maxWidth / 2) -
+                              UiConstant.spaceBetweenCard -
+                              _mainScreenPadding.left
+                          : constraints.maxWidth;
+                  return SingleChildScrollView(
+                    padding: _mainScreenPadding.add(
+                      EdgeInsets.only(
+                        top: UiConstant.spaceBetweenSection,
+                        bottom: 2 * UiConstant.spaceBetweenSection,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.only(right: isWide ? 8.0 : 0),
+                      child: Wrap(
+                        spacing: UiConstant.spaceBetweenCard,
+                        runSpacing: UiConstant.spaceBetweenCard,
+                        children: List.generate(
+                          11,
+                          (index) =>
+                              SizedBox(width: cardWidth, child: LendenCard()),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
 
       floatingActionButton: CustomButton.customFloatingButton(

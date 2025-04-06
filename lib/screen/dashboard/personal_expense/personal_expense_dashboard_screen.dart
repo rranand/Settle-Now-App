@@ -7,13 +7,18 @@ import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 
 class PersonalExpenseDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
-  const PersonalExpenseDashboardScreen({super.key, required this.isSearchEnabled});
+  const PersonalExpenseDashboardScreen({
+    super.key,
+    required this.isSearchEnabled,
+  });
 
   @override
-  State<PersonalExpenseDashboardScreen> createState() => _PersonalExpenseDashboardScreenState();
+  State<PersonalExpenseDashboardScreen> createState() =>
+      _PersonalExpenseDashboardScreenState();
 }
 
-class _PersonalExpenseDashboardScreenState extends State<PersonalExpenseDashboardScreen> {
+class _PersonalExpenseDashboardScreenState
+    extends State<PersonalExpenseDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 
@@ -29,35 +34,41 @@ class _PersonalExpenseDashboardScreenState extends State<PersonalExpenseDashboar
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: _mainScreenPadding,
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
         child: Column(
           children: [
-            CustomFormField.searchBar(
-              "Search",
-              widget.isSearchEnabled,
-              _searchController,
-              (value) {
-                // Add filter logic if needed
-              },
+            Padding(
+              padding: _mainScreenPadding,
+              child: CustomFormField.searchBar(
+                "Search",
+                widget.isSearchEnabled,
+                _searchController,
+                (value) {
+                  // Add filter logic if needed
+                },
+              ),
             ),
             Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.only(
-                  top: UiConstant.spaceBetweenSection,
-                  bottom: 2 * UiConstant.spaceBetweenSection,
+              child: SingleChildScrollView(
+                padding: _mainScreenPadding.add(
+                  EdgeInsets.only(
+                    top: UiConstant.spaceBetweenSection,
+                    bottom: 2 * UiConstant.spaceBetweenSection,
+                  ),
                 ),
-                shrinkWrap: true,
-                itemCount: 20,
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  childAspectRatio: 1.2,
-                  maxCrossAxisExtent: 200,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 12,
+                child: Wrap(
+                  spacing: UiConstant.spaceBetweenCard,
+                  runSpacing: UiConstant.spaceBetweenCard,
+                  children: List.generate(
+                    11,
+                    (index) => SizedBox(
+                      width: 240,
+                      height: 180,
+                      child: PersonalExpenseCard(index: index),
+                    ),
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  return PersonalExpenseCard(index: index);
-                },
               ),
             ),
           ],

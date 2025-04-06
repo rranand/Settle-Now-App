@@ -7,6 +7,10 @@ class UiConstant {
   static const double cardSpaceBetweenSubText = 4;
   static const double cardSpaceAfterSubText = 12;
   static const double cardElevation = 4;
+  static const double spaceBetweenCard = 12;
+
+  static const double scrollBarWidth = 4;
+  static const double maxWidth = 500;
 
   static const double spaceBetweenSection = 20;
   static const double spaceBetweenRowSection = 8;
