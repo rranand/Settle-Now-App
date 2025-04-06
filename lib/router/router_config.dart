@@ -63,9 +63,7 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation:
-        RouterConstants.profileRouteName +
-        RouterConstants.loginActivityRouteName,
+    initialLocation: RouterConstants.dashboardRouteName,
     observers: [observer],
     //errorBuilder: (context, state) => ErrorPage(),
   );

@@ -23,6 +23,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   );
   final List<String> _popMenuTitle = ["Delete My Account"];
   final List<String> _accountSectionTitle = ["Edit Profile", "Login Activity"];
+  final List<IconData> _accountSectionIconData = [
+    Iconsax.edit,
+    Iconsax.monitor_mobbile,
+  ];
 
   void _popMenuButtonHandler(int index) {}
 
@@ -152,7 +156,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: colouredIcon(
-                            Icon(Iconsax.edit),
+                            Icon(_accountSectionIconData[index]),
                             UiConstant.colorsWithShade100[index],
                           ),
                           title: Text(_accountSectionTitle[index]),
