@@ -2,6 +2,8 @@ class RouterConstants {
   static const String dashboardRouteName = '/';
   static const String aboutRouteName = '/about';
   static const String profileRouteName = '/profile';
+  static const String profileEditRouteName = '/edit';
+  static const String loginActivityRouteName = '/logInactivity';
   static const String analysisRouteName = '/analysis';
   static const String bankTransactionRouteName = '/bankTransaction';
   static const String roomRouteName = '/splitroom';

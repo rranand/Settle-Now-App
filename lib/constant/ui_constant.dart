@@ -11,7 +11,7 @@ class UiConstant {
   static const double spaceBetweenSection = 20;
   static const double spaceBetweenRowSection = 8;
 
-  static List<Color> colors = [
+  static List<Color> colorsWithShade50 = [
     Colors.red.shade50,
     Colors.green.shade50,
     Colors.blue.shade50,
@@ -30,6 +30,27 @@ class UiConstant {
     Colors.deepPurple.shade50,
     Colors.lightGreen.shade50,
     Colors.lightBlue.shade50,
+  ];
+
+  static List<Color> colorsWithShade100 = [
+    Colors.red.shade100,
+    Colors.green.shade100,
+    Colors.blue.shade100,
+    Colors.yellow.shade100,
+    Colors.orange.shade100,
+    Colors.purple.shade100,
+    Colors.teal.shade100,
+    Colors.pink.shade100,
+    Colors.brown.shade100,
+    Colors.grey.shade100,
+    Colors.indigo.shade100,
+    Colors.lime.shade100,
+    Colors.cyan.shade100,
+    Colors.amber.shade100,
+    Colors.deepOrange.shade100,
+    Colors.deepPurple.shade100,
+    Colors.lightGreen.shade100,
+    Colors.lightBlue.shade100,
   ];
 
   static List<String> memberAvatars = [

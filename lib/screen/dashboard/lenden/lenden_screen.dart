@@ -31,11 +31,11 @@ class _LendenScreenState extends State<LendenScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: _mainScreenPadding,
-        child: Column(
-          children: [
-            CustomFormField.searchBar(
+      body: Column(
+        children: [
+          Padding(
+            padding: _mainScreenPadding,
+            child: CustomFormField.searchBar(
               "Search Len-Den",
               widget.isSearchEnabled,
               _searchController,
@@ -43,24 +43,26 @@ class _LendenScreenState extends State<LendenScreen> {
                 // Add filter logic if needed
               },
             ),
-            Expanded(
-              child: ListView.separated(
-                padding: EdgeInsets.only(
+          ),
+          Expanded(
+            child: ListView.separated(
+              padding: _mainScreenPadding.add(
+                EdgeInsets.only(
                   top: UiConstant.spaceBetweenSection,
                   bottom: 2 * UiConstant.spaceBetweenSection,
                 ),
-                shrinkWrap: true,
-                itemCount: 20,
-                itemBuilder: (context, index) {
-                  return LendenCard();
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return SizedBox(height: .5 * UiConstant.spaceBetweenSection);
-                },
               ),
+              shrinkWrap: true,
+              itemCount: 20,
+              itemBuilder: (context, index) {
+                return LendenCard();
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return SizedBox(height: .5 * UiConstant.spaceBetweenSection);
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
 
       floatingActionButton: CustomButton.customFloatingButton(

@@ -31,3 +31,12 @@ Widget appBarBackButton(BuildContext context) {
     ),
   );
 }
+
+Widget colouredIcon(Icon icon, Color color, {double radius = 50}) {
+  return Container(
+    width: radius,
+    height: radius,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+    child: icon,
+  );
+}

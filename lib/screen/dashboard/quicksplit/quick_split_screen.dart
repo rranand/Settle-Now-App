@@ -31,11 +31,11 @@ class _QuickSplitScreenState extends State<QuickSplitScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: _mainScreenPadding,
-        child: Column(
-          children: [
-            CustomFormField.searchBar(
+      body: Column(
+        children: [
+          Padding(
+            padding: _mainScreenPadding,
+            child: CustomFormField.searchBar(
               "Search Transaction",
               widget.isSearchEnabled,
               _searchController,
@@ -43,26 +43,26 @@ class _QuickSplitScreenState extends State<QuickSplitScreen> {
                 // Add filter logic if needed
               },
             ),
-            Expanded(
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.only(
-                      bottom:
-                          index == 19 ? 2 * UiConstant.spaceBetweenSection : 0,
-                      top: index == 0 ? UiConstant.spaceBetweenSection : 0,
-                    ),
-                    child: QuickSplitCard(),
-                  );
-                },
-                separatorBuilder:
-                    (context, index) => const SizedBox(height: 10),
-                itemCount: 20,
+          ),
+          Expanded(
+            child: ListView.separated(
+              padding: _mainScreenPadding.add(
+                EdgeInsets.only(
+                  top: UiConstant.spaceBetweenSection,
+                  bottom: 2 * UiConstant.spaceBetweenSection,
+                ),
               ),
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return QuickSplitCard();
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return SizedBox(height: .5 * UiConstant.spaceBetweenSection);
+              },
+              itemCount: 20,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,

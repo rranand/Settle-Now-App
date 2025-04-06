@@ -20,13 +20,13 @@ class CustomButton {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           elevation: elevation,
-          backgroundColor: backgroundColor ?? Colors.black,
+          backgroundColor: backgroundColor,
           side: BorderSide(
             width: borderWidth,
-            color: borderColor ?? Colors.black,
+            color: borderColor ?? Colors.transparent,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius ?? 12),
+            borderRadius: BorderRadius.circular(borderRadius ?? 100),
           ),
         ),
         onPressed: onPressed,
@@ -47,6 +47,11 @@ class CustomButton {
     double? buttonWidth,
     double? buttonTextSize,
     Color buttonTextColor = Colors.black,
+    double elevation = 0,
+    Color? backgroundColor,
+    double borderWidth = 1,
+    Color? borderColor,
+    double? borderRadius,
     VoidCallback? onPressed,
   }) {
     return SizedBox(
@@ -54,6 +59,17 @@ class CustomButton {
       height: buttonHeight,
       child: OutlinedButton(
         onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          elevation: elevation,
+          backgroundColor: backgroundColor,
+          side: BorderSide(
+            width: borderWidth,
+            color: borderColor ?? Colors.transparent,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius ?? 100),
+          ),
+        ),
         child: Text(
           buttonText,
           style: TextStyle(fontSize: buttonTextSize, color: buttonTextColor),
@@ -86,16 +102,13 @@ class CustomButton {
             color: borderColor ?? Colors.black,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius ?? 12),
+            borderRadius: BorderRadius.circular(borderRadius ?? 100),
           ),
         ),
         onPressed: onPressed,
         child: Text(
           buttonText,
-          style: TextStyle(
-            fontSize: buttonTextSize,
-            color: buttonTextColor ?? Colors.white,
-          ),
+          style: TextStyle(fontSize: buttonTextSize, color: buttonTextColor),
         ),
       ),
     );

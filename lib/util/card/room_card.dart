@@ -5,7 +5,7 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomCard extends StatelessWidget {
   final String status;
-  RoomCard({super.key, required this.status});
+  const RoomCard({super.key, required this.status});
 
   Color getStatusBackgroundColor() {
     switch (status.toLowerCase()) {

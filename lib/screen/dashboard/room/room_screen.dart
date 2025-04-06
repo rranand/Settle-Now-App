@@ -87,32 +87,37 @@ class _RoomScreenState extends State<RoomScreen> {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) => Padding(
-                padding: _mainScreenPadding.add(
-                  EdgeInsets.only(bottom: 2 * UiConstant.spaceBetweenSection),
-                ),
-                child: Column(
-                  children: [
-                    CustomFormField.searchBar(
-                      "Search Groups",
+              (context, index) => Column(
+                children: [
+                  Padding(
+                    padding: _mainScreenPadding,
+                    child: CustomFormField.searchBar(
+                      "Search Room",
                       widget.isSearchEnabled,
                       _searchController,
                       (value) {
                         // Add filter logic if needed
                       },
                     ),
-                    ListView.separated(
-                      shrinkWrap: true,
-                      itemBuilder: (BuildContext context, int index) {
-                        return RoomCard(status: statusList[index % 3]);
-                      },
-                      itemCount: 10,
-                      separatorBuilder: (BuildContext context, int index) {
-                        return SizedBox(height: 8);
-                      },
+                  ),
+                  ListView.separated(
+                    padding: _mainScreenPadding.add(
+                      EdgeInsets.only(
+                        bottom: 2 * UiConstant.spaceBetweenSection,
+                      ),
                     ),
-                  ],
-                ),
+                    shrinkWrap: true,
+                    itemBuilder: (BuildContext context, int index) {
+                      return RoomCard(status: statusList[index % 3]);
+                    },
+                    itemCount: 10,
+                    separatorBuilder: (BuildContext context, int index) {
+                      return SizedBox(
+                        height: .5 * UiConstant.spaceBetweenSection,
+                      );
+                    },
+                  ),
+                ],
               ),
               childCount: 1,
             ),

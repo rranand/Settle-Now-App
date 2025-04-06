@@ -20,6 +20,15 @@ class CustomValidator {
     return null;
   }
 
+  static String? validatePhoneNo(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    } else if (value.trim().length == 9 || int.tryParse(value.trim()) == null) {
+      return 'Please enter valid phone no.';
+    }
+    return null;
+  }
+
   static String? validateName(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Name is required';

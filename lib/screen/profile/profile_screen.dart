@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -14,9 +17,34 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  final List<String> _popMenuTitle = ["Edit", "Delete My Account"];
+  final EdgeInsets _cardPadding = EdgeInsets.symmetric(
+    vertical: 18.0,
+    horizontal: 14,
+  );
+  final List<String> _popMenuTitle = ["Delete My Account"];
+  final List<String> _accountSectionTitle = ["Edit Profile", "Login Activity"];
 
   void _popMenuButtonHandler(int index) {}
+
+  void _accountSectionButtonHandler(int index) {
+    switch (index) {
+      case 0:
+        {
+          context.push(
+            "${RouterConstants.profileRouteName}${RouterConstants.profileEditRouteName}",
+          );
+        }
+        break;
+      case 1:
+        {
+          context.push(
+            "${RouterConstants.profileRouteName}${RouterConstants.loginActivityRouteName}",
+          );
+        }
+        break;
+      default:
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -50,7 +78,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SizedBox(width: _mainScreenPadding.right),
         ],
       ),
-
       body: Padding(
         padding: _mainScreenPadding.add(
           EdgeInsets.only(
@@ -59,54 +86,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Center(
-              child: Card(
-                elevation: UiConstant.cardElevation,
-                color: Colors.white,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 18.0, horizontal: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      overlapUserImageWidget(
-                        context,
-                        [UiConstant.memberAvatars.first],
-                        2,
-                        imageRadius: 110,
-                      ),
-                      SizedBox(width: UiConstant.spaceBetweenRowSection),
-                      Text.rich(
-                        TextSpan(
-                          text: "Rohit Anand",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: "\n",
-                              children: [
-                                TextSpan(
-                                  text: "emailID@gmail.com",
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: kDefaultFontSize,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+            Card(
+              elevation: UiConstant.cardElevation,
+              color: Colors.white,
+              child: Padding(
+                padding: _cardPadding,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    overlapUserImageWidget(
+                      context,
+                      [UiConstant.memberAvatars.first],
+                      2,
+                      imageRadius: 100,
+                    ),
+                    SizedBox(width: UiConstant.spaceBetweenRowSection),
+                    Text.rich(
+                      TextSpan(
+                        text: "Rohit Anand",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 24,
                         ),
+                        children: [
+                          TextSpan(
+                            text: "\n",
+                            children: [
+                              TextSpan(
+                                text: "emailID@gmail.com",
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: kDefaultFontSize,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
             SizedBox(height: UiConstant.spaceBetweenSection),
-            Card(elevation: UiConstant.cardElevation),
+            Card(
+              elevation: UiConstant.cardElevation,
+              color: Colors.white,
+              child: Padding(
+                padding: _cardPadding,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Account",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    ...List.generate(
+                      _accountSectionTitle.length,
+                      (index) => Padding(
+                        padding: EdgeInsets.only(
+                          top: UiConstant.spaceBetweenSection,
+                        ),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.zero,
+                          leading: colouredIcon(
+                            Icon(Iconsax.edit),
+                            UiConstant.colorsWithShade100[index],
+                          ),
+                          title: Text(_accountSectionTitle[index]),
+                          trailing: Icon(Iconsax.arrow_right_34),
+                          onTap: () {
+                            _accountSectionButtonHandler(index);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: UiConstant.spaceBetweenSection),
+            Card(
+              elevation: UiConstant.cardElevation,
+              color: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 14),
+                child: Center(
+                  child: Text(
+                    "Member Since March 31, 2022",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -5,6 +5,8 @@ import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/sigup_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/home/home_screen.dart';
+import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
+import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
 
 class AppRouterConfig {
@@ -38,6 +40,20 @@ class AppRouterConfig {
             builder: (context, state) {
               return ProfileScreen();
             },
+            routes: [
+              GoRoute(
+                path: RouterConstants.profileEditRouteName,
+                builder: (context, state) {
+                  return ProfileEditScreen();
+                },
+              ),
+              GoRoute(
+                path: RouterConstants.loginActivityRouteName,
+                builder: (context, state) {
+                  return LoginActivityScreen();
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -47,7 +63,9 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: RouterConstants.profileRouteName,
+    initialLocation:
+        RouterConstants.profileRouteName +
+        RouterConstants.loginActivityRouteName,
     observers: [observer],
     //errorBuilder: (context, state) => ErrorPage(),
   );
