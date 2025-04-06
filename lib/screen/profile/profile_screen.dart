@@ -14,7 +14,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  final List<String> _popMenuTitle = ["Delete My Account"];
+  final List<String> _popMenuTitle = ["Edit", "Delete My Account"];
 
   void _popMenuButtonHandler(int index) {}
 
@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Center(
               child: Card(
-                elevation: 4,
+                elevation: UiConstant.cardElevation,
                 color: Colors.white,
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 18.0, horizontal: 8),
@@ -105,10 +105,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Container(height: 200, width: 200, color: Colors.red),
-            ),
+            SizedBox(height: UiConstant.spaceBetweenSection),
+            Card(elevation: UiConstant.cardElevation),
           ],
         ),
       ),

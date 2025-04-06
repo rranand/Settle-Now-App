@@ -11,7 +11,7 @@ class LendenCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 4,
+                elevation: UiConstant.cardElevation,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
         child: Container(
