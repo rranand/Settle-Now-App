@@ -41,11 +41,11 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        vertical: 6,
+                        vertical: 4,
                         horizontal: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.deepPurple.shade100,
+                        color: Colors.deepPurple.shade50,
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: subTextOnCard(

@@ -5,6 +5,7 @@ import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/sigup_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/home/home_screen.dart';
+import 'package:settlenow_v2/screen/profile/profile_screen.dart';
 
 class AppRouterConfig {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -31,6 +32,14 @@ class AppRouterConfig {
         builder: (context, state) {
           return HomeScreen();
         },
+        routes: [
+          GoRoute(
+            path: RouterConstants.profileRouteName,
+            builder: (context, state) {
+              return ProfileScreen();
+            },
+          ),
+        ],
       ),
     ];
     return allRoutes;
@@ -38,7 +47,7 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: RouterConstants.dashboardRouteName,
+    initialLocation: RouterConstants.profileRouteName,
     observers: [observer],
     //errorBuilder: (context, state) => ErrorPage(),
   );

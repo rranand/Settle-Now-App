@@ -57,6 +57,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        titleSpacing: _mainScreenPadding.left,
         actions: [
           CustomButton.customTextButton("Login", onPressed: _handleOnLogin),
           SizedBox(width: _mainScreenPadding.left),

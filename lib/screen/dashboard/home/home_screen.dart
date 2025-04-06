@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
+import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_screen.dart';
@@ -17,6 +19,16 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
   int _selectedIndex = 1;
+  EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   void _onItemTapped(int index) {
     if (mounted) {
@@ -162,9 +174,9 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (index) {
       case 0:
         appBarActions = [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
+          InkWell(
+            child: Icon(Icons.search),
+            onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
             },
           ),
@@ -172,9 +184,9 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 1:
         appBarActions = [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
+          InkWell(
+            child: Icon(Icons.search),
+            onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
             },
           ),
@@ -182,9 +194,9 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 2:
         appBarActions = [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
+          InkWell(
+            child: Icon(Icons.search),
+            onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
             },
           ),
@@ -192,9 +204,9 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
       case 3:
         appBarActions = [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
+          InkWell(
+            child: Icon(Icons.search),
+            onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
             },
           ),
@@ -204,7 +216,15 @@ class _HomeScreenState extends State<HomeScreen> {
         appBarActions = [];
     }
 
-    return AppBar(title: Text("Settle Now"), actions: appBarActions);
+    if (appBarActions.isNotEmpty) {
+      appBarActions.add(SizedBox(width: _mainScreenPadding.right));
+    }
+
+    return AppBar(
+      titleSpacing: _mainScreenPadding.left,
+      title: Text("Settle Now"),
+      actions: appBarActions,
+    );
   }
 
   @override
