@@ -4,8 +4,8 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 
 class PersonalExpenseCard extends StatelessWidget {
-  final int index;
-  PersonalExpenseCard({super.key, required this.index});
+  final String monthName;
+  PersonalExpenseCard({super.key, required this.monthName});
 
   Widget textWidget(String text, {bool isCurrency = false}) {
     return Text(
@@ -76,7 +76,7 @@ class PersonalExpenseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-                elevation: UiConstant.cardElevation,
+      elevation: UiConstant.cardElevation,
       child: Container(
         padding: EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -88,7 +88,7 @@ class PersonalExpenseCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            textWidget("December 2024"),
+            textWidget(monthName),
             const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
             textWidget(formatCurrency(2000, context), isCurrency: true),
             const SizedBox(height: UiConstant.cardSpaceAfterSubText),
