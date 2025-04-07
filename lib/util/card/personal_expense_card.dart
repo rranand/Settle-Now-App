@@ -39,7 +39,6 @@ class PersonalExpenseCard extends StatelessWidget {
                   color:
                       touchedSpot.bar.gradient?.colors[0] ??
                       touchedSpot.bar.color,
-                  fontWeight: FontWeight.bold,
                   fontSize: 14,
                 );
                 return LineTooltipItem(

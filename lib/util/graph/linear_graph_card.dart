@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 
 class LinearGraphCard extends StatelessWidget {
@@ -18,8 +19,15 @@ class LinearGraphCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 24, horizontal: 16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: Colors.green.shade200,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        gradient: LinearGradient(
+          colors: GradientColorConstant.vibrantPurpleToPink,
+          begin: Alignment.topRight,
+          end: Alignment.bottomLeft,
+        ),
       ),
       child: Column(
         children: [
@@ -40,11 +48,6 @@ class LinearGraphCard extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            monthName,
-            style: TextStyle(fontSize: 16, color: Colors.white60),
           ),
           SizedBox(height: 20),
           SizedBox(
@@ -68,19 +71,35 @@ class LinearGraphCard extends StatelessWidget {
                       interval: 5,
                       getTitlesWidget: (value, _) {
                         int day = value.toInt() + 1;
-                        if (day % 5 == 0 || day == 1) {
-                          return Text(
-                            day.toString().padLeft(2, '0'),
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 10,
-                            ),
-                          );
-                        }
-                        return SizedBox.shrink();
+                        return Text(
+                          day.toString().padLeft(2, '0'),
+                          style: TextStyle(color: Colors.white70, fontSize: 10),
+                        );
                       },
                     ),
                   ),
+                ),
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    maxContentWidth: 100,
+                    getTooltipColor: (touchedSpot) => Colors.black,
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((LineBarSpot touchedSpot) {
+                        final textStyle = TextStyle(
+                          color:
+                              touchedSpot.bar.gradient?.colors[0] ??
+                              touchedSpot.bar.color,
+                          fontSize: 14,
+                        );
+                        return LineTooltipItem(
+                          formatCurrency(touchedSpot.y, context),
+                          textStyle,
+                        );
+                      }).toList();
+                    },
+                  ),
+                  handleBuiltInTouches: true,
+                  getTouchLineStart: (data, index) => 0,
                 ),
                 borderData: FlBorderData(show: false),
                 lineBarsData: [
@@ -93,7 +112,6 @@ class LinearGraphCard extends StatelessWidget {
                     color: Colors.white,
                     barWidth: 2,
                     dotData: FlDotData(show: false),
-                    belowBarData: BarAreaData(show: false),
                   ),
                 ],
               ),

@@ -68,10 +68,9 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            toolbarHeight: 400,
+            toolbarHeight: 330,
             automaticallyImplyLeading: false,
             surfaceTintColor: Colors.transparent,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: false,
               title: LinearGraphCard(expenses: amountData, monthName: "April"),
