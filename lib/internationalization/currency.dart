@@ -16,6 +16,7 @@ String formatCurrency(
   return NumberFormat.currency(
     symbol: format.currencySymbol,
     name: format.currencyName,
-    decimalDigits: 2,
+    decimalDigits: amount.truncateToDouble() == amount ? 0 : 2,
+    customPattern: amount.truncateToDouble() == amount ? '¤#,##0' : '¤#,##0.00',
   ).format(amount);
 }

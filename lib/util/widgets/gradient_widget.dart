@@ -35,3 +35,38 @@ class GradientWidget extends StatelessWidget {
     );
   }
 }
+
+class GradientBorderCard extends StatelessWidget {
+  final Widget child;
+  final double borderRadius;
+  final double borderWidth;
+  final List<Color> gradientColors;
+  final Color backgroundColor;
+
+  const GradientBorderCard({
+    super.key,
+    required this.child,
+    this.borderRadius = 16,
+    this.borderWidth = 2,
+    this.gradientColors = const [Color(0xFF4F46E5), Color(0xFF3B82F6)],
+    this.backgroundColor = Colors.white,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: gradientColors),
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+      padding: EdgeInsets.all(borderWidth),
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(borderRadius - 2),
+        ),
+        child: child,
+      ),
+    );
+  }
+}

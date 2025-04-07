@@ -219,11 +219,20 @@ class _HomeScreenState extends State<HomeScreen> {
         appBarActions = [];
     }
 
-    if (appBarActions.isNotEmpty) {
-      appBarActions.add(SizedBox(width: _mainScreenPadding.right));
-    }
-
     return AppBar(
+      leading: appBarLeadingButton(
+        context,
+        IconButton(
+          icon: const Icon(Icons.menu),
+          onPressed: () {
+            if (Scaffold.of(context).isDrawerOpen) {
+              Scaffold.of(context).openDrawer();
+            } else {
+              Scaffold.of(context).closeDrawer();
+            }
+          },
+        ),
+      ),
       titleSpacing: _mainScreenPadding.left,
       title: Text("Settle Now"),
       actions: appBarActionButton(context, appBarActions),

@@ -29,29 +29,32 @@ class _PersonalExpenseDashboardScreenState
   final List<int> years = [2025, 2024, 2023];
 
   Widget monthWiseCardsWidget(List<String> months) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= UiConstant.maxWidth;
-        final cardWidth =
-            isWide
-                ? constraints.maxWidth
-                : (constraints.maxWidth / 2) -
-                    UiConstant.spaceBetweenCard -
-                    _mainScreenPadding.left;
-        return Wrap(
-          alignment: WrapAlignment.center,
-          spacing: UiConstant.spaceBetweenCard,
-          runSpacing: UiConstant.spaceBetweenCard,
-          children: List.generate(
-            months.length,
-            (index) => SizedBox(
-              width: cardWidth,
-              height: 160,
-              child: PersonalExpenseCard(monthName: months[index]),
+    return Padding(
+      padding: _mainScreenPadding,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          bool isWide = constraints.maxWidth >= UiConstant.maxWidth;
+          double cardWidth =
+              isWide
+                  ? 180.0
+                  : (constraints.maxWidth / 2) -
+                      UiConstant.spaceBetweenCard -
+                      _mainScreenPadding.left;
+          return Wrap(
+            alignment: WrapAlignment.center,
+            spacing: UiConstant.spaceBetweenCard,
+            runSpacing: UiConstant.spaceBetweenCard,
+            children: List.generate(
+              months.length,
+              (index) => SizedBox(
+                width: cardWidth,
+                height: 160,
+                child: PersonalExpenseCard(monthName: months[index]),
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 

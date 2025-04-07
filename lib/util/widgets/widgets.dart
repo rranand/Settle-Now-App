@@ -38,6 +38,17 @@ Widget appBarBackButton(BuildContext context) {
   );
 }
 
+Widget appBarLeadingButton(BuildContext context, Widget child) {
+  EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+  double notchPadding = max(max(viewPadding.left, viewPadding.right), 0);
+  double width = max(
+    context.watch<ScreenSizeProvider>().getPadding.left - notchPadding,
+    0,
+  );
+
+  return Padding(padding: EdgeInsets.only(left: width), child: child);
+}
+
 List<Widget>? appBarActionButton(BuildContext context, List<Widget> widgets) {
   if (widgets.isEmpty) {
     return null;
