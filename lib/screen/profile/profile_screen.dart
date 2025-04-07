@@ -66,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: Text("Profile"),
         titleSpacing: _mainScreenPadding.left,
         leading: appBarBackButton(context),
-        actions: [
+        actions: appBarActionButton(context, [
           PopupMenuButton<int>(
             icon: Icon(Icons.more_vert),
             onSelected: _popMenuButtonHandler,
@@ -79,10 +79,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
           ),
-          SizedBox(width: _mainScreenPadding.right),
-        ],
+        ]),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: _mainScreenPadding.add(
           EdgeInsets.only(
             top: UiConstant.spaceBetweenSection,

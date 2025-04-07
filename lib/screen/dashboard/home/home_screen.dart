@@ -7,6 +7,7 @@ import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_
 import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/room_dashboard_screen.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -225,7 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppBar(
       titleSpacing: _mainScreenPadding.left,
       title: Text("Settle Now"),
-      actions: appBarActions,
+      actions: appBarActionButton(context, appBarActions),
     );
   }
 

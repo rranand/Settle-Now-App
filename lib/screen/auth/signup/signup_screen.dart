@@ -11,6 +11,7 @@ import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/timer_button.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -58,10 +59,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: _mainScreenPadding.left,
-        actions: [
-          CustomButton.customTextButton("Login", onPressed: _handleOnLogin),
-          SizedBox(width: _mainScreenPadding.left),
-        ],
+        actions: appBarActionButton(context, [
+          CustomButton.customTextButton(
+            "Login",
+            onPressed: _handleOnLogin,
+            buttonTextColor: Colors.black,
+          ),
+        ]),
         forceMaterialTransparency: true,
       ),
       body: PopScope(
@@ -177,14 +181,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ValueListenableBuilder(
                 valueListenable: isOTPSent,
                 builder: (BuildContext context, bool value, Widget? child) {
-                  return CustomButton.customElevatedButton(
-                    value ? "Sign Up" : "Send OTP",
-                    onPressed: _handleSignUpSubmit,
-                    elevation: 8,
-                    buttonHeight: 50,
-                    borderRadius: 100,
-                    borderColor: Colors.black87,
-                    backgroundColor: Colors.black87,
+                  return Center(
+                    child: CustomButton.customElevatedButton(
+                      value ? "Sign Up" : "Send OTP",
+                      onPressed: _handleSignUpSubmit,
+                      elevation: 8,
+                      buttonHeight: 50,
+                      buttonWidth: 155,
+                      borderRadius: 100,
+                      borderColor: Colors.black87,
+                      backgroundColor: Colors.black87,
+                    ),
                   );
                 },
               ),

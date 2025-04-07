@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -20,16 +22,35 @@ Widget subTextOnCard(
 }
 
 Widget appBarBackButton(BuildContext context) {
+  EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+  double notchPadding = max(max(viewPadding.left, viewPadding.right), 0);
+  double width = max(
+    context.watch<ScreenSizeProvider>().getPadding.left - notchPadding,
+    0,
+  );
+
   return Padding(
-    padding: EdgeInsets.only(
-      left: context.watch<ScreenSizeProvider>().getPadding.left,
-    ),
-    child: IconButton(
-      color: Colors.black,
-      icon: const Icon(Iconsax.arrow_left_2),
-      onPressed: () => context.pop(),
+    padding: EdgeInsets.only(left: width),
+    child: InkWell(
+      child: const Icon(Iconsax.arrow_left_2),
+      onTap: () => context.pop(),
     ),
   );
+}
+
+List<Widget>? appBarActionButton(BuildContext context, List<Widget> widgets) {
+  if (widgets.isEmpty) {
+    return null;
+  } else {
+    EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+    double notchPadding = max(max(viewPadding.left, viewPadding.right), 0);
+    double width = max(
+      context.watch<ScreenSizeProvider>().getPadding.right - notchPadding,
+      0,
+    );
+    widgets.add(SizedBox(width: width));
+    return widgets;
+  }
 }
 
 Widget colouredIcon(Icon icon, Color color, {double radius = 50}) {

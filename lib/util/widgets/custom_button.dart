@@ -15,7 +15,7 @@ class CustomButton {
     VoidCallback? onPressed,
   }) {
     return SizedBox(
-      width: buttonWidth ?? double.infinity,
+      width: buttonWidth,
       height: buttonHeight,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
@@ -55,7 +55,7 @@ class CustomButton {
     VoidCallback? onPressed,
   }) {
     return SizedBox(
-      width: buttonWidth ?? double.infinity,
+      width: buttonWidth,
       height: buttonHeight,
       child: OutlinedButton(
         onPressed: onPressed,
@@ -92,14 +92,14 @@ class CustomButton {
     VoidCallback? onPressed,
   }) {
     return SizedBox(
-      width: buttonWidth ?? double.infinity,
+      width: buttonWidth,
       height: buttonHeight,
       child: TextButton(
         style: TextButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.black,
+          backgroundColor: backgroundColor ?? Colors.transparent,
           side: BorderSide(
             width: borderWidth,
-            color: borderColor ?? Colors.black,
+            color: borderColor ?? Colors.transparent,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius ?? 100),

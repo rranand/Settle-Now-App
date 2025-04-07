@@ -98,6 +98,9 @@ class MyApp extends StatelessWidget {
       builder: (context, _) {
         context.read<ScreenSizeProvider>().calculatePadding(
           MediaQuery.of(context).size.width,
+          MediaQuery.of(context).size.height,
+          MediaQuery.of(context).orientation,
+          MediaQuery.of(context).viewPadding
         );
         ThemeProvider themeProvider = context.watch<ThemeProvider>();
 

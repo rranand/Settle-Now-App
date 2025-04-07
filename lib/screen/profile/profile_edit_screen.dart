@@ -47,7 +47,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         titleSpacing: _mainScreenPadding.left,
         leading: appBarBackButton(context),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: _mainScreenPadding.add(
           EdgeInsets.only(
             top: UiConstant.spaceBetweenSection,
