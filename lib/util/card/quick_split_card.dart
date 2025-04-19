@@ -21,7 +21,6 @@ class QuickSplitCard extends StatefulWidget {
 
 class _QuickSplitCardState extends State<QuickSplitCard> {
   final double amount = -100;
-  final double _containerPadding = 10;
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
   final List<String> tagsTitle = ["Edited"];
 
@@ -102,7 +101,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(_containerPadding),
+      padding: EdgeInsets.all(UiConstant.cardPadding),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),

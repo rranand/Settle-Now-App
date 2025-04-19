@@ -16,7 +16,6 @@ class PersonalExpenseTransactionScreen extends StatefulWidget {
 
 class _PersonalExpenseTransactionScreenState
     extends State<PersonalExpenseTransactionScreen> {
-  final double _containerPadding = 10;
   final List<String> tagsTitle = [];
 
   @override
@@ -28,7 +27,7 @@ class _PersonalExpenseTransactionScreenState
           elevation: UiConstant.cardElevation,
           color: Colors.white,
           child: Padding(
-            padding: EdgeInsets.all(_containerPadding),
+            padding: EdgeInsets.all(UiConstant.cardPadding),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,

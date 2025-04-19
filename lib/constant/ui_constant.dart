@@ -7,6 +7,7 @@ class UiConstant {
   static const double cardSpaceBetweenSubText = 4;
   static const double cardSpaceAfterSubText = 12;
   static const double cardElevation = 4;
+  static const double cardPadding = 10;
   static const double spaceBetweenCard = 12;
 
   static const double scrollBarWidth = 4;

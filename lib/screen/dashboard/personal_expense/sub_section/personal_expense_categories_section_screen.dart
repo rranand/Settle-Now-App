@@ -23,19 +23,26 @@ class _PersonalExpenseCategoriesSectionScreenState
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         childCount: expenseCategories.length,
-        (context, index) => ListTile(
-          leading: colouredIcon(
-            Icon(categoryIcons[index]),
-            UiConstant.colorsWithShade100[index],
-          ),
-          title: Text(expenseCategories[index]),
-          subtitle: Text("${index + Random().nextInt(4) + 2} transactions"),
-          trailing: Text(
-            formatCurrency(
-              ((index + 1) * 300 + Random().nextInt(300)) * 1.0,
-              context,
+        (context, index) => Card(
+          elevation: UiConstant.cardElevation,
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(UiConstant.cardPadding),
+            child: ListTile(
+              leading: colouredIcon(
+                Icon(categoryIcons[index]),
+                UiConstant.colorsWithShade100[index],
+              ),
+              title: Text(expenseCategories[index]),
+              subtitle: Text("${index + Random().nextInt(4) + 2} transactions"),
+              trailing: Text(
+                formatCurrency(
+                  ((index + 1) * 300 + Random().nextInt(300)) * 1.0,
+                  context,
+                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
             ),
-            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
           ),
         ),
       ),
