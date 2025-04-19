@@ -115,7 +115,7 @@ class _PersonalExpenseDashboardScreenState
                                   state.isPinned
                                       ? GradientColorConstant.tealToGreen
                                       : GradientColorConstant.coolIndigoToBlue,
-                              textSize: 18,
+                              textSize: 16,
                               textColor: Colors.white,
                             ),
                             Expanded(child: SizedBox()),
