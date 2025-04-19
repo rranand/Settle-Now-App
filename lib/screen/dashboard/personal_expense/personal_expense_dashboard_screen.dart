@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/personal_expense_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
@@ -46,10 +48,17 @@ class _PersonalExpenseDashboardScreenState
             runSpacing: UiConstant.spaceBetweenCard,
             children: List.generate(
               months.length,
-              (index) => SizedBox(
-                width: cardWidth + 10,
-                height: 160,
-                child: PersonalExpenseCard(monthName: months[index]),
+              (index) => InkWell(
+                onTap: () {
+                  context.push(
+                    "${RouterConstants.personalExpenseRouteName}/id",
+                  );
+                },
+                child: SizedBox(
+                  width: cardWidth + 10,
+                  height: 160,
+                  child: PersonalExpenseCard(monthName: months[index]),
+                ),
               ),
             ),
           );
