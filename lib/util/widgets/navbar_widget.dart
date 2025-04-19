@@ -25,70 +25,52 @@ class NavBarCard extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: extraHorizontalPadding),
-      child: Stack(
-        children: [
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: headerTitle.length,
-              separatorBuilder: (context, index) {
-                return SizedBox(width: UiConstant.spaceBetweenRowSection * 1.5);
-              },
-              itemBuilder: (context, index) {
-                double eachNavWidth =
-                    width -
-                    UiConstant.spaceBetweenRowSection *
-                        1.5 *
-                        (headerTitleLength - 1) -
-                    extraHorizontalPadding * 2;
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children:
+            List.generate(headerTitle.length, (index) {
+              double eachNavWidth =
+                  width -
+                  UiConstant.spaceBetweenRowSection *
+                      1.5 *
+                      (headerTitleLength - 1) -
+                  extraHorizontalPadding * 2;
 
-                return SizedBox(
-                  width: equalSplit ? eachNavWidth / headerTitleLength : null,
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: InkWell(
-                          onTap: () {
-                            selectedIndex.value = index;
-                          },
-                          child: Text(
-                            "  ${headerTitle[index]}  ",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color:
-                                  selectedIndex.value == index
-                                      ? Colors.deepPurple
-                                      : Colors.black,
-                            ),
+              return SizedBox(
+                width: equalSplit ? eachNavWidth / headerTitleLength : null,
+                child: Column(
+                  children: [
+                    Center(
+                      child: InkWell(
+                        onTap: () {
+                          selectedIndex.value = index;
+                        },
+                        child: Text(
+                          "  ${headerTitle[index]}  ",
+                          style: TextStyle(
+                            fontSize: 18,
+                            color:
+                                selectedIndex.value == index
+                                    ? Colors.deepPurple
+                                    : Colors.black,
                           ),
                         ),
                       ),
-                      Positioned(
-                        bottom: 3,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 2,
-                          color:
-                              selectedIndex.value == index
-                                  ? Colors.deepPurple
-                                  : Colors.transparent,
-                        ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Container(
+                        height: 2,
+                        color:
+                            selectedIndex.value == index
+                                ? Colors.deepPurple
+                                : Colors.transparent,
                       ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-          Positioned(
-            bottom: 2,
-            left: 0,
-            right: 0,
-            child: Container(height: 1.0, color: Colors.black12),
-          ),
-        ],
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
       ),
     );
   }
