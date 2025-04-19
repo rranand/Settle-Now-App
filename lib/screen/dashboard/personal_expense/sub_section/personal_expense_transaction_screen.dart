@@ -16,7 +16,6 @@ class PersonalExpenseTransactionScreen extends StatefulWidget {
 
 class _PersonalExpenseTransactionScreenState
     extends State<PersonalExpenseTransactionScreen> {
-  final double _cardPadding = 2;
   final double _containerPadding = 10;
   final List<String> tagsTitle = [];
 
@@ -34,33 +33,19 @@ class _PersonalExpenseTransactionScreenState
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  width:
-                      MediaQuery.of(context).size.width -
-                      2 * _cardPadding -
-                      2 * _containerPadding,
-                  height: 25,
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: tagsTitle.length + 1,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (index == 0) {
-                        return tagOnCard(
-                          expenseCategories[index % expenseCategories.length],
-                        );
-                      } else {
-                        return tagOnCard(
-                          tagsTitle[index - 1],
-                          textColor: UiConstant.colors[1],
-                          backgroundColor: UiConstant.colorsWithShade50[1],
-                        );
-                      }
-                    },
-                    separatorBuilder: (BuildContext context, int index) {
-                      return SizedBox(width: 8);
-                    },
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    tagOnCard(expenseCategories[0]),
+                    ...List.generate(
+                      tagsTitle.length,
+                      (index) => tagOnCard(
+                        tagsTitle[index],
+                        textColor: UiConstant.colors[1],
+                        backgroundColor: UiConstant.colorsWithShade50[1],
+                      ),
+                    ),
+                  ],
                 ),
                 ListTile(
                   leading: colouredIcon(

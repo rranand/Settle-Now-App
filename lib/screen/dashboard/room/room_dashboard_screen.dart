@@ -43,13 +43,16 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
             backgroundColor: Colors.transparent,
             flexibleSpace: FlexibleSpaceBar(
               titlePadding: EdgeInsets.symmetric(vertical: 8),
+              centerTitle: true,
               title: ValueListenableBuilder(
                 valueListenable: _navBarIndex,
                 builder: (BuildContext context, int value, Widget? child) {
                   return NavBarCard(
                     headerTitle: ["Live", "Close"],
                     selectedIndex: _navBarIndex,
-                    width: MediaQuery.of(context).size.width,
+                    width:
+                        MediaQuery.of(context).size.width -
+                        2 * _mainScreenPadding.left,
                   );
                 },
               ),

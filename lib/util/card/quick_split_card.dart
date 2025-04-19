@@ -121,34 +121,19 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width:
-                    widget.screenWidth -
-                    2 * widget.screenPadding.left -
-                    2 * _containerPadding -
-                    30,
-                height: 25,
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemCount: tagsTitle.length + 1,
-                  itemBuilder: (BuildContext context, int index) {
-                    if (index == 0) {
-                      return tagOnCard(
-                        expenseCategories[index % expenseCategories.length],
-                      );
-                    } else {
-                      return tagOnCard(
-                        tagsTitle[index - 1],
-                        textColor: UiConstant.colors[1],
-                        backgroundColor: UiConstant.colorsWithShade50[1],
-                      );
-                    }
-                  },
-                  separatorBuilder: (BuildContext context, int index) {
-                    return SizedBox(width: 8);
-                  },
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  tagOnCard(expenseCategories[0]),
+                  ...List.generate(
+                    tagsTitle.length,
+                    (index) => tagOnCard(
+                      tagsTitle[index],
+                      textColor: UiConstant.colors[1],
+                      backgroundColor: UiConstant.colorsWithShade50[1],
+                    ),
+                  ),
+                ],
               ),
               InkWell(
                 child: Icon(Iconsax.info_circle, color: Colors.grey),
