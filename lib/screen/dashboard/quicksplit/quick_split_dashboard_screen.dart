@@ -73,7 +73,10 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                           11,
                           (index) => SizedBox(
                             width: cardWidth,
-                            child: QuickSplitCard(),
+                            child: QuickSplitCard(
+                              screenPadding: _mainScreenPadding,
+                              screenWidth: cardWidth,
+                            ),
                           ),
                         ),
                       ),

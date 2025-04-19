@@ -58,6 +58,27 @@ class UiConstant {
     Colors.lightBlue.shade100,
   ];
 
+  static List<Color> colors = [
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+    Colors.yellow,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.pink,
+    Colors.brown,
+    Colors.grey,
+    Colors.indigo,
+    Colors.lime,
+    Colors.cyan,
+    Colors.amber,
+    Colors.deepOrange,
+    Colors.deepPurple,
+    Colors.lightGreen,
+    Colors.lightBlue,
+  ];
+
   static List<String> memberAvatars = [
     "https://picsum.photos/id/237/200/300",
     "https://picsum.photos/id/238/200/300",

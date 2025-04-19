@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class QuickSplitCard extends StatefulWidget {
-  const QuickSplitCard({super.key});
+  final EdgeInsets screenPadding;
+  final double screenWidth;
+  const QuickSplitCard({
+    super.key,
+    required this.screenPadding,
+    required this.screenWidth,
+  });
 
   @override
   State<QuickSplitCard> createState() => _QuickSplitCardState();
@@ -14,7 +21,9 @@ class QuickSplitCard extends StatefulWidget {
 
 class _QuickSplitCardState extends State<QuickSplitCard> {
   final double amount = -100;
+  final double _containerPadding = 10;
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
+  final List<String> tagsTitle = ["Edited"];
 
   Widget transactionInfoWidget(bool value) {
     return Column(
@@ -93,7 +102,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.all(_containerPadding),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
@@ -112,16 +121,34 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  tagOnCard("Food & Drink"),
-                  SizedBox(width: 8),
-                  tagOnCard(
-                    "Edited",
-                    textColor: Colors.green,
-                    backgroundColor: Colors.green.shade50,
-                  ),
-                ],
+              SizedBox(
+                width:
+                    widget.screenWidth -
+                    2 * widget.screenPadding.left -
+                    2 * _containerPadding -
+                    30,
+                height: 25,
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: tagsTitle.length + 1,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == 0) {
+                      return tagOnCard(
+                        expenseCategories[index % expenseCategories.length],
+                      );
+                    } else {
+                      return tagOnCard(
+                        tagsTitle[index - 1],
+                        textColor: UiConstant.colors[1],
+                        backgroundColor: UiConstant.colorsWithShade50[1],
+                      );
+                    }
+                  },
+                  separatorBuilder: (BuildContext context, int index) {
+                    return SizedBox(width: 8);
+                  },
+                ),
               ),
               InkWell(
                 child: Icon(Iconsax.info_circle, color: Colors.grey),

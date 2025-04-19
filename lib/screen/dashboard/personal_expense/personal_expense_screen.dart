@@ -20,7 +20,8 @@ class PersonalExpenseScreen extends StatefulWidget {
 
 class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  final ValueNotifier<int> _navbar_selected_index = ValueNotifier(0);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
+  final double _navBarHeight = 60;
   final List<double> amountData = [
     120.0,
     95.5,
@@ -84,11 +85,11 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
             ),
           ),
           ValueListenableBuilder(
-            valueListenable: _navbar_selected_index,
+            valueListenable: _navbarSelectedIndex,
             builder: (context, value, _) {
               return SliverAppBar(
                 pinned: true,
-                toolbarHeight: 60,
+                toolbarHeight: _navBarHeight,
                 automaticallyImplyLeading: false,
                 backgroundColor: Colors.white,
                 surfaceTintColor: Colors.transparent,
@@ -96,7 +97,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                   centerTitle: false,
                   title: NavBarCard(
                     headerTitle: ["Categories", "Transaction"],
-                    selectedIndex: _navbar_selected_index,
+                    selectedIndex: _navbarSelectedIndex,
                     width: MediaQuery.of(context).size.width,
                   ),
                 ),
@@ -104,7 +105,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
             },
           ),
           ValueListenableBuilder(
-            valueListenable: _navbar_selected_index,
+            valueListenable: _navbarSelectedIndex,
             builder: (context, value, _) {
               if (value == 0) {
                 return PersonalExpenseCategoriesSectionScreen();
@@ -113,7 +114,9 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
               }
             },
           ),
-          SliverToBoxAdapter(child: SizedBox(height: UiConstant.spaceAtBottom)),
+          SliverToBoxAdapter(
+            child: SizedBox(height: UiConstant.spaceAtBottom + _navBarHeight),
+          ),
         ],
       ),
       floatingActionButton: CustomButton.customFloatingButton(
