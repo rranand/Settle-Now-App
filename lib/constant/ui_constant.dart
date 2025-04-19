@@ -14,6 +14,7 @@ class UiConstant {
 
   static const double spaceBetweenSection = 20;
   static const double spaceBetweenRowSection = 8;
+  static const double spaceAtBottom = 80;
 
   static List<Color> colorsWithShade50 = [
     Colors.red.shade50,

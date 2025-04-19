@@ -38,7 +38,7 @@ class _PersonalExpenseDashboardScreenState
               isWide
                   ? 180.0
                   : (constraints.maxWidth / 2) -
-                      UiConstant.spaceBetweenCard -
+                      UiConstant.spaceBetweenCard * .5 -
                       _mainScreenPadding.left;
           return Wrap(
             alignment: WrapAlignment.center,
@@ -47,7 +47,7 @@ class _PersonalExpenseDashboardScreenState
             children: List.generate(
               months.length,
               (index) => SizedBox(
-                width: cardWidth,
+                width: cardWidth + 10,
                 height: 160,
                 child: PersonalExpenseCard(monthName: months[index]),
               ),

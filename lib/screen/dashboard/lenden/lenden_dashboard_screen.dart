@@ -60,7 +60,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                     padding: _mainScreenPadding.add(
                       EdgeInsets.only(
                         top: UiConstant.spaceBetweenSection,
-                        bottom: 2 * UiConstant.spaceBetweenSection,
+                        bottom: UiConstant.spaceAtBottom,
                       ),
                     ),
                     child: Padding(

@@ -61,7 +61,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                     padding: _mainScreenPadding.add(
                       EdgeInsets.only(
                         top: UiConstant.spaceBetweenSection,
-                        bottom: 2 * UiConstant.spaceBetweenSection,
+                        bottom: UiConstant.spaceAtBottom,
                       ),
                     ),
                     child: Padding(

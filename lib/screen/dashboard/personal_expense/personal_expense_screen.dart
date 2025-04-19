@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/screen/dashboard/personal_expense/sub_section/personal_expense_categories_section_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/personal_expense/sub_section/personal_expense_transaction_screen.dart';
 import 'package:settlenow_v2/util/graph/linear_graph_card.dart';
+import 'package:settlenow_v2/util/widgets/custom_button.dart';
+import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class PersonalExpenseScreen extends StatefulWidget {
@@ -14,7 +20,7 @@ class PersonalExpenseScreen extends StatefulWidget {
 
 class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-
+  final ValueNotifier<int> _navbar_selected_index = ValueNotifier(0);
   final List<double> amountData = [
     120.0,
     95.5,
@@ -70,21 +76,49 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           SliverAppBar(
             toolbarHeight: 330,
             automaticallyImplyLeading: false,
+            backgroundColor: Colors.transparent,
             surfaceTintColor: Colors.transparent,
             flexibleSpace: FlexibleSpaceBar(
               centerTitle: false,
               title: LinearGraphCard(expenses: amountData, monthName: "April"),
             ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(height: 100, color: Colors.yellow, width: 100),
-              ),
-            ),
+          ValueListenableBuilder(
+            valueListenable: _navbar_selected_index,
+            builder: (context, value, _) {
+              return SliverAppBar(
+                pinned: true,
+                toolbarHeight: 60,
+                automaticallyImplyLeading: false,
+                backgroundColor: Colors.white,
+                surfaceTintColor: Colors.transparent,
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: false,
+                  title: NavBarCard(
+                    headerTitle: ["Categories", "Transaction"],
+                    selectedIndex: _navbar_selected_index,
+                    width: MediaQuery.of(context).size.width,
+                  ),
+                ),
+              );
+            },
           ),
+          ValueListenableBuilder(
+            valueListenable: _navbar_selected_index,
+            builder: (context, value, _) {
+              if (value == 0) {
+                return PersonalExpenseCategoriesSectionScreen();
+              } else {
+                return PersonalExpenseTransactionScreen();
+              }
+            },
+          ),
+          SliverToBoxAdapter(child: SizedBox(height: UiConstant.spaceAtBottom)),
         ],
+      ),
+      floatingActionButton: CustomButton.customFloatingButton(
+        Iconsax.add,
+        () {},
       ),
     );
   }

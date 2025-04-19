@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
@@ -56,7 +58,7 @@ class PersonalExpenseCard extends StatelessWidget {
         lineBarsData: [
           LineChartBarData(
             spots: List.generate(
-              expenses.length,
+              Random().nextInt(expenses.length),
               (i) => FlSpot(i.toDouble(), expenses[i].toDouble()),
             ),
             isCurved: true,

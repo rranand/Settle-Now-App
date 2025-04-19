@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_screen.dart';
@@ -18,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _homeScreenkey = GlobalKey();
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
   int _selectedIndex = 2;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
@@ -70,6 +73,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  _drawerHandler(int index) {
+    switch (index) {
+      case 0:
+        context.push(RouterConstants.profileRouteName);
+      default:
+    }
+  }
+
   Widget _drawerWidget() {
     return Drawer(
       child: ListView(
@@ -84,7 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           ...List.generate(drawerTitle.length, (index) {
             return ListTile(
-              onTap: () {},
+              onTap: () {
+                _drawerHandler(index);
+              },
               leading: Icon(drawerIcon[index], color: Colors.white, size: 22),
               title: Text(
                 drawerTitle[index],
@@ -225,10 +238,10 @@ class _HomeScreenState extends State<HomeScreen> {
         IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
-            if (Scaffold.of(context).isDrawerOpen) {
-              Scaffold.of(context).openDrawer();
+            if (_homeScreenkey.currentState!.isDrawerOpen) {
+              _homeScreenkey.currentState!.closeDrawer();
             } else {
-              Scaffold.of(context).closeDrawer();
+              _homeScreenkey.currentState!.openDrawer();
             }
           },
         ),
@@ -242,6 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _homeScreenkey,
       appBar: _bottomNavigatorAppBarHandler(_selectedIndex),
       body: _bottomNavigatorBodyHandler(_selectedIndex),
       bottomNavigationBar: _bottomNavigationBarWidget(),

@@ -209,7 +209,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ],
               ),
 
-              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+              SizedBox(height: UiConstant.spaceAtBottom),
             ],
           ),
         ),

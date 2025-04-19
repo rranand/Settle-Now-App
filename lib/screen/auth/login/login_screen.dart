@@ -195,7 +195,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
 
-              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+              SizedBox(height: UiConstant.spaceAtBottom),
             ],
           ),
         ),

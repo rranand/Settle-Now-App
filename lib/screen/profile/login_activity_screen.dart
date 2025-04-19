@@ -36,7 +36,7 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
         padding: _mainScreenPadding.add(
           EdgeInsets.only(
             top: UiConstant.spaceBetweenSection,
-            bottom: 2 * UiConstant.spaceBetweenSection,
+            bottom: UiConstant.spaceAtBottom,
           ),
         ),
         itemBuilder:

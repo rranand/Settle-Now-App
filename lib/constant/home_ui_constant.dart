@@ -43,3 +43,29 @@ const List<IconData> bottomNavigationButtonIcon = [
   Iconsax.money_change,
   Iconsax.graph,
 ];
+
+const List<String> expenseCategories = [
+  'Food & Dining',
+  'Housing',
+  'Transportation',
+  'Utilities',
+  'Entertainment',
+  'Health & Fitness',
+  'Shopping',
+  'Education',
+  'Travel',
+  'Miscellaneous',
+];
+
+const List<IconData> categoryIcons = [
+  Icons.restaurant, // Food & Dining
+  Icons.home, // Housing
+  Icons.directions_car, // Transportation
+  Icons.lightbulb_outline, // Utilities
+  Icons.movie, // Entertainment
+  Icons.fitness_center, // Health & Fitness
+  Icons.shopping_bag, // Shopping
+  Icons.school, // Education
+  Icons.flight_takeoff, // Travel
+  Icons.category, // Miscellaneous
+];

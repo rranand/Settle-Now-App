@@ -82,9 +82,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                               : constraints.maxWidth;
                       return SingleChildScrollView(
                         padding: _mainScreenPadding.add(
-                          EdgeInsets.only(
-                            bottom: 2 * UiConstant.spaceBetweenSection,
-                          ),
+                          EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
                         ),
                         child: Wrap(
                           spacing: UiConstant.spaceBetweenCard,
