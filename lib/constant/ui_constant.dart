@@ -17,6 +17,8 @@ class UiConstant {
   static const double spaceBetweenRowSection = 8;
   static const double spaceAtBottom = 80;
 
+  static const String expenseDatetimeFormat = 'MMMM dd, yyyy';
+
   static List<Color> colorsWithShade50 = [
     Colors.red.shade50,
     Colors.green.shade50,

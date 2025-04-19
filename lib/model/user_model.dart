@@ -13,6 +13,15 @@ class UserModel {
     required this.profileImage,
   });
 
+  factory UserModel.fromBasicInfoMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      email: "",
+      profileImage: "",
+    );
+  }
+
   UserModel copyWith({
     String? id,
     String? name,
@@ -52,7 +61,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email, profileImage: $profileImage)';
+    return 'UserModel(name: $name, email: $email)';
   }
 
   @override

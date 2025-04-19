@@ -14,10 +14,15 @@ Widget subTextOnCard(
   String text, {
   Color? textColor = Colors.grey,
   FontWeight? fontWeight = FontWeight.w400,
+  double? fontSize = 12,
 }) {
   return Text(
     text,
-    style: TextStyle(color: textColor, fontSize: 12, fontWeight: fontWeight),
+    style: TextStyle(
+      color: textColor,
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+    ),
   );
 }
 

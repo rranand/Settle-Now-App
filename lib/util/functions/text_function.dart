@@ -1,4 +1,6 @@
+import 'package:intl/intl.dart';
 import 'package:moment_dart/moment_dart.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
 
 String capatilizeFirstLetter(String inputText) {
   if (inputText.isEmpty) {
@@ -26,4 +28,8 @@ String convertToMoment(DateTime dateTime) {
       .replaceAll("about", "~");
 
   return capatilizeFirstLetter(momentStr);
+}
+
+String convertDateTimeFormat(DateTime dateTime) {
+  return DateFormat(UiConstant.expenseDatetimeFormat).format(dateTime);
 }
