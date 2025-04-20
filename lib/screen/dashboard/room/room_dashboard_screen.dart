@@ -17,6 +17,7 @@ class RoomDashboardScreen extends StatefulWidget {
 }
 
 class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
+  final double _fixedRoomHeight = 160;
   final ValueNotifier<int> _navBarIndex = ValueNotifier(0);
   final TextEditingController _searchController = TextEditingController();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
@@ -83,8 +84,14 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
             padding: _mainScreenPadding.add(
               EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
             ),
-            sliver: SliverList.builder(
+            sliver: SliverGrid.builder(
               itemCount: 11,
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: cardWidth,
+                mainAxisSpacing: UiConstant.spaceBetweenCard,
+                crossAxisSpacing: UiConstant.spaceBetweenCard,
+                childAspectRatio: cardWidth / _fixedRoomHeight,
+              ),
               itemBuilder: (BuildContext context, int index) {
                 return SizedBox(
                   width: cardWidth,
