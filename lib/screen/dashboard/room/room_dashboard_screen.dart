@@ -58,9 +58,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                   return NavBarCard(
                     headerTitle: ["Live", "Close"],
                     selectedIndex: _navBarIndex,
-                    width:
-                        MediaQuery.of(context).size.width -
-                        2 * _mainScreenPadding.left,
                   );
                 },
               ),

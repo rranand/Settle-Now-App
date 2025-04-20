@@ -165,7 +165,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
     EdgeInsets paddingInsets = _mainScreenPadding;
     if (!isWide) {
-      paddingInsets = EdgeInsets.zero;
+      paddingInsets = EdgeInsets.symmetric(horizontal: 8);
     }
     return Scaffold(
       appBar: AppBar(
@@ -176,7 +176,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       body: CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: paddingInsets,
+            padding: paddingInsets.add(
+              EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
+            ),
             sliver: SliverToBoxAdapter(
               child: LendenSummaryCard(gaveAmount: 100, oweAmount: 200),
             ),

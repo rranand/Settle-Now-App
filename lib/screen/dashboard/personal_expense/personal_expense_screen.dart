@@ -111,9 +111,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                     title: NavBarCard(
                       headerTitle: ["Categories", "Transaction"],
                       selectedIndex: _navbarSelectedIndex,
-                      width:
-                          MediaQuery.of(context).size.width -
-                          2 * paddingInsets.left,
                     ),
                   ),
                 ),
