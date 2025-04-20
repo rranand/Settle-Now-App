@@ -1,11 +1,19 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
-import 'package:settlenow_v2/util/widgets/category_parser.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class TransactionCard extends StatefulWidget {
-  const TransactionCard({super.key});
+  final int index;
+  final List<String> tagsTitle;
+  const TransactionCard({
+    super.key,
+    required this.index,
+    required this.tagsTitle,
+  });
 
   @override
   State<TransactionCard> createState() => _TransactionCardState();
@@ -14,49 +22,53 @@ class TransactionCard extends StatefulWidget {
 class _TransactionCardState extends State<TransactionCard> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-        border: Border.all(color: Colors.grey.withAlpha(51)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withAlpha(51),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Row(
+    return Card(
+      elevation: UiConstant.cardElevation,
+      color: Colors.white,
+      child: Padding(
+        padding: EdgeInsets.all(UiConstant.cardPadding),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                CategoryParser.getCategoryEmojiAsWidget("Food"),
-                SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Purchased a burger",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subTextOnCard("Rohit Anand"),
-                  ],
+                tagOnCard(expenseCategories[0]),
+                ...List.generate(
+                  widget.tagsTitle.length,
+                  (index) => tagOnCard(
+                    widget.tagsTitle[index],
+                    textColor: UiConstant.colors[1],
+                    backgroundColor: UiConstant.colorsWithShade50[1],
+                  ),
                 ),
               ],
             ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(formatCurrency(100, context)),
-              subTextOnCard("March 10, 2025"),
-            ],
-          ),
-        ],
+            ListTile(
+              leading: colouredIcon(
+                Icon(categoryIcons[widget.index % categoryIcons.length]),
+                UiConstant.colorsWithShade100[widget.index %
+                    categoryIcons.length],
+              ),
+              title: Text("Chickoo Ice-Cream"),
+              subtitle: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  subTextOnCard("Created On March 10, 2025"),
+                  widget.index % 2 == 0
+                      ? subTextOnCard("Modified On March 12, 2025")
+                      : subTextOnCard(""),
+                ],
+              ),
+              trailing: Text(
+                formatCurrency((121 + Random().nextInt(300)) * 1.0, context),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -100,7 +100,7 @@ class MyApp extends StatelessWidget {
           MediaQuery.of(context).size.width,
           MediaQuery.of(context).size.height,
           MediaQuery.of(context).orientation,
-          MediaQuery.of(context).viewPadding
+          MediaQuery.of(context).viewPadding,
         );
         ThemeProvider themeProvider = context.watch<ThemeProvider>();
 

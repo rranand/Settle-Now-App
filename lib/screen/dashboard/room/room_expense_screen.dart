@@ -4,6 +4,9 @@ import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_analysis_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -19,7 +22,7 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
 
   final List<String> _navBarTitles = [
     "Users",
@@ -52,6 +55,14 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
   Widget _navBarHandler(int index) {
     switch (index) {
+      case 0:
+        return RoomUserScreen(users: users);
+      case 1:
+        return RoomTransactionScreen();
+      case 2:
+        return RoomAnalysisScreen();
+      case 3:
+        return RoomSettleScreen();
       default:
         return RoomUserScreen(users: users);
     }

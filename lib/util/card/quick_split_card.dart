@@ -7,13 +7,7 @@ import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class QuickSplitCard extends StatefulWidget {
-  final EdgeInsets screenPadding;
-  final double screenWidth;
-  const QuickSplitCard({
-    super.key,
-    required this.screenPadding,
-    required this.screenWidth,
-  });
+  const QuickSplitCard({super.key});
 
   @override
   State<QuickSplitCard> createState() => _QuickSplitCardState();
@@ -63,6 +57,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
         Divider(),
         ListView.separated(
           shrinkWrap: true,
+          padding: EdgeInsets.zero,
           itemCount: 3,
           itemBuilder: (BuildContext context, int index) {
             double memberAmount =
