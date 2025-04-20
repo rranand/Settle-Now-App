@@ -6,6 +6,7 @@ import 'package:settlenow_v2/model/lenden_expense_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/lenden_expense_card.dart';
+import 'package:settlenow_v2/util/card/lenden_summary_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -161,6 +162,11 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
+    EdgeInsets paddingInsets = _mainScreenPadding;
+    if (!isWide) {
+      paddingInsets = EdgeInsets.zero;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.id),
@@ -169,7 +175,12 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-          //SliverAppBar(: SliverPadding(padding: _mainScreenPadding)),
+          SliverPadding(
+            padding: paddingInsets,
+            sliver: SliverToBoxAdapter(
+              child: LendenSummaryCard(gaveAmount: 100, oweAmount: 200),
+            ),
+          ),
           SliverPadding(
             padding: _mainScreenPadding,
             sliver: SliverList.builder(
