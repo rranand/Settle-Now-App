@@ -25,4 +25,5 @@ class GradientColorConstant {
     Color(0xFF4EEBD4),
   ];
   static const List<Color> mintBreeze = [Color(0xFFe0f7e9), Color(0xFFf1faff)];
+  static const List<Color> greenToTeal = [Color(0xFF6EE7B7), Color(0xFF3B82F6)];
 }

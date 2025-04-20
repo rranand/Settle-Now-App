@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -24,6 +27,35 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     "Analysis",
     "Settle",
   ];
+
+  final List<UserModel> users = List.generate(
+    7,
+    (index) => UserModel(
+      id: index.toString(),
+      name: "R Anand $index",
+      email: "",
+      profileImage: UiConstant.memberAvatars[index],
+    ),
+  );
+
+  Widget _summaryBox(String title, String value) {
+    return Column(
+      children: [
+        Text(title, style: TextStyle(color: Colors.white70)),
+        Text(
+          value,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+      ],
+    );
+  }
+
+  Widget _navBarHandler(int index) {
+    switch (index) {
+      default:
+        return RoomUserScreen(users: users);
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -49,43 +81,46 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 4,
-              child: Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF6EE7B7), Color(0xFF3B82F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
+          SliverPadding(
+            padding: paddingInsets,
+            sliver: SliverToBoxAdapter(
+              child: Card(
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Room Overview",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                elevation: 4,
+                child: Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: GradientColorConstant.greenToTeal,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Room Overview",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        _summaryBox("Total Spent", "₹ 15,000"),
-                        _summaryBox("You Gave", "₹ 6,000"),
-                        _summaryBox("You Owe", "₹ 3,500"),
-                      ],
-                    ),
-                  ],
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          _summaryBox("Total Spent", "₹ 15,000"),
+                          _summaryBox("You Gave", "₹ 6,000"),
+                          _summaryBox("You Owe", "₹ 3,500"),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -112,20 +147,20 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
               );
             },
           ),
+          ValueListenableBuilder(
+            valueListenable: _navbarSelectedIndex,
+            builder: (context, value, _) {
+              return SliverPadding(
+                padding: _mainScreenPadding,
+                sliver: _navBarHandler(value),
+              );
+            },
+          ),
+          SliverPadding(
+            padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
+          ),
         ],
       ),
     );
   }
-}
-
-Widget _summaryBox(String title, String value) {
-  return Column(
-    children: [
-      Text(title, style: TextStyle(color: Colors.white70)),
-      Text(
-        value,
-        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-      ),
-    ],
-  );
 }
