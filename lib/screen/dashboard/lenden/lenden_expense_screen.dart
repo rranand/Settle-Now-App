@@ -169,24 +169,29 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-          SliverList.builder(
-            itemBuilder: (BuildContext context, int index) {
-              return Padding(
-                padding: EdgeInsets.only(
-                  bottom:
-                      index == transactions.length - 1
-                          ? UiConstant.spaceAtBottom
-                          : 0,
-                ),
-                child: LendenExpenseCard(
-                  expense: LenDenModel.fromMap(transactions[index]),
-                  loggedInUser: UserModel.fromBasicInfoMap({
-                    'id': '1',
-                    'name': 'Rohit Anand',
-                  }),
-                ),
-              );
-            },
+          //SliverAppBar(: SliverPadding(padding: _mainScreenPadding)),
+          SliverPadding(
+            padding: _mainScreenPadding,
+            sliver: SliverList.builder(
+              itemCount: transactions.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom:
+                        index == transactions.length - 1
+                            ? UiConstant.spaceAtBottom
+                            : 0,
+                  ),
+                  child: LendenExpenseCard(
+                    expense: LenDenModel.fromMap(transactions[index]),
+                    loggedInUser: UserModel.fromBasicInfoMap({
+                      'id': '1',
+                      'name': 'Rohit Anand',
+                    }),
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),

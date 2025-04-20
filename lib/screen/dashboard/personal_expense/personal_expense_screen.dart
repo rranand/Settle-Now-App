@@ -66,77 +66,77 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
+    EdgeInsets paddingInsets = _mainScreenPadding;
+    if (!isWide) {
+      paddingInsets = EdgeInsets.zero;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.id),
         titleSpacing: _mainScreenPadding.left,
         leading: appBarBackButton(context),
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          final isWide = constraints.maxWidth >= UiConstant.maxWidth;
-          EdgeInsets paddingInsets = _mainScreenPadding;
-          if (!isWide) {
-            paddingInsets = EdgeInsets.zero;
-          }
-          return Padding(
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
             padding: paddingInsets,
-            child: CustomScrollView(
-              slivers: [
-                SliverAppBar(
-                  toolbarHeight: 330,
+            sliver: SliverAppBar(
+              toolbarHeight: 330,
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              flexibleSpace: FlexibleSpaceBar(
+                centerTitle: false,
+                title: LinearGraphCard(
+                  expenses: amountData,
+                  monthName: "April",
+                ),
+              ),
+            ),
+          ),
+          ValueListenableBuilder(
+            valueListenable: _navbarSelectedIndex,
+            builder: (context, value, _) {
+              return SliverPadding(
+                padding: paddingInsets,
+                sliver: SliverAppBar(
+                  pinned: true,
+                  toolbarHeight: _navBarHeight,
                   automaticallyImplyLeading: false,
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: Colors.white,
                   surfaceTintColor: Colors.transparent,
                   flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: false,
-                    title: LinearGraphCard(
-                      expenses: amountData,
-                      monthName: "April",
+                    centerTitle: true,
+                    title: NavBarCard(
+                      headerTitle: ["Categories", "Transaction"],
+                      selectedIndex: _navbarSelectedIndex,
+                      width:
+                          MediaQuery.of(context).size.width -
+                          2 * paddingInsets.left,
                     ),
                   ),
                 ),
-                ValueListenableBuilder(
-                  valueListenable: _navbarSelectedIndex,
-                  builder: (context, value, _) {
-                    return SliverAppBar(
-                      pinned: true,
-                      toolbarHeight: _navBarHeight,
-                      automaticallyImplyLeading: false,
-                      backgroundColor: Colors.white,
-                      surfaceTintColor: Colors.transparent,
-                      flexibleSpace: FlexibleSpaceBar(
-                        centerTitle: true,
-                        title: NavBarCard(
-                          headerTitle: ["Categories", "Transaction"],
-                          selectedIndex: _navbarSelectedIndex,
-                          width:
-                              MediaQuery.of(context).size.width -
-                              2 * paddingInsets.left,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _navbarSelectedIndex,
-                  builder: (context, value, _) {
-                    if (value == 0) {
-                      return PersonalExpenseCategoriesSectionScreen();
-                    } else {
-                      return PersonalExpenseTransactionScreen();
-                    }
-                  },
-                ),
-                SliverToBoxAdapter(
-                  child: SizedBox(
-                    height: UiConstant.spaceAtBottom + _navBarHeight,
-                  ),
-                ),
-              ],
+              );
+            },
+          ),
+          SliverPadding(
+            padding: paddingInsets,
+            sliver: ValueListenableBuilder(
+              valueListenable: _navbarSelectedIndex,
+              builder: (context, value, _) {
+                if (value == 0) {
+                  return PersonalExpenseCategoriesSectionScreen();
+                } else {
+                  return PersonalExpenseTransactionScreen();
+                }
+              },
             ),
-          );
-        },
+          ),
+          SliverToBoxAdapter(
+            child: SizedBox(height: UiConstant.spaceAtBottom + _navBarHeight),
+          ),
+        ],
       ),
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,
