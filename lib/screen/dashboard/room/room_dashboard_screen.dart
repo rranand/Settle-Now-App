@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/room_card.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
@@ -17,7 +20,6 @@ class RoomDashboardScreen extends StatefulWidget {
 }
 
 class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
-  final double _fixedRoomHeight = 160;
   final ValueNotifier<int> _navBarIndex = ValueNotifier(0);
   final TextEditingController _searchController = TextEditingController();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
@@ -35,14 +37,11 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWide = screenWidth >= UiConstant.maxWidth;
-    final cardWidth =
-        isWide
-            ? (screenWidth / 2) -
-                UiConstant.spaceBetweenCard -
-                _mainScreenPadding.left
-            : screenWidth;
+    final cardSizeInfo = calculateCrossAspectRatio(
+      MediaQuery.of(context).size.width,
+      _mainScreenPadding,
+    );
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -87,14 +86,16 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
             sliver: SliverGrid.builder(
               itemCount: 11,
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: cardWidth,
+                maxCrossAxisExtent: cardSizeInfo[0],
                 mainAxisSpacing: UiConstant.spaceBetweenCard,
                 crossAxisSpacing: UiConstant.spaceBetweenCard,
-                childAspectRatio: cardWidth / _fixedRoomHeight,
+                childAspectRatio: cardSizeInfo[1],
               ),
               itemBuilder: (BuildContext context, int index) {
-                return SizedBox(
-                  width: cardWidth,
+                return InkWell(
+                  onTap: () {
+                    context.push("${RouterConstants.roomRouteName}/id");
+                  },
                   child: RoomCard(status: statusList[index % 3]),
                 );
               },

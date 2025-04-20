@@ -102,6 +102,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(UiConstant.cardPadding),
+      margin: EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),

@@ -8,6 +8,7 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/personal_expense_card.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 
@@ -31,36 +32,28 @@ class _PersonalExpenseDashboardScreenState
   final List<int> years = [2025, 2024, 2023];
 
   Widget monthWiseCardsWidget(List<String> months) {
-    return Padding(
+    final cardSizeInfo = calculateCrossAspectRatio(
+      MediaQuery.of(context).size.width,
+      _mainScreenPadding,
+      cardWidth: UiConstant.cardFixedHeight + 20,
+      cardHeight: UiConstant.cardFixedHeight,
+    );
+    return SliverPadding(
       padding: _mainScreenPadding,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          bool isWide = constraints.maxWidth >= UiConstant.maxWidth;
-          double cardWidth =
-              isWide
-                  ? 180.0
-                  : (constraints.maxWidth / 2) -
-                      UiConstant.spaceBetweenCard * .5 -
-                      _mainScreenPadding.left;
-          return Wrap(
-            alignment: WrapAlignment.center,
-            spacing: UiConstant.spaceBetweenCard,
-            runSpacing: UiConstant.spaceBetweenCard,
-            children: List.generate(
-              months.length,
-              (index) => InkWell(
-                onTap: () {
-                  context.push(
-                    "${RouterConstants.personalExpenseRouteName}/id",
-                  );
-                },
-                child: SizedBox(
-                  width: cardWidth + 10,
-                  height: 160,
-                  child: PersonalExpenseCard(monthName: months[index]),
-                ),
-              ),
-            ),
+      sliver: SliverGrid.builder(
+        itemCount: months.length,
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: cardSizeInfo[0],
+          mainAxisSpacing: UiConstant.spaceBetweenCard,
+          crossAxisSpacing: UiConstant.spaceBetweenCard,
+          childAspectRatio: cardSizeInfo[1],
+        ),
+        itemBuilder: (BuildContext context, int index) {
+          return InkWell(
+            onTap: () {
+              context.push("${RouterConstants.personalExpenseRouteName}/id");
+            },
+            child: PersonalExpenseCard(monthName: months[index]),
           );
         },
       ),
@@ -79,11 +72,10 @@ class _PersonalExpenseDashboardScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox(
-        width: MediaQuery.of(context).size.width,
-        child: Column(
-          children: [
-            Padding(
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
               padding: _mainScreenPadding,
               child: CustomFormField.searchBar(
                 "Search",
@@ -94,45 +86,46 @@ class _PersonalExpenseDashboardScreenState
                 },
               ),
             ),
-            Expanded(
-              child: CustomScrollView(
-                shrinkWrap: true,
-                slivers: List.generate(
-                  years.length,
-                  (index) => SliverStickyHeader.builder(
-                    builder: (context, state) {
-                      return Container(
-                        margin: _mainScreenPadding,
-                        padding: EdgeInsets.symmetric(
-                          vertical: .5 * UiConstant.spaceBetweenSection,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(child: SizedBox()),
-                            GradientWidget(
-                              text: "   ${years[index]}   ",
-                              gradientColors:
-                                  state.isPinned
-                                      ? GradientColorConstant.tealToGreen
-                                      : GradientColorConstant.coolIndigoToBlue,
-                              textSize: 16,
-                              textColor: Colors.white,
-                            ),
-                            Expanded(child: SizedBox()),
-                          ],
-                        ),
-                      );
-                    },
+          ),
+          ...List.generate(
+            years.length,
+            (index) => SliverStickyHeader.builder(
+              builder: (context, state) {
+                final double scrollPercent = state.scrollPercentage.clamp(
+                  0.0,
+                  1.0,
+                );
+                final int alpha =
+                    (255 * (1.0 - scrollPercent)).clamp(0, 255).toInt();
 
-                    sliver: SliverToBoxAdapter(
-                      child: monthWiseCardsWidget(CalenderConstant.monthName),
-                    ),
+                return Container(
+                  margin: _mainScreenPadding,
+                  padding: EdgeInsets.symmetric(
+                    vertical: .5 * UiConstant.spaceBetweenSection,
                   ),
-                ),
-              ),
+                  child: Row(
+                    children: [
+                      Expanded(child: SizedBox()),
+                      GradientWidget(
+                        text: "   ${years[index]}   ",
+                        gradientColors:
+                            state.isPinned
+                                ? GradientColorConstant.tealToGreen
+                                : GradientColorConstant.coolIndigoToBlue
+                                    .map((c) => c.withAlpha(alpha))
+                                    .toList(),
+                        textSize: 16,
+                        textColor: Colors.white,
+                      ),
+                      Expanded(child: SizedBox()),
+                    ],
+                  ),
+                );
+              },
+              sliver: monthWiseCardsWidget(CalenderConstant.monthName),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
