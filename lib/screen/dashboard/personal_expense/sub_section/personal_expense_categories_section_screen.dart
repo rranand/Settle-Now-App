@@ -20,10 +20,10 @@ class _PersonalExpenseCategoriesSectionScreenState
     extends State<PersonalExpenseCategoriesSectionScreen> {
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        childCount: expenseCategories.length,
-        (context, index) => Card(
+    return SliverList.builder(
+      itemCount: expenseCategories.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Card(
           elevation: UiConstant.cardElevation,
           color: Colors.white,
           child: Padding(
@@ -44,8 +44,8 @@ class _PersonalExpenseCategoriesSectionScreenState
               ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

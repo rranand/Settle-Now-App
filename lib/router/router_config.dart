@@ -7,6 +7,7 @@ import 'package:settlenow_v2/screen/auth/signup/signup_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/home/home_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_expense_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/room/room_expense_screen.dart';
 import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
@@ -56,6 +57,21 @@ class AppRouterConfig {
                 },
               ),
             ],
+          ),
+          GoRoute(
+            path: "${RouterConstants.roomRouteName}/:id",
+            builder: (context, state) {
+              return RoomExpenseScreen(id: state.pathParameters["id"]!);
+            },
+            redirect: (context, state) {
+              Map<String, String> param = state.pathParameters;
+
+              if (param.isEmpty) {
+                return RouterConstants.dashboardRouteName;
+              } else {
+                return null;
+              }
+            },
           ),
           GoRoute(
             path: "${RouterConstants.personalExpenseRouteName}/:id",

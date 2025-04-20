@@ -34,6 +34,14 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWide = screenWidth >= UiConstant.maxWidth;
+    final cardWidth =
+        isWide
+            ? (screenWidth / 2) -
+                UiConstant.spaceBetweenCard -
+                _mainScreenPadding.left
+            : screenWidth;
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -58,52 +66,31 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
               ),
             ),
           ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => Column(
-                children: [
-                  Padding(
-                    padding: _mainScreenPadding,
-                    child: CustomFormField.searchBar(
-                      "Search Room",
-                      widget.isSearchEnabled,
-                      _searchController,
-                      (value) {
-                        // Add filter logic if needed
-                      },
-                    ),
-                  ),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isWide =
-                          constraints.maxWidth >= UiConstant.maxWidth;
-                      final cardWidth =
-                          isWide
-                              ? (constraints.maxWidth / 2) -
-                                  UiConstant.spaceBetweenCard -
-                                  _mainScreenPadding.left
-                              : constraints.maxWidth;
-                      return SingleChildScrollView(
-                        padding: _mainScreenPadding.add(
-                          EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
-                        ),
-                        child: Wrap(
-                          spacing: UiConstant.spaceBetweenCard,
-                          runSpacing: UiConstant.spaceBetweenCard,
-                          children: List.generate(
-                            11,
-                            (index) => SizedBox(
-                              width: cardWidth,
-                              child: RoomCard(status: statusList[index % 3]),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: _mainScreenPadding,
+              child: CustomFormField.searchBar(
+                "Search Room",
+                widget.isSearchEnabled,
+                _searchController,
+                (value) {
+                  // Add filter logic if needed
+                },
               ),
-              childCount: 1,
+            ),
+          ),
+          SliverPadding(
+            padding: _mainScreenPadding.add(
+              EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
+            ),
+            sliver: SliverList.builder(
+              itemCount: 11,
+              itemBuilder: (BuildContext context, int index) {
+                return SizedBox(
+                  width: cardWidth,
+                  child: RoomCard(status: statusList[index % 3]),
+                );
+              },
             ),
           ),
         ],

@@ -167,30 +167,26 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
         titleSpacing: _mainScreenPadding.left,
         leading: appBarBackButton(context),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: transactions.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom:
-                        index == transactions.length - 1
-                            ? UiConstant.spaceAtBottom
-                            : 0,
-                  ),
-                  child: LendenExpenseCard(
-                    expense: LenDenModel.fromMap(transactions[index]),
-                    loggedInUser: UserModel.fromBasicInfoMap({
-                      'id': '1',
-                      'name': 'Rohit Anand',
-                    }),
-                  ),
-                );
-              },
-            ),
+      body: CustomScrollView(
+        slivers: [
+          SliverList.builder(
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom:
+                      index == transactions.length - 1
+                          ? UiConstant.spaceAtBottom
+                          : 0,
+                ),
+                child: LendenExpenseCard(
+                  expense: LenDenModel.fromMap(transactions[index]),
+                  loggedInUser: UserModel.fromBasicInfoMap({
+                    'id': '1',
+                    'name': 'Rohit Anand',
+                  }),
+                ),
+              );
+            },
           ),
         ],
       ),

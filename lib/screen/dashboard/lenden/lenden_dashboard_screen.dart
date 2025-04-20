@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/lenden_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
@@ -70,8 +72,17 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                         runSpacing: UiConstant.spaceBetweenCard,
                         children: List.generate(
                           11,
-                          (index) =>
-                              SizedBox(width: cardWidth, child: LendenCard()),
+                          (index) => InkWell(
+                            onTap: () {
+                              context.push(
+                                "${RouterConstants.lendenRouteName}/id",
+                              );
+                            },
+                            child: SizedBox(
+                              width: cardWidth,
+                              child: LendenCard(),
+                            ),
+                          ),
                         ),
                       ),
                     ),
