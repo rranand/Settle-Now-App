@@ -25,8 +25,8 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(3);
 
   final List<String> _navBarTitles = [
-    "Users",
     "Transactions",
+    "Users",
     "Analysis",
     "Settle",
   ];
@@ -56,9 +56,9 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   Widget _navBarHandler(int index) {
     switch (index) {
       case 0:
-        return RoomUserScreen(users: users);
-      case 1:
         return RoomTransactionScreen();
+      case 1:
+        return RoomUserScreen(users: users);
       case 2:
         return RoomAnalysisScreen();
       case 3:
