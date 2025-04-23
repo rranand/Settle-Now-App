@@ -125,6 +125,7 @@ class CustomButton {
     iconBorderColor ??= Colors.black26;
 
     return InkWell(
+      borderRadius: BorderRadius.circular(iconRadius),
       onTap: onPressed,
       child: CircleAvatar(
         radius: iconRadius + 2,

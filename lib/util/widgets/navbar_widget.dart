@@ -20,6 +20,7 @@ class NavBarCard extends StatelessWidget {
       children: [
         Center(
           child: InkWell(
+            borderRadius: BorderRadius.circular(100),
             onTap: () {
               selectedIndex.value = index;
             },

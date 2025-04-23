@@ -71,6 +71,9 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
               ),
               itemBuilder:
                   (context, index) => InkWell(
+                    borderRadius: BorderRadius.circular(
+                      UiConstant.cardBorderRadius,
+                    ),
                     onTap: () {
                       context.push("${RouterConstants.lendenRouteName}/id");
                     },

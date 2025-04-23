@@ -131,6 +131,9 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                 ],
               ),
               InkWell(
+                borderRadius: BorderRadius.circular(
+                  UiConstant.cardBorderRadius,
+                ),
                 child: Icon(Iconsax.info_circle, color: Colors.grey),
                 onTap: () {
                   isExpanded.value = !isExpanded.value;

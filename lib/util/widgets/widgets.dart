@@ -37,6 +37,7 @@ Widget appBarBackButton(BuildContext context) {
   return Padding(
     padding: EdgeInsets.only(left: width),
     child: InkWell(
+      borderRadius: BorderRadius.circular(100),
       child: const Icon(Iconsax.arrow_left_2),
       onTap: () => context.pop(),
     ),
@@ -74,7 +75,7 @@ Widget colouredIcon(Icon icon, Color color, {double radius = 50}) {
     width: radius,
     height: radius,
     decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-    child: icon,
+    child: Center(child: icon),
   );
 }
 

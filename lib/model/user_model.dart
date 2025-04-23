@@ -22,6 +22,13 @@ class UserModel {
     );
   }
 
+  UserModel.fromBasicInfo({
+    required this.id,
+    required this.name,
+    required this.profileImage,
+    this.email = "",
+  });
+
   UserModel copyWith({
     String? id,
     String? name,

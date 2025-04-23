@@ -116,6 +116,9 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
               Visibility(
                 visible: _isManualSplit,
                 child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
                   child: Icon(Iconsax.info_circle, color: Colors.grey),
                   onTap: () {
                     isExpanded.value = !isExpanded.value;

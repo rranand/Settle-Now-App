@@ -50,6 +50,7 @@ class _PersonalExpenseDashboardScreenState
         ),
         itemBuilder: (BuildContext context, int index) {
           return InkWell(
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             onTap: () {
               context.push("${RouterConstants.personalExpenseRouteName}/id");
             },

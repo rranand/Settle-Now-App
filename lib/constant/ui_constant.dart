@@ -18,7 +18,9 @@ class UiConstant {
   static const double spaceBetweenRowSection = 8;
   static const double spaceAtBottom = 80;
 
-  static const String expenseDatetimeFormat = 'MMMM dd, yyyy';
+  static const String expenseDatetimeFormat = 'MMMM dd, yyyy hh:mm a';
+
+  static const int indianRupeeSymbol = 0x20B9;
 
   static List<Color> colorsWithShade50 = [
     Colors.red.shade50,

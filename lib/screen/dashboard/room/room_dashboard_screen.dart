@@ -90,6 +90,9 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
               ),
               itemBuilder: (BuildContext context, int index) {
                 return InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
                   onTap: () {
                     context.push("${RouterConstants.roomRouteName}/id");
                   },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_dashboard_screen.dart';
@@ -53,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(fontSize: 12, color: Colors.white),
           ),
           InkWell(
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             onTap: () async {
               launchUrl(
                 Uri.parse("https://settlenow.in/privacy-policy"),
@@ -191,6 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         appBarActions = [
           InkWell(
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             child: Icon(Icons.search),
             onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
@@ -201,6 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         appBarActions = [
           InkWell(
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             child: Icon(Icons.search),
             onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
@@ -211,6 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         appBarActions = [
           InkWell(
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             child: Icon(Icons.search),
             onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
@@ -221,6 +226,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3:
         appBarActions = [
           InkWell(
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             child: Icon(Icons.search),
             onTap: () {
               _isSearchEnabled.value = !_isSearchEnabled.value;
