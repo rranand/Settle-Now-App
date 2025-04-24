@@ -260,7 +260,7 @@ class _AddTransactionState extends State<AddTransaction> {
               ValueListenableBuilder(
                 valueListenable: _splitTypeIndex,
                 builder: (context, value, child) {
-                  if (_splitType[value].contains("Partial")) {
+                  if (!_splitType[value].contains("Partial")) {
                     return child!;
                   } else {
                     return SizedBox.shrink();

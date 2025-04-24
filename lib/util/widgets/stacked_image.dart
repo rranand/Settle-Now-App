@@ -2,10 +2,12 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
-Widget profileimageWidgetForCachedNetworkimage(
+Widget imageWidgetForCachedNetworkimage(
   ImageProvider? imgProvider,
   bool isLast,
 ) {
@@ -31,6 +33,42 @@ Widget profileimageWidgetForCachedNetworkimage(
   }
 }
 
+Widget errorImageWidget(UserModel user, bool isLast) {
+  String nameInitial = "";
+  final List<String> nameArr = nameInitial.split(" ");
+
+  switch (nameArr.length) {
+    case 0:
+      nameInitial = "UA";
+      break;
+    case 1:
+      nameInitial = user.name.substring(0, 2);
+      break;
+    default:
+      nameInitial = nameArr.first[0] + nameArr.last[0];
+  }
+
+  nameInitial = nameInitial.toUpperCase();
+
+  return Container(
+    decoration: BoxDecoration(shape: BoxShape.circle),
+    child: colouredIcon(
+      Text(
+        nameInitial,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 18,
+          color: Colors.grey.shade800,
+        ),
+      ),
+      UiConstant.colorsWithShade100[Random().nextInt(
+        UiConstant.colorsWithShade100.length,
+      )],
+    ),
+  );
+}
+
 Widget eachUserImageBuilder(
   UserModel eachUser,
   int index,
@@ -44,15 +82,11 @@ Widget eachUserImageBuilder(
     height: imageRadius,
     progressIndicatorBuilder:
         (context, url, downloadProgress) =>
-            profileimageWidgetForCachedNetworkimage(null, isLast),
-    errorWidget:
-        (context, url, error) => profileimageWidgetForCachedNetworkimage(
-          AssetImage("assets/Images/unknown.jpeg"),
-          isLast,
-        ),
+            imageWidgetForCachedNetworkimage(null, isLast),
+    errorWidget: (context, url, error) => errorImageWidget(eachUser, isLast),
     imageBuilder:
         (context, imageProvider) =>
-            profileimageWidgetForCachedNetworkimage(imageProvider, isLast),
+            imageWidgetForCachedNetworkimage(imageProvider, isLast),
   );
   if (index > 0) {
     profileImage = Positioned(
