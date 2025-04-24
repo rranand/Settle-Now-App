@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_analysis_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_screen.dart';
@@ -31,16 +30,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     "Settle",
   ];
 
-  final List<UserModel> users = List.generate(
-    7,
-    (index) => UserModel(
-      id: index.toString(),
-      name: "R Anand $index",
-      email: "",
-      profileImage: UiConstant.memberAvatars[index],
-    ),
-  );
-
   Widget _summaryBox(String title, String value) {
     return Column(
       children: [
@@ -58,13 +47,13 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       case 0:
         return RoomTransactionScreen();
       case 1:
-        return RoomUserScreen(users: users);
+        return RoomUserScreen(users: UiConstant.users);
       case 2:
         return RoomAnalysisScreen();
       case 3:
         return RoomSettleScreen();
       default:
-        return RoomUserScreen(users: users);
+        return RoomUserScreen(users: UiConstant.users);
     }
   }
 

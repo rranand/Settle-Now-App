@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
 Widget profileimageWidgetForCachedNetworkimage(
@@ -31,14 +32,14 @@ Widget profileimageWidgetForCachedNetworkimage(
 }
 
 Widget eachUserImageBuilder(
-  String eachUser,
+  UserModel eachUser,
   int index,
   bool isLast, {
   double nextImageOffset = 22,
   double imageRadius = 30,
 }) {
   Widget profileImage = CachedNetworkImage(
-    imageUrl: eachUser.isEmpty ? "" : eachUser,
+    imageUrl: eachUser.profileImage.isEmpty ? "" : eachUser.profileImage,
     width: imageRadius,
     height: imageRadius,
     progressIndicatorBuilder:
@@ -64,7 +65,7 @@ Widget eachUserImageBuilder(
 
 Widget overlapUserImageWidget(
   BuildContext context,
-  List<String> users,
+  List<UserModel> users,
   int maxProfileImageToShow, {
   int? totalUsers,
   double nextImageOffset = 22,

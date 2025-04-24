@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 
 class UiConstant {
   static const double cardTitleTextSize = 18;
@@ -85,14 +88,60 @@ class UiConstant {
     Colors.lightBlue,
   ];
 
-  static List<String> memberAvatars = [
-    "https://picsum.photos/id/237/200/300",
-    "https://picsum.photos/id/238/200/300",
-    "https://picsum.photos/id/239/200/300",
-    "https://picsum.photos/id/240/200/300",
-    "https://picsum.photos/id/241/200/300",
-    "https://picsum.photos/id/242/200/300",
-    "https://picsum.photos/id/243/200/300",
-    "https://picsum.photos/id/244/200/300",
+  static List<UserModel> users = [
+    UserModel.fromBasicInfo(
+      id: 'u1',
+      name: 'Riya Kapoor',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u2',
+      name: 'Aarav',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u3',
+      name: 'Meera Shah',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u4',
+      name: 'Kabir',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u5',
+      name: 'Anaya Sen',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u6',
+      name: 'Ishaan Malhotra Anaya',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u7',
+      name: 'Tara',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u8',
+      name: 'Dev Verma',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
+    UserModel.fromBasicInfo(
+      id: 'u9',
+      name: 'Zoya',
+      profileImage:
+          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
+    ),
   ];
 }

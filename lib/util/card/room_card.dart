@@ -64,9 +64,9 @@ class RoomCard extends StatelessWidget {
             const SizedBox(height: UiConstant.cardSpaceAfterSubText),
             overlapUserImageWidget(
               context,
-              UiConstant.memberAvatars,
+              UiConstant.users,
               4,
-              totalUsers: UiConstant.memberAvatars.length,
+              totalUsers: UiConstant.users.length,
             ),
           ],
         ),

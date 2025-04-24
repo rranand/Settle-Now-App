@@ -70,12 +70,12 @@ List<Widget>? appBarActionButton(BuildContext context, List<Widget> widgets) {
   }
 }
 
-Widget colouredIcon(Icon icon, Color color, {double radius = 50}) {
+Widget colouredIcon(Widget child, Color color, {double radius = 50}) {
   return Container(
     width: radius,
     height: radius,
     decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-    child: Center(child: icon),
+    child: Center(child: child),
   );
 }
 

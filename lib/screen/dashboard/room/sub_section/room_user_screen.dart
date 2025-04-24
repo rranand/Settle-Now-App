@@ -24,7 +24,6 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
 
   Widget _userExpenseWidget(UserModel user) {
     UserModel user = widget.users.first;
-    List<String> profileImage = [user.profileImage];
     double amount = (111 + Random().nextInt(2000)).toDouble();
 
     if (amount % 2 == 0) {
@@ -39,12 +38,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            overlapUserImageWidget(
-              context,
-              profileImage,
-              profileImage.length,
-              imageRadius: 55,
-            ),
+            overlapUserImageWidget(context, [user], 1, imageRadius: 55),
             SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

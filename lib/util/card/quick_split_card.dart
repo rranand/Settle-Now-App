@@ -3,6 +3,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -30,9 +31,9 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           visible: !value,
           child: overlapUserImageWidget(
             context,
-            UiConstant.memberAvatars,
+            UiConstant.users,
             4,
-            totalUsers: UiConstant.memberAvatars.length,
+            totalUsers: UiConstant.users.length,
             imageRadius: 30,
             nextImageOffset: 24,
           ),
@@ -62,15 +63,13 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           itemBuilder: (BuildContext context, int index) {
             double memberAmount =
                 (100 + 10 * index) * (index % 2 == 0 ? -1 : 1);
-            String imgUrl =
-                UiConstant.memberAvatars[index %
-                    UiConstant.memberAvatars.length];
+            UserModel user = UiConstant.users[index % UiConstant.users.length];
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
                   children: [
-                    overlapUserImageWidget(context, [imgUrl], 1),
+                    overlapUserImageWidget(context, [user], 1),
                     SizedBox(width: 8),
                     Text("Rohit Anand"),
                   ],

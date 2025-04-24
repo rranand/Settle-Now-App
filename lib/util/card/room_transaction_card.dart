@@ -5,6 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -42,9 +43,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
           itemBuilder: (BuildContext context, int index) {
             double memberAmount =
                 (100 + 10 * index) * (index % 2 == 0 ? -1 : 1);
-            String imgUrl =
-                UiConstant.memberAvatars[index %
-                    UiConstant.memberAvatars.length];
+            UserModel user = UiConstant.users[index % UiConstant.users.length];
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
@@ -52,7 +51,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                 children: [
                   Row(
                     children: [
-                      overlapUserImageWidget(context, [imgUrl], 1),
+                      overlapUserImageWidget(context, [user], 1),
                       SizedBox(width: 8),
                       Text("Rohit Anand"),
                     ],

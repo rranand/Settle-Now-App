@@ -60,8 +60,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             children: [
               overlapUserImageWidget(
                 context,
-                [UiConstant.memberAvatars.first],
-                2,
+                [UiConstant.users.first],
+                1,
                 imageRadius: 140,
               ),
               SizedBox(height: 2 * UiConstant.spaceBetweenSection),

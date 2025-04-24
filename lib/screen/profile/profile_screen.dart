@@ -100,8 +100,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     overlapUserImageWidget(
                       context,
-                      [UiConstant.memberAvatars.first],
-                      2,
+                      [UiConstant.users.first],
+                      1,
                       imageRadius: 100,
                     ),
                     SizedBox(width: UiConstant.spaceBetweenRowSection),

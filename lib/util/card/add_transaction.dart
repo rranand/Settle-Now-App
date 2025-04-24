@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +12,7 @@ import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
+import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class AddTransaction extends StatefulWidget {
@@ -24,63 +23,6 @@ class AddTransaction extends StatefulWidget {
 }
 
 class _AddTransactionState extends State<AddTransaction> {
-  final List<UserModel> users = [
-    UserModel.fromBasicInfo(
-      id: 'u1',
-      name: 'Riya Kapoor',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u2',
-      name: 'Aarav',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u3',
-      name: 'Meera Shah',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u4',
-      name: 'Kabir',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u5',
-      name: 'Anaya Sen',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u6',
-      name: 'Ishaan Malhotra Anaya',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u7',
-      name: 'Tara',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u8',
-      name: 'Dev Verma',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u9',
-      name: 'Zoya',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-  ];
-
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _userCardWidth = 110;
   final double _userCardHeight = 110;
@@ -114,11 +56,7 @@ class _AddTransactionState extends State<AddTransaction> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                colouredIcon(
-                  Icon(categoryIcons[0]),
-                  UiConstant.colorsWithShade100[0],
-                  radius: _userImageRadius,
-                ),
+                overlapUserImageWidget(context, [user], 1, imageRadius: 50),
                 SizedBox(height: 8),
                 Text(
                   user.name,
@@ -141,6 +79,100 @@ class _AddTransactionState extends State<AddTransaction> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _categoryWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Category", style: TextStyle(fontSize: 20)),
+        SizedBox(height: .5 * UiConstant.spaceBetweenSection),
+        ValueListenableBuilder(
+          valueListenable: _categoryIndex,
+          builder: (context, value, _) {
+            return Wrap(
+              spacing: UiConstant.spaceBetweenCard,
+              runSpacing: UiConstant.spaceBetweenCard,
+              children: List.generate(
+                categoryIcons.length,
+                (index) => InkWell(
+                  borderRadius: BorderRadius.circular(100),
+                  onTap: () => _categoryIndex.value = index,
+                  child: GradientBorderCard(
+                    borderRadius: 100,
+                    borderWidth: 1,
+                    gradientColors:
+                        index == value
+                            ? GradientColorConstant.vibrantGradient
+                            : [Colors.grey.shade300, Colors.grey.shade300],
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          colouredIcon(
+                            Icon(categoryIcons[index]),
+                            UiConstant.colorsWithShade100[index],
+                            radius: 40,
+                          ),
+                          SizedBox(width: 8),
+                          Text(expenseCategories[index]),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _splitTypeCardWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Split Type", style: TextStyle(fontSize: 20)),
+        SizedBox(height: .5 * UiConstant.spaceBetweenSection),
+        ValueListenableBuilder(
+          valueListenable: _splitTypeIndex,
+          builder: (context, value, _) {
+            return Wrap(
+              spacing: UiConstant.spaceBetweenCard,
+              runSpacing: UiConstant.spaceBetweenCard,
+              children: List.generate(
+                _splitType.length,
+                (index) => InkWell(
+                  borderRadius: BorderRadius.circular(100),
+                  onTap: () => _splitTypeIndex.value = index,
+                  child: GradientBorderCard(
+                    borderRadius: 100,
+                    borderWidth: 1,
+                    gradientColors:
+                        index == value
+                            ? GradientColorConstant.vibrantGradient
+                            : [Colors.grey.shade300, Colors.grey.shade300],
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Text(_splitType[index]),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -223,46 +255,7 @@ class _AddTransactionState extends State<AddTransaction> {
                 },
               ),
               SizedBox(height: UiConstant.spaceBetweenSection),
-              Text("Split Type", style: TextStyle(fontSize: 20)),
-              SizedBox(height: .5 * UiConstant.spaceBetweenSection),
-              ValueListenableBuilder(
-                valueListenable: _splitTypeIndex,
-                builder: (context, value, _) {
-                  return Wrap(
-                    spacing: UiConstant.spaceBetweenCard,
-                    runSpacing: UiConstant.spaceBetweenCard,
-                    children: List.generate(
-                      _splitType.length,
-                      (index) => InkWell(
-                        borderRadius: BorderRadius.circular(100),
-                        onTap: () => _splitTypeIndex.value = index,
-                        child: GradientBorderCard(
-                          borderRadius: 100,
-                          borderWidth: 1,
-                          gradientColors:
-                              index == value
-                                  ? GradientColorConstant.vibrantGradient
-                                  : [
-                                    Colors.grey.shade300,
-                                    Colors.grey.shade300,
-                                  ],
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 4,
-                              horizontal: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(100),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: Text(_splitType[index]),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+              _splitTypeCardWidget(),
               SizedBox(height: UiConstant.spaceBetweenSection),
               ValueListenableBuilder(
                 valueListenable: _splitTypeIndex,
@@ -289,7 +282,7 @@ class _AddTransactionState extends State<AddTransaction> {
                         return GridView.builder(
                           padding: EdgeInsets.zero,
                           shrinkWrap: true,
-                          itemCount: users.length,
+                          itemCount: UiConstant.users.length,
                           gridDelegate:
                               SliverGridDelegateWithMaxCrossAxisExtent(
                                 maxCrossAxisExtent: adjustedWidth,
@@ -298,7 +291,7 @@ class _AddTransactionState extends State<AddTransaction> {
                                     adjustedWidth / _userCardHeight,
                               ),
                           itemBuilder: (context, index) {
-                            UserModel user = users[index];
+                            UserModel user = UiConstant.users[index];
                             return ValueListenableBuilder(
                               valueListenable: _selectedUserIDs,
                               builder: (
@@ -317,52 +310,8 @@ class _AddTransactionState extends State<AddTransaction> {
                   ],
                 ),
               ),
-              Text("Category", style: TextStyle(fontSize: 20)),
-              SizedBox(height: .5 * UiConstant.spaceBetweenSection),
-              ValueListenableBuilder(
-                valueListenable: _categoryIndex,
-                builder: (context, value, _) {
-                  return Wrap(
-                    spacing: UiConstant.spaceBetweenCard,
-                    runSpacing: UiConstant.spaceBetweenCard,
-                    children: List.generate(
-                      categoryIcons.length,
-                      (index) => InkWell(
-                        borderRadius: BorderRadius.circular(100),
-                        onTap: () => _categoryIndex.value = index,
-                        child: GradientBorderCard(
-                          borderRadius: 100,
-                          borderWidth: 1,
-                          gradientColors:
-                              index == value
-                                  ? GradientColorConstant.vibrantGradient
-                                  : [
-                                    Colors.grey.shade300,
-                                    Colors.grey.shade300,
-                                  ],
-                          child: Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                colouredIcon(
-                                  Icon(categoryIcons[index]),
-                                  UiConstant.colorsWithShade100[index],
-                                  radius: 40,
-                                ),
-                                SizedBox(width: 8),
-                                Text(expenseCategories[index]),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+              _categoryWidget(),
               SizedBox(height: UiConstant.spaceBetweenSection),
-
               Center(
                 child: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.9,

@@ -23,7 +23,7 @@ class SettleCard extends StatelessWidget {
         children: [
           overlapUserImageWidget(
             context,
-            [UiConstant.memberAvatars[0]],
+            [UiConstant.users.first],
             1,
             imageRadius: 40,
           ),

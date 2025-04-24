@@ -51,9 +51,9 @@ class LendenCard extends StatelessWidget {
                 children: [
                   overlapUserImageWidget(
                     context,
-                    UiConstant.memberAvatars.sublist(0, 2),
-                    UiConstant.memberAvatars.sublist(0, 2).length,
-                    totalUsers: UiConstant.memberAvatars.sublist(0, 2).length,
+                    UiConstant.users.sublist(0, 2),
+                    UiConstant.users.sublist(0, 2).length,
+                    totalUsers: UiConstant.users.sublist(0, 2).length,
                     imageRadius: 30,
                     nextImageOffset: 24,
                   ),
