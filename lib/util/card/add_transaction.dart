@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
+import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -14,6 +14,8 @@ import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
+
+typedef UserWithTEC = Map<UserModel, TextEditingController>;
 
 class AddTransaction extends StatefulWidget {
   const AddTransaction({super.key});
@@ -25,28 +27,29 @@ class AddTransaction extends StatefulWidget {
 class _AddTransactionState extends State<AddTransaction> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _userCardWidth = 110;
-  final double _userCardHeight = 110;
   final double _userImageRadius = 50;
 
   final GlobalKey<FormState> _formKey = GlobalKey();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  final TextEditingController _creationDateController = TextEditingController();
+  final TextEditingController _creationDateController = TextEditingController(
+    text: convertDateTimeFormat(DateTime.now()),
+  );
 
   final List<String> _splitType = ["Equal", "Partial", "Self"];
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
   final ValueNotifier<int> _splitTypeIndex = ValueNotifier(0);
-  final ValueNotifier<Set<String>> _selectedUserIDs = ValueNotifier({});
+  final ValueNotifier<UserWithTEC> _selectedUserIDs = ValueNotifier({});
 
-  Widget _userCardWidget(UserModel user, Set<String> selectedUserIDs) {
+  Widget _userCardWidget(UserModel user, UserWithTEC selectedUserIDs) {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        final current = Set<String>.from(_selectedUserIDs.value);
-        if (current.contains(user.id)) {
-          current.remove(user.id);
+        final current = UserWithTEC.from(_selectedUserIDs.value);
+        if (current.containsKey(user)) {
+          current.remove(user);
         } else {
-          current.add(user.id);
+          current.putIfAbsent(user, () => TextEditingController());
         }
         _selectedUserIDs.value = current;
       },
@@ -72,12 +75,51 @@ class _AddTransactionState extends State<AddTransaction> {
               bottom: 0,
               right: 0,
               child:
-                  selectedUserIDs.contains(user.id)
+                  selectedUserIDs.containsKey(user)
                       ? Icon(Icons.check_circle, color: Colors.green, size: 24)
                       : SizedBox.shrink(),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _userCardWithAmountWidget(UserModel user) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: 8.0,
+      ).add(EdgeInsets.symmetric(horizontal: 8)),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              overlapUserImageWidget(context, [user], 1),
+              SizedBox(width: 8),
+              Text(user.name, style: TextStyle()),
+            ],
+          ),
+          SizedBox(
+            width: 130,
+            child: CustomFormField.textFormField(
+              _selectedUserIDs.value[user]!,
+              textInputType: TextInputType.numberWithOptions(decimal: true),
+              labelText: "",
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return "Invalid Amount";
+                }
+                return null;
+              },
+              inputFormatters: [AmountInputFormatter()],
+              inputDecoration: TextFormFieldInputBorder.underLine,
+              borderColor: Colors.black54,
+              suffixIcon: UiConstant.indianRupeeSymbol,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -208,24 +250,33 @@ class _AddTransactionState extends State<AddTransaction> {
             children: [
               CustomFormField.textFormField(
                 _amountController,
-                textInputType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                textInputType: TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [AmountInputFormatter()],
                 hintText: 'Amount',
                 labelText: 'Amount',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter a amount.";
+                  }
+                  return null;
+                },
                 inputDecoration: TextFormFieldInputBorder.underLine,
                 borderColor: Colors.black87,
-                suffixIcon: Icon(
-                  IconData(
-                    UiConstant.indianRupeeSymbol,
-                    fontFamily: 'MaterialIcons',
-                  ),
-                ),
+                suffixIcon: UiConstant.indianRupeeSymbol,
               ),
               SizedBox(height: UiConstant.spaceBetweenSection),
               CustomFormField.textFormField(
                 _descriptionController,
                 hintText: 'Description',
                 labelText: 'Description',
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Please enter a description.";
+                  } else if (value.trim().length < 3) {
+                    return "Description must be at least 3 characters long.";
+                  }
+                  return null;
+                },
                 inputDecoration: TextFormFieldInputBorder.underLine,
                 borderColor: Colors.black87,
                 maxLines: 2,
@@ -260,7 +311,7 @@ class _AddTransactionState extends State<AddTransaction> {
               ValueListenableBuilder(
                 valueListenable: _splitTypeIndex,
                 builder: (context, value, child) {
-                  if (!_splitType[value].contains("Partial")) {
+                  if (_splitType[value].contains("Partial")) {
                     return child!;
                   } else {
                     return SizedBox.shrink();
@@ -276,19 +327,16 @@ class _AddTransactionState extends State<AddTransaction> {
                         final double screenWidth = constraint.maxWidth;
                         final double spacing = 8.0;
                         final int columns =
-                            (screenWidth / (_userCardWidth + spacing)).floor();
-                        final double adjustedWidth =
-                            (screenWidth - ((columns - 1) * spacing)) / columns;
+                            (screenWidth / (_userCardWidth + spacing)).ceil();
                         return GridView.builder(
                           padding: EdgeInsets.zero,
                           shrinkWrap: true,
                           itemCount: UiConstant.users.length,
                           gridDelegate:
-                              SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: adjustedWidth,
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columns,
                                 mainAxisSpacing: spacing,
-                                childAspectRatio:
-                                    adjustedWidth / _userCardHeight,
+                                crossAxisSpacing: spacing,
                               ),
                           itemBuilder: (context, index) {
                             UserModel user = UiConstant.users[index];
@@ -296,7 +344,7 @@ class _AddTransactionState extends State<AddTransaction> {
                               valueListenable: _selectedUserIDs,
                               builder: (
                                 BuildContext context,
-                                Set<String> value,
+                                UserWithTEC value,
                                 Widget? child,
                               ) {
                                 return _userCardWidget(user, value);
@@ -307,21 +355,59 @@ class _AddTransactionState extends State<AddTransaction> {
                       },
                     ),
                     SizedBox(height: UiConstant.spaceBetweenSection),
+                    ValueListenableBuilder(
+                      valueListenable: _selectedUserIDs,
+                      builder: (
+                        BuildContext context,
+                        UserWithTEC userWithTEC,
+                        Widget? _,
+                      ) {
+                        List<UserModel> selectedUsers =
+                            userWithTEC.keys.toList();
+                        if (userWithTEC.isEmpty) {
+                          return SizedBox.shrink();
+                        } else {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Members With Amount",
+                                style: TextStyle(fontSize: 20),
+                              ),
+                              SizedBox(
+                                height: .5 * UiConstant.spaceBetweenSection,
+                              ),
+                              ...List.generate(selectedUsers.length, (i) {
+                                return _userCardWithAmountWidget(
+                                  selectedUsers[i],
+                                );
+                              }),
+                            ],
+                          );
+                        }
+                      },
+                    ),
                   ],
                 ),
               ),
               _categoryWidget(),
               SizedBox(height: UiConstant.spaceBetweenSection),
               Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.9,
-                  child: GradientBorderCard(
-                    borderRadius: 100,
-                    borderWidth: 1,
-                    gradientColors: GradientColorConstant.vibrantGradient,
-                    child: CustomButton.customOutlinedButton(
-                      "Add Expense",
-                      buttonHeight: 40,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(100),
+                  onTap: () {
+                    if (_formKey.currentState!.validate()) {}
+                  },
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    child: GradientBorderCard(
+                      borderRadius: 100,
+                      borderWidth: 1,
+                      gradientColors: GradientColorConstant.vibrantGradient,
+                      child: CustomButton.customOutlinedButton(
+                        "Add Expense",
+                        buttonHeight: 40,
+                      ),
                     ),
                   ),
                 ),

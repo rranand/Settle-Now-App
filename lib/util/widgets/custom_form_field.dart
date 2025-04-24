@@ -73,12 +73,6 @@ class CustomFormField {
         focusedBorder: _inputBorder(inputDecoration, borderRadius, borderColor),
         enabledBorder: _inputBorder(inputDecoration, borderRadius, borderColor),
         border: _inputBorder(inputDecoration, borderRadius, borderColor),
-        suffixIconConstraints: const BoxConstraints(
-          minHeight: 41,
-          minWidth: 41,
-          maxHeight: 41,
-          maxWidth: 41,
-        ),
         hintText: hintText,
         hintStyle: hintStyle,
         errorText: null,
