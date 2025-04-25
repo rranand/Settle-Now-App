@@ -11,7 +11,6 @@ import 'package:settlenow_v2/screen/dashboard/room/room_expense_screen.dart';
 import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
-import 'package:settlenow_v2/util/card/add_transaction.dart';
 
 class AppRouterConfig {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -36,7 +35,7 @@ class AppRouterConfig {
       GoRoute(
         path: RouterConstants.dashboardRouteName,
         builder: (context, state) {
-          return AddTransaction();
+          return HomeScreen();
         },
         routes: [
           GoRoute(
@@ -112,7 +111,7 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: RouterConstants.dashboardRouteName,
+    initialLocation: RouterConstants.loginRouteName,
     //initialLocation: "${RouterConstants.roomRouteName}/id",
     observers: [observer],
   );

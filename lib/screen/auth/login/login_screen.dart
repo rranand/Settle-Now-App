@@ -93,12 +93,12 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: UiConstant.spaceBetweenSection),
               const Text(
                 'Welcome Back !',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
               ),
               SizedBox(height: UiConstant.spaceBetweenSection),
               const Text(
                 'Sign In to Continue',
-                style: TextStyle(fontWeight: FontWeight.w900),
+                style: TextStyle(fontWeight: FontWeight.w700),
               ),
               SizedBox(height: 2 * UiConstant.spaceBetweenSection),
               Form(
@@ -175,8 +175,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       buttonWidth: 155,
                       buttonHeight: 50,
                       borderRadius: 100,
-                      borderColor: Colors.black87,
                       backgroundColor: Colors.black87,
+                      borderColor: Colors.black87,
                     ),
                   );
                 },

@@ -171,8 +171,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _bottomNavigatorBodyHandler(index) {
     switch (index) {
-      case 0:
-        return RoomDashboardScreen(isSearchEnabled: _isSearchEnabled);
       case 1:
         return QuickSplitDashboardScreen(isSearchEnabled: _isSearchEnabled);
       case 2:
@@ -182,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3:
         return LendenDashboardScreen(isSearchEnabled: _isSearchEnabled);
       default:
-        return Placeholder();
+        return RoomDashboardScreen(isSearchEnabled: _isSearchEnabled);
     }
   }
 

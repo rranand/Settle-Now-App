@@ -34,14 +34,12 @@ const List<String> bottomNavigationButtonText = [
   "Quick Split",
   "Personal",
   "Len-Den",
-  "Analysis",
 ];
 const List<IconData> bottomNavigationButtonIcon = [
   Iconsax.home,
   Iconsax.flash_11,
   Iconsax.wallet_1,
   Iconsax.money_change,
-  Iconsax.graph,
 ];
 
 const List<String> expenseCategories = [
