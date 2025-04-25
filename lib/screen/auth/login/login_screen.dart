@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -25,20 +26,62 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   final ValueNotifier<bool> _isOTPSent = ValueNotifier(false);
+
   final _loginFormKey = GlobalKey<FormState>();
   final _loginEmailFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   void _handleLoginSubmit() {
     if (_isOTPSent.value) {
-      if (_loginFormKey.currentState!.validate()) {}
+      if (_loginFormKey.currentState!.validate()) {
+        context.read<AuthBloc>().add(
+          AuthLoginRequested(
+            _emailController.text.trim(),
+            _otpController.text.trim(),
+          ),
+        );
+      }
     } else {
       if (_loginEmailFormKey.currentState!.validate()) {
-        _isOTPSent.value = true;
-        showSnackbar(context, "OTP Sent Successful");
+        context.read<AuthBloc>().add(
+          AuthOTPRequested(_emailController.text.trim()),
+        );
       }
     }
   }
+
+  void _resendOTP() {
+    context.read<AuthBloc>().add(
+      AuthOTPRequested(_emailController.text.trim()),
+    );
+  }
+
+  bool _isScreenLoading(AuthState state) {
+    return state is AuthLoginLoading || state is AuthOTPSendLoading;
+  }
+
+  void _blocListenerHandler(BuildContext context, AuthState state) {
+    if (state is! AuthInitial) {
+      if (_isScreenLoading(state)) {
+        loadingWidget(context);
+      } else {
+        context.pop();
+        if (state is AuthOTPSendFailure) {
+          showNormalSnackBar(context, state.error);
+        } else if (state is AuthLoginFailure) {
+          showNormalSnackBar(context, state.error);
+        } else if (state is AuthOTPSendSuccess) {
+          if (_isOTPSent.value == false) {
+            _isOTPSent.value = true;
+          }
+        } else if (state is AuthLoginSuccess) {
+          context.go(RouterConstants.dashboardRouteName);
+        }
+      }
+    }
+  }
+
+  void _googleLoginHandler() {}
 
   void _handleOnSignUp() {
     context.go(RouterConstants.signupRouteName);
@@ -76,128 +119,141 @@ class _LoginScreenState extends State<LoginScreen> {
           }
           SystemNavigator.pop();
         },
-        child: SingleChildScrollView(
-          padding: _mainScreenPadding,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Image.asset(
-                  'assets/sn/SN_WBG.png',
-                  height: 150,
-                  width: 150,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: UiConstant.spaceBetweenSection),
-              const Text(
-                'Welcome Back !',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
-              ),
-              SizedBox(height: UiConstant.spaceBetweenSection),
-              const Text(
-                'Sign In to Continue',
-                style: TextStyle(fontWeight: FontWeight.w700),
-              ),
-              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-              Form(
-                key: _loginFormKey,
-                child: Column(
-                  children: [
-                    Form(
-                      key: _loginEmailFormKey,
-                      child: CustomFormField.textFormFieldWithAutoFillGroup(
-                        _emailController,
-                        autofillHints: [AutofillHints.email],
-                        hintText: 'Email',
-                        labelText: 'Your Email',
-                        validator: CustomValidator.validateEmail,
-                        inputDecoration: TextFormFieldInputBorder.underLine,
-                        borderColor: Colors.black87,
-                      ),
-                    ),
-                    ValueListenableBuilder(
-                      valueListenable: _isOTPSent,
-                      builder: (
-                        BuildContext context,
-                        bool value,
-                        Widget? child,
-                      ) {
-                        return Visibility(
-                          visible: value,
-                          child: child as Widget,
-                        );
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: UiConstant.spaceBetweenSection,
-                        ),
-                        child: Column(
-                          children: [
-                            CustomFormField.textFormField(
-                              _otpController,
-                              textInputType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              hintText: 'OTP',
-                              labelText: 'Enter OTP',
-                              validator: CustomValidator.validateOTP,
-                              inputDecoration:
-                                  TextFormFieldInputBorder.underLine,
-                              borderColor: Colors.black87,
-                              maxLength: 6,
-                            ),
-                            Align(
-                              alignment: Alignment.topRight,
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 8.0),
-                                child: TimerButton(onPressed: () {}),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-              ValueListenableBuilder(
-                valueListenable: _isOTPSent,
-                builder: (BuildContext context, bool value, Widget? child) {
-                  return Center(
-                    child: CustomButton.customElevatedButton(
-                      value ? "Login" : "Send OTP",
-                      onPressed: _handleLoginSubmit,
-                      elevation: 8,
-                      buttonWidth: 155,
-                      buttonHeight: 50,
-                      borderRadius: 100,
-                      backgroundColor: Colors.black87,
-                      borderColor: Colors.black87,
-                    ),
-                  );
-                },
-              ),
-              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-              const Center(child: Text('Or sign in with social account')),
-              SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-              Row(
+        child: BlocConsumer<AuthBloc, AuthState>(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            return SingleChildScrollView(
+              padding: _mainScreenPadding,
+              child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CustomButton.socialButton(
-                    context,
-                    'assets/socialmedia/google.png',
-                    onPressed: () {},
+                  Center(
+                    child: Image.asset(
+                      'assets/sn/SN_WBG.png',
+                      height: 150,
+                      width: 150,
+                      color: Colors.black87,
+                    ),
                   ),
+                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  const Text(
+                    'Welcome Back !',
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  const Text(
+                    'Sign In to Continue',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                  Form(
+                    key: _loginFormKey,
+                    child: Column(
+                      children: [
+                        Form(
+                          key: _loginEmailFormKey,
+                          child: CustomFormField.textFormFieldWithAutoFillGroup(
+                            _emailController,
+                            autofillHints: [AutofillHints.email],
+                            hintText: 'Email',
+                            labelText: 'Your Email',
+                            onChanged: (value) {
+                              if (_isOTPSent.value) {
+                                _isOTPSent.value = false;
+                              }
+                            },
+                            validator: CustomValidator.validateEmail,
+                            inputDecoration: TextFormFieldInputBorder.underLine,
+                            borderColor: Colors.black87,
+                          ),
+                        ),
+                        ValueListenableBuilder(
+                          valueListenable: _isOTPSent,
+                          builder: (
+                            BuildContext context,
+                            bool value,
+                            Widget? child,
+                          ) {
+                            return Visibility(visible: value, child: child!);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                              top: UiConstant.spaceBetweenSection,
+                            ),
+                            child: Column(
+                              children: [
+                                CustomFormField.textFormField(
+                                  _otpController,
+                                  textInputType: TextInputType.number,
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.digitsOnly,
+                                  ],
+                                  hintText: 'OTP',
+                                  labelText: 'Enter OTP',
+                                  validator: CustomValidator.validateOTP,
+                                  inputDecoration:
+                                      TextFormFieldInputBorder.underLine,
+                                  borderColor: Colors.black87,
+                                  maxLength: 6,
+                                ),
+                                Align(
+                                  alignment: Alignment.topRight,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(top: 8.0),
+                                    child:
+                                        state is AuthOTPSendSuccess
+                                            ? TimerButton(
+                                              onPressed: _resendOTP,
+                                              timerDuration: 5,
+                                            )
+                                            : SizedBox.shrink(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                  ValueListenableBuilder(
+                    valueListenable: _isOTPSent,
+                    builder: (BuildContext context, bool value, Widget? child) {
+                      return Center(
+                        child: CustomButton.customElevatedButton(
+                          value ? "Login" : "Send OTP",
+                          onPressed: _handleLoginSubmit,
+                          elevation: 8,
+                          buttonWidth: 155,
+                          buttonHeight: 50,
+                          borderRadius: 100,
+                          backgroundColor: Colors.black87,
+                          borderColor: Colors.black87,
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                  const Center(child: Text('Or sign in with social account')),
+                  SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CustomButton.socialButton(
+                        context,
+                        'assets/socialmedia/google.png',
+                        onPressed: _googleLoginHandler,
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: UiConstant.spaceAtBottom),
                 ],
               ),
-
-              SizedBox(height: UiConstant.spaceAtBottom),
-            ],
-          ),
+            );
+          },
         ),
       ),
       bottomNavigationBar: Padding(

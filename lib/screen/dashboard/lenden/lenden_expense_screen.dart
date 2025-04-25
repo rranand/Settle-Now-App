@@ -197,7 +197,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                   ),
                   child: LendenExpenseCard(
                     expense: LenDenModel.fromMap(transactions[index]),
-                    loggedInUser: UserModel.fromBasicInfoMap({
+                    loggedInUser: UserModel.fromMap({
                       'id': '1',
                       'name': 'Rohit Anand',
                     }),

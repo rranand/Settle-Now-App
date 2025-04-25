@@ -54,7 +54,7 @@ class LenDenModel {
       direction: map['direction'] as String,
       description: map['description'] as String,
       createdOn: DateTime.parse(map['createdOn']),
-      createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
+      createdBy: UserModel.fromMap(map['createdBy']),
       modifiedOn: DateTime.parse(map['modifiedOn']),
     );
   }

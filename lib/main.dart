@@ -4,9 +4,13 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/data/data_provider/auth/auth_data_provider.dart';
+import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/provider/theme_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
@@ -88,66 +92,56 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiRepositoryProvider(
       providers: [
-        ChangeNotifierProvider<ScreenSizeProvider>(
-          create: (_) => ScreenSizeProvider(),
+        RepositoryProvider<AuthRepository>(
+          create: (context) => AuthRepository(AuthDataProvider()),
         ),
-        ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
       ],
-      builder: (context, _) {
-        context.read<ScreenSizeProvider>().calculatePadding(
-          MediaQuery.of(context).size.width,
-          MediaQuery.of(context).size.height,
-          MediaQuery.of(context).orientation,
-          MediaQuery.of(context).viewPadding,
-        );
-        ThemeProvider themeProvider = context.watch<ThemeProvider>();
-
-        return MaterialApp.router(
-          routerConfig: AppRouterConfig.router(context),
-          title: 'Settle Now',
-          themeMode:
-              themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
-          theme: CustomTheme.lightTheme(context),
-          darkTheme: CustomTheme.darkTheme(context),
-          locale: Locale('en', 'IN'),
-          supportedLocales: [Locale('en', 'IN')],
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthBloc>(
+            create:
+                (context) =>
+                    AuthBloc(context.read<AuthRepository>())
+                      ..add(AuthLoggedInUserRequested()),
+          ),
+        ],
+        child: MultiProvider(
+          providers: [
+            ChangeNotifierProvider<ScreenSizeProvider>(
+              create: (_) => ScreenSizeProvider(),
+            ),
+            ChangeNotifierProvider<ThemeProvider>(
+              create: (_) => ThemeProvider(),
+            ),
           ],
-        );
-      },
-    );
-    // return MultiRepositoryProvider(
-    //   providers: [],
-    //   child: MultiBlocProvider(
-    //     providers: [],
-    //     child: MultiProvider(
-    //       providers: [
-    //         ChangeNotifierProvider<ScreenSizeProvider>(
-    //           create: (_) => ScreenSizeProvider(),
-    //         ),
-    //       ],
-    //       builder: (context, _) {
-    //         context.read<ScreenSizeProvider>().calculatePadding(
-    //           MediaQuery.of(context).size.width,
-    //         );
+          builder: (context, _) {
+            context.read<ScreenSizeProvider>().calculatePadding(
+              MediaQuery.of(context).size.width,
+              MediaQuery.of(context).size.height,
+              MediaQuery.of(context).orientation,
+              MediaQuery.of(context).viewPadding,
+            );
+            ThemeProvider themeProvider = context.watch<ThemeProvider>();
 
-    //         return MaterialApp.router(
-    //           routerConfig: AppRouterConfig.router(context),
-    //           title: 'Settle Now',
-    //           locale: DevicePreview.locale(context),
-    //           builder: DevicePreview.appBuilder,
-    //           theme: ThemeData(
-    //             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-    //             useMaterial3: true,
-    //           ),
-    //         );
-    //       },
-    //     ),
-    //   ),
-    // );
+            return MaterialApp.router(
+              routerConfig: AppRouterConfig.router(context),
+              title: 'Settle Now',
+              themeMode:
+                  themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+              theme: CustomTheme.lightTheme(context),
+              darkTheme: CustomTheme.darkTheme(context),
+              locale: Locale('en', 'IN'),
+              supportedLocales: [Locale('en', 'IN')],
+              localizationsDelegates: [
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 }

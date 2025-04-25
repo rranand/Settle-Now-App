@@ -1,10 +1,11 @@
 import 'dart:convert';
 
 class UserModel {
-  String id;
-  String name;
-  String email;
-  String profileImage;
+  bool hasData = true;
+  String id = "";
+  String name = "";
+  String email = "";
+  String profileImage = "";
 
   UserModel({
     required this.id,
@@ -13,21 +14,14 @@ class UserModel {
     required this.profileImage,
   });
 
-  factory UserModel.fromBasicInfoMap(Map<String, dynamic> map) {
-    return UserModel(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      email: "",
-      profileImage: "",
-    );
-  }
-
   UserModel.fromBasicInfo({
     required this.id,
     required this.name,
     required this.profileImage,
     this.email = "",
   });
+
+  UserModel.empty({this.hasData = false});
 
   UserModel copyWith({
     String? id,

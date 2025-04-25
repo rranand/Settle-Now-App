@@ -97,3 +97,31 @@ Widget tagOnCard(
     ),
   );
 }
+
+Future<dynamic> loadingWidget(BuildContext context) {
+  return showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            CircularProgressIndicator.adaptive(),
+            SizedBox(height: 4),
+            Text(
+              "Loading...",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                decoration: TextDecoration.none,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
