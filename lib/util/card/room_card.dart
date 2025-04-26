@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -35,40 +37,44 @@ class RoomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: .5 * UiConstant.spaceBetweenSection),
-      decoration: BoxDecoration(
-        color: getStatusBackgroundColor(),
-        borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-        border: Border(
-          left: BorderSide(
-            color: getStatusColor(),
-            width: UiConstant.cardBorderLeftSideStripWidth,
+    return InkWell(
+      borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+      onTap: () {
+        context.push("${RouterConstants.roomRouteName}/id");
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          border: Border(
+            left: BorderSide(
+              color: getStatusColor(),
+              width: UiConstant.cardBorderLeftSideStripWidth,
+            ),
           ),
         ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16).add(EdgeInsets.only(bottom: 12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Trip to Bhushan",
-              style: const TextStyle(
-                fontSize: UiConstant.cardTitleTextSize,
-                fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.all(16).add(EdgeInsets.only(bottom: 12)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Trip to Bhushan",
+                style: const TextStyle(
+                  fontSize: UiConstant.cardTitleTextSize,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
-            dateOnCard("March 15, 2023"),
-            const SizedBox(height: UiConstant.cardSpaceAfterSubText),
-            overlapUserImageWidget(
-              context,
-              UiConstant.users,
-              4,
-              totalUsers: UiConstant.users.length,
-            ),
-          ],
+              const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+              dateOnCard("March 15, 2023"),
+              const SizedBox(height: UiConstant.cardSpaceAfterSubText),
+              overlapUserImageWidget(
+                context,
+                UiConstant.users,
+                4,
+                totalUsers: UiConstant.users.length,
+              ),
+            ],
+          ),
         ),
       ),
     );

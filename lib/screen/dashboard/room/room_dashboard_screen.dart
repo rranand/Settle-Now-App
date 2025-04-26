@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/room_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
@@ -89,15 +87,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                 childAspectRatio: cardSizeInfo[1],
               ),
               itemBuilder: (BuildContext context, int index) {
-                return InkWell(
-                  borderRadius: BorderRadius.circular(
-                    UiConstant.cardBorderRadius,
-                  ),
-                  onTap: () {
-                    context.push("${RouterConstants.roomRouteName}/id");
-                  },
-                  child: RoomCard(status: statusList[index % 3]),
-                );
+                return RoomCard(status: statusList[index % 3]);
               },
             ),
           ),
