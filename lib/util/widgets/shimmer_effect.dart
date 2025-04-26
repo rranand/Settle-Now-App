@@ -19,12 +19,14 @@ class CustomShimmerEffect {
     );
   }
 
-  static Widget cachedNetworkImageWidget({
+  static Widget imageWidget({
     BoxShape shape = BoxShape.rectangle,
     double radius = 12,
   }) {
     return placeHolderShimmerEffect(
       Container(
+        width: radius,
+        height: radius,
         decoration: BoxDecoration(
           shape: shape,
           borderRadius:
@@ -32,6 +34,28 @@ class CustomShimmerEffect {
                   ? BorderRadius.circular(radius)
                   : null,
           color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  static Widget overlapImageWidget({
+    int noOfImages = 4,
+    double nextImageOffset = 22,
+    double imageRadius = 30,
+  }) {
+    return SizedBox(
+      width:
+          noOfImages * imageRadius +
+          (noOfImages - 1) * (nextImageOffset - imageRadius),
+      height: imageRadius,
+      child: Stack(
+        children: List.generate(
+          noOfImages,
+          (i) => Positioned(
+            left: i * nextImageOffset,
+            child: imageWidget(shape: BoxShape.circle, radius: imageRadius),
+          ),
         ),
       ),
     );
@@ -50,7 +74,7 @@ class CustomShimmerEffect {
       return SizedBox(
         width: width,
         height: fontSize * 1.2 * maxLines + (maxLines - 1) * seperatorHeight,
-        child: cachedNetworkImageWidget(radius: blockRadius),
+        child: imageWidget(radius: blockRadius),
       );
     }
 
@@ -108,7 +132,7 @@ class CustomShimmerEffect {
                   SizedBox(
                     width: double.infinity,
                     height: imageHeight,
-                    child: cachedNetworkImageWidget(),
+                    child: imageWidget(),
                   ),
                   SizedBox(height: UiConstant.spaceBetweenSection),
                   SizedBox(

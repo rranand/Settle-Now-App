@@ -12,7 +12,7 @@ Widget imageWidgetForCachedNetworkimage(
   bool isLast,
 ) {
   if (imgProvider == null) {
-    return CustomShimmerEffect.cachedNetworkImageWidget(shape: BoxShape.circle);
+    return CustomShimmerEffect.imageWidget(shape: BoxShape.circle);
   } else {
     return Container(
       decoration: BoxDecoration(
@@ -35,20 +35,21 @@ Widget imageWidgetForCachedNetworkimage(
 
 Widget errorImageWidget(UserModel user, bool isLast) {
   String nameInitial = "";
-  final List<String> nameArr = nameInitial.split(" ");
+  final List<String> nameArr = user.name.split(" ");
 
   switch (nameArr.length) {
     case 0:
       nameInitial = "UA";
       break;
     case 1:
-      nameInitial = user.name.substring(0, 2);
+      nameInitial = user.name.substring(0, min(user.name.length, 2));
       break;
     default:
       nameInitial = nameArr.first[0] + nameArr.last[0];
   }
 
   nameInitial = nameInitial.toUpperCase();
+  int colourIndex = Random().nextInt(UiConstant.colorsWithShade100.length);
 
   return Container(
     decoration: BoxDecoration(shape: BoxShape.circle),
@@ -59,12 +60,10 @@ Widget errorImageWidget(UserModel user, bool isLast) {
         style: TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 18,
-          color: Colors.grey.shade800,
+          color: UiConstant.colors[colourIndex],
         ),
       ),
-      UiConstant.colorsWithShade100[Random().nextInt(
-        UiConstant.colorsWithShade100.length,
-      )],
+      UiConstant.colorsWithShade100[colourIndex],
     ),
   );
 }

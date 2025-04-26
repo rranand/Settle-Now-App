@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
 Widget dateOnCard(String date) {
   return Text(date, style: TextStyle(color: Colors.grey));
@@ -15,15 +17,18 @@ Widget subTextOnCard(
   Color? textColor = Colors.grey,
   FontWeight? fontWeight = FontWeight.w400,
   double? fontSize = 12,
+  bool isLoading = true,
 }) {
-  return Text(
-    text,
-    style: TextStyle(
-      color: textColor,
-      fontSize: fontSize,
-      fontWeight: fontWeight,
-    ),
-  );
+  return isLoading
+      ? Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: fontSize,
+          fontWeight: fontWeight,
+        ),
+      )
+      : CustomShimmerEffect.textWidget(fontSize: 12, width: 120);
 }
 
 Widget appBarBackButton(BuildContext context) {
@@ -83,19 +88,24 @@ Widget tagOnCard(
   String text, {
   Color textColor = Colors.deepPurple,
   Color? backgroundColor,
+  bool isFirst = false,
+  bool isLoading = false,
 }) {
-  return Container(
-    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
-    decoration: BoxDecoration(
-      color: backgroundColor ?? Colors.deepPurple.shade50,
-      borderRadius: BorderRadius.circular(100),
-    ),
-    child: subTextOnCard(
-      text,
-      textColor: textColor,
-      fontWeight: FontWeight.bold,
-    ),
-  );
+  return isLoading
+      ? Container(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
+        margin: EdgeInsets.only(left: isFirst ? 0 : 4),
+        decoration: BoxDecoration(
+          color: backgroundColor ?? Colors.deepPurple.shade50,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: subTextOnCard(
+          capatilizeFirstLetter(text),
+          textColor: textColor,
+          fontWeight: FontWeight.bold,
+        ),
+      )
+      : CustomShimmerEffect.textWidget(width: 100);
 }
 
 Future<dynamic> loadingWidget(BuildContext context) {

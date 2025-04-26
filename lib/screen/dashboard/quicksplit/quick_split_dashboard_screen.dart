@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/quicksplit_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/quick_split_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 class QuickSplitDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -19,7 +23,12 @@ class QuickSplitDashboardScreen extends StatefulWidget {
 class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
-  final List<int> tempArr = List.generate(11, (index) => index);
+
+  void _blocListenerHandler(BuildContext context, QuicksplitState state) {
+    if (state is QuicksplitFailure) {
+      showNormalSnackBar(context, state.error);
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -31,57 +40,79 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    context.read<QuicksplitBloc>().add(QuicksplitFetch());
+  }
+
+  @override
   Widget build(BuildContext context) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
-    int noOfCardsToBeShown = (tempArr.length / 2).toInt() + tempArr.length % 2;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: _mainScreenPadding,
-              child: CustomFormField.searchBar(
-                "Search Transaction",
-                widget.isSearchEnabled,
-                _searchController,
-                (value) {
-                  // Add filter logic if needed
-                },
+      body: BlocConsumer<QuicksplitBloc, QuicksplitState>(
+        listener: _blocListenerHandler,
+        builder: (context, state) {
+          List<QuickSplitModel> splitData = [];
+          if (state is QuicksplitFetchSuccess) {
+            splitData = state.data;
+          } else if (state is QuicksplitLoading) {
+            splitData = List.generate(11, (i) => QuickSplitModel.empty());
+          }
+          int noOfCardsToBeShown = splitData.length;
+          if (isWide) {
+            noOfCardsToBeShown =
+                (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
+          }
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: _mainScreenPadding,
+                  child: CustomFormField.searchBar(
+                    "Search Transaction",
+                    widget.isSearchEnabled,
+                    _searchController,
+                    (value) {
+                      // Add filter logic if needed
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
-          SliverPadding(
-            padding: _mainScreenPadding.add(
-              EdgeInsets.only(
-                top: UiConstant.spaceBetweenSection,
-                bottom: UiConstant.spaceAtBottom,
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  top: UiConstant.spaceBetweenSection,
+                  bottom: UiConstant.spaceAtBottom,
+                ),
+                sliver: SliverList.builder(
+                  itemCount: noOfCardsToBeShown,
+                  itemBuilder: (BuildContext context, int index) {
+                    QuickSplitModel eachSplitData = splitData[index];
+                    if (isWide) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(child: QuickSplitCard(data: eachSplitData)),
+                          Expanded(
+                            child:
+                                (index == noOfCardsToBeShown - 1 &&
+                                        splitData.length % 2 > 0)
+                                    ? SizedBox()
+                                    : QuickSplitCard(
+                                      data: splitData[2 * index + 1],
+                                    ),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return QuickSplitCard(data: eachSplitData);
+                    }
+                  },
+                ),
               ),
-            ),
-            sliver: SliverList.builder(
-              itemCount: isWide ? noOfCardsToBeShown : tempArr.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (isWide) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(child: QuickSplitCard()),
-                      Expanded(
-                        child:
-                            (index == noOfCardsToBeShown - 1 &&
-                                    tempArr.length % 2 > 0)
-                                ? SizedBox()
-                                : QuickSplitCard(),
-                      ),
-                    ],
-                  );
-                } else {
-                  return QuickSplitCard();
-                }
-              },
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,

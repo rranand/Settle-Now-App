@@ -8,7 +8,7 @@ Widget imageWidgetForCachedNetworkimage(
   BoxShape boxShape = BoxShape.rectangle,
 }) {
   if (imgProvider == null) {
-    return CustomShimmerEffect.cachedNetworkImageWidget(
+    return CustomShimmerEffect.imageWidget(
       radius: borderRadius,
       shape: boxShape,
     );

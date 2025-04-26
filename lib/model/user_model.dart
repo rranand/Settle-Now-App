@@ -8,6 +8,7 @@ class UserModel {
   String profileImage = "";
 
   UserModel({
+    this.hasData = true,
     required this.id,
     required this.name,
     required this.email,
@@ -18,7 +19,6 @@ class UserModel {
     required this.id,
     required this.name,
     required this.profileImage,
-    this.email = "",
   });
 
   UserModel.empty({this.hasData = false});
@@ -50,8 +50,8 @@ class UserModel {
     return UserModel(
       id: map['id'] as String,
       name: map['name'] as String,
-      email: map['email'] as String,
-      profileImage: map['profileImage'] as String,
+      email: (map['email'] ?? "") as String,
+      profileImage: (map['profileImage'] ?? "") as String,
     );
   }
 

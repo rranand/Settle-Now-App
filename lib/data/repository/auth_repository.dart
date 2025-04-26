@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/data/data_provider/auth/auth_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 
 class AuthRepository {

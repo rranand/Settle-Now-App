@@ -9,8 +9,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/data/data_provider/auth/auth_data_provider.dart';
+import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
+import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
+import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/provider/theme_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
@@ -97,6 +100,9 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<AuthRepository>(
           create: (context) => AuthRepository(AuthDataProvider()),
         ),
+        RepositoryProvider<QuicksplitRepository>(
+          create: (context) => QuicksplitRepository(QuicksplitDataProvider()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -105,6 +111,11 @@ class MyApp extends StatelessWidget {
                 (context) =>
                     AuthBloc(context.read<AuthRepository>())
                       ..add(AuthLoggedInUserRequested()),
+          ),
+          BlocProvider<QuicksplitBloc>(
+            create:
+                (context) =>
+                    QuicksplitBloc(context.read<QuicksplitRepository>()),
           ),
         ],
         child: MultiProvider(

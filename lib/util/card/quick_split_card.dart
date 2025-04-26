@@ -3,21 +3,23 @@ import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/model/quicksplit_model.dart';
+import 'package:settlenow_v2/model/user_amount_model.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class QuickSplitCard extends StatefulWidget {
-  const QuickSplitCard({super.key});
+  final QuickSplitModel data;
+  const QuickSplitCard({super.key, required this.data});
 
   @override
   State<QuickSplitCard> createState() => _QuickSplitCardState();
 }
 
 class _QuickSplitCardState extends State<QuickSplitCard> {
-  final double amount = -100;
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
-  final List<String> tagsTitle = ["Edited"];
 
   Widget transactionInfoWidget(bool value) {
     return Column(
@@ -27,26 +29,36 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           visible: !value,
           child: const SizedBox(height: UiConstant.cardSpaceAfterSubText),
         ),
-        Visibility(
-          visible: !value,
-          child: overlapUserImageWidget(
-            context,
-            UiConstant.users,
-            4,
-            totalUsers: UiConstant.users.length,
-            imageRadius: 30,
-            nextImageOffset: 24,
-          ),
-        ),
+        widget.data.hasData
+            ? Visibility(
+              visible: !value,
+              child: overlapUserImageWidget(
+                context,
+                [widget.data.createdBy, ...widget.data.users],
+                4,
+                imageRadius: 30,
+                nextImageOffset: 24,
+              ),
+            )
+            : CustomShimmerEffect.overlapImageWidget(),
         Visibility(
           visible: !value,
           child: const SizedBox(height: UiConstant.cardSpaceAfterSubText),
         ),
-        subTextOnCard("Created By Rohit Anand"),
-        subTextOnCard("Created On March 10, 2025"),
+        subTextOnCard(
+          "Created By ${widget.data.createdBy.name}",
+          isLoading: widget.data.hasData,
+        ),
+        subTextOnCard(
+          "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
+          isLoading: widget.data.hasData,
+        ),
         Visibility(
-          visible: value,
-          child: subTextOnCard("Modified On June 10, 2025"),
+          visible: widget.data.createdOn != widget.data.modifiedOn,
+          child: subTextOnCard(
+            "Modified On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+            isLoading: widget.data.hasData,
+          ),
         ),
       ],
     );
@@ -59,11 +71,14 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
         ListView.separated(
           shrinkWrap: true,
           padding: EdgeInsets.zero,
-          itemCount: 3,
+          itemCount: widget.data.users.length + 1,
           itemBuilder: (BuildContext context, int index) {
-            double memberAmount =
-                (100 + 10 * index) * (index % 2 == 0 ? -1 : 1);
-            UserModel user = UiConstant.users[index % UiConstant.users.length];
+            UserAmountModel user = UserAmountModel.empty();
+            if (index == 0) {
+              user = widget.data.createdBy;
+            } else {
+              user = widget.data.users[index - 1];
+            }
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -71,14 +86,14 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   children: [
                     overlapUserImageWidget(context, [user], 1),
                     SizedBox(width: 8),
-                    Text("Rohit Anand"),
+                    Text(user.name),
                   ],
                 ),
                 Text(
-                  formatCurrency(memberAmount, context),
+                  formatCurrency(user.amount, context),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: memberAmount < 0 ? Colors.red : Colors.green,
+                    color: user.amount < 0 ? Colors.red : Colors.green,
                   ),
                 ),
               ],
@@ -118,25 +133,33 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  tagOnCard(expenseCategories[0]),
+                  tagOnCard(
+                    expenseCategories[0],
+                    isFirst: true,
+                    isLoading: widget.data.hasData,
+                  ),
                   ...List.generate(
-                    tagsTitle.length,
+                    widget.data.tags.length,
                     (index) => tagOnCard(
-                      tagsTitle[index],
+                      widget.data.tags[index],
                       textColor: UiConstant.colors[1],
                       backgroundColor: UiConstant.colorsWithShade50[1],
+                      isLoading: widget.data.hasData,
                     ),
                   ),
                 ],
               ),
-              InkWell(
-                borderRadius: BorderRadius.circular(
-                  UiConstant.cardBorderRadius,
+              Visibility(
+                visible: widget.data.hasData,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
+                  child: Icon(Iconsax.info_circle, color: Colors.grey),
+                  onTap: () {
+                    isExpanded.value = !isExpanded.value;
+                  },
                 ),
-                child: Icon(Iconsax.info_circle, color: Colors.grey),
-                onTap: () {
-                  isExpanded.value = !isExpanded.value;
-                },
               ),
             ],
           ),
@@ -151,10 +174,12 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                         const SizedBox(
                           height: UiConstant.cardSpaceBetweenSubText,
                         ),
-                        Text(
-                          "Purchased a burger",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
+                        widget.data.hasData
+                            ? Text(
+                              widget.data.description,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )
+                            : CustomShimmerEffect.textWidget(width: 250),
                         ValueListenableBuilder(
                           valueListenable: isExpanded,
                           builder: (
@@ -170,13 +195,25 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   ],
                 ),
               ),
-              Text(
-                formatCurrency(amount, context),
-                style: TextStyle(
-                  color: amount < 0 ? Colors.red : Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
+              Builder(
+                builder: (context) {
+                  if (widget.data.hasData) {
+                    UserAmountModel userData = widget.data.users.first;
+                    return Text(
+                      formatCurrency(userData.amount, context),
+                      style: TextStyle(
+                        color: userData.amount < 0 ? Colors.red : Colors.green,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    );
+                  } else {
+                    return CustomShimmerEffect.textWidget(
+                      width: 50,
+                      fontSize: 16,
+                    );
+                  }
+                },
               ),
             ],
           ),

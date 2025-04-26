@@ -111,7 +111,7 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: RouterConstants.loginRouteName,
+    initialLocation: RouterConstants.dashboardRouteName,
     //initialLocation: "${RouterConstants.roomRouteName}/id",
     observers: [observer],
   );
