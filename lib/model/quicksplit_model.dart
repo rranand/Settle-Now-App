@@ -6,6 +6,7 @@ import 'package:settlenow_v2/model/user_amount_model.dart';
 
 class QuickSplitModel {
   bool hasData = true;
+  String id = "";
   String description = "";
   double amount = 0;
   List<String> tags = [];
@@ -16,6 +17,7 @@ class QuickSplitModel {
   DateTime modifiedOn = DateTime.now();
 
   QuickSplitModel({
+    required this.id,
     required this.description,
     required this.amount,
     required this.tags,
@@ -29,6 +31,7 @@ class QuickSplitModel {
   QuickSplitModel.empty({this.hasData = false});
 
   QuickSplitModel copyWith({
+    String? id,
     String? description,
     double? amount,
     List<String>? tags,
@@ -39,6 +42,7 @@ class QuickSplitModel {
     DateTime? modifiedOn,
   }) {
     return QuickSplitModel(
+      id: id ?? this.id,
       description: description ?? this.description,
       amount: amount ?? this.amount,
       tags: tags ?? this.tags,
@@ -52,6 +56,7 @@ class QuickSplitModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
+      'id': id,
       'amount': amount,
       'tags': tags,
       'category': category,
@@ -64,6 +69,7 @@ class QuickSplitModel {
 
   factory QuickSplitModel.fromMap(Map<String, dynamic> map) {
     return QuickSplitModel(
+      id: map['id'] as String,
       description: map['description'] as String,
       amount: map['amount'] as double,
       tags: List<String>.from(map['tags']),
@@ -84,14 +90,14 @@ class QuickSplitModel {
 
   @override
   String toString() {
-    return 'QuickSplitModel(description: $description, amount: $amount, tags: $tags, category: $category)';
+    return 'QuickSplitModel(id: $id, description: $description, amount: $amount, tags: $tags, category: $category)';
   }
 
   @override
   bool operator ==(covariant QuickSplitModel other) {
     if (identical(this, other)) return true;
 
-    return other.hasData == hasData &&
+    return other.id == id &&
         other.amount == amount &&
         listEquals(other.tags, tags) &&
         other.category == category &&
@@ -103,7 +109,7 @@ class QuickSplitModel {
 
   @override
   int get hashCode {
-    return hasData.hashCode ^
+    return id.hashCode ^
         description.hashCode ^
         amount.hashCode ^
         tags.hashCode ^

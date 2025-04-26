@@ -1,29 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:shimmer/shimmer.dart';
 
 class RoomCard extends StatelessWidget {
-  final String status;
-  const RoomCard({super.key, required this.status});
-
-  Color getStatusBackgroundColor() {
-    switch (status.toLowerCase()) {
-      case 'open':
-        return Colors.green.shade50;
-      case 'closed':
-        return Colors.red.shade50;
-      case 'partially closed':
-        return Colors.orange.shade50;
-      default:
-        return Colors.grey;
-    }
-  }
+  final RoomInfoModel data;
+  const RoomCard({super.key, required this.data});
 
   Color getStatusColor() {
-    switch (status.toLowerCase()) {
+    switch (data.status.toLowerCase()) {
       case 'open':
         return Colors.green;
       case 'closed':
@@ -43,38 +34,69 @@ class RoomCard extends StatelessWidget {
         context.push("${RouterConstants.roomRouteName}/id");
       },
       child: Container(
+        margin: const EdgeInsets.only(
+          left: UiConstant.cardBorderLeftSideStripWidth,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-          border: Border(
-            left: BorderSide(
-              color: getStatusColor(),
-              width: UiConstant.cardBorderLeftSideStripWidth,
-            ),
-          ),
+          color: Colors.transparent,
+          border:
+              data.hasData
+                  ? Border(
+                    left: BorderSide(
+                      color: getStatusColor(),
+                      width: UiConstant.cardBorderLeftSideStripWidth,
+                    ),
+                  )
+                  : null,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16).add(EdgeInsets.only(bottom: 12)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Trip to Bhushan",
-                style: const TextStyle(
-                  fontSize: UiConstant.cardTitleTextSize,
-                  fontWeight: FontWeight.bold,
+        child: Stack(
+          children: [
+            data.hasData
+                ? SizedBox.shrink()
+                : CustomShimmerEffect.placeHolderShimmerEffect(
+                  Expanded(
+                    child: Container(
+                      width: UiConstant.cardBorderLeftSideStripWidth,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                      ),
+                    ),
+                  ),
+                  shimmerDirection: ShimmerDirection.ttb,
                 ),
+            Padding(
+              padding: const EdgeInsets.all(
+                16,
+              ).add(EdgeInsets.only(bottom: 12)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  data.hasData
+                      ? Text(
+                        data.roomName,
+                        style: const TextStyle(
+                          fontSize: UiConstant.cardTitleTextSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                      : CustomShimmerEffect.textWidget(width: 250),
+                  const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+                  dateOnCard(
+                    "Updated On ${convertDateTimeFormat(data.createdOn)}",
+                    isLoading: data.hasData,
+                  ),
+                  const SizedBox(height: UiConstant.cardSpaceAfterSubText),
+                  data.hasData
+                      ? overlapUserImageWidget(context, data.users, 4)
+                      : CustomShimmerEffect.overlapImageWidget(),
+                ],
               ),
-              const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
-              dateOnCard("March 15, 2023"),
-              const SizedBox(height: UiConstant.cardSpaceAfterSubText),
-              overlapUserImageWidget(
-                context,
-                UiConstant.users,
-                4,
-                totalUsers: UiConstant.users.length,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

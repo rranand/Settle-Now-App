@@ -3,10 +3,14 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CustomShimmerEffect {
-  static Widget placeHolderShimmerEffect(Widget child) {
+  static Widget placeHolderShimmerEffect(
+    Widget child, {
+    ShimmerDirection shimmerDirection = ShimmerDirection.ltr,
+  }) {
     return Shimmer.fromColors(
       baseColor: Colors.grey.shade300,
       highlightColor: Colors.grey.shade100,
+      direction: shimmerDirection,
       child: child,
     );
   }

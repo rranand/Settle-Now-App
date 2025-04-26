@@ -8,6 +8,7 @@ class QuicksplitDataProvider {
       await Future.delayed(Duration(milliseconds: 1500));
       String dataStr = '''[
   {
+    "id": "1",
     "description": "Dinner at Italian place",
     "amount": 120.5,
     "tags": ["dinner", "friends"],
@@ -39,6 +40,7 @@ class QuicksplitDataProvider {
     "modifiedOn": "2024-04-25T19:10:00.000Z"
   },
   {
+    "id": "2",
     "description": "Netflix Subscription",
     "amount": 15.0,
     "tags": ["subscription"],
@@ -63,6 +65,7 @@ class QuicksplitDataProvider {
     "modifiedOn": "2024-04-20T10:05:00.000Z"
   },
   {
+    "id": "3",
     "description": "Taxi ride",
     "amount": 25.75,
     "tags": ["travel", "taxi"],
@@ -87,6 +90,7 @@ class QuicksplitDataProvider {
     "modifiedOn": "2024-04-22T14:45:00.000Z"
   },
   {
+    "id": "4",
     "description": "Monthly Rent",
     "amount": 500.0,
     "tags": ["rent"],
