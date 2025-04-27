@@ -1,67 +1,116 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/lenden_model.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:shimmer/shimmer.dart';
 
 class LendenCard extends StatelessWidget {
-  final double amount = -100;
-  const LendenCard({super.key});
+  final LendenModel data;
+  const LendenCard({super.key, required this.data});
+
+  Color getStatusColor() {
+    switch (data.status.toLowerCase()) {
+      case 'open':
+        return Colors.green;
+      case 'closed':
+        return Colors.red;
+      case 'partially closed':
+        return Colors.amber;
+      default:
+        return Colors.grey.shade200;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: UiConstant.cardElevation,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-        child: Container(
-          padding: const EdgeInsets.all(10.0),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: const Border(
-              left: BorderSide(
-                color: Color(0xFF14B8A6),
-                width: UiConstant.cardBorderLeftSideStripWidth,
-              ),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Trip to Bhushan",
-                style: const TextStyle(
-                  fontSize: UiConstant.cardTitleTextSize,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
-              Text(
-                "${amount < 0 ? "-" : "+"} ${formatCurrency(amount.abs(), context)}",
-                style: TextStyle(
-                  color: amount < 0 ? Colors.red : Colors.green,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
-                ),
-              ),
-              const SizedBox(height: UiConstant.cardSpaceAfterSubText),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  overlapUserImageWidget(
-                    context,
-                    UiConstant.users.sublist(0, 2),
-                    UiConstant.users.sublist(0, 2).length,
-                    totalUsers: UiConstant.users.sublist(0, 2).length,
-                    imageRadius: 30,
-                    nextImageOffset: 24,
+    return InkWell(
+      borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+      onTap: () {
+        context.push("${RouterConstants.lendenRouteName}/id");
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          border:
+              data.hasData
+                  ? Border(
+                    left: BorderSide(
+                      color: getStatusColor(),
+                      width: UiConstant.cardBorderLeftSideStripWidth,
+                    ),
+                  )
+                  : null,
+        ),
+        child: Stack(
+          children: [
+            data.hasData
+                ? SizedBox.shrink()
+                : CustomShimmerEffect.placeHolderShimmerEffect(
+                  Expanded(
+                    child: Container(
+                      width: UiConstant.cardBorderLeftSideStripWidth,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                      ),
+                    ),
                   ),
-                  dateOnCard("March 15, 2023"),
+                  shimmerDirection: ShimmerDirection.ttb,
+                ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  data.hasData
+                      ? Text(
+                        data.roomName,
+                        style: const TextStyle(
+                          fontSize: UiConstant.cardTitleTextSize,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                      : CustomShimmerEffect.textWidget(width: 250),
+                  const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+                  dateOnCard(
+                    "Updated On ${convertDateTimeFormat(data.modifiedOn)}",
+                    isLoading: data.hasData,
+                  ),
+                  const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+                  data.hasData
+                      ? Text(
+                        "${data.amount < 0 ? "-" : "+"} ${formatCurrency(data.amount.abs(), context)}",
+                        style: TextStyle(
+                          color: data.amount < 0 ? Colors.red : Colors.green,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                      )
+                      : CustomShimmerEffect.textWidget(width: 100),
+                  const SizedBox(height: UiConstant.cardSpaceAfterSubText),
+                  data.hasData
+                      ? overlapUserImageWidget(
+                        context,
+                        data.users,
+                        4,
+                        imageRadius: 30,
+                        nextImageOffset: 24,
+                      )
+                      : CustomShimmerEffect.overlapImageWidget(noOfImages: 2),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

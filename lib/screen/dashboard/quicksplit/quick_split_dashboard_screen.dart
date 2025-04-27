@@ -42,7 +42,11 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<QuicksplitBloc>().add(QuicksplitFetch());
+    final quicksplitDataFetched = context.read<QuicksplitBloc>().state;
+
+    if (!quicksplitDataFetched.hasData) {
+      context.read<QuicksplitBloc>().add(QuicksplitFetch());
+    }
   }
 
   @override

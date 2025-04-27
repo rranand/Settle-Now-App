@@ -45,7 +45,11 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<RoomBloc>().add(RoomFetch());
+    final roomDataFetched = context.read<RoomBloc>().state;
+
+    if (!roomDataFetched.hasData) {
+      context.read<RoomBloc>().add(RoomFetch());
+    }
   }
 
   @override

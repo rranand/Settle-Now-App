@@ -1,20 +1,28 @@
 part of 'room_bloc.dart';
 
 @immutable
-sealed class RoomState {}
+sealed class RoomState {
+  final bool hasData;
 
-final class RoomInitial extends RoomState {}
+  const RoomState({this.hasData = false});
+}
 
-final class RoomLoading extends RoomState {}
+final class RoomInitial extends RoomState {
+  const RoomInitial() : super(hasData: false);
+}
+
+final class RoomLoading extends RoomState {
+  const RoomLoading() : super(hasData: false);
+}
 
 final class RoomFetchSuccess extends RoomState {
   final List<RoomInfoModel> data;
 
-  RoomFetchSuccess(this.data);
+  const RoomFetchSuccess(this.data) : super(hasData: true);
 }
 
 final class RoomFailure extends RoomState {
   final String error;
 
-  RoomFailure(this.error);
+  const RoomFailure(this.error);
 }

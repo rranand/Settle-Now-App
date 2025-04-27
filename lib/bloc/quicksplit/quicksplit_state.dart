@@ -1,20 +1,28 @@
 part of 'quicksplit_bloc.dart';
 
 @immutable
-sealed class QuicksplitState {}
+sealed class QuicksplitState {
+  final bool hasData;
 
-final class QuicksplitInitial extends QuicksplitState {}
+  const QuicksplitState({this.hasData = false});
+}
 
-final class QuicksplitLoading extends QuicksplitState {}
+final class QuicksplitInitial extends QuicksplitState {
+  const QuicksplitInitial() : super(hasData: false);
+}
+
+final class QuicksplitLoading extends QuicksplitState {
+  const QuicksplitLoading() : super(hasData: false);
+}
 
 final class QuicksplitFetchSuccess extends QuicksplitState {
   final List<QuickSplitModel> data;
 
-  QuicksplitFetchSuccess(this.data);
+  const QuicksplitFetchSuccess(this.data) : super(hasData: true);
 }
 
 final class QuicksplitFailure extends QuicksplitState {
   final String error;
 
-  QuicksplitFailure(this.error);
+  const QuicksplitFailure(this.error) : super(hasData: false);
 }

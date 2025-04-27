@@ -1,0 +1,109 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+import 'package:settlenow_v2/model/user_model.dart';
+
+class LendenModel {
+  bool hasData = true;
+  String id = "";
+  String roomName = "";
+  String status = "";
+  DateTime createdOn = DateTime.now();
+  DateTime modifiedOn = DateTime.now();
+  double amount = 0;
+  List<UserModel> users = [];
+
+  LendenModel({
+    required this.id,
+    required this.roomName,
+    required this.status,
+    required this.createdOn,
+    required this.modifiedOn,
+    required this.amount,
+    required this.users,
+  });
+
+  LendenModel.empty({this.hasData = false});
+
+  LendenModel copyWith({
+    String? id,
+    String? roomName,
+    String? status,
+    DateTime? createdOn,
+    DateTime? modifiedOn,
+    double? amount,
+    List<UserModel>? users,
+  }) {
+    return LendenModel(
+      id: id ?? this.id,
+      roomName: roomName ?? this.roomName,
+      status: status ?? this.status,
+      createdOn: createdOn ?? this.createdOn,
+      modifiedOn: modifiedOn ?? this.modifiedOn,
+      amount: amount ?? this.amount,
+      users: users ?? this.users,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'roomName': roomName,
+      'status': status,
+      'createdOn': createdOn.toString(),
+      'modifiedOn': modifiedOn.toString(),
+      'amount': amount.toString(),
+      'users': users.map((x) => x.toMap()).toList(),
+    };
+  }
+
+  factory LendenModel.fromMap(Map<String, dynamic> map) {
+    return LendenModel(
+      id: map['id'] as String,
+      roomName: map['roomName'] as String,
+      status: map['status'] as String,
+      createdOn: DateTime.parse(map['createdOn']),
+      modifiedOn: DateTime.parse(map['modifiedOn']),
+      amount: map['amount'] as double,
+      users: List<UserModel>.from(
+        (map['users']).map((x) => UserModel.fromMap(x)),
+      ),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory LendenModel.fromJson(String source) =>
+      LendenModel.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  @override
+  String toString() {
+    return 'LendenModel(id: $id, roomName: $roomName, amount $amount,status $status, createdOn: $createdOn)';
+  }
+
+  @override
+  bool operator ==(covariant LendenModel other) {
+    if (identical(this, other)) return true;
+
+    return other.id == id &&
+        other.roomName == roomName &&
+        other.status == status &&
+        other.createdOn == createdOn &&
+        other.modifiedOn == modifiedOn &&
+        other.amount == amount &&
+        listEquals(other.users, users);
+  }
+
+  @override
+  int get hashCode {
+    return id.hashCode ^
+        roomName.hashCode ^
+        status.hashCode ^
+        createdOn.hashCode ^
+        modifiedOn.hashCode ^
+        amount.hashCode ^
+        users.hashCode;
+  }
+}

@@ -8,7 +8,7 @@ class UiConstant {
   static const double cardBorderLeftSideStripWidth = 6;
   static const double cardBorderRadius = 12;
   static const double cardSpaceBetweenSubText = 4;
-  static const double cardSpaceAfterSubText = 12;
+  static const double cardSpaceAfterSubText = 8;
   static const double cardElevation = 4;
   static const double cardPadding = 10;
   static const double spaceBetweenCard = 12;
