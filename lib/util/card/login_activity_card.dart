@@ -72,7 +72,7 @@ class LoginActivityCard extends StatelessWidget {
           trailing: ButtonWithShimmerEffect(
             buttonText: "Log Out",
             buttonType: CustomButtonType.customElevatedButton,
-            isLoading: false,
+            isLoaded: false,
             buttonHeight: 40,
             buttonWidth: 100,
             backgroundColor: Colors.red.shade400,

@@ -47,17 +47,17 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
         ),
         subTextOnCard(
           "Created By ${widget.data.createdBy.name}",
-          isLoading: widget.data.hasData,
+          isLoaded: widget.data.hasData,
         ),
         subTextOnCard(
           "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
-          isLoading: widget.data.hasData,
+          isLoaded: widget.data.hasData,
         ),
         Visibility(
           visible: widget.data.createdOn != widget.data.modifiedOn,
           child: subTextOnCard(
             "Modified On ${convertDateTimeFormat(widget.data.modifiedOn)}",
-            isLoading: widget.data.hasData,
+            isLoaded: widget.data.hasData,
           ),
         ),
       ],
@@ -136,7 +136,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   tagOnCard(
                     expenseCategories[0],
                     isFirst: true,
-                    isLoading: widget.data.hasData,
+                    isLoaded: widget.data.hasData,
                   ),
                   ...List.generate(
                     widget.data.tags.length,
@@ -144,7 +144,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                       widget.data.tags[index],
                       textColor: UiConstant.colors[1],
                       backgroundColor: UiConstant.colorsWithShade50[1],
-                      isLoading: widget.data.hasData,
+                      isLoaded: widget.data.hasData,
                     ),
                   ),
                 ],

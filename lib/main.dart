@@ -10,14 +10,17 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/lenden_bloc.dart';
+import 'package:settlenow_v2/bloc/personal_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/bloc/room/room_bloc.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/personal_expense_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/room_data_provider.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden_repository.dart';
+import 'package:settlenow_v2/data/repository/personal_expense_repository.dart';
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/data/repository/room_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -115,6 +118,11 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<LendenRepository>(
           create: (context) => LendenRepository(LendenDataProvider()),
         ),
+        RepositoryProvider<PersonalExpenseRepository>(
+          create:
+              (context) =>
+                  PersonalExpenseRepository(PersonalExpenseDataProvider()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -134,6 +142,12 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<LendenBloc>(
             create: (context) => LendenBloc(context.read<LendenRepository>()),
+          ),
+          BlocProvider<PersonalExpenseBloc>(
+            create:
+                (context) => PersonalExpenseBloc(
+                  context.read<PersonalExpenseRepository>(),
+                ),
           ),
         ],
         child: MultiProvider(

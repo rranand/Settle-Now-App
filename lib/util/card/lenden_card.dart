@@ -20,7 +20,7 @@ class LendenCard extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        context.push("${RouterConstants.lendenRouteName}/id");
+        context.push("${RouterConstants.lendenRouteName}/${data.id}");
       },
       child: Container(
         decoration: BoxDecoration(
@@ -72,7 +72,7 @@ class LendenCard extends StatelessWidget {
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
                     "Updated On ${convertDateTimeFormat(data.modifiedOn)}",
-                    isLoading: data.hasData,
+                    isLoaded: data.hasData,
                   ),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   data.hasData

@@ -70,18 +70,30 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
           }
           return CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: _mainScreenPadding,
-                  child: CustomFormField.searchBar(
-                    "Search Transaction",
-                    widget.isSearchEnabled,
-                    _searchController,
-                    (value) {
-                      // Add filter logic if needed
-                    },
-                  ),
-                ),
+              ValueListenableBuilder(
+                valueListenable: widget.isSearchEnabled,
+                builder: (BuildContext context, bool value, Widget? _) {
+                  if (!value) {
+                    return SliverToBoxAdapter(child: SizedBox.shrink());
+                  }
+                  return SliverPadding(
+                    padding: _mainScreenPadding,
+                    sliver: SliverAppBar(
+                      automaticallyImplyLeading: false,
+                      pinned: value,
+                      backgroundColor: Colors.white,
+                      surfaceTintColor: Colors.white,
+                      title: CustomFormField.searchBar(
+                        "Search",
+                        widget.isSearchEnabled,
+                        _searchController,
+                        (value) {
+                          // Add filter logic if needed
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
               SliverPadding(
                 padding: EdgeInsets.only(

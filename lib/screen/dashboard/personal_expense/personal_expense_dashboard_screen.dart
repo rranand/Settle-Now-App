@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:go_router/go_router.dart';
+import 'package:settlenow_v2/bloc/personal_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/personal_expense_info_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/personal_expense_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 class PersonalExpenseDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -28,20 +30,27 @@ class _PersonalExpenseDashboardScreenState
     extends State<PersonalExpenseDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
+  List<double> cardSizeInfo = List.filled(2, 0);
+  late ScrollController _scrollController;
 
-  final List<int> years = [2025, 2024, 2023];
+  void _blocListenerHandler(BuildContext context, PersonalExpenseState state) {
+    if (state is PersonalExpenseFailure) {
+      showNormalSnackBar(context, state.error);
+    }
+  }
 
-  Widget monthWiseCardsWidget(List<String> months) {
-    final cardSizeInfo = calculateCrossAspectRatio(
-      MediaQuery.of(context).size.width,
-      _mainScreenPadding,
-      cardWidth: UiConstant.cardFixedHeight + 20,
-      cardHeight: UiConstant.cardFixedHeight,
+  Widget monthWiseCardsWidget(
+    List<PersonalExpenseInfoModel> monthlyPersonalTransaction,
+  ) {
+    monthlyPersonalTransaction.sort(
+      (a, b) => CalenderConstant.monthName
+          .indexOf(a.monthName)
+          .compareTo(CalenderConstant.monthName.indexOf(b.monthName)),
     );
     return SliverPadding(
       padding: _mainScreenPadding,
       sliver: SliverGrid.builder(
-        itemCount: months.length,
+        itemCount: monthlyPersonalTransaction.length,
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: cardSizeInfo[0],
           mainAxisSpacing: UiConstant.spaceBetweenCard,
@@ -49,13 +58,7 @@ class _PersonalExpenseDashboardScreenState
           childAspectRatio: cardSizeInfo[1],
         ),
         itemBuilder: (BuildContext context, int index) {
-          return InkWell(
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            onTap: () {
-              context.push("${RouterConstants.personalExpenseRouteName}/id");
-            },
-            child: PersonalExpenseCard(monthName: months[index]),
-          );
+          return PersonalExpenseCard(data: monthlyPersonalTransaction[index]);
         },
       ),
     );
@@ -65,68 +68,119 @@ class _PersonalExpenseDashboardScreenState
   void didChangeDependencies() {
     super.didChangeDependencies();
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
+    cardSizeInfo = calculateCrossAspectRatio(
+      MediaQuery.of(context).size.width,
+      _mainScreenPadding,
+      cardWidth: UiConstant.cardFixedHeight + 20,
+      cardHeight: UiConstant.cardFixedHeight,
+    );
     if (mounted) {
       setState(() {});
     }
   }
 
   @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    final personalExpenseDataFetched =
+        context.read<PersonalExpenseBloc>().state;
+    if (!personalExpenseDataFetched.hasData) {
+      context.read<PersonalExpenseBloc>().add(PersonalExpenseFetch());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: _mainScreenPadding,
-              child: CustomFormField.searchBar(
-                "Search",
-                widget.isSearchEnabled,
-                _searchController,
-                (value) {
-                  // Add filter logic if needed
+      body: BlocConsumer<PersonalExpenseBloc, PersonalExpenseState>(
+        listener: _blocListenerHandler,
+        builder: (context, state) {
+          List<int> years = [DateTime.now().year];
+          if (state is PersonalExpenseFetchSuccess) {
+            years = state.data.keys.toList();
+            years.sort((a, b) => a.compareTo(b));
+
+            SchedulerBinding.instance.addPostFrameCallback((_) {
+              if (_scrollController.hasClients) {
+                _scrollController.jumpTo(
+                  _scrollController.position.maxScrollExtent,
+                );
+              }
+            });
+          }
+
+          return CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              ValueListenableBuilder(
+                valueListenable: widget.isSearchEnabled,
+                builder: (BuildContext context, bool value, Widget? _) {
+                  if (!value) {
+                    return SliverToBoxAdapter(child: SizedBox.shrink());
+                  }
+                  return SliverPadding(
+                    padding: _mainScreenPadding,
+                    sliver: SliverAppBar(
+                      automaticallyImplyLeading: false,
+                      pinned: value,
+                      backgroundColor: Colors.white,
+                      surfaceTintColor: Colors.white,
+                      title: CustomFormField.searchBar(
+                        "Search",
+                        widget.isSearchEnabled,
+                        _searchController,
+                        (value) {
+                          // Add filter logic if needed
+                        },
+                      ),
+                    ),
+                  );
                 },
               ),
-            ),
-          ),
-          ...List.generate(
-            years.length,
-            (index) => SliverStickyHeader.builder(
-              builder: (context, state) {
-                final double scrollPercent = state.scrollPercentage.clamp(
-                  0.0,
-                  1.0,
-                );
-                final int alpha =
-                    (255 * (1.0 - scrollPercent)).clamp(0, 255).toInt();
-
-                return Container(
-                  margin: _mainScreenPadding,
-                  padding: EdgeInsets.symmetric(
-                    vertical: .5 * UiConstant.spaceBetweenSection,
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(child: SizedBox()),
-                      GradientWidget(
-                        text: "   ${years[index]}   ",
-                        gradientColors:
-                            state.isPinned
-                                ? GradientColorConstant.tealToGreen
-                                : GradientColorConstant.coolIndigoToBlue
-                                    .map((c) => c.withAlpha(alpha))
-                                    .toList(),
-                        textSize: 16,
-                        textColor: Colors.white,
+              ...List.generate(
+                years.length,
+                (index) => SliverStickyHeader.builder(
+                  sticky: false,
+                  builder: (context, state) {
+                    return Container(
+                      margin: _mainScreenPadding,
+                      padding: EdgeInsets.symmetric(
+                        vertical: .5 * UiConstant.spaceBetweenSection,
                       ),
-                      Expanded(child: SizedBox()),
-                    ],
+                      child: Row(
+                        children: [
+                          Expanded(child: SizedBox()),
+                          GradientWidget(
+                            text: "   ${years[index]}   ",
+                            gradientColors: GradientColorConstant.tealToGreen,
+                            textSize: 16,
+                            textColor: Colors.white,
+                          ),
+                          Expanded(child: SizedBox()),
+                        ],
+                      ),
+                    );
+                  },
+                  sliver: monthWiseCardsWidget(
+                    state is! PersonalExpenseFetchSuccess
+                        ? List.filled(12, PersonalExpenseInfoModel.empty())
+                        : state.data[years[index]]!,
                   ),
-                );
-              },
-              sliver: monthWiseCardsWidget(CalenderConstant.monthName),
-            ),
-          ),
-        ],
+                ),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

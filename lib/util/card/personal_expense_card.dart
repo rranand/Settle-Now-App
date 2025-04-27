@@ -1,26 +1,35 @@
-import 'dart:math';
-
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/personal_expense_info_model.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
 class PersonalExpenseCard extends StatelessWidget {
-  final String monthName;
-  PersonalExpenseCard({super.key, required this.monthName});
+  final PersonalExpenseInfoModel data;
+  const PersonalExpenseCard({super.key, required this.data});
 
-  Widget textWidget(String text, {bool isCurrency = false}) {
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: isCurrency ? Colors.green : null,
-      ),
-    );
+  Widget textWidget(
+    String text, {
+    bool isCurrency = false,
+    bool isLoaded = true,
+  }) {
+    return isLoaded
+        ? Text(
+          text,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: isCurrency ? Colors.green : null,
+          ),
+        )
+        : CustomShimmerEffect.textWidget(
+          fontSize: 18,
+          width: isCurrency ? 60 : 100,
+        );
   }
-
-  final expenses = [1200, 1450, 900, 1600, 1800, 1700, 2000];
 
   Widget linerChartForPersonalExpenseDashBoard(BuildContext context) {
     return LineChart(
@@ -58,8 +67,8 @@ class PersonalExpenseCard extends StatelessWidget {
         lineBarsData: [
           LineChartBarData(
             spots: List.generate(
-              Random().nextInt(expenses.length),
-              (i) => FlSpot(i.toDouble(), expenses[i].toDouble()),
+              data.transaction.length,
+              (i) => FlSpot(i.toDouble(), data.transaction[i]),
             ),
             isCurved: true,
             color: Colors.green.shade50,
@@ -76,39 +85,66 @@ class PersonalExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: UiConstant.cardElevation,
-      child: Container(
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-          border: Border.all(color: Colors.black.withAlpha(51)),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            textWidget(monthName),
-            const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
-            textWidget(formatCurrency(2000, context), isCurrency: true),
-            const SizedBox(height: UiConstant.cardSpaceAfterSubText),
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade50,
-                  borderRadius: BorderRadius.circular(
-                    UiConstant.cardBorderRadius,
-                  ),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: linerChartForPersonalExpenseDashBoard(context),
-                ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+      onTap: () {
+        context.push("${RouterConstants.personalExpenseRouteName}/${data.id}");
+      },
+      child: Card(
+        elevation: UiConstant.cardElevation,
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+            border: Border.all(color: Colors.black.withAlpha(51)),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              textWidget(data.monthName, isLoaded: data.hasData),
+              const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+              textWidget(
+                formatCurrency(data.amount, context),
+                isCurrency: true,
+                isLoaded: data.hasData,
               ),
-            ),
-          ],
+              const SizedBox(height: UiConstant.cardSpaceAfterSubText),
+              Expanded(
+                child:
+                    data.hasData
+                        ? Container(
+                          margin: EdgeInsets.symmetric(
+                            vertical: 4,
+                            horizontal: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(
+                              UiConstant.cardBorderRadius,
+                            ),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: linerChartForPersonalExpenseDashBoard(
+                              context,
+                            ),
+                          ),
+                        )
+                        : CustomShimmerEffect.placeHolderShimmerEffect(
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                UiConstant.cardBorderRadius,
+                              ),
+                            ),
+                          ),
+                        ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -58,18 +58,30 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: _mainScreenPadding,
-              child: CustomFormField.searchBar(
-                "Search Len-Den",
-                widget.isSearchEnabled,
-                _searchController,
-                (value) {
-                  // Add filter logic if needed
-                },
-              ),
-            ),
+          ValueListenableBuilder(
+            valueListenable: widget.isSearchEnabled,
+            builder: (BuildContext context, bool value, Widget? _) {
+              if (!value) {
+                return SliverToBoxAdapter(child: SizedBox.shrink());
+              }
+              return SliverPadding(
+                padding: _mainScreenPadding,
+                sliver: SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  pinned: value,
+                  backgroundColor: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  title: CustomFormField.searchBar(
+                    "Search",
+                    widget.isSearchEnabled,
+                    _searchController,
+                    (value) {
+                      // Add filter logic if needed
+                    },
+                  ),
+                ),
+              );
+            },
           ),
           BlocConsumer<LendenBloc, LendenState>(
             listener: _blocListenerHandler,

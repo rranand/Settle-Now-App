@@ -19,7 +19,7 @@ class RoomCard extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        context.push("${RouterConstants.roomRouteName}/id");
+        context.push("${RouterConstants.roomRouteName}/${data.id}");
       },
       child: Container(
         margin: const EdgeInsets.only(
@@ -75,7 +75,7 @@ class RoomCard extends StatelessWidget {
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
                     "Updated On ${convertDateTimeFormat(data.createdOn)}",
-                    isLoading: data.hasData,
+                    isLoaded: data.hasData,
                   ),
                   const SizedBox(height: UiConstant.cardSpaceAfterSubText),
                   data.hasData

@@ -9,7 +9,7 @@ enum CustomButtonType {
 }
 
 class ButtonWithShimmerEffect extends StatelessWidget {
-  final bool isLoading;
+  final bool isLoaded;
   final String buttonText;
   final CustomButtonType buttonType;
   final double? elevation;
@@ -25,7 +25,7 @@ class ButtonWithShimmerEffect extends StatelessWidget {
 
   const ButtonWithShimmerEffect({
     super.key,
-    required this.isLoading,
+    required this.isLoaded,
     required this.buttonText,
     required this.buttonType,
     this.buttonHeight,
@@ -92,7 +92,7 @@ class ButtonWithShimmerEffect extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
+    return isLoaded
         ? SizedBox(
           width: buttonWidth ?? double.infinity,
           height: buttonHeight,

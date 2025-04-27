@@ -8,8 +8,8 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
-Widget dateOnCard(String date, {bool isLoading = true}) {
-  return isLoading
+Widget dateOnCard(String date, {bool isLoaded = true}) {
+  return isLoaded
       ? Text(date, style: TextStyle(color: Colors.grey))
       : CustomShimmerEffect.textWidget(width: 200);
 }
@@ -19,9 +19,9 @@ Widget subTextOnCard(
   Color? textColor = Colors.grey,
   FontWeight? fontWeight = FontWeight.w400,
   double? fontSize = 12,
-  bool isLoading = true,
+  bool isLoaded = true,
 }) {
-  return isLoading
+  return isLoaded
       ? Text(
         text,
         style: TextStyle(
@@ -91,9 +91,9 @@ Widget tagOnCard(
   Color textColor = Colors.deepPurple,
   Color? backgroundColor,
   bool isFirst = false,
-  bool isLoading = false,
+  bool isLoaded = false,
 }) {
-  return isLoading
+  return isLoaded
       ? Container(
         padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
         margin: EdgeInsets.only(left: isFirst ? 0 : 4),
