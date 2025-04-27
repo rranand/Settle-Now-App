@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 
@@ -30,3 +31,17 @@ List<double> calculateCrossAspectRatio(
     return [boxWidth, boxWidth / cardHeight];
   }
 }
+
+
+Color getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'open':
+        return Colors.green;
+      case 'closed':
+        return Colors.red;
+      case 'partially closed':
+        return Colors.amber;
+      default:
+        return Colors.grey.shade200;
+    }
+  }

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
@@ -12,19 +13,6 @@ import 'package:shimmer/shimmer.dart';
 class RoomCard extends StatelessWidget {
   final RoomInfoModel data;
   const RoomCard({super.key, required this.data});
-
-  Color getStatusColor() {
-    switch (data.status.toLowerCase()) {
-      case 'open':
-        return Colors.green;
-      case 'closed':
-        return Colors.red;
-      case 'partially closed':
-        return Colors.amber;
-      default:
-        return Colors.grey.shade200;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +32,7 @@ class RoomCard extends StatelessWidget {
               data.hasData
                   ? Border(
                     left: BorderSide(
-                      color: getStatusColor(),
+                      color: getStatusColor(data.status),
                       width: UiConstant.cardBorderLeftSideStripWidth,
                     ),
                   )
