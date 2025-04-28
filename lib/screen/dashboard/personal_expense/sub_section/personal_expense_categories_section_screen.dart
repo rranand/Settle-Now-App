@@ -1,10 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
+
+import '../../../../core.dart';
 
 // TODO : Sort By Option
 
@@ -21,7 +22,7 @@ class _PersonalExpenseCategoriesSectionScreenState
   @override
   Widget build(BuildContext context) {
     return SliverList.builder(
-      itemCount: expenseCategories.length,
+      itemCount: CategoryParser.expenseCategories.length,
       itemBuilder: (BuildContext context, int index) {
         return Card(
           elevation: UiConstant.cardElevation,
@@ -30,10 +31,10 @@ class _PersonalExpenseCategoriesSectionScreenState
             padding: const EdgeInsets.all(UiConstant.cardPadding),
             child: ListTile(
               leading: colouredIcon(
-                Icon(categoryIcons[index]),
+                Icon(CategoryParser.expenseCategoryIcons[index]),
                 UiConstant.colorsWithShade100[index],
               ),
-              title: Text(expenseCategories[index]),
+              title: Text(CategoryParser.expenseCategories[index]),
               subtitle: Text("${index + Random().nextInt(4) + 2} transactions"),
               trailing: Text(
                 formatCurrency(

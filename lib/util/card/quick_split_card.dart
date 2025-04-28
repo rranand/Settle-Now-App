@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/quicksplit_model.dart';
@@ -134,7 +133,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   tagOnCard(
-                    expenseCategories[0],
+                    widget.data.category,
                     isFirst: true,
                     isLoaded: widget.data.hasData,
                   ),

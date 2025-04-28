@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
@@ -101,7 +101,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  tagOnCard(expenseCategories[0]),
+                  tagOnCard("Food"),
                   ...List.generate(
                     tagsTitle.length,
                     (index) => tagOnCard(
@@ -128,9 +128,12 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
           ),
           ListTile(
             leading: colouredIcon(
-              Icon(categoryIcons[widget.index % categoryIcons.length]),
+              Icon(
+                CategoryParser.expenseCategoryIcons[widget.index %
+                    CategoryParser.expenseCategoryIcons.length],
+              ),
               UiConstant.colorsWithShade100[widget.index %
-                  categoryIcons.length],
+                  CategoryParser.expenseCategoryIcons.length],
             ),
             title: Text("Chickoo Ice-Cream"),
             subtitle: Column(

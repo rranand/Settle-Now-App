@@ -1,6 +1,6 @@
-// part of 'personal_expense_bloc.dart';
+part of 'personal_expense_bloc.dart';
 
-// @immutable
-// sealed class PersonalExpenseEvent {}
+@immutable
+sealed class PersonalExpenseMonthlyExpenseEvent {}
 
-// final class PersonalExpenseFetch extends PersonalExpenseEvent {}
+final class PersonalExpenseMonthlyExpenseFetch extends PersonalExpenseMonthlyExpenseEvent {}

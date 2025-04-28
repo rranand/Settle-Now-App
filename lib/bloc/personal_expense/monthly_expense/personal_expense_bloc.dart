@@ -1,31 +1,36 @@
-// import 'package:bloc/bloc.dart';
-// import 'package:flutter/foundation.dart';
-// import 'package:settlenow_v2/data/repository/personal_expense/dashboard/personal_expense_dashboard_repository.dart';
-// import 'package:settlenow_v2/model/personal_expense_info_model.dart';
+import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
+import 'package:settlenow_v2/util/custom/typedefs.dart';
 
-// part 'personal_expense_event.dart';
-// part 'personal_expense_state.dart';
+part 'personal_expense_event.dart';
+part 'personal_expense_state.dart';
 
-// class PersonalExpenseBloc
-//     extends Bloc<PersonalExpenseEvent, PersonalExpenseState> {
-//   final PersonalExpenseRepository personalExpenseRepository;
+class PersonalExpenseMonthlyExpenseBloc
+    extends
+        Bloc<
+          PersonalExpenseMonthlyExpenseEvent,
+          PersonalExpenseMonthlyExpenseState
+        > {
+  final PersonalExpenseMonthlyExpenseRepository personalExpenseRepository;
 
-//   PersonalExpenseBloc(this.personalExpenseRepository)
-//     : super(PersonalExpenseInitial()) {
-//     on<PersonalExpenseFetch>(_personalExpenseFetch);
-//   }
+  PersonalExpenseMonthlyExpenseBloc(this.personalExpenseRepository)
+    : super(PersonalExpenseMonthlyExpenseInitial()) {
+    on<PersonalExpenseMonthlyExpenseFetch>(_personalExpenseFetch);
+  }
 
-//   void _personalExpenseFetch(
-//     PersonalExpenseFetch event,
-//     Emitter<PersonalExpenseState> emit,
-//   ) async {
-//     emit(PersonalExpenseLoading());
-//     try {
-//       Map<int, List<PersonalExpenseInfoModel>> data =
-//           await personalExpenseRepository.fetchData("niriif@kff.ed");
-//       return emit(PersonalExpenseFetchSuccess(data));
-//     } catch (e) {
-//       return emit(PersonalExpenseFailure(e.toString()));
-//     }
-//   }
-// }
+  void _personalExpenseFetch(
+    PersonalExpenseMonthlyExpenseFetch event,
+    Emitter<PersonalExpenseMonthlyExpenseState> emit,
+  ) async {
+    emit(PersonalExpenseMonthlyExpenseLoading());
+    try {
+      PersonalMonthlyExpenseTD data = await personalExpenseRepository.fetchData(
+        "niriif@kff.ed",
+      );
+      return emit(PersonalExpenseMonthlyExpenseFetchSuccess(data));
+    } catch (e) {
+      return emit(PersonalExpenseMonthlyExpenseFailure(e.toString()));
+    }
+  }
+}

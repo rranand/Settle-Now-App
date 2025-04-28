@@ -1,31 +1,36 @@
-// import 'package:settlenow_v2/data/data_provider/personal_expense_data_provider.dart';
-// import 'package:settlenow_v2/model/personal_expense_info_model.dart';
+import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
+import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
+import 'package:settlenow_v2/util/custom/pair.dart';
 
-// class PersonalExpenseRepository {
-//   final PersonalExpenseDataProvider personalExpenseDataProvider;
+class PersonalExpenseMonthlyExpenseRepository {
+  final PersonalExpenseMonthlyExpenseDataProvider personalExpenseDataProvider;
 
-//   PersonalExpenseRepository(this.personalExpenseDataProvider);
+  PersonalExpenseMonthlyExpenseRepository(this.personalExpenseDataProvider);
 
-//   Future<Map<int, List<PersonalExpenseInfoModel>>> fetchData(
-//     String email,
-//   ) async {
-//     try {
-//       List<PersonalExpenseInfoModel> data = await personalExpenseDataProvider
-//           .fetchData(email);
+  Future<Pair<List<double>, List<PersonalExpenseTransactionModel>>> fetchData(
+    String email,
+  ) async {
+    try {
+      List<PersonalExpenseTransactionModel> data =
+          await personalExpenseDataProvider.fetchData(email);
 
-//       Map<int, List<PersonalExpenseInfoModel>> yearWiseExpense = {};
+      PersonalMonthlyExpenseTD processedData = PersonalMonthlyExpenseTD(
+        List.filled(CategoryParser.getCategoryList().length, 0),
+        data,
+      );
+      processedData.second = data;
 
-//       for (int i = 0; i < data.length; i++) {
-//         int curYear = int.parse(data[i].year);
-//         if (yearWiseExpense.containsKey(curYear)) {
-//           yearWiseExpense[curYear]!.add(data[i]);
-//         } else {
-//           yearWiseExpense[curYear] = [data[i]];
-//         }
-//       }
-//       return yearWiseExpense;
-//     } catch (e) {
-//       rethrow;
-//     }
-//   }
-// }
+      for (int i = 0; i < processedData.second.length; i++) {
+        PersonalExpenseTransactionModel eachExpense = processedData.second[i];
+        processedData.first[CategoryParser.indexOfCategory(
+              eachExpense.category,
+            )] +=
+            eachExpense.amount;
+      }
+      return processedData;
+    } catch (e) {
+      rethrow;
+    }
+  }
+}

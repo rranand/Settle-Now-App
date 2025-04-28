@@ -1,7 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/util/custom/category_parser.dart';
 
 class HorizontalGraphCard extends StatelessWidget {
   final Map<String, double> data;
@@ -44,7 +44,9 @@ class HorizontalGraphCard extends StatelessWidget {
                       return SideTitleWidget(
                         meta: meta,
                         child: Icon(
-                          categoryIcons[categories.indexOf(categories[index])],
+                          CategoryParser.getCategoryIconByCategory(
+                            categories[index],
+                          ),
                           color: UiConstant.colors[index],
                         ),
                       );

@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
-import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
@@ -14,8 +14,6 @@ import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
-
-typedef UserWithTEC = Map<UserModel, TextEditingController>;
 
 class AddTransaction extends StatefulWidget {
   const AddTransaction({super.key});
@@ -28,6 +26,7 @@ class _AddTransactionState extends State<AddTransaction> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _userCardWidth = 110;
   final double _userImageRadius = 50;
+  List<String> expenseCategories = [];
 
   final GlobalKey<FormState> _formKey = GlobalKey();
   final TextEditingController _amountController = TextEditingController();
@@ -39,13 +38,18 @@ class _AddTransactionState extends State<AddTransaction> {
   final List<String> _splitType = ["Equal", "Partial", "Self"];
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
   final ValueNotifier<int> _splitTypeIndex = ValueNotifier(0);
-  final ValueNotifier<UserWithTEC> _selectedUserIDs = ValueNotifier({});
+  final ValueNotifier<UserWithEditControlTD> _selectedUserIDs = ValueNotifier(
+    {},
+  );
 
-  Widget _userCardWidget(UserModel user, UserWithTEC selectedUserIDs) {
+  Widget _userCardWidget(
+    UserModel user,
+    UserWithEditControlTD selectedUserIDs,
+  ) {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        final current = UserWithTEC.from(_selectedUserIDs.value);
+        final current = UserWithEditControlTD.from(_selectedUserIDs.value);
         if (current.containsKey(user)) {
           current.remove(user);
         } else {
@@ -137,7 +141,7 @@ class _AddTransactionState extends State<AddTransaction> {
               spacing: UiConstant.spaceBetweenCard,
               runSpacing: UiConstant.spaceBetweenCard,
               children: List.generate(
-                categoryIcons.length,
+                CategoryParser.expenseCategoryIcons.length,
                 (index) => InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onTap: () => _categoryIndex.value = index,
@@ -154,7 +158,7 @@ class _AddTransactionState extends State<AddTransaction> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           colouredIcon(
-                            Icon(categoryIcons[index]),
+                            Icon(CategoryParser.expenseCategoryIcons[index]),
                             UiConstant.colorsWithShade100[index],
                             radius: 40,
                           ),
@@ -222,6 +226,7 @@ class _AddTransactionState extends State<AddTransaction> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
+    expenseCategories = CategoryParser.getCategoryList();
     if (mounted) {
       setState(() {});
     }
@@ -344,7 +349,7 @@ class _AddTransactionState extends State<AddTransaction> {
                               valueListenable: _selectedUserIDs,
                               builder: (
                                 BuildContext context,
-                                UserWithTEC value,
+                                UserWithEditControlTD value,
                                 Widget? child,
                               ) {
                                 return _userCardWidget(user, value);
@@ -359,12 +364,12 @@ class _AddTransactionState extends State<AddTransaction> {
                       valueListenable: _selectedUserIDs,
                       builder: (
                         BuildContext context,
-                        UserWithTEC userWithTEC,
+                        UserWithEditControlTD UserWithEditControlTD,
                         Widget? _,
                       ) {
                         List<UserModel> selectedUsers =
-                            userWithTEC.keys.toList();
-                        if (userWithTEC.isEmpty) {
+                            UserWithEditControlTD.keys.toList();
+                        if (UserWithEditControlTD.isEmpty) {
                           return SizedBox.shrink();
                         } else {
                           return Column(
