@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
-import 'package:settlenow_v2/bloc/personal_expense/personal_expense_bloc.dart';
+import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
@@ -33,8 +33,11 @@ class _PersonalExpenseDashboardScreenState
   List<double> cardSizeInfo = List.filled(2, 0);
   late ScrollController _scrollController;
 
-  void _blocListenerHandler(BuildContext context, PersonalExpenseState state) {
-    if (state is PersonalExpenseFailure) {
+  void _blocListenerHandler(
+    BuildContext context,
+    PersonalExpenseDashboardState state,
+  ) {
+    if (state is PersonalExpenseDashboardFailure) {
       showNormalSnackBar(context, state.error);
     }
   }
@@ -84,9 +87,11 @@ class _PersonalExpenseDashboardScreenState
     super.initState();
     _scrollController = ScrollController();
     final personalExpenseDataFetched =
-        context.read<PersonalExpenseBloc>().state;
+        context.read<PersonalExpenseDashboardBloc>().state;
     if (!personalExpenseDataFetched.hasData) {
-      context.read<PersonalExpenseBloc>().add(PersonalExpenseFetch());
+      context.read<PersonalExpenseDashboardBloc>().add(
+        PersonalExpenseDashboardFetch(),
+      );
     }
   }
 
@@ -99,11 +104,14 @@ class _PersonalExpenseDashboardScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<PersonalExpenseBloc, PersonalExpenseState>(
+      body: BlocConsumer<
+        PersonalExpenseDashboardBloc,
+        PersonalExpenseDashboardState
+      >(
         listener: _blocListenerHandler,
         builder: (context, state) {
           List<int> years = [DateTime.now().year];
-          if (state is PersonalExpenseFetchSuccess) {
+          if (state is PersonalExpenseDashboardFetchSuccess) {
             years = state.data.keys.toList();
             years.sort((a, b) => a.compareTo(b));
 
@@ -169,7 +177,7 @@ class _PersonalExpenseDashboardScreenState
                     );
                   },
                   sliver: monthWiseCardsWidget(
-                    state is! PersonalExpenseFetchSuccess
+                    state is! PersonalExpenseDashboardFetchSuccess
                         ? List.filled(12, PersonalExpenseInfoModel.empty())
                         : state.data[years[index]]!,
                   ),

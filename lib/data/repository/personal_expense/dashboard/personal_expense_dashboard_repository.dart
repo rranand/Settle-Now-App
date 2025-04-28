@@ -1,10 +1,10 @@
-import 'package:settlenow_v2/data/data_provider/personal_expense_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/personal_expense/dashboard/personal_expense_dashboard_data_provider.dart';
 import 'package:settlenow_v2/model/personal_expense_info_model.dart';
 
-class PersonalExpenseRepository {
-  final PersonalExpenseDataProvider personalExpenseDataProvider;
+class PersonalExpenseDashboardRepository {
+  final PersonalExpenseDashboardDataProvider personalExpenseDataProvider;
 
-  PersonalExpenseRepository(this.personalExpenseDataProvider);
+  PersonalExpenseDashboardRepository(this.personalExpenseDataProvider);
 
   Future<Map<int, List<PersonalExpenseInfoModel>>> fetchData(
     String email,
