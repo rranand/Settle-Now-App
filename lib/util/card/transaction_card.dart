@@ -1,27 +1,37 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/util/custom/category_parser.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class TransactionCard extends StatefulWidget {
-  final int index;
-  final List<String> tagsTitle;
-  const TransactionCard({
-    super.key,
-    required this.index,
-    required this.tagsTitle,
-  });
+  final PersonalExpenseTransactionModel data;
+
+  const TransactionCard({super.key, required this.data});
 
   @override
   State<TransactionCard> createState() => _TransactionCardState();
 }
 
 class _TransactionCardState extends State<TransactionCard> {
+  List<String> createTags() {
+    List<String> tags = [widget.data.category];
+    if (widget.data.createdOn != widget.data.modifiedOn) {
+      tags.add("Edited");
+    }
+    if (widget.data.roomData.hasData) {
+      tags.add(widget.data.roomData.roomName);
+    }
+    return tags;
+  }
+
   @override
   Widget build(BuildContext context) {
+    int categoryIndex = CategoryParser.indexOfCategory(widget.data.category);
+    List<String> tags = createTags();
+
     return Card(
       elevation: UiConstant.cardElevation,
       color: Colors.white,
@@ -33,40 +43,41 @@ class _TransactionCardState extends State<TransactionCard> {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                tagOnCard("Food"),
-                ...List.generate(
-                  widget.tagsTitle.length,
-                  (index) => tagOnCard(
-                    widget.tagsTitle[index],
-                    textColor: UiConstant.colors[1],
-                    backgroundColor: UiConstant.colorsWithShade50[1],
-                  ),
+              children: List.generate(
+                tags.length,
+                (index) => tagOnCard(
+                  tags[index],
+                  textColor: UiConstant.colors[index],
+                  backgroundColor: UiConstant.colorsWithShade50[index],
                 ),
-              ],
+              ),
             ),
             ListTile(
               leading: colouredIcon(
                 Icon(
-                  CategoryParser.expenseCategoryIcons[widget.index %
+                  CategoryParser.expenseCategoryIcons[categoryIndex %
                       CategoryParser.expenseCategoryIcons.length],
                 ),
-                UiConstant.colorsWithShade100[widget.index %
+                UiConstant.colorsWithShade100[categoryIndex %
                     CategoryParser.expenseCategoryIcons.length],
               ),
-              title: Text("Chickoo Ice-Cream"),
+              title: Text(widget.data.description),
               subtitle: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  subTextOnCard("Created On March 10, 2025"),
-                  widget.index % 2 == 0
-                      ? subTextOnCard("Modified On March 12, 2025")
+                  subTextOnCard(
+                    "Created On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                  ),
+                  widget.data.modifiedOn != widget.data.createdOn
+                      ? subTextOnCard(
+                        "Modified On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                      )
                       : subTextOnCard(""),
                 ],
               ),
               trailing: Text(
-                formatCurrency((121 + Random().nextInt(300)) * 1.0, context),
+                formatCurrency(widget.data.amount, context),
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),
             ),

@@ -1,6 +1,5 @@
 import 'package:intl/intl.dart';
 import 'package:moment_dart/moment_dart.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
 
 String capatilizeFirstLetter(String inputText) {
   if (inputText.isEmpty) {
@@ -30,6 +29,18 @@ String convertToMoment(DateTime dateTime) {
   return capatilizeFirstLetter(momentStr);
 }
 
-String convertDateTimeFormat(DateTime dateTime) {
-  return DateFormat(UiConstant.expenseDatetimeFormat).format(dateTime);
+String convertDateTimeFormat(DateTime date) {
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  final dateOnly = DateTime(date.year, date.month, date.day);
+
+  if (dateOnly == today) {
+    return 'Today, ${DateFormat.jm().format(date)}';
+  } else if (dateOnly == today.subtract(Duration(days: 1))) {
+    return 'Yesterday, ${DateFormat.jm().format(date)}';
+  } else if (now.difference(date).inDays < 7) {
+    return '${DateFormat.E().format(date)} at ${DateFormat.jm().format(date)}';
+  } else {
+    return '${DateFormat.MMMd().format(date)} at ${DateFormat.jm().format(date)}';
+  }
 }

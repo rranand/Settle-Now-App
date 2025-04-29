@@ -91,7 +91,7 @@ Widget tagOnCard(
   Color textColor = Colors.deepPurple,
   Color? backgroundColor,
   bool isFirst = false,
-  bool isLoaded = false,
+  bool isLoaded = true,
 }) {
   return isLoaded
       ? Container(

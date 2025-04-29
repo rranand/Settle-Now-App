@@ -28,10 +28,8 @@ class UiConstant {
   );
 
   static List<Color> colorsWithShade50 = [
-    Colors.red.shade50,
     Colors.green.shade50,
     Colors.blue.shade50,
-    Colors.yellow.shade50,
     Colors.orange.shade50,
     Colors.purple.shade50,
     Colors.teal.shade50,
@@ -46,13 +44,13 @@ class UiConstant {
     Colors.deepPurple.shade50,
     Colors.lightGreen.shade50,
     Colors.lightBlue.shade50,
+    Colors.red.shade50,
+    Colors.yellow.shade50,
   ];
 
   static List<Color> colorsWithShade100 = [
-    Colors.red.shade100,
     Colors.green.shade100,
     Colors.blue.shade100,
-    Colors.yellow.shade100,
     Colors.orange.shade100,
     Colors.purple.shade100,
     Colors.teal.shade100,
@@ -67,13 +65,13 @@ class UiConstant {
     Colors.deepPurple.shade100,
     Colors.lightGreen.shade100,
     Colors.lightBlue.shade100,
+    Colors.red.shade100,
+    Colors.yellow.shade100,
   ];
 
   static List<Color> colors = [
-    Colors.red,
     Colors.green,
     Colors.blue,
-    Colors.yellow,
     Colors.orange,
     Colors.purple,
     Colors.teal,
@@ -88,6 +86,8 @@ class UiConstant {
     Colors.deepPurple,
     Colors.lightGreen,
     Colors.lightBlue,
+    Colors.red,
+    Colors.yellow,
   ];
 
   static List<UserModel> users = [

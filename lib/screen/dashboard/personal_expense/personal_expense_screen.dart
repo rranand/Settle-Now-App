@@ -29,7 +29,7 @@ class PersonalExpenseScreen extends StatefulWidget {
 
 class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
   final double _navBarHeight = 60;
 
   void _blocListenerHandler(

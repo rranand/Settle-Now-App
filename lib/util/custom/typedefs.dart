@@ -4,4 +4,4 @@ import 'package:settlenow_v2/core.dart';
 typedef UserWithEditControlTD = Map<UserModel, TextEditingController>;
 
 typedef PersonalMonthlyExpensePairTD =
-    Pair<List<double>, List<PersonalExpenseTransactionModel>>;
+    Pair<List<Pair<double, int>>, List<PersonalExpenseTransactionModel>>;

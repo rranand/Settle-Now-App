@@ -12,16 +12,19 @@ class PersonalMonthlyExpenseRepository {
           await personalMonthlyExpenseDataProvider.fetchData(email);
 
       PersonalMonthlyExpensePairTD processedData = PersonalMonthlyExpensePairTD(
-        List.filled(CategoryParser.getCategoryList().length, 0),
+        List.generate(
+          CategoryParser.getCategoryList().length,
+          (i) => Pair<double, int>(0, 0),
+        ),
         data,
       );
 
       for (int i = 0; i < data.length; i++) {
         PersonalExpenseTransactionModel eachExpense = data[i];
-        processedData.first[CategoryParser.indexOfCategory(
-              eachExpense.category,
-            )] +=
-            eachExpense.amount;
+        int index = CategoryParser.indexOfCategory(eachExpense.category);
+
+        processedData.first[index].first += eachExpense.amount;
+        processedData.first[index].second += 1;
       }
 
       return processedData;
