@@ -1,34 +1,29 @@
 part of 'personal_expense_bloc.dart';
 
 @immutable
-sealed class PersonalExpenseMonthlyExpenseState {
+sealed class PersonalMonthlyExpenseState {
   final bool hasData;
 
-  const PersonalExpenseMonthlyExpenseState({this.hasData = false});
+  const PersonalMonthlyExpenseState({this.hasData = false});
 }
 
-final class PersonalExpenseMonthlyExpenseInitial
-    extends PersonalExpenseMonthlyExpenseState {
-  const PersonalExpenseMonthlyExpenseInitial() : super(hasData: false);
+final class PersonalMonthlyExpenseInitial extends PersonalMonthlyExpenseState {
+  const PersonalMonthlyExpenseInitial() : super(hasData: false);
 }
 
-final class PersonalExpenseMonthlyExpenseLoading
-    extends PersonalExpenseMonthlyExpenseState {
-  const PersonalExpenseMonthlyExpenseLoading() : super(hasData: false);
+final class PersonalMonthlyExpenseLoading extends PersonalMonthlyExpenseState {
+  const PersonalMonthlyExpenseLoading() : super(hasData: false);
 }
 
-final class PersonalExpenseMonthlyExpenseFetchSuccess
-    extends PersonalExpenseMonthlyExpenseState {
-  final PersonalMonthlyExpenseTD data;
+final class PersonalMonthlyExpenseFetchSuccess
+    extends PersonalMonthlyExpenseState {
+  final PersonalMonthlyExpensePairTD data;
 
-  const PersonalExpenseMonthlyExpenseFetchSuccess(this.data)
-    : super(hasData: true);
+  const PersonalMonthlyExpenseFetchSuccess(this.data) : super(hasData: true);
 }
 
-final class PersonalExpenseMonthlyExpenseFailure
-    extends PersonalExpenseMonthlyExpenseState {
+final class PersonalMonthlyExpenseFailure extends PersonalMonthlyExpenseState {
   final String error;
 
-  const PersonalExpenseMonthlyExpenseFailure(this.error)
-    : super(hasData: false);
+  const PersonalMonthlyExpenseFailure(this.error) : super(hasData: false);
 }

@@ -6,31 +6,26 @@ import 'package:settlenow_v2/util/custom/typedefs.dart';
 part 'personal_expense_event.dart';
 part 'personal_expense_state.dart';
 
-class PersonalExpenseMonthlyExpenseBloc
-    extends
-        Bloc<
-          PersonalExpenseMonthlyExpenseEvent,
-          PersonalExpenseMonthlyExpenseState
-        > {
-  final PersonalExpenseMonthlyExpenseRepository personalExpenseRepository;
+class PersonalMonthlyExpenseBloc
+    extends Bloc<PersonalMonthlyExpenseEvent, PersonalMonthlyExpenseState> {
+  final PersonalMonthlyExpenseRepository personalMonthlyExpenseRepository;
 
-  PersonalExpenseMonthlyExpenseBloc(this.personalExpenseRepository)
-    : super(PersonalExpenseMonthlyExpenseInitial()) {
-    on<PersonalExpenseMonthlyExpenseFetch>(_personalExpenseFetch);
+  PersonalMonthlyExpenseBloc(this.personalMonthlyExpenseRepository)
+    : super(PersonalMonthlyExpenseInitial()) {
+    on<PersonalMonthlyExpenseFetch>(_personalExpenseFetch);
   }
 
   void _personalExpenseFetch(
-    PersonalExpenseMonthlyExpenseFetch event,
-    Emitter<PersonalExpenseMonthlyExpenseState> emit,
+    PersonalMonthlyExpenseFetch event,
+    Emitter<PersonalMonthlyExpenseState> emit,
   ) async {
-    emit(PersonalExpenseMonthlyExpenseLoading());
+    emit(PersonalMonthlyExpenseLoading());
     try {
-      PersonalMonthlyExpenseTD data = await personalExpenseRepository.fetchData(
-        "niriif@kff.ed",
-      );
-      return emit(PersonalExpenseMonthlyExpenseFetchSuccess(data));
+      PersonalMonthlyExpensePairTD data =
+          await personalMonthlyExpenseRepository.fetchData("niriif@kff.ed");
+      return emit(PersonalMonthlyExpenseFetchSuccess(data));
     } catch (e) {
-      return emit(PersonalExpenseMonthlyExpenseFailure(e.toString()));
+      return emit(PersonalMonthlyExpenseFailure(e.toString()));
     }
   }
 }

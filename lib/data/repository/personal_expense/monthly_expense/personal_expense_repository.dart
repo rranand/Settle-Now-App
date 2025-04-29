@@ -1,33 +1,29 @@
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
-import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
-import 'package:settlenow_v2/util/custom/pair.dart';
 
-class PersonalExpenseMonthlyExpenseRepository {
-  final PersonalExpenseMonthlyExpenseDataProvider personalExpenseDataProvider;
+class PersonalMonthlyExpenseRepository {
+  final PersonalMonthlyExpenseDataProvider personalMonthlyExpenseDataProvider;
 
-  PersonalExpenseMonthlyExpenseRepository(this.personalExpenseDataProvider);
+  PersonalMonthlyExpenseRepository(this.personalMonthlyExpenseDataProvider);
 
-  Future<Pair<List<double>, List<PersonalExpenseTransactionModel>>> fetchData(
-    String email,
-  ) async {
+  Future<PersonalMonthlyExpensePairTD> fetchData(String email) async {
     try {
       List<PersonalExpenseTransactionModel> data =
-          await personalExpenseDataProvider.fetchData(email);
+          await personalMonthlyExpenseDataProvider.fetchData(email);
 
-      PersonalMonthlyExpenseTD processedData = PersonalMonthlyExpenseTD(
+      PersonalMonthlyExpensePairTD processedData = PersonalMonthlyExpensePairTD(
         List.filled(CategoryParser.getCategoryList().length, 0),
         data,
       );
-      processedData.second = data;
 
-      for (int i = 0; i < processedData.second.length; i++) {
-        PersonalExpenseTransactionModel eachExpense = processedData.second[i];
+      for (int i = 0; i < data.length; i++) {
+        PersonalExpenseTransactionModel eachExpense = data[i];
         processedData.first[CategoryParser.indexOfCategory(
               eachExpense.category,
             )] +=
             eachExpense.amount;
       }
+
       return processedData;
     } catch (e) {
       rethrow;

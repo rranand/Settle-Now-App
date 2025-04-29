@@ -127,10 +127,10 @@ class MyApp extends StatelessWidget {
                 PersonalExpenseDashboardDataProvider(),
               ),
         ),
-        RepositoryProvider<PersonalExpenseMonthlyExpenseRepository>(
+        RepositoryProvider<PersonalMonthlyExpenseRepository>(
           create:
-              (context) => PersonalExpenseMonthlyExpenseRepository(
-                PersonalExpenseMonthlyExpenseDataProvider(),
+              (context) => PersonalMonthlyExpenseRepository(
+                PersonalMonthlyExpenseDataProvider(),
               ),
         ),
       ],
@@ -159,10 +159,10 @@ class MyApp extends StatelessWidget {
                   context.read<PersonalExpenseDashboardRepository>(),
                 ),
           ),
-          BlocProvider<PersonalExpenseMonthlyExpenseBloc>(
+          BlocProvider<PersonalMonthlyExpenseBloc>(
             create:
-                (context) => PersonalExpenseMonthlyExpenseBloc(
-                  context.read<PersonalExpenseMonthlyExpenseRepository>(),
+                (context) => PersonalMonthlyExpenseBloc(
+                  context.read<PersonalMonthlyExpenseRepository>(),
                 ),
           ),
         ],

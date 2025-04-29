@@ -116,7 +116,8 @@ class _PersonalExpenseDashboardScreenState
             years.sort((a, b) => a.compareTo(b));
 
             SchedulerBinding.instance.addPostFrameCallback((_) {
-              if (_scrollController.hasClients) {
+              if (_scrollController.hasClients &&
+                  _scrollController.position.hasContentDimensions) {
                 _scrollController.jumpTo(
                   _scrollController.position.maxScrollExtent,
                 );

@@ -30,9 +30,6 @@ class RoomLinkedModel {
   }
 
   factory RoomLinkedModel.fromMap(Map<String, dynamic> map) {
-    if (map.isEmpty) {
-      return RoomLinkedModel.empty();
-    }
     return RoomLinkedModel(
       id: map['id'] as String,
       roomName: map['roomName'] as String,
@@ -108,15 +105,27 @@ class PersonalExpenseTransactionModel {
   }
 
   factory PersonalExpenseTransactionModel.fromMap(Map<String, dynamic> map) {
-    return PersonalExpenseTransactionModel(
-      id: map['id'] as String,
-      amount: map['amount'] as double,
-      description: map['description'] as String,
-      category: map['category'] as String,
-      createdOn: DateTime.parse(map['createdOn']),
-      modifiedOn: DateTime.parse(map['modifiedOn']),
-      roomData: RoomLinkedModel.fromMap(map['roomData']),
-    );
+    if (map.containsKey('roomData') && map['roomData'] != null) {
+      return PersonalExpenseTransactionModel(
+        id: map['id'] as String,
+        amount: map['amount'] as double,
+        description: map['description'] as String,
+        category: map['category'] as String,
+        createdOn: DateTime.parse(map['createdOn']),
+        modifiedOn: DateTime.parse(map['modifiedOn']),
+        roomData: RoomLinkedModel.fromMap(map['roomData']),
+      );
+    } else {
+      return PersonalExpenseTransactionModel(
+        id: map['id'] as String,
+        amount: map['amount'] as double,
+        description: map['description'] as String,
+        category: map['category'] as String,
+        createdOn: DateTime.parse(map['createdOn']),
+        modifiedOn: DateTime.parse(map['modifiedOn']),
+        roomData: RoomLinkedModel.empty(),
+      );
+    }
   }
 
   String toJson() => json.encode(toMap());

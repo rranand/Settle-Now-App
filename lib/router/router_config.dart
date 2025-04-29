@@ -74,9 +74,12 @@ class AppRouterConfig {
             },
           ),
           GoRoute(
-            path: "${RouterConstants.personalExpenseRouteName}/:id",
+            path: "${RouterConstants.personalExpenseRouteName}/:year/:month",
             builder: (context, state) {
-              return PersonalExpenseScreen(id: state.pathParameters["id"]!);
+              return PersonalExpenseScreen(
+                year: state.pathParameters["year"]!,
+                month: state.pathParameters["month"]!,
+              );
             },
             redirect: (context, state) {
               Map<String, String> param = state.pathParameters;
@@ -112,7 +115,7 @@ class AppRouterConfig {
   static final _router = GoRouter(
     routes: _allRoutes(),
     //initialLocation: RouterConstants.dashboardRouteName,
-    initialLocation: "${RouterConstants.personalExpenseRouteName}/id",
+    initialLocation: "${RouterConstants.personalExpenseRouteName}/2025/April",
     observers: [observer],
   );
 

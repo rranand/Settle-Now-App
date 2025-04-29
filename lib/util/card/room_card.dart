@@ -43,16 +43,20 @@ class RoomCard extends StatelessWidget {
             data.hasData
                 ? SizedBox.shrink()
                 : CustomShimmerEffect.placeHolderShimmerEffect(
-                  Expanded(
-                    child: Container(
-                      width: UiConstant.cardBorderLeftSideStripWidth,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          UiConstant.cardBorderRadius,
+                  Column(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          width: UiConstant.cardBorderLeftSideStripWidth,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                              UiConstant.cardBorderRadius,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                   shimmerDirection: ShimmerDirection.ttb,
                 ),

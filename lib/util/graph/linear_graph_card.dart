@@ -5,12 +5,7 @@ import 'package:settlenow_v2/internationalization/currency.dart';
 
 class LinearGraphCard extends StatelessWidget {
   final List<double> expenses;
-  final String monthName;
-  const LinearGraphCard({
-    super.key,
-    required this.expenses,
-    required this.monthName,
-  });
+  const LinearGraphCard({super.key, required this.expenses});
 
   @override
   Widget build(BuildContext context) {
