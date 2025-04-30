@@ -88,7 +88,11 @@ class PersonalExpenseCard extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        context.push("${RouterConstants.personalExpenseRouteName}/${data.id}");
+        if (data.hasData) {
+          context.push(
+            "${RouterConstants.personalExpenseRouteName}/${data.year}/${data.monthName}",
+          );
+        }
       },
       child: Card(
         elevation: UiConstant.cardElevation,

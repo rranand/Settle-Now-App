@@ -20,7 +20,9 @@ class LendenCard extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        context.push("${RouterConstants.lendenRouteName}/${data.id}");
+        if (data.hasData) {
+          context.push("${RouterConstants.lendenRouteName}/${data.id}");
+        }
       },
       child: Container(
         decoration: BoxDecoration(

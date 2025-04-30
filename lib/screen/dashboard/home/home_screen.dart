@@ -187,53 +187,16 @@ class _HomeScreenState extends State<HomeScreen> {
   PreferredSizeWidget? _bottomNavigatorAppBarHandler(index) {
     List<Widget> appBarActions = [];
 
-    switch (index) {
-      case 0:
-        appBarActions = [
-          InkWell(
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            child: Icon(Icons.search),
-            onTap: () {
-              _isSearchEnabled.value = !_isSearchEnabled.value;
-            },
-          ),
-        ];
-        break;
-      case 1:
-        appBarActions = [
-          InkWell(
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            child: Icon(Icons.search),
-            onTap: () {
-              _isSearchEnabled.value = !_isSearchEnabled.value;
-            },
-          ),
-        ];
-        break;
-      case 2:
-        appBarActions = [
-          InkWell(
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            child: Icon(Icons.search),
-            onTap: () {
-              _isSearchEnabled.value = !_isSearchEnabled.value;
-            },
-          ),
-        ];
-        break;
-      case 3:
-        appBarActions = [
-          InkWell(
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            child: Icon(Icons.search),
-            onTap: () {
-              _isSearchEnabled.value = !_isSearchEnabled.value;
-            },
-          ),
-        ];
-        break;
-      default:
-        appBarActions = [];
+    if (index <= 3) {
+      appBarActions = [
+        InkWell(
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          child: Icon(Icons.search),
+          onTap: () {
+            _isSearchEnabled.value = !_isSearchEnabled.value;
+          },
+        ),
+      ];
     }
 
     return AppBar(

@@ -5,7 +5,7 @@ import 'package:settlenow_v2/model/quicksplit_model.dart';
 class QuicksplitDataProvider {
   Future<List<QuickSplitModel>> fetchData(String email) async {
     try {
-      await Future.delayed(Duration(milliseconds: 1500));
+      await Future.delayed(Duration(seconds: 2), () {});
       String dataStr = '''[
   {
     "id": "1",

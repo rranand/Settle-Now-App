@@ -19,7 +19,9 @@ class RoomCard extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        context.push("${RouterConstants.roomRouteName}/${data.id}");
+        if (data.hasData) {
+          context.push("${RouterConstants.roomRouteName}/${data.id}");
+        }
       },
       child: Container(
         margin: const EdgeInsets.only(
