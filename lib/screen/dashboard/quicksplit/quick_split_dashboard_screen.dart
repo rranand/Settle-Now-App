@@ -96,9 +96,11 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                 },
               ),
               SliverPadding(
-                padding: EdgeInsets.only(
-                  top: UiConstant.spaceBetweenSection,
-                  bottom: UiConstant.spaceAtBottom,
+                padding: _mainScreenPadding.add(
+                  EdgeInsets.only(
+                    top: UiConstant.spaceBetweenSection,
+                    bottom: UiConstant.spaceAtBottom,
+                  ),
                 ),
                 sliver: SliverList.builder(
                   itemCount: noOfCardsToBeShown,

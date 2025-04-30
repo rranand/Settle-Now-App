@@ -24,9 +24,6 @@ class RoomCard extends StatelessWidget {
         }
       },
       child: Container(
-        margin: const EdgeInsets.only(
-          left: UiConstant.cardBorderLeftSideStripWidth,
-        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
           color: Colors.transparent,

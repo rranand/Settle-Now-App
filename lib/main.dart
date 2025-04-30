@@ -9,19 +9,19 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/bloc/lenden/lenden_bloc.dart';
+import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/bloc/room/room_bloc.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
-import 'package:settlenow_v2/data/data_provider/lenden_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/dashboard/personal_expense_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/room_data_provider.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
-import 'package:settlenow_v2/data/repository/lenden_repository.dart';
+import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/dashboard/personal_expense_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
@@ -118,8 +118,10 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<QuicksplitRepository>(
           create: (context) => QuicksplitRepository(QuicksplitDataProvider()),
         ),
-        RepositoryProvider<LendenRepository>(
-          create: (context) => LendenRepository(LendenDataProvider()),
+        RepositoryProvider<LendenDashboardRepository>(
+          create:
+              (context) =>
+                  LendenDashboardRepository(LendenDashboardDataProvider()),
         ),
         RepositoryProvider<PersonalExpenseDashboardRepository>(
           create:
@@ -150,8 +152,11 @@ class MyApp extends StatelessWidget {
           BlocProvider<RoomBloc>(
             create: (context) => RoomBloc(context.read<RoomRepository>()),
           ),
-          BlocProvider<LendenBloc>(
-            create: (context) => LendenBloc(context.read<LendenRepository>()),
+          BlocProvider<LendenDashboardBloc>(
+            create:
+                (context) => LendenDashboardBloc(
+                  context.read<LendenDashboardRepository>(),
+                ),
           ),
           BlocProvider<PersonalExpenseDashboardBloc>(
             create:

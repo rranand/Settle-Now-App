@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
-import 'package:settlenow_v2/model/lenden_model.dart';
+import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
@@ -12,7 +12,7 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 import 'package:shimmer/shimmer.dart';
 
 class LendenCard extends StatelessWidget {
-  final LendenModel data;
+  final LendenDashboardModel data;
   const LendenCard({super.key, required this.data});
 
   @override

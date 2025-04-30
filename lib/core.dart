@@ -3,7 +3,7 @@ export './util/custom/category_parser.dart';
 export './util/custom/pair.dart';
 export './util/custom/tuple.dart';
 export './model/lenden_expense_model.dart';
-export './model/lenden_model.dart';
+export 'model/lenden_dashboard_model.dart';
 export './model/personal_expense_info_model.dart';
 export './model/personal_expense_transaction_model.dart';
 export './model/quicksplit_model.dart';

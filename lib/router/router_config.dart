@@ -114,8 +114,8 @@ class AppRouterConfig {
 
   static final _router = GoRouter(
     routes: _allRoutes(),
-    initialLocation: RouterConstants.dashboardRouteName,
-    //initialLocation: "${RouterConstants.personalExpenseRouteName}/2025/April",
+    //initialLocation: RouterConstants.dashboardRouteName,
+    initialLocation: "${RouterConstants.lendenRouteName}/lenden_id_1",
     observers: [observer],
   );
 

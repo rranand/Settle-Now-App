@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:settlenow_v2/model/user_model.dart';
 
-class LendenModel {
+class LendenDashboardModel {
   bool hasData = true;
   String id = "";
   String roomName = "";
@@ -15,7 +15,7 @@ class LendenModel {
   double amount = 0;
   List<UserModel> users = [];
 
-  LendenModel({
+  LendenDashboardModel({
     required this.id,
     required this.roomName,
     required this.status,
@@ -25,9 +25,9 @@ class LendenModel {
     required this.users,
   });
 
-  LendenModel.empty({this.hasData = false});
+  LendenDashboardModel.empty({this.hasData = false});
 
-  LendenModel copyWith({
+  LendenDashboardModel copyWith({
     String? id,
     String? roomName,
     String? status,
@@ -36,7 +36,7 @@ class LendenModel {
     double? amount,
     List<UserModel>? users,
   }) {
-    return LendenModel(
+    return LendenDashboardModel(
       id: id ?? this.id,
       roomName: roomName ?? this.roomName,
       status: status ?? this.status,
@@ -59,8 +59,8 @@ class LendenModel {
     };
   }
 
-  factory LendenModel.fromMap(Map<String, dynamic> map) {
-    return LendenModel(
+  factory LendenDashboardModel.fromMap(Map<String, dynamic> map) {
+    return LendenDashboardModel(
       id: map['id'] as String,
       roomName: map['roomName'] as String,
       status: map['status'] as String,
@@ -75,16 +75,16 @@ class LendenModel {
 
   String toJson() => json.encode(toMap());
 
-  factory LendenModel.fromJson(String source) =>
-      LendenModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory LendenDashboardModel.fromJson(String source) =>
+      LendenDashboardModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'LendenModel(id: $id, roomName: $roomName, amount $amount,status $status, createdOn: $createdOn)';
+    return 'LendenDashboardModel(id: $id, roomName: $roomName, amount $amount,status $status, createdOn: $createdOn)';
   }
 
   @override
-  bool operator ==(covariant LendenModel other) {
+  bool operator ==(covariant LendenDashboardModel other) {
     if (identical(this, other)) return true;
 
     return other.id == id &&

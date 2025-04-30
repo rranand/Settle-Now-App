@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:settlenow_v2/bloc/lenden/lenden_bloc.dart';
+import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/model/lenden_model.dart';
+import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/lenden_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
@@ -23,8 +23,8 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
 
-  void _blocListenerHandler(BuildContext context, LendenState state) {
-    if (state is LendenFailure) {
+  void _blocListenerHandler(BuildContext context, LendenDashboardState state) {
+    if (state is LendenDashboardFailure) {
       showNormalSnackBar(context, state.error);
     }
   }
@@ -41,10 +41,10 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final lendenDataFetched = context.read<LendenBloc>().state;
+    final lendenDataFetched = context.read<LendenDashboardBloc>().state;
 
     if (!lendenDataFetched.hasData) {
-      context.read<LendenBloc>().add(LendenFetch());
+      context.read<LendenDashboardBloc>().add(LendenDashboardFetch());
     }
   }
 
@@ -83,14 +83,14 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
               );
             },
           ),
-          BlocConsumer<LendenBloc, LendenState>(
+          BlocConsumer<LendenDashboardBloc, LendenDashboardState>(
             listener: _blocListenerHandler,
             builder: (context, state) {
-              List<LendenModel> lendenData = [];
-              if (state is LendenFetchSuccess) {
+              List<LendenDashboardModel> lendenData = [];
+              if (state is LendenDashboardFetchSuccess) {
                 lendenData = state.data;
-              } else if (state is LendenLoading) {
-                lendenData = List.generate(11, (i) => LendenModel.empty());
+              } else if (state is LendenDashboardLoading) {
+                lendenData = List.generate(11, (i) => LendenDashboardModel.empty());
               }
               return SliverPadding(
                 padding: _mainScreenPadding.add(
