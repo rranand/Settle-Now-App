@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
@@ -27,7 +28,7 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
   final UserModel loggedInUser = UserModel.fromMap({
     'id': 'user_1',
     'name': 'Rohit Anand',
@@ -161,6 +162,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     if (!(state is RoomFetchSuccess && state.id == widget.id)) {
       context.read<RoomBloc>().add(RoomFetch(widget.id));
       context.read<RoomUserCubit>().fetchData(widget.id);
+      context.read<RoomSettleCubit>().fetchData(widget.id);
     }
   }
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 
 class RoomDataProvider {
@@ -369,6 +370,89 @@ class RoomDataProvider {
       List<dynamic> tempArr = jsonDecode(dataStr);
       List<RoomUserModel> arr =
           tempArr.map((ele) => RoomUserModel.fromMap(ele)).toList();
+
+      return arr;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<RoomSettleModel>> fetchSettleData(String email, String id) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      String dataStr = '''
+      [
+  {
+    "id": "settle_001",
+    "recevier": {
+      "id": "user_1",
+      "name": "Rohit Anand",
+      "profileImage": "https://picsum.photos/id/11/200/300"
+    },
+    "sender": {
+      "id": "user_102",
+      "name": "Aman Mehra",
+      "profileImage": "https://picsum.photos/id/12/200/300"
+    },
+    "amount": 350.0,
+    "createdOn": "2024-12-01T10:30:00Z",
+    "modifiedOn": "2024-12-01T12:00:00Z"
+  },
+  {
+    "id": "settle_002",
+    "recevier": {
+      "id": "user_1",
+      "name": "Rohit Anand",
+      "profileImage": "https://picsum.photos/id/13/200/300"
+    },
+    "sender": {
+      "id": "user_104",
+      "name": "Rahul Singh",
+      "profileImage": "https://picsum.photos/id/14/200/300"
+    },
+    "amount": -1200.0,
+    "createdOn": "2024-11-28T09:15:00Z",
+    "modifiedOn": "2024-11-28T09:45:00Z"
+  },
+  {
+    "id": "settle_003",
+    "recevier": {
+      "id": "user_105",
+      "name": "Sneha Kapoor",
+      "profileImage": "https://picsum.photos/id/15/200/300"
+    },
+    "sender": {
+      "id": "user_1",
+      "name": "Rohit Anand",
+      "profileImage": "https://picsum.photos/id/16/200/300"
+    },
+    "amount": 560.0,
+    "createdOn": "2024-10-20T14:00:00Z",
+    "modifiedOn": "2024-10-20T15:00:00Z"
+  },
+  {
+    "id": "settle_004",
+    "recevier": {
+      "id": "user_107",
+      "name": "Priya Dutta",
+      "profileImage": "https://picsum.photos/id/17/200/300"
+    },
+    "sender": {
+      "id": "user_108",
+      "name": "Kunal Joshi",
+      "profileImage": "https://picsum.photos/id/18/200/300"
+    },
+    "amount": 890.0,
+    "createdOn": "2025-01-05T11:20:00Z",
+    "modifiedOn": "2025-01-05T11:50:00Z"
+  }
+]
+
+
+    ''';
+      List<dynamic> tempArr = jsonDecode(dataStr);
+      List<RoomSettleModel> arr =
+          tempArr.map((ele) => RoomSettleModel.fromMap(ele)).toList();
 
       return arr;
     } catch (e) {

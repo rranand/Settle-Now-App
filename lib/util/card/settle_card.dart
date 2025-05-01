@@ -1,19 +1,27 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/room_settle_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class SettleCard extends StatelessWidget {
   final double screenWidth;
-  const SettleCard({super.key, required this.screenWidth});
+  final RoomSettleModel data;
+  final UserModel loggedInUser;
+  const SettleCard({
+    super.key,
+    required this.screenWidth,
+    required this.data,
+    required this.loggedInUser,
+  });
 
-  Widget _userCard(BuildContext context, bool isLast) {
+  Widget _userCard(BuildContext context, UserModel user, bool isLast) {
     final userCardWidth = (screenWidth - 2 * UiConstant.cardPadding - 36) * .5;
     return SizedBox(
       width: userCardWidth,
@@ -21,28 +29,41 @@ class SettleCard extends StatelessWidget {
         mainAxisAlignment:
             isLast ? MainAxisAlignment.end : MainAxisAlignment.start,
         children: [
-          overlapUserImageWidget(
-            context,
-            [UiConstant.users.first],
-            1,
-            imageRadius: 40,
-          ),
+          user.hasData
+              ? overlapUserImageWidget(context, [user], 1, imageRadius: 40)
+              : CustomShimmerEffect.overlapImageWidget(
+                noOfImages: 1,
+                imageRadius: 40,
+              ),
           SizedBox(width: 8),
-          Flexible(
-            child: Text(
-              "Rohit Anand",
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
+          user.hasData
+              ? Flexible(
+                child: Text(
+                  user.name,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              )
+              : CustomShimmerEffect.textWidget(width: 90),
         ],
       ),
     );
   }
 
+  String _getAddedByString() {
+    String str = "Added By ";
+    if (data.sender.id == loggedInUser.id) {
+      str += "You";
+    } else {
+      str += data.sender.name.split(" ").first;
+    }
+    return str;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Slidable(
+      enabled: data.hasData && data.sender.id == loggedInUser.id,
       endActionPane: ActionPane(
         motion: StretchMotion(),
         children: [
@@ -80,34 +101,68 @@ class SettleCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _userCard(context, false),
+                  _userCard(
+                    context,
+                    data.amount > 0 ? data.sender : data.recevier,
+                    false,
+                  ),
                   Icon(Iconsax.arrow_right_14),
-                  _userCard(context, true),
+                  _userCard(
+                    context,
+                    data.amount > 0 ? data.recevier : data.sender,
+                    true,
+                  ),
                 ],
               ),
               SizedBox(height: UiConstant.spaceBetweenSection),
               Padding(
                 padding: const EdgeInsets.only(left: 4.0),
-                child: Text(
-                  formatCurrency(
-                    (1111 + Random().nextInt(10000)).toDouble(),
-                    context,
-                  ),
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
-                ),
+                child:
+                    data.hasData
+                        ? Text(
+                          formatCurrency(data.amount.abs(), context),
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        )
+                        : CustomShimmerEffect.textWidget(
+                          fontSize: 20,
+                          width: 80,
+                        ),
               ),
               Divider(),
-              subTextOnCard(
-                convertDateTimeFormat(
-                  DateTime.now().subtract(
-                    Duration(hours: 11 + Random().nextInt(1000)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  subTextOnCard(
+                    convertDateTimeFormat(data.modifiedOn),
+                    fontSize: 14,
+                    isLoaded: data.hasData,
                   ),
-                ),
-                fontSize: 14,
+                  Row(
+                    children: [
+                      subTextOnCard(
+                        _getAddedByString(),
+                        fontSize: 14,
+                        isLoaded: data.hasData,
+                      ),
+                      Visibility(
+                        visible: data.sender.id == loggedInUser.id,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          margin: EdgeInsets.only(left: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

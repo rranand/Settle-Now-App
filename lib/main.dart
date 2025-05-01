@@ -17,6 +17,7 @@ import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
@@ -202,6 +203,10 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<RoomBloc>(
             create: (context) => RoomBloc(context.read<RoomRepository>()),
+          ),
+          BlocProvider<RoomSettleCubit>(
+            create:
+                (context) => RoomSettleCubit(context.read<RoomRepository>()),
           ),
         ],
         child: MultiProvider(

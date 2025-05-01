@@ -60,7 +60,7 @@ class CategoryParser {
   }
 
   static int indexOfCategory(String category) {
-    return _categoryToIndex[category] ?? 0;
+    return _categoryToIndex[category] ?? 13;
   }
 
   static IconData getCategoryIconByIndex(int categoryIndex) {
