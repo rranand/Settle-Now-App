@@ -61,7 +61,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     super.initState();
     final state = context.read<LendenRoomBloc>().state;
 
-    if (!(state is LendenRoomFetchSuccess && state.roomID == widget.id)) {
+    if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
       context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
     }
     context.read<LendenRoomNameCubit>().fetchName(widget.id, widget.roomName);

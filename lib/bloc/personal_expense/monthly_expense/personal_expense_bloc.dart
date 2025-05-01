@@ -21,8 +21,17 @@ class PersonalMonthlyExpenseBloc
   ) async {
     emit(PersonalMonthlyExpenseLoading());
     try {
-      PersonalMonthlyExpensePairTD data = await repo.fetchData("niriif@kff.ed");
-      return emit(PersonalMonthlyExpenseFetchSuccess(data));
+      PersonalMonthlyExpensePairTD data = await repo.fetchData(
+        "niriif@kff.ed",
+        event.year,
+        event.month,
+      );
+      return emit(
+        PersonalMonthlyExpenseFetchSuccess(
+          (event.year + event.month).toLowerCase(),
+          data,
+        ),
+      );
     } catch (e) {
       return emit(PersonalMonthlyExpenseFailure(e.toString()));
     }

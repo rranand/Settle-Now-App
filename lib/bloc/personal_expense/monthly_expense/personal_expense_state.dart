@@ -9,9 +9,10 @@ final class PersonalMonthlyExpenseLoading extends PersonalMonthlyExpenseState {}
 
 final class PersonalMonthlyExpenseFetchSuccess
     extends PersonalMonthlyExpenseState {
+  final String id;
   final PersonalMonthlyExpensePairTD data;
 
-  PersonalMonthlyExpenseFetchSuccess(this.data);
+  PersonalMonthlyExpenseFetchSuccess(this.id, this.data);
 }
 
 final class PersonalMonthlyExpenseFailure extends PersonalMonthlyExpenseState {

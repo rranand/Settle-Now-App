@@ -6,10 +6,14 @@ class PersonalMonthlyExpenseRepository {
 
   PersonalMonthlyExpenseRepository(this._dataProvider);
 
-  Future<PersonalMonthlyExpensePairTD> fetchData(String email) async {
+  Future<PersonalMonthlyExpensePairTD> fetchData(
+    String email,
+    String year,
+    String month,
+  ) async {
     try {
       List<PersonalExpenseTransactionModel> data = await _dataProvider
-          .fetchData(email);
+          .fetchData(email, year, month);
 
       PersonalMonthlyExpensePairTD processedData = PersonalMonthlyExpensePairTD(
         List.generate(

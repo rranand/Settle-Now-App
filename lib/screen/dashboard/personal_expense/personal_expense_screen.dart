@@ -54,9 +54,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   void initState() {
     super.initState();
     final state = context.read<PersonalMonthlyExpenseBloc>().state;
-    if (state is! PersonalMonthlyExpenseFetchSuccess) {
+    if (!(state is PersonalMonthlyExpenseFetchSuccess &&
+        state.id == (widget.year + widget.month).toLowerCase())) {
       context.read<PersonalMonthlyExpenseBloc>().add(
-        PersonalMonthlyExpenseFetch(),
+        PersonalMonthlyExpenseFetch(year: widget.year, month: widget.month),
       );
     }
   }

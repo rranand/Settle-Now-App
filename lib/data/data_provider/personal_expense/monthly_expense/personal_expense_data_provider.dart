@@ -3,7 +3,11 @@ import 'dart:convert';
 import 'package:settlenow_v2/core.dart';
 
 class PersonalMonthlyExpenseDataProvider {
-  Future<List<PersonalExpenseTransactionModel>> fetchData(String email) async {
+  Future<List<PersonalExpenseTransactionModel>> fetchData(
+    String email,
+    String year,
+    String month,
+  ) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
       String dataStr = '''
