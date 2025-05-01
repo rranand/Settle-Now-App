@@ -1,18 +1,18 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomUserScreen extends StatefulWidget {
-  final List<UserModel> users;
-  const RoomUserScreen({super.key, required this.users});
+  const RoomUserScreen({super.key});
 
   @override
   State<RoomUserScreen> createState() => _RoomUserScreenState();
@@ -22,13 +22,17 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double subTextFontSize = UiConstant.cardTitleTextSize - 3;
 
-  Widget _userExpenseWidget(UserModel user) {
-    UserModel user = widget.users.first;
-    double amount = (111 + Random().nextInt(2000)).toDouble();
-
-    if (amount % 2 == 0) {
-      amount *= -1;
+  Color? getAmountColor(double amount) {
+    if (amount == 0) {
+      return Colors.grey;
     }
+
+    return amount < 0 ? Colors.red : Colors.green;
+  }
+
+  Widget _userExpenseWidget(RoomUserModel data) {
+    UserModel user = data.user;
+    double amount = data.contribution - data.spent;
 
     return Card(
       elevation: UiConstant.cardElevation,
@@ -38,30 +42,43 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            overlapUserImageWidget(context, [user], 1, imageRadius: 55),
+            data.hasData
+                ? overlapUserImageWidget(context, [user], 1, imageRadius: 55)
+                : CustomShimmerEffect.overlapImageWidget(
+                  noOfImages: 1,
+                  imageRadius: 55,
+                ),
             SizedBox(width: 8),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  user.name,
-                  style: TextStyle(
-                    fontSize: UiConstant.cardTitleTextSize,
-                    fontWeight: FontWeight.w500,
-                  ),
+                data.hasData
+                    ? Text(
+                      user.name,
+                      style: TextStyle(
+                        fontSize: UiConstant.cardTitleTextSize,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    )
+                    : CustomShimmerEffect.textWidget(
+                      fontSize: UiConstant.cardTitleTextSize,
+                      width: 150,
+                    ),
+                subTextOnCard(
+                  "Contributed: ${formatCurrency(data.contribution, context)}",
+                  fontSize: subTextFontSize,
+                  isLoaded: data.hasData,
                 ),
                 subTextOnCard(
-                  "Contributed: ${formatCurrency(1200, context)}",
+                  "Spent: ${formatCurrency(data.spent, context)}",
                   fontSize: subTextFontSize,
-                ),
-                subTextOnCard(
-                  "Spent: ${formatCurrency(800, context)}",
-                  fontSize: subTextFontSize,
+                  isLoaded: data.hasData,
                 ),
                 subTextOnCard(
                   "Balance: ${formatCurrency(amount, context)}",
                   fontSize: subTextFontSize,
-                  textColor: amount < 0 ? Colors.red : Colors.green,
+                  textColor: getAmountColor(amount),
+                  isLoaded: data.hasData,
                 ),
               ],
             ),
@@ -87,16 +104,28 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
       _mainScreenPadding,
       cardHeight: 135,
     );
-    return SliverGrid.builder(
-      itemCount: widget.users.length,
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: cardSizeInfo[0],
-        mainAxisSpacing: UiConstant.spaceBetweenCard,
-        crossAxisSpacing: UiConstant.spaceBetweenCard,
-        childAspectRatio: cardSizeInfo[1],
-      ),
-      itemBuilder: (BuildContext context, int index) {
-        return _userExpenseWidget(widget.users[index]);
+    return BlocBuilder<RoomUserCubit, RoomUserState>(
+      builder: (context, state) {
+        List<RoomUserModel> data = [];
+
+        if (state is RoomUserSuccess) {
+          data = state.data;
+        } else {
+          data = List.filled(11, RoomUserModel.empty());
+        }
+
+        return SliverGrid.builder(
+          itemCount: data.length,
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: cardSizeInfo[0],
+            mainAxisSpacing: UiConstant.spaceBetweenCard,
+            crossAxisSpacing: UiConstant.spaceBetweenCard,
+            childAspectRatio: cardSizeInfo[1],
+          ),
+          itemBuilder: (BuildContext context, int index) {
+            return _userExpenseWidget(data[index]);
+          },
+        );
       },
     );
   }

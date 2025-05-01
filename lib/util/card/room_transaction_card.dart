@@ -35,10 +35,6 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
     return tags;
   }
 
-  // Vivo v23  pro
-  // 899
-  // Patna
-  //
   @override
   void initState() {
     super.initState();

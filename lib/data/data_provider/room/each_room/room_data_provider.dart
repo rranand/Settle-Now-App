@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
 
 class RoomDataProvider {
   Future<List<TransactionModel>> fetchData(String email, String id) async {
@@ -290,6 +291,84 @@ class RoomDataProvider {
       List<dynamic> tempArr = jsonDecode(dataStr);
       List<TransactionModel> arr =
           tempArr.map((ele) => TransactionModel.fromMap(ele)).toList();
+
+      return arr;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<RoomUserModel>> fetchUserData(String email, String id) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      String dataStr = '''
+      [
+  {
+    "id": "ru1",
+    "user": {
+      "id": "user_1",
+      "name": "John Doe",
+      "profileImage": "https://picsum.photos/id/23/200/300"
+    },
+    "contribution": 150.75,
+    "spent": 120.50
+  },
+  {
+    "id": "ru2",
+    "user": {
+      "id": "u2",
+      "name": "Alice Smith",
+      "profileImage": "https://picsum.photos/id/45/200/300"
+    },
+    "contribution": 0,
+    "spent": 85.00
+  },
+  {
+    "id": "ru3",
+    "user": {
+      "id": "u3",
+      "name": "Bob Johnson",
+      "profileImage": "https://picsum.photos/id/67/200/300"
+    },
+    "contribution": 200.00,
+    "spent": 200.00
+  },
+  {
+    "id": "ru4",
+    "user": {
+      "id": "u4",
+      "name": "Eve Wilson",
+      "profileImage": "https://picsum.photos/id/89/200/300"
+    },
+    "contribution": 75.50,
+    "spent": 0
+  },
+  {
+    "id": "ru5",
+    "user": {
+      "id": "u5",
+      "name": "Mike Brown",
+      "profileImage": "https://picsum.photos/id/12/200/300"
+    },
+    "contribution": 300.25,
+    "spent": 275.75
+  },
+  {
+    "id": "ru6",
+    "user": {
+      "id": "u6",
+      "name": "Sarah Davis",
+      "profileImage": "https://picsum.photos/id/34/200/300"
+    },
+    "contribution": 0,
+    "spent": 0
+  }
+]
+
+    ''';
+      List<dynamic> tempArr = jsonDecode(dataStr);
+      List<RoomUserModel> arr =
+          tempArr.map((ele) => RoomUserModel.fromMap(ele)).toList();
 
       return arr;
     } catch (e) {

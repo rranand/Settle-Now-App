@@ -13,12 +13,12 @@ class LendenRoomNameCubit extends Cubit<LendenRoomNameState> {
     try {
       if (name == null) {
         name = await repo.fetchRoomNameByID("email", id);
-        emit(LendenRoomNameSuccess(name));
+        return emit(LendenRoomNameSuccess(name));
       } else {
-        emit(LendenRoomNameSuccess(name));
+        return emit(LendenRoomNameSuccess(name));
       }
     } catch (e) {
-      emit(LendenRoomNameSuccess(e.toString()));
+      return emit(LendenRoomNameFailure(e.toString()));
     }
   }
 }

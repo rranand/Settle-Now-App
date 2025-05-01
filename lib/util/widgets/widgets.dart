@@ -31,7 +31,7 @@ Widget subTextOnCard(
         ),
       )
       : Padding(
-        padding: EdgeInsets.only(top: 2),
+        padding: EdgeInsets.only(top: 6),
         child: CustomShimmerEffect.textWidget(fontSize: 12, width: 120),
       );
 }

@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_analysis_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomExpenseScreen extends StatefulWidget {
@@ -22,7 +27,11 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
+  final UserModel loggedInUser = UserModel.fromMap({
+    'id': 'user_1',
+    'name': 'Rohit Anand',
+  });
 
   final List<String> _navBarTitles = [
     "Transactions",
@@ -45,16 +54,14 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
   Widget _navBarHandler(int index) {
     switch (index) {
-      case 0:
-        return RoomTransactionScreen();
       case 1:
-        return RoomUserScreen(users: UiConstant.users);
+        return RoomUserScreen();
       case 2:
         return RoomAnalysisScreen();
       case 3:
         return RoomSettleScreen();
       default:
-        return RoomUserScreen(users: UiConstant.users);
+        return RoomTransactionScreen();
     }
   }
 
@@ -67,6 +74,85 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     }
   }
 
+  Widget _roomSummaryCard() {
+    return BlocBuilder<RoomUserCubit, RoomUserState>(
+      builder: (context, state) {
+        if (state is RoomUserSuccess) {
+          RoomUserModel data = RoomUserModel.empty();
+          double totalSpent = 0;
+          for (int i = 0; i < state.data.length; i++) {
+            if (loggedInUser.id == state.data[i].user.id) {
+              data = state.data[i];
+            }
+            totalSpent += state.data[i].contribution;
+          }
+          double balance = data.contribution - data.spent;
+
+          return Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            elevation: 4,
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: GradientColorConstant.greenToTeal,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Room Overview",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _summaryBox(
+                        "Total Spent",
+                        formatCurrency(totalSpent, context),
+                      ),
+                      _summaryBox(
+                        "You Gave",
+                        formatCurrency(data.contribution, context),
+                      ),
+                      _summaryBox(
+                        "Balance",
+                        "${balance < 0 ? "-" : "+"}${formatCurrency(balance, context)}",
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        } else {
+          return CustomShimmerEffect.placeHolderShimmerEffect(
+            Container(
+              padding: EdgeInsets.all(16),
+              height: 108,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.white,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +160,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
     if (!(state is RoomFetchSuccess && state.id == widget.id)) {
       context.read<RoomBloc>().add(RoomFetch(widget.id));
+      context.read<RoomUserCubit>().fetchData(widget.id);
     }
   }
 
@@ -94,47 +181,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         slivers: [
           SliverPadding(
             padding: paddingInsets,
-            sliver: SliverToBoxAdapter(
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 4,
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: GradientColorConstant.greenToTeal,
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Room Overview",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _summaryBox("Total Spent", "₹ 15,000"),
-                          _summaryBox("You Gave", "₹ 6,000"),
-                          _summaryBox("You Owe", "₹ 3,500"),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
           ),
           ValueListenableBuilder(
             valueListenable: _navbarSelectedIndex,
