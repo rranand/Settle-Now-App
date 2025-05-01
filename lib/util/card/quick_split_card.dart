@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
-import 'package:settlenow_v2/model/quicksplit_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
@@ -10,7 +10,7 @@ import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class QuickSplitCard extends StatefulWidget {
-  final QuickSplitModel data;
+  final TransactionModel data;
   const QuickSplitCard({super.key, required this.data});
 
   @override
@@ -19,6 +19,14 @@ class QuickSplitCard extends StatefulWidget {
 
 class _QuickSplitCardState extends State<QuickSplitCard> {
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
+
+  List<String> createTags() {
+    List<String> tags = [widget.data.category];
+    if (widget.data.createdOn != widget.data.modifiedOn) {
+      tags.add("Edited");
+    }
+    return tags;
+  }
 
   Widget transactionInfoWidget(bool value) {
     return Column(
@@ -55,7 +63,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
         Visibility(
           visible: widget.data.createdOn != widget.data.modifiedOn,
           child: subTextOnCard(
-            "Modified On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+            "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
             isLoaded: widget.data.hasData,
           ),
         ),
@@ -108,6 +116,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> tags = createTags();
     return Container(
       padding: EdgeInsets.all(UiConstant.cardPadding),
       margin: EdgeInsets.all(4),
@@ -131,22 +140,18 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  tagOnCard(
-                    widget.data.category,
-                    isFirst: true,
+                children: List.generate(
+                  tags.length,
+                  (index) => tagOnCard(
+                    tags[index],
+                    textColor:
+                        UiConstant.colors[index % UiConstant.colors.length],
+                    backgroundColor:
+                        UiConstant.colorsWithShade50[index %
+                            UiConstant.colors.length],
                     isLoaded: widget.data.hasData,
                   ),
-                  ...List.generate(
-                    widget.data.tags.length,
-                    (index) => tagOnCard(
-                      widget.data.tags[index],
-                      textColor: UiConstant.colors[1],
-                      backgroundColor: UiConstant.colorsWithShade50[1],
-                      isLoaded: widget.data.hasData,
-                    ),
-                  ),
-                ],
+                ),
               ),
               Visibility(
                 visible: widget.data.hasData,

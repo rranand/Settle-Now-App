@@ -55,6 +55,14 @@ class UserModel {
     );
   }
 
+  factory UserModel.fromBasicInfoMap(Map<String, dynamic> map) {
+    return UserModel.fromBasicInfo(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      profileImage: (map['profileImage'] ?? "") as String,
+    );
+  }
+
   String toJson() => json.encode(toMap());
 
   factory UserModel.fromJson(String source) =>

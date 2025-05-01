@@ -1,20 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow_v2/model/lenden_room_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/custom/pair.dart';
 
 class LendenSummaryCard extends StatelessWidget {
-  final double gaveAmount;
-  final double oweAmount;
+  final List<LendenRoomModel> data;
+  final UserModel loggedInUser;
 
   const LendenSummaryCard({
     super.key,
-    required this.gaveAmount,
-    required this.oweAmount,
+    required this.data,
+    required this.loggedInUser,
   });
+
+  Pair<double, double> calculateBalance() {
+    double gaveAmount = 0;
+    double oweAmount = 0;
+
+    for (int i = 0; i < data.length; i++) {
+      bool isMe = data[i].createdBy.id == loggedInUser.id;
+
+      if (isMe) {
+        if (data[i].amount < 0) {
+          oweAmount += data[i].amount.abs();
+        } else {
+          gaveAmount += data[i].amount;
+        }
+      } else {
+        if (data[i].amount < 0) {
+          gaveAmount += data[i].amount.abs();
+        } else {
+          oweAmount += data[i].amount;
+        }
+      }
+    }
+    return Pair(gaveAmount, oweAmount);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final netBalance = gaveAmount - oweAmount;
+    Pair<double, double> balance = calculateBalance();
+    final netBalance = balance.first - balance.second;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -35,9 +64,9 @@ class LendenSummaryCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildSection("You Gave", gaveAmount, Colors.green[700]!, context),
+          _buildSection("You Gave", balance.first, Colors.green[700]!, context),
           _divider(),
-          _buildSection("You Owe", oweAmount, Colors.red[600]!, context),
+          _buildSection("You Owe", balance.second, Colors.red[600]!, context),
           _divider(),
           _buildSection(
             "Net Balance",

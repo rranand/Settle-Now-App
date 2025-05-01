@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:settlenow_v2/model/room_info_model.dart';
 
-class RoomDataProvider {
+class RoomDashboardDataProvider {
   Future<List<RoomInfoModel>> fetchData(String email) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});

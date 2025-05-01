@@ -1,114 +1,114 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/model/user_amount_model.dart';
 
-class Transaction {
+class TransactionModel {
   bool hasData = true;
-  String id;
-  String purpose;
-  double amount;
-  DateTime createdOn;
-  DateTime modifiedOn;
-  UserModel createdBy;
-  String category;
-  List<UserModel> splittedBetween = [];
+  String id = "";
+  String description = "";
+  double amount = 0;
+  String category = "";
+  UserAmountModel createdBy = UserAmountModel.empty();
+  List<UserAmountModel> users = [];
+  DateTime createdOn = DateTime.now();
+  DateTime modifiedOn = DateTime.now();
 
-  Transaction({
+  TransactionModel({
     required this.id,
-    required this.purpose,
+    required this.description,
     required this.amount,
+    required this.category,
+    required this.users,
+    required this.createdBy,
     required this.createdOn,
     required this.modifiedOn,
-    required this.createdBy,
-    required this.category,
-    required this.splittedBetween,
   });
 
-  Transaction copyWith({
+  TransactionModel.empty({this.hasData = false});
+
+  TransactionModel copyWith({
     String? id,
-    String? purpose,
+    String? description,
     double? amount,
+    String? category,
+    List<UserAmountModel>? users,
+    UserAmountModel? createdBy,
     DateTime? createdOn,
     DateTime? modifiedOn,
-    UserModel? createdBy,
-    String? category,
-    List<UserModel>? splittedBetween,
   }) {
-    return Transaction(
+    return TransactionModel(
       id: id ?? this.id,
-      purpose: purpose ?? this.purpose,
+      description: description ?? this.description,
       amount: amount ?? this.amount,
+      category: category ?? this.category,
+      users: users ?? this.users,
+      createdBy: createdBy ?? this.createdBy,
       createdOn: createdOn ?? this.createdOn,
       modifiedOn: modifiedOn ?? this.modifiedOn,
-      createdBy: createdBy ?? this.createdBy,
-      category: category ?? this.category,
-      splittedBetween: splittedBetween ?? this.splittedBetween,
     );
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'purpose': purpose,
       'amount': amount,
-      'createdOn': createdOn.millisecondsSinceEpoch,
-      'modifiedOn': modifiedOn.millisecondsSinceEpoch,
-      'createdBy': createdBy.toMap(),
       'category': category,
-      'splittedBetween': splittedBetween.map((x) => x.toMap()).toList(),
+      'users': users.map((x) => x.toMap()).toList(),
+      'createdBy': createdBy.toMap(),
+      'createdOn': createdOn.toString(),
+      'modifiedOn': modifiedOn.toString(),
     };
   }
 
-  factory Transaction.fromMap(Map<String, dynamic> map) {
-    return Transaction(
+  factory TransactionModel.fromMap(Map<String, dynamic> map) {
+    return TransactionModel(
       id: map['id'] as String,
-      purpose: map['purpose'] as String,
+      description: map['description'] as String,
       amount: map['amount'] as double,
-      createdOn: DateTime.fromMillisecondsSinceEpoch(map['createdOn'] as int),
-      modifiedOn: DateTime.fromMillisecondsSinceEpoch(map['modifiedOn'] as int),
-      createdBy: UserModel.fromMap(map['createdBy'] as Map<String, dynamic>),
       category: map['category'] as String,
-      splittedBetween: List<UserModel>.from(
-        (map['splittedBetween'] as List<int>).map<UserModel>(
-          (x) => UserModel.fromMap(x as Map<String, dynamic>),
-        ),
+      users: List<UserAmountModel>.from(
+        (map['users']).map((x) => UserAmountModel.fromMap(x)),
       ),
+      createdBy: UserAmountModel.fromMap(map['createdBy']),
+      createdOn: DateTime.parse(map['createdOn']),
+      modifiedOn: DateTime.parse(map['modifiedOn']),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory Transaction.fromJson(String source) =>
-      Transaction.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory TransactionModel.fromJson(String source) =>
+      TransactionModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'Transaction(id: $id, purpose: $purpose, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category, splittedBetween: $splittedBetween)';
+    return 'TransactionModel(id: $id, description: $description, amount: $amount, category: $category)';
   }
 
   @override
-  bool operator ==(covariant Transaction other) {
+  bool operator ==(covariant TransactionModel other) {
     if (identical(this, other)) return true;
 
     return other.id == id &&
-        other.purpose == purpose &&
         other.amount == amount &&
-        other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn &&
-        other.createdBy == createdBy &&
         other.category == category &&
-        listEquals(other.splittedBetween, splittedBetween);
+        listEquals(other.users, users) &&
+        other.createdBy == createdBy &&
+        other.createdOn == createdOn &&
+        other.modifiedOn == modifiedOn;
   }
 
   @override
   int get hashCode {
     return id.hashCode ^
-        purpose.hashCode ^
+        description.hashCode ^
         amount.hashCode ^
-        createdOn.hashCode ^
-        modifiedOn.hashCode ^
-        createdBy.hashCode ^
         category.hashCode ^
-        splittedBetween.hashCode;
+        users.hashCode ^
+        createdBy.hashCode ^
+        createdOn.hashCode ^
+        modifiedOn.hashCode;
   }
 }

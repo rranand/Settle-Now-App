@@ -10,22 +10,26 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
+import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
-import 'package:settlenow_v2/bloc/room/room_bloc.dart';
+import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
+import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubit.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/lenden/room/lenden_room_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/dashboard/personal_expense_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
-import 'package:settlenow_v2/data/data_provider/room_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
+import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/dashboard/personal_expense_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
-import 'package:settlenow_v2/data/repository/room_repository.dart';
+import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/provider/theme_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
@@ -112,8 +116,9 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<AuthRepository>(
           create: (context) => AuthRepository(AuthDataProvider()),
         ),
-        RepositoryProvider<RoomRepository>(
-          create: (context) => RoomRepository(RoomDataProvider()),
+        RepositoryProvider<RoomDashboardRepository>(
+          create:
+              (context) => RoomDashboardRepository(RoomDashboardDataProvider()),
         ),
         RepositoryProvider<QuicksplitRepository>(
           create: (context) => QuicksplitRepository(QuicksplitDataProvider()),
@@ -135,6 +140,9 @@ class MyApp extends StatelessWidget {
                 PersonalMonthlyExpenseDataProvider(),
               ),
         ),
+        RepositoryProvider<LendenRoomRepository>(
+          create: (context) => LendenRoomRepository(LendenRoomDataProvider()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -149,8 +157,10 @@ class MyApp extends StatelessWidget {
                 (context) =>
                     QuicksplitBloc(context.read<QuicksplitRepository>()),
           ),
-          BlocProvider<RoomBloc>(
-            create: (context) => RoomBloc(context.read<RoomRepository>()),
+          BlocProvider<RoomDashboardBloc>(
+            create:
+                (context) =>
+                    RoomDashboardBloc(context.read<RoomDashboardRepository>()),
           ),
           BlocProvider<LendenDashboardBloc>(
             create:
@@ -169,6 +179,16 @@ class MyApp extends StatelessWidget {
                 (context) => PersonalMonthlyExpenseBloc(
                   context.read<PersonalMonthlyExpenseRepository>(),
                 ),
+          ),
+          BlocProvider<LendenRoomBloc>(
+            create:
+                (context) =>
+                    LendenRoomBloc(context.read<LendenRoomRepository>()),
+          ),
+          BlocProvider<LendenRoomNameCubit>(
+            create:
+                (context) =>
+                    LendenRoomNameCubit(context.read<LendenRoomRepository>()),
           ),
         ],
         child: MultiProvider(

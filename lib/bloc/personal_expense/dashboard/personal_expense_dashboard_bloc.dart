@@ -8,9 +8,9 @@ part 'personal_expense_dashboard_state.dart';
 
 class PersonalExpenseDashboardBloc
     extends Bloc<PersonalExpenseDashboardEvent, PersonalExpenseDashboardState> {
-  final PersonalExpenseDashboardRepository personalExpenseRepository;
+  final PersonalExpenseDashboardRepository repo;
 
-  PersonalExpenseDashboardBloc(this.personalExpenseRepository)
+  PersonalExpenseDashboardBloc(this.repo)
     : super(PersonalExpenseDashboardInitial()) {
     on<PersonalExpenseDashboardFetch>(_personalExpenseFetch);
   }
@@ -21,8 +21,9 @@ class PersonalExpenseDashboardBloc
   ) async {
     emit(PersonalExpenseDashboardLoading());
     try {
-      Map<int, List<PersonalExpenseInfoModel>> data =
-          await personalExpenseRepository.fetchData("niriif@kff.ed");
+      Map<int, List<PersonalExpenseInfoModel>> data = await repo.fetchData(
+        "niriif@kff.ed",
+      );
       return emit(PersonalExpenseDashboardFetchSuccess(data));
     } catch (e) {
       return emit(PersonalExpenseDashboardFailure(e.toString()));

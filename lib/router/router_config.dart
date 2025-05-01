@@ -94,7 +94,10 @@ class AppRouterConfig {
           GoRoute(
             path: "${RouterConstants.lendenRouteName}/:id",
             builder: (context, state) {
-              return LendenExpenseScreen(id: state.pathParameters["id"]!);
+              return LendenExpenseScreen(
+                id: state.pathParameters["id"]!,
+                roomName: state.extra as String?,
+              );
             },
             redirect: (context, state) {
               Map<String, String> param = state.pathParameters;
@@ -115,7 +118,7 @@ class AppRouterConfig {
   static final _router = GoRouter(
     routes: _allRoutes(),
     //initialLocation: RouterConstants.dashboardRouteName,
-    initialLocation: "${RouterConstants.lendenRouteName}/lenden_id_1",
+    initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
     observers: [observer],
   );
 

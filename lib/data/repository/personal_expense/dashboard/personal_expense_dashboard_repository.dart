@@ -2,16 +2,17 @@ import 'package:settlenow_v2/data/data_provider/personal_expense/dashboard/perso
 import 'package:settlenow_v2/model/personal_expense_info_model.dart';
 
 class PersonalExpenseDashboardRepository {
-  final PersonalExpenseDashboardDataProvider personalExpenseDataProvider;
+  final PersonalExpenseDashboardDataProvider _dataProvider;
 
-  PersonalExpenseDashboardRepository(this.personalExpenseDataProvider);
+  PersonalExpenseDashboardRepository(this._dataProvider);
 
   Future<Map<int, List<PersonalExpenseInfoModel>>> fetchData(
     String email,
   ) async {
     try {
-      List<PersonalExpenseInfoModel> data = await personalExpenseDataProvider
-          .fetchData(email);
+      List<PersonalExpenseInfoModel> data = await _dataProvider.fetchData(
+        email,
+      );
 
       Map<int, List<PersonalExpenseInfoModel>> yearWiseExpense = {};
 

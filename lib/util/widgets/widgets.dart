@@ -30,7 +30,10 @@ Widget subTextOnCard(
           fontWeight: fontWeight,
         ),
       )
-      : CustomShimmerEffect.textWidget(fontSize: 12, width: 120);
+      : Padding(
+        padding: EdgeInsets.only(top: 2),
+        child: CustomShimmerEffect.textWidget(fontSize: 12, width: 120),
+      );
 }
 
 Widget appBarBackButton(BuildContext context) {

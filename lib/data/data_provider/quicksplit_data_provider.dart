@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/model/quicksplit_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
 
 class QuicksplitDataProvider {
-  Future<List<QuickSplitModel>> fetchData(String email) async {
+  Future<List<TransactionModel>> fetchData(String email) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
       String dataStr = '''[
@@ -125,8 +125,8 @@ class QuicksplitDataProvider {
 ''';
 
       List<dynamic> tempArr = jsonDecode(dataStr);
-      List<QuickSplitModel> arr =
-          tempArr.map((ele) => QuickSplitModel.fromMap(ele)).toList();
+      List<TransactionModel> arr =
+          tempArr.map((ele) => TransactionModel.fromMap(ele)).toList();
 
       return arr;
     } catch (e) {

@@ -53,8 +53,8 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    final personalMonthlyExp = context.read<PersonalMonthlyExpenseBloc>().state;
-    if (!personalMonthlyExp.hasData) {
+    final state = context.read<PersonalMonthlyExpenseBloc>().state;
+    if (state is! PersonalMonthlyExpenseFetchSuccess) {
       context.read<PersonalMonthlyExpenseBloc>().add(
         PersonalMonthlyExpenseFetch(),
       );

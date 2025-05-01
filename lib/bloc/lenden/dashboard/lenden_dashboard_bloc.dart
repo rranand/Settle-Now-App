@@ -6,20 +6,21 @@ import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 part 'lenden_dashboard_event.dart';
 part 'lenden_dashboard_state.dart';
 
+class LendenDashboardBloc
+    extends Bloc<LendenDashboardEvent, LendenDashboardState> {
+  final LendenDashboardRepository repo;
 
-class LendenDashboardBloc extends Bloc<LendenDashboardEvent, LendenDashboardState> {
-  final LendenDashboardRepository lendenDashboardRepository;
-
-  LendenDashboardBloc(this.lendenDashboardRepository) : super(LendenDashboardInitial()) {
+  LendenDashboardBloc(this.repo) : super(LendenDashboardInitial()) {
     on<LendenDashboardFetch>(_lendenDashboardFetch);
   }
 
-  void _lendenDashboardFetch(LendenDashboardFetch event, Emitter<LendenDashboardState> emit) async {
+  void _lendenDashboardFetch(
+    LendenDashboardFetch event,
+    Emitter<LendenDashboardState> emit,
+  ) async {
     emit(LendenDashboardLoading());
     try {
-      List<LendenDashboardModel> data = await lendenDashboardRepository.fetchData(
-        "niriif@kff.ed",
-      );
+      List<LendenDashboardModel> data = await repo.fetchData("niriif@kff.ed");
       return emit(LendenDashboardFetchSuccess(data));
     } catch (e) {
       return emit(LendenDashboardFailure(e.toString()));

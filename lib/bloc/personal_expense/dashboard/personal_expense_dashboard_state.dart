@@ -1,32 +1,24 @@
 part of 'personal_expense_dashboard_bloc.dart';
 
 @immutable
-sealed class PersonalExpenseDashboardState {
-  final bool hasData;
-
-  const PersonalExpenseDashboardState({this.hasData = false});
-}
+sealed class PersonalExpenseDashboardState {}
 
 final class PersonalExpenseDashboardInitial
-    extends PersonalExpenseDashboardState {
-  const PersonalExpenseDashboardInitial() : super(hasData: false);
-}
+    extends PersonalExpenseDashboardState {}
 
 final class PersonalExpenseDashboardLoading
-    extends PersonalExpenseDashboardState {
-  const PersonalExpenseDashboardLoading() : super(hasData: false);
-}
+    extends PersonalExpenseDashboardState {}
 
 final class PersonalExpenseDashboardFetchSuccess
     extends PersonalExpenseDashboardState {
   final Map<int, List<PersonalExpenseInfoModel>> data;
 
-  const PersonalExpenseDashboardFetchSuccess(this.data) : super(hasData: true);
+  PersonalExpenseDashboardFetchSuccess(this.data);
 }
 
 final class PersonalExpenseDashboardFailure
     extends PersonalExpenseDashboardState {
   final String error;
 
-  const PersonalExpenseDashboardFailure(this.error) : super(hasData: false);
+  PersonalExpenseDashboardFailure(this.error);
 }

@@ -86,9 +86,8 @@ class _PersonalExpenseDashboardScreenState
   void initState() {
     super.initState();
     _scrollController = ScrollController();
-    final personalExpenseDataFetched =
-        context.read<PersonalExpenseDashboardBloc>().state;
-    if (!personalExpenseDataFetched.hasData) {
+    final state = context.read<PersonalExpenseDashboardBloc>().state;
+    if (state is! PersonalExpenseDashboardFetchSuccess) {
       context.read<PersonalExpenseDashboardBloc>().add(
         PersonalExpenseDashboardFetch(),
       );

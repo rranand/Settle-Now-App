@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:settlenow_v2/bloc/room/room_bloc.dart';
+import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -27,8 +27,8 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
 
   List<String> statusList = ["Open", "Closed", "Partially Closed"];
 
-  void _blocListenerHandler(BuildContext context, RoomState state) {
-    if (state is RoomFailure) {
+  void _blocListenerHandler(BuildContext context, RoomDashboardState state) {
+    if (state is RoomDashboardFailure) {
       showNormalSnackBar(context, state.error);
     }
   }
@@ -45,10 +45,10 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final roomDataFetched = context.read<RoomBloc>().state;
+    final state = context.read<RoomDashboardBloc>().state;
 
-    if (!roomDataFetched.hasData) {
-      context.read<RoomBloc>().add(RoomFetch());
+    if (state is! RoomDashboardFetchSuccess) {
+      context.read<RoomDashboardBloc>().add(RoomDashboardFetch());
     }
   }
 
@@ -105,13 +105,13 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
               );
             },
           ),
-          BlocConsumer<RoomBloc, RoomState>(
+          BlocConsumer<RoomDashboardBloc, RoomDashboardState>(
             listener: _blocListenerHandler,
             builder: (context, state) {
               List<RoomInfoModel> roomInfoData = [];
-              if (state is RoomFetchSuccess) {
+              if (state is RoomDashboardFetchSuccess) {
                 roomInfoData = state.data;
-              } else if (state is RoomLoading) {
+              } else if (state is RoomDashboardLoading) {
                 roomInfoData = List.generate(11, (i) => RoomInfoModel.empty());
               }
               return SliverPadding(

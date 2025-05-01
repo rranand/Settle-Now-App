@@ -5,13 +5,14 @@ import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomTransactionCard extends StatefulWidget {
-  final int index;
-  const RoomTransactionCard({super.key, required this.index});
+  final TransactionModel data;
+  const RoomTransactionCard({super.key, required this.data});
 
   @override
   State<RoomTransactionCard> createState() => _RoomTransactionCardState();
@@ -20,15 +21,29 @@ class RoomTransactionCard extends StatefulWidget {
 class _RoomTransactionCardState extends State<RoomTransactionCard> {
   final double amount = -100;
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
-  final List<String> tagsTitle = ["Edited"];
   bool _isManualSplit = false;
+
+  List<String> createTags() {
+    List<String> tags = [widget.data.category];
+    if (widget.data.hasData) {
+      if (widget.data.createdOn != widget.data.modifiedOn) {
+        tags.add("Edited");
+      }
+      if (widget.data.users.isEmpty &&
+          widget.data.createdBy.amount == widget.data.amount) {
+        tags.add("Self");
+      } else if (widget.data.users.isNotEmpty) {
+        tags.add("Partial");
+      }
+    }
+    return tags;
+  }
 
   @override
   void initState() {
     super.initState();
-    if (widget.index % 2 == 0) {
+    if (widget.data.users.isNotEmpty) {
       _isManualSplit = true;
-      tagsTitle.add("Partial");
     }
   }
 
@@ -77,6 +92,8 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
 
   @override
   Widget build(BuildContext context) {
+    List<String> tags = createTags();
+    int categoryIndex = CategoryParser.indexOfCategory(widget.data.category);
     return Container(
       padding: EdgeInsets.all(UiConstant.cardPadding),
       margin: EdgeInsets.all(4),
@@ -100,17 +117,18 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  tagOnCard("Food"),
-                  ...List.generate(
-                    tagsTitle.length,
-                    (index) => tagOnCard(
-                      tagsTitle[index],
-                      textColor: UiConstant.colors[1],
-                      backgroundColor: UiConstant.colorsWithShade50[1],
-                    ),
+                children: List.generate(
+                  tags.length,
+                  (index) => tagOnCard(
+                    tags[index],
+                    textColor:
+                        UiConstant.colors[index % UiConstant.colors.length],
+                    backgroundColor:
+                        UiConstant.colorsWithShade50[index %
+                            UiConstant.colors.length],
+                    isLoaded: widget.data.hasData,
                   ),
-                ],
+                ),
               ),
               Visibility(
                 visible: _isManualSplit,
@@ -127,29 +145,53 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
             ],
           ),
           ListTile(
-            leading: colouredIcon(
-              Icon(
-                CategoryParser.expenseCategoryIcons[widget.index %
-                    CategoryParser.expenseCategoryIcons.length],
-              ),
-              UiConstant.colorsWithShade100[widget.index %
-                  CategoryParser.expenseCategoryIcons.length],
-            ),
-            title: Text("Chickoo Ice-Cream"),
+            leading:
+                widget.data.hasData
+                    ? colouredIcon(
+                      Icon(
+                        CategoryParser.expenseCategoryIcons[categoryIndex %
+                            CategoryParser.expenseCategoryIcons.length],
+                      ),
+                      UiConstant.colorsWithShade100[categoryIndex %
+                          CategoryParser.expenseCategoryIcons.length],
+                    )
+                    : CustomShimmerEffect.imageWidget(
+                      shape: BoxShape.circle,
+                      radius: 50,
+                    ),
+            title:
+                widget.data.hasData
+                    ? Text(widget.data.description)
+                    : CustomShimmerEffect.textWidget(width: 125),
             subtitle: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                subTextOnCard("Created On March 10, 2025"),
-                widget.index % 3 == 0
-                    ? subTextOnCard("Modified On March 12, 2025")
-                    : subTextOnCard(""),
+                subTextOnCard(
+                  "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
+                  isLoaded: widget.data.hasData,
+                ),
+                widget.data.createdOn != widget.data.modifiedOn
+                    ? subTextOnCard(
+                      "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                      isLoaded: widget.data.hasData,
+                    )
+                    : subTextOnCard("", isLoaded: widget.data.hasData),
               ],
             ),
-            trailing: Text(
-              formatCurrency((121 + Random().nextInt(300)) * 1.0, context),
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-            ),
+            trailing:
+                widget.data.hasData
+                    ? Text(
+                      formatCurrency(
+                        (121 + Random().nextInt(300)) * 1.0,
+                        context,
+                      ),
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    )
+                    : CustomShimmerEffect.textWidget(width: 50, fontSize: 16),
           ),
           ValueListenableBuilder(
             valueListenable: isExpanded,

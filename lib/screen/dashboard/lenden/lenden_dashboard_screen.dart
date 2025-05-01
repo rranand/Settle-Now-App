@@ -41,9 +41,9 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final lendenDataFetched = context.read<LendenDashboardBloc>().state;
+    final state = context.read<LendenDashboardBloc>().state;
 
-    if (!lendenDataFetched.hasData) {
+    if (state is! LendenDashboardFetchSuccess) {
       context.read<LendenDashboardBloc>().add(LendenDashboardFetch());
     }
   }
@@ -90,7 +90,10 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
               if (state is LendenDashboardFetchSuccess) {
                 lendenData = state.data;
               } else if (state is LendenDashboardLoading) {
-                lendenData = List.generate(11, (i) => LendenDashboardModel.empty());
+                lendenData = List.generate(
+                  11,
+                  (i) => LendenDashboardModel.empty(),
+                );
               }
               return SliverPadding(
                 padding: _mainScreenPadding.add(

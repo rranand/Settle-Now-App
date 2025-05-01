@@ -7,9 +7,9 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
+  final AuthRepository repo;
 
-  AuthBloc(this.authRepository) : super(AuthInitial()) {
+  AuthBloc(this.repo) : super(AuthInitial()) {
     on<AuthLoginRequested>(_authLoginRequested);
     on<AuthGoogleSignInRequested>(_authGoogleSignInRequested);
     on<AuthSignUpRequested>(_authSignUpRequested);
@@ -27,10 +27,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      UserModel userData = await authRepository.getLoginToken(
-        event.email,
-        event.otp,
-      );
+      UserModel userData = await repo.getLoginToken(event.email, event.otp);
 
       return emit(AuthLoginSuccess(userData));
     } catch (e) {
@@ -75,10 +72,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthSignUpLoading());
 
     try {
-      bool isSignUpSuccess = await authRepository.signUpUser(
-        event.name,
-        event.email,
-      );
+      bool isSignUpSuccess = await repo.signUpUser(event.name, event.email);
       if (isSignUpSuccess) {
         return emit(AuthSignUpSuccess(isSignUpSuccess));
       } else {
@@ -101,7 +95,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthOTPSendLoading());
 
     try {
-      bool isOTPSend = await authRepository.sendOTP(event.email);
+      bool isOTPSend = await repo.sendOTP(event.email);
       if (isOTPSend) {
         return emit(AuthOTPSendSuccess());
       } else {
@@ -125,10 +119,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final userData = (state as AuthLoginSuccess).userData;
     emit(AuthLogoutLoading(userData));
     try {
-      bool isLogoutSuccessful = await authRepository.logoutUser(
-        userData.email,
-        "",
-      );
+      bool isLogoutSuccessful = await repo.logoutUser(userData.email, "");
       // if (GoogleSignIN.getCurrentUser() != null) {
       //   await GoogleSignIN.logout();
       // } else if (await FacebookLogin.getAccessToken() != null) {
@@ -159,7 +150,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     return emit(AuthInitial());
     // emit(AuthLoginLoading());
     // try {
-    //   UserModel userData = await authRepository.getLoggedInUser();
+    //   UserModel userData = await repo.getLoggedInUser();
     //   return emit(AuthLoginSuccess(userData));
     // } catch (e) {
     //   return emit(AuthInitial());

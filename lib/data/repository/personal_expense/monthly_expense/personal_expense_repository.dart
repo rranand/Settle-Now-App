@@ -2,14 +2,14 @@ import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
 
 class PersonalMonthlyExpenseRepository {
-  final PersonalMonthlyExpenseDataProvider personalMonthlyExpenseDataProvider;
+  final PersonalMonthlyExpenseDataProvider _dataProvider;
 
-  PersonalMonthlyExpenseRepository(this.personalMonthlyExpenseDataProvider);
+  PersonalMonthlyExpenseRepository(this._dataProvider);
 
   Future<PersonalMonthlyExpensePairTD> fetchData(String email) async {
     try {
-      List<PersonalExpenseTransactionModel> data =
-          await personalMonthlyExpenseDataProvider.fetchData(email);
+      List<PersonalExpenseTransactionModel> data = await _dataProvider
+          .fetchData(email);
 
       PersonalMonthlyExpensePairTD processedData = PersonalMonthlyExpensePairTD(
         List.generate(

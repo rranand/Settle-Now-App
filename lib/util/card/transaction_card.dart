@@ -71,7 +71,7 @@ class _TransactionCardState extends State<TransactionCard> {
                   ),
                   widget.data.modifiedOn != widget.data.createdOn
                       ? subTextOnCard(
-                        "Modified On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                        "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
                       )
                       : subTextOnCard(""),
                 ],

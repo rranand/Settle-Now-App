@@ -4,7 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/model/quicksplit_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/quick_split_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
@@ -42,9 +42,9 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    final quicksplitDataFetched = context.read<QuicksplitBloc>().state;
+    final state = context.read<QuicksplitBloc>().state;
 
-    if (!quicksplitDataFetched.hasData) {
+    if (state is! QuicksplitFetchSuccess) {
       context.read<QuicksplitBloc>().add(QuicksplitFetch());
     }
   }
@@ -57,11 +57,11 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       body: BlocConsumer<QuicksplitBloc, QuicksplitState>(
         listener: _blocListenerHandler,
         builder: (context, state) {
-          List<QuickSplitModel> splitData = [];
+          List<TransactionModel> splitData = [];
           if (state is QuicksplitFetchSuccess) {
             splitData = state.data;
           } else if (state is QuicksplitLoading) {
-            splitData = List.generate(11, (i) => QuickSplitModel.empty());
+            splitData = List.generate(11, (i) => TransactionModel.empty());
           }
           int noOfCardsToBeShown = splitData.length;
           if (isWide) {
@@ -105,7 +105,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                 sliver: SliverList.builder(
                   itemCount: noOfCardsToBeShown,
                   itemBuilder: (BuildContext context, int index) {
-                    QuickSplitModel eachSplitData = splitData[index];
+                    TransactionModel eachSplitData = splitData[index];
                     if (isWide) {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,

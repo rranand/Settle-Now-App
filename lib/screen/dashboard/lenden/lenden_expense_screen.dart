@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/model/lenden_expense_model.dart';
+import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubit.dart';
+import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/lenden_expense_card.dart';
 import 'package:settlenow_v2/util/card/lenden_summary_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class LendenExpenseScreen extends StatefulWidget {
   final String id;
-  const LendenExpenseScreen({super.key, required this.id});
+  final String? roomName;
+
+  const LendenExpenseScreen({super.key, required this.id, this.roomName});
 
   @override
   State<LendenExpenseScreen> createState() => _LendenExpenseScreenState();
@@ -20,136 +26,26 @@ class LendenExpenseScreen extends StatefulWidget {
 
 class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+  UserModel loggedInUser = UserModel.fromMap({
+    'id': 'user_1',
+    'name': 'Rohit Anand',
+  });
 
-  final List<Map<String, dynamic>> transactions = [
-    {
-      'amount': 250.0,
-      'direction': 'gave',
-      'description': 'Dinner at Olive',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 1, hours: 2)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 100.0,
-      'direction': 'owe',
-      'description': 'Shared cab',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 1, hours: 6)).toString(),
-      'createdBy': {'id': '2', 'name': 'RA'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 40.0,
-      'direction': 'gave',
-      'description': 'Snacks at the mall',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 2, hours: 4)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 300.0,
-      'direction': 'gave',
-      'description': 'Weekend Airbnb',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 3, hours: 1)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 80.0,
-      'direction': 'owe',
-      'description': 'Fuel split',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 3, hours: 2)).toString(),
-      'createdBy': {'id': '2', 'name': 'RA'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 20.0,
-      'direction': 'gave',
-      'description': 'Ice cream 🍦',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 4, hours: 5)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 60.0,
-      'direction': 'owe',
-      'description': 'Lunch at CCD',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 5, hours: 3)).toString(),
-      'createdBy': {'id': '2', 'name': 'RA'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 90.0,
-      'direction': 'gave',
-      'description': 'Board games',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 5, hours: 4)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 150.0,
-      'direction': 'owe',
-      'description':
-          'Concert tickets and Country Foods, Concert tickets and Country Foods 🎵',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 6, hours: 2)).toString(),
-      'createdBy': {'id': '2', 'name': 'RA'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 110.0,
-      'direction': 'gave',
-      'description': 'Groceries',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 7, hours: 5)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 45.0,
-      'direction': 'owe',
-      'description': 'Tea & Snacks',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 8, hours: 1)).toString(),
-      'createdBy': {'id': '2', 'name': 'RA'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 35.0,
-      'direction': 'gave',
-      'description': 'Auto fare',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 8, hours: 3)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 200.0,
-      'direction': 'gave',
-      'description': 'Shopping at Dmart',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 9, hours: 6)).toString(),
-      'createdBy': {'id': '1', 'name': 'Rohit Anand'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-    {
-      'amount': 30.0,
-      'direction': 'owe',
-      'description': 'Late night Maggie',
-      'createdOn':
-          DateTime.now().subtract(Duration(days: 9, hours: 7)).toString(),
-      'createdBy': {'id': '2', 'name': 'RA'},
-      'modifiedOn': DateTime.now().toString(),
-    },
-  ];
+  void _blocListenerHandler(BuildContext context, LendenRoomState state) {
+    if (state is LendenRoomFailure) {
+      showNormalSnackBar(context, state.error);
+    }
+  }
+
+  List<LendenRoomModel> generateShimmerData() {
+    return List.generate(11, (i) {
+      LendenRoomModel tempData = LendenRoomModel.empty();
+      if (i % 2 == 0) {
+        tempData.createdBy.id = loggedInUser.id;
+      }
+      return tempData;
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -161,6 +57,17 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    final state = context.read<LendenRoomBloc>().state;
+
+    if (!(state is LendenRoomFetchSuccess && state.roomID == widget.id)) {
+      context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
+    }
+    context.read<LendenRoomNameCubit>().fetchName(widget.id, widget.roomName);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
     EdgeInsets paddingInsets = _mainScreenPadding;
@@ -169,44 +76,77 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.id),
+        title: BlocBuilder<LendenRoomNameCubit, LendenRoomNameState>(
+          builder: (context, state) {
+            if (state is LendenRoomNameSuccess) {
+              return Text(state.roomName);
+            } else if (state is LendenRoomNameFailure) {
+              showNormalSnackBar(context, state.error);
+              return Text(widget.id);
+            } else {
+              return CustomShimmerEffect.textWidget(width: 180, fontSize: 20);
+            }
+          },
+        ),
         titleSpacing: _mainScreenPadding.left,
         leading: appBarBackButton(context),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: paddingInsets.add(
-              EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
-            ),
-            sliver: SliverToBoxAdapter(
-              child: LendenSummaryCard(gaveAmount: 100, oweAmount: 200),
-            ),
-          ),
-          SliverPadding(
-            padding: _mainScreenPadding,
-            sliver: SliverList.builder(
-              itemCount: transactions.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom:
-                        index == transactions.length - 1
-                            ? UiConstant.spaceAtBottom
-                            : 0,
-                  ),
-                  child: LendenExpenseCard(
-                    expense: LenDenModel.fromMap(transactions[index]),
-                    loggedInUser: UserModel.fromMap({
-                      'id': '1',
-                      'name': 'Rohit Anand',
-                    }),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+      body: BlocConsumer<LendenRoomBloc, LendenRoomState>(
+        listener: _blocListenerHandler,
+        builder: (context, state) {
+          List<LendenRoomModel> lendenRoomData = [];
+          if (state is LendenRoomFetchSuccess) {
+            lendenRoomData = state.data;
+          } else {
+            lendenRoomData = generateShimmerData();
+          }
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: paddingInsets.add(
+                  EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
+                ),
+                sliver: SliverToBoxAdapter(
+                  child:
+                      state is LendenRoomLoading
+                          ? CustomShimmerEffect.placeHolderShimmerEffect(
+                            Container(
+                              height: 95,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.white,
+                              ),
+                            ),
+                          )
+                          : LendenSummaryCard(
+                            data: lendenRoomData,
+                            loggedInUser: loggedInUser,
+                          ),
+                ),
+              ),
+              SliverPadding(
+                padding: _mainScreenPadding,
+                sliver: SliverList.builder(
+                  itemCount: lendenRoomData.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom:
+                            index == lendenRoomData.length - 1
+                                ? UiConstant.spaceAtBottom
+                                : 0,
+                      ),
+                      child: LendenExpenseCard(
+                        data: lendenRoomData[index],
+                        loggedInUser: loggedInUser,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,

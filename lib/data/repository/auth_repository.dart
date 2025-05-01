@@ -4,8 +4,8 @@ import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 
 class AuthRepository {
-  final AuthDataProvider authDataProvider;
-  AuthRepository(this.authDataProvider);
+  final AuthDataProvider _dataProvider;
+  AuthRepository(this._dataProvider);
 
   Future<UserModel> getLoggedInUser() async {
     try {
@@ -21,7 +21,7 @@ class AuthRepository {
 
   Future<UserModel> getLoginToken(String email, String otp) async {
     try {
-      final loginData = await authDataProvider.loginUser(email, otp);
+      final loginData = await _dataProvider.loginUser(email, otp);
       final data = jsonDecode(loginData);
       return UserModel.fromMap(data);
     } catch (e) {
@@ -31,7 +31,7 @@ class AuthRepository {
 
   Future<bool> signUpUser(String name, String email) async {
     try {
-      final isSignUpSuccessful = await authDataProvider.signUpUser(name, email);
+      final isSignUpSuccessful = await _dataProvider.signUpUser(name, email);
 
       return isSignUpSuccessful;
     } catch (e) {
@@ -41,7 +41,7 @@ class AuthRepository {
 
   Future<bool> sendOTP(String email) async {
     try {
-      final isOTPSend = await authDataProvider.sendOTP(email);
+      final isOTPSend = await _dataProvider.sendOTP(email);
       return isOTPSend;
     } catch (e) {
       throw e.toString();
@@ -50,7 +50,7 @@ class AuthRepository {
 
   Future<bool> logoutUser(String uid, String sessionToken) async {
     try {
-      final isLogoutSuccessful = await authDataProvider.logoutUser(
+      final isLogoutSuccessful = await _dataProvider.logoutUser(
         uid,
         sessionToken,
       );

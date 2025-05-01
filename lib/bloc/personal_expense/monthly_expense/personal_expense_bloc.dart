@@ -8,9 +8,9 @@ part 'personal_expense_state.dart';
 
 class PersonalMonthlyExpenseBloc
     extends Bloc<PersonalMonthlyExpenseEvent, PersonalMonthlyExpenseState> {
-  final PersonalMonthlyExpenseRepository personalMonthlyExpenseRepository;
+  final PersonalMonthlyExpenseRepository repo;
 
-  PersonalMonthlyExpenseBloc(this.personalMonthlyExpenseRepository)
+  PersonalMonthlyExpenseBloc(this.repo)
     : super(PersonalMonthlyExpenseInitial()) {
     on<PersonalMonthlyExpenseFetch>(_personalExpenseFetch);
   }
@@ -21,8 +21,7 @@ class PersonalMonthlyExpenseBloc
   ) async {
     emit(PersonalMonthlyExpenseLoading());
     try {
-      PersonalMonthlyExpensePairTD data =
-          await personalMonthlyExpenseRepository.fetchData("niriif@kff.ed");
+      PersonalMonthlyExpensePairTD data = await repo.fetchData("niriif@kff.ed");
       return emit(PersonalMonthlyExpenseFetchSuccess(data));
     } catch (e) {
       return emit(PersonalMonthlyExpenseFailure(e.toString()));

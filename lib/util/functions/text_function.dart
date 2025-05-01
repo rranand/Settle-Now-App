@@ -38,9 +38,11 @@ String convertDateTimeFormat(DateTime date) {
     return 'Today, ${DateFormat.jm().format(date)}';
   } else if (dateOnly == today.subtract(Duration(days: 1))) {
     return 'Yesterday, ${DateFormat.jm().format(date)}';
-  } else if (now.difference(date).inDays < 7) {
+  } else if (now.difference(date).inDays < 7 && now.year == date.year) {
     return '${DateFormat.E().format(date)} at ${DateFormat.jm().format(date)}';
-  } else {
+  } else if (now.year == date.year) {
     return '${DateFormat.MMMd().format(date)} at ${DateFormat.jm().format(date)}';
+  } else {
+    return '${DateFormat.yMMMd().format(date)} at ${DateFormat.jm().format(date)}';
   }
 }

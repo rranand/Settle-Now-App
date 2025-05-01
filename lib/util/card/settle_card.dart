@@ -30,7 +30,7 @@ class SettleCard extends StatelessWidget {
           SizedBox(width: 8),
           Flexible(
             child: Text(
-              "Rohit Anand, Anand, Anand",
+              "Rohit Anand",
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
             ),
