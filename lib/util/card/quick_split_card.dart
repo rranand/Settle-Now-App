@@ -57,13 +57,13 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           isLoaded: widget.data.hasData,
         ),
         subTextOnCard(
-          "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
+          "Created ${convertDateTimeFormat(widget.data.createdOn)}",
           isLoaded: widget.data.hasData,
         ),
         Visibility(
           visible: widget.data.createdOn != widget.data.modifiedOn,
           child: subTextOnCard(
-            "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+            "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
             isLoaded: widget.data.hasData,
           ),
         ),

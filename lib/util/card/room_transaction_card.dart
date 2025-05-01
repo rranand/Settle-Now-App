@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
@@ -19,9 +17,7 @@ class RoomTransactionCard extends StatefulWidget {
 }
 
 class _RoomTransactionCardState extends State<RoomTransactionCard> {
-  final double amount = -100;
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
-  bool _isManualSplit = false;
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
@@ -39,12 +35,13 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
     return tags;
   }
 
+  // Vivo v23  pro
+  // 899
+  // Patna
+  //
   @override
   void initState() {
     super.initState();
-    if (widget.data.users.isNotEmpty) {
-      _isManualSplit = true;
-    }
   }
 
   Widget extendedTransactionWidget() {
@@ -54,11 +51,14 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
         ListView.separated(
           shrinkWrap: true,
           padding: EdgeInsets.zero,
-          itemCount: 3,
+          itemCount: widget.data.users.length + 1,
           itemBuilder: (BuildContext context, int index) {
-            double memberAmount =
-                (100 + 10 * index) * (index % 2 == 0 ? -1 : 1);
-            UserModel user = UiConstant.users[index % UiConstant.users.length];
+            UserAmountModel user = UserAmountModel.empty();
+            if (index == 0) {
+              user = widget.data.createdBy;
+            } else {
+              user = widget.data.users[index - 1];
+            }
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
@@ -68,14 +68,14 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     children: [
                       overlapUserImageWidget(context, [user], 1),
                       SizedBox(width: 8),
-                      Text("Rohit Anand"),
+                      Text(user.name),
                     ],
                   ),
                   Text(
-                    formatCurrency(memberAmount, context),
+                    formatCurrency(user.amount, context),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: memberAmount < 0 ? Colors.red : Colors.green,
+                      color: user.amount < 0 ? Colors.red : Colors.green,
                     ),
                   ),
                 ],
@@ -94,9 +94,13 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
   Widget build(BuildContext context) {
     List<String> tags = createTags();
     int categoryIndex = CategoryParser.indexOfCategory(widget.data.category);
+    bool isManualSplit = false;
+    if (widget.data.users.isNotEmpty) {
+      isManualSplit = true;
+    }
     return Container(
       padding: EdgeInsets.all(UiConstant.cardPadding),
-      margin: EdgeInsets.all(4),
+      margin: EdgeInsets.symmetric(vertical: 2),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
@@ -131,7 +135,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                 ),
               ),
               Visibility(
-                visible: _isManualSplit,
+                visible: isManualSplit,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(
                     UiConstant.cardBorderRadius,
@@ -168,12 +172,16 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 subTextOnCard(
-                  "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
+                  "Created By ${widget.data.createdBy.name}",
+                  isLoaded: widget.data.hasData,
+                ),
+                subTextOnCard(
+                  "Created ${convertDateTimeFormat(widget.data.createdOn)}",
                   isLoaded: widget.data.hasData,
                 ),
                 widget.data.createdOn != widget.data.modifiedOn
                     ? subTextOnCard(
-                      "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                      "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
                       isLoaded: widget.data.hasData,
                     )
                     : subTextOnCard("", isLoaded: widget.data.hasData),
@@ -182,10 +190,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
             trailing:
                 widget.data.hasData
                     ? Text(
-                      formatCurrency(
-                        (121 + Random().nextInt(300)) * 1.0,
-                        context,
-                      ),
+                      formatCurrency(widget.data.amount, context),
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,

@@ -15,6 +15,7 @@ import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_da
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
+import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubit.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
@@ -23,6 +24,7 @@ import 'package:settlenow_v2/data/data_provider/personal_expense/dashboard/perso
 import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provider.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
@@ -30,6 +32,7 @@ import 'package:settlenow_v2/data/repository/personal_expense/dashboard/personal
 import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
+import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/provider/theme_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
@@ -143,6 +146,9 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<LendenRoomRepository>(
           create: (context) => LendenRoomRepository(LendenRoomDataProvider()),
         ),
+        RepositoryProvider<RoomRepository>(
+          create: (context) => RoomRepository(RoomDataProvider()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -189,6 +195,9 @@ class MyApp extends StatelessWidget {
             create:
                 (context) =>
                     LendenRoomNameCubit(context.read<LendenRoomRepository>()),
+          ),
+          BlocProvider<RoomBloc>(
+            create: (context) => RoomBloc(context.read<RoomRepository>()),
           ),
         ],
         child: MultiProvider(

@@ -17,6 +17,30 @@ class _PersonalExpenseTransactionScreenState
     extends State<PersonalExpenseTransactionScreen> {
   final List<String> tagsTitle = [];
 
+  Widget shimmerWidget() {
+    return SliverList.builder(
+      itemCount: 14,
+      itemBuilder: (BuildContext context, int index) {
+        return Card(
+          elevation: UiConstant.cardElevation,
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.all(UiConstant.cardPadding),
+            child: ListTile(
+              leading: CustomShimmerEffect.imageWidget(
+                shape: BoxShape.circle,
+                radius: 50,
+              ),
+              title: CustomShimmerEffect.textWidget(width: 80),
+              subtitle: CustomShimmerEffect.textWidget(fontSize: 10, width: 80),
+              trailing: CustomShimmerEffect.textWidget(fontSize: 15, width: 80),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<
@@ -26,33 +50,7 @@ class _PersonalExpenseTransactionScreenState
       listener: (context, state) {},
       builder: (context, state) {
         if (state is! PersonalMonthlyExpenseFetchSuccess) {
-          return SliverList.builder(
-            itemCount: 14,
-            itemBuilder: (BuildContext context, int index) {
-              return Card(
-                elevation: UiConstant.cardElevation,
-                color: Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(UiConstant.cardPadding),
-                  child: ListTile(
-                    leading: CustomShimmerEffect.imageWidget(
-                      shape: BoxShape.circle,
-                      radius: 50,
-                    ),
-                    title: CustomShimmerEffect.textWidget(width: 80),
-                    subtitle: CustomShimmerEffect.textWidget(
-                      fontSize: 10,
-                      width: 80,
-                    ),
-                    trailing: CustomShimmerEffect.textWidget(
-                      fontSize: 15,
-                      width: 80,
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
+          return shimmerWidget();
         } else {
           return SliverList.builder(
             itemCount: state.data.second.length,

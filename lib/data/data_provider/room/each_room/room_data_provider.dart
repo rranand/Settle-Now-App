@@ -18,7 +18,7 @@ class RoomDataProvider {
       "name": "John Doe",
       "email": "john@example.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
-      "amount": 45.50
+      "amount": 0
     },
     "users": [],
     "createdOn": "2023-05-15T10:30:00Z",
@@ -34,7 +34,7 @@ class RoomDataProvider {
       "name": "Alice Smith",
       "email": "alice@example.com",
       "profileImage": "https://picsum.photos/id/45/200/300",
-      "amount": 60.00
+      "amount": 20.00
     },
     "users": [
       {
@@ -49,13 +49,6 @@ class RoomDataProvider {
         "name": "Bob Johnson",
         "email": "bob@example.com",
         "profileImage": "https://picsum.photos/id/67/200/300",
-        "amount": 20.00
-      },
-      {
-        "id": "u4",
-        "name": "Eve Wilson",
-        "email": "eve@example.com",
-        "profileImage": "https://picsum.photos/id/89/200/300",
         "amount": 20.00
       }
     ],
@@ -72,7 +65,7 @@ class RoomDataProvider {
       "name": "Bob Johnson",
       "email": "bob@example.com",
       "profileImage": "https://picsum.photos/id/67/200/300",
-      "amount": 120.75
+      "amount": 40.25
     },
     "users": [
       {
@@ -87,13 +80,6 @@ class RoomDataProvider {
         "name": "Alice Smith",
         "email": "alice@example.com",
         "profileImage": "https://picsum.photos/id/45/200/300",
-        "amount": 40.25
-      },
-      {
-        "id": "u3",
-        "name": "Bob Johnson",
-        "email": "bob@example.com",
-        "profileImage": "https://picsum.photos/id/67/200/300",
         "amount": 40.25
       }
     ],
@@ -126,16 +112,9 @@ class RoomDataProvider {
       "name": "John Doe",
       "email": "john@example.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
-      "amount": 250.00
+      "amount": 125.00
     },
     "users": [
-      {
-        "id": "u1",
-        "name": "John Doe",
-        "email": "john@example.com",
-        "profileImage": "https://picsum.photos/id/23/200/300",
-        "amount": 125.00
-      },
       {
         "id": "u2",
         "name": "Alice Smith",
@@ -157,7 +136,7 @@ class RoomDataProvider {
       "name": "Alice Smith",
       "email": "alice@example.com",
       "profileImage": "https://picsum.photos/id/45/200/300",
-      "amount": 480.50
+      "amount": 120.125
     },
     "users": [
       {
@@ -165,13 +144,6 @@ class RoomDataProvider {
         "name": "John Doe",
         "email": "john@example.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
-        "amount": 120.125
-      },
-      {
-        "id": "u2",
-        "name": "Alice Smith",
-        "email": "alice@example.com",
-        "profileImage": "https://picsum.photos/id/45/200/300",
         "amount": 120.125
       },
       {
@@ -202,7 +174,7 @@ class RoomDataProvider {
       "name": "Bob Johnson",
       "email": "bob@example.com",
       "profileImage": "https://picsum.photos/id/67/200/300",
-      "amount": 75.30
+      "amount": 0
     },
     "users": [],
     "createdOn": "2023-05-21T14:25:00Z",
@@ -220,15 +192,7 @@ class RoomDataProvider {
       "profileImage": "https://picsum.photos/id/89/200/300",
       "amount": 90.00
     },
-    "users": [
-      {
-        "id": "u4",
-        "name": "Eve Wilson",
-        "email": "eve@example.com",
-        "profileImage": "https://picsum.photos/id/89/200/300",
-        "amount": 90.00
-      }
-    ],
+    "users": [],
     "createdOn": "2023-05-22T11:40:00Z",
     "modifiedOn": "2023-05-22T11:40:00Z"
   },
@@ -242,16 +206,9 @@ class RoomDataProvider {
       "name": "John Doe",
       "email": "john@example.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
-      "amount": 12.50
+      "amount": 6.25
     },
     "users": [
-      {
-        "id": "u1",
-        "name": "John Doe",
-        "email": "john@example.com",
-        "profileImage": "https://picsum.photos/id/23/200/300",
-        "amount": 6.25
-      },
       {
         "id": "u3",
         "name": "Bob Johnson",
@@ -289,7 +246,7 @@ class RoomDataProvider {
       "name": "Bob Johnson",
       "email": "bob@example.com",
       "profileImage": "https://picsum.photos/id/67/200/300",
-      "amount": 85.00
+      "amount": 42.50
     },
     "users": [
       {
@@ -297,13 +254,6 @@ class RoomDataProvider {
         "name": "John Doe",
         "email": "john@example.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
-        "amount": 42.50
-      },
-      {
-        "id": "u3",
-        "name": "Bob Johnson",
-        "email": "bob@example.com",
-        "profileImage": "https://picsum.photos/id/67/200/300",
         "amount": 42.50
       }
     ],
@@ -320,7 +270,7 @@ class RoomDataProvider {
       "name": "Eve Wilson",
       "email": "eve@example.com",
       "profileImage": "https://picsum.photos/id/89/200/300",
-      "amount": 70.00
+      "amount": 35.00
     },
     "users": [
       {
@@ -328,13 +278,6 @@ class RoomDataProvider {
         "name": "Alice Smith",
         "email": "alice@example.com",
         "profileImage": "https://picsum.photos/id/45/200/300",
-        "amount": 35.00
-      },
-      {
-        "id": "u4",
-        "name": "Eve Wilson",
-        "email": "eve@example.com",
-        "profileImage": "https://picsum.photos/id/89/200/300",
         "amount": 35.00
       }
     ],

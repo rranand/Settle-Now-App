@@ -17,7 +17,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     emit(RoomLoading());
     try {
       List<TransactionModel> data = await repo.fetchData("email", event.id);
-      emit(RoomFetchSuccess(data));
+      emit(RoomFetchSuccess(event.id, data));
     } catch (e) {
       emit(RoomFailure(e.toString()));
     }

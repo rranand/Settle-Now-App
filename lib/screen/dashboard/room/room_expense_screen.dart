@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -63,6 +64,16 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<RoomBloc>().state;
+
+    if (!(state is RoomFetchSuccess && state.id == widget.id)) {
+      context.read<RoomBloc>().add(RoomFetch(widget.id));
     }
   }
 
