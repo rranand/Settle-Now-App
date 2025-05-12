@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
@@ -13,10 +14,16 @@ class RoomTransactionScreen extends StatefulWidget {
 }
 
 class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
-  final UserModel loggedInUser = UserModel.fromMap({
-    'id': 'user_1',
-    'name': 'Rohit Anand',
-  });
+  UserModel _loggedInUser = UserModel.empty();
+
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +48,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                   Expanded(
                     child: RoomTransactionCard(
                       data: data[index],
-                      loggedInUser: loggedInUser,
+                      loggedInUser: _loggedInUser,
                     ),
                   ),
                   Expanded(
@@ -50,7 +57,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                             ? SizedBox()
                             : RoomTransactionCard(
                               data: data[index],
-                              loggedInUser: loggedInUser,
+                              loggedInUser: _loggedInUser,
                             ),
                   ),
                 ],
@@ -58,7 +65,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
             } else {
               return RoomTransactionCard(
                 data: data[index],
-                loggedInUser: loggedInUser,
+                loggedInUser: _loggedInUser,
               );
             }
           },

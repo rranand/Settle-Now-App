@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubit.dart';
@@ -26,10 +27,7 @@ class LendenExpenseScreen extends StatefulWidget {
 
 class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  UserModel loggedInUser = UserModel.fromMap({
-    'id': 'user_1',
-    'name': 'Rohit Anand',
-  });
+  UserModel _loggedInUser = UserModel.empty();
 
   void _blocListenerHandler(BuildContext context, LendenRoomState state) {
     if (state is LendenRoomFailure) {
@@ -41,7 +39,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     return List.generate(11, (i) {
       LendenRoomModel tempData = LendenRoomModel.empty();
       if (i % 2 == 0) {
-        tempData.createdBy.id = loggedInUser.id;
+        tempData.createdBy.id = _loggedInUser.id;
       }
       return tempData;
     });
@@ -59,6 +57,11 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
+
     final state = context.read<LendenRoomBloc>().state;
 
     if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
@@ -120,7 +123,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                           )
                           : LendenSummaryCard(
                             data: lendenRoomData,
-                            loggedInUser: loggedInUser,
+                            loggedInUser: _loggedInUser,
                           ),
                 ),
               ),
@@ -138,7 +141,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                       ),
                       child: LendenExpenseCard(
                         data: lendenRoomData[index],
-                        loggedInUser: loggedInUser,
+                        loggedInUser: _loggedInUser,
                       ),
                     );
                   },

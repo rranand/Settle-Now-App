@@ -14,6 +14,7 @@ class SettleCard extends StatelessWidget {
   final double screenWidth;
   final RoomSettleModel data;
   final UserModel loggedInUser;
+
   const SettleCard({
     super.key,
     required this.screenWidth,

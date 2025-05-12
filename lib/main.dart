@@ -92,16 +92,15 @@ Future<void> main() async {
               ? firebase_dev.DefaultFirebaseOptions.currentPlatform
               : firebase_prod.DefaultFirebaseOptions.currentPlatform,
     );
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
   }
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ),
-  );
 
   runApp(
     DevicePreview(

@@ -7,6 +7,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
@@ -61,22 +62,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _blocListenerHandler(BuildContext context, AuthState state) {
-    if (state is! AuthInitial) {
-      if (_isScreenLoading(state)) {
-        loadingWidget(context);
-      } else {
-        context.pop();
-        if (state is AuthOTPSendFailure) {
-          showNormalSnackBar(context, state.error);
-        } else if (state is AuthLoginFailure) {
-          showNormalSnackBar(context, state.error);
-        } else if (state is AuthOTPSendSuccess) {
-          if (_isOTPSent.value == false) {
-            _isOTPSent.value = true;
-          }
-        } else if (state is AuthLoginSuccess) {
-          context.go(RouterConstants.dashboardRouteName);
-        }
+    if (state is AuthLoginSuccess) {
+      context.go(RouterConstants.dashboardRouteName);
+    } else if (state is AuthOTPSendFailure) {
+      showNormalSnackBar(context, state.error);
+    } else if (state is AuthLoginFailure) {
+      showNormalSnackBar(context, state.error);
+    } else if (state is AuthOTPSendSuccess) {
+      if (_isOTPSent.value == false) {
+        _isOTPSent.value = true;
       }
     }
   }
@@ -98,31 +92,37 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        titleSpacing: _mainScreenPadding.left,
-        actions: appBarActionButton(context, [
-          CustomButton.customTextButton(
-            "Sign Up",
-            onPressed: _handleOnSignUp,
-            buttonTextColor: Colors.black,
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: _blocListenerHandler,
+      builder: (context, state) {
+        if (_isScreenLoading(state) || state is AuthLoginSuccess) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: LoadingPage(),
+          );
+        }
+        return Scaffold(
+          appBar: AppBar(
+            titleSpacing: _mainScreenPadding.left,
+            actions: appBarActionButton(context, [
+              CustomButton.customTextButton(
+                "Sign Up",
+                onPressed: _handleOnSignUp,
+                buttonTextColor: Colors.black,
+              ),
+              SizedBox(width: _mainScreenPadding.left),
+            ]),
+            forceMaterialTransparency: true,
           ),
-          SizedBox(width: _mainScreenPadding.left),
-        ]),
-        forceMaterialTransparency: true,
-      ),
-      body: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (bool didPop, Object? result) async {
-          if (didPop) {
-            return;
-          }
-          SystemNavigator.pop();
-        },
-        child: BlocConsumer<AuthBloc, AuthState>(
-          listener: _blocListenerHandler,
-          builder: (context, state) {
-            return SingleChildScrollView(
+          body: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, Object? result) async {
+              if (didPop) {
+                return;
+              }
+              SystemNavigator.pop();
+            },
+            child: SingleChildScrollView(
               padding: _mainScreenPadding,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -252,56 +252,56 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: UiConstant.spaceAtBottom),
                 ],
               ),
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: Padding(
-        padding: EdgeInsets.only(
-          bottom: 2 * UiConstant.spaceBetweenSection,
-          left: _mainScreenPadding.left,
-          right: _mainScreenPadding.right,
-        ),
-        child: RichText(
-          textAlign: TextAlign.center,
-          text: TextSpan(
-            text: 'By signing in, You agree to the ',
-            children: [
-              TextSpan(
-                text: 'Terms of Use',
-                style: TextStyle(decoration: TextDecoration.underline),
-                recognizer:
-                    TapGestureRecognizer()
-                      ..onTap = () async {
-                        launchUrl(
-                          Uri.parse("https://settlenow.in/privacy-policy"),
-                          mode: LaunchMode.inAppWebView,
-                          webViewConfiguration: const WebViewConfiguration(
-                            enableJavaScript: true,
-                          ),
-                        );
-                      },
-              ),
-              TextSpan(text: ' and '),
-              TextSpan(
-                text: 'Privacy Policy',
-                style: TextStyle(decoration: TextDecoration.underline),
-                recognizer:
-                    TapGestureRecognizer()
-                      ..onTap = () async {
-                        launchUrl(
-                          Uri.parse("https://settlenow.in/privacy-policy"),
-                          mode: LaunchMode.inAppWebView,
-                          webViewConfiguration: const WebViewConfiguration(
-                            enableJavaScript: true,
-                          ),
-                        );
-                      },
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+          bottomNavigationBar: Padding(
+            padding: EdgeInsets.only(
+              bottom: 2 * UiConstant.spaceBetweenSection,
+              left: _mainScreenPadding.left,
+              right: _mainScreenPadding.right,
+            ),
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                text: 'By signing in, You agree to the ',
+                children: [
+                  TextSpan(
+                    text: 'Terms of Use',
+                    style: TextStyle(decoration: TextDecoration.underline),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () async {
+                            launchUrl(
+                              Uri.parse("https://settlenow.in/privacy-policy"),
+                              mode: LaunchMode.inAppWebView,
+                              webViewConfiguration: const WebViewConfiguration(
+                                enableJavaScript: true,
+                              ),
+                            );
+                          },
+                  ),
+                  TextSpan(text: ' and '),
+                  TextSpan(
+                    text: 'Privacy Policy',
+                    style: TextStyle(decoration: TextDecoration.underline),
+                    recognizer:
+                        TapGestureRecognizer()
+                          ..onTap = () async {
+                            launchUrl(
+                              Uri.parse("https://settlenow.in/privacy-policy"),
+                              mode: LaunchMode.inAppWebView,
+                              webViewConfiguration: const WebViewConfiguration(
+                                enableJavaScript: true,
+                              ),
+                            );
+                          },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

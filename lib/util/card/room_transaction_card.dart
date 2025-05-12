@@ -11,6 +11,7 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 class RoomTransactionCard extends StatefulWidget {
   final TransactionModel data;
   final UserModel loggedInUser;
+
   const RoomTransactionCard({
     super.key,
     required this.data,
@@ -38,11 +39,6 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
       }
     }
     return tags;
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   Widget extendedTransactionWidget() {

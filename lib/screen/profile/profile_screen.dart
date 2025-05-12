@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -29,6 +33,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ];
 
   void _popMenuButtonHandler(int index) {}
+
+  void _blocListenerHandler(BuildContext context, AuthState state) {}
 
   void _accountSectionButtonHandler(int index) {
     switch (index) {
@@ -60,133 +66,193 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    final state = context.read<AuthBloc>().state;
+
+    if (state is! AuthLoginSuccess) {
+      context.read<AuthBloc>().add(AuthLoggedInUserRequested());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Profile"),
-        titleSpacing: _mainScreenPadding.left,
-        leading: appBarBackButton(context),
-        actions: appBarActionButton(context, [
-          PopupMenuButton<int>(
-            icon: Icon(Icons.more_vert),
-            onSelected: _popMenuButtonHandler,
-            itemBuilder:
-                (context) => List.generate(
-                  _popMenuTitle.length,
-                  (index) => PopupMenuItem(
-                    value: index,
-                    child: Text(_popMenuTitle[index]),
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: _blocListenerHandler,
+      builder: (context, state) {
+        UserModel userData = UserModel.empty();
+
+        if (state is AuthLoginSuccess) {
+          userData = state.userData;
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Profile"),
+            titleSpacing: _mainScreenPadding.left,
+            leading: appBarBackButton(context),
+            actions: appBarActionButton(
+              context,
+              userData.hasData
+                  ? [
+                    PopupMenuButton<int>(
+                      icon: Icon(Icons.more_vert),
+                      onSelected: _popMenuButtonHandler,
+                      itemBuilder:
+                          (context) => List.generate(
+                            _popMenuTitle.length,
+                            (index) => PopupMenuItem(
+                              value: index,
+                              child: Text(_popMenuTitle[index]),
+                            ),
+                          ),
+                    ),
+                  ]
+                  : [],
+            ),
+          ),
+          body: SingleChildScrollView(
+            padding: _mainScreenPadding.add(
+              EdgeInsets.only(
+                top: UiConstant.spaceBetweenSection,
+                bottom: 2 * UiConstant.spaceBetweenSection,
+              ),
+            ),
+            child: Column(
+              children: [
+                Card(
+                  elevation: UiConstant.cardElevation,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: _cardPadding,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        userData.hasData
+                            ? overlapUserImageWidget(
+                              context,
+                              [userData],
+                              1,
+                              imageRadius: 100,
+                            )
+                            : CustomShimmerEffect.overlapImageWidget(
+                              noOfImages: 1,
+                              imageRadius: 100,
+                            ),
+                        SizedBox(width: UiConstant.spaceBetweenRowSection),
+                        userData.hasData
+                            ? Text.rich(
+                              TextSpan(
+                                text: userData.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: "\n",
+                                    children: [
+                                      TextSpan(
+                                        text: userData.email,
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: kDefaultFontSize,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            )
+                            : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomShimmerEffect.textWidget(
+                                  fontSize: 24,
+                                  width: 150,
+                                ),
+                                SizedBox(height: 4),
+                                CustomShimmerEffect.textWidget(width: 200),
+                              ],
+                            ),
+                      ],
+                    ),
                   ),
                 ),
-          ),
-        ]),
-      ),
-      body: SingleChildScrollView(
-        padding: _mainScreenPadding.add(
-          EdgeInsets.only(
-            top: UiConstant.spaceBetweenSection,
-            bottom: 2 * UiConstant.spaceBetweenSection,
-          ),
-        ),
-        child: Column(
-          children: [
-            Card(
-              elevation: UiConstant.cardElevation,
-              color: Colors.white,
-              child: Padding(
-                padding: _cardPadding,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    overlapUserImageWidget(
-                      context,
-                      [UiConstant.users.first],
-                      1,
-                      imageRadius: 100,
-                    ),
-                    SizedBox(width: UiConstant.spaceBetweenRowSection),
-                    Text.rich(
-                      TextSpan(
-                        text: "Rohit Anand",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 24,
-                        ),
-                        children: [
-                          TextSpan(
-                            text: "\n",
-                            children: [
-                              TextSpan(
-                                text: "emailID@gmail.com",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: kDefaultFontSize,
+                SizedBox(height: UiConstant.spaceBetweenSection),
+                userData.hasData
+                    ? Card(
+                      elevation: UiConstant.cardElevation,
+                      color: Colors.white,
+                      child: Padding(
+                        padding: _cardPadding,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Account",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            ...List.generate(
+                              _accountSectionTitle.length,
+                              (index) => Padding(
+                                padding: EdgeInsets.only(
+                                  top: UiConstant.spaceBetweenSection,
+                                ),
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: colouredIcon(
+                                    Icon(_accountSectionIconData[index]),
+                                    UiConstant.colorsWithShade100[index],
+                                  ),
+                                  title: Text(_accountSectionTitle[index]),
+                                  trailing: Icon(Iconsax.arrow_right_34),
+                                  onTap: () {
+                                    _accountSectionButtonHandler(index);
+                                  },
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: UiConstant.spaceBetweenSection),
-            Card(
-              elevation: UiConstant.cardElevation,
-              color: Colors.white,
-              child: Padding(
-                padding: _cardPadding,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Account",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    ...List.generate(
-                      _accountSectionTitle.length,
-                      (index) => Padding(
-                        padding: EdgeInsets.only(
-                          top: UiConstant.spaceBetweenSection,
+                            ),
+                          ],
                         ),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: colouredIcon(
-                            Icon(_accountSectionIconData[index]),
-                            UiConstant.colorsWithShade100[index],
-                          ),
-                          title: Text(_accountSectionTitle[index]),
-                          trailing: Icon(Iconsax.arrow_right_34),
-                          onTap: () {
-                            _accountSectionButtonHandler(index);
-                          },
+                      ),
+                    )
+                    : CustomShimmerEffect.placeHolderShimmerEffect(
+                      Container(
+                        height: 190,
+                        padding: _cardPadding,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(height: UiConstant.spaceBetweenSection),
-            Card(
-              elevation: UiConstant.cardElevation,
-              color: Colors.white,
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 14),
-                child: Center(
-                  child: Text(
-                    "Member Since March 31, 2022",
-                    style: TextStyle(color: Colors.grey),
+                SizedBox(height: UiConstant.spaceBetweenSection),
+                Card(
+                  elevation: UiConstant.cardElevation,
+                  color: Colors.white,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 14.0,
+                      horizontal: 14,
+                    ),
+                    child: Center(
+                      child:
+                          userData.hasData
+                              ? Text(
+                                "Member Since March 31, 2022",
+                                style: TextStyle(color: Colors.grey),
+                              )
+                              : CustomShimmerEffect.textWidget(width: 250),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

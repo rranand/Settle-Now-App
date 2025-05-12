@@ -9,11 +9,14 @@ class AuthRepository {
 
   Future<UserModel> getLoggedInUser() async {
     try {
-      return UserModel.fromBasicInfo(
+      await Future.delayed(Duration(seconds: 2), () {});
+      UserModel userData = UserModel.fromBasicInfo(
         name: 'Rohit Anand',
-        id: 'rranand',
+        id: 'user_1',
         profileImage: "https://picsum.photos/id/5/200/300",
       );
+      userData.email = "rrohitanand3336@gmail.com";
+      return userData;
     } catch (e) {
       throw e.toString();
     }

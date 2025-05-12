@@ -147,13 +147,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoggedInUserRequested event,
     Emitter<AuthState> emit,
   ) async {
-    return emit(AuthInitial());
-    // emit(AuthLoginLoading());
-    // try {
-    //   UserModel userData = await repo.getLoggedInUser();
-    //   return emit(AuthLoginSuccess(userData));
-    // } catch (e) {
-    //   return emit(AuthInitial());
-    // }
+    emit(AuthLoginLoading());
+    try {
+      UserModel userData = await repo.getLoggedInUser();
+      return emit(AuthLoginSuccess(userData));
+    } catch (e) {
+      return emit(AuthInitial());
+    }
   }
 }

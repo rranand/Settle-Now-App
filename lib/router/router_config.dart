@@ -1,6 +1,8 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/signup_screen.dart';
@@ -11,6 +13,7 @@ import 'package:settlenow_v2/screen/dashboard/room/room_expense_screen.dart';
 import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
+import 'package:settlenow_v2/util/handler/stream_to_listenable.dart';
 
 class AppRouterConfig {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -115,14 +118,32 @@ class AppRouterConfig {
     return allRoutes;
   }
 
-  static final _router = GoRouter(
-    routes: _allRoutes(),
-    //initialLocation: RouterConstants.dashboardRouteName,
-    initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
-    observers: [observer],
-  );
-
   static GoRouter router(BuildContext context) {
-    return _router;
+    final authBloc = BlocProvider.of<AuthBloc>(context);
+
+    return GoRouter(
+      routes: _allRoutes(),
+      //initialLocation: RouterConstants.dashboardRouteName,
+      //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
+      initialLocation: RouterConstants.profileRouteName,
+      observers: [observer],
+      refreshListenable: StreamToListenable(authBloc.stream),
+      redirect: (context, state) {
+        final authBlocInstance = context.read<AuthBloc>();
+        String url = state.uri.toString();
+        if (url.startsWith(RouterConstants.loginRouteName) ||
+            url.startsWith(RouterConstants.signupRouteName)) {
+          if (authBlocInstance.state is AuthLoginSuccess) {
+            return RouterConstants.dashboardRouteName;
+          }
+        } else {
+          if (authBlocInstance.state is! AuthLoginSuccess) {
+            return RouterConstants.loginRouteName;
+          }
+        }
+
+        return null;
+      },
+    );
   }
 }

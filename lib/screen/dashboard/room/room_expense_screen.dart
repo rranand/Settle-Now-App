@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
@@ -29,10 +30,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
   final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
-  final UserModel loggedInUser = UserModel.fromMap({
-    'id': 'user_1',
-    'name': 'Rohit Anand',
-  });
+  UserModel _loggedInUser = UserModel.empty();
 
   final List<String> _navBarTitles = [
     "Transactions",
@@ -82,7 +80,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           RoomUserModel data = RoomUserModel.empty();
           double totalSpent = 0;
           for (int i = 0; i < state.data.length; i++) {
-            if (loggedInUser.id == state.data[i].user.id) {
+            if (_loggedInUser.id == state.data[i].user.id) {
               data = state.data[i];
             }
             totalSpent += state.data[i].contribution;
@@ -157,6 +155,11 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
+
     final state = context.read<RoomBloc>().state;
 
     if (!(state is RoomFetchSuccess && state.id == widget.id)) {
