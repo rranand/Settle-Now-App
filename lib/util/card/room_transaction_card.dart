@@ -10,7 +10,12 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomTransactionCard extends StatefulWidget {
   final TransactionModel data;
-  const RoomTransactionCard({super.key, required this.data});
+  final UserModel loggedInUser;
+  const RoomTransactionCard({
+    super.key,
+    required this.data,
+    required this.loggedInUser,
+  });
 
   @override
   State<RoomTransactionCard> createState() => _RoomTransactionCardState();
@@ -64,7 +69,9 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     children: [
                       overlapUserImageWidget(context, [user], 1),
                       SizedBox(width: 8),
-                      Text(user.name),
+                      Text(
+                        "${user.name}${widget.loggedInUser.id == user.id ? " (You)" : ""}",
+                      ),
                     ],
                   ),
                   Text(
@@ -168,7 +175,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 subTextOnCard(
-                  "Created By ${widget.data.createdBy.name}",
+                  "Created By ${widget.loggedInUser.id == widget.data.createdBy.id ? "You" : widget.data.createdBy.name}",
                   isLoaded: widget.data.hasData,
                 ),
                 subTextOnCard(

@@ -16,7 +16,7 @@ class RoomDataProvider {
     "amount": 45.50,
     "category": "Food",
     "createdBy": {
-      "id": "u1",
+      "id": "user_1",
       "name": "John Doe",
       "email": "john@example.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
@@ -40,7 +40,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id": "user_1",
         "name": "John Doe",
         "email": "john@example.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
@@ -71,7 +71,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id": "user_1",
         "name": "John Doe",
         "email": "john@example.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
@@ -110,7 +110,7 @@ class RoomDataProvider {
     "amount": 250.00,
     "category": "Entertainment",
     "createdBy": {
-      "id": "u1",
+      "id": "user_1",
       "name": "John Doe",
       "email": "john@example.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
@@ -142,7 +142,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id": "user_1",
         "name": "John Doe",
         "email": "john@example.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
@@ -204,7 +204,7 @@ class RoomDataProvider {
     "amount": 12.50,
     "category": "Food",
     "createdBy": {
-      "id": "u1",
+      "id": "user_1",
       "name": "John Doe",
       "email": "john@example.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
@@ -252,7 +252,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id": "user_1",
         "name": "John Doe",
         "email": "john@example.com",
         "profileImage": "https://picsum.photos/id/23/200/300",

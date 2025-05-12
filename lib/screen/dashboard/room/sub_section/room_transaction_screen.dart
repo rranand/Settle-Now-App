@@ -13,6 +13,11 @@ class RoomTransactionScreen extends StatefulWidget {
 }
 
 class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
+  final UserModel loggedInUser = UserModel.fromMap({
+    'id': 'user_1',
+    'name': 'Rohit Anand',
+  });
+
   @override
   Widget build(BuildContext context) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
@@ -33,17 +38,28 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: RoomTransactionCard(data: data[index])),
+                  Expanded(
+                    child: RoomTransactionCard(
+                      data: data[index],
+                      loggedInUser: loggedInUser,
+                    ),
+                  ),
                   Expanded(
                     child:
                         (index == noOfCardsToBeShown - 1 && data.length % 2 > 0)
                             ? SizedBox()
-                            : RoomTransactionCard(data: data[index]),
+                            : RoomTransactionCard(
+                              data: data[index],
+                              loggedInUser: loggedInUser,
+                            ),
                   ),
                 ],
               );
             } else {
-              return RoomTransactionCard(data: data[index]);
+              return RoomTransactionCard(
+                data: data[index],
+                loggedInUser: loggedInUser,
+              );
             }
           },
         );
