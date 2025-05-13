@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
+import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 
 class AuthRepository {
@@ -58,6 +59,21 @@ class AuthRepository {
         sessionToken,
       );
       return isLogoutSuccessful;
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<List<LoginActivityModel>> fetchLoginActivity(
+    String uid,
+    String sessionToken,
+  ) async {
+    try {
+      final loginActivityData = await _dataProvider.fetchLoginActivity(
+        uid,
+        sessionToken,
+      );
+      return loginActivityData;
     } catch (e) {
       throw e.toString();
     }

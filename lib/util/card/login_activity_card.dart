@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/button_with_shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
-enum DeviceType { mobile, web }
+enum DeviceType { mobile, web, other }
 
 extension DeviceTypeExtension on DeviceType {
   Color get color {
@@ -14,6 +16,8 @@ extension DeviceTypeExtension on DeviceType {
         return Colors.blue.shade100;
       case DeviceType.web:
         return Colors.green.shade100;
+      default:
+        return Colors.redAccent.shade100;
     }
   }
 
@@ -23,6 +27,8 @@ extension DeviceTypeExtension on DeviceType {
         return Iconsax.mobile;
       case DeviceType.web:
         return Iconsax.monitor;
+      default:
+        return Icons.devices_other_outlined;
     }
   }
 
@@ -33,17 +39,28 @@ extension DeviceTypeExtension on DeviceType {
       case 'web':
         return DeviceType.web;
       default:
-        throw Exception("Unknown device type: $value");
+        return DeviceType.other;
     }
   }
 }
 
 class LoginActivityCard extends StatelessWidget {
-  final String deviceType;
-  const LoginActivityCard({super.key, required this.deviceType});
+  final LoginActivityModel data;
+  const LoginActivityCard({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
+    if (!data.hasData) {
+      return CustomShimmerEffect.placeHolderShimmerEffect(
+        Container(
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      );
+    }
     return Card(
       elevation: UiConstant.cardElevation,
       color: Colors.white,
@@ -51,33 +68,40 @@ class LoginActivityCard extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
           leading: colouredIcon(
-            Icon(DeviceTypeExtension.fromString(deviceType).icon),
-            DeviceTypeExtension.fromString(deviceType).color,
+            Icon(DeviceTypeExtension.fromString(data.deviceType).icon),
+            DeviceTypeExtension.fromString(data.deviceType).color,
           ),
-          title: Text("Pixel 7 Pro"),
+          title: Text(data.deviceName),
           subtitle: Text.rich(
             TextSpan(
-              text: deviceType,
+              text: data.deviceType,
               style: TextStyle(fontSize: 12, color: Colors.grey),
               children: [
                 TextSpan(text: "\nActive "),
-                TextSpan(
-                  text: convertToMoment(
-                    DateTime.now().add(Duration(hours: -10)),
-                  ),
-                ),
+                TextSpan(text: convertToMoment(data.lastLoggedIn)),
               ],
             ),
           ),
-          trailing: ButtonWithShimmerEffect(
-            buttonText: "Log Out",
-            buttonType: CustomButtonType.customElevatedButton,
-            isLoaded: false,
-            buttonHeight: 40,
-            buttonWidth: 100,
-            backgroundColor: Colors.red.shade400,
-            onPressed: () {},
-          ),
+          trailing:
+              data.id.isEmpty
+                  ? ButtonWithShimmerEffect(
+                    buttonText: "Current",
+                    buttonType: CustomButtonType.customElevatedButton,
+                    isLoaded: false,
+                    buttonHeight: 40,
+                    buttonWidth: 100,
+                    backgroundColor: Colors.green.shade400,
+                    onPressed: () {},
+                  )
+                  : ButtonWithShimmerEffect(
+                    buttonText: "Log Out",
+                    buttonType: CustomButtonType.customElevatedButton,
+                    isLoaded: false,
+                    buttonHeight: 40,
+                    buttonWidth: 100,
+                    backgroundColor: Colors.red.shade400,
+                    onPressed: () {},
+                  ),
         ),
       ),
     );

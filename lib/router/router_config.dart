@@ -123,14 +123,17 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      //initialLocation: RouterConstants.dashboardRouteName,
+      initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
-      initialLocation: RouterConstants.profileRouteName,
+      // initialLocation:
+      //     RouterConstants.profileRouteName +
+      //     RouterConstants.loginActivityRouteName,
       observers: [observer],
       refreshListenable: StreamToListenable(authBloc.stream),
       redirect: (context, state) {
         final authBlocInstance = context.read<AuthBloc>();
         String url = state.uri.toString();
+
         if (url.startsWith(RouterConstants.loginRouteName) ||
             url.startsWith(RouterConstants.signupRouteName)) {
           if (authBlocInstance.state is AuthLoginSuccess) {
