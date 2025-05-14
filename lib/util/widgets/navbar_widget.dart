@@ -53,7 +53,8 @@ class NavBarCard extends StatelessWidget {
     );
   }
 
-  Widget _navBarHandler() {
+  @override
+  Widget build(BuildContext context) {
     if (headerTitle.length > 3) {
       return ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -69,10 +70,5 @@ class NavBarCard extends StatelessWidget {
             }).toList(),
       );
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _navBarHandler();
   }
 }

@@ -7,6 +7,7 @@ import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/room_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
@@ -23,6 +24,10 @@ class RoomDashboardScreen extends StatefulWidget {
 class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   final ValueNotifier<int> _navBarIndex = ValueNotifier(0);
   final TextEditingController _searchController = TextEditingController();
+  final ValueNotifier<int> _roomJoinOrCreate = ValueNotifier(0);
+  final GlobalKey<FormState> _roomJoinOrCreateKey = GlobalKey();
+  final TextEditingController _roomJoinOrCreateController =
+      TextEditingController();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   List<String> statusList = ["Open", "Closed", "Partially Closed"];
@@ -50,6 +55,87 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     if (state is! RoomDashboardFetchSuccess) {
       context.read<RoomDashboardBloc>().add(RoomDashboardFetch());
     }
+  }
+
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(height: 4, width: 60, color: Colors.grey[300]),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                height: 40,
+                child: ValueListenableBuilder(
+                  valueListenable: _roomJoinOrCreate,
+                  builder: (BuildContext context, int value, Widget? child) {
+                    return NavBarCard(
+                      headerTitle: ["Create Room", "Join Room"],
+                      selectedIndex: _roomJoinOrCreate,
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.0),
+                child: ValueListenableBuilder(
+                  valueListenable: _roomJoinOrCreate,
+                  builder: (BuildContext context, int value, Widget? child) {
+                    String hintText =
+                        "Room ${_roomJoinOrCreate.value == 0 ? 'Name' : 'Key'}";
+                    return Form(
+                      key: _roomJoinOrCreateKey,
+                      child: CustomFormField.textFormField(
+                        _roomJoinOrCreateController,
+                        hintText: hintText,
+                        labelText: hintText,
+                        validator: (value) {
+                          if (_roomJoinOrCreate.value == 0) {
+                            return CustomValidator.validateRoomName(value);
+                          } else {
+                            return CustomValidator.validateRoomKey(value);
+                          }
+                        },
+                        inputDecoration: TextFormFieldInputBorder.underLine,
+                        borderColor: Colors.black87,
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
+                child: ValueListenableBuilder(
+                  valueListenable: _roomJoinOrCreate,
+                  builder: (BuildContext context, int value, Widget? child) {
+                    String buttonText =
+                        _roomJoinOrCreate.value == 0 ? 'Create' : 'Join';
+                    return CustomButton.customElevatedButton(
+                      buttonText,
+                      buttonHeight: 45,
+                      buttonWidth: 100,
+                      borderColor: Colors.deepPurpleAccent,
+                      borderRadius: 16,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -137,7 +223,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       ),
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,
-        () {},
+        () => _showBottomSheet(context),
       ),
     );
   }

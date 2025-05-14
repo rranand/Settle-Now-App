@@ -39,4 +39,26 @@ class CustomValidator {
     }
     return null;
   }
+
+  static String? validateRoomKey(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Room Key is required';
+    } else if (value.trim().length != 7) {
+      return 'Invalid Room Key';
+    } else if (!RegExp(r"^[a-zA-Z0-9]+$").hasMatch(value.trim())) {
+      return 'Invalid Room Key';
+    }
+    return null;
+  }
+
+  static String? validateRoomName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Room Name is required';
+    } else if (value.trim().length < 4) {
+      return 'Room Name must be at least 4 characters';
+    } else if (RegExp(r"[<>';=%()\[\]{}\\\/^`*,\$]").hasMatch(value.trim())) {
+      return 'Invalid Room Key';
+    }
+    return null;
+  }
 }

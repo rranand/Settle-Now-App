@@ -123,11 +123,11 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      //initialLocation: RouterConstants.dashboardRouteName,
+      initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
-      initialLocation:
-          RouterConstants.profileRouteName +
-          RouterConstants.loginActivityRouteName,
+      //initialLocation:
+      //  RouterConstants.profileRouteName +
+      //RouterConstants.loginActivityRouteName,
       observers: [observer],
       refreshListenable: StreamToListenable(authBloc.stream),
       redirect: (context, state) {
