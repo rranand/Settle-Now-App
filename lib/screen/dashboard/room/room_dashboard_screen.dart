@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
+import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -10,7 +11,9 @@ import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
+import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
+import 'package:settlenow_v2/util/widgets/rounded_navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 class RoomDashboardScreen extends StatefulWidget {
@@ -36,6 +39,10 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     if (state is RoomDashboardFailure) {
       showNormalSnackBar(context, state.error);
     }
+  }
+
+  void _roomJoinOrCreateHandler() {
+    if (_roomJoinOrCreateKey.currentState!.validate()) {}
   }
 
   @override
@@ -75,17 +82,14 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                 child: Container(height: 4, width: 60, color: Colors.grey[300]),
               ),
               const SizedBox(height: 16),
-              SizedBox(
-                height: 40,
-                child: ValueListenableBuilder(
-                  valueListenable: _roomJoinOrCreate,
-                  builder: (BuildContext context, int value, Widget? child) {
-                    return NavBarCard(
-                      headerTitle: ["Create Room", "Join Room"],
-                      selectedIndex: _roomJoinOrCreate,
-                    );
-                  },
-                ),
+              ValueListenableBuilder(
+                valueListenable: _roomJoinOrCreate,
+                builder: (BuildContext context, int value, Widget? _) {
+                  return RoundedNavbarWidget(
+                    title: ["Create Room", "Join Room"],
+                    titleIndex: _roomJoinOrCreate,
+                  );
+                },
               ),
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 20.0),
@@ -107,8 +111,9 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                             return CustomValidator.validateRoomKey(value);
                           }
                         },
-                        inputDecoration: TextFormFieldInputBorder.underLine,
-                        borderColor: Colors.black87,
+                        inputDecoration:
+                            TextFormFieldInputBorder.outlineInputBorder,
+                        borderColor: Colors.black12,
                       ),
                     );
                   },
@@ -121,12 +126,18 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                   builder: (BuildContext context, int value, Widget? child) {
                     String buttonText =
                         _roomJoinOrCreate.value == 0 ? 'Create' : 'Join';
-                    return CustomButton.customElevatedButton(
-                      buttonText,
-                      buttonHeight: 45,
-                      buttonWidth: 100,
-                      borderColor: Colors.deepPurpleAccent,
-                      borderRadius: 16,
+                    return InkWell(
+                      onTap: _roomJoinOrCreateHandler,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * .9,
+                        child: GradientWidget(
+                          text: buttonText,
+                          gradientColors:
+                              GradientColorConstant.coolIndigoToBlue,
+                          textSize: 14,
+                          textColor: Colors.white,
+                        ),
+                      ),
                     );
                   },
                 ),

@@ -29,6 +29,7 @@ class GradientWidget extends StatelessWidget {
         padding: const EdgeInsets.all(10.0),
         child: Text(
           text,
+          textAlign: TextAlign.center,
           style: TextStyle(color: textColor, fontSize: textSize),
         ),
       ),
