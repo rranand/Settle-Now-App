@@ -165,11 +165,14 @@ class _PersonalExpenseDashboardScreenState
                       child: Row(
                         children: [
                           Expanded(child: SizedBox()),
-                          GradientWidget(
-                            text: "   ${years[index]}   ",
-                            gradientColors: GradientColorConstant.tealToGreen,
-                            textSize: 16,
-                            textColor: Colors.white,
+                          SizedBox(
+                            width: 80,
+                            child: GradientWidget(
+                              text: years[index].toString(),
+                              gradientColors: GradientColorConstant.tealToGreen,
+                              textSize: 16,
+                              textColor: Colors.white,
+                            ),
                           ),
                           Expanded(child: SizedBox()),
                         ],
