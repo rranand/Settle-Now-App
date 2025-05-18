@@ -8,12 +8,12 @@ import 'package:settlenow_v2/model/user_amount_model.dart';
 
 class NewTransactionModel {
   bool hasData = true;
-  double amount = 0;
   String description = "";
-  DateTime createdOn = DateTime.now();
-  List<UserAmountModel> members = [];
-  UserAmountModel createdBy = UserAmountModel.empty();
+  double amount = 0;
   String category = "";
+  UserAmountModel createdBy = UserAmountModel.empty();
+  List<UserAmountModel> members = [];
+  DateTime createdOn = DateTime.now();
 
   NewTransactionModel({
     required this.amount,
@@ -48,7 +48,7 @@ class NewTransactionModel {
     return <String, dynamic>{
       'amount': amount,
       'description': description,
-      'createdOn': createdOn.millisecondsSinceEpoch,
+      'createdOn': createdOn.toString(),
       'members': members.map((x) => x.toMap()).toList(),
       'createdBy': createdBy.toMap(),
       'category': category,
@@ -59,7 +59,7 @@ class NewTransactionModel {
     return NewTransactionModel(
       amount: map['amount'] as double,
       description: map['description'] as String,
-      createdOn: DateTime.fromMillisecondsSinceEpoch(map['createdOn'] as int),
+      createdOn: DateTime.parse(map['createdOn'] as String),
       members: List<UserAmountModel>.from(
         (map['members'] as List<int>).map<UserAmountModel>(
           (x) => UserAmountModel.fromMap(x as Map<String, dynamic>),

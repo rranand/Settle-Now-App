@@ -8,6 +8,7 @@ import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/cubit/quicksplit/new_transaction/quicksplit_new_transaction_cubit.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -15,6 +16,7 @@ import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -58,6 +60,7 @@ class _AddTransactionState extends State<AddTransaction> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  DateTime _createdOn = DateTime.now();
   final TextEditingController _creationDateController = TextEditingController(
     text: convertDateTimeFormat(DateTime.now()),
   );
@@ -280,33 +283,48 @@ class _AddTransactionState extends State<AddTransaction> {
 
   void _newTransactionHandler() {
     if (_formKey.currentState!.validate()) {
+      double sumAmount = 0;
+      double totalAmount = double.parse(_amountController.text);
       List<UserAmountModel> userWithAmount = [];
       UserAmountModel createdBy = UserAmountModel.empty();
       _selectedUserIDs.value.forEach((userData, amountTxt) {
+        double tempAmount = double.parse(amountTxt.text);
+        sumAmount += tempAmount;
+
         if (userData.id == _loggedInUser.id) {
-          createdBy = UserAmountModel.copyFromUser(
-            _loggedInUser,
-            double.parse(amountTxt.text),
-          );
+          createdBy = UserAmountModel.copyFromUser(_loggedInUser, tempAmount);
         } else {
           userWithAmount.add(
-            UserAmountModel.copyFromUser(
-              userData,
-              double.parse(amountTxt.text),
-            ),
+            UserAmountModel.copyFromUser(userData, tempAmount),
           );
         }
       });
       NewTransactionModel data = NewTransactionModel(
-        amount: double.parse(_amountController.text),
+        amount: totalAmount,
         description: _descriptionController.text,
-        createdOn: DateTime.parse(_creationDateController.text),
+        createdOn: _createdOn,
         members: userWithAmount,
         createdBy: createdBy,
         category: expenseCategories[_categoryIndex.value],
       );
 
-      debugPrint(data.toString());
+      switch (transactionType) {
+        case TransactionType.quicksplit:
+          {
+            if (userWithAmount.isEmpty) {
+              showNormalSnackBar(context, "Add Atleast One Member");
+            } else if (totalAmount != sumAmount) {
+              showNormalSnackBar(context, "Total Amount does not match");
+            } else {
+              context.read<QuicksplitNewTransactionCubit>().createNewExpense(
+                context,
+                data,
+              );
+            }
+          }
+        default:
+          debugPrint("Unidenified Transaction");
+      }
     }
   }
 
@@ -378,6 +396,7 @@ class _AddTransactionState extends State<AddTransaction> {
                     context: context,
                     is24HourMode: false,
                     isShowSeconds: false,
+                    lastDate: DateTime.now(),
                     borderRadius: BorderRadius.circular(16.0),
                     padding: EdgeInsets.symmetric(vertical: 12),
                   );
@@ -385,6 +404,7 @@ class _AddTransactionState extends State<AddTransaction> {
                     _creationDateController.text = convertDateTimeFormat(
                       dateTime,
                     );
+                    _createdOn = dateTime;
                   }
                 },
               ),

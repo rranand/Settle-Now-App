@@ -33,7 +33,7 @@ Widget imageWidgetForCachedNetworkimage(
   }
 }
 
-Widget errorImageWidget(UserModel user, bool isLast) {
+Widget errorImageWidget(UserModel user, double radius, bool isLast) {
   String nameInitial = "";
   final List<String> nameArr = user.name.split(" ");
 
@@ -59,7 +59,7 @@ Widget errorImageWidget(UserModel user, bool isLast) {
         textAlign: TextAlign.center,
         style: TextStyle(
           fontWeight: FontWeight.w600,
-          fontSize: 18,
+          fontSize: radius * 0.5,
           color: UiConstant.colors[colourIndex],
         ),
       ),
@@ -82,7 +82,9 @@ Widget eachUserImageBuilder(
     progressIndicatorBuilder:
         (context, url, downloadProgress) =>
             imageWidgetForCachedNetworkimage(null, isLast),
-    errorWidget: (context, url, error) => errorImageWidget(eachUser, isLast),
+    errorWidget:
+        (context, url, error) =>
+            errorImageWidget(eachUser, imageRadius, isLast),
     imageBuilder:
         (context, imageProvider) =>
             imageWidgetForCachedNetworkimage(imageProvider, isLast),

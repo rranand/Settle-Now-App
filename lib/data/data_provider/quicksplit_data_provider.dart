@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 
 class QuicksplitDataProvider {
@@ -129,6 +130,16 @@ class QuicksplitDataProvider {
           tempArr.map((ele) => TransactionModel.fromMap(ele)).toList();
 
       return arr;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<TransactionModel> create(NewTransactionModel data) async {
+    try {
+      TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
+      newExpense.id = "${newExpense.description}##${newExpense.createdOn}";
+      return newExpense;
     } catch (e) {
       rethrow;
     }

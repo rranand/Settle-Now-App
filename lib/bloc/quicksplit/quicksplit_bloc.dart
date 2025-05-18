@@ -11,6 +11,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
 
   QuicksplitBloc(this.repo) : super(QuicksplitInitial()) {
     on<QuicksplitFetch>(_quicksplitFetch);
+    on<QuicksplitAddNewTransaction>(_quicksplitAddNewTransaction);
   }
 
   void _quicksplitFetch(
@@ -24,5 +25,14 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     } catch (e) {
       return emit(QuicksplitFailure(e.toString()));
     }
+  }
+
+  void _quicksplitAddNewTransaction(
+    QuicksplitAddNewTransaction event,
+    Emitter<QuicksplitState> emit,
+  ) async {
+    final qsOldData = state as QuicksplitFetchSuccess;
+    List<TransactionModel> data = [event.data, ...qsOldData.data];
+    return emit(QuicksplitFetchSuccess(data));
   }
 }

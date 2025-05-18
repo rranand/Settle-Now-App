@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 
 class TransactionModel {
@@ -60,6 +61,19 @@ class TransactionModel {
       'createdOn': createdOn.toString(),
       'modifiedOn': modifiedOn.toString(),
     };
+  }
+
+  factory TransactionModel.fromNewTransaction(NewTransactionModel data) {
+    return TransactionModel(
+      id: "",
+      description: data.description,
+      amount: data.amount,
+      category: data.category,
+      users: data.members,
+      createdBy: data.createdBy,
+      createdOn: data.createdOn,
+      modifiedOn: data.createdOn,
+    );
   }
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
