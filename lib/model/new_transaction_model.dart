@@ -1,0 +1,106 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+
+import 'package:settlenow_v2/model/user_amount_model.dart';
+
+class NewTransactionModel {
+  bool hasData = true;
+  double amount = 0;
+  String description = "";
+  DateTime createdOn = DateTime.now();
+  List<UserAmountModel> members = [];
+  UserAmountModel createdBy = UserAmountModel.empty();
+  String category = "";
+
+  NewTransactionModel({
+    required this.amount,
+    required this.description,
+    required this.createdOn,
+    required this.members,
+    required this.createdBy,
+    required this.category,
+  });
+
+  NewTransactionModel.empty({this.hasData = false});
+
+  NewTransactionModel copyWith({
+    double? amount,
+    String? description,
+    DateTime? createdOn,
+    List<UserAmountModel>? members,
+    UserAmountModel? createdBy,
+    String? category,
+  }) {
+    return NewTransactionModel(
+      amount: amount ?? this.amount,
+      description: description ?? this.description,
+      createdOn: createdOn ?? this.createdOn,
+      members: members ?? this.members,
+      createdBy: createdBy ?? this.createdBy,
+      category: category ?? this.category,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'amount': amount,
+      'description': description,
+      'createdOn': createdOn.millisecondsSinceEpoch,
+      'members': members.map((x) => x.toMap()).toList(),
+      'createdBy': createdBy.toMap(),
+      'category': category,
+    };
+  }
+
+  factory NewTransactionModel.fromMap(Map<String, dynamic> map) {
+    return NewTransactionModel(
+      amount: map['amount'] as double,
+      description: map['description'] as String,
+      createdOn: DateTime.fromMillisecondsSinceEpoch(map['createdOn'] as int),
+      members: List<UserAmountModel>.from(
+        (map['members'] as List<int>).map<UserAmountModel>(
+          (x) => UserAmountModel.fromMap(x as Map<String, dynamic>),
+        ),
+      ),
+      createdBy: UserAmountModel.fromMap(
+        map['createdBy'] as Map<String, dynamic>,
+      ),
+      category: map['category'] as String,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory NewTransactionModel.fromJson(String source) =>
+      NewTransactionModel.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  @override
+  String toString() {
+    return 'NewTransactionModel(amount: $amount, description: $description, createdOn: $createdOn, members: $members, createdBy: $createdBy, category: $category)';
+  }
+
+  @override
+  bool operator ==(covariant NewTransactionModel other) {
+    if (identical(this, other)) return true;
+
+    return other.amount == amount &&
+        other.description == description &&
+        other.createdOn == createdOn &&
+        listEquals(other.members, members) &&
+        other.createdBy == createdBy &&
+        other.category == category;
+  }
+
+  @override
+  int get hashCode {
+    return amount.hashCode ^
+        description.hashCode ^
+        createdOn.hashCode ^
+        members.hashCode ^
+        createdBy.hashCode ^
+        category.hashCode;
+  }
+}

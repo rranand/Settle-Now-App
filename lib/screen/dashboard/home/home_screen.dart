@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
@@ -23,7 +24,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _homeScreenkey = GlobalKey();
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
-  int _selectedIndex = 3;
+  int _selectedIndex = 1;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   @override

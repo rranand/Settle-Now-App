@@ -10,7 +10,7 @@ class AuthRepository {
 
   Future<UserModel> getLoggedInUser() async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
+      await Future.delayed(Duration(seconds: 1), () {});
       UserModel userData = UserModel.fromBasicInfo(
         name: 'Rohit Anand',
         id: 'user_1',

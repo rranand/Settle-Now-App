@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
@@ -15,14 +18,38 @@ import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
+enum TransactionType { quicksplit, lenden, room }
+
+extension TransactionTypeExtension on TransactionType {
+  static TransactionType fromPath(BuildContext context) {
+    String path =
+        GoRouter.of(context).routeInformationProvider.value.uri.toString();
+
+    if (path.startsWith(RouterConstants.quickSplitAddExpenseRouteName)) {
+      return TransactionType.quicksplit;
+    }
+    switch (path.toLowerCase()) {
+      case 'quicksplit':
+        return TransactionType.quicksplit;
+      case 'lenden':
+        return TransactionType.lenden;
+      default:
+        return TransactionType.room;
+    }
+  }
+}
+
 class AddTransaction extends StatefulWidget {
-  const AddTransaction({super.key});
+  final NewTransactionModel? transactionData;
+  const AddTransaction({super.key, this.transactionData});
 
   @override
   State<AddTransaction> createState() => _AddTransactionState();
 }
 
 class _AddTransactionState extends State<AddTransaction> {
+  UserModel _loggedInUser = UserModel.empty();
+  TransactionType transactionType = TransactionType.room;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _userCardWidth = 110;
   final double _userImageRadius = 50;
@@ -181,6 +208,7 @@ class _AddTransactionState extends State<AddTransaction> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(height: UiConstant.spaceBetweenSection),
         Text("Split Type", style: TextStyle(fontSize: 20)),
         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
         ValueListenableBuilder(
@@ -229,6 +257,56 @@ class _AddTransactionState extends State<AddTransaction> {
     expenseCategories = CategoryParser.getCategoryList();
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
+
+    transactionType = TransactionTypeExtension.fromPath(context);
+    if (transactionType == TransactionType.quicksplit) {
+      _splitTypeIndex.value = 1;
+      _selectedUserIDs.value.putIfAbsent(
+        _loggedInUser,
+        () => TextEditingController(),
+      );
+    }
+  }
+
+  void _newTransactionHandler() {
+    if (_formKey.currentState!.validate()) {
+      List<UserAmountModel> userWithAmount = [];
+      UserAmountModel createdBy = UserAmountModel.empty();
+      _selectedUserIDs.value.forEach((userData, amountTxt) {
+        if (userData.id == _loggedInUser.id) {
+          createdBy = UserAmountModel.copyFromUser(
+            _loggedInUser,
+            double.parse(amountTxt.text),
+          );
+        } else {
+          userWithAmount.add(
+            UserAmountModel.copyFromUser(
+              userData,
+              double.parse(amountTxt.text),
+            ),
+          );
+        }
+      });
+      NewTransactionModel data = NewTransactionModel(
+        amount: double.parse(_amountController.text),
+        description: _descriptionController.text,
+        createdOn: DateTime.parse(_creationDateController.text),
+        members: userWithAmount,
+        createdBy: createdBy,
+        category: expenseCategories[_categoryIndex.value],
+      );
+
+      debugPrint(data.toString());
     }
   }
 
@@ -310,8 +388,10 @@ class _AddTransactionState extends State<AddTransaction> {
                   }
                 },
               ),
-              SizedBox(height: UiConstant.spaceBetweenSection),
-              _splitTypeCardWidget(),
+              Visibility(
+                visible: TransactionType.room == transactionType,
+                child: _splitTypeCardWidget(),
+              ),
               SizedBox(height: UiConstant.spaceBetweenSection),
               ValueListenableBuilder(
                 valueListenable: _splitTypeIndex,
@@ -364,12 +444,12 @@ class _AddTransactionState extends State<AddTransaction> {
                       valueListenable: _selectedUserIDs,
                       builder: (
                         BuildContext context,
-                        UserWithEditControlTD UserWithEditControlTD,
+                        UserWithEditControlTD userWithEditControlTD,
                         Widget? _,
                       ) {
                         List<UserModel> selectedUsers =
-                            UserWithEditControlTD.keys.toList();
-                        if (UserWithEditControlTD.isEmpty) {
+                            userWithEditControlTD.keys.toList();
+                        if (userWithEditControlTD.isEmpty) {
                           return SizedBox.shrink();
                         } else {
                           return Column(
@@ -400,9 +480,7 @@ class _AddTransactionState extends State<AddTransaction> {
               Center(
                 child: InkWell(
                   borderRadius: BorderRadius.circular(100),
-                  onTap: () {
-                    if (_formKey.currentState!.validate()) {}
-                  },
+                  onTap: _newTransactionHandler,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,
                     child: GradientBorderCard(

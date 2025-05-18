@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/quick_split_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
@@ -132,10 +134,9 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
           );
         },
       ),
-      floatingActionButton: CustomButton.customFloatingButton(
-        Iconsax.add,
-        () {},
-      ),
+      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
+        context.push(RouterConstants.quickSplitAddExpenseRouteName);
+      }),
     );
   }
 }

@@ -30,6 +30,17 @@ class UserAmountModel extends UserModel {
   }
 
   @override
+  factory UserAmountModel.copyFromUser(UserModel user, double amount) {
+    return UserAmountModel(
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      profileImage: user.profileImage,
+      amount: amount,
+    );
+  }
+
+  @override
   factory UserAmountModel.fromMap(Map<String, dynamic> map) {
     return UserAmountModel(
       id: map['id'] ?? '',

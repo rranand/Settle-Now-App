@@ -13,7 +13,9 @@ import 'package:settlenow_v2/screen/dashboard/room/room_expense_screen.dart';
 import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
+import 'package:settlenow_v2/util/card/add_transaction.dart';
 import 'package:settlenow_v2/util/handler/stream_to_listenable.dart';
+import 'package:settlenow_v2/util/widgets/auth_gate.dart';
 
 class AppRouterConfig {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -38,25 +40,25 @@ class AppRouterConfig {
       GoRoute(
         path: RouterConstants.dashboardRouteName,
         builder: (context, state) {
-          return HomeScreen();
+          return AuthGate(child: HomeScreen());
         },
         routes: [
           GoRoute(
             path: RouterConstants.profileRouteName,
             builder: (context, state) {
-              return ProfileScreen();
+              return AuthGate(child: ProfileScreen());
             },
             routes: [
               GoRoute(
                 path: RouterConstants.profileEditRouteName,
                 builder: (context, state) {
-                  return ProfileEditScreen();
+                  return AuthGate(child: ProfileEditScreen());
                 },
               ),
               GoRoute(
                 path: RouterConstants.loginActivityRouteName,
                 builder: (context, state) {
-                  return LoginActivityScreen();
+                  return AuthGate(child: LoginActivityScreen());
                 },
               ),
             ],
@@ -64,7 +66,9 @@ class AppRouterConfig {
           GoRoute(
             path: "${RouterConstants.roomRouteName}/:id",
             builder: (context, state) {
-              return RoomExpenseScreen(id: state.pathParameters["id"]!);
+              return AuthGate(
+                child: RoomExpenseScreen(id: state.pathParameters["id"]!),
+              );
             },
             redirect: (context, state) {
               Map<String, String> param = state.pathParameters;
@@ -79,9 +83,11 @@ class AppRouterConfig {
           GoRoute(
             path: "${RouterConstants.personalExpenseRouteName}/:year/:month",
             builder: (context, state) {
-              return PersonalExpenseScreen(
-                year: state.pathParameters["year"]!,
-                month: state.pathParameters["month"]!,
+              return AuthGate(
+                child: PersonalExpenseScreen(
+                  year: state.pathParameters["year"]!,
+                  month: state.pathParameters["month"]!,
+                ),
               );
             },
             redirect: (context, state) {
@@ -97,10 +103,33 @@ class AppRouterConfig {
           GoRoute(
             path: "${RouterConstants.lendenRouteName}/:id",
             builder: (context, state) {
-              return LendenExpenseScreen(
-                id: state.pathParameters["id"]!,
-                roomName: state.extra as String?,
+              return AuthGate(
+                child: LendenExpenseScreen(
+                  id: state.pathParameters["id"]!,
+                  roomName: state.extra as String?,
+                ),
               );
+            },
+            redirect: (context, state) {
+              Map<String, String> param = state.pathParameters;
+
+              if (param.isEmpty) {
+                return RouterConstants.dashboardRouteName;
+              } else {
+                return null;
+              }
+            },
+          ),
+          GoRoute(
+            path: RouterConstants.quickSplitAddExpenseRouteName,
+            builder: (context, state) {
+              return AuthGate(child: AddTransaction());
+            },
+          ),
+          GoRoute(
+            path: RouterConstants.quickSplitEditExpenseRouteName,
+            builder: (context, state) {
+              return AuthGate(child: AddTransaction());
             },
             redirect: (context, state) {
               Map<String, String> param = state.pathParameters;
@@ -123,7 +152,7 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      initialLocation: RouterConstants.dashboardRouteName,
+      initialLocation: RouterConstants.quickSplitAddExpenseRouteName,
       //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
       //initialLocation:
       //  RouterConstants.profileRouteName +
