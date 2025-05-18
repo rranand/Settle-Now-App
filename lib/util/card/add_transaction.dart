@@ -8,10 +8,11 @@ import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/cubit/quicksplit/new_transaction/quicksplit_new_transaction_cubit.dart';
+import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
@@ -71,6 +72,22 @@ class _AddTransactionState extends State<AddTransaction> {
   final ValueNotifier<UserWithEditControlTD> _selectedUserIDs = ValueNotifier(
     {},
   );
+
+  void resetForm() {
+    _amountController.text = "";
+    _descriptionController.text = "";
+    _createdOn = DateTime.now();
+    _creationDateController.text = convertDateTimeFormat(_createdOn);
+    _selectedUserIDs.value.clear();
+    _categoryIndex.value = 0;
+
+    if (transactionType == TransactionType.quicksplit) {
+      _selectedUserIDs.value.putIfAbsent(
+        _loggedInUser,
+        () => TextEditingController(),
+      );
+    }
+  }
 
   Widget _userCardWidget(
     UserModel user,
@@ -281,6 +298,17 @@ class _AddTransactionState extends State<AddTransaction> {
     }
   }
 
+  void _blocListenerHandler(BuildContext context, NewTransactionState state) {
+    if (state is NewTransactionFailure) {
+      showNormalSnackBar(context, state.error);
+    } else if (state is NewTransactionSuccess) {
+      resetForm();
+      if (context.canPop()) {
+        context.pop();
+      }
+    }
+  }
+
   void _newTransactionHandler() {
     if (_formKey.currentState!.validate()) {
       double sumAmount = 0;
@@ -307,6 +335,7 @@ class _AddTransactionState extends State<AddTransaction> {
         createdBy: createdBy,
         category: expenseCategories[_categoryIndex.value],
       );
+      bool flag = false;
 
       switch (transactionType) {
         case TransactionType.quicksplit:
@@ -316,209 +345,229 @@ class _AddTransactionState extends State<AddTransaction> {
             } else if (totalAmount != sumAmount) {
               showNormalSnackBar(context, "Total Amount does not match");
             } else {
-              context.read<QuicksplitNewTransactionCubit>().createNewExpense(
-                context,
-                data,
-              );
+              flag = true;
             }
           }
         default:
           debugPrint("Unidenified Transaction");
+      }
+
+      if (flag) {
+        context.read<NewTransactionCubit>().createNewExpense(context, data);
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Add New Expense"),
-        centerTitle: false,
-        titleSpacing: _mainScreenPadding.left,
-        leading: appBarBackButton(context),
-      ),
-      body: SingleChildScrollView(
-        padding: _mainScreenPadding.add(
-          EdgeInsets.only(
-            top: UiConstant.spaceBetweenSection,
-            bottom: UiConstant.spaceAtBottom,
+    return BlocConsumer<NewTransactionCubit, NewTransactionState>(
+      listener: _blocListenerHandler,
+      builder: (context, state) {
+        if (state is NewTransactionLoading) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Add New Expense"),
+              centerTitle: false,
+              titleSpacing: _mainScreenPadding.left,
+              leading: appBarBackButton(context),
+            ),
+            body: LoadingPage(),
+          );
+        }
+        return Scaffold(
+          appBar: AppBar(
+            title: Text("Add New Expense"),
+            centerTitle: false,
+            titleSpacing: _mainScreenPadding.left,
+            leading: appBarBackButton(context),
           ),
-        ),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomFormField.textFormField(
-                _amountController,
-                textInputType: TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [AmountInputFormatter()],
-                hintText: 'Amount',
-                labelText: 'Amount',
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Please enter a amount.";
-                  }
-                  return null;
-                },
-                inputDecoration: TextFormFieldInputBorder.underLine,
-                borderColor: Colors.black87,
-                suffixIcon: UiConstant.indianRupeeSymbol,
+          body: SingleChildScrollView(
+            padding: _mainScreenPadding.add(
+              EdgeInsets.only(
+                top: UiConstant.spaceBetweenSection,
+                bottom: UiConstant.spaceAtBottom,
               ),
-              SizedBox(height: UiConstant.spaceBetweenSection),
-              CustomFormField.textFormField(
-                _descriptionController,
-                hintText: 'Description',
-                labelText: 'Description',
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Please enter a description.";
-                  } else if (value.trim().length < 3) {
-                    return "Description must be at least 3 characters long.";
-                  }
-                  return null;
-                },
-                inputDecoration: TextFormFieldInputBorder.underLine,
-                borderColor: Colors.black87,
-                maxLines: 2,
-              ),
-              SizedBox(height: UiConstant.spaceBetweenSection),
-              CustomFormField.textFormField(
-                _creationDateController,
-                readOnly: true,
-                labelText: 'Creation Date',
-                hintText: 'Creation Date',
-                inputDecoration: TextFormFieldInputBorder.underLine,
-                borderColor: Colors.black87,
-                suffixIcon: Icon(Iconsax.calendar),
-                onTap: () async {
-                  DateTime? dateTime = await showOmniDateTimePicker(
-                    context: context,
-                    is24HourMode: false,
-                    isShowSeconds: false,
-                    lastDate: DateTime.now(),
-                    borderRadius: BorderRadius.circular(16.0),
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                  );
-                  if (dateTime != null && mounted) {
-                    _creationDateController.text = convertDateTimeFormat(
-                      dateTime,
-                    );
-                    _createdOn = dateTime;
-                  }
-                },
-              ),
-              Visibility(
-                visible: TransactionType.room == transactionType,
-                child: _splitTypeCardWidget(),
-              ),
-              SizedBox(height: UiConstant.spaceBetweenSection),
-              ValueListenableBuilder(
-                valueListenable: _splitTypeIndex,
-                builder: (context, value, child) {
-                  if (_splitType[value].contains("Partial")) {
-                    return child!;
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Members", style: TextStyle(fontSize: 20)),
-                    SizedBox(height: .5 * UiConstant.spaceBetweenSection),
-                    LayoutBuilder(
-                      builder: (context, constraint) {
-                        final double screenWidth = constraint.maxWidth;
-                        final double spacing = 8.0;
-                        final int columns =
-                            (screenWidth / (_userCardWidth + spacing)).ceil();
-                        return GridView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: UiConstant.users.length,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: columns,
-                                mainAxisSpacing: spacing,
-                                crossAxisSpacing: spacing,
-                              ),
-                          itemBuilder: (context, index) {
-                            UserModel user = UiConstant.users[index];
-                            return ValueListenableBuilder(
-                              valueListenable: _selectedUserIDs,
-                              builder: (
-                                BuildContext context,
-                                UserWithEditControlTD value,
-                                Widget? child,
-                              ) {
-                                return _userCardWidget(user, value);
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomFormField.textFormField(
+                    _amountController,
+                    textInputType: TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    inputFormatters: [AmountInputFormatter()],
+                    hintText: 'Amount',
+                    labelText: 'Amount',
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Please enter a amount.";
+                      }
+                      return null;
+                    },
+                    inputDecoration: TextFormFieldInputBorder.underLine,
+                    borderColor: Colors.black87,
+                    suffixIcon: UiConstant.indianRupeeSymbol,
+                  ),
+                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  CustomFormField.textFormField(
+                    _descriptionController,
+                    hintText: 'Description',
+                    labelText: 'Description',
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Please enter a description.";
+                      } else if (value.trim().length < 3) {
+                        return "Description must be at least 3 characters long.";
+                      }
+                      return null;
+                    },
+                    inputDecoration: TextFormFieldInputBorder.underLine,
+                    borderColor: Colors.black87,
+                    maxLines: 2,
+                  ),
+                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  CustomFormField.textFormField(
+                    _creationDateController,
+                    readOnly: true,
+                    labelText: 'Creation Date',
+                    hintText: 'Creation Date',
+                    inputDecoration: TextFormFieldInputBorder.underLine,
+                    borderColor: Colors.black87,
+                    suffixIcon: Icon(Iconsax.calendar),
+                    onTap: () async {
+                      DateTime? dateTime = await showOmniDateTimePicker(
+                        context: context,
+                        is24HourMode: false,
+                        isShowSeconds: false,
+                        lastDate: DateTime.now(),
+                        borderRadius: BorderRadius.circular(16.0),
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                      );
+                      if (dateTime != null && mounted) {
+                        _creationDateController.text = convertDateTimeFormat(
+                          dateTime,
+                        );
+                        _createdOn = dateTime;
+                      }
+                    },
+                  ),
+                  Visibility(
+                    visible: TransactionType.room == transactionType,
+                    child: _splitTypeCardWidget(),
+                  ),
+                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  ValueListenableBuilder(
+                    valueListenable: _splitTypeIndex,
+                    builder: (context, value, child) {
+                      if (_splitType[value].contains("Partial")) {
+                        return child!;
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Members", style: TextStyle(fontSize: 20)),
+                        SizedBox(height: .5 * UiConstant.spaceBetweenSection),
+                        LayoutBuilder(
+                          builder: (context, constraint) {
+                            final double screenWidth = constraint.maxWidth;
+                            final double spacing = 8.0;
+                            final int columns =
+                                (screenWidth / (_userCardWidth + spacing))
+                                    .ceil();
+                            return GridView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: UiConstant.users.length,
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: columns,
+                                    mainAxisSpacing: spacing,
+                                    crossAxisSpacing: spacing,
+                                  ),
+                              itemBuilder: (context, index) {
+                                UserModel user = UiConstant.users[index];
+                                return ValueListenableBuilder(
+                                  valueListenable: _selectedUserIDs,
+                                  builder: (
+                                    BuildContext context,
+                                    UserWithEditControlTD value,
+                                    Widget? child,
+                                  ) {
+                                    return _userCardWidget(user, value);
+                                  },
+                                );
                               },
                             );
                           },
-                        );
-                      },
+                        ),
+                        SizedBox(height: UiConstant.spaceBetweenSection),
+                        ValueListenableBuilder(
+                          valueListenable: _selectedUserIDs,
+                          builder: (
+                            BuildContext context,
+                            UserWithEditControlTD userWithEditControlTD,
+                            Widget? _,
+                          ) {
+                            List<UserModel> selectedUsers =
+                                userWithEditControlTD.keys.toList();
+                            if (userWithEditControlTD.isEmpty) {
+                              return SizedBox.shrink();
+                            } else {
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Members With Amount",
+                                    style: TextStyle(fontSize: 20),
+                                  ),
+                                  SizedBox(
+                                    height: .5 * UiConstant.spaceBetweenSection,
+                                  ),
+                                  ...List.generate(selectedUsers.length, (i) {
+                                    return _userCardWithAmountWidget(
+                                      selectedUsers[i],
+                                    );
+                                  }),
+                                ],
+                              );
+                            }
+                          },
+                        ),
+                      ],
                     ),
-                    SizedBox(height: UiConstant.spaceBetweenSection),
-                    ValueListenableBuilder(
-                      valueListenable: _selectedUserIDs,
-                      builder: (
-                        BuildContext context,
-                        UserWithEditControlTD userWithEditControlTD,
-                        Widget? _,
-                      ) {
-                        List<UserModel> selectedUsers =
-                            userWithEditControlTD.keys.toList();
-                        if (userWithEditControlTD.isEmpty) {
-                          return SizedBox.shrink();
-                        } else {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Members With Amount",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              SizedBox(
-                                height: .5 * UiConstant.spaceBetweenSection,
-                              ),
-                              ...List.generate(selectedUsers.length, (i) {
-                                return _userCardWithAmountWidget(
-                                  selectedUsers[i],
-                                );
-                              }),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              _categoryWidget(),
-              SizedBox(height: UiConstant.spaceBetweenSection),
-              Center(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(100),
-                  onTap: _newTransactionHandler,
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: GradientBorderCard(
-                      borderRadius: 100,
-                      borderWidth: 1,
-                      gradientColors: GradientColorConstant.vibrantGradient,
-                      child: CustomButton.customOutlinedButton(
-                        "Add Expense",
-                        buttonHeight: 40,
+                  ),
+                  _categoryWidget(),
+                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  Center(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(100),
+                      onTap: _newTransactionHandler,
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        child: GradientBorderCard(
+                          borderRadius: 100,
+                          borderWidth: 1,
+                          gradientColors: GradientColorConstant.vibrantGradient,
+                          child: CustomButton.customOutlinedButton(
+                            "Add Expense",
+                            buttonHeight: 40,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

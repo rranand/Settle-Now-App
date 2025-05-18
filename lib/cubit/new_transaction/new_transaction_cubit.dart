@@ -5,25 +5,23 @@ import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 
-part 'quicksplit_new_transaction_state.dart';
+part 'new_transaction_state.dart';
 
-class QuicksplitNewTransactionCubit
-    extends Cubit<QuicksplitNewTransactionState> {
+class NewTransactionCubit extends Cubit<NewTransactionState> {
   final QuicksplitRepository repo;
-  QuicksplitNewTransactionCubit(this.repo)
-    : super(QuicksplitNewTransactionInitial());
+  NewTransactionCubit(this.repo) : super(NewTransactionInitial());
 
   void createNewExpense(BuildContext context, NewTransactionModel data) async {
-    emit(QSNTransactionLoading());
+    emit(NewTransactionLoading());
 
-    final quicksplitBloc = context.read<QuicksplitBloc>();
+    final bloc = context.read<QuicksplitBloc>();
     try {
       final TransactionModel newData = await repo.create(data);
 
-      quicksplitBloc.add(QuicksplitAddNewTransaction(newData));
-      emit(QSNTransactionSuccess(newData));
+      bloc.add(QuicksplitAddNewTransaction(newData));
+      emit(NewTransactionSuccess(newData));
     } catch (e) {
-      emit(QSNTransactionFailure(e.toString()));
+      emit(NewTransactionFailure(e.toString()));
     }
   }
 }

@@ -17,6 +17,7 @@ class QuicksplitRepository {
 
   Future<TransactionModel> create(NewTransactionModel data) async {
     try {
+      await Future.delayed(Duration(seconds: 2), () {});
       return _dataProvider.create(data);
     } catch (e) {
       rethrow;
