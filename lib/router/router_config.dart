@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/signup_screen.dart';
@@ -129,12 +130,13 @@ class AppRouterConfig {
           GoRoute(
             path: RouterConstants.quickSplitEditExpenseRouteName,
             builder: (context, state) {
-              return AuthGate(child: AddTransaction());
+              TransactionModel data = state.extra as TransactionModel;
+              return AuthGate(child: AddTransaction(transactionData: data));
             },
             redirect: (context, state) {
-              Map<String, String> param = state.pathParameters;
+              final extra = state.extra;
 
-              if (param.isEmpty) {
+              if (extra == null) {
                 return RouterConstants.dashboardRouteName;
               } else {
                 return null;
@@ -152,7 +154,7 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      initialLocation: RouterConstants.quickSplitAddExpenseRouteName,
+      initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
       //initialLocation:
       //  RouterConstants.profileRouteName +

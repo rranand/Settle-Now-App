@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
@@ -18,6 +23,7 @@ class QuickSplitCard extends StatefulWidget {
 }
 
 class _QuickSplitCardState extends State<QuickSplitCard> {
+  UserModel _loggedInUser = UserModel.empty();
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
 
   List<String> createTags() {
@@ -53,7 +59,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           child: const SizedBox(height: UiConstant.cardSpaceAfterSubText),
         ),
         subTextOnCard(
-          "Created By ${widget.data.createdBy.name}",
+          "Created By ${widget.data.createdBy.id == _loggedInUser.id ? "You" : widget.data.createdBy.name}",
           isLoaded: widget.data.hasData,
         ),
         subTextOnCard(
@@ -115,6 +121,15 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<String> tags = createTags();
     return Container(
@@ -153,17 +168,42 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   ),
                 ),
               ),
-              Visibility(
-                visible: widget.data.hasData,
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(
-                    UiConstant.cardBorderRadius,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Visibility(
+                    visible:
+                        widget.data.hasData &&
+                        widget.data.createdBy.id == _loggedInUser.id,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 10.0),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                        child: Icon(Iconsax.edit, color: Colors.grey),
+                        onTap: () {
+                          context.push(
+                            RouterConstants.quickSplitEditExpenseRouteName,
+                            extra: widget.data,
+                          );
+                        },
+                      ),
+                    ),
                   ),
-                  child: Icon(Iconsax.info_circle, color: Colors.grey),
-                  onTap: () {
-                    isExpanded.value = !isExpanded.value;
-                  },
-                ),
+                  Visibility(
+                    visible: widget.data.hasData,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(
+                        UiConstant.cardBorderRadius,
+                      ),
+                      child: Icon(Iconsax.info_circle, color: Colors.grey),
+                      onTap: () {
+                        isExpanded.value = !isExpanded.value;
+                      },
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

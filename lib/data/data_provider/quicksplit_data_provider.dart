@@ -11,15 +11,15 @@ class QuicksplitDataProvider {
   {
     "id": "1",
     "description": "Dinner at Italian place",
-    "amount": 120.5,
+    "amount": 120,
     "tags": ["dinner", "friends"],
-    "category": "Food & Dining",
+    "category": "Food",
     "createdBy": {
       "id": "u1",
-      "name": "Alice Johnson",
-      "email": "alice@example.com",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/10/200/300",
-      "amount": 0.0
+      "amount": 60.0
     },
     "users": [
       {
@@ -27,14 +27,14 @@ class QuicksplitDataProvider {
         "name": "Bob Smith",
         "email": "bob@example.com",
         "profileImage": "https://picsum.photos/id/11/200/300",
-        "amount": 40.17
+        "amount": 15.0
       },
       {
         "id": "u3",
         "name": "Charlie Lee",
         "email": "charlie@example.com",
         "profileImage": "https://picsum.photos/id/12/200/300",
-        "amount": 80.33
+        "amount": 45.0
       }
     ],
     "createdOn": "2024-04-25T19:00:00.000Z",
@@ -55,9 +55,9 @@ class QuicksplitDataProvider {
     },
     "users": [
       {
-        "id": "u5",
-        "name": "Eve Stone",
-        "email": "eve@example.com",
+      "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/14/200/300",
         "amount": 10.0
       }
@@ -70,7 +70,7 @@ class QuicksplitDataProvider {
     "description": "Taxi ride",
     "amount": 25.75,
     "tags": ["travel", "taxi"],
-    "category": "Transportation",
+    "category": "Travel",
     "createdBy": {
       "id": "u6",
       "name": "Fiona Clark",
@@ -80,9 +80,9 @@ class QuicksplitDataProvider {
     },
     "users": [
       {
-        "id": "u7",
-        "name": "George Baker",
-        "email": "george@example.com",
+      "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/16/200/300",
         "amount": 25.75
       }
@@ -95,11 +95,11 @@ class QuicksplitDataProvider {
     "description": "Monthly Rent",
     "amount": 500.0,
     "tags": ["rent"],
-    "category": "Housing",
+    "category": "Household",
     "createdBy": {
-      "id": "u8",
-      "name": "Henry Adams",
-      "email": "henry@example.com",
+      "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/17/200/300",
       "amount": 100.0
     },

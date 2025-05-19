@@ -28,7 +28,8 @@ extension TransactionTypeExtension on TransactionType {
     String path =
         GoRouter.of(context).routeInformationProvider.value.uri.toString();
 
-    if (path.startsWith(RouterConstants.quickSplitAddExpenseRouteName)) {
+    if (path.startsWith(RouterConstants.quickSplitAddExpenseRouteName) ||
+        path.startsWith(RouterConstants.quickSplitEditExpenseRouteName)) {
       return TransactionType.quicksplit;
     }
     switch (path.toLowerCase()) {
@@ -43,7 +44,7 @@ extension TransactionTypeExtension on TransactionType {
 }
 
 class AddTransaction extends StatefulWidget {
-  final NewTransactionModel? transactionData;
+  final TransactionModel? transactionData;
   const AddTransaction({super.key, this.transactionData});
 
   @override
@@ -72,38 +73,34 @@ class _AddTransactionState extends State<AddTransaction> {
   final ValueNotifier<UserWithEditControlTD> _selectedUserIDs = ValueNotifier(
     {},
   );
+  final ValueNotifier<Set<String>> _selectedUserIDSet = ValueNotifier({});
 
-  void resetForm() {
-    _amountController.text = "";
-    _descriptionController.text = "";
-    _createdOn = DateTime.now();
-    _creationDateController.text = convertDateTimeFormat(_createdOn);
-    _selectedUserIDs.value.clear();
-    _categoryIndex.value = 0;
+  void _removeUserFromSplitTransaction(UserModel user) {
+    {
+      final current = UserWithEditControlTD.from(_selectedUserIDs.value);
+      final oldUserIDs = Set<String>.from(_selectedUserIDSet.value);
 
-    if (transactionType == TransactionType.quicksplit) {
-      _selectedUserIDs.value.putIfAbsent(
-        _loggedInUser,
-        () => TextEditingController(),
-      );
+      if (oldUserIDs.contains(user.id)) {
+        if (_loggedInUser.id == user.id) {
+          showNormalSnackBar(context, "You can't remove yourself");
+        } else {
+          oldUserIDs.remove(user.id);
+          current.removeWhere((k, v) => k.id == user.id);
+        }
+      } else {
+        oldUserIDs.add(user.id);
+        current.putIfAbsent(user, () => TextEditingController());
+      }
+
+      _selectedUserIDs.value = current;
+      _selectedUserIDSet.value = oldUserIDs;
     }
   }
 
-  Widget _userCardWidget(
-    UserModel user,
-    UserWithEditControlTD selectedUserIDs,
-  ) {
+  Widget _userCardWidget(UserModel user) {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-      onTap: () {
-        final current = UserWithEditControlTD.from(_selectedUserIDs.value);
-        if (current.containsKey(user)) {
-          current.remove(user);
-        } else {
-          current.putIfAbsent(user, () => TextEditingController());
-        }
-        _selectedUserIDs.value = current;
-      },
+      onTap: () => _removeUserFromSplitTransaction(user),
       child: Center(
         child: Stack(
           children: [
@@ -126,7 +123,7 @@ class _AddTransactionState extends State<AddTransaction> {
               bottom: 0,
               right: 0,
               child:
-                  selectedUserIDs.containsKey(user)
+                  _selectedUserIDSet.value.contains(user.id)
                       ? Icon(Icons.check_circle, color: Colors.green, size: 24)
                       : SizedBox.shrink(),
             ),
@@ -152,23 +149,42 @@ class _AddTransactionState extends State<AddTransaction> {
               Text(user.name, style: TextStyle()),
             ],
           ),
-          SizedBox(
-            width: 130,
-            child: CustomFormField.textFormField(
-              _selectedUserIDs.value[user]!,
-              textInputType: TextInputType.numberWithOptions(decimal: true),
-              labelText: "",
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return "Invalid Amount";
-                }
-                return null;
-              },
-              inputFormatters: [AmountInputFormatter()],
-              inputDecoration: TextFormFieldInputBorder.underLine,
-              borderColor: Colors.black54,
-              suffixIcon: UiConstant.indianRupeeSymbol,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              SizedBox(
+                width: 130,
+                child: CustomFormField.textFormField(
+                  _selectedUserIDs.value[user]!,
+                  textInputType: TextInputType.numberWithOptions(decimal: true),
+                  labelText: "",
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Invalid Amount";
+                    }
+                    return null;
+                  },
+                  inputFormatters: [AmountInputFormatter()],
+                  inputDecoration: TextFormFieldInputBorder.underLine,
+                  borderColor: Colors.black54,
+                  suffixIcon: UiConstant.indianRupeeSymbol,
+                ),
+              ),
+              InkWell(
+                hoverColor:
+                    user.id == _loggedInUser.id ? Colors.transparent : null,
+                onTap: () {
+                  if (user.id != _loggedInUser.id) {
+                    _removeUserFromSplitTransaction(user);
+                  }
+                },
+                child: Icon(
+                  Icons.close,
+                  color:
+                      user.id == _loggedInUser.id ? Colors.transparent : null,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -280,6 +296,54 @@ class _AddTransactionState extends State<AddTransaction> {
     }
   }
 
+  void _resetForm() {
+    _amountController.text = "";
+    _descriptionController.text = "";
+    _createdOn = DateTime.now();
+    _creationDateController.text = convertDateTimeFormat(_createdOn);
+    _selectedUserIDs.value = {};
+    _selectedUserIDs.value = {};
+    _categoryIndex.value = 0;
+
+    if (_splitTypeIndex.value == 1) {
+      _selectedUserIDs.value.putIfAbsent(
+        _loggedInUser,
+        () => TextEditingController(),
+      );
+    }
+  }
+
+  void _populateEditForm(TransactionModel transactionData) {
+    _amountController.text = transactionData.amount.toString();
+    _descriptionController.text = transactionData.description;
+    _createdOn = transactionData.createdOn;
+    _creationDateController.text = convertDateTimeFormat(_createdOn);
+    _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
+      transactionData.category,
+    );
+
+    _selectedUserIDs.value = {};
+    _selectedUserIDSet.value = {};
+
+    UserWithEditControlTD tempMap = {};
+    Set<String> tempUserIDs = {};
+
+    tempMap[transactionData.createdBy as UserModel] = TextEditingController(
+      text: transactionData.createdBy.amount.toString(),
+    );
+    tempUserIDs.add(transactionData.createdBy.id);
+
+    for (UserAmountModel ele in transactionData.users) {
+      tempMap[ele as UserModel] = TextEditingController(
+        text: ele.amount.toString(),
+      );
+      tempUserIDs.add(ele.id);
+    }
+
+    _selectedUserIDs.value = tempMap;
+    _selectedUserIDSet.value = tempUserIDs;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -289,12 +353,24 @@ class _AddTransactionState extends State<AddTransaction> {
     }
 
     transactionType = TransactionTypeExtension.fromPath(context);
-    if (transactionType == TransactionType.quicksplit) {
-      _splitTypeIndex.value = 1;
-      _selectedUserIDs.value.putIfAbsent(
-        _loggedInUser,
-        () => TextEditingController(),
-      );
+
+    switch (transactionType) {
+      case TransactionType.quicksplit:
+        {
+          _splitTypeIndex.value = 1;
+          if (widget.transactionData == null) {
+            _selectedUserIDs.value.putIfAbsent(
+              _loggedInUser,
+              () => TextEditingController(),
+            );
+            _selectedUserIDSet.value.add(_loggedInUser.id);
+          }
+        }
+      default:
+        {}
+    }
+    if (widget.transactionData != null) {
+      _populateEditForm(widget.transactionData!);
     }
   }
 
@@ -302,7 +378,7 @@ class _AddTransactionState extends State<AddTransaction> {
     if (state is NewTransactionFailure) {
       showNormalSnackBar(context, state.error);
     } else if (state is NewTransactionSuccess) {
-      resetForm();
+      _resetForm();
       if (context.canPop()) {
         context.pop();
       }
@@ -337,8 +413,8 @@ class _AddTransactionState extends State<AddTransaction> {
       );
       bool flag = false;
 
-      switch (transactionType) {
-        case TransactionType.quicksplit:
+      switch (_splitTypeIndex.value) {
+        case 1:
           {
             if (userWithAmount.isEmpty) {
               showNormalSnackBar(context, "Add Atleast One Member");
@@ -443,6 +519,7 @@ class _AddTransactionState extends State<AddTransaction> {
                         is24HourMode: false,
                         isShowSeconds: false,
                         lastDate: DateTime.now(),
+                        initialDate: _createdOn,
                         borderRadius: BorderRadius.circular(16.0),
                         padding: EdgeInsets.symmetric(vertical: 12),
                       );
@@ -499,7 +576,7 @@ class _AddTransactionState extends State<AddTransaction> {
                                     UserWithEditControlTD value,
                                     Widget? child,
                                   ) {
-                                    return _userCardWidget(user, value);
+                                    return _userCardWidget(user);
                                   },
                                 );
                               },

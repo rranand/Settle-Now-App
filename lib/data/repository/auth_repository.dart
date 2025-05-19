@@ -13,7 +13,7 @@ class AuthRepository {
       await Future.delayed(Duration(seconds: 1), () {});
       UserModel userData = UserModel.fromBasicInfo(
         name: 'Rohit Anand',
-        id: 'user_1',
+        id: 'u1',
         profileImage: "https://picsum.photos/id/5/200/300",
       );
       userData.email = "rrohitanand3336@gmail.com";

@@ -16,9 +16,9 @@ class RoomDataProvider {
     "amount": 45.50,
     "category": "Food",
     "createdBy": {
-      "id": "user_1",
-      "name": "John Doe",
-      "email": "john@example.com",
+      "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
       "amount": 0
     },
@@ -40,9 +40,9 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "user_1",
-        "name": "John Doe",
-        "email": "john@example.com",
+        "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
         "amount": 20.00
       },
@@ -71,9 +71,9 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "user_1",
-        "name": "John Doe",
-        "email": "john@example.com",
+        "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
         "amount": 40.25
       },
@@ -110,9 +110,9 @@ class RoomDataProvider {
     "amount": 250.00,
     "category": "Entertainment",
     "createdBy": {
-      "id": "user_1",
-      "name": "John Doe",
-      "email": "john@example.com",
+      "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
       "amount": 125.00
     },
@@ -142,9 +142,9 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "user_1",
-        "name": "John Doe",
-        "email": "john@example.com",
+        "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
         "amount": 120.125
       },
@@ -204,9 +204,9 @@ class RoomDataProvider {
     "amount": 12.50,
     "category": "Food",
     "createdBy": {
-      "id": "user_1",
-      "name": "John Doe",
-      "email": "john@example.com",
+      "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
       "amount": 6.25
     },
@@ -252,9 +252,9 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "user_1",
-        "name": "John Doe",
-        "email": "john@example.com",
+        "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
         "amount": 42.50
       }
@@ -307,8 +307,9 @@ class RoomDataProvider {
   {
     "id": "ru1",
     "user": {
-      "id": "user_1",
-      "name": "John Doe",
+      "id": "u1",
+      "name": "Rohit Anand",
+      "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300"
     },
     "contribution": 150.75,
@@ -385,7 +386,7 @@ class RoomDataProvider {
   {
     "id": "settle_001",
     "recevier": {
-      "id": "user_1",
+      "id": "u1",
       "name": "Rohit Anand",
       "profileImage": "https://picsum.photos/id/11/200/300"
     },
@@ -401,7 +402,7 @@ class RoomDataProvider {
   {
     "id": "settle_002",
     "recevier": {
-      "id": "user_1",
+      "id": "u1",
       "name": "Rohit Anand",
       "profileImage": "https://picsum.photos/id/13/200/300"
     },
@@ -422,7 +423,7 @@ class RoomDataProvider {
       "profileImage": "https://picsum.photos/id/15/200/300"
     },
     "sender": {
-      "id": "user_1",
+      "id": "u1",
       "name": "Rohit Anand",
       "profileImage": "https://picsum.photos/id/16/200/300"
     },

@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
 import 'package:settlenow_v2/model/user_model.dart';
@@ -62,6 +63,16 @@ class UserAmountModel extends UserModel {
 
   @override
   String toString() {
-    return 'UserAmountModel(name: $name, email: $email, amount: $amount)';
+    return 'UserAmountModel(id: $id, name: $name, email: $email, amount: $amount)';
   }
+
+  @override
+  bool operator ==(covariant UserAmountModel other) {
+    if (identical(this, other)) return true;
+
+    return other.amount == amount;
+  }
+
+  @override
+  int get hashCode => amount.hashCode;
 }

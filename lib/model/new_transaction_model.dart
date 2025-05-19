@@ -8,6 +8,7 @@ import 'package:settlenow_v2/model/user_amount_model.dart';
 
 class NewTransactionModel {
   bool hasData = true;
+  String id = "";
   String description = "";
   double amount = 0;
   String category = "";

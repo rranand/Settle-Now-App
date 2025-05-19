@@ -92,12 +92,6 @@ class UiConstant {
 
   static List<UserModel> users = [
     UserModel.fromBasicInfo(
-      id: 'u1',
-      name: 'Riya Kapoor',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
       id: 'u2',
       name: 'Aarav',
       profileImage:
