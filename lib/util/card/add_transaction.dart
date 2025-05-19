@@ -420,16 +420,23 @@ class _AddTransactionState extends State<AddTransaction> {
               showNormalSnackBar(context, "Add Atleast One Member");
             } else if (totalAmount != sumAmount) {
               showNormalSnackBar(context, "Total Amount does not match");
+            } else if (!createdBy.hasData) {
+              showNormalSnackBar(context, "You can't remove yourself");
             } else {
               flag = true;
             }
           }
         default:
-          debugPrint("Unidenified Transaction");
+          {}
       }
 
       if (flag) {
-        context.read<NewTransactionCubit>().createNewExpense(context, data);
+        if (widget.transactionData == null) {
+          context.read<NewTransactionCubit>().createNewExpense(context, data);
+        } else {
+          data.id = widget.transactionData!.id;
+          context.read<NewTransactionCubit>().updateExpense(context, data);
+        }
       }
     }
   }

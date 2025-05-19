@@ -23,4 +23,13 @@ class QuicksplitRepository {
       rethrow;
     }
   }
+
+  Future<TransactionModel> update(NewTransactionModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return _dataProvider.update(data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

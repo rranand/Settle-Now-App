@@ -144,4 +144,16 @@ class QuicksplitDataProvider {
       rethrow;
     }
   }
+
+  Future<TransactionModel> update(NewTransactionModel data) async {
+    try {
+      TransactionModel updatedExpense = TransactionModel.fromNewTransaction(
+        data,
+      );
+      updatedExpense.modifiedOn = DateTime.now();
+      return updatedExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

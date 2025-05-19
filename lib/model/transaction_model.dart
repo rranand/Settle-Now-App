@@ -65,7 +65,7 @@ class TransactionModel {
 
   factory TransactionModel.fromNewTransaction(NewTransactionModel data) {
     return TransactionModel(
-      id: "",
+      id: data.id,
       description: data.description,
       amount: data.amount,
       category: data.category,

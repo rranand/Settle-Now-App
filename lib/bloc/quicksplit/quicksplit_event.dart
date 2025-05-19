@@ -10,3 +10,9 @@ final class QuicksplitAddNewTransaction extends QuicksplitEvent {
 
   QuicksplitAddNewTransaction(this.data);
 }
+
+final class QuicksplitUpdateTransaction extends QuicksplitEvent {
+  final TransactionModel data;
+
+  QuicksplitUpdateTransaction(this.data);
+}

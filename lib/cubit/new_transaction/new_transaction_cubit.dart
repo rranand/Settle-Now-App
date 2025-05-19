@@ -24,4 +24,18 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
       emit(NewTransactionFailure(e.toString()));
     }
   }
+
+  void updateExpense(BuildContext context, NewTransactionModel data) async {
+    emit(NewTransactionLoading());
+
+    final bloc = context.read<QuicksplitBloc>();
+    try {
+      final TransactionModel updatedData = await repo.update(data);
+
+      bloc.add(QuicksplitUpdateTransaction(updatedData));
+      emit(NewTransactionSuccess(updatedData));
+    } catch (e) {
+      emit(NewTransactionFailure(e.toString()));
+    }
+  }
 }
