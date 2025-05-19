@@ -38,4 +38,22 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
       emit(NewTransactionFailure(e.toString()));
     }
   }
+
+  void deleteExpense(BuildContext context, String expenseID) async {
+    emit(NewTransactionLoading());
+
+    final bloc = context.read<QuicksplitBloc>();
+    try {
+      final bool isDeleted = await repo.delete(expenseID);
+
+      if (isDeleted) {
+        bloc.add(QuicksplitDeleteTransaction(expenseID));
+        emit(NewTransactionSuccess(TransactionModel.empty()));
+      } else {
+        emit(NewTransactionFailure("Something went wrong!"));
+      }
+    } catch (e) {
+      emit(NewTransactionFailure(e.toString()));
+    }
+  }
 }

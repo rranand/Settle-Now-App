@@ -156,4 +156,12 @@ class QuicksplitDataProvider {
       rethrow;
     }
   }
+
+  Future<bool> delete(String expenseID) async {
+    try {
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

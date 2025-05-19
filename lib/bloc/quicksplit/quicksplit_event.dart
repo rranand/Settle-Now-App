@@ -16,3 +16,9 @@ final class QuicksplitUpdateTransaction extends QuicksplitEvent {
 
   QuicksplitUpdateTransaction(this.data);
 }
+
+final class QuicksplitDeleteTransaction extends QuicksplitEvent {
+  final String expenseID;
+
+  QuicksplitDeleteTransaction(this.expenseID);
+}

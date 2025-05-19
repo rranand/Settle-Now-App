@@ -32,4 +32,13 @@ class QuicksplitRepository {
       rethrow;
     }
   }
+
+  Future<bool> delete(String expenseID) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return _dataProvider.delete(expenseID);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

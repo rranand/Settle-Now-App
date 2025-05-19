@@ -52,6 +52,7 @@ class AddTransaction extends StatefulWidget {
 }
 
 class _AddTransactionState extends State<AddTransaction> {
+  String _appBarTitle = "";
   UserModel _loggedInUser = UserModel.empty();
   TransactionType transactionType = TransactionType.room;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
@@ -370,7 +371,10 @@ class _AddTransactionState extends State<AddTransaction> {
         {}
     }
     if (widget.transactionData != null) {
+      _appBarTitle = "Update Expense";
       _populateEditForm(widget.transactionData!);
+    } else {
+      _appBarTitle = "Add New Expense";
     }
   }
 
@@ -449,7 +453,7 @@ class _AddTransactionState extends State<AddTransaction> {
         if (state is NewTransactionLoading) {
           return Scaffold(
             appBar: AppBar(
-              title: Text("Add New Expense"),
+              title: Text(_appBarTitle),
               centerTitle: false,
               titleSpacing: _mainScreenPadding.left,
               leading: appBarBackButton(context),
@@ -459,10 +463,24 @@ class _AddTransactionState extends State<AddTransaction> {
         }
         return Scaffold(
           appBar: AppBar(
-            title: Text("Add New Expense"),
+            title: Text(_appBarTitle),
             centerTitle: false,
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
+            actions:
+                widget.transactionData == null
+                    ? null
+                    : [
+                      IconButton(
+                        onPressed: () {
+                          context.read<NewTransactionCubit>().deleteExpense(
+                            context,
+                            widget.transactionData!.id,
+                          );
+                        },
+                        icon: Icon(Icons.delete_outline),
+                      ),
+                    ],
           ),
           body: SingleChildScrollView(
             padding: _mainScreenPadding.add(
