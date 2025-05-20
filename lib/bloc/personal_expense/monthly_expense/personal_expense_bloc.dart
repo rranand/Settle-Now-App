@@ -58,6 +58,7 @@ class PersonalMonthlyExpenseBloc
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
         data[i] = event.data;
+        break;
       }
     }
     return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
@@ -69,7 +70,16 @@ class PersonalMonthlyExpenseBloc
   ) async {
     final oldData = state as PersonalMonthlyExpenseFetchSuccess;
     List<PersonalExpenseTransactionModel> data = [...oldData.data];
-    data.removeWhere((element) => element.id == event.expenseID);
+    if (event.isLoading) {
+      for (int i = 0; i < data.length; i++) {
+        if (data[i].id == event.expenseID) {
+          data[i].hasData = false;
+          break;
+        }
+      }
+    } else {
+      data.removeWhere((element) => element.id == event.expenseID);
+    }
     return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
   }
 }

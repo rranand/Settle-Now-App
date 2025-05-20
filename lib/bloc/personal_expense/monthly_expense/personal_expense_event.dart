@@ -22,7 +22,8 @@ final class PersonalMonthlyExpenseUpdate extends PersonalMonthlyExpenseEvent {
 }
 
 final class PersonalMonthlyExpenseDelete extends PersonalMonthlyExpenseEvent {
+  final bool isLoading;
   final String expenseID;
 
-  PersonalMonthlyExpenseDelete(this.expenseID);
+  PersonalMonthlyExpenseDelete(this.isLoading, this.expenseID);
 }

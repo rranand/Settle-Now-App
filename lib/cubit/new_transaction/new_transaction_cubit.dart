@@ -122,12 +122,14 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.personal:
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
+            bloc.add(PersonalMonthlyExpenseDelete(true, expenseID));
             final bool isDeleted = await repoPS.delete(expenseID);
 
             if (isDeleted) {
-              bloc.add(PersonalMonthlyExpenseDelete(expenseID));
+              bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
               return emit(NewTransactionSuccess(TransactionModel.empty()));
             } else {
+              bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
               return emit(NewTransactionFailure("Something went wrong!"));
             }
           }

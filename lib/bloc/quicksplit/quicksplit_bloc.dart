@@ -47,6 +47,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
         data[i] = event.data;
+        break;
       }
     }
     return emit(QuicksplitFetchSuccess(data));
