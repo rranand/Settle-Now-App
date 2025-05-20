@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/card/add_transaction.dart';
 import 'package:settlenow_v2/util/custom/category_parser.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class TransactionCard extends StatefulWidget {
@@ -21,7 +25,41 @@ class TransactionCard extends StatefulWidget {
 }
 
 class _TransactionCardState extends State<TransactionCard> {
+  void _deleteExpenseDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Delete Expense"),
+          content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop();
+              },
+              child: Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.pop();
+                context.read<NewTransactionCubit>().deleteExpense(
+                  context,
+                  widget.data.id,
+                  TransactionType.personal,
+                );
+              },
+              child: Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   List<String> createTags() {
+    if (!widget.data.hasData) {
+      return List.filled(1, "");
+    }
     List<String> tags = [widget.data.category];
     if (widget.data.createdOn != widget.data.modifiedOn) {
       tags.add("Edited");
@@ -57,63 +95,85 @@ class _TransactionCardState extends State<TransactionCard> {
                       tags[index],
                       textColor: UiConstant.colors[index],
                       backgroundColor: UiConstant.colorsWithShade50[index],
+                      isLoaded: widget.data.hasData,
                     ),
                   ),
                 ),
-                InkWell(
-                  borderRadius: BorderRadius.circular(
-                    UiConstant.cardBorderRadius,
-                  ),
-                  child: Icon(
-                    widget.data.roomData.hasData
-                        ? Icons.delete_outline
-                        : Iconsax.edit,
-                    color: Colors.grey,
-                    size: widget.data.roomData.hasData ? null : 20,
-                  ),
-                  onTap: () {
-                    if (widget.data.roomData.hasData) {
-                    } else {
-                      context.push(
-                        "${RouterConstants.personalExpenseRouteName}/${widget.data.createdOn.year}/${CalenderConstant.monthName[widget.data.createdOn.month]}${RouterConstants.personalExpenseEditExpenseRouteName}",
-                        extra: TransactionModel.fromPersonalExpense(
-                          widget.data,
-                        ),
-                      );
-                    }
-                  },
-                ),
+                widget.data.hasData
+                    ? InkWell(
+                      borderRadius: BorderRadius.circular(
+                        UiConstant.cardBorderRadius,
+                      ),
+                      child: Icon(
+                        widget.data.roomData.hasData
+                            ? Icons.delete_outline
+                            : Iconsax.edit,
+                        color: Colors.grey,
+                        size: widget.data.roomData.hasData ? null : 20,
+                      ),
+                      onTap: () {
+                        if (widget.data.roomData.hasData) {
+                          _deleteExpenseDialog();
+                        } else {
+                          context.push(
+                            "${RouterConstants.personalExpenseRouteName}/${widget.data.createdOn.year}/${CalenderConstant.monthName[widget.data.createdOn.month]}${RouterConstants.personalExpenseEditExpenseRouteName}",
+                            extra: TransactionModel.fromPersonalExpense(
+                              widget.data,
+                            ),
+                          );
+                        }
+                      },
+                    )
+                    : SizedBox.shrink(),
               ],
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: colouredIcon(
-                Icon(
-                  CategoryParser.expenseCategoryIcons[categoryIndex %
-                      CategoryParser.expenseCategoryIcons.length],
-                ),
-                UiConstant.colorsWithShade100[categoryIndex %
-                    CategoryParser.expenseCategoryIcons.length],
-              ),
-              title: Text(widget.data.description),
+              leading:
+                  widget.data.hasData
+                      ? colouredIcon(
+                        Icon(
+                          CategoryParser.expenseCategoryIcons[categoryIndex %
+                              CategoryParser.expenseCategoryIcons.length],
+                        ),
+                        UiConstant.colorsWithShade100[categoryIndex %
+                            CategoryParser.expenseCategoryIcons.length],
+                      )
+                      : CustomShimmerEffect.imageWidget(
+                        shape: BoxShape.circle,
+                        radius: 50,
+                      ),
+              title:
+                  widget.data.hasData
+                      ? Text(widget.data.description)
+                      : CustomShimmerEffect.textWidget(width: 100),
               subtitle: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   subTextOnCard(
                     "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
+                    isLoaded: widget.data.hasData,
                   ),
-                  widget.data.modifiedOn != widget.data.createdOn
+                  widget.data.modifiedOn != widget.data.createdOn ||
+                          !widget.data.hasData
                       ? subTextOnCard(
                         "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                        isLoaded: widget.data.hasData,
                       )
                       : subTextOnCard(""),
                 ],
               ),
-              trailing: Text(
-                formatCurrency(widget.data.amount, context),
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-              ),
+              trailing:
+                  widget.data.hasData
+                      ? Text(
+                        formatCurrency(widget.data.amount, context),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      )
+                      : CustomShimmerEffect.textWidget(fontSize: 20, width: 40),
             ),
           ],
         ),
