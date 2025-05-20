@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/sub_section/personal_expense_categories_section_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/sub_section/personal_expense_transaction_screen.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
@@ -95,8 +97,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                   builder: (context, state) {
                     if (state is PersonalMonthlyExpenseFetchSuccess) {
                       return LinearGraphCard(
-                        expenses:
-                            state.data.second.map((ele) => ele.amount).toList(),
+                        expenses: state.data.map((ele) => ele.amount).toList(),
                       );
                     } else {
                       return CustomShimmerEffect.placeHolderShimmerEffect(
@@ -166,10 +167,11 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           ),
         ],
       ),
-      floatingActionButton: CustomButton.customFloatingButton(
-        Iconsax.add,
-        () {},
-      ),
+      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
+        context.push(
+          "${RouterConstants.personalExpenseRouteName}/${widget.year}/${widget.month}${RouterConstants.personalExpenseAddExpenseRouteName}",
+        );
+      }),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
+import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 
 class TransactionModel {
@@ -73,6 +74,21 @@ class TransactionModel {
       createdBy: data.createdBy,
       createdOn: data.createdOn,
       modifiedOn: data.createdOn,
+    );
+  }
+
+  factory TransactionModel.fromPersonalExpense(
+    PersonalExpenseTransactionModel data,
+  ) {
+    return TransactionModel(
+      id: data.id,
+      description: data.description,
+      amount: data.amount,
+      category: data.category,
+      users: [],
+      createdBy: UserAmountModel.empty(),
+      createdOn: data.createdOn,
+      modifiedOn: data.modifiedOn,
     );
   }
 

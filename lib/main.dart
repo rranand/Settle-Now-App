@@ -216,8 +216,12 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<NewTransactionCubit>(
             create:
-                (context) =>
-                    NewTransactionCubit(context.read<QuicksplitRepository>()),
+                (context) => NewTransactionCubit(
+                  context.read<QuicksplitRepository>(),
+                  context.read<PersonalMonthlyExpenseRepository>(),
+                  context.read<LendenRoomRepository>(),
+                  context.read<RoomRepository>(),
+                ),
           ),
         ],
         child: MultiProvider(

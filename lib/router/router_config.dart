@@ -100,6 +100,30 @@ class AppRouterConfig {
                 return null;
               }
             },
+            routes: [
+              GoRoute(
+                path: RouterConstants.personalExpenseAddExpenseRouteName,
+                builder: (context, state) {
+                  return AuthGate(child: AddTransaction());
+                },
+              ),
+              GoRoute(
+                path: RouterConstants.personalExpenseEditExpenseRouteName,
+                builder: (context, state) {
+                  TransactionModel data = state.extra as TransactionModel;
+                  return AuthGate(child: AddTransaction(transactionData: data));
+                },
+                redirect: (context, state) {
+                  final extra = state.extra;
+
+                  if (extra == null) {
+                    return RouterConstants.dashboardRouteName;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: "${RouterConstants.lendenRouteName}/:id",
@@ -154,7 +178,7 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      initialLocation: RouterConstants.dashboardRouteName,
+      initialLocation: "${RouterConstants.personalExpenseRouteName}/2023/April",
       //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
       //initialLocation:
       //  RouterConstants.profileRouteName +

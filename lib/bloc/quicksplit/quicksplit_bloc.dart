@@ -33,8 +33,8 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     QuicksplitAddNewTransaction event,
     Emitter<QuicksplitState> emit,
   ) async {
-    final qsOldData = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [event.data, ...qsOldData.data];
+    final oldData = state as QuicksplitFetchSuccess;
+    List<TransactionModel> data = [event.data, ...oldData.data];
     return emit(QuicksplitFetchSuccess(data));
   }
 
@@ -42,8 +42,8 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     QuicksplitUpdateTransaction event,
     Emitter<QuicksplitState> emit,
   ) async {
-    final qsOldData = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [...qsOldData.data];
+    final oldData = state as QuicksplitFetchSuccess;
+    List<TransactionModel> data = [...oldData.data];
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
         data[i] = event.data;
@@ -56,8 +56,8 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     QuicksplitDeleteTransaction event,
     Emitter<QuicksplitState> emit,
   ) async {
-    final qsOldData = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [...qsOldData.data];
+    final oldData = state as QuicksplitFetchSuccess;
+    List<TransactionModel> data = [...oldData.data];
     data.removeWhere((element) => element.id == event.expenseID);
     return emit(QuicksplitFetchSuccess(data));
   }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 
 class PersonalMonthlyExpenseDataProvider {
   Future<List<PersonalExpenseTransactionModel>> fetchData(
@@ -19,6 +20,38 @@ class PersonalMonthlyExpenseDataProvider {
               .map((ele) => PersonalExpenseTransactionModel.fromMap(ele))
               .toList();
       return arr;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<PersonalExpenseTransactionModel> add(NewTransactionModel data) async {
+    try {
+      PersonalExpenseTransactionModel newExpense =
+          PersonalExpenseTransactionModel.fromNewTransaction(data);
+      newExpense.id = "${newExpense.description}##${newExpense.createdOn}";
+      return newExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<PersonalExpenseTransactionModel> update(
+    NewTransactionModel data,
+  ) async {
+    try {
+      PersonalExpenseTransactionModel updatedExpense =
+          PersonalExpenseTransactionModel.fromNewTransaction(data);
+      updatedExpense.modifiedOn = DateTime.now();
+      return updatedExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> delete(String expenseID) async {
+    try {
+      return true;
     } catch (e) {
       rethrow;
     }

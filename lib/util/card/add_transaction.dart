@@ -21,7 +21,7 @@ import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
-enum TransactionType { quicksplit, lenden, room }
+enum TransactionType { quicksplit, lenden, room, personal }
 
 extension TransactionTypeExtension on TransactionType {
   static TransactionType fromPath(BuildContext context) {
@@ -31,12 +31,17 @@ extension TransactionTypeExtension on TransactionType {
     if (path.startsWith(RouterConstants.quickSplitAddExpenseRouteName) ||
         path.startsWith(RouterConstants.quickSplitEditExpenseRouteName)) {
       return TransactionType.quicksplit;
+    } else if (path.startsWith(RouterConstants.personalExpenseRouteName)) {
+      return TransactionType.personal;
     }
+
     switch (path.toLowerCase()) {
       case 'quicksplit':
         return TransactionType.quicksplit;
       case 'lenden':
         return TransactionType.lenden;
+      case 'personal':
+        return TransactionType.personal;
       default:
         return TransactionType.room;
     }
@@ -389,7 +394,7 @@ class _AddTransactionState extends State<AddTransaction> {
     }
   }
 
-  void _newTransactionHandler() {
+  void _submitTransactionHandler() {
     if (_formKey.currentState!.validate()) {
       double sumAmount = 0;
       double totalAmount = double.parse(_amountController.text);
@@ -431,15 +436,25 @@ class _AddTransactionState extends State<AddTransaction> {
             }
           }
         default:
-          {}
+          {
+            flag = true;
+          }
       }
 
       if (flag) {
         if (widget.transactionData == null) {
-          context.read<NewTransactionCubit>().createNewExpense(context, data);
+          context.read<NewTransactionCubit>().createNewExpense(
+            context,
+            data,
+            transactionType,
+          );
         } else {
           data.id = widget.transactionData!.id;
-          context.read<NewTransactionCubit>().updateExpense(context, data);
+          context.read<NewTransactionCubit>().updateExpense(
+            context,
+            data,
+            transactionType,
+          );
         }
       }
     }
@@ -476,6 +491,7 @@ class _AddTransactionState extends State<AddTransaction> {
                           context.read<NewTransactionCubit>().deleteExpense(
                             context,
                             widget.transactionData!.id,
+                            transactionType,
                           );
                         },
                         icon: Icon(Icons.delete_outline),
@@ -649,7 +665,7 @@ class _AddTransactionState extends State<AddTransaction> {
                   Center(
                     child: InkWell(
                       borderRadius: BorderRadius.circular(100),
-                      onTap: _newTransactionHandler,
+                      onTap: _submitTransactionHandler,
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: GradientBorderCard(

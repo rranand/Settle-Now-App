@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:settlenow_v2/model/new_transaction_model.dart';
+
 class RoomLinkedModel {
   bool hasData = true;
   String id = "";
@@ -104,6 +106,21 @@ class PersonalExpenseTransactionModel {
     };
   }
 
+  factory PersonalExpenseTransactionModel.fromNewTransaction(
+    NewTransactionModel data,
+  ) {
+    return PersonalExpenseTransactionModel(
+      id: data.id,
+      amount: data.amount,
+      description: data.description,
+      category: data.category,
+      createdOn: data.createdOn,
+      modifiedOn: data.createdOn,
+      roomData: RoomLinkedModel.empty(),
+    );
+  }
+
+  @override
   factory PersonalExpenseTransactionModel.fromMap(Map<String, dynamic> map) {
     if (map.containsKey('roomData') && map['roomData'] != null) {
       return PersonalExpenseTransactionModel(

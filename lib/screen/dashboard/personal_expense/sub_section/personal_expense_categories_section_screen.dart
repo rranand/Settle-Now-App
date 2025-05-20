@@ -25,11 +25,25 @@ class _PersonalExpenseCategoriesSectionScreenState
     return BlocBuilder<PersonalMonthlyExpenseBloc, PersonalMonthlyExpenseState>(
       builder: (context, state) {
         bool isLoaded = state is PersonalMonthlyExpenseFetchSuccess;
+        List<Pair<double, int>> categoryWiseExpense = List.generate(
+          CategoryParser.getCategoryList().length,
+          (i) => Pair<double, int>(0, 0),
+        );
+
+        if (isLoaded) {
+          for (int i = 0; i < state.data.length; i++) {
+            PersonalExpenseTransactionModel eachExpense = state.data[i];
+            int index = CategoryParser.indexOfCategory(eachExpense.category);
+
+            categoryWiseExpense[index].first += eachExpense.amount;
+            categoryWiseExpense[index].second += 1;
+          }
+        }
 
         return SliverList.builder(
           itemCount: CategoryParser.expenseCategories.length,
           itemBuilder: (BuildContext context, int index) {
-            if (isLoaded && state.data.first[index].second == 0) {
+            if (isLoaded && categoryWiseExpense[index].second == 0) {
               return SizedBox.shrink();
             }
             return Card(
@@ -38,6 +52,7 @@ class _PersonalExpenseCategoriesSectionScreenState
               child: Padding(
                 padding: const EdgeInsets.all(UiConstant.cardPadding),
                 child: ListTile(
+                  contentPadding: EdgeInsets.zero,
                   leading:
                       isLoaded
                           ? colouredIcon(
@@ -55,7 +70,7 @@ class _PersonalExpenseCategoriesSectionScreenState
                   subtitle:
                       isLoaded
                           ? Text(
-                            "${state.data.first[index].second} transactions",
+                            "${categoryWiseExpense[index].second} transactions",
                           )
                           : CustomShimmerEffect.textWidget(
                             fontSize: 10,
@@ -65,7 +80,7 @@ class _PersonalExpenseCategoriesSectionScreenState
                       isLoaded
                           ? Text(
                             formatCurrency(
-                              state.data.first[index].first,
+                              categoryWiseExpense[index].first,
                               context,
                             ),
                             style: TextStyle(

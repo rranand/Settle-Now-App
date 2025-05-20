@@ -1,12 +1,13 @@
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 
 class PersonalMonthlyExpenseRepository {
   final PersonalMonthlyExpenseDataProvider _dataProvider;
 
   PersonalMonthlyExpenseRepository(this._dataProvider);
 
-  Future<PersonalMonthlyExpensePairTD> fetchData(
+  Future<List<PersonalExpenseTransactionModel>> fetchData(
     String email,
     String year,
     String month,
@@ -15,23 +16,36 @@ class PersonalMonthlyExpenseRepository {
       List<PersonalExpenseTransactionModel> data = await _dataProvider
           .fetchData(email, year, month);
 
-      PersonalMonthlyExpensePairTD processedData = PersonalMonthlyExpensePairTD(
-        List.generate(
-          CategoryParser.getCategoryList().length,
-          (i) => Pair<double, int>(0, 0),
-        ),
-        data,
-      );
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-      for (int i = 0; i < data.length; i++) {
-        PersonalExpenseTransactionModel eachExpense = data[i];
-        int index = CategoryParser.indexOfCategory(eachExpense.category);
+  Future<PersonalExpenseTransactionModel> add(NewTransactionModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return _dataProvider.add(data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-        processedData.first[index].first += eachExpense.amount;
-        processedData.first[index].second += 1;
-      }
+  Future<PersonalExpenseTransactionModel> update(
+    NewTransactionModel data,
+  ) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return _dataProvider.update(data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 
-      return processedData;
+  Future<bool> delete(String expenseID) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return _dataProvider.delete(expenseID);
     } catch (e) {
       rethrow;
     }

@@ -53,10 +53,9 @@ class _PersonalExpenseTransactionScreenState
           return shimmerWidget();
         } else {
           return SliverList.builder(
-            itemCount: state.data.second.length,
+            itemCount: state.data.length,
             itemBuilder:
-                (context, index) =>
-                    TransactionCard(data: state.data.second[index]),
+                (context, index) => TransactionCard(data: state.data[index]),
           );
         }
       },
