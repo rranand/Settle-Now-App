@@ -105,12 +105,13 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     TransactionType transactionType,
   ) async {
     emit(NewTransactionLoading());
+    dynamic bloc;
 
     try {
       switch (transactionType) {
         case TransactionType.quicksplit:
           {
-            final bloc = context.read<QuicksplitBloc>();
+            bloc = context.read<QuicksplitBloc>();
             final bool isDeleted = await repo.delete(expenseID);
             if (isDeleted) {
               bloc.add(QuicksplitDeleteTransaction(expenseID));
@@ -121,7 +122,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           }
         case TransactionType.personal:
           {
-            final bloc = context.read<PersonalMonthlyExpenseBloc>();
+            bloc = context.read<PersonalMonthlyExpenseBloc>();
             bloc.add(PersonalMonthlyExpenseDelete(true, expenseID));
             final bool isDeleted = await repoPS.delete(expenseID);
 
@@ -141,6 +142,9 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           }
       }
     } catch (e) {
+      if (transactionType == TransactionType.personal) {
+        bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
+      }
       return emit(NewTransactionFailure(e.toString()));
     }
   }
