@@ -14,6 +14,10 @@ class RouterConstants {
   static const String personalExpenseAddExpenseRouteName = '/add';
   static const String personalExpenseEditExpenseRouteName = '/edit';
 
+  //Lenden Route
+  static const String lendenAddExpenseRouteName = '/add';
+  static const String lendenEditExpenseRouteName = '/edit';
+
   //Quicksplit
   static const String quickSplitAddExpenseRouteName = '/quicksplit/add';
   static const String quickSplitEditExpenseRouteName = '/quicksplit/edit';

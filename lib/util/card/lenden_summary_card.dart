@@ -62,7 +62,7 @@ class LendenSummaryCard extends StatelessWidget {
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _buildSection("You Gave", balance.first, Colors.green[700]!, context),
           _divider(),

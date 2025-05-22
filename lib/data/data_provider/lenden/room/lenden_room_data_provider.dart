@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/model/lenden_room_model.dart';
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 
 class LendenRoomDataProvider {
   Future<List<LendenRoomModel>> fetchData(String email, String id) async {
@@ -23,6 +24,36 @@ class LendenRoomDataProvider {
       await Future.delayed(Duration(seconds: 2), () {});
 
       return "RA-LD";
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<LendenRoomModel> create(NewTransactionModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      LendenRoomModel newExpense = LendenRoomModel.fromNewTransaction(data);
+      return newExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<LendenRoomModel> update(NewTransactionModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      LendenRoomModel updatedExpense = LendenRoomModel.fromNewTransaction(data);
+      updatedExpense.modifiedOn = DateTime.now();
+      return updatedExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> delete(String expenseID) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return true;
     } catch (e) {
       rethrow;
     }

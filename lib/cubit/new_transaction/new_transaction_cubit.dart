@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
-import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
-import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
 
 part 'new_transaction_state.dart';
@@ -49,6 +49,15 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
             );
           }
+        case TransactionType.lenden:
+          {
+            final bloc = context.read<LendenRoomBloc>();
+            final LendenRoomModel newData = await repoLD.create(data);
+            bloc.add(LendenAddNewTransaction(newData));
+            return emit(
+              NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
+            );
+          }
         default:
           {
             return emit(
@@ -83,6 +92,15 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final PersonalExpenseTransactionModel updatedData = await repoPS
                 .update(data);
             bloc.add(PersonalMonthlyExpenseUpdate(updatedData));
+            return emit(
+              NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
+            );
+          }
+        case TransactionType.lenden:
+          {
+            final bloc = context.read<LendenRoomBloc>();
+            final LendenRoomModel updatedData = await repoLD.update(data);
+            bloc.add(LendenUpdateTransaction(updatedData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
             );
@@ -131,6 +149,19 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return emit(NewTransactionSuccess(TransactionModel.empty()));
             } else {
               bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
+              return emit(NewTransactionFailure("Something went wrong!"));
+            }
+          }
+        case TransactionType.lenden:
+          {
+            bloc = context.read<LendenRoomBloc>();
+            bloc.add(LendenDeleteTransaction(expenseID));
+            final bool isDeleted = await repoLD.delete(expenseID);
+
+            if (isDeleted) {
+              bloc.add(LendenDeleteTransaction(expenseID));
+              return emit(NewTransactionSuccess(TransactionModel.empty()));
+            } else {
               return emit(NewTransactionFailure("Something went wrong!"));
             }
           }

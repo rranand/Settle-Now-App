@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
@@ -8,6 +9,7 @@ import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubi
 import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/lenden_expense_card.dart';
 import 'package:settlenow_v2/util/card/lenden_summary_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
@@ -140,6 +142,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                 : 0,
                       ),
                       child: LendenExpenseCard(
+                        lendenID: widget.id,
                         data: lendenRoomData[index],
                         loggedInUser: _loggedInUser,
                       ),
@@ -151,10 +154,11 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
           );
         },
       ),
-      floatingActionButton: CustomButton.customFloatingButton(
-        Iconsax.add,
-        () {},
-      ),
+      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
+        context.push(
+          "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
+        );
+      }),
     );
   }
 }

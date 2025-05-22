@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
@@ -87,6 +88,19 @@ class TransactionModel {
       category: data.category,
       users: [],
       createdBy: UserAmountModel.empty(),
+      createdOn: data.createdOn,
+      modifiedOn: data.modifiedOn,
+    );
+  }
+
+  factory TransactionModel.fromLendenRoomModel(LendenRoomModel data) {
+    return TransactionModel(
+      id: data.id,
+      description: data.description,
+      amount: data.amount,
+      category: "",
+      users: [],
+      createdBy: UserAmountModel.copyFromUser(data.createdBy, 0),
       createdOn: data.createdOn,
       modifiedOn: data.modifiedOn,
     );

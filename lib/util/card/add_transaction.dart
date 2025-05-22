@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +35,8 @@ extension TransactionTypeExtension on TransactionType {
       return TransactionType.quicksplit;
     } else if (path.startsWith(RouterConstants.personalExpenseRouteName)) {
       return TransactionType.personal;
+    } else if (path.startsWith(RouterConstants.lendenRouteName)) {
+      return TransactionType.lenden;
     }
 
     switch (path.toLowerCase()) {
@@ -61,6 +65,7 @@ class _AddTransactionState extends State<AddTransaction> {
   UserModel _loggedInUser = UserModel.empty();
   TransactionType transactionType = TransactionType.room;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+  final double _headerTextSize = 20;
   final double _userCardWidth = 110;
   final double _userImageRadius = 50;
   List<String> expenseCategories = [];
@@ -74,8 +79,10 @@ class _AddTransactionState extends State<AddTransaction> {
   );
 
   final List<String> _splitType = ["Equal", "Partial", "Self"];
+  final List<String> _lendenTransactionType = ["Gave", "Owe"];
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
   final ValueNotifier<int> _splitTypeIndex = ValueNotifier(0);
+  final ValueNotifier<int> _lendenTransactionTypeIndex = ValueNotifier(0);
   final ValueNotifier<UserWithEditControlTD> _selectedUserIDs = ValueNotifier(
     {},
   );
@@ -197,11 +204,40 @@ class _AddTransactionState extends State<AddTransaction> {
     );
   }
 
+  Widget _cardWidget(int index, int currentInd, String text, IconData? icon) {
+    return GradientBorderCard(
+      borderRadius: 100,
+      borderWidth: 1,
+      gradientColors:
+          index == currentInd
+              ? GradientColorConstant.vibrantGradient
+              : [Colors.grey.shade300, Colors.grey.shade300],
+      child: Padding(
+        padding: EdgeInsets.all(8),
+        child:
+            icon == null
+                ? Padding(padding: const EdgeInsets.all(8.0), child: Text(text))
+                : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    colouredIcon(
+                      Icon(icon),
+                      UiConstant.colorsWithShade100[index],
+                      radius: 40,
+                    ),
+                    SizedBox(width: 8),
+                    Text(text),
+                  ],
+                ),
+      ),
+    );
+  }
+
   Widget _categoryWidget() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Category", style: TextStyle(fontSize: 20)),
+        Text("Category", style: TextStyle(fontSize: _headerTextSize)),
         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
         ValueListenableBuilder(
           valueListenable: _categoryIndex,
@@ -214,28 +250,11 @@ class _AddTransactionState extends State<AddTransaction> {
                 (index) => InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onTap: () => _categoryIndex.value = index,
-                  child: GradientBorderCard(
-                    borderRadius: 100,
-                    borderWidth: 1,
-                    gradientColors:
-                        index == value
-                            ? GradientColorConstant.vibrantGradient
-                            : [Colors.grey.shade300, Colors.grey.shade300],
-                    child: Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          colouredIcon(
-                            Icon(CategoryParser.expenseCategoryIcons[index]),
-                            UiConstant.colorsWithShade100[index],
-                            radius: 40,
-                          ),
-                          SizedBox(width: 8),
-                          Text(expenseCategories[index]),
-                        ],
-                      ),
-                    ),
+                  child: _cardWidget(
+                    index,
+                    value,
+                    expenseCategories[index],
+                    CategoryParser.expenseCategoryIcons[index],
                   ),
                 ),
               ),
@@ -251,7 +270,7 @@ class _AddTransactionState extends State<AddTransaction> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(height: UiConstant.spaceBetweenSection),
-        Text("Split Type", style: TextStyle(fontSize: 20)),
+        Text("Split Type", style: TextStyle(fontSize: _headerTextSize)),
         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
         ValueListenableBuilder(
           valueListenable: _splitTypeIndex,
@@ -320,7 +339,11 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _populateEditForm(TransactionModel transactionData) {
-    _amountController.text = transactionData.amount.toString();
+    if (transactionType == TransactionType.lenden &&
+        transactionData.amount < 0) {
+      _lendenTransactionTypeIndex.value = 1;
+    }
+    _amountController.text = transactionData.amount.abs().toString();
     _descriptionController.text = transactionData.description;
     _createdOn = transactionData.createdOn;
     _creationDateController.text = convertDateTimeFormat(_createdOn);
@@ -430,7 +453,10 @@ class _AddTransactionState extends State<AddTransaction> {
       double sumAmount = 0;
       double totalAmount = double.parse(_amountController.text);
       List<UserAmountModel> userWithAmount = [];
-      UserAmountModel createdBy = UserAmountModel.empty();
+      UserAmountModel createdBy = UserAmountModel.copyFromUser(
+        _loggedInUser,
+        0,
+      );
       _selectedUserIDs.value.forEach((userData, amountTxt) {
         double tempAmount = double.parse(amountTxt.text);
         sumAmount += tempAmount;
@@ -449,9 +475,20 @@ class _AddTransactionState extends State<AddTransaction> {
         createdOn: _createdOn,
         members: userWithAmount,
         createdBy: createdBy,
-        category: expenseCategories[_categoryIndex.value],
+        category: expenseCategories[max(0, _categoryIndex.value)],
       );
       bool flag = false;
+
+      switch (transactionType) {
+        case TransactionType.lenden:
+          {
+            if (_lendenTransactionTypeIndex.value == 1) {
+              data.amount = -1 * data.amount;
+            }
+          }
+        default:
+          {}
+      }
 
       switch (_splitTypeIndex.value) {
         case 1:
@@ -616,7 +653,10 @@ class _AddTransactionState extends State<AddTransaction> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Members", style: TextStyle(fontSize: 20)),
+                        Text(
+                          "Members",
+                          style: TextStyle(fontSize: _headerTextSize),
+                        ),
                         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
                         LayoutBuilder(
                           builder: (context, constraint) {
@@ -669,7 +709,7 @@ class _AddTransactionState extends State<AddTransaction> {
                                 children: [
                                   Text(
                                     "Members With Amount",
-                                    style: TextStyle(fontSize: 20),
+                                    style: TextStyle(fontSize: _headerTextSize),
                                   ),
                                   SizedBox(
                                     height: .5 * UiConstant.spaceBetweenSection,
@@ -687,7 +727,50 @@ class _AddTransactionState extends State<AddTransaction> {
                       ],
                     ),
                   ),
-                  _categoryWidget(),
+                  Visibility(
+                    visible: transactionType != TransactionType.lenden,
+                    child: _categoryWidget(),
+                  ),
+                  Visibility(
+                    visible: transactionType == TransactionType.lenden,
+                    child: ValueListenableBuilder(
+                      valueListenable: _lendenTransactionTypeIndex,
+                      builder: (context, value, _) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Type",
+                              style: TextStyle(fontSize: _headerTextSize),
+                            ),
+                            SizedBox(
+                              height: .5 * UiConstant.spaceBetweenSection,
+                            ),
+                            Wrap(
+                              spacing: UiConstant.spaceBetweenCard,
+                              runSpacing: UiConstant.spaceBetweenCard,
+                              children: List.generate(
+                                _lendenTransactionType.length,
+                                (index) => InkWell(
+                                  borderRadius: BorderRadius.circular(100),
+                                  onTap:
+                                      () =>
+                                          _lendenTransactionTypeIndex.value =
+                                              index,
+                                  child: _cardWidget(
+                                    index,
+                                    value,
+                                    _lendenTransactionType[index],
+                                    null,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
                   SizedBox(height: UiConstant.spaceBetweenSection),
                   Center(
                     child: InkWell(

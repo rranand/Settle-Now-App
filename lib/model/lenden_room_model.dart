@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 
 class LendenRoomModel {
@@ -51,6 +52,7 @@ class LendenRoomModel {
     };
   }
 
+  @override
   factory LendenRoomModel.fromMap(Map<String, dynamic> map) {
     return LendenRoomModel(
       id: map['id'] as String,
@@ -59,6 +61,18 @@ class LendenRoomModel {
       createdOn: DateTime.parse(map['createdOn']),
       createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
       modifiedOn: DateTime.parse(map['modifiedOn']),
+    );
+  }
+
+  @override
+  factory LendenRoomModel.fromNewTransaction(NewTransactionModel data) {
+    return LendenRoomModel(
+      id: data.id,
+      amount: data.amount,
+      description: data.description,
+      createdOn: data.createdOn,
+      createdBy: data.createdBy,
+      modifiedOn: data.createdOn,
     );
   }
 
