@@ -80,6 +80,30 @@ class AppRouterConfig {
                 return null;
               }
             },
+            routes: [
+              GoRoute(
+                path: RouterConstants.roomAddExpenseRouteName,
+                builder: (context, state) {
+                  return AuthGate(child: AddTransaction());
+                },
+              ),
+              GoRoute(
+                path: RouterConstants.roomEditExpenseRouteName,
+                builder: (context, state) {
+                  TransactionModel data = state.extra as TransactionModel;
+                  return AuthGate(child: AddTransaction(transactionData: data));
+                },
+                redirect: (context, state) {
+                  final extra = state.extra;
+
+                  if (extra == null) {
+                    return RouterConstants.dashboardRouteName;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: "${RouterConstants.personalExpenseRouteName}/:year/:month",
@@ -202,8 +226,8 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      initialLocation: RouterConstants.dashboardRouteName,
-      //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
+      //initialLocation: RouterConstants.dashboardRouteName,
+      initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,

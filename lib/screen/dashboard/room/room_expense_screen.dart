@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
@@ -10,10 +12,12 @@ import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_analysis_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
+import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -60,7 +64,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       case 3:
         return RoomSettleScreen();
       default:
-        return RoomTransactionScreen();
+        return RoomTransactionScreen(roomID: widget.id);
     }
   }
 
@@ -224,6 +228,36 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           ),
         ],
       ),
+      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
+        showModalBottomSheet(
+          context: context,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (context) {
+            return Wrap(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.group_add),
+                  title: Text('Add an Expense'),
+                  onTap: () {
+                    context.push(
+                      "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.meeting_room),
+                  title: Text('Settle Expense'),
+                  onTap: () {
+                    context.pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }),
     );
   }
 }

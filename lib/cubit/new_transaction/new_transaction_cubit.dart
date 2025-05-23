@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
+import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
@@ -58,11 +59,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
             );
           }
-        default:
+        case TransactionType.room:
           {
-            return emit(
-              NewTransactionFailure("Unimplemented Transaction Type"),
-            );
+            final bloc = context.read<RoomBloc>();
+            final TransactionModel newData = await repoRD.create(data);
+            bloc.add(RoomAddNewTransaction(newData));
+            return emit(NewTransactionSuccess(newData));
           }
       }
     } catch (e) {
@@ -105,11 +107,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
             );
           }
-        default:
+        case TransactionType.room:
           {
-            return emit(
-              NewTransactionFailure("Unimplemented Transaction Type"),
-            );
+            final bloc = context.read<RoomBloc>();
+            final TransactionModel newData = await repoRD.update(data);
+            bloc.add(RoomAddNewTransaction(newData));
+            return emit(NewTransactionSuccess(newData));
           }
       }
     } catch (e) {
@@ -165,11 +168,17 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return emit(NewTransactionFailure("Something went wrong!"));
             }
           }
-        default:
+        case TransactionType.room:
           {
-            return emit(
-              NewTransactionFailure("Unimplemented Transaction Type"),
-            );
+            final bloc = context.read<RoomBloc>();
+            final bool isDeleted = await repoRD.delete(expenseID);
+
+            if (isDeleted) {
+              bloc.add(RoomDeleteTransaction(expenseID));
+              return emit(NewTransactionSuccess(TransactionModel.empty()));
+            } else {
+              return emit(NewTransactionFailure("Something went wrong!"));
+            }
           }
       }
     } catch (e) {

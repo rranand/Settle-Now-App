@@ -7,7 +7,8 @@ import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/util/card/room_transaction_card.dart';
 
 class RoomTransactionScreen extends StatefulWidget {
-  const RoomTransactionScreen({super.key});
+  final String roomID;
+  const RoomTransactionScreen({super.key, required this.roomID});
 
   @override
   State<RoomTransactionScreen> createState() => _RoomTransactionScreenState();
@@ -47,6 +48,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                 children: [
                   Expanded(
                     child: RoomTransactionCard(
+                      roomID: widget.roomID,
                       data: data[index],
                       loggedInUser: _loggedInUser,
                     ),
@@ -56,6 +58,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                         (index == noOfCardsToBeShown - 1 && data.length % 2 > 0)
                             ? SizedBox()
                             : RoomTransactionCard(
+                              roomID: widget.roomID,
                               data: data[index],
                               loggedInUser: _loggedInUser,
                             ),
@@ -64,6 +67,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
               );
             } else {
               return RoomTransactionCard(
+                roomID: widget.roomID,
                 data: data[index],
                 loggedInUser: _loggedInUser,
               );

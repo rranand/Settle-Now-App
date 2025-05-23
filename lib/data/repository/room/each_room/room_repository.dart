@@ -1,4 +1,5 @@
 import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provider.dart';
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
@@ -33,6 +34,32 @@ class RoomRepository {
         id,
       );
       return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<TransactionModel> create(NewTransactionModel data) async {
+    try {
+      TransactionModel newExpense = await _dataProvider.createExpense(data);
+      return newExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<TransactionModel> update(NewTransactionModel data) async {
+    try {
+      TransactionModel updatedExpense = await _dataProvider.updateExpense(data);
+      return updatedExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> delete(String expenseID) async {
+    try {
+      return _dataProvider.deleteExpense(expenseID);
     } catch (e) {
       rethrow;
     }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 
@@ -456,6 +457,39 @@ class RoomDataProvider {
           tempArr.map((ele) => RoomSettleModel.fromMap(ele)).toList();
 
       return arr;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<TransactionModel> createExpense(NewTransactionModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
+      newExpense.id = "${newExpense.description}##${newExpense.createdOn}";
+      return newExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<TransactionModel> updateExpense(NewTransactionModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      TransactionModel updatedExpense = TransactionModel.fromNewTransaction(
+        data,
+      );
+      updatedExpense.modifiedOn = DateTime.now();
+      return updatedExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> deleteExpense(String expenseID) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return true;
     } catch (e) {
       rethrow;
     }

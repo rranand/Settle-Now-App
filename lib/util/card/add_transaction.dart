@@ -609,32 +609,38 @@ class _AddTransactionState extends State<AddTransaction> {
                     borderColor: Colors.black87,
                     maxLines: 2,
                   ),
-                  SizedBox(height: UiConstant.spaceBetweenSection),
-                  CustomFormField.textFormField(
-                    _creationDateController,
-                    readOnly: true,
-                    labelText: 'Creation Date',
-                    hintText: 'Creation Date',
-                    inputDecoration: TextFormFieldInputBorder.underLine,
-                    borderColor: Colors.black87,
-                    suffixIcon: Icon(Iconsax.calendar),
-                    onTap: () async {
-                      DateTime? dateTime = await showOmniDateTimePicker(
-                        context: context,
-                        is24HourMode: false,
-                        isShowSeconds: false,
-                        lastDate: DateTime.now(),
-                        initialDate: _createdOn,
-                        borderRadius: BorderRadius.circular(16.0),
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                      );
-                      if (dateTime != null && mounted) {
-                        _creationDateController.text = convertDateTimeFormat(
-                          dateTime,
-                        );
-                        _createdOn = dateTime;
-                      }
-                    },
+                  Visibility(
+                    visible: _appBarTitle.contains("Add"),
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: UiConstant.spaceBetweenSection,
+                      ),
+                      child: CustomFormField.textFormField(
+                        _creationDateController,
+                        readOnly: true,
+                        labelText: 'Creation Date',
+                        hintText: 'Creation Date',
+                        inputDecoration: TextFormFieldInputBorder.underLine,
+                        borderColor: Colors.black87,
+                        suffixIcon: Icon(Iconsax.calendar),
+                        onTap: () async {
+                          DateTime? dateTime = await showOmniDateTimePicker(
+                            context: context,
+                            is24HourMode: false,
+                            isShowSeconds: false,
+                            lastDate: DateTime.now(),
+                            initialDate: _createdOn,
+                            borderRadius: BorderRadius.circular(16.0),
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                          );
+                          if (dateTime != null && mounted) {
+                            _creationDateController
+                                .text = convertDateTimeFormat(dateTime);
+                            _createdOn = dateTime;
+                          }
+                        },
+                      ),
+                    ),
                   ),
                   Visibility(
                     visible: TransactionType.room == transactionType,
