@@ -31,16 +31,13 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
-    if (widget.data.hasData) {
-      if (widget.data.createdOn != widget.data.modifiedOn) {
-        tags.add("Edited");
-      }
-      if (widget.data.users.isEmpty &&
-          widget.data.createdBy.amount == widget.data.amount) {
-        tags.add("Self");
-      } else if (widget.data.users.isNotEmpty) {
-        tags.add("Partial");
-      }
+    if (widget.data.createdBy.amount == widget.data.amount) {
+      tags.add("Self");
+    } else if (widget.data.users.isNotEmpty) {
+      tags.add("Partial");
+    }
+    if (widget.data.createdOn != widget.data.modifiedOn) {
+      tags.add("Edited");
     }
     return tags;
   }
@@ -103,11 +100,13 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
     }
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-      onLongPress: () {
-        context.push(
-          "${RouterConstants.roomRouteName}/${widget.roomID}${RouterConstants.roomEditExpenseRouteName}",
-          extra: widget.data,
-        );
+      onTap: () {
+        if (widget.loggedInUser.id == widget.data.createdBy.id) {
+          context.push(
+            "${RouterConstants.roomRouteName}/${widget.roomID}${RouterConstants.roomEditExpenseRouteName}",
+            extra: widget.data,
+          );
+        }
       },
       child: Container(
         padding: EdgeInsets.all(UiConstant.cardPadding),
@@ -160,6 +159,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
               ],
             ),
             ListTile(
+              contentPadding: EdgeInsets.zero,
               leading:
                   widget.data.hasData
                       ? colouredIcon(

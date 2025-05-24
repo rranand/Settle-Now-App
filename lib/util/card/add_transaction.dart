@@ -11,6 +11,7 @@ import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -329,8 +330,10 @@ class _AddTransactionState extends State<AddTransaction> {
     _selectedUserIDs.value = {};
     _selectedUserIDs.value = {};
     _categoryIndex.value = 0;
+    _splitTypeIndex.value = 0;
 
-    if (_splitTypeIndex.value == 1) {
+    if (transactionType == TransactionType.quicksplit) {
+      _splitTypeIndex.value = 1;
       _selectedUserIDs.value.putIfAbsent(
         _loggedInUser,
         () => TextEditingController(),
@@ -350,6 +353,14 @@ class _AddTransactionState extends State<AddTransaction> {
     _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
       transactionData.category,
     );
+
+    if (transactionType == TransactionType.room) {
+      if (transactionData.users.isNotEmpty) {
+        _splitTypeIndex.value = 1;
+      } else if (transactionData.createdBy.amount == transactionData.amount) {
+        _splitTypeIndex.value = 2;
+      }
+    }
 
     _selectedUserIDs.value = {};
     _selectedUserIDSet.value = {};
@@ -455,20 +466,23 @@ class _AddTransactionState extends State<AddTransaction> {
       List<UserAmountModel> userWithAmount = [];
       UserAmountModel createdBy = UserAmountModel.copyFromUser(
         _loggedInUser,
-        0,
+        _splitTypeIndex.value == 2 ? totalAmount : 0,
       );
-      _selectedUserIDs.value.forEach((userData, amountTxt) {
-        double tempAmount = double.parse(amountTxt.text);
-        sumAmount += tempAmount;
+      if (_splitTypeIndex.value == 1) {
+        _selectedUserIDs.value.forEach((userData, amountTxt) {
+          double tempAmount = double.parse(amountTxt.text);
+          sumAmount += tempAmount;
 
-        if (userData.id == _loggedInUser.id) {
-          createdBy = UserAmountModel.copyFromUser(_loggedInUser, tempAmount);
-        } else {
-          userWithAmount.add(
-            UserAmountModel.copyFromUser(userData, tempAmount),
-          );
-        }
-      });
+          if (userData.id == _loggedInUser.id) {
+            createdBy = UserAmountModel.copyFromUser(_loggedInUser, tempAmount);
+          } else {
+            userWithAmount.add(
+              UserAmountModel.copyFromUser(userData, tempAmount),
+            );
+          }
+        });
+      }
+
       NewTransactionModel data = NewTransactionModel(
         amount: totalAmount,
         description: _descriptionController.text,
@@ -671,10 +685,23 @@ class _AddTransactionState extends State<AddTransaction> {
                             final int columns =
                                 (screenWidth / (_userCardWidth + spacing))
                                     .ceil();
+                            List<UserModel> users = UiConstant.users;
+
+                            if (transactionType == TransactionType.room) {
+                              final roomUserState =
+                                  context.read<RoomUserCubit>().state;
+                              if (roomUserState is RoomUserSuccess) {
+                                users =
+                                    roomUserState.data
+                                        .map((ele) => ele.user)
+                                        .toList();
+                              }
+                            }
+
                             return GridView.builder(
                               padding: EdgeInsets.zero,
                               shrinkWrap: true,
-                              itemCount: UiConstant.users.length,
+                              itemCount: users.length,
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: columns,
@@ -682,7 +709,7 @@ class _AddTransactionState extends State<AddTransaction> {
                                     crossAxisSpacing: spacing,
                                   ),
                               itemBuilder: (context, index) {
-                                UserModel user = UiConstant.users[index];
+                                UserModel user = users[index];
                                 return ValueListenableBuilder(
                                   valueListenable: _selectedUserIDs,
                                   builder: (
