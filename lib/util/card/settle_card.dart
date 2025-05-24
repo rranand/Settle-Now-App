@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class SettleCard extends StatelessWidget {
+  final String roomID;
   final double screenWidth;
   final RoomSettleModel data;
   final UserModel loggedInUser;
 
   const SettleCard({
     super.key,
+    required this.roomID,
     required this.screenWidth,
     required this.data,
     required this.loggedInUser,
@@ -64,25 +68,22 @@ class SettleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Slidable(
-      enabled: data.hasData && data.sender.id == loggedInUser.id,
+      enabled: true || data.hasData && data.sender.id == loggedInUser.id,
       endActionPane: ActionPane(
         motion: StretchMotion(),
         children: [
           SlidableAction(
-            onPressed: (context) {},
+            onPressed: (context) {
+              context.push(
+                "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomSettleEditRouteName}",
+                extra: data,
+              );
+            },
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             backgroundColor: Color(0xFF5bc0de),
             foregroundColor: Colors.white,
             icon: Icons.edit,
             label: 'Edit',
-          ),
-          SlidableAction(
-            onPressed: (context) {},
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            backgroundColor: Colors.redAccent,
-            foregroundColor: Colors.white,
-            icon: Icons.delete,
-            label: 'Delete',
           ),
         ],
       ),

@@ -691,10 +691,17 @@ class _AddTransactionState extends State<AddTransaction> {
                               final roomUserState =
                                   context.read<RoomUserCubit>().state;
                               if (roomUserState is RoomUserSuccess) {
-                                users =
-                                    roomUserState.data
-                                        .map((ele) => ele.user)
-                                        .toList();
+                                users = [];
+                                for (
+                                  int i = 0;
+                                  i < roomUserState.data.length;
+                                  i++
+                                ) {
+                                  if (roomUserState.data[i].user.id !=
+                                      _loggedInUser.id) {
+                                    users.add(roomUserState.data[i].user);
+                                  }
+                                }
                               }
                             }
 

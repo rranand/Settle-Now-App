@@ -33,7 +33,7 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(3);
   UserModel _loggedInUser = UserModel.empty();
 
   final List<String> _navBarTitles = [
@@ -62,7 +62,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       case 2:
         return RoomAnalysisScreen();
       case 3:
-        return RoomSettleScreen();
+        return RoomSettleScreen(roomID: widget.id);
       default:
         return RoomTransactionScreen(roomID: widget.id);
     }
@@ -89,7 +89,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             }
             totalSpent += state.data[i].contribution;
           }
-          double balance = data.contribution - data.spent;
+          double balance = data.contribution - data.spent + data.settle;
 
           return Card(
             shape: RoundedRectangleBorder(
@@ -241,6 +241,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                   leading: Icon(Icons.group_add),
                   title: Text('Add an Expense'),
                   onTap: () {
+                    context.pop();
                     context.push(
                       "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
                     );
@@ -251,6 +252,9 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                   title: Text('Settle Expense'),
                   onTap: () {
                     context.pop();
+                    context.push(
+                      "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomSettleAddRouteName}",
+                    );
                   },
                 ),
               ],

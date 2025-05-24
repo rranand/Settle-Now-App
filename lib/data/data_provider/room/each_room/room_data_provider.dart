@@ -313,8 +313,9 @@ class RoomDataProvider {
       "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300"
     },
-    "contribution": 150.75,
-    "spent": 120.50
+    "contribution": 0,
+    "spent": 120.50,
+    "settle": 0
   },
   {
     "id": "ru2",
@@ -324,7 +325,8 @@ class RoomDataProvider {
       "profileImage": "https://picsum.photos/id/45/200/300"
     },
     "contribution": 0,
-    "spent": 85.00
+    "spent": 85.00,
+    "settle": 5.5
   },
   {
     "id": "ru3",
@@ -334,7 +336,8 @@ class RoomDataProvider {
       "profileImage": "https://picsum.photos/id/67/200/300"
     },
     "contribution": 200.00,
-    "spent": 200.00
+    "spent": 200.00,
+    "settle": 0
   },
   {
     "id": "ru4",
@@ -344,7 +347,8 @@ class RoomDataProvider {
       "profileImage": "https://picsum.photos/id/89/200/300"
     },
     "contribution": 75.50,
-    "spent": 0
+    "spent": 0,
+    "settle": -5.5
   },
   {
     "id": "ru5",
@@ -354,7 +358,8 @@ class RoomDataProvider {
       "profileImage": "https://picsum.photos/id/12/200/300"
     },
     "contribution": 300.25,
-    "spent": 275.75
+    "spent": 275.75,
+    "settle": 0
   },
   {
     "id": "ru6",
@@ -364,7 +369,8 @@ class RoomDataProvider {
       "profileImage": "https://picsum.photos/id/34/200/300"
     },
     "contribution": 0,
-    "spent": 0
+    "spent": 0,
+    "settle": 0
   }
 ]
 
@@ -387,66 +393,18 @@ class RoomDataProvider {
   {
     "id": "settle_001",
     "recevier": {
-      "id": "u1",
-      "name": "Rohit Anand",
-      "profileImage": "https://picsum.photos/id/11/200/300"
+      "id": "u4",
+      "name": "Eve Wilson",
+      "profileImage": "https://picsum.photos/id/89/200/300"
     },
     "sender": {
-      "id": "user_102",
-      "name": "Aman Mehra",
-      "profileImage": "https://picsum.photos/id/12/200/300"
+      "id": "u2",
+      "name": "Alice Smith",
+      "profileImage": "https://picsum.photos/id/45/200/300"
     },
-    "amount": 350.0,
+    "amount": 5.5,
     "createdOn": "2024-12-01T10:30:00Z",
     "modifiedOn": "2024-12-01T12:00:00Z"
-  },
-  {
-    "id": "settle_002",
-    "recevier": {
-      "id": "u1",
-      "name": "Rohit Anand",
-      "profileImage": "https://picsum.photos/id/13/200/300"
-    },
-    "sender": {
-      "id": "user_104",
-      "name": "Rahul Singh",
-      "profileImage": "https://picsum.photos/id/14/200/300"
-    },
-    "amount": -1200.0,
-    "createdOn": "2024-11-28T09:15:00Z",
-    "modifiedOn": "2024-11-28T09:45:00Z"
-  },
-  {
-    "id": "settle_003",
-    "recevier": {
-      "id": "user_105",
-      "name": "Sneha Kapoor",
-      "profileImage": "https://picsum.photos/id/15/200/300"
-    },
-    "sender": {
-      "id": "u1",
-      "name": "Rohit Anand",
-      "profileImage": "https://picsum.photos/id/16/200/300"
-    },
-    "amount": 560.0,
-    "createdOn": "2024-10-20T14:00:00Z",
-    "modifiedOn": "2024-10-20T15:00:00Z"
-  },
-  {
-    "id": "settle_004",
-    "recevier": {
-      "id": "user_107",
-      "name": "Priya Dutta",
-      "profileImage": "https://picsum.photos/id/17/200/300"
-    },
-    "sender": {
-      "id": "user_108",
-      "name": "Kunal Joshi",
-      "profileImage": "https://picsum.photos/id/18/200/300"
-    },
-    "amount": 890.0,
-    "createdOn": "2025-01-05T11:20:00Z",
-    "modifiedOn": "2025-01-05T11:50:00Z"
   }
 ]
 
@@ -487,6 +445,35 @@ class RoomDataProvider {
   }
 
   Future<bool> deleteExpense(String expenseID) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<RoomSettleModel> createNewSettleExpense(RoomSettleModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      data.id = "${data.createdOn}##${data.amount}";
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<RoomSettleModel> updateSettleExpense(RoomSettleModel data) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      data.modifiedOn = DateTime.now();
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> deleteSettleExpense(String expenseID) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
       return true;

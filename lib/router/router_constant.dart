@@ -21,10 +21,12 @@ class RouterConstants {
   //Room Route
   static const String roomAddExpenseRouteName = '/add';
   static const String roomEditExpenseRouteName = '/edit';
+  static const String roomSettleAddRouteName = '/add-settle';
+  static const String roomSettleEditRouteName = '/edit-settle';
 
   //Quicksplit
-  static const String quickSplitAddExpenseRouteName = '/quicksplit/add';
-  static const String quickSplitEditExpenseRouteName = '/quicksplit/edit';
+  static const String quickSplitAddExpenseRouteName = '/add-quicksplit';
+  static const String quickSplitEditExpenseRouteName = '/edit-quicksplit';
 
   //Profile Route
   static const String profileRouteName = '/profile';

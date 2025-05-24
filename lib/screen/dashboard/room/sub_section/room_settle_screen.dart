@@ -9,7 +9,8 @@ import 'package:settlenow_v2/util/card/settle_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 
 class RoomSettleScreen extends StatefulWidget {
-  const RoomSettleScreen({super.key});
+  final String roomID;
+  const RoomSettleScreen({super.key, required this.roomID});
 
   @override
   State<RoomSettleScreen> createState() => _RoomSettleScreenState();
@@ -55,6 +56,7 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
               ),
               itemBuilder: (BuildContext context, int index) {
                 return SettleCard(
+                  roomID: widget.roomID,
                   screenWidth: cardSizeInfo[0],
                   data: data[index],
                   loggedInUser: _loggedInUser,

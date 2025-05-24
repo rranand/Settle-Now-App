@@ -32,7 +32,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
 
   Widget _userExpenseWidget(RoomUserModel data) {
     UserModel user = data.user;
-    double amount = data.contribution - data.spent;
+    double amount = data.contribution - data.spent + data.settle;
 
     return Card(
       elevation: UiConstant.cardElevation,

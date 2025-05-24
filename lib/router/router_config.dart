@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/signup_screen.dart';
@@ -15,6 +16,7 @@ import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
+import 'package:settlenow_v2/util/card/settle_expense.dart';
 import 'package:settlenow_v2/util/handler/stream_to_listenable.dart';
 import 'package:settlenow_v2/util/widgets/auth_gate.dart';
 
@@ -97,6 +99,42 @@ class AppRouterConfig {
                   final extra = state.extra;
 
                   if (extra == null) {
+                    return RouterConstants.dashboardRouteName;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              GoRoute(
+                path: RouterConstants.roomSettleAddRouteName,
+                builder: (context, state) {
+                  final id = state.pathParameters['id'];
+                  return AuthGate(child: SettleExpense(roomID: id!));
+                },
+                redirect: (context, state) {
+                  final id = state.pathParameters['id'];
+
+                  if (id == null) {
+                    return RouterConstants.dashboardRouteName;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              GoRoute(
+                path: RouterConstants.roomSettleEditRouteName,
+                builder: (context, state) {
+                  final id = state.pathParameters['id'];
+                  final RoomSettleModel data = state.extra as RoomSettleModel;
+                  return AuthGate(
+                    child: SettleExpense(roomID: id!, transactionData: data),
+                  );
+                },
+                redirect: (context, state) {
+                  final id = state.pathParameters['id'];
+                  final extra = state.extra;
+
+                  if (id == null || extra == null) {
                     return RouterConstants.dashboardRouteName;
                   } else {
                     return null;

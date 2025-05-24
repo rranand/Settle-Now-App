@@ -39,7 +39,7 @@ class RoomRepository {
     }
   }
 
-  Future<TransactionModel> create(NewTransactionModel data) async {
+  Future<TransactionModel> createExpense(NewTransactionModel data) async {
     try {
       TransactionModel newExpense = await _dataProvider.createExpense(data);
       return newExpense;
@@ -48,7 +48,7 @@ class RoomRepository {
     }
   }
 
-  Future<TransactionModel> update(NewTransactionModel data) async {
+  Future<TransactionModel> updateExpense(NewTransactionModel data) async {
     try {
       TransactionModel updatedExpense = await _dataProvider.updateExpense(data);
       return updatedExpense;
@@ -57,9 +57,39 @@ class RoomRepository {
     }
   }
 
-  Future<bool> delete(String expenseID) async {
+  Future<bool> deleteExpense(String expenseID) async {
     try {
       return _dataProvider.deleteExpense(expenseID);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<RoomSettleModel> createNewSettleExpense(RoomSettleModel data) async {
+    try {
+      RoomSettleModel newExpense = await _dataProvider.createNewSettleExpense(
+        data,
+      );
+      return newExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<RoomSettleModel> updateSettleExpense(RoomSettleModel data) async {
+    try {
+      RoomSettleModel updatedExpense = await _dataProvider.updateSettleExpense(
+        data,
+      );
+      return updatedExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> deleteSettleExpense(String settleExpenseID) async {
+    try {
+      return _dataProvider.deleteSettleExpense(settleExpenseID);
     } catch (e) {
       rethrow;
     }

@@ -9,12 +9,14 @@ class RoomUserModel {
   UserModel user = UserModel.empty();
   double contribution = 0;
   double spent = 0;
+  double settle = 0;
 
   RoomUserModel({
     required this.id,
     required this.user,
     required this.contribution,
     required this.spent,
+    required this.settle,
   });
 
   RoomUserModel.empty({this.hasData = false});
@@ -24,12 +26,14 @@ class RoomUserModel {
     UserModel? user,
     double? contribution,
     double? spent,
+    double? settle,
   }) {
     return RoomUserModel(
       id: id ?? this.id,
       user: user ?? this.user,
       contribution: contribution ?? this.contribution,
       spent: spent ?? this.spent,
+      settle: settle ?? this.settle,
     );
   }
 
@@ -39,6 +43,7 @@ class RoomUserModel {
       'user': user.toMap(),
       'contribution': contribution,
       'spent': spent,
+      'settle': settle,
     };
   }
 
@@ -48,6 +53,7 @@ class RoomUserModel {
       user: UserModel.fromBasicInfoMap(map['user']),
       contribution: map['contribution'] as double,
       spent: map['spent'] as double,
+      settle: map['settle'] as double,
     );
   }
 
@@ -58,7 +64,7 @@ class RoomUserModel {
 
   @override
   String toString() {
-    return 'RoomUserModel(id: $id, user: $user, contribution: $contribution, spent: $spent)';
+    return 'RoomUserModel(id: $id, user: $user, contribution: $contribution, spent: $spent, settle: $settle)';
   }
 
   @override
@@ -68,11 +74,16 @@ class RoomUserModel {
     return other.id == id &&
         other.user == user &&
         other.contribution == contribution &&
-        other.spent == spent;
+        other.spent == spent &&
+        other.settle == settle;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^ user.hashCode ^ contribution.hashCode ^ spent.hashCode;
+    return id.hashCode ^
+        user.hashCode ^
+        contribution.hashCode ^
+        spent.hashCode ^
+        settle.hashCode;
   }
 }

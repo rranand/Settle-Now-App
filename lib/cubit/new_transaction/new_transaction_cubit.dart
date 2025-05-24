@@ -62,7 +62,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final TransactionModel newData = await repoRD.create(data);
+            final TransactionModel newData = await repoRD.createExpense(data);
             bloc.add(RoomAddNewTransaction(newData));
             return emit(NewTransactionSuccess(newData));
           }
@@ -110,7 +110,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final TransactionModel newData = await repoRD.update(data);
+            final TransactionModel newData = await repoRD.updateExpense(data);
             bloc.add(RoomUpdateTransaction(newData));
             return emit(NewTransactionSuccess(newData));
           }
@@ -171,7 +171,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final bool isDeleted = await repoRD.delete(expenseID);
+            final bool isDeleted = await repoRD.deleteExpense(expenseID);
 
             if (isDeleted) {
               bloc.add(RoomDeleteTransaction(expenseID));

@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
+import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 
 part 'room_user_state.dart';
@@ -176,6 +177,20 @@ class RoomUserCubit extends Cubit<RoomUserState> {
           }
           usersData[i].spent -= splitAmount;
         }
+      }
+    }
+    return emit(RoomUserSuccess([...usersData].toList()));
+  }
+
+  void onAddNewSettleExpense(RoomSettleModel data) {
+    final roomUserState = state as RoomUserSuccess;
+    List<RoomUserModel> usersData = roomUserState.data;
+
+    for (int i = 0; i < usersData.length; i++) {
+      if (data.sender.id == usersData[i].user.id) {
+        usersData[i].settle += data.amount;
+      } else if (data.recevier.id == usersData[i].user.id) {
+        usersData[i].settle -= data.amount;
       }
     }
     return emit(RoomUserSuccess([...usersData].toList()));
