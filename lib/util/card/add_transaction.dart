@@ -816,7 +816,7 @@ class _AddTransactionState extends State<AddTransaction> {
                           borderWidth: 1,
                           gradientColors: GradientColorConstant.vibrantGradient,
                           child: CustomButton.customOutlinedButton(
-                            "Add Expense",
+                            "${widget.transactionData == null ? "Add" : "Update"} Expense",
                             buttonHeight: 40,
                           ),
                         ),

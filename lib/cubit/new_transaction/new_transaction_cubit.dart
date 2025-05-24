@@ -111,7 +111,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<RoomBloc>();
             final TransactionModel newData = await repoRD.update(data);
-            bloc.add(RoomAddNewTransaction(newData));
+            bloc.add(RoomUpdateTransaction(newData));
             return emit(NewTransactionSuccess(newData));
           }
       }

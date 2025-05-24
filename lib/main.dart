@@ -194,16 +194,21 @@ class MyApp extends StatelessWidget {
                 (context) =>
                     LendenRoomBloc(context.read<LendenRoomRepository>()),
           ),
-          BlocProvider<LendenRoomNameCubit>(
-            create:
-                (context) =>
-                    LendenRoomNameCubit(context.read<LendenRoomRepository>()),
-          ),
+
           BlocProvider<RoomUserCubit>(
             create: (context) => RoomUserCubit(context.read<RoomRepository>()),
           ),
           BlocProvider<RoomBloc>(
-            create: (context) => RoomBloc(context.read<RoomRepository>()),
+            create:
+                (context) => RoomBloc(
+                  context.read<RoomRepository>(),
+                  context.read<RoomUserCubit>(),
+                ),
+          ),
+          BlocProvider<LendenRoomNameCubit>(
+            create:
+                (context) =>
+                    LendenRoomNameCubit(context.read<LendenRoomRepository>()),
           ),
           BlocProvider<RoomSettleCubit>(
             create:
