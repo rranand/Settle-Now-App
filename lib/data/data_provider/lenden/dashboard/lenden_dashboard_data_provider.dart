@@ -17,4 +17,22 @@ class LendenDashboardDataProvider {
       rethrow;
     }
   }
+
+  Future<LendenDashboardModel> createRoom(String roomName) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      LendenDashboardModel data = LendenDashboardModel(
+        id: "${DateTime.now()}##$roomName",
+        roomName: roomName,
+        status: "open",
+        createdOn: DateTime.now(),
+        modifiedOn: DateTime.now(),
+        amount: 0,
+        users: [],
+      );
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

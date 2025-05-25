@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/lenden_card.dart';
@@ -53,7 +55,19 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     }
   }
 
-  void _createRoomHandler() {}
+  void _createRoomHandler() {
+    if (_createRoomKey.currentState!.validate()) {
+      context.read<CreateRoomCubit>().createNewRoom(
+        context,
+        _createRoomController.text,
+      );
+
+      if (context.canPop()) {
+        _createRoomController.text = "";
+        context.pop();
+      }
+    }
+  }
 
   void _showBottomSheet(BuildContext context) {
     showModalBottomSheet(
@@ -153,39 +167,48 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
               );
             },
           ),
-          BlocConsumer<LendenDashboardBloc, LendenDashboardState>(
-            listener: _blocListenerHandler,
-            builder: (context, state) {
-              List<LendenDashboardModel> lendenData = [];
-              if (state is LendenDashboardFetchSuccess) {
-                lendenData = state.data;
-              } else if (state is LendenDashboardLoading) {
-                lendenData = List.generate(
-                  11,
-                  (i) => LendenDashboardModel.empty(),
-                );
+          BlocConsumer<CreateRoomCubit, CreateRoomState>(
+            listener: (context, state) {
+              if (state is CreateRoomFailure) {
+                showNormalSnackBar(context, state.error);
               }
-              return SliverPadding(
-                padding: _mainScreenPadding.add(
-                  EdgeInsets.only(
-                    top: UiConstant.spaceBetweenSection,
-                    bottom: UiConstant.spaceAtBottom,
-                  ),
-                ),
-                sliver: SliverGrid.builder(
-                  itemCount: lendenData.length,
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: cardSizeInfo[0],
-                    mainAxisSpacing: UiConstant.spaceBetweenCard,
-                    crossAxisSpacing: UiConstant.spaceBetweenCard,
-                    childAspectRatio: cardSizeInfo[1],
-                  ),
-                  itemBuilder:
-                      (context, index) => SizedBox(
-                        width: cardSizeInfo[0],
-                        child: LendenCard(data: lendenData[index]),
+            },
+            builder: (context, state) {
+              return BlocConsumer<LendenDashboardBloc, LendenDashboardState>(
+                listener: _blocListenerHandler,
+                builder: (context, state) {
+                  List<LendenDashboardModel> lendenData = [];
+                  if (state is LendenDashboardFetchSuccess) {
+                    lendenData = state.data;
+                  } else if (state is LendenDashboardLoading) {
+                    lendenData = List.generate(
+                      11,
+                      (i) => LendenDashboardModel.empty(),
+                    );
+                  }
+                  return SliverPadding(
+                    padding: _mainScreenPadding.add(
+                      EdgeInsets.only(
+                        top: UiConstant.spaceBetweenSection,
+                        bottom: UiConstant.spaceAtBottom,
                       ),
-                ),
+                    ),
+                    sliver: SliverGrid.builder(
+                      itemCount: lendenData.length,
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: cardSizeInfo[0],
+                        mainAxisSpacing: UiConstant.spaceBetweenCard,
+                        crossAxisSpacing: UiConstant.spaceBetweenCard,
+                        childAspectRatio: cardSizeInfo[1],
+                      ),
+                      itemBuilder:
+                          (context, index) => SizedBox(
+                            width: cardSizeInfo[0],
+                            child: LendenCard(data: lendenData[index]),
+                          ),
+                    ),
+                  );
+                },
               );
             },
           ),
