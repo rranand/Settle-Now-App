@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
-void showSnackbar(BuildContext context, String txt, {Icon? icon}) {
+void showSnackbar(
+  BuildContext context,
+  String txt, {
+  Icon? icon,
+  ScaffoldMessengerState? scaffoldMessenger,
+}) {
   icon ??= Icon(Iconsax.tick_circle5, color: Colors.green);
   final snackBar = SnackBar(
     content: Row(
       children: [
-        icon,
-        SizedBox(width: 18),
+        Padding(padding: const EdgeInsets.only(right: 18.0), child: icon),
         Text(
           txt,
           textAlign: TextAlign.center,
@@ -15,7 +19,6 @@ void showSnackbar(BuildContext context, String txt, {Icon? icon}) {
         ),
       ],
     ),
-    padding: const EdgeInsets.all(10),
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     behavior: SnackBarBehavior.floating,
     shape: RoundedRectangleBorder(
@@ -24,9 +27,62 @@ void showSnackbar(BuildContext context, String txt, {Icon? icon}) {
     ),
   );
 
-  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  if (scaffoldMessenger == null) {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  } else {
+    scaffoldMessenger.showSnackBar(snackBar);
+  }
 }
 
-void showNormalSnackBar(BuildContext context, String txt) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(txt)));
+void showSnackbarWithChildWidget(
+  BuildContext context,
+  String txt, {
+  Widget? child,
+  ScaffoldMessengerState? scaffoldMessenger,
+  Duration duration = const Duration(seconds: 1),
+}) {
+  final snackBar = SnackBar(
+    content: Row(
+      children: [
+        Visibility(
+          visible: child != null,
+          child: Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: child,
+          ),
+        ),
+        Text(
+          txt,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+        ),
+      ],
+    ),
+    duration: duration,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    behavior: SnackBarBehavior.floating,
+    shape: RoundedRectangleBorder(
+      side: BorderSide(color: Colors.black54, width: 1),
+      borderRadius: BorderRadius.circular(24),
+    ),
+  );
+
+  if (scaffoldMessenger == null) {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  } else {
+    scaffoldMessenger.showSnackBar(snackBar);
+  }
+}
+
+void showNormalSnackBar(
+  BuildContext context,
+  String txt, {
+  ScaffoldMessengerState? scaffoldMessenger,
+}) {
+  final snackBar = SnackBar(content: Text(txt));
+  if (scaffoldMessenger == null) {
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  } else {
+    scaffoldMessenger.showSnackBar(snackBar);
+  }
 }

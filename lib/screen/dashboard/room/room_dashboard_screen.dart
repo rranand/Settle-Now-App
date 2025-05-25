@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/room_card.dart';
@@ -42,7 +44,24 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   }
 
   void _roomJoinOrCreateHandler() {
-    if (_roomJoinOrCreateKey.currentState!.validate()) {}
+    if (_roomJoinOrCreateKey.currentState!.validate()) {
+      if (_roomJoinOrCreate.value == 0) {
+        context.read<CreateJoinRoomCubit>().createNewRoom(
+          context,
+          _roomJoinOrCreateController.text,
+        );
+      } else {
+        context.read<CreateJoinRoomCubit>().joinNewRoom(
+          context,
+          _roomJoinOrCreateController.text,
+          ScaffoldMessenger.of(context),
+        );
+      }
+      if (context.canPop()) {
+        _roomJoinOrCreateController.text = "";
+        context.pop();
+      }
+    }
   }
 
   @override
@@ -202,31 +221,43 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
               );
             },
           ),
-          BlocConsumer<RoomDashboardBloc, RoomDashboardState>(
-            listener: _blocListenerHandler,
-            builder: (context, state) {
-              List<RoomInfoModel> roomInfoData = [];
-              if (state is RoomDashboardFetchSuccess) {
-                roomInfoData = state.data;
-              } else if (state is RoomDashboardLoading) {
-                roomInfoData = List.generate(11, (i) => RoomInfoModel.empty());
+          BlocConsumer<CreateJoinRoomCubit, CreateJoinRoomState>(
+            listener: (context, state) {
+              if (state is CreateJoinRoomFailure) {
+                showNormalSnackBar(context, state.error);
               }
-              return SliverPadding(
-                padding: _mainScreenPadding.add(
-                  EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
-                ),
-                sliver: SliverGrid.builder(
-                  itemCount: roomInfoData.length,
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: cardSizeInfo[0],
-                    mainAxisSpacing: UiConstant.spaceBetweenCard,
-                    crossAxisSpacing: UiConstant.spaceBetweenCard,
-                    childAspectRatio: cardSizeInfo[1],
-                  ),
-                  itemBuilder: (BuildContext context, int index) {
-                    return RoomCard(data: roomInfoData[index]);
-                  },
-                ),
+            },
+            builder: (context, state) {
+              return BlocConsumer<RoomDashboardBloc, RoomDashboardState>(
+                listener: _blocListenerHandler,
+                builder: (context, state) {
+                  List<RoomInfoModel> roomInfoData = [];
+                  if (state is RoomDashboardFetchSuccess) {
+                    roomInfoData = state.data;
+                  } else if (state is RoomDashboardLoading) {
+                    roomInfoData = List.generate(
+                      11,
+                      (i) => RoomInfoModel.empty(),
+                    );
+                  }
+                  return SliverPadding(
+                    padding: _mainScreenPadding.add(
+                      EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
+                    ),
+                    sliver: SliverGrid.builder(
+                      itemCount: roomInfoData.length,
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: cardSizeInfo[0],
+                        mainAxisSpacing: UiConstant.spaceBetweenCard,
+                        crossAxisSpacing: UiConstant.spaceBetweenCard,
+                        childAspectRatio: cardSizeInfo[1],
+                      ),
+                      itemBuilder: (BuildContext context, int index) {
+                        return RoomCard(data: roomInfoData[index]);
+                      },
+                    ),
+                  );
+                },
               );
             },
           ),

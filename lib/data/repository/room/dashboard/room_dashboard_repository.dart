@@ -14,4 +14,22 @@ class RoomDashboardRepository {
       rethrow;
     }
   }
+
+  Future<RoomInfoModel> createRoom(String roomName) async {
+    try {
+      RoomInfoModel data = await _dataProvider.createRoom(roomName);
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> joinRoom(String roomKey) async {
+    try {
+      bool isJoin = await _dataProvider.joinRoom(roomKey);
+      return isJoin;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

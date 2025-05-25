@@ -18,4 +18,30 @@ class RoomDashboardDataProvider {
       rethrow;
     }
   }
+
+  Future<RoomInfoModel> createRoom(String roomName) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      RoomInfoModel data = RoomInfoModel(
+        id: "${DateTime.now()}##$roomName",
+        roomName: roomName,
+        status: "Open",
+        createdOn: DateTime.now(),
+        modifiedOn: DateTime.now(),
+        users: [],
+      );
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> joinRoom(String roomKey) async {
+    try {
+      await Future.delayed(Duration(seconds: 2), () {});
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

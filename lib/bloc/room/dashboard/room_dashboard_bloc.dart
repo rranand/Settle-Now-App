@@ -11,6 +11,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
 
   RoomDashboardBloc(this.repo) : super(RoomDashboardInitial()) {
     on<RoomDashboardFetch>(_roomFetch);
+    on<RoomDashboardOnAddNewRoom>(_roomDashboardOnAddNewRoom);
   }
 
   void _roomFetch(
@@ -24,5 +25,26 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     } catch (e) {
       return emit(RoomDashboardFailure(e.toString()));
     }
+  }
+
+  void _roomDashboardOnAddNewRoom(
+    RoomDashboardOnAddNewRoom event,
+    Emitter<RoomDashboardState> emit,
+  ) async {
+    final allRoomState = (state as RoomDashboardFetchSuccess);
+    List<RoomInfoModel> data = [];
+    if (event.isLoading) {
+      data = [event.data, ...allRoomState.data];
+    } else {
+      if (event.data.hasData) {
+        data = [event.data];
+      }
+      for (int i = 0; i < allRoomState.data.length; i++) {
+        if (allRoomState.data[i].hasData) {
+          data.add(allRoomState.data[i]);
+        }
+      }
+    }
+    return emit(RoomDashboardFetchSuccess(data));
   }
 }

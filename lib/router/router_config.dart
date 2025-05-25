@@ -264,8 +264,8 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      //initialLocation: RouterConstants.dashboardRouteName,
-      initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
+      initialLocation: RouterConstants.dashboardRouteName,
+      //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,
