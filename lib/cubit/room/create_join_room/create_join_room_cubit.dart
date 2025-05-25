@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
@@ -43,12 +44,11 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     showSnackbarWithChildWidget(
-      context,
       "Joining Room",
       child: SizedBox(
         width: 16,
         height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2),
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
       ),
       duration: Duration(minutes: 2),
       scaffoldMessenger: scaffoldMessenger,
@@ -58,9 +58,9 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       bool isRoomJoined = await repo.joinRoom(roomKey);
       if (isRoomJoined) {
         scaffoldMessenger.hideCurrentSnackBar();
-        showSnackbar(
-          context,
+        showSnackbarWithChildWidget(
           "Room Join Requested",
+          child: Icon(Iconsax.tick_circle5, color: Colors.green),
           scaffoldMessenger: scaffoldMessenger,
         );
         return emit(CreateJoinRoomSuccess());
