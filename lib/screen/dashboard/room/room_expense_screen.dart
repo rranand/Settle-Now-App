@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
@@ -17,7 +18,6 @@ import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_analysis_scr
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
-import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -33,7 +33,8 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(3);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
+  ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
 
   final List<String> _navBarTitles = [
@@ -228,40 +229,57 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           ),
         ],
       ),
-      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
-        showModalBottomSheet(
-          context: context,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      floatingActionButton: SpeedDial(
+        icon: Iconsax.add,
+        activeIcon: Icons.close,
+        backgroundColor: Colors.deepPurpleAccent,
+        foregroundColor: Colors.white,
+        spacing: 3,
+        openCloseDial: isDialOpen,
+        childPadding: const EdgeInsets.all(5),
+        spaceBetweenChildren: 4,
+        useRotationAnimation: true,
+        animationCurve: Curves.elasticInOut,
+        children: [
+          SpeedDialChild(
+            child: const Icon(Iconsax.add),
+            backgroundColor: UiConstant.colors[0],
+            foregroundColor: Colors.white,
+            label: 'Add Expense',
+            visible: true,
+            onTap: () {
+              context.push(
+                "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
+              );
+            },
           ),
-          builder: (context) {
-            return Wrap(
-              children: [
-                ListTile(
-                  leading: Icon(Icons.group_add),
-                  title: Text('Add an Expense'),
-                  onTap: () {
-                    context.pop();
-                    context.push(
-                      "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: Icon(Icons.meeting_room),
-                  title: Text('Settle Expense'),
-                  onTap: () {
-                    context.pop();
-                    context.push(
-                      "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomSettleAddRouteName}",
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      }),
+          SpeedDialChild(
+            child: const Icon(Icons.arrow_outward),
+            backgroundColor: UiConstant.colors[1],
+            foregroundColor: Colors.white,
+            label: 'Add Settle Expense',
+            onTap: () {
+              context.push(
+                "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomSettleAddRouteName}",
+              );
+            },
+          ),
+          SpeedDialChild(
+            child: const Icon(Iconsax.lock),
+            backgroundColor: UiConstant.colors[2],
+            foregroundColor: Colors.white,
+            label: 'Close Room',
+            onTap: () {},
+          ),
+          SpeedDialChild(
+            child: const Icon(Iconsax.message_question),
+            backgroundColor: UiConstant.colors[3],
+            foregroundColor: Colors.white,
+            label: 'Close Room Request',
+            onTap: () {},
+          ),
+        ],
+      ),
     );
   }
 }

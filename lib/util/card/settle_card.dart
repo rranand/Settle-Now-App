@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
@@ -67,26 +66,14 @@ class SettleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      enabled: true || data.hasData && data.sender.id == loggedInUser.id,
-      endActionPane: ActionPane(
-        motion: StretchMotion(),
-        children: [
-          SlidableAction(
-            onPressed: (context) {
-              context.push(
-                "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomSettleEditRouteName}",
-                extra: data,
-              );
-            },
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            backgroundColor: Color(0xFF5bc0de),
-            foregroundColor: Colors.white,
-            icon: Icons.edit,
-            label: 'Edit',
-          ),
-        ],
-      ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+      onTap: () {
+        context.push(
+          "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomSettleEditRouteName}",
+          extra: data,
+        );
+      },
       child: Card(
         elevation: UiConstant.cardElevation,
         color: Colors.white,

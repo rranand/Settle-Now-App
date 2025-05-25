@@ -47,8 +47,13 @@ class _SettleExpenseState extends State<SettleExpense> {
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
         _selectedUser.value = userData.user.id;
-        _amountController.text =
-            min(userCanPay, userData.contribution - userData.spent).toString();
+        if (_amountController.text.isEmpty) {
+          _amountController.text =
+              min(
+                userCanPay,
+                userData.contribution - userData.spent,
+              ).toString();
+        }
       },
       child: Center(
         child: Stack(
