@@ -27,6 +27,7 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
     emit(RoomSettleUpsertLoading());
     try {
       final RoomSettleModel updateData = await repo.updateSettleExpense(data);
+      roomSettleCubit.updateSettleExpense(updateData);
       return emit(RoomSettleUpsertSuccess(updateData));
     } catch (e) {
       return emit(RoomSettleUpsertFailure(e.toString()));
@@ -38,6 +39,7 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
     try {
       bool isDeleted = await repo.deleteSettleExpense(settleExpenseID);
       if (isDeleted) {
+        roomSettleCubit.deleteSettleExpense(settleExpenseID);
         return emit(RoomSettleUpsertSuccess(RoomSettleModel.empty()));
       } else {
         return emit(RoomSettleUpsertFailure("Something Went Wrong!"));

@@ -195,4 +195,38 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     }
     return emit(RoomUserSuccess([...usersData].toList()));
   }
+
+  void updateSettleExpense(RoomSettleModel oldData, RoomSettleModel data) {
+    final roomUserState = state as RoomUserSuccess;
+    List<RoomUserModel> usersData = roomUserState.data;
+
+    for (int i = 0; i < usersData.length; i++) {
+      if (oldData.sender.id == usersData[i].user.id) {
+        usersData[i].settle -= oldData.amount;
+      } else if (oldData.recevier.id == usersData[i].user.id) {
+        usersData[i].settle += oldData.amount;
+      }
+
+      if (data.sender.id == usersData[i].user.id) {
+        usersData[i].settle += data.amount;
+      } else if (data.recevier.id == usersData[i].user.id) {
+        usersData[i].settle -= data.amount;
+      }
+    }
+    return emit(RoomUserSuccess([...usersData].toList()));
+  }
+
+  void deleteSettleExpense(RoomSettleModel data) {
+    final roomUserState = state as RoomUserSuccess;
+    List<RoomUserModel> usersData = roomUserState.data;
+
+    for (int i = 0; i < usersData.length; i++) {
+      if (data.sender.id == usersData[i].user.id) {
+        usersData[i].settle -= data.amount;
+      } else if (data.recevier.id == usersData[i].user.id) {
+        usersData[i].settle += data.amount;
+      }
+    }
+    return emit(RoomUserSuccess([...usersData].toList()));
+  }
 }

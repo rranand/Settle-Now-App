@@ -121,6 +121,9 @@ class _SettleExpenseState extends State<SettleExpense> {
             TextButton(
               onPressed: () {
                 context.pop();
+                context.read<RoomSettleUpsertCubit>().deleteSettleExpense(
+                  widget.transactionData!.id,
+                );
               },
               child: Text("Yes"),
             ),
@@ -141,7 +144,7 @@ class _SettleExpenseState extends State<SettleExpense> {
     }
   }
 
-  _resetForm() {
+  void _resetForm() {
     _amountController.text = "";
     _selectedUser.value = "";
   }
@@ -195,9 +198,14 @@ class _SettleExpenseState extends State<SettleExpense> {
         );
         context.read<RoomSettleUpsertCubit>().addNewSettleExpense(newData);
       } else {
-        RoomSettleModel updatedData = widget.transactionData!;
-        updatedData.amount = amountToBeSettled;
-        updatedData.recevier = receiverData;
+        RoomSettleModel updatedData = RoomSettleModel(
+          id: widget.transactionData!.id,
+          recevier: receiverData,
+          sender: _loggedInUser,
+          amount: amountToBeSettled,
+          createdOn: widget.transactionData!.createdOn,
+          modifiedOn: widget.transactionData!.modifiedOn,
+        );
         context.read<RoomSettleUpsertCubit>().updateSettleExpense(updatedData);
       }
     }

@@ -27,4 +27,37 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     roomUserCubit.onAddNewSettleExpense(data);
     return emit(RoomSettleSuccess(newArr));
   }
+
+  void updateSettleExpense(RoomSettleModel data) {
+    final roomSettleSuccessState = state as RoomSettleSuccess;
+    List<RoomSettleModel> oldArr = [...roomSettleSuccessState.data];
+    RoomSettleModel oldData = RoomSettleModel.empty();
+
+    for (int i = 0; i < oldArr.length; i++) {
+      if (oldArr[i].id == data.id) {
+        oldData = oldArr[i];
+        oldArr[i] = data;
+        break;
+      }
+    }
+    roomUserCubit.updateSettleExpense(oldData, data);
+    return emit(RoomSettleSuccess(oldArr));
+  }
+
+  void deleteSettleExpense(String settleExpenseID) {
+    final roomSettleSuccessState = state as RoomSettleSuccess;
+    List<RoomSettleModel> oldArr = [...roomSettleSuccessState.data];
+
+    int index = -1;
+    for (int i = 0; i < oldArr.length; i++) {
+      if (oldArr[i].id == settleExpenseID) {
+        index = i;
+        break;
+      }
+    }
+    if (index != -1) {
+      roomUserCubit.deleteSettleExpense(oldArr.removeAt(index));
+    }
+    return emit(RoomSettleSuccess(oldArr));
+  }
 }
