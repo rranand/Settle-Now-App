@@ -133,7 +133,7 @@ class AuthDataProvider {
   Future<bool> logoutDifferentDevice(String authToken, String sessionID) async {
     try {
       final response = await createAPICall(
-        'auth/logout?id=$sessionID',
+        'auth/logout?id=${Uri.encodeQueryComponent(sessionID)}',
         "get",
         authToken,
         {},
