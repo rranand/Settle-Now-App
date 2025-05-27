@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/user/user_login_activity_cubit.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/button_with_shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 enum DeviceType { mobile, web, other }
@@ -36,7 +39,7 @@ extension DeviceTypeExtension on DeviceType {
     switch (value.toLowerCase()) {
       case 'mobile':
         return DeviceType.mobile;
-      case 'web':
+      case 'web' || 'web browser':
         return DeviceType.web;
       default:
         return DeviceType.other;
@@ -91,7 +94,12 @@ class LoginActivityCard extends StatelessWidget {
                     buttonHeight: 40,
                     buttonWidth: 100,
                     backgroundColor: Colors.green.shade400,
-                    onPressed: () {},
+                    onPressed: () {
+                      showNormalSnackBar(
+                        context,
+                        "Can't Logout Current Device",
+                      );
+                    },
                   )
                   : ButtonWithShimmerEffect(
                     buttonText: "Log Out",
@@ -100,7 +108,12 @@ class LoginActivityCard extends StatelessWidget {
                     buttonHeight: 40,
                     buttonWidth: 100,
                     backgroundColor: Colors.red.shade400,
-                    onPressed: () {},
+                    onPressed: () {
+                      context.read<UserLoginActivityCubit>().logoutDevice(
+                        context,
+                        data.id,
+                      );
+                    },
                   ),
         ),
       ),

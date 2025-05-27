@@ -119,7 +119,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final userData = (state as AuthLoginSuccess).userData;
     emit(AuthLogoutLoading(userData));
     try {
-      bool isLogoutSuccessful = await repo.logoutUser(userData.email, "");
+      bool isLogoutSuccessful = await repo.logoutUser(userData.email);
       // if (GoogleSignIN.getCurrentUser() != null) {
       //   await GoogleSignIN.logout();
       // } else if (await FacebookLogin.getAccessToken() != null) {

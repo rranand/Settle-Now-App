@@ -1,19 +1,85 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/firebase/firebase_messaging.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow_v2/util/handler/network_call.dart';
+import 'package:settlenow_v2/util/handler/platform_service.dart';
+import 'package:settlenow_v2/util/handler/sharedPrefParse.dart';
 
 class AuthDataProvider {
-  Future<String> loginUser(String username, String password) async {
+  Future<UserModel> loginUser(String email, String otp) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      UserModel userData = UserModel.fromBasicInfo(
-        name: 'Rohit Anand',
-        id: 'rranand',
-        profileImage: "https://picsum.photos/id/5/200/300",
+      final deviceData = await Future.wait([
+        generateFCMToken(),
+        platformState(),
+        fetchIP(),
+      ]);
+      final String fcmToken = deviceData[0] as String;
+      final Map<String, String> deviceInfo =
+          deviceData[1] as Map<String, String>;
+      final String deviceIP = deviceData[2] as String;
+
+      final String token = Crypto.encrypt(
+        "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}",
       );
 
-      return userData.toJson();
+      Map<String, String> jsonInputData = {
+        'email': Crypto.encrypt(email),
+        'otp': Crypto.encrypt(otp),
+        'token': Crypto.encrypt(token),
+        'device': Crypto.encrypt(deviceInfo['device']!),
+        'deviceToken': Crypto.encrypt(fcmToken),
+        'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
+        'ip': Crypto.encrypt(deviceIP),
+      };
+
+      final response = await createAPICall(
+        'auth/login',
+        "post",
+        "",
+        jsonInputData,
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final userInfoData = await Future.wait([
+          setStringPref('auth_token', token),
+          getOwnUserInfo(token),
+        ]);
+
+        return userInfoData[1] as UserModel;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> getOwnUserInfo(String authToken) async {
+    try {
+      final response = await createAPICall('auth', "get", authToken, {});
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        UserModel userData = UserModel.fromBasicInfo(
+          id: Crypto.decrypt(data['data']['id']),
+          name: Crypto.decrypt(data['data']['name']),
+          profileImage: Crypto.decrypt(data['data']['profileImage']),
+        );
+
+        userData.phoneNo = Crypto.decrypt(data['data']['phoneNo']);
+        userData.createdOn = DateTime.parse(
+          Crypto.decrypt(data['data']['createdOn']),
+        );
+        userData.email = Crypto.decrypt(data['data']['email']);
+        userData.authToken = authToken;
+        return userData;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       throw e.toString();
     }
@@ -25,119 +91,84 @@ class AuthDataProvider {
 
       return true;
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
   Future<bool> sendOTP(String email) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
+      Map<String, String> jsonInputData = {'email': Crypto.encrypt(email)};
+      final response = await createAPICall(
+        'auth/otp',
+        "post",
+        "",
+        jsonInputData,
+      );
 
-      return true;
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
-  Future<bool> logoutUser(String uid, String sessionToken) async {
+  Future<bool> logoutUser(String authToken) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-
-      return true;
+      final response = await createAPICall('auth/logout', "get", authToken, {});
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
-  Future<List<LoginActivityModel>> fetchLoginActivity(
-    String uid,
-    String sessionToken,
-  ) async {
+  Future<bool> logoutDifferentDevice(String authToken, String sessionID) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-
-      String data = '''
-      [
-  {
-    "id": "a1f9d2e3",
-    "deviceName": "Pixel 7",
-    "deviceType": "Mobile",
-    "lastLoggedIn": "2025-05-13T08:32:45Z",
-    "createdOn": "2025-01-23T13:14:10Z"
-  },
-  {
-    "id": "",
-    "deviceName": "iPhone 13 Pro",
-    "deviceType": "Mobile",
-    "lastLoggedIn": "2025-05-12T19:44:22Z",
-    "createdOn": "2024-12-10T11:05:36Z"
-  },
-  {
-    "id": "d7e2a3c4",
-    "deviceName": "MacBook Air M1",
-    "deviceType": "macOS",
-    "lastLoggedIn": "2025-05-11T15:23:00Z",
-    "createdOn": "2024-11-20T08:12:00Z"
-  },
-  {
-    "id": "e1b2c3d4",
-    "deviceName": "Samsung Galaxy S22",
-    "deviceType": "Mobile",
-    "lastLoggedIn": "2025-05-10T10:10:10Z",
-    "createdOn": "2025-02-01T14:00:00Z"
-  },
-  {
-    "id": "f3a4d5b6",
-    "deviceName": "iPad Pro 12.9",
-    "deviceType": "Mobile",
-    "lastLoggedIn": "2025-05-09T06:45:30Z",
-    "createdOn": "2025-01-15T18:30:00Z"
-  },
-  {
-    "id": "g5h6j7k8",
-    "deviceName": "Dell XPS 15",
-    "deviceType": "Web",
-    "lastLoggedIn": "2025-05-08T17:00:00Z",
-    "createdOn": "2024-12-01T09:00:00Z"
-  },
-  {
-    "id": "h9i8j7k6",
-    "deviceName": "OnePlus 11",
-    "deviceType": "Mobile",
-    "lastLoggedIn": "2025-05-07T21:30:00Z",
-    "createdOn": "2025-02-10T11:11:11Z"
-  },
-  {
-    "id": "z1x2c3v4",
-    "deviceName": "iMac 24",
-    "deviceType": "macOS",
-    "lastLoggedIn": "2025-05-06T08:15:00Z",
-    "createdOn": "2024-10-25T13:45:00Z"
-  },
-  {
-    "id": "l3m4n5o6",
-    "deviceName": "Realme GT Neo 3",
-    "deviceType": "Mobile",
-    "lastLoggedIn": "2025-05-05T12:00:00Z",
-    "createdOn": "2024-11-11T16:20:00Z"
-  },
-  {
-    "id": "u1v2w3x4",
-    "deviceName": "iPhone SE",
-    "deviceType": "Mobile",
-    "lastLoggedIn": "2025-05-04T14:40:00Z",
-    "createdOn": "2024-09-30T10:10:10Z"
+      final response = await createAPICall(
+        'auth/logout?id=$sessionID',
+        "get",
+        authToken,
+        {},
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
   }
-]
 
+  Future<List<LoginActivityModel>> fetchLoginActivity(String authToken) async {
+    try {
+      final response = await createAPICall(
+        'auth/login_activity',
+        "get",
+        authToken,
+        {},
+      );
 
-''';
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        List<LoginActivityModel> arr = [];
+        for (int i = 0; i < data['data'].length; i++) {
+          arr.add(LoginActivityModel.fromMap(data['data'][i]));
+        }
 
-      List<dynamic> dataArr = jsonDecode(data);
-      List<LoginActivityModel> arr =
-          dataArr.map((ele) => LoginActivityModel.fromMap(ele)).toList();
-
-      return arr;
+        return arr;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       throw e.toString();
     }

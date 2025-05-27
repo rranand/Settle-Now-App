@@ -46,3 +46,7 @@ String convertDateTimeFormat(DateTime date) {
     return '${DateFormat.yMMMd().format(date)} ${DateFormat.jm().format(date)}';
   }
 }
+
+String convertInDateFormat(DateTime date) {
+  return DateFormat.yMMMd().format(date);
+}

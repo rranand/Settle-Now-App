@@ -275,7 +275,7 @@ class AppRouterConfig {
         final authState = context.read<AuthBloc>().state;
         final url = state.uri.toString();
 
-        if (authState is AuthInitial || authState is AuthLoginLoading) {
+        if (authState is AuthLoginLoading) {
           return null;
         }
 

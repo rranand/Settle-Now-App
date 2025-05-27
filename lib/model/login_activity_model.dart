@@ -1,6 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:settlenow_v2/util/handler/crypto.dart';
+
 class LoginActivityModel {
   bool hasData = true;
   String id = "";
@@ -47,11 +49,11 @@ class LoginActivityModel {
 
   factory LoginActivityModel.fromMap(Map<String, dynamic> map) {
     return LoginActivityModel(
-      id: map['id'] as String,
-      deviceName: map['deviceName'] as String,
-      deviceType: map['deviceType'] as String,
-      lastLoggedIn: DateTime.parse(map['lastLoggedIn']),
-      createdOn: DateTime.parse(map['createdOn']),
+      id: Crypto.decrypt(map['id']),
+      deviceName: Crypto.decrypt(map['deviceName']),
+      deviceType: Crypto.decrypt(map['deviceType']),
+      lastLoggedIn: DateTime.parse(Crypto.decrypt(map['lastLoggedIn'])),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
     );
   }
 

@@ -1,8 +1,8 @@
-import 'dart:convert';
-
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow_v2/util/handler/sharedPrefParse.dart';
 
 class AuthRepository {
   final AuthDataProvider _dataProvider;
@@ -10,26 +10,22 @@ class AuthRepository {
 
   Future<UserModel> getLoggedInUser() async {
     try {
-      await Future.delayed(Duration(seconds: 1), () {});
-      UserModel userData = UserModel.fromBasicInfo(
-        name: 'Rohit Anand',
-        id: 'u1',
-        profileImage: "https://picsum.photos/id/5/200/300",
-      );
-      userData.email = "rrohitanand3336@gmail.com";
+      String? authToken = await getStringPref('auth_token');
+      authToken ??=
+          "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIlHdemXluNqesg1dMffrf40ud363UyM3zQenJJFc6Q4akMZGhNOrKdqT/3qtEkvStU=";
+      final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
       return userData;
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
   Future<UserModel> getLoginToken(String email, String otp) async {
     try {
-      final loginData = await _dataProvider.loginUser(email, otp);
-      final data = jsonDecode(loginData);
-      return UserModel.fromMap(data);
+      final UserModel loginData = await _dataProvider.loginUser(email, otp);
+      return loginData;
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
@@ -39,7 +35,7 @@ class AuthRepository {
 
       return isSignUpSuccessful;
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
@@ -48,34 +44,38 @@ class AuthRepository {
       final isOTPSend = await _dataProvider.sendOTP(email);
       return isOTPSend;
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
-  Future<bool> logoutUser(String uid, String sessionToken) async {
+  Future<bool> logoutUser(String authToken) async {
     try {
-      final isLogoutSuccessful = await _dataProvider.logoutUser(
-        uid,
-        sessionToken,
+      final isLogoutSuccessful = await _dataProvider.logoutUser(authToken);
+      return isLogoutSuccessful;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> logoutDifferentDevice(String authToken, String sessionID) async {
+    try {
+      final isLogoutSuccessful = await _dataProvider.logoutDifferentDevice(
+        authToken,
+        Crypto.encrypt(sessionID),
       );
       return isLogoutSuccessful;
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 
-  Future<List<LoginActivityModel>> fetchLoginActivity(
-    String uid,
-    String sessionToken,
-  ) async {
+  Future<List<LoginActivityModel>> fetchLoginActivity(String authToken) async {
     try {
-      final loginActivityData = await _dataProvider.fetchLoginActivity(
-        uid,
-        sessionToken,
-      );
+      final List<LoginActivityModel> loginActivityData = await _dataProvider
+          .fetchLoginActivity(authToken);
       return loginActivityData;
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 }

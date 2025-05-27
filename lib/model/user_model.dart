@@ -6,6 +6,9 @@ class UserModel {
   String name = "";
   String email = "";
   String profileImage = "";
+  DateTime createdOn = DateTime.now();
+  String authToken = "";
+  String phoneNo = "";
 
   UserModel({
     this.hasData = true,

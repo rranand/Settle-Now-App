@@ -11,7 +11,7 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     final authState = context.watch<AuthBloc>().state;
 
-    if (authState is AuthInitial || authState is AuthLoginLoading) {
+    if (authState is AuthLoginLoading) {
       return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.transparent,

@@ -7,6 +7,7 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -61,16 +62,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
     if (mounted) {
       setState(() {});
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    final state = context.read<AuthBloc>().state;
-
-    if (state is! AuthLoginSuccess) {
-      context.read<AuthBloc>().add(AuthLoggedInUserRequested());
     }
   }
 
@@ -240,7 +231,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child:
                           userData.hasData
                               ? Text(
-                                "Member Since March 31, 2022",
+                                "Member Since ${convertInDateFormat(userData.createdOn)}",
                                 style: TextStyle(color: Colors.grey),
                               )
                               : CustomShimmerEffect.textWidget(width: 250),

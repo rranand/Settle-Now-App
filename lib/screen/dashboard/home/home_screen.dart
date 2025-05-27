@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_dashboard_screen.dart';
@@ -24,6 +26,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _homeScreenkey = GlobalKey();
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
+  UserModel _loggedInUser = UserModel.empty();
   int _selectedIndex = 3;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
@@ -33,6 +36,15 @@ class _HomeScreenState extends State<HomeScreen> {
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
     if (mounted) {
       setState(() {});
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
     }
   }
 
@@ -90,11 +102,11 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           UserAccountsDrawerHeader(
             currentAccountPicture: imageWidgetForCachedNetworkImage(
-              "https://fastly.picsum.photos/id/237/200/300.jpg?hmac=TmmQSbShHz9CdQm0NkEjx1Dyh_Y984R9LpNrpvH2D_U",
+              _loggedInUser.profileImage,
               boxShape: BoxShape.circle,
             ),
-            accountName: Text("Rohit Anand"),
-            accountEmail: Text("rrohitanand3336@gmail.com"),
+            accountName: Text(_loggedInUser.name),
+            accountEmail: Text(_loggedInUser.email),
           ),
           ...List.generate(drawerTitle.length, (index) {
             return ListTile(

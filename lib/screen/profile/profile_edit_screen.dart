@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/user_model.dart';
@@ -57,7 +56,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           if (state is AuthLoginSuccess) {
             userData = state.userData;
             _name.text = userData.name;
-            _mobileNumber.text = "";
+            _mobileNumber.text = userData.phoneNo;
             _email.text = userData.email;
           } else {
             return LoadingPage();
