@@ -25,8 +25,11 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
     BuildContext context,
     UserLoginActivityState state,
   ) {
-    if (state is UserLoginActivityFailure) {
-      showNormalSnackBar(context, state.error);
+    final state =
+        context.read<UserLoginActivityCubit>().state
+            as UserLoginActivityDataState;
+    if (state.error != null) {
+      showNormalSnackBar(context, state.error!);
     }
   }
 
@@ -47,9 +50,11 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
       _loggedInUser = authState.userData;
     }
 
-    final state = context.read<UserLoginActivityCubit>().state;
+    final state =
+        context.read<UserLoginActivityCubit>().state
+            as UserLoginActivityDataState;
 
-    if (state is! UserLoginActivitySuccess) {
+    if (state.data.isEmpty) {
       context.read<UserLoginActivityCubit>().fetchLoginData(_loggedInUser);
     }
   }
@@ -70,7 +75,7 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
             LoginActivityModel.empty(),
           );
 
-          if (state is UserLoginActivitySuccess) {
+          if (state is UserLoginActivityDataState) {
             data = state.data;
           }
 

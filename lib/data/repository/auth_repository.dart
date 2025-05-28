@@ -12,7 +12,7 @@ class AuthRepository {
     try {
       String? authToken = await getStringPref('auth_token');
       authToken ??=
-          "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIlHdemXluNqesg1dMffrf40ud363UyM3zQenJJFc6Q4akMZGhNOrKdqT/3qtEkvStU=";
+          "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIlH1NAf+hK/yXYjDQSNzegDb6Ya4+u5bD9Ssut6C/bZgW4qM/lISiHBBGkXglQXmj4=";
       final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
       return userData;
     } catch (e) {

@@ -8,6 +8,8 @@ import 'package:settlenow_v2/util/handler/network_call.dart';
 import 'package:settlenow_v2/util/handler/platform_service.dart';
 import 'package:settlenow_v2/util/handler/sharedPrefParse.dart';
 
+//TODO: Incase of failure, Success state data is not showing.
+
 class AuthDataProvider {
   Future<UserModel> loginUser(String email, String otp) async {
     try {

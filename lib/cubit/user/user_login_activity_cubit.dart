@@ -9,26 +9,32 @@ part 'user_login_activity_state.dart';
 
 class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
   final AuthRepository repo;
-  UserLoginActivityCubit(this.repo) : super(UserLoginActivityInitial());
+  UserLoginActivityCubit(this.repo) : super(UserLoginActivityDataState());
 
   void fetchLoginData(UserModel userdata) async {
-    emit(UserLoginActivityLoading());
+    emit(UserLoginActivityDataState(isLoading: true));
 
     try {
       final List<LoginActivityModel> data = await repo.fetchLoginActivity(
         userdata.authToken,
       );
 
-      return emit(UserLoginActivitySuccess(data));
+      return emit(UserLoginActivityDataState(data: data));
     } catch (e) {
-      return emit(UserLoginActivityFailure(e.toString()));
+      return emit(
+        UserLoginActivityDataState(
+          isLoading: false,
+          data: [],
+          error: e.toString(),
+        ),
+      );
     }
   }
 
   void logoutDevice(BuildContext context, String sessionID) async {
     final logInSuccessState =
         context.read<AuthBloc>().state as AuthLoginSuccess;
-    final oldState = state as UserLoginActivitySuccess;
+    final oldState = state as UserLoginActivityDataState;
     List<LoginActivityModel> oldArr = [...oldState.data];
     try {
       for (int i = 0; i < oldArr.length; i++) {
@@ -37,13 +43,13 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
           break;
         }
       }
-      emit(UserLoginActivitySuccess(oldArr));
+      emit(UserLoginActivityDataState(data: oldArr));
       await repo.logoutDifferentDevice(
         logInSuccessState.userData.authToken,
         sessionID,
       );
       oldArr.removeWhere((element) => element.id == sessionID);
-      return emit(UserLoginActivitySuccess(oldArr));
+      return emit(UserLoginActivityDataState(data: oldArr));
     } catch (e) {
       for (int i = 0; i < oldArr.length; i++) {
         if (oldArr[i].id == sessionID) {
@@ -51,8 +57,9 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
           break;
         }
       }
-      emit(UserLoginActivitySuccess(oldArr));
-      return emit(UserLoginActivityFailure(e.toString()));
+      return emit(
+        UserLoginActivityDataState(data: oldArr, error: e.toString()),
+      );
     }
   }
 }
