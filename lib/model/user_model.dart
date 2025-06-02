@@ -16,6 +16,9 @@ class UserModel {
     required this.name,
     required this.email,
     required this.profileImage,
+    required this.createdOn,
+    required this.authToken,
+    required this.phoneNo,
   });
 
   UserModel.fromBasicInfo({
@@ -31,12 +34,30 @@ class UserModel {
     String? name,
     String? email,
     String? profileImage,
+    DateTime? createdOn,
+    String? authToken,
+    String? phoneNo,
   }) {
     return UserModel(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       profileImage: profileImage ?? this.profileImage,
+      createdOn: createdOn ?? this.createdOn,
+      authToken: authToken ?? this.authToken,
+      phoneNo: phoneNo ?? this.phoneNo,
+    );
+  }
+
+  factory UserModel.copyFromUser(UserModel data) {
+    return UserModel(
+      id: data.id,
+      name: data.name,
+      email: data.email,
+      profileImage: data.profileImage,
+      createdOn: data.createdOn,
+      authToken: data.authToken,
+      phoneNo: data.phoneNo,
     );
   }
 
@@ -55,6 +76,9 @@ class UserModel {
       name: map['name'] as String,
       email: (map['email'] ?? "") as String,
       profileImage: (map['profileImage'] ?? "") as String,
+      createdOn: DateTime.parse(map['createdOn'] ?? DateTime.now().toString()),
+      authToken: (map['authToken'] ?? "") as String,
+      phoneNo: (map['phoneNo'] ?? "") as String,
     );
   }
 

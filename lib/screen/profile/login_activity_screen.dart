@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/user/user_login_activity_cubit.dart';
+import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -25,9 +25,6 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
     BuildContext context,
     UserLoginActivityState state,
   ) {
-    final state =
-        context.read<UserLoginActivityCubit>().state
-            as UserLoginActivityDataState;
     if (state.error != null) {
       showNormalSnackBar(context, state.error!);
     }
@@ -50,9 +47,7 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
       _loggedInUser = authState.userData;
     }
 
-    final state =
-        context.read<UserLoginActivityCubit>().state
-            as UserLoginActivityDataState;
+    final state = context.read<UserLoginActivityCubit>().state;
 
     if (state.data.isEmpty) {
       context.read<UserLoginActivityCubit>().fetchLoginData(_loggedInUser);
@@ -75,7 +70,7 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
             LoginActivityModel.empty(),
           );
 
-          if (state is UserLoginActivityDataState) {
+          if (!state.isLoading) {
             data = state.data;
           }
 

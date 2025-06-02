@@ -7,21 +7,29 @@ class UserAmountModel extends UserModel {
   double amount = 0;
 
   UserAmountModel({
-    super.hasData = true,
     required super.id,
     required super.name,
     required super.email,
     required super.profileImage,
     required this.amount,
-  });
+  }) : super(
+         hasData: true,
+         createdOn: DateTime.now(),
+         authToken: "",
+         phoneNo: "",
+       );
 
-  UserAmountModel.empty({
-    super.id = "",
-    super.name = "",
-    super.email = "",
-    super.profileImage = "",
-    super.hasData = false,
-  });
+  UserAmountModel.empty()
+    : super(
+        id: "",
+        name: "",
+        email: "",
+        profileImage: "",
+        hasData: false,
+        createdOn: DateTime.now(),
+        authToken: "",
+        phoneNo: "",
+      );
 
   @override
   Map<String, dynamic> toMap() {

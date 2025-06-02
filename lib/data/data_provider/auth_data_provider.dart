@@ -175,4 +175,13 @@ class AuthDataProvider {
       throw e.toString();
     }
   }
+
+  Future<bool> updateProfile(UserModel userData) async {
+    try {
+      await Future.delayed(Duration(seconds: 2));
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

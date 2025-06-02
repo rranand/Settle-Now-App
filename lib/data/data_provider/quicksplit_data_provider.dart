@@ -15,7 +15,7 @@ class QuicksplitDataProvider {
     "tags": ["dinner", "friends"],
     "category": "Food",
     "createdBy": {
-      "id": "u1",
+      "id": "61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/10/200/300",
@@ -55,7 +55,7 @@ class QuicksplitDataProvider {
     },
     "users": [
       {
-      "id": "u1",
+      "id": "61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/14/200/300",
@@ -80,7 +80,7 @@ class QuicksplitDataProvider {
     },
     "users": [
       {
-      "id": "u1",
+      "id": "61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/16/200/300",
@@ -97,7 +97,7 @@ class QuicksplitDataProvider {
     "tags": ["rent"],
     "category": "Household",
     "createdBy": {
-      "id": "u1",
+      "id": "61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/17/200/300",

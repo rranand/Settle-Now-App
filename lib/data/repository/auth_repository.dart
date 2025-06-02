@@ -12,7 +12,7 @@ class AuthRepository {
     try {
       String? authToken = await getStringPref('auth_token');
       authToken ??=
-          "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIlH1NAf+hK/yXYjDQSNzegDb6Ya4+u5bD9Ssut6C/bZgW4qM/lISiHBBGkXglQXmj4=";
+          "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIlizgpz/Q2uv3UKQBRNUID/HBwhsXOVM16op23EffYTf1NcWHfj1XjR5dynhls5jm8=";
       final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
       return userData;
     } catch (e) {
@@ -74,6 +74,15 @@ class AuthRepository {
       final List<LoginActivityModel> loginActivityData = await _dataProvider
           .fetchLoginActivity(authToken);
       return loginActivityData;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> updateProfile(UserModel userData) async {
+    try {
+      final bool isUpdated = await _dataProvider.updateProfile(userData);
+      return isUpdated;
     } catch (e) {
       rethrow;
     }

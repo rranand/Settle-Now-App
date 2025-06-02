@@ -23,7 +23,8 @@ import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.
 import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle_upsert/room_settle_upsert_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
-import 'package:settlenow_v2/cubit/user/user_login_activity_cubit.dart';
+import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
+import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_cubit.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden/room/lenden_room_data_provider.dart';
@@ -197,7 +198,11 @@ class MyApp extends StatelessWidget {
                 (context) =>
                     LendenRoomBloc(context.read<LendenRoomRepository>()),
           ),
-
+          BlocProvider<UserUpdateProfileCubit>(
+            create:
+                (context) =>
+                    UserUpdateProfileCubit(context.read<AuthRepository>()),
+          ),
           BlocProvider<RoomUserCubit>(
             create: (context) => RoomUserCubit(context.read<RoomRepository>()),
           ),

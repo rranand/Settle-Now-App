@@ -17,7 +17,7 @@ class RoomDataProvider {
     "amount": 45.50,
     "category": "Food",
     "createdBy": {
-      "id": "u1",
+      "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
@@ -41,7 +41,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
@@ -72,7 +72,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
@@ -111,7 +111,7 @@ class RoomDataProvider {
     "amount": 250.00,
     "category": "Entertainment",
     "createdBy": {
-      "id": "u1",
+      "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
@@ -143,7 +143,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
@@ -205,7 +205,7 @@ class RoomDataProvider {
     "amount": 12.50,
     "category": "Food",
     "createdBy": {
-      "id": "u1",
+      "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300",
@@ -253,7 +253,7 @@ class RoomDataProvider {
     },
     "users": [
       {
-        "id": "u1",
+        "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
         "profileImage": "https://picsum.photos/id/23/200/300",
@@ -308,12 +308,12 @@ class RoomDataProvider {
   {
     "id": "ru1",
     "user": {
-      "id": "u1",
+      "id":"61e583aa96fca945d821c038",
       "name": "Rohit Anand",
       "email": "rrohitanand3336@gmail.com",
       "profileImage": "https://picsum.photos/id/23/200/300"
     },
-    "contribution": 0,
+    "contribution": 308,
     "spent": 120.50,
     "settle": 0
   },

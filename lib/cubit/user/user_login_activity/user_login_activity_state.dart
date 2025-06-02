@@ -1,25 +1,23 @@
 part of 'user_login_activity_cubit.dart';
 
 @immutable
-sealed class UserLoginActivityState {}
-
-class UserLoginActivityDataState extends UserLoginActivityState {
+class UserLoginActivityState {
   final bool isLoading;
   final List<LoginActivityModel> data;
   final String? error;
 
-  UserLoginActivityDataState({
+  const UserLoginActivityState({
     this.data = const [],
     this.isLoading = false,
     this.error,
   });
 
-  UserLoginActivityDataState copyWith({
+  UserLoginActivityState copyWith({
     bool? isLoading,
     List<LoginActivityModel>? data,
     String? error,
   }) {
-    return UserLoginActivityDataState(
+    return UserLoginActivityState(
       isLoading: isLoading ?? this.isLoading,
       data: data ?? this.data,
       error: error ?? this.error,
