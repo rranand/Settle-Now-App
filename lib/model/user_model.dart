@@ -9,6 +9,7 @@ class UserModel {
   DateTime createdOn = DateTime.now();
   String authToken = "";
   String phoneNo = "";
+  bool isGoogle = false;
 
   UserModel({
     this.hasData = true,

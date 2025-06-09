@@ -76,8 +76,11 @@ class AuthDataProvider {
         userData.createdOn = DateTime.parse(
           Crypto.decrypt(data['data']['createdOn']),
         );
+
         userData.email = Crypto.decrypt(data['data']['email']);
+        userData.isGoogle = Crypto.decrypt(data['data']['isGoogle']) == "true";
         userData.authToken = authToken;
+
         return userData;
       } else {
         throw Crypto.decrypt(data['message']);
