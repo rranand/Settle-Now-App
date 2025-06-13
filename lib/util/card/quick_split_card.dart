@@ -28,10 +28,29 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
-    if (widget.data.createdOn != widget.data.modifiedOn) {
+    if (isUpdated()) {
       tags.add("Edited");
     }
     return tags;
+  }
+
+  bool isUpdated() {
+    DateTime d1 = DateTime(
+      widget.data.createdOn.year,
+      widget.data.createdOn.month,
+      widget.data.createdOn.day,
+      widget.data.createdOn.hour,
+      widget.data.createdOn.minute,
+    );
+    DateTime d2 = DateTime(
+      widget.data.modifiedOn.year,
+      widget.data.modifiedOn.month,
+      widget.data.modifiedOn.day,
+      widget.data.modifiedOn.hour,
+      widget.data.modifiedOn.minute,
+    );
+
+    return d1 != d2;
   }
 
   Widget transactionInfoWidget(bool value) {
@@ -67,7 +86,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           isLoaded: widget.data.hasData,
         ),
         Visibility(
-          visible: widget.data.createdOn != widget.data.modifiedOn,
+          visible: isUpdated(),
           child: subTextOnCard(
             "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
             isLoaded: widget.data.hasData,
@@ -242,7 +261,10 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               Builder(
                 builder: (context) {
                   if (widget.data.hasData) {
-                    UserAmountModel userData = widget.data.users.first;
+                    UserAmountModel userData = widget.data.users.firstWhere(
+                      (user) => user.id == _loggedInUser.id,
+                      orElse: () => widget.data.createdBy,
+                    );
                     return Text(
                       formatCurrency(userData.amount, context),
                       style: TextStyle(

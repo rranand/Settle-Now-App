@@ -7,9 +7,9 @@ class QuicksplitRepository {
 
   QuicksplitRepository(this._dataProvider);
 
-  Future<List<TransactionModel>> fetchData(String email) async {
+  Future<List<TransactionModel>> fetchData(String authToken) async {
     try {
-      return _dataProvider.fetchData(email);
+      return _dataProvider.fetchData(authToken);
     } catch (e) {
       rethrow;
     }
@@ -24,19 +24,20 @@ class QuicksplitRepository {
     }
   }
 
-  Future<TransactionModel> update(NewTransactionModel data) async {
+  Future<TransactionModel> update(
+    NewTransactionModel data,
+    String authToken,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      return _dataProvider.update(data);
+      return _dataProvider.update(data, authToken);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> delete(String expenseID) async {
+  Future<bool> delete(String expenseID, String authToken) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      return _dataProvider.delete(expenseID);
+      return _dataProvider.delete(expenseID, authToken);
     } catch (e) {
       rethrow;
     }

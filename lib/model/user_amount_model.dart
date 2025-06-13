@@ -2,9 +2,11 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class UserAmountModel extends UserModel {
   double amount = 0;
+  bool isSettled = false;
 
   UserAmountModel({
     required super.id,
@@ -35,6 +37,7 @@ class UserAmountModel extends UserModel {
   Map<String, dynamic> toMap() {
     final map = super.toMap();
     map['amount'] = amount;
+    map['isSettled'] = isSettled;
     return map;
   }
 
@@ -51,18 +54,29 @@ class UserAmountModel extends UserModel {
 
   @override
   factory UserAmountModel.fromMap(Map<String, dynamic> map) {
-    return UserAmountModel(
-      id: map['id'] ?? '',
-      name: map['name'] ?? '',
-      email: map['email'] ?? '',
-      profileImage: map['profileImage'] ?? '',
-      amount: (map['amount'] ?? 0).toDouble(),
+    UserAmountModel newData = UserAmountModel(
+      id: Crypto.decrypt(map['id']),
+      name: Crypto.decrypt(map['name']),
+      email: '',
+      profileImage: Crypto.decrypt(map['profileImage']),
+      amount: double.parse(Crypto.decrypt(map['amount'])),
     );
+    newData.isSettled = Crypto.decrypt(map['isSettled']) == 'true';
+    return newData;
   }
 
   @override
   String toJson() {
     return json.encode(toMap());
+  }
+
+  String toQuickSplitJson() {
+    Map<String, String> data = {
+      'id': Crypto.encrypt(id),
+      'amount': Crypto.encrypt(amount.toString()),
+      'isSettled': Crypto.encrypt(isSettled.toString()),
+    };
+    return json.encode(data);
   }
 
   @override
@@ -78,7 +92,12 @@ class UserAmountModel extends UserModel {
   bool operator ==(covariant UserAmountModel other) {
     if (identical(this, other)) return true;
 
-    return other.amount == amount;
+    return other.amount == amount &&
+        other.id == id &&
+        other.name == name &&
+        other.email == email &&
+        other.profileImage == profileImage &&
+        other.isSettled == isSettled;
   }
 
   @override

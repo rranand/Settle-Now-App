@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
@@ -78,13 +79,18 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     TransactionType transactionType,
   ) async {
     emit(NewTransactionLoading());
+    final loggedInUser =
+        (context.read<AuthBloc>().state as AuthLoginSuccess).userData;
 
     try {
       switch (transactionType) {
         case TransactionType.quicksplit:
           {
             final bloc = context.read<QuicksplitBloc>();
-            final TransactionModel updatedData = await repo.update(data);
+            final TransactionModel updatedData = await repo.update(
+              data,
+              loggedInUser.authToken,
+            );
             bloc.add(QuicksplitUpdateTransaction(updatedData));
             return emit(NewTransactionSuccess(updatedData));
           }
@@ -128,12 +134,18 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     emit(NewTransactionLoading());
     dynamic bloc;
 
+    final loggedInUser =
+        (context.read<AuthBloc>().state as AuthLoginSuccess).userData;
+
     try {
       switch (transactionType) {
         case TransactionType.quicksplit:
           {
             bloc = context.read<QuicksplitBloc>();
-            final bool isDeleted = await repo.delete(expenseID);
+            final bool isDeleted = await repo.delete(
+              expenseID,
+              loggedInUser.authToken,
+            );
             if (isDeleted) {
               bloc.add(QuicksplitDeleteTransaction(expenseID));
               return emit(NewTransactionSuccess(TransactionModel.empty()));

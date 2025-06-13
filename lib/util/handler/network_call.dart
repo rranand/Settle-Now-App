@@ -11,6 +11,8 @@ Function getHttpMethod(String methodName) {
       return post;
     case "patch":
       return patch;
+    case "put":
+      return put;
     default:
       return delete;
   }

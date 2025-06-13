@@ -368,16 +368,19 @@ class _AddTransactionState extends State<AddTransaction> {
     UserWithEditControlTD tempMap = {};
     Set<String> tempUserIDs = {};
 
-    tempMap[transactionData.createdBy as UserModel] = TextEditingController(
+    tempMap[transactionData.createdBy] = TextEditingController(
       text: transactionData.createdBy.amount.toString(),
     );
     tempUserIDs.add(transactionData.createdBy.id);
 
-    for (UserAmountModel ele in transactionData.users) {
-      tempMap[ele as UserModel] = TextEditingController(
-        text: ele.amount.toString(),
-      );
-      tempUserIDs.add(ele.id);
+    for (int i = 0; i < transactionData.users.length; i++) {
+      final userWithAmountData = <UserModel, TextEditingController>{
+        transactionData.users[i]: TextEditingController(
+          text: transactionData.users[i].amount.toString(),
+        ),
+      };
+      tempMap.addAll(userWithAmountData);
+      tempUserIDs.add(transactionData.users[i].id);
     }
 
     _selectedUserIDs.value = tempMap;

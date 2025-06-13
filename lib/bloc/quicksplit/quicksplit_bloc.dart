@@ -21,8 +21,9 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     Emitter<QuicksplitState> emit,
   ) async {
     emit(QuicksplitLoading());
+
     try {
-      List<TransactionModel> data = await repo.fetchData("niriif@kff.ed");
+      List<TransactionModel> data = await repo.fetchData(event.authToken);
       return emit(QuicksplitFetchSuccess(data));
     } catch (e) {
       return emit(QuicksplitFailure(e.toString()));

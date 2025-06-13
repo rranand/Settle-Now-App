@@ -6,6 +6,7 @@ import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class TransactionModel {
   bool hasData = true;
@@ -108,20 +109,33 @@ class TransactionModel {
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
     return TransactionModel(
-      id: map['id'] as String,
-      description: map['description'] as String,
-      amount: map['amount'] as double,
-      category: map['category'] as String,
+      id: Crypto.decrypt(map['id']),
+      description: Crypto.decrypt(map['description']),
+      amount: double.parse(Crypto.decrypt(map['amount'])),
+      category: Crypto.decrypt(map['category']),
       users: List<UserAmountModel>.from(
         (map['users']).map((x) => UserAmountModel.fromMap(x)),
       ),
       createdBy: UserAmountModel.fromMap(map['createdBy']),
-      createdOn: DateTime.parse(map['createdOn']),
-      modifiedOn: DateTime.parse(map['modifiedOn']),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
     );
   }
 
   String toJson() => json.encode(toMap());
+
+  String toQuickSplitJson() {
+    List<String> userData = users.map((e) => e.toQuickSplitJson()).toList();
+    Map<String, String> data = {
+      "id": Crypto.encrypt(id),
+      "description": Crypto.encrypt(description),
+      "amount": Crypto.encrypt(amount.toString()),
+      "category": Crypto.encrypt(category),
+      "users": json.encode(userData),
+      "createdBy": createdBy.toQuickSplitJson(),
+    };
+    return json.encode(data);
+  }
 
   factory TransactionModel.fromJson(String source) =>
       TransactionModel.fromMap(json.decode(source) as Map<String, dynamic>);
