@@ -17,12 +17,18 @@ class Crypto {
   static final IV _iv = IV(utf8.encode(cryptoIV)); // 16-byte IV for CBC mode
 
   static String encrypt(String text) {
+    if (text.isEmpty) {
+      return '';
+    }
     final encrypter = Encrypter(AES(_key, mode: AESMode.cbc));
     final encrypted = encrypter.encrypt(text, iv: _iv);
     return encrypted.base64;
   }
 
   static String decrypt(String text) {
+    if (text.isEmpty) {
+      return '';
+    }
     final encrypter = Encrypter(AES(_key, mode: AESMode.cbc));
     final decrypted = encrypter.decrypt64(text, iv: _iv);
     return decrypted;

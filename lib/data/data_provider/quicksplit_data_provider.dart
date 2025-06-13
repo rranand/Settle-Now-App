@@ -25,11 +25,27 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<TransactionModel> create(NewTransactionModel data) async {
+  Future<TransactionModel> create(
+    NewTransactionModel data,
+    String authToken,
+  ) async {
     try {
       TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
-      newExpense.id = "${newExpense.description}##${newExpense.createdOn}";
-      return newExpense;
+
+      final response = await createAPICall(
+        'quicksplit',
+        "post",
+        authToken,
+        newExpense.toQuickSplitJson(),
+      );
+
+      final respData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        newExpense.id = Crypto.decrypt(respData['data']['id']);
+        return newExpense;
+      } else {
+        throw Crypto.decrypt(respData['message']);
+      }
     } catch (e) {
       rethrow;
     }

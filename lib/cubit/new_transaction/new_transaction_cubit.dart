@@ -30,13 +30,18 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     TransactionType transactionType,
   ) async {
     emit(NewTransactionLoading());
+    final loggedInUser =
+        (context.read<AuthBloc>().state as AuthLoginSuccess).userData;
 
     try {
       switch (transactionType) {
         case TransactionType.quicksplit:
           {
             final bloc = context.read<QuicksplitBloc>();
-            final TransactionModel newData = await repo.create(data);
+            final TransactionModel newData = await repo.create(
+              data,
+              loggedInUser.authToken,
+            );
             bloc.add(QuicksplitAddNewTransaction(newData));
             return emit(NewTransactionSuccess(newData));
           }

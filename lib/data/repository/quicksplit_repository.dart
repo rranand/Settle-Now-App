@@ -15,10 +15,12 @@ class QuicksplitRepository {
     }
   }
 
-  Future<TransactionModel> create(NewTransactionModel data) async {
+  Future<TransactionModel> create(
+    NewTransactionModel data,
+    String authToken,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      return _dataProvider.create(data);
+      return _dataProvider.create(data, authToken);
     } catch (e) {
       rethrow;
     }
