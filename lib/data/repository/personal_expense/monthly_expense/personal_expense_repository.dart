@@ -22,30 +22,31 @@ class PersonalMonthlyExpenseRepository {
     }
   }
 
-  Future<PersonalExpenseTransactionModel> add(NewTransactionModel data) async {
+  Future<PersonalExpenseTransactionModel> add(
+    String authToken,
+    NewTransactionModel data,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      return _dataProvider.add(data);
+      return _dataProvider.add(authToken, data);
     } catch (e) {
       rethrow;
     }
   }
 
   Future<PersonalExpenseTransactionModel> update(
+    String authToken,
     NewTransactionModel data,
   ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      return _dataProvider.update(data);
+      return _dataProvider.update(authToken, data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> delete(String expenseID) async {
+  Future<bool> delete(String authToken, String expenseID, String transactionType) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      return _dataProvider.delete(expenseID);
+      return _dataProvider.delete(authToken, expenseID, transactionType);
     } catch (e) {
       rethrow;
     }

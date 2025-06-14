@@ -11,14 +11,20 @@ import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
 import 'package:settlenow_v2/util/custom/category_parser.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class TransactionCard extends StatefulWidget {
   final PersonalExpenseTransactionModel data;
+  final bool isEditable;
 
-  const TransactionCard({super.key, required this.data});
+  const TransactionCard({
+    super.key,
+    required this.data,
+    required this.isEditable,
+  });
 
   @override
   State<TransactionCard> createState() => _TransactionCardState();
@@ -46,6 +52,7 @@ class _TransactionCardState extends State<TransactionCard> {
                   context,
                   widget.data.id,
                   TransactionType.personal,
+                  personalExpenseType: widget.data.roomData.transactionType,
                 );
               },
               child: Text("Yes"),
@@ -56,12 +63,17 @@ class _TransactionCardState extends State<TransactionCard> {
     );
   }
 
+  bool showEdited() {
+    return isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn) ||
+        !widget.data.hasData;
+  }
+
   List<String> createTags() {
     if (!widget.data.hasData) {
       return List.filled(1, "");
     }
     List<String> tags = [widget.data.category];
-    if (widget.data.createdOn != widget.data.modifiedOn) {
+    if (isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
     }
     if (widget.data.roomData.hasData) {
@@ -99,7 +111,7 @@ class _TransactionCardState extends State<TransactionCard> {
                     ),
                   ),
                 ),
-                widget.data.hasData
+                widget.data.hasData && widget.isEditable
                     ? InkWell(
                       borderRadius: BorderRadius.circular(
                         UiConstant.cardBorderRadius,
@@ -155,8 +167,7 @@ class _TransactionCardState extends State<TransactionCard> {
                     "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
                     isLoaded: widget.data.hasData,
                   ),
-                  widget.data.modifiedOn != widget.data.createdOn ||
-                          !widget.data.hasData
+                  showEdited()
                       ? subTextOnCard(
                         "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
                         isLoaded: widget.data.hasData,

@@ -140,6 +140,17 @@ class PersonalExpenseTransactionModel {
 
   String toJson() => json.encode(toMap());
 
+  String toCreateNewExpenseJson() {
+    Map<String, String> data = {
+      "id": Crypto.encrypt(id),
+      "description": Crypto.encrypt(description),
+      "amount": Crypto.encrypt(amount.toString()),
+      "category": Crypto.encrypt(category),
+      "createdOn": Crypto.encrypt(createdOn.toIso8601String()),
+    };
+    return json.encode(data);
+  }
+
   factory PersonalExpenseTransactionModel.fromJson(String source) =>
       PersonalExpenseTransactionModel.fromMap(
         json.decode(source) as Map<String, dynamic>,

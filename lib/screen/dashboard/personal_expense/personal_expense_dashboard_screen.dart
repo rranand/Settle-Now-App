@@ -49,9 +49,8 @@ class _PersonalExpenseDashboardScreenState
     List<PersonalExpenseInfoModel> monthlyPersonalTransaction,
   ) {
     monthlyPersonalTransaction.sort(
-      (a, b) => CalenderConstant.monthName
-          .indexOf(a.monthName)
-          .compareTo(CalenderConstant.monthName.indexOf(b.monthName)),
+      (a, b) => CalenderConstant.getIndexOfMonth(a.monthName)
+          .compareTo(CalenderConstant.getIndexOfMonth(b.monthName)),
     );
     return SliverPadding(
       padding: _mainScreenPadding,
@@ -123,6 +122,10 @@ class _PersonalExpenseDashboardScreenState
           if (state is PersonalExpenseDashboardFetchSuccess) {
             years = state.data.keys.toList();
             years.sort((a, b) => a.compareTo(b));
+            int currentYear = DateTime.now().year;
+            if (years.isEmpty || years.last != currentYear) {
+              years.add(currentYear);
+            }
 
             SchedulerBinding.instance.addPostFrameCallback((_) {
               if (_scrollController.hasClients &&
@@ -162,9 +165,49 @@ class _PersonalExpenseDashboardScreenState
                   );
                 },
               ),
-              ...List.generate(
-                years.length,
-                (index) => SliverStickyHeader.builder(
+              ...List.generate(years.length, (index) {
+                List<PersonalExpenseInfoModel> monthlyPersonalTransaction = [];
+                if (state is PersonalExpenseDashboardFetchSuccess) {
+                  bool isCurrentPersonalExpense = state.data.containsKey(
+                    years[index],
+                  );
+                  int currentYear = DateTime.now().year;
+                  String currentMonthName =
+                      CalenderConstant.monthName[DateTime.now().month - 1];
+                  if (isCurrentPersonalExpense) {
+                    monthlyPersonalTransaction = state.data[years[index]]!;
+
+                    if (currentYear == years[index]) {
+                      isCurrentPersonalExpense =
+                          monthlyPersonalTransaction
+                              .firstWhere(
+                                (ele) => ele.monthName == currentMonthName,
+                                orElse: () {
+                                  return PersonalExpenseInfoModel.empty();
+                                },
+                              )
+                              .hasData;
+                    }
+                  }
+
+                  if (!isCurrentPersonalExpense) {
+                    monthlyPersonalTransaction.add(
+                      PersonalExpenseInfoModel(
+                        id: "",
+                        amount: 0,
+                        monthName: currentMonthName,
+                        year: years[index].toString(),
+                        transaction: [],
+                      ),
+                    );
+                  }
+                } else {
+                  monthlyPersonalTransaction = List.filled(
+                    12,
+                    PersonalExpenseInfoModel.empty(),
+                  );
+                }
+                return SliverStickyHeader.builder(
                   sticky: false,
                   builder: (context, state) {
                     return Container(
@@ -189,13 +232,9 @@ class _PersonalExpenseDashboardScreenState
                       ),
                     );
                   },
-                  sliver: monthWiseCardsWidget(
-                    state is! PersonalExpenseDashboardFetchSuccess
-                        ? List.filled(12, PersonalExpenseInfoModel.empty())
-                        : state.data[years[index]]!,
-                  ),
-                ),
-              ),
+                  sliver: monthWiseCardsWidget(monthlyPersonalTransaction),
+                );
+              }),
               SliverPadding(
                 padding: EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
               ),

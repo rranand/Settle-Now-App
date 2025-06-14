@@ -43,3 +43,10 @@ Color getStatusColor(String status) {
       return Colors.grey.shade200;
   }
 }
+
+bool isDateTimeSame(DateTime d1, DateTime d2) {
+  DateTime dC1 = DateTime(d1.year, d1.month, d1.day, d1.hour, d1.minute);
+  DateTime dC2 = DateTime(d2.year, d2.month, d2.day, d2.hour, d2.minute);
+
+  return dC1 == dC2;
+}

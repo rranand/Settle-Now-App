@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
+import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -35,6 +36,8 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
   final double _navBarHeight = 60;
+  final DateTime _currentDate = DateTime.now();
+  bool _isLivePersonalExpense = false;
   UserModel _loggedInUser = UserModel.empty();
 
   void _blocListenerHandler(
@@ -58,6 +61,13 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   @override
   void initState() {
     super.initState();
+
+    if (_currentDate.year.toString() == widget.year &&
+        CalenderConstant.getIndexOfMonth(widget.month) + 1 ==
+            _currentDate.month) {
+      _isLivePersonalExpense = true;
+    }
+
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
@@ -89,100 +99,119 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
         titleSpacing: _mainScreenPadding.left,
         leading: appBarBackButton(context),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: paddingInsets,
-            sliver: SliverAppBar(
-              toolbarHeight: 330,
-              automaticallyImplyLeading: false,
-              backgroundColor: Colors.transparent,
-              surfaceTintColor: Colors.transparent,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: false,
-                title: BlocConsumer<
-                  PersonalMonthlyExpenseBloc,
-                  PersonalMonthlyExpenseState
-                >(
-                  listener: _blocListenerHandler,
-                  builder: (context, state) {
-                    if (state is PersonalMonthlyExpenseFetchSuccess) {
-                      return LinearGraphCard(
-                        expenses: state.data.map((ele) => ele.amount).toList(),
-                      );
-                    } else {
-                      return CustomShimmerEffect.placeHolderShimmerEffect(
-                        Column(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 24,
-                                  horizontal: 16,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(24),
-                                    bottomRight: Radius.circular(24),
+      body: BlocConsumer<
+        PersonalMonthlyExpenseBloc,
+        PersonalMonthlyExpenseState
+      >(
+        listener: _blocListenerHandler,
+        builder: (context, state) {
+          if (state is PersonalMonthlyExpenseFetchSuccess &&
+              state.data.isEmpty) {
+            return Center(
+              child: Text(
+                "No Expense Found",
+                style: TextStyle(fontSize: 20, color: Colors.grey),
+              ),
+            );
+          }
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: paddingInsets,
+                sliver: SliverAppBar(
+                  toolbarHeight: 330,
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  flexibleSpace: FlexibleSpaceBar(
+                    centerTitle: false,
+                    title: Builder(
+                      builder: (context) {
+                        if (state is PersonalMonthlyExpenseFetchSuccess) {
+                          return LinearGraphCard(
+                            expenses:
+                                state.data.map((ele) => ele.amount).toList(),
+                          );
+                        } else {
+                          return CustomShimmerEffect.placeHolderShimmerEffect(
+                            Column(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 24,
+                                      horizontal: 16,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                        bottomLeft: Radius.circular(24),
+                                        bottomRight: Radius.circular(24),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: _navbarSelectedIndex,
+                builder: (context, value, _) {
+                  return SliverPadding(
+                    padding: paddingInsets,
+                    sliver: SliverAppBar(
+                      pinned: true,
+                      toolbarHeight: _navBarHeight,
+                      automaticallyImplyLeading: false,
+                      backgroundColor: Colors.white,
+                      surfaceTintColor: Colors.transparent,
+                      flexibleSpace: FlexibleSpaceBar(
+                        centerTitle: true,
+                        title: NavBarCard(
+                          headerTitle: ["Categories", "Transaction"],
+                          selectedIndex: _navbarSelectedIndex,
                         ),
-                      );
+                      ),
+                    ),
+                  );
+                },
+              ),
+              SliverPadding(
+                padding: paddingInsets,
+                sliver: ValueListenableBuilder(
+                  valueListenable: _navbarSelectedIndex,
+                  builder: (context, value, _) {
+                    if (value == 0) {
+                      return PersonalExpenseCategoriesSectionScreen();
+                    } else {
+                      return PersonalExpenseTransactionScreen();
                     }
                   },
                 ),
               ),
-            ),
-          ),
-          ValueListenableBuilder(
-            valueListenable: _navbarSelectedIndex,
-            builder: (context, value, _) {
-              return SliverPadding(
-                padding: paddingInsets,
-                sliver: SliverAppBar(
-                  pinned: true,
-                  toolbarHeight: _navBarHeight,
-                  automaticallyImplyLeading: false,
-                  backgroundColor: Colors.white,
-                  surfaceTintColor: Colors.transparent,
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: NavBarCard(
-                      headerTitle: ["Categories", "Transaction"],
-                      selectedIndex: _navbarSelectedIndex,
-                    ),
-                  ),
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: UiConstant.spaceAtBottom + _navBarHeight,
                 ),
-              );
-            },
-          ),
-          SliverPadding(
-            padding: paddingInsets,
-            sliver: ValueListenableBuilder(
-              valueListenable: _navbarSelectedIndex,
-              builder: (context, value, _) {
-                if (value == 0) {
-                  return PersonalExpenseCategoriesSectionScreen();
-                } else {
-                  return PersonalExpenseTransactionScreen();
-                }
-              },
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SizedBox(height: UiConstant.spaceAtBottom + _navBarHeight),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
-      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
-        context.push(
-          "${RouterConstants.personalExpenseRouteName}/${widget.year}/${widget.month}${RouterConstants.personalExpenseAddExpenseRouteName}",
-        );
-      }),
+      floatingActionButton:
+          _isLivePersonalExpense
+              ? CustomButton.customFloatingButton(Iconsax.add, () {
+                context.push(
+                  "${RouterConstants.personalExpenseRouteName}/${widget.year}/${widget.month}${RouterConstants.personalExpenseAddExpenseRouteName}",
+                );
+              })
+              : null,
     );
   }
 }

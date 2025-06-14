@@ -35,33 +35,79 @@ class PersonalMonthlyExpenseDataProvider {
     }
   }
 
-  Future<PersonalExpenseTransactionModel> add(NewTransactionModel data) async {
+  Future<PersonalExpenseTransactionModel> add(
+    String authToken,
+    NewTransactionModel expenseData,
+  ) async {
     try {
       PersonalExpenseTransactionModel newExpense =
-          PersonalExpenseTransactionModel.fromNewTransaction(data);
-      newExpense.id = "${newExpense.description}##${newExpense.createdOn}";
-      return newExpense;
+          PersonalExpenseTransactionModel.fromNewTransaction(expenseData);
+
+      final response = await createAPICall(
+        'personal',
+        "post",
+        authToken,
+        newExpense.toCreateNewExpenseJson(),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        newExpense.id = Crypto.decrypt(data['data']['id']);
+        return newExpense;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }
   }
 
   Future<PersonalExpenseTransactionModel> update(
-    NewTransactionModel data,
+    String authToken,
+    NewTransactionModel expenseData,
   ) async {
     try {
       PersonalExpenseTransactionModel updatedExpense =
-          PersonalExpenseTransactionModel.fromNewTransaction(data);
-      updatedExpense.modifiedOn = DateTime.now();
-      return updatedExpense;
+          PersonalExpenseTransactionModel.fromNewTransaction(expenseData);
+      final response = await createAPICall(
+        'personal',
+        'put',
+        authToken,
+        updatedExpense.toCreateNewExpenseJson(),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        updatedExpense.modifiedOn = DateTime.now();
+        return updatedExpense;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> delete(String expenseID) async {
+  Future<bool> delete(
+    String authToken,
+    String expenseID,
+    String transactionType,
+  ) async {
     try {
-      return true;
+      final response = await createAPICall('personal', 'delete', authToken, {
+        "id": Crypto.encrypt(expenseID),
+        "transactionType": Crypto.encrypt(transactionType),
+      });
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }

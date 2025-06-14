@@ -49,8 +49,10 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
             final PersonalExpenseTransactionModel newData = await repoPS.add(
+              loggedInUser.authToken,
               data,
             );
+
             bloc.add(PersonalMonthlyExpenseAdd(newData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
@@ -103,7 +105,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
             final PersonalExpenseTransactionModel updatedData = await repoPS
-                .update(data);
+                .update(loggedInUser.authToken, data);
             bloc.add(PersonalMonthlyExpenseUpdate(updatedData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
@@ -134,8 +136,9 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
   void deleteExpense(
     BuildContext context,
     String expenseID,
-    TransactionType transactionType,
-  ) async {
+    TransactionType transactionType, {
+    String personalExpenseType = "Personal",
+  }) async {
     emit(NewTransactionLoading());
     dynamic bloc;
 
@@ -162,7 +165,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             bloc = context.read<PersonalMonthlyExpenseBloc>();
             bloc.add(PersonalMonthlyExpenseDelete(true, expenseID));
-            final bool isDeleted = await repoPS.delete(expenseID);
+            final bool isDeleted = await repoPS.delete(
+              loggedInUser.authToken,
+              expenseID,
+              personalExpenseType,
+            );
 
             if (isDeleted) {
               bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));

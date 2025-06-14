@@ -9,6 +9,7 @@ import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
@@ -28,29 +29,10 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
-    if (isUpdated()) {
+    if (isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
     }
     return tags;
-  }
-
-  bool isUpdated() {
-    DateTime d1 = DateTime(
-      widget.data.createdOn.year,
-      widget.data.createdOn.month,
-      widget.data.createdOn.day,
-      widget.data.createdOn.hour,
-      widget.data.createdOn.minute,
-    );
-    DateTime d2 = DateTime(
-      widget.data.modifiedOn.year,
-      widget.data.modifiedOn.month,
-      widget.data.modifiedOn.day,
-      widget.data.modifiedOn.hour,
-      widget.data.modifiedOn.minute,
-    );
-
-    return d1 != d2;
   }
 
   Widget transactionInfoWidget(bool value) {
@@ -86,7 +68,10 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           isLoaded: widget.data.hasData,
         ),
         Visibility(
-          visible: isUpdated(),
+          visible: isDateTimeSame(
+            widget.data.createdOn,
+            widget.data.modifiedOn,
+          ),
           child: subTextOnCard(
             "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
             isLoaded: widget.data.hasData,
