@@ -74,6 +74,7 @@ class _AddTransactionState extends State<AddTransaction> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final DateTime _currentDate = DateTime.now();
   DateTime _createdOn = DateTime.now();
   final TextEditingController _creationDateController = TextEditingController(
     text: convertDateTimeFormat(DateTime.now()),
@@ -645,6 +646,14 @@ class _AddTransactionState extends State<AddTransaction> {
                             context: context,
                             is24HourMode: false,
                             isShowSeconds: false,
+                            firstDate:
+                                TransactionType.personal == transactionType
+                                    ? DateTime(
+                                      _currentDate.year,
+                                      _currentDate.month,
+                                      1,
+                                    )
+                                    : null,
                             lastDate: DateTime.now(),
                             initialDate: _createdOn,
                             borderRadius: BorderRadius.circular(16.0),

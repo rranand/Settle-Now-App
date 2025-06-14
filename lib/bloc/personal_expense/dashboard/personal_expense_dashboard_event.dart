@@ -13,3 +13,11 @@ final class PersonalExpenseDashboardFetch
     required this.alreadyHave,
   });
 }
+
+final class PersonalExpenseDashboardUpdate
+    extends PersonalExpenseDashboardEvent {
+  final String id;
+  final List<PersonalExpenseTransactionModel> data;
+
+  PersonalExpenseDashboardUpdate({required this.id, required this.data});
+}

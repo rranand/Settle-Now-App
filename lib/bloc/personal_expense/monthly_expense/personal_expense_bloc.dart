@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 
@@ -9,8 +10,9 @@ part 'personal_expense_state.dart';
 class PersonalMonthlyExpenseBloc
     extends Bloc<PersonalMonthlyExpenseEvent, PersonalMonthlyExpenseState> {
   final PersonalMonthlyExpenseRepository repo;
+  final PersonalExpenseDashboardBloc dashboardBloc;
 
-  PersonalMonthlyExpenseBloc(this.repo)
+  PersonalMonthlyExpenseBloc(this.repo, this.dashboardBloc)
     : super(PersonalMonthlyExpenseInitial()) {
     on<PersonalMonthlyExpenseFetch>(_personalExpenseFetch);
     on<PersonalMonthlyExpenseAdd>(_personalMonthlyExpenseAdd);
@@ -46,6 +48,9 @@ class PersonalMonthlyExpenseBloc
   ) async {
     final oldData = state as PersonalMonthlyExpenseFetchSuccess;
     List<PersonalExpenseTransactionModel> data = [event.data, ...oldData.data];
+    dashboardBloc.add(
+      PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
+    );
     return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
   }
 
@@ -61,6 +66,9 @@ class PersonalMonthlyExpenseBloc
         break;
       }
     }
+    dashboardBloc.add(
+      PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
+    );
     return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
   }
 
@@ -80,6 +88,9 @@ class PersonalMonthlyExpenseBloc
     } else {
       data.removeWhere((element) => element.id == event.expenseID);
     }
+    dashboardBloc.add(
+      PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
+    );
     return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
   }
 }

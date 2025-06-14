@@ -191,6 +191,7 @@ class MyApp extends StatelessWidget {
             create:
                 (context) => PersonalMonthlyExpenseBloc(
                   context.read<PersonalMonthlyExpenseRepository>(),
+                  context.read<PersonalExpenseDashboardBloc>(),
                 ),
           ),
           BlocProvider<LendenRoomBloc>(
