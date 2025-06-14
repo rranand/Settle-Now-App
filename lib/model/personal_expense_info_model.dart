@@ -2,6 +2,8 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/constant/calender_constant.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class PersonalExpenseInfoModel {
   bool hasData = true;
@@ -48,12 +50,19 @@ class PersonalExpenseInfoModel {
   }
 
   factory PersonalExpenseInfoModel.fromMap(Map<String, dynamic> map) {
+    List<double> transaction = [];
+    for (int i = 0; i < map["transaction"].length; i++) {
+      transaction.add(double.parse(Crypto.decrypt(map["transaction"][i])));
+    }
     return PersonalExpenseInfoModel(
-      id: map['id'] as String,
-      amount: map['amount'] as double,
-      monthName: map['monthName'] as String,
-      year: map['year'] as String,
-      transaction: List<double>.from(map['transaction']),
+      id: Crypto.decrypt(map['id']),
+      amount: double.parse(Crypto.decrypt(map['amount'])),
+      monthName:
+          CalenderConstant.monthName[int.parse(
+            Crypto.decrypt(map['monthName']),
+          )],
+      year: Crypto.decrypt(map['year']),
+      transaction: transaction,
     );
   }
 

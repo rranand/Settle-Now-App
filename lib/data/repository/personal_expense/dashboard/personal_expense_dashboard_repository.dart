@@ -7,11 +7,13 @@ class PersonalExpenseDashboardRepository {
   PersonalExpenseDashboardRepository(this._dataProvider);
 
   Future<Map<int, List<PersonalExpenseInfoModel>>> fetchData(
-    String email,
+    int alreadyHave,
+    String authToken,
   ) async {
     try {
       List<PersonalExpenseInfoModel> data = await _dataProvider.fetchData(
-        email,
+        alreadyHave,
+        authToken,
       );
 
       Map<int, List<PersonalExpenseInfoModel>> yearWiseExpense = {};

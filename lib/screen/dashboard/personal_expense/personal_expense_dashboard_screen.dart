@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/personal_expense_info_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/personal_expense_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
@@ -32,6 +34,7 @@ class _PersonalExpenseDashboardScreenState
   final TextEditingController _searchController = TextEditingController();
   List<double> cardSizeInfo = List.filled(2, 0);
   late ScrollController _scrollController;
+  UserModel _loggedInUser = UserModel.empty();
 
   void _blocListenerHandler(
     BuildContext context,
@@ -86,10 +89,17 @@ class _PersonalExpenseDashboardScreenState
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
     final state = context.read<PersonalExpenseDashboardBloc>().state;
     if (state is! PersonalExpenseDashboardFetchSuccess) {
       context.read<PersonalExpenseDashboardBloc>().add(
-        PersonalExpenseDashboardFetch(),
+        PersonalExpenseDashboardFetch(
+          authToken: _loggedInUser.authToken,
+          alreadyHave: 0,
+        ),
       );
     }
   }

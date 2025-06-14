@@ -22,7 +22,8 @@ class PersonalExpenseDashboardBloc
     emit(PersonalExpenseDashboardLoading());
     try {
       Map<int, List<PersonalExpenseInfoModel>> data = await repo.fetchData(
-        "niriif@kff.ed",
+        event.alreadyHave,
+        event.authToken,
       );
       return emit(PersonalExpenseDashboardFetchSuccess(data));
     } catch (e) {
