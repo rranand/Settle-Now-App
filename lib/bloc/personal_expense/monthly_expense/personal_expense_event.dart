@@ -4,9 +4,15 @@ part of 'personal_expense_bloc.dart';
 sealed class PersonalMonthlyExpenseEvent {}
 
 final class PersonalMonthlyExpenseFetch extends PersonalMonthlyExpenseEvent {
+  final String authToken;
   final String year;
   final String month;
-  PersonalMonthlyExpenseFetch({required this.year, required this.month});
+
+  PersonalMonthlyExpenseFetch({
+    required this.authToken,
+    required this.year,
+    required this.month,
+  });
 }
 
 final class PersonalMonthlyExpenseAdd extends PersonalMonthlyExpenseEvent {

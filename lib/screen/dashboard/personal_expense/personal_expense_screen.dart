@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/sub_section/personal_expense_categories_section_screen.dart';
@@ -33,6 +35,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
   final double _navBarHeight = 60;
+  UserModel _loggedInUser = UserModel.empty();
 
   void _blocListenerHandler(
     BuildContext context,
@@ -55,11 +58,19 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
     final state = context.read<PersonalMonthlyExpenseBloc>().state;
     if (!(state is PersonalMonthlyExpenseFetchSuccess &&
         state.id == (widget.year + widget.month).toLowerCase())) {
       context.read<PersonalMonthlyExpenseBloc>().add(
-        PersonalMonthlyExpenseFetch(year: widget.year, month: widget.month),
+        PersonalMonthlyExpenseFetch(
+          authToken: _loggedInUser.authToken,
+          year: widget.year,
+          month: widget.month,
+        ),
       );
     }
   }

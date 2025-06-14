@@ -8,13 +8,13 @@ class PersonalMonthlyExpenseRepository {
   PersonalMonthlyExpenseRepository(this._dataProvider);
 
   Future<List<PersonalExpenseTransactionModel>> fetchData(
-    String email,
+    String authToken,
     String year,
     String month,
   ) async {
     try {
       List<PersonalExpenseTransactionModel> data = await _dataProvider
-          .fetchData(email, year, month);
+          .fetchData(authToken, year, month);
 
       return data;
     } catch (e) {

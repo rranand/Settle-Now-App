@@ -2,21 +2,18 @@
 import 'dart:convert';
 
 import 'package:settlenow_v2/model/new_transaction_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class RoomLinkedModel {
   bool hasData = true;
   String id = "";
   String roomName = "";
-  String transactionID = "";
-  DateTime createdOn = DateTime.now();
-  DateTime modifiedOn = DateTime.now();
+  String transactionType = "";
 
   RoomLinkedModel({
     required this.id,
     required this.roomName,
-    required this.transactionID,
-    required this.createdOn,
-    required this.modifiedOn,
+    required this.transactionType,
   });
 
   RoomLinkedModel.empty({this.hasData = false});
@@ -25,19 +22,15 @@ class RoomLinkedModel {
     return <String, dynamic>{
       'id': id,
       'roomName': roomName,
-      'transactionID': transactionID,
-      'createdOn': createdOn,
-      'modifiedOn': modifiedOn,
+      'transactionType': transactionType,
     };
   }
 
   factory RoomLinkedModel.fromMap(Map<String, dynamic> map) {
     return RoomLinkedModel(
-      id: map['id'] as String,
-      roomName: map['roomName'] as String,
-      transactionID: map['transactionID'] as String,
-      createdOn: DateTime.parse(map['createdOn']),
-      modifiedOn: DateTime.parse(map['modifiedOn']),
+      id: Crypto.decrypt(map['id']),
+      roomName: Crypto.decrypt(map['roomName']),
+      transactionType: Crypto.decrypt(map['transactionType']),
     );
   }
 
@@ -48,7 +41,7 @@ class RoomLinkedModel {
 
   @override
   String toString() {
-    return 'RoomLinkedModel(id: $id, RoomName: $roomName, TransactionID: $transactionID)';
+    return 'RoomLinkedModel(id: $id, RoomName: $roomName, TransactionType: $transactionType)';
   }
 }
 
@@ -124,22 +117,22 @@ class PersonalExpenseTransactionModel {
   factory PersonalExpenseTransactionModel.fromMap(Map<String, dynamic> map) {
     if (map.containsKey('roomData') && map['roomData'] != null) {
       return PersonalExpenseTransactionModel(
-        id: map['id'] as String,
-        amount: map['amount'] as double,
-        description: map['description'] as String,
-        category: map['category'] as String,
-        createdOn: DateTime.parse(map['createdOn']),
-        modifiedOn: DateTime.parse(map['modifiedOn']),
+        id: Crypto.decrypt(map['id']),
+        amount: double.parse(Crypto.decrypt(map['amount'])),
+        description: Crypto.decrypt(map['description']),
+        category: Crypto.decrypt(map['category']),
+        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
         roomData: RoomLinkedModel.fromMap(map['roomData']),
       );
     } else {
       return PersonalExpenseTransactionModel(
-        id: map['id'] as String,
-        amount: map['amount'] as double,
-        description: map['description'] as String,
-        category: map['category'] as String,
-        createdOn: DateTime.parse(map['createdOn']),
-        modifiedOn: DateTime.parse(map['modifiedOn']),
+        id: Crypto.decrypt(map['id']),
+        amount: double.parse(Crypto.decrypt(map['amount'])),
+        description: Crypto.decrypt(map['description']),
+        category: Crypto.decrypt(map['category']),
+        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
         roomData: RoomLinkedModel.empty(),
       );
     }
