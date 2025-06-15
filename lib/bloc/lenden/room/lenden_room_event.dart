@@ -16,6 +16,13 @@ final class LendenAddNewTransaction extends LendenRoomEvent {
   LendenAddNewTransaction(this.data);
 }
 
+final class LendenCloseRoom extends LendenRoomEvent {
+  final String uid;
+  final String authToken;
+
+  LendenCloseRoom({required this.uid, required this.authToken});
+}
+
 final class LendenUpdateTransaction extends LendenRoomEvent {
   final LendenTransactionModel data;
 

@@ -4,15 +4,18 @@ import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
+import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubit.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
+import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/lenden_expense_card.dart';
 import 'package:settlenow_v2/util/card/lenden_summary_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
+import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
+import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -47,6 +50,188 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     });
   }
 
+  void _closeRoomPopupDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Close Room"),
+          content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop();
+              },
+              child: Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.pop();
+                context.read<LendenRoomBloc>().add(
+                  LendenCloseRoom(
+                    authToken: _loggedInUser.authToken,
+                    uid: _loggedInUser.id,
+                  ),
+                );
+              },
+              child: Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showBottomSheet(BuildContext context, List<LendenUserModel> oldUsers) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return BlocBuilder<LendenRoomBloc, LendenRoomState>(
+          builder: (context, state) {
+            List<LendenUserModel> users = [];
+            if (state is LendenRoomFetchSuccess) {
+              users = state.roomData.users;
+            } else {
+              users = oldUsers;
+            }
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Center(
+                    child: Container(
+                      height: 4,
+                      width: 60,
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      "Users",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.0),
+                    child: Column(
+                      children: List.generate(users.length, (index) {
+                        return ListTile(
+                          leading: imageWidgetForCachedNetworkImage(
+                            users[index].profileImage,
+                            width: 45,
+                            height: 45,
+                            boxShape: BoxShape.circle,
+                          ),
+                          title: Text(users[index].name),
+                          subtitle: Text(
+                            users[index].isClosed ? "Closed" : "Open",
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          trailing:
+                              _loggedInUser.id == users[index].id &&
+                                      !users[index].isClosed
+                                  ? IconButton(
+                                    icon: Icon(Iconsax.unlock),
+                                    onPressed: () => _closeRoomPopupDialog(),
+                                  )
+                                  : null,
+                        );
+                      }),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 20.0),
+                    child: InkWell(
+                      onTap: () => context.pop(),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * .9,
+                        child: GradientWidget(
+                          text: "Close",
+                          gradientColors:
+                              GradientColorConstant.coolIndigoToBlue,
+                          textSize: 14,
+                          textColor: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _loadingScreen(EdgeInsets paddingInsets) {
+    List<LendenTransactionModel> lendenTransactionData = generateShimmerData();
+    return Scaffold(
+      appBar: AppBar(
+        title: CustomShimmerEffect.textWidget(width: 180, fontSize: 20),
+        titleSpacing: _mainScreenPadding.left,
+        centerTitle: false,
+        leading: appBarBackButton(context),
+      ),
+      body: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: paddingInsets.add(
+              EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
+            ),
+            sliver: SliverToBoxAdapter(
+              child: CustomShimmerEffect.placeHolderShimmerEffect(
+                Container(
+                  height: 95,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: _mainScreenPadding,
+            sliver: SliverList.builder(
+              itemCount: lendenTransactionData.length,
+              itemBuilder: (BuildContext context, int index) {
+                return Padding(
+                  padding: EdgeInsets.only(
+                    bottom:
+                        index == lendenTransactionData.length - 1
+                            ? UiConstant.spaceAtBottom
+                            : 0,
+                  ),
+                  child: LendenExpenseCard(
+                    lendenID: widget.id,
+                    data: lendenTransactionData[index],
+                    loggedInUser: _loggedInUser,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -71,7 +256,6 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
         LendenRoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
       );
     }
-    context.read<LendenRoomNameCubit>().fetchName(widget.id, widget.roomName);
   }
 
   @override
@@ -81,87 +265,83 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     if (!isWide) {
       paddingInsets = EdgeInsets.symmetric(horizontal: 8);
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: BlocConsumer<LendenRoomBloc, LendenRoomState>(
-          listener: _blocListenerHandler,
-          builder: (context, state) {
-            if (state is LendenRoomFailure) {
-              showNormalSnackBar(context, state.error);
-            }
-            if (state is LendenRoomFetchSuccess) {
-              return Text(state.roomData.roomName);
-            } else {
-              return CustomShimmerEffect.textWidget(width: 180, fontSize: 20);
-            }
-          },
-        ),
-        titleSpacing: _mainScreenPadding.left,
-        leading: appBarBackButton(context),
-      ),
-      body: BlocConsumer<LendenRoomBloc, LendenRoomState>(
-        listener: _blocListenerHandler,
-        builder: (context, state) {
-          List<LendenTransactionModel> lendenRoomData = [];
-          if (state is LendenRoomFetchSuccess) {
-            lendenRoomData = state.data;
-          } else {
-            lendenRoomData = generateShimmerData();
-          }
-          return CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: paddingInsets.add(
-                  EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
-                ),
-                sliver: SliverToBoxAdapter(
-                  child:
-                      state is LendenRoomLoading
-                          ? CustomShimmerEffect.placeHolderShimmerEffect(
-                            Container(
-                              height: 95,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(16),
-                                color: Colors.white,
+    return BlocConsumer<LendenRoomBloc, LendenRoomState>(
+      listener: _blocListenerHandler,
+      builder: (context, state) {
+        if (state is LendenRoomFetchSuccess) {
+          List<LendenTransactionModel> lendenTransactionData = state.data;
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text(state.roomData.roomName),
+              titleSpacing: _mainScreenPadding.left,
+              centerTitle: false,
+              leading: appBarBackButton(context),
+              actions:
+                  state.roomData.users.length <= 1
+                      ? null
+                      : appBarActionButton(context, [
+                        IconButton(
+                          onPressed:
+                              () => _showBottomSheet(
+                                context,
+                                state.roomData.users,
                               ),
-                            ),
-                          )
-                          : LendenSummaryCard(
-                            data: lendenRoomData,
-                            loggedInUser: _loggedInUser,
-                          ),
+                          icon: Icon(Iconsax.profile_2user),
+                        ),
+                      ]),
+            ),
+            body: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: paddingInsets.add(
+                    EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: LendenSummaryCard(
+                      data: lendenTransactionData,
+                      loggedInUser: _loggedInUser,
+                    ),
+                  ),
                 ),
-              ),
-              SliverPadding(
-                padding: _mainScreenPadding,
-                sliver: SliverList.builder(
-                  itemCount: lendenRoomData.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        bottom:
-                            index == lendenRoomData.length - 1
-                                ? UiConstant.spaceAtBottom
-                                : 0,
-                      ),
-                      child: LendenExpenseCard(
-                        lendenID: widget.id,
-                        data: lendenRoomData[index],
-                        loggedInUser: _loggedInUser,
-                      ),
-                    );
-                  },
+                SliverPadding(
+                  padding: _mainScreenPadding,
+                  sliver: SliverList.builder(
+                    itemCount: lendenTransactionData.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom:
+                              index == lendenTransactionData.length - 1
+                                  ? UiConstant.spaceAtBottom
+                                  : 0,
+                        ),
+                        child: LendenExpenseCard(
+                          lendenID: widget.id,
+                          data: lendenTransactionData[index],
+                          loggedInUser: _loggedInUser,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
+            floatingActionButton:
+                state.roomData.users
+                        .firstWhere((ele) => ele.id == _loggedInUser.id)
+                        .isClosed
+                    ? null
+                    : CustomButton.customFloatingButton(Iconsax.add, () {
+                      context.push(
+                        "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
+                      );
+                    }),
           );
-        },
-      ),
-      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
-        context.push(
-          "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
-        );
-      }),
+        } else {
+          return _loadingScreen(paddingInsets);
+        }
+      },
     );
   }
 }

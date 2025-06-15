@@ -20,14 +20,6 @@ class LendenRoomRepository {
     }
   }
 
-  Future<String> fetchRoomNameByID(String id, String authToken) async {
-    try {
-      return _dataProvider.fetchRoomNameByID(id, authToken);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<LendenTransactionModel> create(NewTransactionModel data) async {
     try {
       return _dataProvider.create(data);
@@ -47,6 +39,16 @@ class LendenRoomRepository {
   Future<bool> delete(String expenseID) async {
     try {
       return _dataProvider.delete(expenseID);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> closeRoom(String roomID, String authToken) async {
+    try {
+      await Future.delayed(const Duration(seconds: 2));
+      return true;
+      //return _dataProvider.closeRoom(roomID, authToken);
     } catch (e) {
       rethrow;
     }

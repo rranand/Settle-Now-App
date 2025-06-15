@@ -36,16 +36,6 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<String> fetchRoomNameByID(String id, String authToken) async {
-    try {
-      await Future.delayed(Duration(seconds: 2), () {});
-
-      return "RA-LD";
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<LendenTransactionModel> create(NewTransactionModel data) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
@@ -73,6 +63,26 @@ class LendenRoomDataProvider {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
       return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> closeRoom(String roomID, String authToken) async {
+    try {
+      final response = await createAPICall(
+        'lenden/$roomID',
+        "delete",
+        authToken,
+        {},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }

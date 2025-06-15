@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
+import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
 
 part 'lenden_room_event.dart';
@@ -13,6 +14,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
 
   LendenRoomBloc(this.repo) : super(LendenRoomInitial()) {
     on<LendenRoomFetch>(_lendenRoomFetch);
+    on<LendenCloseRoom>(_lendenCloseRoom);
     on<LendenAddNewTransaction>(_lendenAddNewTransaction);
     on<LendenUpdateTransaction>(_lendenUpdateTransaction);
     on<LendenDeleteTransaction>(_lendenDeleteTransaction);
@@ -64,5 +66,39 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     List<LendenTransactionModel> data = [...oldData.data];
     data.removeWhere((element) => element.id == event.expenseID);
     return emit(LendenRoomFetchSuccess(oldData.id, oldData.roomData, data));
+  }
+
+  void _lendenCloseRoom(
+    LendenCloseRoom event,
+    Emitter<LendenRoomState> emit,
+  ) async {
+    final oldData = state as LendenRoomFetchSuccess;
+    emit(LendenRoomLoading());
+    List<LendenUserModel> users = [...oldData.roomData.users];
+    try {
+      await repo.closeRoom(oldData.id, event.authToken);
+      bool isClosed = true;
+      for (int i = 0; i < users.length; i++) {
+        if (users[i].id == event.uid) {
+          users[i].isClosed = true;
+        }
+        isClosed = isClosed && users[i].isClosed;
+      }
+      return emit(
+        LendenRoomFetchSuccess(
+          oldData.id,
+          oldData.roomData.copyWith(
+            status: isClosed ? "Closed" : "Partially Closed",
+            users: users,
+          ),
+          oldData.data,
+        ),
+      );
+    } catch (e) {
+      emit(LendenRoomFailure(e.toString()));
+      return emit(
+        LendenRoomFetchSuccess(oldData.id, oldData.roomData, oldData.data),
+      );
+    }
   }
 }

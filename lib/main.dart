@@ -17,7 +17,6 @@ import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
-import 'package:settlenow_v2/cubit/lenden/lenden_room_name/lenden_room_name_cubit.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
 import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
@@ -234,11 +233,7 @@ class MyApp extends StatelessWidget {
                   context.read<RoomSettleCubit>(),
                 ),
           ),
-          BlocProvider<LendenRoomNameCubit>(
-            create:
-                (context) =>
-                    LendenRoomNameCubit(context.read<LendenRoomRepository>()),
-          ),
+
           BlocProvider<CreateRoomCubit>(
             create:
                 (context) =>
