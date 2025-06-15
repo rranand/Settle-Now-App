@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/util/handler/crypto.dart';
+
 class UserModel {
   bool hasData = true;
   String id = "";
@@ -71,23 +73,39 @@ class UserModel {
     };
   }
 
-  factory UserModel.fromMap(Map<String, dynamic> map) {
-    return UserModel(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      email: (map['email'] ?? "") as String,
-      profileImage: (map['profileImage'] ?? "") as String,
-      createdOn: DateTime.parse(map['createdOn'] ?? DateTime.now().toString()),
-      authToken: (map['authToken'] ?? "") as String,
-      phoneNo: (map['phoneNo'] ?? "") as String,
+  factory UserModel.fromBasicInfoMap(Map<String, dynamic> map) {
+    return UserModel.fromBasicInfo(
+      id: Crypto.decrypt(map['id']),
+      name: Crypto.decrypt(map['name']),
+      profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
     );
   }
 
-  factory UserModel.fromBasicInfoMap(Map<String, dynamic> map) {
-    return UserModel.fromBasicInfo(
-      id: map['id'] as String,
-      name: map['name'] as String,
-      profileImage: (map['profileImage'] ?? "") as String,
+  factory UserModel.forOwnerInfo(Map<String, dynamic> map, String authToken) {
+    UserModel userData = UserModel.fromBasicInfo(
+      id: Crypto.decrypt(map['id']),
+      name: Crypto.decrypt(map['name']),
+      profileImage: Crypto.decrypt(map['profileImage']),
+    );
+
+    userData.phoneNo = Crypto.decrypt(map['phoneNo']);
+    userData.createdOn = DateTime.parse(Crypto.decrypt(map['createdOn']));
+
+    userData.email = Crypto.decrypt(map['email']);
+    userData.isGoogle = Crypto.decrypt(map['isGoogle']) == "true";
+    userData.authToken = authToken;
+    return userData;
+  }
+
+  factory UserModel.fromMap(Map<String, dynamic> map) {
+    return UserModel(
+      id: Crypto.decrypt(map['id']),
+      name: Crypto.decrypt(map['name']),
+      email: Crypto.decrypt(map['email'] ?? ""),
+      profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      authToken: Crypto.decrypt(map['authToken'] ?? ""),
+      phoneNo: Crypto.decrypt(map['phoneNo'] ?? ""),
     );
   }
 

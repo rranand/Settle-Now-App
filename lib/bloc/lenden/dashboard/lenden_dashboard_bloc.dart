@@ -21,7 +21,7 @@ class LendenDashboardBloc
   ) async {
     emit(LendenDashboardLoading());
     try {
-      List<LendenDashboardModel> data = await repo.fetchData("niriif@kff.ed");
+      List<LendenDashboardModel> data = await repo.fetchData(event.authToken);
       return emit(LendenDashboardFetchSuccess(data));
     } catch (e) {
       return emit(LendenDashboardFailure(e.toString()));

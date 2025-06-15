@@ -11,7 +11,7 @@ class PersonalExpenseDashboardDataProvider {
   ) async {
     try {
       final response = await createAPICall(
-        'personal/dashboard?alreadyHave=${Uri.encodeQueryComponent(alreadyHave.toString())}',
+        'personal/all?alreadyHave=${Uri.encodeQueryComponent(alreadyHave.toString())}',
         "get",
         authToken,
         {},

@@ -5,18 +5,19 @@ sealed class LendenRoomEvent {}
 
 final class LendenRoomFetch extends LendenRoomEvent {
   final String id;
+  final String authToken;
 
-  LendenRoomFetch({required this.id});
+  LendenRoomFetch({required this.id, required this.authToken});
 }
 
 final class LendenAddNewTransaction extends LendenRoomEvent {
-  final LendenRoomModel data;
+  final LendenTransactionModel data;
 
   LendenAddNewTransaction(this.data);
 }
 
 final class LendenUpdateTransaction extends LendenRoomEvent {
-  final LendenRoomModel data;
+  final LendenTransactionModel data;
 
   LendenUpdateTransaction(this.data);
 }

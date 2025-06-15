@@ -1,18 +1,19 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
 
-class LendenRoomModel {
+class LendenTransactionModel {
   bool hasData = true;
   String id = "";
   double amount = 0;
   String description = "";
   DateTime createdOn = DateTime.now();
-  UserModel createdBy = UserModel.empty();
+  LendenUserModel createdBy = LendenUserModel.empty();
   DateTime modifiedOn = DateTime.now();
 
-  LendenRoomModel({
+  LendenTransactionModel({
     required this.id,
     required this.amount,
     required this.description,
@@ -21,17 +22,17 @@ class LendenRoomModel {
     required this.modifiedOn,
   });
 
-  LendenRoomModel.empty({this.hasData = false});
+  LendenTransactionModel.empty({this.hasData = false});
 
-  LendenRoomModel copyWith({
+  LendenTransactionModel copyWith({
     String? id,
     double? amount,
     String? description,
     DateTime? createdOn,
-    UserModel? createdBy,
+    LendenUserModel? createdBy,
     DateTime? modifiedOn,
   }) {
-    return LendenRoomModel(
+    return LendenTransactionModel(
       id: id ?? this.id,
       amount: amount ?? this.amount,
       description: description ?? this.description,
@@ -53,41 +54,49 @@ class LendenRoomModel {
   }
 
   @override
-  factory LendenRoomModel.fromMap(Map<String, dynamic> map) {
-    return LendenRoomModel(
-      id: map['id'] as String,
-      amount: map['amount'] as double,
-      description: map['description'] as String,
-      createdOn: DateTime.parse(map['createdOn']),
-      createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
-      modifiedOn: DateTime.parse(map['modifiedOn']),
+  factory LendenTransactionModel.fromMap(
+    Map<String, dynamic> map,
+    List<LendenUserModel> users,
+  ) {
+    return LendenTransactionModel(
+      id: Crypto.decrypt(map['id']),
+      amount: double.parse(Crypto.decrypt(map['amount'])),
+      description: Crypto.decrypt(map['description']),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      createdBy: users.firstWhere(
+        (user) => user.id == Crypto.decrypt(map['createdBy']),
+      ),
+      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
     );
   }
 
   @override
-  factory LendenRoomModel.fromNewTransaction(NewTransactionModel data) {
-    return LendenRoomModel(
+  factory LendenTransactionModel.fromNewTransaction(NewTransactionModel data) {
+    return LendenTransactionModel(
       id: data.id,
       amount: data.amount,
       description: data.description,
       createdOn: data.createdOn,
-      createdBy: data.createdBy,
+      createdBy: LendenUserModel.fromUserModel(data.createdBy),
       modifiedOn: data.createdOn,
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory LendenRoomModel.fromJson(String source) =>
-      LendenRoomModel.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory LendenTransactionModel.fromJson(String source) =>
+      LendenTransactionModel.fromMap(
+        json.decode(source) as Map<String, dynamic>,
+        [],
+      );
 
   @override
   String toString() {
-    return 'LendenRoomModel(id: $id, amount: $amount, createdBy: $createdBy, description: $description)';
+    return 'LendenTransactionModel(id: $id, amount: $amount, createdBy: $createdBy, description: $description)';
   }
 
   @override
-  bool operator ==(covariant LendenRoomModel other) {
+  bool operator ==(covariant LendenTransactionModel other) {
     if (identical(this, other)) return true;
 
     return other.id == id &&

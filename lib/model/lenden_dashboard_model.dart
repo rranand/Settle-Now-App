@@ -2,8 +2,9 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/model/lenden_user_model.dart';
 
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class LendenDashboardModel {
   bool hasData = true;
@@ -11,16 +12,14 @@ class LendenDashboardModel {
   String roomName = "";
   String status = "";
   DateTime createdOn = DateTime.now();
-  DateTime modifiedOn = DateTime.now();
   double amount = 0;
-  List<UserModel> users = [];
+  List<LendenUserModel> users = [];
 
   LendenDashboardModel({
     required this.id,
     required this.roomName,
     required this.status,
     required this.createdOn,
-    required this.modifiedOn,
     required this.amount,
     required this.users,
   });
@@ -34,14 +33,13 @@ class LendenDashboardModel {
     DateTime? createdOn,
     DateTime? modifiedOn,
     double? amount,
-    List<UserModel>? users,
+    List<LendenUserModel>? users,
   }) {
     return LendenDashboardModel(
       id: id ?? this.id,
       roomName: roomName ?? this.roomName,
       status: status ?? this.status,
       createdOn: createdOn ?? this.createdOn,
-      modifiedOn: modifiedOn ?? this.modifiedOn,
       amount: amount ?? this.amount,
       users: users ?? this.users,
     );
@@ -53,7 +51,6 @@ class LendenDashboardModel {
       'roomName': roomName,
       'status': status,
       'createdOn': createdOn.toString(),
-      'modifiedOn': modifiedOn.toString(),
       'amount': amount.toString(),
       'users': users.map((x) => x.toMap()).toList(),
     };
@@ -61,14 +58,13 @@ class LendenDashboardModel {
 
   factory LendenDashboardModel.fromMap(Map<String, dynamic> map) {
     return LendenDashboardModel(
-      id: map['id'] as String,
-      roomName: map['roomName'] as String,
-      status: map['status'] as String,
-      createdOn: DateTime.parse(map['createdOn']),
-      modifiedOn: DateTime.parse(map['modifiedOn']),
-      amount: map['amount'] as double,
-      users: List<UserModel>.from(
-        (map['users']).map((x) => UserModel.fromMap(x)),
+      id: Crypto.decrypt(map['id']),
+      roomName: Crypto.decrypt(map['roomName']),
+      status: Crypto.decrypt(map['status']),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      amount: double.parse(Crypto.decrypt(map['amount'])),
+      users: List<LendenUserModel>.from(
+        (map['users']).map((x) => LendenUserModel.fromBasicInfoMap(x)),
       ),
     );
   }
@@ -91,7 +87,6 @@ class LendenDashboardModel {
         other.roomName == roomName &&
         other.status == status &&
         other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn &&
         other.amount == amount &&
         listEquals(other.users, users);
   }
@@ -102,7 +97,6 @@ class LendenDashboardModel {
         roomName.hashCode ^
         status.hashCode ^
         createdOn.hashCode ^
-        modifiedOn.hashCode ^
         amount.hashCode ^
         users.hashCode;
   }

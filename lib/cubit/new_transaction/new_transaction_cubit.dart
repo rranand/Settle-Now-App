@@ -61,7 +61,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.lenden:
           {
             final bloc = context.read<LendenRoomBloc>();
-            final LendenRoomModel newData = await repoLD.create(data);
+            final LendenTransactionModel newData = await repoLD.create(data);
             bloc.add(LendenAddNewTransaction(newData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
@@ -114,7 +114,9 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.lenden:
           {
             final bloc = context.read<LendenRoomBloc>();
-            final LendenRoomModel updatedData = await repoLD.update(data);
+            final LendenTransactionModel updatedData = await repoLD.update(
+              data,
+            );
             bloc.add(LendenUpdateTransaction(updatedData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),

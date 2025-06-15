@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/lenden_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
@@ -29,6 +31,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   final TextEditingController _searchController = TextEditingController();
   final GlobalKey<FormState> _createRoomKey = GlobalKey();
   final TextEditingController _createRoomController = TextEditingController();
+  UserModel _loggedInUser = UserModel.empty();
 
   void _blocListenerHandler(BuildContext context, LendenDashboardState state) {
     if (state is LendenDashboardFailure) {
@@ -48,10 +51,16 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   @override
   void initState() {
     super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
     final state = context.read<LendenDashboardBloc>().state;
 
     if (state is! LendenDashboardFetchSuccess) {
-      context.read<LendenDashboardBloc>().add(LendenDashboardFetch());
+      context.read<LendenDashboardBloc>().add(
+        LendenDashboardFetch(authToken: _loggedInUser.authToken),
+      );
     }
   }
 

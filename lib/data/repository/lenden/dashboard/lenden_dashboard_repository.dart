@@ -6,9 +6,9 @@ class LendenDashboardRepository {
 
   LendenDashboardRepository(this._dataProvider);
 
-  Future<List<LendenDashboardModel>> fetchData(String email) async {
+  Future<List<LendenDashboardModel>> fetchData(String authToken) async {
     try {
-      return _dataProvider.fetchData(email);
+      return _dataProvider.fetchData(authToken);
     } catch (e) {
       rethrow;
     }

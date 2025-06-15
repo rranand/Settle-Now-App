@@ -12,7 +12,7 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class LendenExpenseCard extends StatelessWidget {
   final String lendenID;
-  final LendenRoomModel data;
+  final LendenTransactionModel data;
   final UserModel loggedInUser;
 
   const LendenExpenseCard({
@@ -58,7 +58,7 @@ class LendenExpenseCard extends StatelessWidget {
           if (data.createdBy.id == loggedInUser.id) {
             context.push(
               "${RouterConstants.lendenRouteName}/$lendenID${RouterConstants.lendenEditExpenseRouteName}",
-              extra: TransactionModel.fromLendenRoomModel(data),
+              extra: TransactionModel.fromLendenTransactionModel(data),
             );
           }
         },

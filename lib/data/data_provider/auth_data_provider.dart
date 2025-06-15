@@ -66,20 +66,7 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        UserModel userData = UserModel.fromBasicInfo(
-          id: Crypto.decrypt(data['data']['id']),
-          name: Crypto.decrypt(data['data']['name']),
-          profileImage: Crypto.decrypt(data['data']['profileImage']),
-        );
-
-        userData.phoneNo = Crypto.decrypt(data['data']['phoneNo']);
-        userData.createdOn = DateTime.parse(
-          Crypto.decrypt(data['data']['createdOn']),
-        );
-
-        userData.email = Crypto.decrypt(data['data']['email']);
-        userData.isGoogle = Crypto.decrypt(data['data']['isGoogle']) == "true";
-        userData.authToken = authToken;
+        UserModel userData = UserModel.forOwnerInfo(data['data'], authToken);
 
         return userData;
       } else {

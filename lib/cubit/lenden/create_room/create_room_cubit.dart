@@ -4,6 +4,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
+import 'package:settlenow_v2/model/lenden_user_model.dart';
 
 part 'create_room_state.dart';
 
@@ -23,7 +24,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       );
 
       LendenDashboardModel newData = await repo.createRoom(roomName);
-      newData.users = [authLoginState.userData];
+      newData.users = [LendenUserModel.fromUserModel(authLoginState.userData)];
       lendenDashboardCtx.add(
         LendenDashboardOnAddNewRoom(data: newData, isLoading: false),
       );

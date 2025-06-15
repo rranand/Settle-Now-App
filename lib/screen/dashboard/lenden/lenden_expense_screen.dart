@@ -37,9 +37,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     }
   }
 
-  List<LendenRoomModel> generateShimmerData() {
+  List<LendenTransactionModel> generateShimmerData() {
     return List.generate(11, (i) {
-      LendenRoomModel tempData = LendenRoomModel.empty();
+      LendenTransactionModel tempData = LendenTransactionModel.empty();
       if (i % 2 == 0) {
         tempData.createdBy.id = _loggedInUser.id;
       }
@@ -67,7 +67,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     final state = context.read<LendenRoomBloc>().state;
 
     if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
-      context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
+      context.read<LendenRoomBloc>().add(
+        LendenRoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
+      );
     }
     context.read<LendenRoomNameCubit>().fetchName(widget.id, widget.roomName);
   }
@@ -81,13 +83,14 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     }
     return Scaffold(
       appBar: AppBar(
-        title: BlocBuilder<LendenRoomNameCubit, LendenRoomNameState>(
+        title: BlocConsumer<LendenRoomBloc, LendenRoomState>(
+          listener: _blocListenerHandler,
           builder: (context, state) {
-            if (state is LendenRoomNameSuccess) {
-              return Text(state.roomName);
-            } else if (state is LendenRoomNameFailure) {
+            if (state is LendenRoomFailure) {
               showNormalSnackBar(context, state.error);
-              return Text(widget.id);
+            }
+            if (state is LendenRoomFetchSuccess) {
+              return Text(state.roomData.roomName);
             } else {
               return CustomShimmerEffect.textWidget(width: 180, fontSize: 20);
             }
@@ -99,7 +102,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       body: BlocConsumer<LendenRoomBloc, LendenRoomState>(
         listener: _blocListenerHandler,
         builder: (context, state) {
-          List<LendenRoomModel> lendenRoomData = [];
+          List<LendenTransactionModel> lendenRoomData = [];
           if (state is LendenRoomFetchSuccess) {
             lendenRoomData = state.data;
           } else {

@@ -9,9 +9,10 @@ final class LendenRoomLoading extends LendenRoomState {}
 
 final class LendenRoomFetchSuccess extends LendenRoomState {
   final String id;
-  final List<LendenRoomModel> data;
+  final LendenDashboardModel roomData;
+  final List<LendenTransactionModel> data;
 
-  LendenRoomFetchSuccess(this.id, this.data);
+  LendenRoomFetchSuccess(this.id, this.roomData, this.data);
 }
 
 final class LendenRoomFailure extends LendenRoomState {

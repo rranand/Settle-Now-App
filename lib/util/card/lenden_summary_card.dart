@@ -6,7 +6,7 @@ import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
 
 class LendenSummaryCard extends StatelessWidget {
-  final List<LendenRoomModel> data;
+  final List<LendenTransactionModel> data;
   final UserModel loggedInUser;
 
   const LendenSummaryCard({

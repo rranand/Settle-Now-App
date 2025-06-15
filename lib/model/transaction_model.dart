@@ -94,7 +94,9 @@ class TransactionModel {
     );
   }
 
-  factory TransactionModel.fromLendenRoomModel(LendenRoomModel data) {
+  factory TransactionModel.fromLendenTransactionModel(
+    LendenTransactionModel data,
+  ) {
     return TransactionModel(
       id: data.id,
       description: data.description,
