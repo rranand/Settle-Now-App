@@ -13,3 +13,8 @@ final class LendenDashboardOnAddNewRoom extends LendenDashboardEvent {
   final bool isLoading;
   LendenDashboardOnAddNewRoom({required this.data, required this.isLoading});
 }
+
+final class LendenDashboardOnUpdateRoom extends LendenDashboardEvent {
+  final LendenDashboardModel data;
+  LendenDashboardOnUpdateRoom({required this.data});
+}

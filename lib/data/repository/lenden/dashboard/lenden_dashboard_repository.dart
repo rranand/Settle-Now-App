@@ -14,9 +14,15 @@ class LendenDashboardRepository {
     }
   }
 
-  Future<LendenDashboardModel> createRoom(String roomName) async {
+  Future<LendenDashboardModel> createRoom(
+    LendenDashboardModel roomData,
+    String authToken,
+  ) async {
     try {
-      LendenDashboardModel data = await _dataProvider.createRoom(roomName);
+      LendenDashboardModel data = await _dataProvider.createRoom(
+        roomData,
+        authToken,
+      );
       return data;
     } catch (e) {
       rethrow;

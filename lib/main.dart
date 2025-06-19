@@ -195,8 +195,10 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<LendenRoomBloc>(
             create:
-                (context) =>
-                    LendenRoomBloc(context.read<LendenRoomRepository>()),
+                (context) => LendenRoomBloc(
+                  context.read<LendenRoomRepository>(),
+                  context.read<LendenDashboardBloc>(),
+                ),
           ),
           BlocProvider<UserUpdateProfileCubit>(
             create:

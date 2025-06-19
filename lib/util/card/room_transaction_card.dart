@@ -5,6 +5,7 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
@@ -190,7 +191,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     "Created ${convertDateTimeFormat(widget.data.createdOn)}",
                     isLoaded: widget.data.hasData,
                   ),
-                  widget.data.createdOn != widget.data.modifiedOn
+                  isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)
                       ? subTextOnCard(
                         "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
                         isLoaded: widget.data.hasData,

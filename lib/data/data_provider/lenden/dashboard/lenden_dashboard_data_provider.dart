@@ -24,18 +24,22 @@ class LendenDashboardDataProvider {
     }
   }
 
-  Future<LendenDashboardModel> createRoom(String roomName) async {
+  Future<LendenDashboardModel> createRoom(
+    LendenDashboardModel roomData,
+    String authToken,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      LendenDashboardModel data = LendenDashboardModel(
-        id: "${DateTime.now()}##$roomName",
-        roomName: roomName,
-        status: "open",
-        createdOn: DateTime.now(),
-        amount: 0,
-        users: [],
-      );
-      return data;
+      final response = await createAPICall('lenden', "post", authToken, {
+        "name": Crypto.encrypt(roomData.roomName),
+      });
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        roomData.id = Crypto.decrypt(data["data"]["id"]);
+        return roomData;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }

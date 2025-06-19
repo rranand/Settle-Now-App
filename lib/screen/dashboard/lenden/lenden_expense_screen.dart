@@ -222,6 +222,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                     lendenID: widget.id,
                     data: lendenTransactionData[index],
                     loggedInUser: _loggedInUser,
+                    isEditable: false,
                   ),
                 );
               },
@@ -270,6 +271,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       builder: (context, state) {
         if (state is LendenRoomFetchSuccess) {
           List<LendenTransactionModel> lendenTransactionData = state.data;
+          LendenUserModel loggedInUserData = state.roomData.users.firstWhere(
+            (ele) => ele.id == _loggedInUser.id,
+          );
 
           return Scaffold(
             appBar: AppBar(
@@ -277,60 +281,63 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
               titleSpacing: _mainScreenPadding.left,
               centerTitle: false,
               leading: appBarBackButton(context),
-              actions:
-                  state.roomData.users.length <= 1
-                      ? null
-                      : appBarActionButton(context, [
-                        IconButton(
-                          onPressed:
-                              () => _showBottomSheet(
-                                context,
-                                state.roomData.users,
-                              ),
-                          icon: Icon(Iconsax.profile_2user),
-                        ),
-                      ]),
+              actions: appBarActionButton(context, [
+                IconButton(
+                  onPressed:
+                      () => _showBottomSheet(context, state.roomData.users),
+                  icon: Icon(Iconsax.profile_2user),
+                ),
+              ]),
             ),
-            body: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: paddingInsets.add(
-                    EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: LendenSummaryCard(
-                      data: lendenTransactionData,
-                      loggedInUser: _loggedInUser,
+            body:
+                lendenTransactionData.isEmpty
+                    ? Center(
+                      child: Text(
+                        "No Expense Found",
+                        style: TextStyle(fontSize: 20, color: Colors.grey),
+                      ),
+                    )
+                    : CustomScrollView(
+                      slivers: [
+                        SliverPadding(
+                          padding: paddingInsets.add(
+                            EdgeInsets.only(
+                              bottom: UiConstant.spaceBetweenSection,
+                            ),
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: LendenSummaryCard(
+                              data: lendenTransactionData,
+                              loggedInUser: _loggedInUser,
+                            ),
+                          ),
+                        ),
+                        SliverPadding(
+                          padding: _mainScreenPadding,
+                          sliver: SliverList.builder(
+                            itemCount: lendenTransactionData.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom:
+                                      index == lendenTransactionData.length - 1
+                                          ? UiConstant.spaceAtBottom
+                                          : 0,
+                                ),
+                                child: LendenExpenseCard(
+                                  lendenID: widget.id,
+                                  data: lendenTransactionData[index],
+                                  loggedInUser: _loggedInUser,
+                                  isEditable: !loggedInUserData.isClosed,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ),
-                SliverPadding(
-                  padding: _mainScreenPadding,
-                  sliver: SliverList.builder(
-                    itemCount: lendenTransactionData.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom:
-                              index == lendenTransactionData.length - 1
-                                  ? UiConstant.spaceAtBottom
-                                  : 0,
-                        ),
-                        child: LendenExpenseCard(
-                          lendenID: widget.id,
-                          data: lendenTransactionData[index],
-                          loggedInUser: _loggedInUser,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
             floatingActionButton:
-                state.roomData.users
-                        .firstWhere((ele) => ele.id == _loggedInUser.id)
-                        .isClosed
+                loggedInUserData.isClosed
                     ? null
                     : CustomButton.customFloatingButton(Iconsax.add, () {
                       context.push(

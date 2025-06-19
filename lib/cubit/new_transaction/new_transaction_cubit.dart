@@ -61,7 +61,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.lenden:
           {
             final bloc = context.read<LendenRoomBloc>();
-            final LendenTransactionModel newData = await repoLD.create(data);
+            final roomID = (bloc.state as LendenRoomFetchSuccess).id;
+            final LendenTransactionModel newData = await repoLD.create(
+              roomID,
+              loggedInUser.authToken,
+              data,
+            );
             bloc.add(LendenAddNewTransaction(newData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
@@ -114,7 +119,10 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.lenden:
           {
             final bloc = context.read<LendenRoomBloc>();
+            final roomID = (bloc.state as LendenRoomFetchSuccess).id;
             final LendenTransactionModel updatedData = await repoLD.update(
+              roomID,
+              loggedInUser.authToken,
               data,
             );
             bloc.add(LendenUpdateTransaction(updatedData));
@@ -185,7 +193,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             bloc = context.read<LendenRoomBloc>();
             bloc.add(LendenDeleteTransaction(expenseID));
-            final bool isDeleted = await repoLD.delete(expenseID);
+            final roomID = (bloc.state as LendenRoomFetchSuccess).id;
+            final bool isDeleted = await repoLD.delete(
+              roomID,
+              loggedInUser.authToken,
+              expenseID,
+            );
 
             if (isDeleted) {
               bloc.add(LendenDeleteTransaction(expenseID));

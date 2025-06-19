@@ -82,6 +82,26 @@ class LendenTransactionModel {
     );
   }
 
+  String toCreateExpenseJson() {
+    Map<String, String> data = {
+      "amount": Crypto.encrypt(amount.toString()),
+      "description": Crypto.encrypt(description),
+      "createdOn": Crypto.encrypt(createdOn.toIso8601String()),
+    };
+
+    return json.encode(data);
+  }
+
+  String toUpdateExpenseJson() {
+    Map<String, String> data = {
+      "id": Crypto.encrypt(id),
+      "amount": Crypto.encrypt(amount.toString()),
+      "description": Crypto.encrypt(description),
+    };
+
+    return json.encode(data);
+  }
+
   String toJson() => json.encode(toMap());
 
   factory LendenTransactionModel.fromJson(String source) =>

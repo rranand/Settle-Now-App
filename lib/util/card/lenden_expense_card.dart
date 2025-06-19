@@ -6,6 +6,7 @@ import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -14,12 +15,14 @@ class LendenExpenseCard extends StatelessWidget {
   final String lendenID;
   final LendenTransactionModel data;
   final UserModel loggedInUser;
+  final bool isEditable;
 
   const LendenExpenseCard({
     super.key,
     required this.lendenID,
     required this.data,
     required this.loggedInUser,
+    required this.isEditable,
   });
 
   BorderRadius _borderRadius(bool isMe) {
@@ -54,8 +57,8 @@ class LendenExpenseCard extends StatelessWidget {
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: InkWell(
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-        onLongPress: () {
-          if (data.createdBy.id == loggedInUser.id) {
+        onTap: () {
+          if (data.createdBy.id == loggedInUser.id && isEditable) {
             context.push(
               "${RouterConstants.lendenRouteName}/$lendenID${RouterConstants.lendenEditExpenseRouteName}",
               extra: TransactionModel.fromLendenTransactionModel(data),
@@ -98,14 +101,14 @@ class LendenExpenseCard extends StatelessWidget {
                 textColor: Colors.grey.shade700,
                 isLoaded: data.hasData,
               ),
-              data.createdOn != data.modifiedOn
-                  ? subTextOnCard(
+              isDateTimeSame(data.createdOn, data.modifiedOn)
+                  ? subTextOnCard("")
+                  : subTextOnCard(
                     'Updated: ${convertDateTimeFormat(data.modifiedOn)}',
                     fontSize: 11,
                     textColor: Colors.grey.shade700,
                     isLoaded: data.hasData,
-                  )
-                  : subTextOnCard(""),
+                  ),
             ],
           ),
         ),

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
@@ -11,8 +12,10 @@ part 'lenden_room_state.dart';
 
 class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
   final LendenRoomRepository repo;
+  final LendenDashboardBloc lendenDashboardBloc;
 
-  LendenRoomBloc(this.repo) : super(LendenRoomInitial()) {
+  LendenRoomBloc(this.repo, this.lendenDashboardBloc)
+    : super(LendenRoomInitial()) {
     on<LendenRoomFetch>(_lendenRoomFetch);
     on<LendenCloseRoom>(_lendenCloseRoom);
     on<LendenAddNewTransaction>(_lendenAddNewTransaction);
@@ -40,7 +43,11 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
   ) async {
     final oldData = state as LendenRoomFetchSuccess;
     List<LendenTransactionModel> data = [event.data, ...oldData.data];
-    return emit(LendenRoomFetchSuccess(oldData.id, oldData.roomData, data));
+    LendenDashboardModel roomData = oldData.roomData.copyWith(
+      amount: oldData.roomData.amount + event.data.amount,
+    );
+    lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+    return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
   }
 
   void _lendenUpdateTransaction(
@@ -49,13 +56,19 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
   ) async {
     final oldData = state as LendenRoomFetchSuccess;
     List<LendenTransactionModel> data = [...oldData.data];
+    double updatedAmount = oldData.roomData.amount + event.data.amount;
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
+        updatedAmount -= data[i].amount;
         data[i] = event.data;
         break;
       }
     }
-    return emit(LendenRoomFetchSuccess(oldData.id, oldData.roomData, data));
+    LendenDashboardModel roomData = oldData.roomData.copyWith(
+      amount: updatedAmount,
+    );
+    lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+    return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
   }
 
   void _lendenDeleteTransaction(
@@ -64,8 +77,20 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
   ) async {
     final oldData = state as LendenRoomFetchSuccess;
     List<LendenTransactionModel> data = [...oldData.data];
-    data.removeWhere((element) => element.id == event.expenseID);
-    return emit(LendenRoomFetchSuccess(oldData.id, oldData.roomData, data));
+    double updatedAmount = oldData.roomData.amount;
+    data.removeWhere((element) {
+      if (element.id == event.expenseID) {
+        updatedAmount -= element.amount;
+        return true;
+      } else {
+        return false;
+      }
+    });
+    LendenDashboardModel roomData = oldData.roomData.copyWith(
+      amount: updatedAmount,
+    );
+    lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+    return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
   }
 
   void _lendenCloseRoom(
@@ -84,16 +109,12 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         }
         isClosed = isClosed && users[i].isClosed;
       }
-      return emit(
-        LendenRoomFetchSuccess(
-          oldData.id,
-          oldData.roomData.copyWith(
-            status: isClosed ? "Closed" : "Partially Closed",
-            users: users,
-          ),
-          oldData.data,
-        ),
+      LendenDashboardModel roomData = oldData.roomData.copyWith(
+        status: isClosed ? "Closed" : "Partially Closed",
+        users: users,
       );
+      lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
+      return emit(LendenRoomFetchSuccess(oldData.id, roomData, oldData.data));
     } catch (e) {
       emit(LendenRoomFailure(e.toString()));
       return emit(

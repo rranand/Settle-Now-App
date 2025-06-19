@@ -36,33 +36,71 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<LendenTransactionModel> create(NewTransactionModel data) async {
+  Future<LendenTransactionModel> create(
+    String id,
+    String authToken,
+    NewTransactionModel expenseData,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
       LendenTransactionModel newExpense =
-          LendenTransactionModel.fromNewTransaction(data);
-      return newExpense;
+          LendenTransactionModel.fromNewTransaction(expenseData);
+      final response = await createAPICall(
+        'lenden/$id',
+        "post",
+        authToken,
+        newExpense.toCreateExpenseJson(),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        newExpense.id = Crypto.decrypt(data['data']['id']);
+        return newExpense;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<LendenTransactionModel> update(NewTransactionModel data) async {
+  Future<LendenTransactionModel> update(
+    String id,
+    String authToken,
+    NewTransactionModel expenseData,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      LendenTransactionModel updatedExpense =
-          LendenTransactionModel.fromNewTransaction(data);
-      updatedExpense.modifiedOn = DateTime.now();
-      return updatedExpense;
+      LendenTransactionModel newExpense =
+          LendenTransactionModel.fromNewTransaction(expenseData);
+      final response = await createAPICall(
+        'lenden/$id',
+        "patch",
+        authToken,
+        newExpense.toUpdateExpenseJson(),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        newExpense.modifiedOn = DateTime.now();
+        return newExpense;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> delete(String expenseID) async {
+  Future<bool> delete(String id, String authToken, String expenseID) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      return true;
+      final response = await createAPICall('lenden/$id', "delete", authToken, {
+        "id": Crypto.encrypt(expenseID),
+      });
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }
@@ -72,7 +110,7 @@ class LendenRoomDataProvider {
     try {
       final response = await createAPICall(
         'lenden/$roomID',
-        "delete",
+        "put",
         authToken,
         {},
       );

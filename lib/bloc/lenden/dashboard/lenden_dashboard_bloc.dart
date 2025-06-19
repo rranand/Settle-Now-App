@@ -13,6 +13,7 @@ class LendenDashboardBloc
   LendenDashboardBloc(this.repo) : super(LendenDashboardInitial()) {
     on<LendenDashboardFetch>(_lendenDashboardFetch);
     on<LendenDashboardOnAddNewRoom>(_lendenDashboardOnAddNewRoom);
+    on<LendenDashboardOnUpdateRoom>(_lendenDashboardOnUpdateRoom);
   }
 
   void _lendenDashboardFetch(
@@ -45,6 +46,28 @@ class LendenDashboardBloc
           data.add(allLendenRoomState.data[i]);
         }
       }
+    }
+    return emit(LendenDashboardFetchSuccess(data));
+  }
+
+  void _lendenDashboardOnUpdateRoom(
+    LendenDashboardOnUpdateRoom event,
+    Emitter<LendenDashboardState> emit,
+  ) async {
+    final allLendenRoomState = (state as LendenDashboardFetchSuccess);
+    List<LendenDashboardModel> data = allLendenRoomState.data;
+    int index = -1;
+
+    for (int i = 0; i < data.length; i++) {
+      if (data[i].id == event.data.id) {
+        index = i;
+        data[i] = event.data;
+        break;
+      }
+    }
+
+    if (index == -1) {
+      data = [event.data, ...data];
     }
     return emit(LendenDashboardFetchSuccess(data));
   }
