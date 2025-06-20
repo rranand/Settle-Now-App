@@ -12,6 +12,7 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow_v2/cubit/user/friend/friend_cubit.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -20,6 +21,7 @@ import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -90,6 +92,14 @@ class _AddTransactionState extends State<AddTransaction> {
   );
   final ValueNotifier<Set<String>> _selectedUserIDSet = ValueNotifier({});
 
+  void _fetchFriendData() {
+    final friendCubitState = context.read<FriendCubit>().state;
+    if (!(friendCubitState is FriendSuccess ||
+        friendCubitState is FriendLoading)) {
+      context.read<FriendCubit>().fetchLoginData(_loggedInUser);
+    }
+  }
+
   void _removeUserFromSplitTransaction(UserModel user) {
     {
       final current = UserWithEditControlTD.from(_selectedUserIDs.value);
@@ -113,6 +123,35 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   Widget _userCardWidget(UserModel user) {
+    if (!user.hasData) {
+      return Center(
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CustomShimmerEffect.imageWidget(
+                  radius: 50,
+                  shape: BoxShape.circle,
+                ),
+                SizedBox(height: 8),
+                CustomShimmerEffect.textWidget(width: 100),
+              ],
+            ),
+            Positioned(
+              left: _userImageRadius / 2 + 10,
+              top: 0,
+              bottom: 0,
+              right: 0,
+              child:
+                  _selectedUserIDSet.value.contains(user.id)
+                      ? Icon(Icons.check_circle, color: Colors.green, size: 24)
+                      : SizedBox.shrink(),
+            ),
+          ],
+        ),
+      );
+    }
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () => _removeUserFromSplitTransaction(user),
@@ -284,7 +323,12 @@ class _AddTransactionState extends State<AddTransaction> {
                 _splitType.length,
                 (index) => InkWell(
                   borderRadius: BorderRadius.circular(100),
-                  onTap: () => _splitTypeIndex.value = index,
+                  onTap: () {
+                    _splitTypeIndex.value = index;
+                    if (index == 1) {
+                      _fetchFriendData();
+                    }
+                  },
                   child: GradientBorderCard(
                     borderRadius: 100,
                     borderWidth: 1,
@@ -432,6 +476,7 @@ class _AddTransactionState extends State<AddTransaction> {
     switch (transactionType) {
       case TransactionType.quicksplit:
         {
+          _fetchFriendData();
           _splitTypeIndex.value = 1;
           if (widget.transactionData == null) {
             _selectedUserIDs.value.putIfAbsent(
@@ -460,6 +505,12 @@ class _AddTransactionState extends State<AddTransaction> {
       if (context.canPop()) {
         context.pop();
       }
+    }
+  }
+
+  void _friendBlocListenerHandler(BuildContext context, FriendState state) {
+    if (state is FriendFailure) {
+      showNormalSnackBar(context, state.error);
     }
   }
 
@@ -544,6 +595,74 @@ class _AddTransactionState extends State<AddTransaction> {
         }
       }
     }
+  }
+
+  Widget _showMemberWidget(List<UserModel> users, bool isLoaded) {
+    return LayoutBuilder(
+      builder: (context, constraint) {
+        final double screenWidth = constraint.maxWidth;
+        final double spacing = 8.0;
+        final int columns = (screenWidth / (_userCardWidth + spacing)).ceil();
+
+        if (!isLoaded) {
+          users = List.filled(columns * 2, UserModel.empty());
+        }
+
+        return GridView.builder(
+          padding: EdgeInsets.zero,
+          shrinkWrap: true,
+          itemCount: users.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            mainAxisSpacing: spacing,
+            crossAxisSpacing: spacing,
+          ),
+          itemBuilder: (context, index) {
+            UserModel user = users[index];
+            return ValueListenableBuilder(
+              valueListenable: _selectedUserIDs,
+              builder: (
+                BuildContext context,
+                UserWithEditControlTD value,
+                Widget? child,
+              ) {
+                return _userCardWidget(user);
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _showMemberWidgetController() {
+    bool isLoaded = false;
+    List<UserModel> users = [];
+    if (transactionType == TransactionType.room) {
+      final roomUserState = context.read<RoomUserCubit>().state;
+      if (roomUserState is RoomUserSuccess) {
+        isLoaded = true;
+        for (int i = 0; i < roomUserState.data.length; i++) {
+          if (roomUserState.data[i].user.id != _loggedInUser.id) {
+            users.add(roomUserState.data[i].user);
+          }
+        }
+      }
+    } else if (transactionType == TransactionType.quicksplit ||
+        _splitTypeIndex.value == 1) {
+      return BlocConsumer<FriendCubit, FriendState>(
+        listener: _friendBlocListenerHandler,
+        builder: (context, state) {
+          if (state is FriendSuccess) {
+            return _showMemberWidget(state.data, true);
+          } else {
+            return _showMemberWidget([], false);
+          }
+        },
+      );
+    }
+
+    return _showMemberWidget(users, isLoaded);
   }
 
   @override
@@ -690,59 +809,7 @@ class _AddTransactionState extends State<AddTransaction> {
                           style: TextStyle(fontSize: _headerTextSize),
                         ),
                         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
-                        LayoutBuilder(
-                          builder: (context, constraint) {
-                            final double screenWidth = constraint.maxWidth;
-                            final double spacing = 8.0;
-                            final int columns =
-                                (screenWidth / (_userCardWidth + spacing))
-                                    .ceil();
-                            List<UserModel> users = UiConstant.users;
-
-                            if (transactionType == TransactionType.room) {
-                              final roomUserState =
-                                  context.read<RoomUserCubit>().state;
-                              if (roomUserState is RoomUserSuccess) {
-                                users = [];
-                                for (
-                                  int i = 0;
-                                  i < roomUserState.data.length;
-                                  i++
-                                ) {
-                                  if (roomUserState.data[i].user.id !=
-                                      _loggedInUser.id) {
-                                    users.add(roomUserState.data[i].user);
-                                  }
-                                }
-                              }
-                            }
-
-                            return GridView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: users.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: columns,
-                                    mainAxisSpacing: spacing,
-                                    crossAxisSpacing: spacing,
-                                  ),
-                              itemBuilder: (context, index) {
-                                UserModel user = users[index];
-                                return ValueListenableBuilder(
-                                  valueListenable: _selectedUserIDs,
-                                  builder: (
-                                    BuildContext context,
-                                    UserWithEditControlTD value,
-                                    Widget? child,
-                                  ) {
-                                    return _userCardWidget(user);
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        ),
+                        _showMemberWidgetController(),
                         SizedBox(height: UiConstant.spaceBetweenSection),
                         ValueListenableBuilder(
                           valueListenable: _selectedUserIDs,

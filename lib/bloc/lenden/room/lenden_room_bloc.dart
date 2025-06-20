@@ -42,7 +42,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     Emitter<LendenRoomState> emit,
   ) async {
     final oldData = state as LendenRoomFetchSuccess;
-    List<LendenTransactionModel> data = [event.data, ...oldData.data];
+    List<LendenTransactionModel> data = [...oldData.data, event.data];
     LendenDashboardModel roomData = oldData.roomData.copyWith(
       amount: oldData.roomData.amount + event.data.amount,
     );

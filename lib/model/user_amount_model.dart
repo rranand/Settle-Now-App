@@ -85,7 +85,7 @@ class UserAmountModel extends UserModel {
 
   @override
   String toString() {
-    return 'UserAmountModel(id: $id, name: $name, email: $email, amount: $amount)';
+    return 'UserAmountModel(id: $id, name: $name, email: $email, profileImage: $profileImage, amount: $amount)';
   }
 
   @override

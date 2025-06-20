@@ -22,6 +22,7 @@ import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.
 import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle_upsert/room_settle_upsert_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow_v2/cubit/user/friend/friend_cubit.dart';
 import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
 import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_cubit.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
@@ -245,6 +246,9 @@ class MyApp extends StatelessWidget {
             create:
                 (context) =>
                     UserLoginActivityCubit(context.read<AuthRepository>()),
+          ),
+          BlocProvider<FriendCubit>(
+            create: (context) => FriendCubit(context.read<AuthRepository>()),
           ),
           BlocProvider<NewTransactionCubit>(
             create:

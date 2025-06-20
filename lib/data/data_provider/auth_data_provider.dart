@@ -174,4 +174,24 @@ class AuthDataProvider {
       rethrow;
     }
   }
+
+  Future<List<UserModel>> fetchFriend(String authToken) async {
+    try {
+      final response = await createAPICall('friend', "get", authToken, {});
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        List<UserModel> arr = [];
+        for (int i = 0; i < data['data'].length; i++) {
+          arr.add(UserModel.fromBasicInfoMap(data['data'][i]));
+        }
+        
+        return arr;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

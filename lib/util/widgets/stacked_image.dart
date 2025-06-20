@@ -33,25 +33,40 @@ Widget imageWidgetForCachedNetworkimage(
   }
 }
 
+int convertInitialToNumber(String input) {
+  if (input.isEmpty) {
+    return Random().nextInt(UiConstant.colorsWithShade100.length);
+  }
+  int c1 = input.codeUnitAt(0);
+  int c2 = input.length > 1 ? input.codeUnitAt(1) : 0;
+  return (c1 << 16) | c2;
+}
+
 Widget errorImageWidget(UserModel user, double radius, bool isLast) {
   String nameInitial = "";
-  final List<String> nameArr = user.name.split(" ");
-
+  final List<String> nameArr = user.name.trim().split(" ");
   switch (nameArr.length) {
     case 0:
       nameInitial = "UA";
       break;
     case 1:
-      nameInitial = user.name.substring(0, min(user.name.length, 2));
+      {
+        if (user.name.trim().isNotEmpty) {
+          nameInitial = user.name[0];
+        }
+      }
       break;
     default:
       nameInitial = nameArr.first[0] + nameArr.last[0];
   }
-
   nameInitial = nameInitial.toUpperCase();
-  int colourIndex = Random().nextInt(UiConstant.colorsWithShade100.length);
+  int colourIndex =
+      convertInitialToNumber(nameInitial) %
+      UiConstant.colorsWithShade100.length;
 
   return Container(
+    width: radius,
+    height: radius,
     decoration: BoxDecoration(shape: BoxShape.circle),
     child: colouredIcon(
       Text(
@@ -75,20 +90,25 @@ Widget eachUserImageBuilder(
   double nextImageOffset = 22,
   double imageRadius = 30,
 }) {
-  Widget profileImage = CachedNetworkImage(
-    imageUrl: eachUser.profileImage.isEmpty ? "" : eachUser.profileImage,
-    width: imageRadius,
-    height: imageRadius,
-    progressIndicatorBuilder:
-        (context, url, downloadProgress) =>
-            imageWidgetForCachedNetworkimage(null, isLast),
-    errorWidget:
-        (context, url, error) =>
-            errorImageWidget(eachUser, imageRadius, isLast),
-    imageBuilder:
-        (context, imageProvider) =>
-            imageWidgetForCachedNetworkimage(imageProvider, isLast),
-  );
+  Widget profileImage = errorImageWidget(eachUser, imageRadius, isLast);
+
+  if (eachUser.profileImage.isNotEmpty) {
+    profileImage = CachedNetworkImage(
+      imageUrl: eachUser.profileImage,
+      width: imageRadius,
+      height: imageRadius,
+      progressIndicatorBuilder:
+          (context, url, downloadProgress) =>
+              imageWidgetForCachedNetworkimage(null, isLast),
+      errorWidget:
+          (context, url, error) =>
+              errorImageWidget(eachUser, imageRadius, isLast),
+      imageBuilder:
+          (context, imageProvider) =>
+              imageWidgetForCachedNetworkimage(imageProvider, isLast),
+    );
+  }
+
   if (index > 0) {
     profileImage = Positioned(
       left: index * nextImageOffset,

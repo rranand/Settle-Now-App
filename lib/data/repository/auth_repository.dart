@@ -87,4 +87,13 @@ class AuthRepository {
       rethrow;
     }
   }
+
+  Future<List<UserModel>> fetchFriend(String authToken) async {
+    try {
+      final List<UserModel> data = await _dataProvider.fetchFriend(authToken);
+      return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

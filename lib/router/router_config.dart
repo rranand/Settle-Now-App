@@ -264,8 +264,8 @@ class AppRouterConfig {
 
     return GoRouter(
       routes: _allRoutes(),
-      initialLocation: "/lenden/68507aa8edab6949efac70ca",
-      //initialLocation: "${RouterConstants.roomRouteName}/room_id_1",
+      //initialLocation: "/lenden/68507aa8edab6949efac70ca",
+      initialLocation: "${RouterConstants.quickSplitAddExpenseRouteName}",
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,
