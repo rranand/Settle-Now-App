@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-
-enum CustomButtonType {
-  customElevatedButton,
-  customOutlinedButton,
-  customTextButton,
-}
 
 class ButtonWithShimmerEffect extends StatelessWidget {
   final bool isLoaded;

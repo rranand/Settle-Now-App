@@ -33,6 +33,9 @@ class RouterConstants {
   static const String profileEditRouteName = '/edit';
   static const String loginActivityRouteName = '/logInactivity';
 
+  //Invite Friend
+  static const String inviteMember = '/invite';
+
   //Error Route
   static const String errorPageRouteName = '/404';
 

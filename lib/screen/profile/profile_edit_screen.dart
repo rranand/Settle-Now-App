@@ -8,6 +8,7 @@ import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
+import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';

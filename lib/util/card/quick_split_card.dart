@@ -29,7 +29,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
-    if (isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
+    if (!isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
     }
     return tags;
@@ -68,10 +68,8 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           isLoaded: widget.data.hasData,
         ),
         Visibility(
-          visible: isDateTimeSame(
-            widget.data.createdOn,
-            widget.data.modifiedOn,
-          ),
+          visible:
+              !isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn),
           child: subTextOnCard(
             "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
             isLoaded: widget.data.hasData,

@@ -40,6 +40,9 @@ class PersonalExpenseDashboardBloc
     PersonalExpenseDashboardUpdate event,
     Emitter<PersonalExpenseDashboardState> emit,
   ) async {
+    if (state is! PersonalExpenseDashboardFetchSuccess) {
+      return emit(PersonalExpenseDashboardInitial());
+    }
     final oldState = state as PersonalExpenseDashboardFetchSuccess;
     final oldData = oldState.data;
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/util/enum/enums.dart';
 
-enum TextFormFieldInputBorder { underLine, outlineInputBorder, none }
+
 
 class CustomFormField {
   static InputBorder _inputBorder(

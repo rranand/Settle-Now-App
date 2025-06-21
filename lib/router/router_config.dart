@@ -16,6 +16,7 @@ import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
+import 'package:settlenow_v2/util/card/invite_member.dart';
 import 'package:settlenow_v2/util/card/settle_expense.dart';
 import 'package:settlenow_v2/util/handler/stream_to_listenable.dart';
 import 'package:settlenow_v2/util/widgets/auth_gate.dart';
@@ -236,6 +237,32 @@ class AppRouterConfig {
             builder: (context, state) {
               return AuthGate(child: AddTransaction());
             },
+            routes: [
+              GoRoute(
+                path: RouterConstants.inviteMember,
+                builder: (context, state) {
+                  Map<String, dynamic> data =
+                      state.extra as Map<String, dynamic>;
+                  return AuthGate(
+                    child: InviteMember(
+                      userID: data["userID"],
+                      transactionType: data["transactionType"],
+                    ),
+                  );
+                },
+                redirect: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  if (extra == null ||
+                      extra.isEmpty ||
+                      !extra.containsKey("userID") ||
+                      !extra.containsKey("transactionType")) {
+                    return RouterConstants.quickSplitAddExpenseRouteName;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+            ],
           ),
           GoRoute(
             path: RouterConstants.quickSplitEditExpenseRouteName,
@@ -265,7 +292,7 @@ class AppRouterConfig {
     return GoRouter(
       routes: _allRoutes(),
       //initialLocation: "/lenden/68507aa8edab6949efac70ca",
-      initialLocation: "${RouterConstants.quickSplitAddExpenseRouteName}",
+      initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,

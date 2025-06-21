@@ -11,7 +11,7 @@ import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/pe
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
-import 'package:settlenow_v2/util/card/add_transaction.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 
 part 'new_transaction_state.dart';
 

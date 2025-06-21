@@ -185,7 +185,6 @@ class AuthDataProvider {
         for (int i = 0; i < data['data'].length; i++) {
           arr.add(UserModel.fromBasicInfoMap(data['data'][i]));
         }
-        
         return arr;
       } else {
         throw Crypto.decrypt(data['message']);
