@@ -21,7 +21,10 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
         RoomDashboardOnAddNewRoom(data: RoomInfoModel.empty(), isLoading: true),
       );
 
-      RoomInfoModel newData = await repo.createRoom(roomName);
+      RoomInfoModel newData = await repo.createRoom(
+        roomName,
+        authLoginState.userData.authToken,
+      );
       newData.users = [authLoginState.userData];
       roomDashboardCtx.add(
         RoomDashboardOnAddNewRoom(data: newData, isLoading: false),

@@ -4,22 +4,25 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class RoomInfoModel {
   bool hasData = true;
   String id = "";
   String roomName = "";
+  String roomKey = "";
+  String roomLink = "";
   String status = "";
   DateTime createdOn = DateTime.now();
-  DateTime modifiedOn = DateTime.now();
   List<UserModel> users = [];
 
   RoomInfoModel({
     required this.id,
     required this.roomName,
+    required this.roomKey,
+    required this.roomLink,
     required this.status,
     required this.createdOn,
-    required this.modifiedOn,
     required this.users,
   });
 
@@ -29,8 +32,9 @@ class RoomInfoModel {
     String? id,
     String? roomName,
     String? status,
+    String? roomKey,
+    String? roomLink,
     DateTime? createdOn,
-    DateTime? modifiedOn,
     List<UserModel>? users,
   }) {
     return RoomInfoModel(
@@ -38,8 +42,9 @@ class RoomInfoModel {
       roomName: roomName ?? this.roomName,
       status: status ?? this.status,
       createdOn: createdOn ?? this.createdOn,
-      modifiedOn: modifiedOn ?? this.modifiedOn,
       users: users ?? this.users,
+      roomKey: roomKey ?? this.roomKey,
+      roomLink: roomLink ?? this.roomLink,
     );
   }
 
@@ -48,21 +53,23 @@ class RoomInfoModel {
       'id': id,
       'roomName': roomName,
       'status': status,
+      'roomKey': roomKey,
+      'roomLink': roomLink,
       'createdOn': createdOn.toString(),
-      'modifiedOn': modifiedOn.toString(),
       'users': users.map((x) => x.toMap()).toList(),
     };
   }
 
   factory RoomInfoModel.fromMap(Map<String, dynamic> map) {
     return RoomInfoModel(
-      id: map['id'] as String,
-      roomName: map['roomName'] as String,
-      status: map['status'] as String,
-      createdOn: DateTime.parse(map['createdOn']),
-      modifiedOn: DateTime.parse(map['modifiedOn']),
+      id: Crypto.decrypt(map['id']),
+      roomName: Crypto.decrypt(map['roomName']),
+      status: Crypto.decrypt(map['status']),
+      roomKey: Crypto.decrypt(map['roomKey']),
+      roomLink: Crypto.decrypt(map['roomLink']),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
       users: List<UserModel>.from(
-        (map['users']).map((x) => UserModel.fromMap(x)),
+        (map['users']).map((x) => UserModel.fromBasicInfoMap(x)),
       ),
     );
   }
@@ -74,7 +81,7 @@ class RoomInfoModel {
 
   @override
   String toString() {
-    return 'RoomInfoModel(id: $id, roomName: $roomName, status $status, createdOn: $createdOn)';
+    return 'RoomInfoModel(id: $id, roomName: $roomName, roomKey: $roomKey, status $status, createdOn: $createdOn)';
   }
 
   @override
@@ -83,9 +90,10 @@ class RoomInfoModel {
 
     return other.id == id &&
         other.roomName == roomName &&
+        other.roomKey == roomKey &&
+        other.roomLink == roomLink &&
         other.status == status &&
         other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn &&
         listEquals(other.users, users);
   }
 
@@ -93,9 +101,10 @@ class RoomInfoModel {
   int get hashCode {
     return id.hashCode ^
         roomName.hashCode ^
+        roomKey.hashCode ^
+        roomLink.hashCode ^
         status.hashCode ^
         createdOn.hashCode ^
-        modifiedOn.hashCode ^
         users.hashCode;
   }
 }

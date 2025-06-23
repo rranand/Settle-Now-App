@@ -5,3 +5,5 @@ enum CustomButtonType {
 }
 
 enum TextFormFieldInputBorder { underLine, outlineInputBorder, none }
+
+enum FetchStatus { success, done }
