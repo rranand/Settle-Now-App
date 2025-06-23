@@ -7,6 +7,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
@@ -20,6 +21,7 @@ import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomExpenseScreen extends StatefulWidget {
@@ -168,7 +170,13 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     final state = context.read<RoomBloc>().state;
 
     if (!(state is RoomFetchSuccess && state.id == widget.id)) {
-      context.read<RoomBloc>().add(RoomFetch(widget.id));
+      context.read<RoomInfoCubit>().fetchData(
+        widget.id,
+        _loggedInUser.authToken,
+      );
+      context.read<RoomBloc>().add(
+        RoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
+      );
       context.read<RoomUserCubit>().fetchData(widget.id);
       context.read<RoomSettleCubit>().fetchData(widget.id);
     }
@@ -181,105 +189,117 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     if (!isWide) {
       paddingInsets = EdgeInsets.symmetric(horizontal: 8);
     }
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.id),
-        titleSpacing: _mainScreenPadding.left,
-        leading: appBarBackButton(context),
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: paddingInsets,
-            sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
+    return BlocConsumer<RoomInfoCubit, RoomInfoState>(
+      listener: (context, state) {
+        if (state is RoomInfoFailure) {
+          showNormalSnackBar(context, state.error);
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title:
+                (state is RoomInfoSuccess)
+                    ? Text(state.data.roomName)
+                    : CustomShimmerEffect.textWidget(width: 180, fontSize: 20),
+            titleSpacing: _mainScreenPadding.left,
+            leading: appBarBackButton(context),
           ),
-          ValueListenableBuilder(
-            valueListenable: _navbarSelectedIndex,
-            builder: (context, value, _) {
-              return SliverPadding(
-                padding: paddingInsets.add(EdgeInsets.only(top: 8)),
-                sliver: SliverAppBar(
-                  pinned: true,
-                  toolbarHeight: _navBarHeight,
-                  automaticallyImplyLeading: false,
-                  backgroundColor: Colors.white,
-                  surfaceTintColor: Colors.transparent,
-                  flexibleSpace: FlexibleSpaceBar(
-                    centerTitle: true,
-                    title: NavBarCard(
-                      headerTitle: _navBarTitles,
-                      selectedIndex: _navbarSelectedIndex,
+          body: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: paddingInsets,
+                sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
+              ),
+              ValueListenableBuilder(
+                valueListenable: _navbarSelectedIndex,
+                builder: (context, value, _) {
+                  return SliverPadding(
+                    padding: paddingInsets.add(EdgeInsets.only(top: 8)),
+                    sliver: SliverAppBar(
+                      pinned: true,
+                      toolbarHeight: _navBarHeight,
+                      automaticallyImplyLeading: false,
+                      backgroundColor: Colors.white,
+                      surfaceTintColor: Colors.transparent,
+                      flexibleSpace: FlexibleSpaceBar(
+                        centerTitle: true,
+                        title: NavBarCard(
+                          headerTitle: _navBarTitles,
+                          selectedIndex: _navbarSelectedIndex,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+              ValueListenableBuilder(
+                valueListenable: _navbarSelectedIndex,
+                builder: (context, value, _) {
+                  return SliverPadding(
+                    padding: _mainScreenPadding,
+                    sliver: _navBarHandler(value),
+                  );
+                },
+              ),
+              SliverPadding(
+                padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
+              ),
+            ],
           ),
-          ValueListenableBuilder(
-            valueListenable: _navbarSelectedIndex,
-            builder: (context, value, _) {
-              return SliverPadding(
-                padding: _mainScreenPadding,
-                sliver: _navBarHandler(value),
-              );
-            },
-          ),
-          SliverPadding(
-            padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
-          ),
-        ],
-      ),
-      floatingActionButton: SpeedDial(
-        icon: Iconsax.add,
-        activeIcon: Icons.close,
-        backgroundColor: Colors.deepPurpleAccent,
-        foregroundColor: Colors.white,
-        spacing: 3,
-        openCloseDial: isDialOpen,
-        childPadding: const EdgeInsets.all(5),
-        spaceBetweenChildren: 4,
-        useRotationAnimation: true,
-        animationCurve: Curves.elasticInOut,
-        children: [
-          SpeedDialChild(
-            child: const Icon(Iconsax.add),
-            backgroundColor: UiConstant.colors[0],
+          floatingActionButton: SpeedDial(
+            icon: Iconsax.add,
+            activeIcon: Icons.close,
+            backgroundColor: Colors.deepPurpleAccent,
             foregroundColor: Colors.white,
-            label: 'Add Expense',
-            visible: true,
-            onTap: () {
-              context.push(
-                "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
-              );
-            },
+            spacing: 3,
+            openCloseDial: isDialOpen,
+            childPadding: const EdgeInsets.all(5),
+            spaceBetweenChildren: 4,
+            useRotationAnimation: true,
+            animationCurve: Curves.elasticInOut,
+            children: [
+              SpeedDialChild(
+                child: const Icon(Iconsax.add),
+                backgroundColor: UiConstant.colors[0],
+                foregroundColor: Colors.white,
+                label: 'Add Expense',
+                visible: true,
+                onTap: () {
+                  context.push(
+                    "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
+                  );
+                },
+              ),
+              SpeedDialChild(
+                child: const Icon(Icons.arrow_outward),
+                backgroundColor: UiConstant.colors[1],
+                foregroundColor: Colors.white,
+                label: 'Add Settle Expense',
+                onTap: () {
+                  context.push(
+                    "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomSettleAddRouteName}",
+                  );
+                },
+              ),
+              SpeedDialChild(
+                child: const Icon(Iconsax.lock),
+                backgroundColor: UiConstant.colors[2],
+                foregroundColor: Colors.white,
+                label: 'Close Room',
+                onTap: () {},
+              ),
+              SpeedDialChild(
+                child: const Icon(Iconsax.message_question),
+                backgroundColor: UiConstant.colors[3],
+                foregroundColor: Colors.white,
+                label: 'Close Room Request',
+                onTap: () {},
+              ),
+            ],
           ),
-          SpeedDialChild(
-            child: const Icon(Icons.arrow_outward),
-            backgroundColor: UiConstant.colors[1],
-            foregroundColor: Colors.white,
-            label: 'Add Settle Expense',
-            onTap: () {
-              context.push(
-                "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomSettleAddRouteName}",
-              );
-            },
-          ),
-          SpeedDialChild(
-            child: const Icon(Iconsax.lock),
-            backgroundColor: UiConstant.colors[2],
-            foregroundColor: Colors.white,
-            label: 'Close Room',
-            onTap: () {},
-          ),
-          SpeedDialChild(
-            child: const Icon(Iconsax.message_question),
-            backgroundColor: UiConstant.colors[3],
-            foregroundColor: Colors.white,
-            label: 'Close Room Request',
-            onTap: () {},
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

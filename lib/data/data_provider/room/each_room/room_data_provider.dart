@@ -4,9 +4,27 @@ import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow_v2/util/handler/network_call.dart';
 
 class RoomDataProvider {
-  Future<List<TransactionModel>> fetchData(String email, String id) async {
+  Future<RoomInfoModel> fetchRoomInfo(String id, String authToken) async {
+    try {
+      final response = await createAPICall('room/$id', "get", authToken, {});
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        RoomInfoModel roomData = RoomInfoModel.fromMap(data['data']);
+        return roomData;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<TransactionModel>> fetchData(String id, String authToken) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
       String dataStr = '''
