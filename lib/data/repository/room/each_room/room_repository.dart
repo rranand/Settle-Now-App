@@ -70,12 +70,27 @@ class RoomRepository {
     }
   }
 
-  Future<List<RoomSettleModel>> fetchSettleData(String email, String id) async {
+  Future<List<RoomSettleModel>> fetchSettleData(
+    String id,
+    String authToken,
+    List<UserModel> users,
+  ) async {
     try {
       List<RoomSettleModel> data = await _dataProvider.fetchSettleData(
-        email,
         id,
+        authToken,
       );
+
+      Map<String, UserModel> userMap = {};
+      for (int i = 0; i < users.length; i++) {
+        userMap[users[i].id] = users[i];
+      }
+
+      for (int i = 0; i < data.length; i++) {
+        data[i].sender = userMap[data[i].sender.id]!;
+        data[i].recevier = userMap[data[i].recevier.id]!;
+      }
+
       return data;
     } catch (e) {
       rethrow;

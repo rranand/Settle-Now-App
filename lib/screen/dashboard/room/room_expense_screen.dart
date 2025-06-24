@@ -35,7 +35,7 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(3);
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
 
@@ -88,7 +88,11 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         widget.id,
         _loggedInUser.authToken,
       );
-      context.read<RoomSettleCubit>().fetchData(widget.id);
+      context.read<RoomSettleCubit>().fetchData(
+        widget.id,
+        _loggedInUser.authToken,
+        roomInfoState.data.users,
+      );
     }
 
     if (mounted) {

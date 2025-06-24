@@ -76,7 +76,7 @@ class UserModel {
   factory UserModel.fromBasicInfoMap(Map<String, dynamic> map) {
     return UserModel.fromBasicInfo(
       id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name']),
+      name: Crypto.decrypt(map['name'] ?? ""),
       profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
@@ -11,10 +12,10 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   final RoomUserCubit roomUserCubit;
   RoomSettleCubit(this.repo, this.roomUserCubit) : super(RoomSettleInitial());
 
-  void fetchData(String id) async {
+  void fetchData(String id, String authToken, List<UserModel> users) async {
     emit(RoomSettleLoading());
     try {
-      List<RoomSettleModel> data = await repo.fetchSettleData("email", id);
+      List<RoomSettleModel> data = await repo.fetchSettleData(id, authToken, users);
       return emit(RoomSettleSuccess(data));
     } catch (e) {
       return emit(RoomSettleFailure(e.toString()));

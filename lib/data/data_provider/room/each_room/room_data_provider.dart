@@ -139,36 +139,29 @@ class RoomDataProvider {
     }
   }
 
-  Future<List<RoomSettleModel>> fetchSettleData(String email, String id) async {
+  Future<List<RoomSettleModel>> fetchSettleData(
+    String id,
+    String authToken,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      String dataStr = '''
-      [
-  {
-    "id": "settle_001",
-    "recevier": {
-      "id": "u4",
-      "name": "Eve Wilson",
-      "profileImage": "https://picsum.photos/id/89/200/300"
-    },
-    "sender": {
-      "id": "u2",
-      "name": "Alice Smith",
-      "profileImage": "https://picsum.photos/id/45/200/300"
-    },
-    "amount": 5.5,
-    "createdOn": "2024-12-01T10:30:00Z",
-    "modifiedOn": "2024-12-01T12:00:00Z"
-  }
-]
+      final response = await createAPICall(
+        'room/$id/settle',
+        "get",
+        authToken,
+        {},
+      );
 
+      final data = jsonDecode(response.body);
 
-    ''';
-      List<dynamic> tempArr = jsonDecode(dataStr);
-      List<RoomSettleModel> arr =
-          tempArr.map((ele) => RoomSettleModel.fromMap(ele)).toList();
-
-      return arr;
+      if (response.statusCode == 200) {
+        List<RoomSettleModel> arr = [];
+        for (int i = 0; i < data['data'].length; i++) {
+          arr.add(RoomSettleModel.fromMap(data['data'][i]));
+        }
+        return arr;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }
