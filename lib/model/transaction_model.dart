@@ -116,9 +116,9 @@ class TransactionModel {
       amount: double.parse(Crypto.decrypt(map['amount'])),
       category: Crypto.decrypt(map['category']),
       users: List<UserAmountModel>.from(
-        (map['users']).map((x) => UserAmountModel.fromMap(x)),
+        (map['users']).map((x) => UserAmountModel.fromBasicInfoMap(x)),
       ),
-      createdBy: UserAmountModel.fromMap(map['createdBy']),
+      createdBy: UserAmountModel.fromBasicInfoMap(map['createdBy']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
       modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
     );

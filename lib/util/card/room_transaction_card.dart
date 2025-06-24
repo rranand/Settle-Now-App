@@ -37,7 +37,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
     } else if (widget.data.users.isNotEmpty) {
       tags.add("Partial");
     }
-    if (widget.data.createdOn != widget.data.modifiedOn) {
+    if (!isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
     }
     return tags;
@@ -191,7 +191,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     "Created ${convertDateTimeFormat(widget.data.createdOn)}",
                     isLoaded: widget.data.hasData,
                   ),
-                  isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)
+                  !isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)
                       ? subTextOnCard(
                         "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
                         isLoaded: widget.data.hasData,

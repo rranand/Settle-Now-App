@@ -291,12 +291,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
             ),
             body:
                 lendenTransactionData.isEmpty
-                    ? Center(
-                      child: Text(
-                        "No Expense Found",
-                        style: TextStyle(fontSize: 20, color: Colors.grey),
-                      ),
-                    )
+                    ? noRecordFoundWidget("No Expense Found")
                     : CustomScrollView(
                       slivers: [
                         SliverPadding(

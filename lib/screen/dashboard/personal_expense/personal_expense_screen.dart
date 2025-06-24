@@ -107,12 +107,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
         builder: (context, state) {
           if (state is PersonalMonthlyExpenseFetchSuccess &&
               state.data.isEmpty) {
-            return Center(
-              child: Text(
-                "No Expense Found",
-                style: TextStyle(fontSize: 20, color: Colors.grey),
-              ),
-            );
+            return noRecordFoundWidget("No Expense Found");
           }
           return CustomScrollView(
             slivers: [

@@ -177,7 +177,10 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       context.read<RoomBloc>().add(
         RoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
       );
-      context.read<RoomUserCubit>().fetchData(widget.id);
+      context.read<RoomUserCubit>().fetchData(
+        widget.id,
+        _loggedInUser.authToken,
+      );
       context.read<RoomSettleCubit>().fetchData(widget.id);
     }
   }

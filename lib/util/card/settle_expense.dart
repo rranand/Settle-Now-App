@@ -241,7 +241,10 @@ class _SettleExpenseState extends State<SettleExpense> {
 
     final roomUserState = context.read<RoomUserCubit>().state;
     if (roomUserState is RoomUserInitial || roomUserState is RoomUserFailure) {
-      context.read<RoomUserCubit>().fetchData(widget.roomID);
+      context.read<RoomUserCubit>().fetchData(
+        widget.roomID,
+        _loggedInUser.authToken,
+      );
     }
 
     if (widget.transactionData != null) {

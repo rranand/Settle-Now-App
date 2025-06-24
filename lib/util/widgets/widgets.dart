@@ -140,3 +140,9 @@ Future<dynamic> loadingWidget(BuildContext context) {
     },
   );
 }
+
+Widget noRecordFoundWidget(String txt) {
+  return Center(
+    child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
+  );
+}

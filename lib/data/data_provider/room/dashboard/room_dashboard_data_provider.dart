@@ -13,7 +13,7 @@ class RoomDashboardDataProvider {
   ) async {
     try {
       final response = await createAPICall(
-        'room${isActiveRoom ? "" : "/close"}?alreadyHave=$alreadyHave',
+        'room${isActiveRoom ? "/open" : "/close"}?alreadyHave=$alreadyHave',
         "get",
         authToken,
         {},

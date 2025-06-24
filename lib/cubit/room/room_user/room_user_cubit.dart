@@ -11,10 +11,10 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   final RoomRepository repo;
   RoomUserCubit(this.repo) : super(RoomUserInitial());
 
-  void fetchData(String id) async {
+  void fetchData(String id, String authToken) async {
     emit(RoomUserLoading());
     try {
-      List<RoomUserModel> data = await repo.fetchUserData("email", id);
+      List<RoomUserModel> data = await repo.fetchUserData(id, authToken);
       return emit(RoomUserSuccess(data));
     } catch (e) {
       return emit(RoomUserFailure(e.toString()));

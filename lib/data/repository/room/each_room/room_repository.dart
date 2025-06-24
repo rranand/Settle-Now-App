@@ -35,9 +35,12 @@ class RoomRepository {
     }
   }
 
-  Future<List<RoomUserModel>> fetchUserData(String email, String id) async {
+  Future<List<RoomUserModel>> fetchUserData(String id, String authToken) async {
     try {
-      List<RoomUserModel> data = await _dataProvider.fetchUserData(email, id);
+      List<RoomUserModel> data = await _dataProvider.fetchUserData(
+        id,
+        authToken,
+      );
       return data;
     } catch (e) {
       rethrow;

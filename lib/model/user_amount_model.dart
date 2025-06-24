@@ -11,7 +11,6 @@ class UserAmountModel extends UserModel {
   UserAmountModel({
     required super.id,
     required super.name,
-    required super.email,
     required super.profileImage,
     required this.amount,
   }) : super(
@@ -19,6 +18,7 @@ class UserAmountModel extends UserModel {
          createdOn: DateTime.now(),
          authToken: "",
          phoneNo: "",
+         email: "",
        );
 
   UserAmountModel.empty()
@@ -46,10 +46,23 @@ class UserAmountModel extends UserModel {
     return UserAmountModel(
       id: user.id,
       name: user.name,
-      email: user.email,
       profileImage: user.profileImage,
       amount: amount,
     );
+  }
+
+  @override
+  factory UserAmountModel.fromBasicInfoMap(Map<String, dynamic> map) {
+    UserAmountModel newData = UserAmountModel(
+      id: Crypto.decrypt(map['id']),
+      name: '',
+      profileImage: '',
+      amount: double.parse(Crypto.decrypt(map['amount'])),
+    );
+    if (map.containsKey('isSettled')) {
+      newData.isSettled = Crypto.decrypt(map['isSettled']) == 'true';
+    }
+    return newData;
   }
 
   @override
@@ -57,11 +70,12 @@ class UserAmountModel extends UserModel {
     UserAmountModel newData = UserAmountModel(
       id: Crypto.decrypt(map['id']),
       name: Crypto.decrypt(map['name']),
-      email: '',
       profileImage: Crypto.decrypt(map['profileImage']),
       amount: double.parse(Crypto.decrypt(map['amount'])),
     );
-    newData.isSettled = Crypto.decrypt(map['isSettled']) == 'true';
+    if (map.containsKey('isSettled')) {
+      newData.isSettled = Crypto.decrypt(map['isSettled']) == 'true';
+    }
     return newData;
   }
 
