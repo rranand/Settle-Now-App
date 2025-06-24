@@ -4,6 +4,8 @@ import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
+import 'package:settlenow_v2/model/user_amount_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 
 class RoomRepository {
   final RoomDataProvider _dataProvider;
@@ -23,12 +25,33 @@ class RoomRepository {
     }
   }
 
-  Future<List<TransactionModel>> fetchData(String id, String authToken) async {
+  Future<List<TransactionModel>> fetchData(
+    String id,
+    String authToken,
+    List<UserModel> users,
+  ) async {
     try {
       List<TransactionModel> data = await _dataProvider.fetchData(
         id,
         authToken,
       );
+      Map<String, UserModel> userMap = {};
+      for (int i = 0; i < users.length; i++) {
+        userMap[users[i].id] = users[i];
+      }
+
+      for (int i = 0; i < data.length; i++) {
+        data[i].createdBy = UserAmountModel.copyFromUser(
+          userMap[data[i].createdBy.id]!,
+          data[i].createdBy.amount,
+        );
+        for (int j = 0; j < data[i].users.length; j++) {
+          data[i].users[j] = UserAmountModel.copyFromUser(
+            userMap[data[i].users[j].id]!,
+            data[i].users[j].amount,
+          );
+        }
+      }
       return data;
     } catch (e) {
       rethrow;

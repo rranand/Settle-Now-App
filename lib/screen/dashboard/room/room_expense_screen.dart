@@ -75,6 +75,22 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
+    final RoomInfoState roomInfoState = context.watch<RoomInfoCubit>().state;
+    if (roomInfoState is RoomInfoSuccess) {
+      context.read<RoomBloc>().add(
+        RoomFetch(
+          id: widget.id,
+          authToken: _loggedInUser.authToken,
+          users: roomInfoState.data.users,
+        ),
+      );
+      context.read<RoomUserCubit>().fetchData(
+        widget.id,
+        _loggedInUser.authToken,
+      );
+      context.read<RoomSettleCubit>().fetchData(widget.id);
+    }
+
     if (mounted) {
       setState(() {});
     }
@@ -174,14 +190,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         widget.id,
         _loggedInUser.authToken,
       );
-      context.read<RoomBloc>().add(
-        RoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
-      );
-      context.read<RoomUserCubit>().fetchData(
-        widget.id,
-        _loggedInUser.authToken,
-      );
-      context.read<RoomSettleCubit>().fetchData(widget.id);
     }
   }
 
