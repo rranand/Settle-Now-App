@@ -22,6 +22,5 @@ String formatCurrency(
     customPattern: amount.truncateToDouble() == amount ? '¤#,##0' : '¤#,##0.00',
   ).format(amount);
 
-  debugPrint("Amount $amount $formattedAmount");
   return formattedAmount;
 }
