@@ -35,7 +35,7 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
 
@@ -71,10 +71,31 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     }
   }
 
+  void _resetCubit() {
+    final RoomSettleState roomSettleState =
+        context.watch<RoomSettleCubit>().state;
+
+    if (roomSettleState is RoomSettleSuccess &&
+        roomSettleState.id != widget.id) {
+      context.read<RoomSettleCubit>().resetCubit();
+    }
+
+    final RoomState roomState = context.watch<RoomBloc>().state;
+    if (roomState is RoomFetchSuccess && roomState.id != widget.id) {
+      context.read<RoomBloc>().add(RoomBlocReset());
+    }
+
+    final RoomUserState roomUserState = context.watch<RoomUserCubit>().state;
+    if (roomUserState is RoomUserSuccess && roomUserState.id != widget.id) {
+      context.read<RoomUserCubit>().resetCubit();
+    }
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
+    _resetCubit();
     final RoomInfoState roomInfoState = context.watch<RoomInfoCubit>().state;
     if (roomInfoState is RoomInfoSuccess) {
       final RoomSettleState roomSettleState =
@@ -99,11 +120,16 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         );
       }
 
+      final RoomUserState roomUserState = context.watch<RoomUserCubit>().state;
+
       if (roomSettleState is RoomSettleSuccess &&
           roomSettleState.id == widget.id &&
           roomState is RoomFetchSuccess &&
-          roomState.id == widget.id) {
+          roomState.id == widget.id &&
+          (roomUserState is! RoomUserSuccess ||
+              roomUserState.id != widget.id)) {
         context.read<RoomUserCubit>().fetchData(
+          roomInfoState.data.id,
           roomInfoState.data.users,
           roomState.data,
           roomSettleState.data,

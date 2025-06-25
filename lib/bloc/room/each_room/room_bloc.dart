@@ -16,6 +16,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     on<RoomAddNewTransaction>(_roomAddTransaction);
     on<RoomUpdateTransaction>(_roomUpdateTransaction);
     on<RoomDeleteTransaction>(_roomDeleteTransaction);
+    on<RoomBlocReset>(_roomBlocReset);
   }
 
   void _roomFetch(RoomFetch event, Emitter<RoomState> emit) async {
@@ -78,5 +79,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       roomUserCubit.onDeleteTransaction(data.removeAt(index));
     }
     return emit(RoomFetchSuccess(oldData.id, data));
+  }
+
+  void _roomBlocReset(RoomBlocReset event, Emitter<RoomState> emit) {
+    return emit(RoomLoading());
   }
 }

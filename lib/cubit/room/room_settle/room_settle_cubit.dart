@@ -7,8 +7,6 @@ import 'package:settlenow_v2/model/room_settle_model.dart';
 
 part 'room_settle_state.dart';
 
-// FIXME: On Room Change, Data of old room is still shown RoomInfo is loading
-
 class RoomSettleCubit extends Cubit<RoomSettleState> {
   final RoomRepository repo;
   final RoomUserCubit roomUserCubit;
@@ -26,6 +24,10 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     } catch (e) {
       return emit(RoomSettleFailure(e.toString()));
     }
+  }
+
+  void resetCubit() async {
+    return emit(RoomSettleLoading());
   }
 
   void addNewSettleExpense(RoomSettleModel data) {

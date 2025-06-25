@@ -30,7 +30,10 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
-      child: noRecordFoundWidget("No Record Found"),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * .5,
+        child: noRecordFoundWidget("No Transaction Found"),
+      ),
       // child: ValueListenableBuilder(
       //   valueListenable: _selectedGraphIndex,
       //   builder: (context, value, _) {

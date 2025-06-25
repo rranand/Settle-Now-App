@@ -8,9 +8,10 @@ final class RoomUserInitial extends RoomUserState {}
 final class RoomUserLoading extends RoomUserState {}
 
 final class RoomUserSuccess extends RoomUserState {
+  final String id;
   final List<RoomUserModel> data;
 
-  RoomUserSuccess(this.data);
+  RoomUserSuccess(this.id, this.data);
 }
 
 final class RoomUserFailure extends RoomUserState {

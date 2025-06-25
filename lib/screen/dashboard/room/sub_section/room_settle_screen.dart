@@ -7,6 +7,7 @@ import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/card/settle_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomSettleScreen extends StatefulWidget {
   final String roomID;
@@ -44,6 +45,15 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
               data = state.data;
             } else {
               data = List.filled(11, RoomSettleModel.empty());
+            }
+
+            if (data.isEmpty) {
+              return SliverToBoxAdapter(
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * .5,
+                  child: noRecordFoundWidget("No Record Found"),
+                ),
+              );
             }
 
             return SliverGrid.builder(

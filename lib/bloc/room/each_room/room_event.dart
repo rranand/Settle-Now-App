@@ -28,3 +28,7 @@ final class RoomDeleteTransaction extends RoomEvent {
 
   RoomDeleteTransaction(this.expenseID);
 }
+
+final class RoomBlocReset extends RoomEvent {
+  RoomBlocReset();
+}
