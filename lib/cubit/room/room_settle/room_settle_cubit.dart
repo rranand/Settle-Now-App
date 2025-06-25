@@ -7,6 +7,8 @@ import 'package:settlenow_v2/model/room_settle_model.dart';
 
 part 'room_settle_state.dart';
 
+// FIXME: On Room Change, Data of old room is still shown RoomInfo is loading
+
 class RoomSettleCubit extends Cubit<RoomSettleState> {
   final RoomRepository repo;
   final RoomUserCubit roomUserCubit;
@@ -15,8 +17,12 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   void fetchData(String id, String authToken, List<UserModel> users) async {
     emit(RoomSettleLoading());
     try {
-      List<RoomSettleModel> data = await repo.fetchSettleData(id, authToken, users);
-      return emit(RoomSettleSuccess(data));
+      List<RoomSettleModel> data = await repo.fetchSettleData(
+        id,
+        authToken,
+        users,
+      );
+      return emit(RoomSettleSuccess(id, data));
     } catch (e) {
       return emit(RoomSettleFailure(e.toString()));
     }
@@ -26,7 +32,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     final roomSettleSuccessState = state as RoomSettleSuccess;
     List<RoomSettleModel> newArr = [data, ...roomSettleSuccessState.data];
     roomUserCubit.onAddNewSettleExpense(data);
-    return emit(RoomSettleSuccess(newArr));
+    return emit(RoomSettleSuccess(roomSettleSuccessState.id, newArr));
   }
 
   void updateSettleExpense(RoomSettleModel data) {
@@ -42,7 +48,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
       }
     }
     roomUserCubit.updateSettleExpense(oldData, data);
-    return emit(RoomSettleSuccess(oldArr));
+    return emit(RoomSettleSuccess(roomSettleSuccessState.id, oldArr));
   }
 
   void deleteSettleExpense(String settleExpenseID) {
@@ -59,6 +65,6 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     if (index != -1) {
       roomUserCubit.deleteSettleExpense(oldArr.removeAt(index));
     }
-    return emit(RoomSettleSuccess(oldArr));
+    return emit(RoomSettleSuccess(roomSettleSuccessState.id, oldArr));
   }
 }

@@ -239,14 +239,6 @@ class _SettleExpenseState extends State<SettleExpense> {
       _loggedInUser = authState.userData;
     }
 
-    final roomUserState = context.read<RoomUserCubit>().state;
-    if (roomUserState is RoomUserInitial || roomUserState is RoomUserFailure) {
-      context.read<RoomUserCubit>().fetchData(
-        widget.roomID,
-        _loggedInUser.authToken,
-      );
-    }
-
     if (widget.transactionData != null) {
       _populateEditForm(widget.transactionData!);
     }

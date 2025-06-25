@@ -35,7 +35,7 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(3);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
 
@@ -77,22 +77,38 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
     final RoomInfoState roomInfoState = context.watch<RoomInfoCubit>().state;
     if (roomInfoState is RoomInfoSuccess) {
-      context.read<RoomBloc>().add(
-        RoomFetch(
-          id: widget.id,
-          authToken: _loggedInUser.authToken,
-          users: roomInfoState.data.users,
-        ),
-      );
-      context.read<RoomUserCubit>().fetchData(
-        widget.id,
-        _loggedInUser.authToken,
-      );
-      context.read<RoomSettleCubit>().fetchData(
-        widget.id,
-        _loggedInUser.authToken,
-        roomInfoState.data.users,
-      );
+      final RoomSettleState roomSettleState =
+          context.watch<RoomSettleCubit>().state;
+      if (roomSettleState is! RoomSettleSuccess ||
+          (roomSettleState.id != widget.id)) {
+        context.read<RoomSettleCubit>().fetchData(
+          widget.id,
+          _loggedInUser.authToken,
+          roomInfoState.data.users,
+        );
+      }
+
+      final RoomState roomState = context.watch<RoomBloc>().state;
+      if (roomState is! RoomFetchSuccess || (roomState.id != widget.id)) {
+        context.read<RoomBloc>().add(
+          RoomFetch(
+            id: widget.id,
+            authToken: _loggedInUser.authToken,
+            users: roomInfoState.data.users,
+          ),
+        );
+      }
+
+      if (roomSettleState is RoomSettleSuccess &&
+          roomSettleState.id == widget.id &&
+          roomState is RoomFetchSuccess &&
+          roomState.id == widget.id) {
+        context.read<RoomUserCubit>().fetchData(
+          roomInfoState.data.users,
+          roomState.data,
+          roomSettleState.data,
+        );
+      }
     }
 
     if (mounted) {

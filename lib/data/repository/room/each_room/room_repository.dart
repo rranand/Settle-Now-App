@@ -2,7 +2,6 @@ import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provide
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
-import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
@@ -52,18 +51,6 @@ class RoomRepository {
           );
         }
       }
-      return data;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<List<RoomUserModel>> fetchUserData(String id, String authToken) async {
-    try {
-      List<RoomUserModel> data = await _dataProvider.fetchUserData(
-        id,
-        authToken,
-      );
       return data;
     } catch (e) {
       rethrow;

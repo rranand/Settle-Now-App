@@ -11,10 +11,73 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   final RoomRepository repo;
   RoomUserCubit(this.repo) : super(RoomUserInitial());
 
-  void fetchData(String id, String authToken) async {
+  void fetchData(
+    List<UserModel> userArr,
+    List<TransactionModel> transArr,
+    List<RoomSettleModel> settleArr,
+  ) async {
     emit(RoomUserLoading());
     try {
-      List<RoomUserModel> data = await repo.fetchUserData(id, authToken);
+      Map<String, double> contributionMap = {};
+      Map<String, double> spentMap = {};
+      Map<String, double> settleMap = {};
+
+      int n = userArr.length;
+
+      // for (int i = 0; i < n; i++) {
+      //   contributionMap[userArr[i].id] = 0;
+      //   spentMap[userArr[i].id] = 0;
+      //   settleMap[userArr[i].id] = 0;
+      // }
+
+      for (int i = 0; i < settleArr.length; i++) {
+        RoomSettleModel eachObj = settleArr[i];
+        String senderUID = eachObj.sender.id;
+        String recevierUID = eachObj.recevier.id;
+
+        settleMap[senderUID] = (settleMap[senderUID] ?? 0) + eachObj.amount;
+        settleMap[recevierUID] = (settleMap[recevierUID] ?? 0) - eachObj.amount;
+      }
+
+      double totalCommonSplitAmount = 0;
+
+      for (int i = 0; i < transArr.length; i++) {
+        TransactionModel eachObj = transArr[i];
+        String createdBy = eachObj.createdBy.id;
+
+        contributionMap[createdBy] =
+            (contributionMap[createdBy] ?? 0) + eachObj.amount;
+
+        if (eachObj.users.isEmpty) {
+          totalCommonSplitAmount += eachObj.amount / n;
+        } else {
+          spentMap[createdBy] =
+              (spentMap[createdBy] ?? 0) + eachObj.createdBy.amount;
+
+          for (int j = 0; j < eachObj.users.length; j++) {
+            String userID = eachObj.users[j].id;
+            spentMap[userID] =
+                (spentMap[userID] ?? 0) + eachObj.users[j].amount;
+          }
+        }
+      }
+
+      List<RoomUserModel> data = [];
+
+      for (int i = 0; i < n; i++) {
+        spentMap[userArr[i].id] =
+            (spentMap[userArr[i].id] ?? 0) + totalCommonSplitAmount;
+
+        RoomUserModel eachObj = RoomUserModel(
+          user: userArr[i],
+          contribution: contributionMap[userArr[i].id] ?? 0,
+          spent: spentMap[userArr[i].id] ?? 0,
+          settle: settleMap[userArr[i].id] ?? 0,
+        );
+
+        data.add(eachObj);
+      }
+
       return emit(RoomUserSuccess(data));
     } catch (e) {
       return emit(RoomUserFailure(e.toString()));

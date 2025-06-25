@@ -5,14 +5,12 @@ import 'package:settlenow_v2/core.dart';
 
 class RoomUserModel {
   bool hasData = true;
-  String id = "";
   UserModel user = UserModel.empty();
   double contribution = 0;
   double spent = 0;
   double settle = 0;
 
   RoomUserModel({
-    required this.id,
     required this.user,
     required this.contribution,
     required this.spent,
@@ -29,7 +27,6 @@ class RoomUserModel {
     double? settle,
   }) {
     return RoomUserModel(
-      id: id ?? this.id,
       user: user ?? this.user,
       contribution: contribution ?? this.contribution,
       spent: spent ?? this.spent,
@@ -39,7 +36,6 @@ class RoomUserModel {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'id': id,
       'user': user.toMap(),
       'contribution': contribution,
       'spent': spent,
@@ -49,7 +45,6 @@ class RoomUserModel {
 
   factory RoomUserModel.fromMap(Map<String, dynamic> map) {
     return RoomUserModel(
-      id: map['id'] as String,
       user: UserModel.fromBasicInfoMap(map['user']),
       contribution: map['contribution'] as double,
       spent: map['spent'] as double,
@@ -64,15 +59,14 @@ class RoomUserModel {
 
   @override
   String toString() {
-    return 'RoomUserModel(id: $id, user: $user, contribution: $contribution, spent: $spent, settle: $settle)';
+    return 'RoomUserModel(user: $user, contribution: $contribution, spent: $spent, settle: $settle)';
   }
 
   @override
   bool operator ==(covariant RoomUserModel other) {
     if (identical(this, other)) return true;
 
-    return other.id == id &&
-        other.user == user &&
+    return other.user == user &&
         other.contribution == contribution &&
         other.spent == spent &&
         other.settle == settle;
@@ -80,8 +74,7 @@ class RoomUserModel {
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        user.hashCode ^
+    return user.hashCode ^
         contribution.hashCode ^
         spent.hashCode ^
         settle.hashCode;
