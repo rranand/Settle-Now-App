@@ -155,6 +155,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             totalSpent += state.data[i].contribution;
           }
           double balance = data.contribution - data.spent + data.settle;
+          balance = (balance.abs() < 1e-2) ? 0 : balance;
 
           return Card(
             shape: RoundedRectangleBorder(
