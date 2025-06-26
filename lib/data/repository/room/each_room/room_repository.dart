@@ -84,6 +84,14 @@ class RoomRepository {
     }
   }
 
+  Future<void> closeRoomRequest(String id, String authToken) async {
+    try {
+      await _dataProvider.closeRoomRequest(id, authToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<TransactionModel> createExpense(NewTransactionModel data) async {
     try {
       TransactionModel newExpense = await _dataProvider.createExpense(data);

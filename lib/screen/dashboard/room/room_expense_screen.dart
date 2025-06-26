@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -7,6 +9,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/room_close_request/room_close_request_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
@@ -38,6 +41,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
+  late final StreamSubscription roomCloseRequestSubscription;
 
   final List<String> _navBarTitles = [
     "Transactions",
@@ -238,6 +242,26 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         _loggedInUser.authToken,
       );
     }
+
+    roomCloseRequestSubscription = context
+        .read<RoomCloseRequestCubit>()
+        .stream
+        .listen((state) {
+          if (mounted) {
+            if (state is RoomCloseRequestSuccess && widget.id == state.roomID) {
+              showNormalSnackBar(context, "Member Notified for Room Close");
+            } else if (state is RoomCloseRequestFailure &&
+                widget.id == state.roomID) {
+              showNormalSnackBar(context, state.error);
+            }
+          }
+        });
+  }
+
+  @override
+  void dispose() {
+    roomCloseRequestSubscription.cancel();
+    super.dispose();
   }
 
   @override
@@ -352,7 +376,12 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                 backgroundColor: UiConstant.colors[3],
                 foregroundColor: Colors.white,
                 label: 'Close Room Request',
-                onTap: () {},
+                onTap: () {
+                  context.read<RoomCloseRequestCubit>().closeRoomRequest(
+                    widget.id,
+                    _loggedInUser.authToken,
+                  );
+                },
               ),
             ],
           ),
