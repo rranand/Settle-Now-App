@@ -278,11 +278,25 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         }
       },
       builder: (context, state) {
+        bool isRoomActive = false;
+        bool isLoaded = false;
+        String roomName = "";
+        RoomUserModel roomUserModel = RoomUserModel.empty();
+
+        if (state is RoomInfoSuccess) {
+          isRoomActive = state.data.active;
+          roomName = state.data.roomName;
+          isLoaded = true;
+          roomUserModel = state.data.users.firstWhere(
+            (ele) => _loggedInUser.id == ele.user.id,
+          );
+        }
+
         return Scaffold(
           appBar: AppBar(
             title:
-                (state is RoomInfoSuccess)
-                    ? Text(state.data.roomName)
+                isLoaded
+                    ? Text(roomName)
                     : CustomShimmerEffect.textWidget(width: 180, fontSize: 20),
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
@@ -329,62 +343,70 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
               ),
             ],
           ),
-          floatingActionButton: SpeedDial(
-            icon: Iconsax.add,
-            activeIcon: Icons.close,
-            backgroundColor: Colors.deepPurpleAccent,
-            foregroundColor: Colors.white,
-            spacing: 3,
-            openCloseDial: isDialOpen,
-            childPadding: const EdgeInsets.all(5),
-            spaceBetweenChildren: 4,
-            useRotationAnimation: true,
-            animationCurve: Curves.elasticInOut,
-            children: [
-              SpeedDialChild(
-                child: const Icon(Iconsax.add),
-                backgroundColor: UiConstant.colors[0],
-                foregroundColor: Colors.white,
-                label: 'Add Expense',
-                visible: true,
-                onTap: () {
-                  context.push(
-                    "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
-                  );
-                },
-              ),
-              SpeedDialChild(
-                child: const Icon(Icons.arrow_outward),
-                backgroundColor: UiConstant.colors[1],
-                foregroundColor: Colors.white,
-                label: 'Add Settle Expense',
-                onTap: () {
-                  context.push(
-                    "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomSettleAddRouteName}",
-                  );
-                },
-              ),
-              SpeedDialChild(
-                child: const Icon(Iconsax.lock),
-                backgroundColor: UiConstant.colors[2],
-                foregroundColor: Colors.white,
-                label: 'Close Room',
-                onTap: () {},
-              ),
-              SpeedDialChild(
-                child: const Icon(Iconsax.message_question),
-                backgroundColor: UiConstant.colors[3],
-                foregroundColor: Colors.white,
-                label: 'Close Room Request',
-                onTap: () {
-                  context.read<RoomCloseRequestCubit>().closeRoomRequest(
-                    widget.id,
-                    _loggedInUser.authToken,
-                  );
-                },
-              ),
-            ],
-          ),
+          floatingActionButton:
+              isRoomActive
+                  ? SpeedDial(
+                    icon: Iconsax.add,
+                    activeIcon: Icons.close,
+                    backgroundColor: Colors.deepPurpleAccent,
+                    foregroundColor: Colors.white,
+                    spacing: 3,
+                    openCloseDial: isDialOpen,
+                    childPadding: const EdgeInsets.all(5),
+                    spaceBetweenChildren: 4,
+                    useRotationAnimation: true,
+                    animationCurve: Curves.elasticInOut,
+                    children: [
+                      SpeedDialChild(
+                        child: const Icon(Iconsax.add),
+                        backgroundColor: UiConstant.colors[0],
+                        foregroundColor: Colors.white,
+                        label: 'Add Expense',
+                        visible: roomUserModel.active,
+                        onTap: () {
+                          context.push(
+                            "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddExpenseRouteName}",
+                          );
+                        },
+                      ),
+                      SpeedDialChild(
+                        child: const Icon(Icons.arrow_outward),
+                        backgroundColor: UiConstant.colors[1],
+                        foregroundColor: Colors.white,
+                        visible: roomUserModel.active,
+                        label: 'Add Settle Expense',
+                        onTap: () {
+                          context.push(
+                            "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomSettleAddRouteName}",
+                          );
+                        },
+                      ),
+                      SpeedDialChild(
+                        child: const Icon(Iconsax.lock),
+                        backgroundColor: UiConstant.colors[2],
+                        foregroundColor: Colors.white,
+                        visible: roomUserModel.active,
+                        label: 'Close Room',
+                        onTap: () {},
+                      ),
+                      SpeedDialChild(
+                        child: const Icon(Iconsax.message_question),
+                        backgroundColor: UiConstant.colors[3],
+                        foregroundColor: Colors.white,
+                        visible: isRoomActive,
+                        label: 'Close Room Request',
+                        onTap: () {
+                          context
+                              .read<RoomCloseRequestCubit>()
+                              .closeRoomRequest(
+                                widget.id,
+                                _loggedInUser.authToken,
+                              );
+                        },
+                      ),
+                    ],
+                  )
+                  : null,
         );
       },
     );

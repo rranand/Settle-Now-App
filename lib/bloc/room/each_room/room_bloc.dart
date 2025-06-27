@@ -21,7 +21,10 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
   }
 
   void _roomFetch(RoomFetch event, Emitter<RoomState> emit) async {
-    emit(RoomLoading());
+    if (state is RoomLoading && (state as RoomLoading).id == event.id) {
+      return;
+    }
+    emit(RoomLoading(event.id));
     try {
       List<TransactionModel> data = await repo.fetchData(
         event.id,
@@ -83,6 +86,6 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
   }
 
   void _roomBlocReset(RoomBlocReset event, Emitter<RoomState> emit) {
-    return emit(RoomLoading());
+    return emit(RoomLoading(""));
   }
 }

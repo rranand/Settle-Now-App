@@ -5,7 +5,11 @@ sealed class RoomSettleState {}
 
 final class RoomSettleInitial extends RoomSettleState {}
 
-final class RoomSettleLoading extends RoomSettleState {}
+final class RoomSettleLoading extends RoomSettleState {
+  final String id;
+
+  RoomSettleLoading(this.id);
+}
 
 final class RoomSettleSuccess extends RoomSettleState {
   final String id;

@@ -13,7 +13,10 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   RoomSettleCubit(this.repo, this.roomUserCubit) : super(RoomSettleInitial());
 
   void fetchData(String id, String authToken, List<RoomUserModel> users) async {
-    emit(RoomSettleLoading());
+    if (state is RoomSettleLoading && (state as RoomSettleLoading).id == id) {
+      return;
+    }
+    emit(RoomSettleLoading(id));
     try {
       List<RoomSettleModel> data = await repo.fetchSettleData(
         id,
@@ -27,7 +30,7 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   }
 
   void resetCubit() async {
-    return emit(RoomSettleLoading());
+    return emit(RoomSettleLoading(""));
   }
 
   void addNewSettleExpense(RoomSettleModel data) {
