@@ -13,7 +13,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
 
   void fetchData(
     String id,
-    List<UserModel> userArr,
+    List<RoomUserModel> userArr,
     List<TransactionModel> transArr,
     List<RoomSettleModel> settleArr,
   ) async {
@@ -60,14 +60,16 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       List<RoomUserModel> data = [];
 
       for (int i = 0; i < n; i++) {
-        spentMap[userArr[i].id] =
-            (spentMap[userArr[i].id] ?? 0) + totalCommonSplitAmount;
+        String userID = userArr[i].user.id;
+        spentMap[userID] = (spentMap[userID] ?? 0) + totalCommonSplitAmount;
 
         RoomUserModel eachObj = RoomUserModel(
-          user: userArr[i],
-          contribution: contributionMap[userArr[i].id] ?? 0,
-          spent: spentMap[userArr[i].id] ?? 0,
-          settle: settleMap[userArr[i].id] ?? 0,
+          id: userArr[i].id,
+          active: userArr[i].active,
+          user: userArr[i].user,
+          contribution: contributionMap[userID] ?? 0,
+          spent: spentMap[userID] ?? 0,
+          settle: settleMap[userID] ?? 0,
         );
 
         data.add(eachObj);

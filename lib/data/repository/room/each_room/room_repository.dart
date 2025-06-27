@@ -2,6 +2,7 @@ import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provide
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
@@ -27,7 +28,7 @@ class RoomRepository {
   Future<List<TransactionModel>> fetchData(
     String id,
     String authToken,
-    List<UserModel> users,
+    List<RoomUserModel> users,
   ) async {
     try {
       List<TransactionModel> data = await _dataProvider.fetchData(
@@ -36,7 +37,7 @@ class RoomRepository {
       );
       Map<String, UserModel> userMap = {};
       for (int i = 0; i < users.length; i++) {
-        userMap[users[i].id] = users[i];
+        userMap[users[i].user.id] = users[i].user;
       }
 
       for (int i = 0; i < data.length; i++) {
@@ -60,7 +61,7 @@ class RoomRepository {
   Future<List<RoomSettleModel>> fetchSettleData(
     String id,
     String authToken,
-    List<UserModel> users,
+    List<RoomUserModel> users,
   ) async {
     try {
       List<RoomSettleModel> data = await _dataProvider.fetchSettleData(
@@ -70,7 +71,7 @@ class RoomRepository {
 
       Map<String, UserModel> userMap = {};
       for (int i = 0; i < users.length; i++) {
-        userMap[users[i].id] = users[i];
+        userMap[users[i].user.id] = users[i].user;
       }
 
       for (int i = 0; i < data.length; i++) {

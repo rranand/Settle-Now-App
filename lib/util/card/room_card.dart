@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
@@ -16,6 +17,7 @@ class RoomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<UserModel> users = data.users.map((obj) => obj.user).toList();
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
@@ -82,7 +84,7 @@ class RoomCard extends StatelessWidget {
                   ),
                   const SizedBox(height: UiConstant.cardSpaceAfterSubText),
                   data.hasData
-                      ? overlapUserImageWidget(context, data.users, 4)
+                      ? overlapUserImageWidget(context, users, 4)
                       : CustomShimmerEffect.overlapImageWidget(),
                 ],
               ),

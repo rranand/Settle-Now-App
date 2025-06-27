@@ -1,5 +1,7 @@
 import 'package:settlenow_v2/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
 
 class RoomDashboardRepository {
@@ -24,9 +26,20 @@ class RoomDashboardRepository {
     }
   }
 
-  Future<RoomInfoModel> createRoom(String roomName, String authToken) async {
+  Future<RoomInfoModel> createRoom(String roomName, UserModel user) async {
     try {
-      RoomInfoModel data = await _dataProvider.createRoom(roomName, authToken);
+      Pair<RoomInfoModel, String> roomData = await _dataProvider.createRoom(
+        roomName,
+        user.authToken,
+      );
+      RoomInfoModel data = roomData.first;
+      data.users = [
+        RoomUserModel.fromBasicInfo(
+          id: roomData.second,
+          user: user,
+          active: true,
+        ),
+      ];
       return data;
     } catch (e) {
       rethrow;

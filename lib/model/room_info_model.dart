@@ -2,8 +2,8 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
 
-import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class RoomInfoModel {
@@ -14,7 +14,8 @@ class RoomInfoModel {
   String roomLink = "";
   String status = "";
   DateTime createdOn = DateTime.now();
-  List<UserModel> users = [];
+  List<RoomUserModel> users = [];
+  bool active = true;
 
   RoomInfoModel({
     required this.id,
@@ -24,6 +25,7 @@ class RoomInfoModel {
     required this.status,
     required this.createdOn,
     required this.users,
+    required this.active,
   });
 
   RoomInfoModel.empty({this.hasData = false});
@@ -35,7 +37,8 @@ class RoomInfoModel {
     String? roomKey,
     String? roomLink,
     DateTime? createdOn,
-    List<UserModel>? users,
+    List<RoomUserModel>? users,
+    bool? active,
   }) {
     return RoomInfoModel(
       id: id ?? this.id,
@@ -45,6 +48,7 @@ class RoomInfoModel {
       users: users ?? this.users,
       roomKey: roomKey ?? this.roomKey,
       roomLink: roomLink ?? this.roomLink,
+      active: active ?? this.active,
     );
   }
 
@@ -57,6 +61,7 @@ class RoomInfoModel {
       'roomLink': roomLink,
       'createdOn': createdOn.toString(),
       'users': users.map((x) => x.toMap()).toList(),
+      'active': active,
     };
   }
 
@@ -68,9 +73,10 @@ class RoomInfoModel {
       roomKey: Crypto.decrypt(map['roomKey']),
       roomLink: Crypto.decrypt(map['roomLink']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
-      users: List<UserModel>.from(
-        (map['users']).map((x) => UserModel.fromBasicInfoMap(x)),
+      users: List<RoomUserModel>.from(
+        (map['users']).map((x) => RoomUserModel.fromBasicInfoMap(x)),
       ),
+      active: Crypto.decrypt(map['active']) == 'true',
     );
   }
 
@@ -81,7 +87,7 @@ class RoomInfoModel {
 
   @override
   String toString() {
-    return 'RoomInfoModel(id: $id, roomName: $roomName, roomKey: $roomKey, status $status, createdOn: $createdOn)';
+    return 'RoomInfoModel(id: $id, active: $active roomName: $roomName, roomKey: $roomKey, status $status, createdOn: $createdOn)';
   }
 
   @override
@@ -89,6 +95,7 @@ class RoomInfoModel {
     if (identical(this, other)) return true;
 
     return other.id == id &&
+        other.active == active &&
         other.roomName == roomName &&
         other.roomKey == roomKey &&
         other.roomLink == roomLink &&
@@ -100,6 +107,7 @@ class RoomInfoModel {
   @override
   int get hashCode {
     return id.hashCode ^
+        active.hashCode ^
         roomName.hashCode ^
         roomKey.hashCode ^
         roomLink.hashCode ^

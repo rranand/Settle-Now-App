@@ -36,7 +36,10 @@ class RoomDashboardDataProvider {
     }
   }
 
-  Future<RoomInfoModel> createRoom(String roomName, String authToken) async {
+  Future<Pair<RoomInfoModel, String>> createRoom(
+    String roomName,
+    String authToken,
+  ) async {
     try {
       final response = await createAPICall('room', 'post', authToken, {
         "roomName": Crypto.encrypt(roomName),
@@ -53,8 +56,9 @@ class RoomDashboardDataProvider {
           users: [],
           roomKey: Crypto.decrypt(data["data"]["roomKey"]),
           roomLink: Crypto.decrypt(data["data"]["roomLink"]),
+          active: true,
         );
-        return newRoomData;
+        return Pair(newRoomData, Crypto.decrypt(data["data"]["roomMemberID"]));
       } else {
         throw Crypto.decrypt(data['message']);
       }
