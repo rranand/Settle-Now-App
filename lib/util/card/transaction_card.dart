@@ -64,7 +64,7 @@ class _TransactionCardState extends State<TransactionCard> {
   }
 
   bool showEdited() {
-    return isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn) ||
+    return !isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn) ||
         !widget.data.hasData;
   }
 
@@ -73,7 +73,7 @@ class _TransactionCardState extends State<TransactionCard> {
       return List.filled(1, "");
     }
     List<String> tags = [widget.data.category];
-    if (isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
+    if (!isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
     }
     if (widget.data.roomData.hasData) {

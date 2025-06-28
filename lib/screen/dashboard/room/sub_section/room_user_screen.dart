@@ -43,46 +43,76 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
         padding: const EdgeInsets.all(UiConstant.cardPadding + 2),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            data.hasData
-                ? overlapUserImageWidget(context, [user], 1, imageRadius: 55)
-                : CustomShimmerEffect.overlapImageWidget(
-                  noOfImages: 1,
-                  imageRadius: 55,
-                ),
-            SizedBox(width: 8),
-            Column(
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 data.hasData
-                    ? Text(
-                      user.name,
-                      style: TextStyle(
-                        fontSize: UiConstant.cardTitleTextSize,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    ? overlapUserImageWidget(
+                      context,
+                      [user],
+                      1,
+                      imageRadius: 55,
                     )
-                    : CustomShimmerEffect.textWidget(
-                      fontSize: UiConstant.cardTitleTextSize,
-                      width: 150,
+                    : CustomShimmerEffect.overlapImageWidget(
+                      noOfImages: 1,
+                      imageRadius: 55,
                     ),
-                subTextOnCard(
-                  "Contributed: ${formatCurrency(data.contribution, context)}",
-                  fontSize: subTextFontSize,
-                  isLoaded: data.hasData,
-                ),
-                subTextOnCard(
-                  "Spent: ${formatCurrency(data.spent, context)}",
-                  fontSize: subTextFontSize,
-                  isLoaded: data.hasData,
-                ),
-                subTextOnCard(
-                  "Balance: ${formatCurrency(amount, context)}",
-                  fontSize: subTextFontSize,
-                  textColor: getAmountColor(amount),
-                  isLoaded: data.hasData,
+                SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    data.hasData
+                        ? Text(
+                          user.name,
+                          style: TextStyle(
+                            fontSize: UiConstant.cardTitleTextSize,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                        : CustomShimmerEffect.textWidget(
+                          fontSize: UiConstant.cardTitleTextSize,
+                          width: 150,
+                        ),
+                    subTextOnCard(
+                      "Contributed: ${formatCurrency(data.contribution, context)}",
+                      fontSize: subTextFontSize,
+                      isLoaded: data.hasData,
+                    ),
+                    subTextOnCard(
+                      "Spent: ${formatCurrency(data.spent, context)}",
+                      fontSize: subTextFontSize,
+                      isLoaded: data.hasData,
+                    ),
+                    subTextOnCard(
+                      "Balance: ${formatCurrency(amount, context)}",
+                      fontSize: subTextFontSize,
+                      textColor: getAmountColor(amount),
+                      isLoaded: data.hasData,
+                    ),
+                  ],
                 ),
               ],
+            ),
+            Visibility(
+              visible: data.hasData,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+                decoration: BoxDecoration(
+                  color:
+                      data.active ? Colors.green.shade50 : Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  data.active ? "Active" : "Closed",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: data.active ? Colors.green : Colors.red,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

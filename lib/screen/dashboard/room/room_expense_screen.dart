@@ -38,7 +38,7 @@ class RoomExpenseScreen extends StatefulWidget {
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
   late final StreamSubscription roomCloseRequestSubscription;
@@ -249,7 +249,14 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         .listen((state) {
           if (mounted) {
             if (state is RoomCloseRequestSuccess && widget.id == state.roomID) {
-              showNormalSnackBar(context, "Member Notified for Room Close");
+              if (state.retryCount > 1) {
+                showNormalSnackBar(
+                  context,
+                  "Member Already Notified for Room Close",
+                );
+              } else {
+                showNormalSnackBar(context, "Member Notified for Room Close");
+              }
             } else if (state is RoomCloseRequestFailure &&
                 widget.id == state.roomID) {
               showNormalSnackBar(context, state.error);
