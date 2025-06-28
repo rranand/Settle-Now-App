@@ -100,6 +100,25 @@ class RoomDataProvider {
     }
   }
 
+  Future<void> closeRoom(String id, String authToken) async {
+    try {
+      final response = await createAPICall(
+        'room/close/$id',
+        "get",
+        authToken,
+        {},
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<TransactionModel> createExpense(NewTransactionModel data) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});

@@ -19,6 +19,7 @@ import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
 import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_close/room_close_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close_request/room_close_request_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
@@ -208,23 +209,7 @@ class MyApp extends StatelessWidget {
                 (context) =>
                     UserUpdateProfileCubit(context.read<AuthRepository>()),
           ),
-          BlocProvider<RoomUserCubit>(
-            create: (context) => RoomUserCubit(context.read<RoomRepository>()),
-          ),
-          BlocProvider<RoomBloc>(
-            create:
-                (context) => RoomBloc(
-                  context.read<RoomRepository>(),
-                  context.read<RoomUserCubit>(),
-                ),
-          ),
-          BlocProvider<RoomSettleCubit>(
-            create:
-                (context) => RoomSettleCubit(
-                  context.read<RoomRepository>(),
-                  context.read<RoomUserCubit>(),
-                ),
-          ),
+
           BlocProvider<CreateJoinRoomCubit>(
             create:
                 (context) => CreateJoinRoomCubit(
@@ -250,10 +235,38 @@ class MyApp extends StatelessWidget {
                   context.read<RoomRepository>(),
                 ),
           ),
+          BlocProvider<RoomUserCubit>(
+            create:
+                (context) => RoomUserCubit(
+                  context.read<RoomRepository>(),
+                  context.read<RoomInfoCubit>(),
+                ),
+          ),
+          BlocProvider<RoomBloc>(
+            create:
+                (context) => RoomBloc(
+                  context.read<RoomRepository>(),
+                  context.read<RoomUserCubit>(),
+                ),
+          ),
+          BlocProvider<RoomSettleCubit>(
+            create:
+                (context) => RoomSettleCubit(
+                  context.read<RoomRepository>(),
+                  context.read<RoomUserCubit>(),
+                ),
+          ),
           BlocProvider<RoomCloseRequestCubit>(
             create:
                 (context) =>
                     RoomCloseRequestCubit(context.read<RoomRepository>()),
+          ),
+          BlocProvider<RoomCloseCubit>(
+            create:
+                (context) => RoomCloseCubit(
+                  context.read<RoomRepository>(),
+                  context.read<RoomUserCubit>(),
+                ),
           ),
           BlocProvider<UserLoginActivityCubit>(
             create:

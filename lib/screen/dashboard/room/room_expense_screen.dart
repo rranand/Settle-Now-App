@@ -9,6 +9,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/room_close/room_close_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close_request/room_close_request_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
@@ -42,6 +43,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
   late final StreamSubscription roomCloseRequestSubscription;
+  late final StreamSubscription roomCloseSubscription;
 
   final List<String> _navBarTitles = [
     "Transactions",
@@ -263,12 +265,60 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             }
           }
         });
+
+    roomCloseSubscription = context.read<RoomCloseCubit>().stream.listen((
+      state,
+    ) {
+      if (mounted) {
+        if (state is RoomCloseSuccess && widget.id == state.roomID) {
+          if (state.retryCount > 1) {
+            showNormalSnackBar(context, "Room Already Closed");
+          } else {
+            showNormalSnackBar(context, "Room Closed Successfully");
+          }
+        } else if (state is RoomCloseFailure && widget.id == state.roomID) {
+          showNormalSnackBar(context, state.error);
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     roomCloseRequestSubscription.cancel();
+    roomCloseSubscription.cancel();
     super.dispose();
+  }
+
+  void _closeRoomPopupDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Close Room"),
+          content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop();
+              },
+              child: Text("No"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.pop();
+                context.read<RoomCloseCubit>().closeRoom(
+                  widget.id,
+                  _loggedInUser.id,
+                  _loggedInUser.authToken,
+                );
+              },
+              child: Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -394,7 +444,20 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         foregroundColor: Colors.white,
                         visible: roomUserModel.active,
                         label: 'Close Room',
-                        onTap: () {},
+                        onTap: () {
+                          if (!roomUserModel.hasData) {
+                            return;
+                          }
+                          double unSettledAmount =
+                              roomUserModel.contribution -
+                              roomUserModel.spent +
+                              roomUserModel.settle;
+                          if (unSettledAmount.abs() < 0.2) {
+                            _closeRoomPopupDialog();
+                          } else {
+                            showNormalSnackBar(context, "Settle Your Spending");
+                          }
+                        },
                       ),
                       SpeedDialChild(
                         child: const Icon(Iconsax.message_question),

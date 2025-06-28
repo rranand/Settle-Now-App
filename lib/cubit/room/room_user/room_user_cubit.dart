@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
@@ -9,7 +10,8 @@ part 'room_user_state.dart';
 
 class RoomUserCubit extends Cubit<RoomUserState> {
   final RoomRepository repo;
-  RoomUserCubit(this.repo) : super(RoomUserInitial());
+  final RoomInfoCubit _roomInfoCubit;
+  RoomUserCubit(this.repo, this._roomInfoCubit) : super(RoomUserInitial());
 
   void fetchData(
     String id,
@@ -74,11 +76,31 @@ class RoomUserCubit extends Cubit<RoomUserState> {
 
         data.add(eachObj);
       }
-
+      _roomInfoCubit.updateUserData(id, data);
       return emit(RoomUserSuccess(id, data));
     } catch (e) {
       return emit(RoomUserFailure(e.toString()));
     }
+  }
+
+  void updateCloseStatus(String id, String uid, bool active) async {
+    if (state is RoomUserSuccess) {
+      final oldState = (state as RoomUserSuccess);
+
+      if (oldState.id == id) {
+        List<RoomUserModel> userData = [...oldState.data];
+        for (int i = 0; i < userData.length; i++) {
+          if (userData[i].user.id == uid) {
+            userData[i].active = active;
+            break;
+          }
+        }
+        _roomInfoCubit.updateUserData(id, userData);
+        return emit(RoomUserSuccess(id, userData));
+      }
+    }
+
+    return;
   }
 
   void onAddNewTransaction(TransactionModel data) {

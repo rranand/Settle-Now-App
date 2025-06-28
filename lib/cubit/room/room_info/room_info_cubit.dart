@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
 
 part 'room_info_state.dart';
 
@@ -38,5 +39,17 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     } catch (e) {
       return emit(RoomInfoFailure(e.toString()));
     }
+  }
+
+  void updateUserData(String id, List<RoomUserModel> userData) async {
+    if (state is RoomInfoSuccess) {
+      final oldState = (state as RoomInfoSuccess);
+
+      if (oldState.data.id == id) {
+        return emit(RoomInfoSuccess(oldState.data.copyWith(users: userData)));
+      }
+    }
+
+    return;
   }
 }
