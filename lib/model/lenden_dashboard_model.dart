@@ -61,7 +61,7 @@ class LendenDashboardModel {
       id: Crypto.decrypt(map['id']),
       roomName: Crypto.decrypt(map['roomName']),
       status: Crypto.decrypt(map['status']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
       amount: double.parse(Crypto.decrypt(map['amount'])),
       users: List<LendenUserModel>.from(
         (map['users']).map((x) => LendenUserModel.fromBasicInfoMap(x)),

@@ -89,7 +89,8 @@ class UserModel {
     );
 
     userData.phoneNo = Crypto.decrypt(map['phoneNo']);
-    userData.createdOn = DateTime.parse(Crypto.decrypt(map['createdOn']));
+    userData.createdOn =
+        DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal();
 
     userData.email = Crypto.decrypt(map['email']);
     userData.isGoogle = Crypto.decrypt(map['isGoogle']) == "true";
@@ -103,7 +104,7 @@ class UserModel {
       name: Crypto.decrypt(map['name']),
       email: Crypto.decrypt(map['email'] ?? ""),
       profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
       authToken: Crypto.decrypt(map['authToken'] ?? ""),
       phoneNo: Crypto.decrypt(map['phoneNo'] ?? ""),
     );

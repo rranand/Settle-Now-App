@@ -72,7 +72,7 @@ class RoomInfoModel {
       status: Crypto.decrypt(map['status']),
       roomKey: Crypto.decrypt(map['roomKey']),
       roomLink: Crypto.decrypt(map['roomLink']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
       users: List<RoomUserModel>.from(
         (map['users']).map((x) => RoomUserModel.fromBasicInfoMap(x)),
       ),

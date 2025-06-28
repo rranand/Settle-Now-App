@@ -61,8 +61,8 @@ class RoomSettleModel {
       ),
       sender: UserModel.fromBasicInfoMap(map['sender'] as Map<String, dynamic>),
       amount: double.parse(Crypto.decrypt(map['amount'])),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
+      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
     );
   }
 

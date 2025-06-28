@@ -119,8 +119,8 @@ class TransactionModel {
         (map['users']).map((x) => UserAmountModel.fromBasicInfoMap(x)),
       ),
       createdBy: UserAmountModel.fromBasicInfoMap(map['createdBy']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
+      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
     );
   }
 

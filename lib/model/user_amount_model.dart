@@ -55,8 +55,8 @@ class UserAmountModel extends UserModel {
   factory UserAmountModel.fromBasicInfoMap(Map<String, dynamic> map) {
     UserAmountModel newData = UserAmountModel(
       id: Crypto.decrypt(map['id']),
-      name: '',
-      profileImage: '',
+      name: Crypto.decrypt(map['name'] ?? ""),
+      profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
       amount: double.parse(Crypto.decrypt(map['amount'])),
     );
     if (map.containsKey('isSettled')) {

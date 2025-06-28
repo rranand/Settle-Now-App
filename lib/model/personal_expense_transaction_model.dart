@@ -121,8 +121,8 @@ class PersonalExpenseTransactionModel {
         amount: double.parse(Crypto.decrypt(map['amount'])),
         description: Crypto.decrypt(map['description']),
         category: Crypto.decrypt(map['category']),
-        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
-        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
+        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
+        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
         roomData: RoomLinkedModel.fromMap(map['roomData']),
       );
     } else {
@@ -131,8 +131,8 @@ class PersonalExpenseTransactionModel {
         amount: double.parse(Crypto.decrypt(map['amount'])),
         description: Crypto.decrypt(map['description']),
         category: Crypto.decrypt(map['category']),
-        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
-        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
+        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
+        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
         roomData: RoomLinkedModel.empty(),
       );
     }

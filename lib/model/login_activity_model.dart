@@ -52,8 +52,8 @@ class LoginActivityModel {
       id: Crypto.decrypt(map['id']),
       deviceName: Crypto.decrypt(map['deviceName']),
       deviceType: Crypto.decrypt(map['deviceType']),
-      lastLoggedIn: DateTime.parse(Crypto.decrypt(map['lastLoggedIn'])),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      lastLoggedIn: DateTime.parse(Crypto.decrypt(map['lastLoggedIn'])).toLocal(),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
     );
   }
 

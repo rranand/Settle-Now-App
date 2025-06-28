@@ -62,11 +62,11 @@ class LendenTransactionModel {
       id: Crypto.decrypt(map['id']),
       amount: double.parse(Crypto.decrypt(map['amount'])),
       description: Crypto.decrypt(map['description']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])),
+      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
       createdBy: users.firstWhere(
         (user) => user.id == Crypto.decrypt(map['createdBy']),
       ),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])),
+      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
     );
   }
 
