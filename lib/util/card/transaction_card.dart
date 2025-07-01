@@ -52,7 +52,7 @@ class _TransactionCardState extends State<TransactionCard> {
                   context,
                   widget.data.id,
                   TransactionType.personal,
-                  personalExpenseType: widget.data.roomData.transactionType,
+                  expenseType: widget.data.roomData.transactionType,
                 );
               },
               child: Text("Yes"),

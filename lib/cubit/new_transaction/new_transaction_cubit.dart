@@ -138,7 +138,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final TransactionModel newData = await repoRD.updateExpense(data);
+            final roomID = (bloc.state as RoomFetchSuccess).id;
+            final TransactionModel newData = await repoRD.updateExpense(
+              roomID,
+              data,
+              loggedInUser.authToken,
+            );
             bloc.add(RoomUpdateTransaction(newData));
             return emit(NewTransactionSuccess(newData));
           }
@@ -152,7 +157,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     BuildContext context,
     String expenseID,
     TransactionType transactionType, {
-    String personalExpenseType = "Personal",
+    String expenseType = "Personal",
   }) async {
     emit(NewTransactionLoading());
     dynamic bloc;
@@ -183,7 +188,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final bool isDeleted = await repoPS.delete(
               loggedInUser.authToken,
               expenseID,
-              personalExpenseType,
+              expenseType,
             );
 
             if (isDeleted) {
@@ -215,8 +220,14 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final bool isDeleted = await repoRD.deleteExpense(expenseID);
-
+            final roomID = (bloc.state as RoomFetchSuccess).id;
+            final bool isDeleted = await repoRD.deleteExpense(
+              roomID,
+              expenseID,
+              expenseType,
+              loggedInUser.authToken,
+            );
+            debugPrint("$expenseType $expenseID");
             if (isDeleted) {
               bloc.add(RoomDeleteTransaction(expenseID));
               return emit(NewTransactionSuccess(TransactionModel.empty()));

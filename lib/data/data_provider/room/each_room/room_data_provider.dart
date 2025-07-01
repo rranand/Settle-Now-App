@@ -146,7 +146,11 @@ class RoomDataProvider {
     }
   }
 
-  Future<TransactionModel> updateExpense(NewTransactionModel data) async {
+  Future<TransactionModel> updateExpense(
+    String id,
+    NewTransactionModel data,
+    String authToken,
+  ) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
       TransactionModel updatedExpense = TransactionModel.fromNewTransaction(
@@ -159,12 +163,27 @@ class RoomDataProvider {
     }
   }
 
-  Future<bool> deleteExpense(String expenseID) async {
-    try {
-      await Future.delayed(Duration(seconds: 2), () {});
+  Future<bool> deleteExpense(
+    String id,
+    String expenseID,
+    String expenseType,
+    String authToken,
+  ) async {
+    final response = await createAPICall(
+      'room/$id/transaction',
+      "delete",
+      authToken,
+      {
+        "id": Crypto.encrypt(expenseID),
+        "splitType": Crypto.encrypt(expenseType),
+      },
+    );
+
+    final respData = jsonDecode(response.body);
+    if (response.statusCode == 200) {
       return true;
-    } catch (e) {
-      rethrow;
+    } else {
+      throw Crypto.decrypt(respData['message']);
     }
   }
 

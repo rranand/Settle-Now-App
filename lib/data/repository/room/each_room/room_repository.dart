@@ -120,18 +120,31 @@ class RoomRepository {
     }
   }
 
-  Future<TransactionModel> updateExpense(NewTransactionModel data) async {
+  Future<TransactionModel> updateExpense(
+    String id,
+    NewTransactionModel data,
+    String authToken,
+  ) async {
     try {
-      TransactionModel updatedExpense = await _dataProvider.updateExpense(data);
+      TransactionModel updatedExpense = await _dataProvider.updateExpense(
+        id,
+        data,
+        authToken,
+      );
       return updatedExpense;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> deleteExpense(String expenseID) async {
+  Future<bool> deleteExpense(
+    String id,
+    String expenseID,
+    String expenseType,
+    String authToken,
+  ) async {
     try {
-      return _dataProvider.deleteExpense(expenseID);
+      return _dataProvider.deleteExpense(id, expenseID, expenseType, authToken);
     } catch (e) {
       rethrow;
     }

@@ -339,6 +339,17 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _deleteExpenseDialog() {
+    String expenseType = "";
+
+    if (transactionType == TransactionType.room) {
+      if (!(widget.transactionData!.users.isNotEmpty ||
+          widget.transactionData!.amount ==
+              widget.transactionData!.createdBy.amount)) {
+        expenseType = "equal";
+      } else {
+        expenseType = "split";
+      }
+    }
     showDialog(
       context: context,
       builder: (context) {
@@ -359,6 +370,7 @@ class _AddTransactionState extends State<AddTransaction> {
                   context,
                   widget.transactionData!.id,
                   transactionType,
+                  expenseType: expenseType,
                 );
               },
               child: Text("Yes"),
