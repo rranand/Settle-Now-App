@@ -9,7 +9,9 @@ class QuicksplitRepository {
 
   Future<List<TransactionModel>> fetchData(String authToken) async {
     try {
-      return _dataProvider.fetchData(authToken);
+      List<TransactionModel> data = await _dataProvider.fetchData(authToken);
+      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+      return data;
     } catch (e) {
       rethrow;
     }

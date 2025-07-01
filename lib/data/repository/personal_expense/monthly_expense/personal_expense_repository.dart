@@ -15,7 +15,7 @@ class PersonalMonthlyExpenseRepository {
     try {
       List<PersonalExpenseTransactionModel> data = await _dataProvider
           .fetchData(authToken, year, month);
-
+      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
     } catch (e) {
       rethrow;
@@ -44,7 +44,11 @@ class PersonalMonthlyExpenseRepository {
     }
   }
 
-  Future<bool> delete(String authToken, String expenseID, String transactionType) async {
+  Future<bool> delete(
+    String authToken,
+    String expenseID,
+    String transactionType,
+  ) async {
     try {
       return _dataProvider.delete(authToken, expenseID, transactionType);
     } catch (e) {

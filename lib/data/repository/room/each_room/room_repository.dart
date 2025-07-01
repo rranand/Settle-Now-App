@@ -52,6 +52,8 @@ class RoomRepository {
           );
         }
       }
+      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+
       return data;
     } catch (e) {
       rethrow;
@@ -78,7 +80,7 @@ class RoomRepository {
         data[i].sender = userMap[data[i].sender.id]!;
         data[i].recevier = userMap[data[i].recevier.id]!;
       }
-
+      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
     } catch (e) {
       rethrow;
@@ -101,9 +103,17 @@ class RoomRepository {
     }
   }
 
-  Future<TransactionModel> createExpense(NewTransactionModel data) async {
+  Future<TransactionModel> createExpense(
+    String id,
+    NewTransactionModel data,
+    String authToken,
+  ) async {
     try {
-      TransactionModel newExpense = await _dataProvider.createExpense(data);
+      TransactionModel newExpense = await _dataProvider.createExpense(
+        id,
+        data,
+        authToken,
+      );
       return newExpense;
     } catch (e) {
       rethrow;

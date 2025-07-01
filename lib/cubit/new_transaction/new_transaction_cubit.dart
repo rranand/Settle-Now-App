@@ -75,7 +75,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final TransactionModel newData = await repoRD.createExpense(data);
+            final roomID = (bloc.state as RoomFetchSuccess).id;
+            final TransactionModel newData = await repoRD.createExpense(
+              roomID,
+              data,
+              loggedInUser.authToken,
+            );
             bloc.add(RoomAddNewTransaction(newData));
             return emit(NewTransactionSuccess(newData));
           }

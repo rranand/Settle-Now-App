@@ -216,13 +216,6 @@ class MyApp extends StatelessWidget {
                   context.read<RoomDashboardRepository>(),
                 ),
           ),
-          BlocProvider<RoomSettleUpsertCubit>(
-            create:
-                (context) => RoomSettleUpsertCubit(
-                  context.read<RoomRepository>(),
-                  context.read<RoomSettleCubit>(),
-                ),
-          ),
           BlocProvider<CreateRoomCubit>(
             create:
                 (context) =>
@@ -254,6 +247,13 @@ class MyApp extends StatelessWidget {
                 (context) => RoomSettleCubit(
                   context.read<RoomRepository>(),
                   context.read<RoomUserCubit>(),
+                ),
+          ),
+          BlocProvider<RoomSettleUpsertCubit>(
+            create:
+                (context) => RoomSettleUpsertCubit(
+                  context.read<RoomRepository>(),
+                  context.read<RoomSettleCubit>(),
                 ),
           ),
           BlocProvider<RoomCloseRequestCubit>(

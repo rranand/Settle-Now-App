@@ -222,7 +222,18 @@ class _AddTransactionState extends State<AddTransaction> {
                 (index) => InkWell(
                   borderRadius: BorderRadius.circular(100),
                   onTap: () {
-                    _splitTypeIndex.value = index;
+                    if (_splitTypeIndex.value != index) {
+                      if (index == 1) {
+                        _selectedUserIDs.value.clear();
+                        _selectedUserIDSet.value.clear();
+                        _selectedUserIDs.value.putIfAbsent(
+                          _loggedInUser,
+                          () => TextEditingController(),
+                        );
+                        _selectedUserIDSet.value.add(_loggedInUser.id);
+                      }
+                      _splitTypeIndex.value = index;
+                    }
                   },
                   child: GradientBorderCard(
                     borderRadius: 100,

@@ -8,7 +8,11 @@ class LendenDashboardRepository {
 
   Future<List<LendenDashboardModel>> fetchData(String authToken) async {
     try {
-      return _dataProvider.fetchData(authToken);
+      List<LendenDashboardModel> data = await _dataProvider.fetchData(
+        authToken,
+      );
+      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+      return data;
     } catch (e) {
       rethrow;
     }

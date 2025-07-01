@@ -14,6 +14,9 @@ class LendenRoomRepository {
     String authToken,
   ) async {
     try {
+      Pair<LendenDashboardModel, List<LendenTransactionModel>> lendenData =
+          await _dataProvider.fetchData(id, authToken);
+      lendenData.second.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return _dataProvider.fetchData(id, authToken);
     } catch (e) {
       rethrow;

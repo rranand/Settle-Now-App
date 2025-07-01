@@ -119,12 +119,28 @@ class RoomDataProvider {
     }
   }
 
-  Future<TransactionModel> createExpense(NewTransactionModel data) async {
+  Future<TransactionModel> createExpense(
+    String id,
+    NewTransactionModel data,
+    String authToken,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
       TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
-      newExpense.id = "${newExpense.description}##${newExpense.createdOn}";
-      return newExpense;
+
+      final response = await createAPICall(
+        'room/$id/transaction',
+        "post",
+        authToken,
+        newExpense.toQuickSplitJson(),
+      );
+
+      final respData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        newExpense.id = Crypto.decrypt(respData['data']['id']);
+        return newExpense;
+      } else {
+        throw Crypto.decrypt(respData['message']);
+      }
     } catch (e) {
       rethrow;
     }

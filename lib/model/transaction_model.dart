@@ -133,6 +133,7 @@ class TransactionModel {
       "description": Crypto.encrypt(description),
       "amount": Crypto.encrypt(amount.toString()),
       "category": Crypto.encrypt(category),
+      "createdOn": Crypto.encrypt(createdOn.toIso8601String()),
       "users": json.encode(userData),
       "createdBy": createdBy.toQuickSplitJson(),
     };

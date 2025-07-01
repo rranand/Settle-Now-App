@@ -139,7 +139,8 @@ class _InviteMemberState extends State<InviteMember> {
       final roomUserState = context.read<RoomUserCubit>().state;
       if (roomUserState is RoomUserSuccess) {
         for (int i = 0; i < roomUserState.data.length; i++) {
-          if (roomUserState.data[i].user.id != _loggedInUser.id) {
+          if (roomUserState.data[i].user.id != _loggedInUser.id &&
+              roomUserState.data[i].active) {
             users.add(roomUserState.data[i].user);
           }
         }
