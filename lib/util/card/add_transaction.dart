@@ -223,7 +223,7 @@ class _AddTransactionState extends State<AddTransaction> {
                   borderRadius: BorderRadius.circular(100),
                   onTap: () {
                     if (_splitTypeIndex.value != index) {
-                      if (index == 1) {
+                      if (_splitType[index] == 'Partial') {
                         _selectedUserIDs.value.clear();
                         _selectedUserIDSet.value.clear();
                         _selectedUserIDs.value.putIfAbsent(
@@ -281,10 +281,10 @@ class _AddTransactionState extends State<AddTransaction> {
     _selectedUserIDs.value = {};
     _selectedUserIDs.value = {};
     _categoryIndex.value = 0;
-    _splitTypeIndex.value = 0;
+    _splitTypeIndex.value = _splitType.indexOf("Equal");
 
     if (transactionType == TransactionType.quicksplit) {
-      _splitTypeIndex.value = 1;
+      _splitTypeIndex.value = _splitType.indexOf("Partial");
       _selectedUserIDs.value.putIfAbsent(
         _loggedInUser,
         () => TextEditingController(),
@@ -307,9 +307,9 @@ class _AddTransactionState extends State<AddTransaction> {
 
     if (transactionType == TransactionType.room) {
       if (transactionData.users.isNotEmpty) {
-        _splitTypeIndex.value = 1;
+        _splitTypeIndex.value = _splitType.indexOf("Partial");
       } else if (transactionData.createdBy.amount == transactionData.amount) {
-        _splitTypeIndex.value = 2;
+        _splitTypeIndex.value = _splitType.indexOf("Self");
       }
     }
 
@@ -396,7 +396,7 @@ class _AddTransactionState extends State<AddTransaction> {
     switch (transactionType) {
       case TransactionType.quicksplit:
         {
-          _splitTypeIndex.value = 1;
+          _splitTypeIndex.value = _splitType.indexOf("Partial");
           if (widget.transactionData == null) {
             _selectedUserIDs.value.putIfAbsent(
               _loggedInUser,
@@ -434,9 +434,9 @@ class _AddTransactionState extends State<AddTransaction> {
       List<UserAmountModel> userWithAmount = [];
       UserAmountModel createdBy = UserAmountModel.copyFromUser(
         _loggedInUser,
-        _splitTypeIndex.value == 2 ? totalAmount : 0,
+        _splitTypeIndex.value == _splitType.indexOf("Self") ? totalAmount : 0,
       );
-      if (_splitTypeIndex.value == 1) {
+      if (_splitType[_splitTypeIndex.value] == "Partial") {
         _selectedUserIDs.value.forEach((userData, amountTxt) {
           double tempAmount = double.parse(amountTxt.text);
           sumAmount += tempAmount;
@@ -472,8 +472,8 @@ class _AddTransactionState extends State<AddTransaction> {
           {}
       }
 
-      switch (_splitTypeIndex.value) {
-        case 1:
+      switch (_splitType[_splitTypeIndex.value]) {
+        case "Partial":
           {
             if (userWithAmount.isEmpty) {
               showNormalSnackBar(context, "Add Atleast One Member");

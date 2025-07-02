@@ -140,6 +140,19 @@ class TransactionModel {
     return json.encode(data);
   }
 
+  String toQuickSplitUpdateJson() {
+    List<String> userData = users.map((e) => e.toQuickSplitJson()).toList();
+    Map<String, String> data = {
+      "id": Crypto.encrypt(id),
+      "description": Crypto.encrypt(description),
+      "amount": Crypto.encrypt(amount.toString()),
+      "category": Crypto.encrypt(category),
+      "users": json.encode(userData),
+      "createdBy": createdBy.toQuickSplitJson(),
+    };
+    return json.encode(data);
+  }
+
   factory TransactionModel.fromJson(String source) =>
       TransactionModel.fromMap(json.decode(source) as Map<String, dynamic>);
 

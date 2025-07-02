@@ -152,12 +152,22 @@ class RoomDataProvider {
     String authToken,
   ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      TransactionModel updatedExpense = TransactionModel.fromNewTransaction(
-        data,
+      TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
+
+      final response = await createAPICall(
+        'room/$id/transaction',
+        "patch",
+        authToken,
+        newExpense.toQuickSplitUpdateJson(),
       );
-      updatedExpense.modifiedOn = DateTime.now();
-      return updatedExpense;
+
+      final respData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        newExpense.id = Crypto.decrypt(respData['data']['id']);
+        return newExpense;
+      } else {
+        throw Crypto.decrypt(respData['message']);
+      }
     } catch (e) {
       rethrow;
     }
