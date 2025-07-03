@@ -140,7 +140,7 @@ class TransactionModel {
     return json.encode(data);
   }
 
-  String toQuickSplitUpdateJson() {
+  String toQuickSplitUpdateJson({Map<String, String> extraData = const {}}) {
     List<String> userData = users.map((e) => e.toQuickSplitJson()).toList();
     Map<String, String> data = {
       "id": Crypto.encrypt(id),
@@ -149,6 +149,7 @@ class TransactionModel {
       "category": Crypto.encrypt(category),
       "users": json.encode(userData),
       "createdBy": createdBy.toQuickSplitJson(),
+      ...extraData,
     };
     return json.encode(data);
   }

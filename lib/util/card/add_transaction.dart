@@ -49,6 +49,8 @@ class _AddTransactionState extends State<AddTransaction> {
   final TextEditingController _creationDateController = TextEditingController(
     text: convertDateTimeFormat(DateTime.now()),
   );
+  bool _isNewExpense = true;
+  String expenseType = "";
 
   final List<String> _splitType = ["Equal", "Partial", "Self"];
   final List<String> _lendenTransactionType = ["Gave", "Owe"];
@@ -293,10 +295,34 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _populateEditForm(TransactionModel transactionData) {
-    if (transactionType == TransactionType.lenden &&
-        transactionData.amount < 0) {
-      _lendenTransactionTypeIndex.value = 1;
+    _isNewExpense = false;
+    switch (transactionType) {
+      case TransactionType.lenden:
+        {
+          if (transactionData.amount < 0) {
+            _lendenTransactionTypeIndex.value = 1;
+          }
+        }
+      case TransactionType.room:
+        {
+          if (transactionData.users.isNotEmpty) {
+            _splitTypeIndex.value = _splitType.indexOf("Partial");
+          } else if (transactionData.createdBy.amount ==
+              transactionData.amount) {
+            _splitTypeIndex.value = _splitType.indexOf("Self");
+          }
+          if (!(widget.transactionData!.users.isNotEmpty ||
+              widget.transactionData!.amount ==
+                  widget.transactionData!.createdBy.amount)) {
+            expenseType = "equal";
+          } else {
+            expenseType = "split";
+          }
+        }
+      default:
+        {}
     }
+
     _amountController.text = transactionData.amount.abs().toString();
     _descriptionController.text = transactionData.description;
     _createdOn = transactionData.createdOn;
@@ -304,14 +330,6 @@ class _AddTransactionState extends State<AddTransaction> {
     _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
       transactionData.category,
     );
-
-    if (transactionType == TransactionType.room) {
-      if (transactionData.users.isNotEmpty) {
-        _splitTypeIndex.value = _splitType.indexOf("Partial");
-      } else if (transactionData.createdBy.amount == transactionData.amount) {
-        _splitTypeIndex.value = _splitType.indexOf("Self");
-      }
-    }
 
     _selectedUserIDs.value = {};
     _selectedUserIDSet.value = {};
@@ -339,17 +357,6 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _deleteExpenseDialog() {
-    String expenseType = "";
-
-    if (transactionType == TransactionType.room) {
-      if (!(widget.transactionData!.users.isNotEmpty ||
-          widget.transactionData!.amount ==
-              widget.transactionData!.createdBy.amount)) {
-        expenseType = "equal";
-      } else {
-        expenseType = "split";
-      }
-    }
     showDialog(
       context: context,
       builder: (context) {
@@ -504,6 +511,7 @@ class _AddTransactionState extends State<AddTransaction> {
             context,
             data,
             transactionType,
+            expenseType: expenseType,
           );
         }
       }
@@ -633,7 +641,9 @@ class _AddTransactionState extends State<AddTransaction> {
                     ),
                   ),
                   Visibility(
-                    visible: TransactionType.room == transactionType,
+                    visible:
+                        TransactionType.room == transactionType &&
+                        _isNewExpense,
                     child: _splitTypeCardWidget(),
                   ),
                   SizedBox(height: UiConstant.spaceBetweenSection),

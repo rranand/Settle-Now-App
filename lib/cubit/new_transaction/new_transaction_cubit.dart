@@ -93,8 +93,9 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
   void updateExpense(
     BuildContext context,
     NewTransactionModel data,
-    TransactionType transactionType,
-  ) async {
+    TransactionType transactionType, {
+    String expenseType = "Personal",
+  }) async {
     emit(NewTransactionLoading());
     final loggedInUser =
         (context.read<AuthBloc>().state as AuthLoginSuccess).userData;
@@ -142,6 +143,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final TransactionModel newData = await repoRD.updateExpense(
               roomID,
               data,
+              expenseType,
               loggedInUser.authToken,
             );
             bloc.add(RoomUpdateTransaction(newData));
@@ -227,7 +229,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               expenseType,
               loggedInUser.authToken,
             );
-            debugPrint("$expenseType $expenseID");
+
             if (isDeleted) {
               bloc.add(RoomDeleteTransaction(expenseID));
               return emit(NewTransactionSuccess(TransactionModel.empty()));

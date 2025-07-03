@@ -149,6 +149,7 @@ class RoomDataProvider {
   Future<TransactionModel> updateExpense(
     String id,
     NewTransactionModel data,
+    String expenseType,
     String authToken,
   ) async {
     try {
@@ -158,12 +159,14 @@ class RoomDataProvider {
         'room/$id/transaction',
         "patch",
         authToken,
-        newExpense.toQuickSplitUpdateJson(),
+        newExpense.toQuickSplitUpdateJson(
+          extraData: {"splitType": Crypto.encrypt(expenseType)},
+        ),
       );
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.id = Crypto.decrypt(respData['data']['id']);
+        newExpense.modifiedOn = DateTime.now();
         return newExpense;
       } else {
         throw Crypto.decrypt(respData['message']);
