@@ -66,6 +66,17 @@ class RoomSettleModel {
     );
   }
 
+  String toSettleTransactionJSON() {
+    Map<String, String> data = {
+      'id': Crypto.encrypt(""),
+      'amount': Crypto.encrypt(amount.toString()),
+      'sender': Crypto.encrypt(sender.id),
+      'recevier': Crypto.encrypt(recevier.id),
+    };
+
+    return json.encode(data);
+  }
+
   String toJson() => json.encode(toMap());
 
   factory RoomSettleModel.fromJson(String source) =>

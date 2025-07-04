@@ -69,10 +69,12 @@ class SettleCard extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        context.push(
-          "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomSettleEditRouteName}",
-          extra: data,
-        );
+        if (loggedInUser.id == data.sender.id) {
+          context.push(
+            "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomSettleEditRouteName}",
+            extra: data,
+          );
+        }
       },
       child: Card(
         elevation: UiConstant.cardElevation,

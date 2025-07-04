@@ -200,17 +200,36 @@ class RoomDataProvider {
     }
   }
 
-  Future<RoomSettleModel> createNewSettleExpense(RoomSettleModel data) async {
+  Future<RoomSettleModel> createNewSettleExpense(
+    String id,
+    RoomSettleModel data,
+    String authToken,
+  ) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
-      data.id = "${data.createdOn}##${data.amount}";
-      return data;
+      final response = await createAPICall(
+        'room/$id/settle',
+        "post",
+        authToken,
+        data.toSettleTransactionJSON(),
+      );
+
+      final respData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        data.id = Crypto.decrypt(respData['data']['id']);
+        return data;
+      } else {
+        throw Crypto.decrypt(respData['message']);
+      }
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<RoomSettleModel> updateSettleExpense(RoomSettleModel data) async {
+  Future<RoomSettleModel> updateSettleExpense(
+    String id,
+    RoomSettleModel data,
+    String authToken,
+  ) async {
     try {
       await Future.delayed(Duration(seconds: 2), () {});
       data.modifiedOn = DateTime.now();
@@ -220,12 +239,23 @@ class RoomDataProvider {
     }
   }
 
-  Future<bool> deleteSettleExpense(String expenseID) async {
-    try {
-      await Future.delayed(Duration(seconds: 2), () {});
+  Future<bool> deleteSettleExpense(
+    String id,
+    String expenseID,
+    String authToken,
+  ) async {
+    final response = await createAPICall(
+      'room/$id/settle',
+      "delete",
+      authToken,
+      {"id": Crypto.encrypt(expenseID)},
+    );
+
+    final respData = jsonDecode(response.body);
+    if (response.statusCode == 200) {
       return true;
-    } catch (e) {
-      rethrow;
+    } else {
+      throw Crypto.decrypt(respData['message']);
     }
   }
 }

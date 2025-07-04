@@ -152,10 +152,16 @@ class RoomRepository {
     }
   }
 
-  Future<RoomSettleModel> createNewSettleExpense(RoomSettleModel data) async {
+  Future<RoomSettleModel> createNewSettleExpense(
+    String id,
+    RoomSettleModel data,
+    String authToken,
+  ) async {
     try {
       RoomSettleModel newExpense = await _dataProvider.createNewSettleExpense(
+        id,
         data,
+        authToken,
       );
       return newExpense;
     } catch (e) {
@@ -163,10 +169,16 @@ class RoomRepository {
     }
   }
 
-  Future<RoomSettleModel> updateSettleExpense(RoomSettleModel data) async {
+  Future<RoomSettleModel> updateSettleExpense(
+    String id,
+    RoomSettleModel data,
+    String authToken,
+  ) async {
     try {
       RoomSettleModel updatedExpense = await _dataProvider.updateSettleExpense(
+        id,
         data,
+        authToken,
       );
       return updatedExpense;
     } catch (e) {
@@ -174,9 +186,13 @@ class RoomRepository {
     }
   }
 
-  Future<bool> deleteSettleExpense(String settleExpenseID) async {
+  Future<bool> deleteSettleExpense(
+    String id,
+    String expenseID,
+    String authToken,
+  ) async {
     try {
-      return _dataProvider.deleteSettleExpense(settleExpenseID);
+      return _dataProvider.deleteSettleExpense(id, expenseID, authToken);
     } catch (e) {
       rethrow;
     }

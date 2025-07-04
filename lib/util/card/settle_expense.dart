@@ -44,16 +44,18 @@ class _SettleExpenseState extends State<SettleExpense> {
   double userCanPay = 0;
 
   Widget _userCardWidget(RoomUserModel userData) {
+    double unSettledAmount =
+        userData.contribution - userData.spent + userData.settle;
+    double payableAmount = min(userCanPay.abs(), unSettledAmount.abs());
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
         _selectedUser.value = userData.user.id;
         if (_amountController.text.isEmpty) {
-          _amountController.text =
-              min(
-                userCanPay,
-                userData.contribution - userData.spent,
-              ).toString();
+          _amountController.text = formatCurrency(
+            payableAmount,
+            context,
+          ).substring(1).replaceAll(",", "");
         }
       },
       child: Center(
@@ -82,10 +84,7 @@ class _SettleExpenseState extends State<SettleExpense> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    formatCurrency(
-                      userData.contribution - userData.spent,
-                      context,
-                    ),
+                    formatCurrency(payableAmount, context),
                     maxLines: 1,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.clip,
@@ -128,7 +127,9 @@ class _SettleExpenseState extends State<SettleExpense> {
               onPressed: () {
                 context.pop();
                 context.read<RoomSettleUpsertCubit>().deleteSettleExpense(
+                  widget.roomID,
                   widget.transactionData!.id,
+                  _loggedInUser.authToken,
                 );
               },
               child: Text("Yes"),
@@ -179,16 +180,16 @@ class _SettleExpenseState extends State<SettleExpense> {
       }
       if (!receiverData.hasData) {
         showNormalSnackBar(context, "Invalid User");
-      } else if (amountToBeSettled > userCanPay) {
+      } else if (amountToBeSettled > userCanPay.abs()) {
         showNormalSnackBar(
           context,
-          "You can pay ${formatCurrency(userCanPay, context)} at max!",
+          "You can pay ${formatCurrency(userCanPay.abs(), context)} at max!",
         );
         return;
-      } else if (amountToBeSettled > userCanReceive) {
+      } else if (amountToBeSettled > userCanReceive.abs()) {
         showNormalSnackBar(
           context,
-          "User can receive ${formatCurrency(userCanReceive, context)} at max!",
+          "User can receive ${formatCurrency(userCanReceive.abs(), context)} at max!",
         );
         return;
       }
@@ -198,23 +199,80 @@ class _SettleExpenseState extends State<SettleExpense> {
           id: "",
           recevier: receiverData,
           sender: _loggedInUser,
-          amount: amountToBeSettled,
+          amount: (userCanPay > 0 ? -1 : 1) * amountToBeSettled.abs(),
           createdOn: DateTime.now(),
           modifiedOn: DateTime.now(),
         );
-        context.read<RoomSettleUpsertCubit>().addNewSettleExpense(newData);
+        context.read<RoomSettleUpsertCubit>().addNewSettleExpense(
+          widget.roomID,
+          newData,
+          _loggedInUser.authToken,
+        );
       } else {
         RoomSettleModel updatedData = RoomSettleModel(
           id: widget.transactionData!.id,
           recevier: receiverData,
           sender: _loggedInUser,
-          amount: amountToBeSettled,
+          amount: (userCanPay > 0 ? -1 : 1) * amountToBeSettled.abs(),
           createdOn: widget.transactionData!.createdOn,
           modifiedOn: widget.transactionData!.modifiedOn,
         );
-        context.read<RoomSettleUpsertCubit>().updateSettleExpense(updatedData);
+        context.read<RoomSettleUpsertCubit>().updateSettleExpense(
+          widget.roomID,
+          updatedData,
+          _loggedInUser.authToken,
+        );
       }
     }
+  }
+
+  List<RoomUserModel> getSettleMember(List<RoomUserModel> data) {
+    List<RoomUserModel> users = [];
+    for (int i = 0; i < data.length; i++) {
+      double bal = data[i].contribution - data[i].spent + data[i].settle;
+
+      if (data[i].user.id == _loggedInUser.id) {
+        userCanPay = bal;
+        break;
+      }
+    }
+    bool isNega = false;
+    if (userCanPay < 0) {
+      isNega = true;
+    }
+    for (int i = 0; i < data.length; i++) {
+      if (widget.transactionData != null) {
+        if (widget.transactionData!.recevier.id == data[i].user.id) {
+          users.add(data[i]);
+          break;
+        }
+      } else {
+        double bal = data[i].contribution - data[i].spent + data[i].settle;
+        bool isNega2 = false;
+        if (bal < 0) {
+          isNega2 = true;
+        }
+        if (bal.abs() < 0.2) {
+          continue;
+        } else if (data[i].user.id != _loggedInUser.id && isNega2 != isNega) {
+          users.add(data[i]);
+        }
+      }
+    }
+
+    return users;
+  }
+
+  Widget _loadingScreen({Widget child = const LoadingPage()}) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Settle Expense"),
+        centerTitle: false,
+        titleSpacing: _mainScreenPadding.left,
+        leading: appBarBackButton(context),
+      ),
+      body: child,
+    );
   }
 
   void _populateEditForm(RoomSettleModel data) {
@@ -246,157 +304,178 @@ class _SettleExpenseState extends State<SettleExpense> {
 
   @override
   Widget build(BuildContext context) {
-    List<RoomUserModel> users = [];
-    final roomUserState = context.watch<RoomUserCubit>().state;
-    if (roomUserState is RoomUserSuccess) {
-      for (int i = 0; i < roomUserState.data.length; i++) {
-        double bal =
-            roomUserState.data[i].contribution -
-            roomUserState.data[i].spent +
-            roomUserState.data[i].settle;
-
-        if (roomUserState.data[i].user.id == _loggedInUser.id) {
-          userCanPay = bal * -1;
-        } else if (roomUserState.data[i].user.id != _loggedInUser.id &&
-            bal > 0) {
-          users.add(roomUserState.data[i]);
+    return BlocConsumer<RoomUserCubit, RoomUserState>(
+      listener: (context, state) {
+        if (state is RoomUserFailure) {
+          showNormalSnackBar(context, state.error);
         }
-      }
-    }
-
-    return BlocConsumer<RoomSettleUpsertCubit, RoomSettleUpsertState>(
-      listener: _blocListenerHandler,
+      },
       builder: (context, state) {
-        if (state is RoomSettleUpsertLoading || users.isEmpty) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text("Settle Expense"),
-              centerTitle: false,
-              titleSpacing: _mainScreenPadding.left,
-              leading: appBarBackButton(context),
-            ),
-            body: LoadingPage(),
-          );
+        List<RoomUserModel> users = [];
+        if (state is RoomUserSuccess) {
+          users = getSettleMember(state.data);
+        } else {
+          return _loadingScreen();
         }
+        if (users.isEmpty) {
+          return _loadingScreen(child: noRecordFoundWidget("No User Found"));
+        }
+        return BlocConsumer<RoomSettleUpsertCubit, RoomSettleUpsertState>(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            if (state is RoomSettleUpsertLoading) {
+              return _loadingScreen();
+            }
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("Settle Expense"),
-            centerTitle: false,
-            titleSpacing: _mainScreenPadding.left,
-            leading: appBarBackButton(context),
-            actions:
-                widget.transactionData == null
-                    ? null
-                    : [
-                      IconButton(
-                        onPressed: () {
-                          _deleteExpenseDialog();
-                        },
-                        icon: Icon(Icons.delete_outline),
-                      ),
-                    ],
-          ),
-          body: SingleChildScrollView(
-            padding: _mainScreenPadding.add(
-              EdgeInsets.only(
-                top: UiConstant.spaceBetweenSection,
-                bottom: UiConstant.spaceAtBottom,
-              ),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  CustomFormField.textFormField(
-                    _amountController,
-                    textInputType: TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    inputFormatters: [AmountInputFormatter()],
-                    hintText: 'Amount',
-                    labelText: 'Amount',
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Please enter a amount.";
-                      }
-                      return null;
-                    },
-                    inputDecoration: TextFormFieldInputBorder.underLine,
-                    borderColor: Colors.black87,
-                    suffixIcon: UiConstant.indianRupeeSymbol,
-                  ),
-                  SizedBox(height: UiConstant.spaceBetweenSection),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Members",
-                        style: TextStyle(fontSize: _headerTextSize),
-                      ),
-                      SizedBox(height: .5 * UiConstant.spaceBetweenSection),
-                      LayoutBuilder(
-                        builder: (context, constraint) {
-                          final double screenWidth = constraint.maxWidth;
-                          final double spacing = 8.0;
-                          final int columns =
-                              (screenWidth / (_userCardWidth + spacing)).ceil();
-
-                          return GridView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            itemCount: users.length,
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: columns,
-                                  mainAxisSpacing: spacing,
-                                  crossAxisSpacing: spacing,
-                                  childAspectRatio: 0.85,
-                                ),
-                            itemBuilder: (context, index) {
-                              RoomUserModel userData = users[index];
-                              return ValueListenableBuilder(
-                                valueListenable: _selectedUser,
-                                builder: (
-                                  BuildContext context,
-                                  String value,
-                                  Widget? child,
-                                ) {
-                                  return _userCardWidget(userData);
-                                },
-                              );
+            return Scaffold(
+              appBar: AppBar(
+                title: Text("Settle Expense"),
+                centerTitle: false,
+                titleSpacing: _mainScreenPadding.left,
+                leading: appBarBackButton(context),
+                actions:
+                    widget.transactionData == null
+                        ? null
+                        : [
+                          IconButton(
+                            onPressed: () {
+                              _deleteExpenseDialog();
                             },
-                          );
+                            icon: Icon(Icons.delete_outline),
+                          ),
+                        ],
+              ),
+              body: SingleChildScrollView(
+                padding: _mainScreenPadding.add(
+                  EdgeInsets.only(
+                    top: UiConstant.spaceBetweenSection,
+                    bottom: UiConstant.spaceAtBottom,
+                  ),
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      CustomFormField.textFormField(
+                        _amountController,
+                        textInputType: TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [AmountInputFormatter()],
+                        hintText: 'Amount',
+                        labelText: 'Amount',
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please enter a amount.";
+                          }
+                          return null;
+                        },
+                        inputDecoration: TextFormFieldInputBorder.underLine,
+                        borderColor: Colors.black87,
+                        suffixIcon: UiConstant.indianRupeeSymbol,
+                      ),
+                      ValueListenableBuilder(
+                        valueListenable: _selectedUser,
+                        builder: (context, _, _) {
+                          if (_selectedUser.value.isNotEmpty &&
+                              userCanPay > 0) {
+                            RoomUserModel userToBePaid = users.firstWhere(
+                              (ele) => ele.user.id == _selectedUser.value,
+                              orElse: () => RoomUserModel.empty(),
+                            );
+                            if (userToBePaid.hasData) {
+                              return Align(
+                                alignment: Alignment.topLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 2.0),
+                                  child: Text(
+                                    "Settling on ${userToBePaid.user.name}'s behalf",
+                                    style: TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return SizedBox.shrink();
+                            }
+                          } else {
+                            return SizedBox.shrink();
+                          }
                         },
                       ),
                       SizedBox(height: UiConstant.spaceBetweenSection),
-                      Center(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(100),
-                          onTap: () {
-                            _submitTransactionHandler(users);
-                          },
-                          child: SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.9,
-                            child: GradientBorderCard(
-                              borderRadius: 100,
-                              borderWidth: 1,
-                              gradientColors:
-                                  GradientColorConstant.vibrantGradient,
-                              child: CustomButton.customOutlinedButton(
-                                "${widget.transactionData == null ? "Add" : "Update"} Amount",
-                                buttonHeight: 40,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Members",
+                            style: TextStyle(fontSize: _headerTextSize),
+                          ),
+                          SizedBox(height: .5 * UiConstant.spaceBetweenSection),
+                          LayoutBuilder(
+                            builder: (context, constraint) {
+                              final double screenWidth = constraint.maxWidth;
+                              final double spacing = 8.0;
+                              final int columns =
+                                  (screenWidth / (_userCardWidth + spacing))
+                                      .ceil();
+
+                              return GridView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: users.length,
+                                gridDelegate:
+                                    SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: columns,
+                                      mainAxisSpacing: spacing,
+                                      crossAxisSpacing: spacing,
+                                      childAspectRatio: 0.85,
+                                    ),
+                                itemBuilder: (context, index) {
+                                  RoomUserModel userData = users[index];
+                                  return ValueListenableBuilder(
+                                    valueListenable: _selectedUser,
+                                    builder: (
+                                      BuildContext context,
+                                      String value,
+                                      Widget? child,
+                                    ) {
+                                      return _userCardWidget(userData);
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                          SizedBox(height: UiConstant.spaceBetweenSection),
+                          Center(
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(100),
+                              onTap: () {
+                                _submitTransactionHandler(users);
+                              },
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.9,
+                                child: GradientBorderCard(
+                                  borderRadius: 100,
+                                  borderWidth: 1,
+                                  gradientColors:
+                                      GradientColorConstant.vibrantGradient,
+                                  child: CustomButton.customOutlinedButton(
+                                    "${widget.transactionData == null ? "Add" : "Update"} Amount",
+                                    buttonHeight: 40,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

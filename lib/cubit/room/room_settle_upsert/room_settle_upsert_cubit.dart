@@ -12,10 +12,18 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
   RoomSettleUpsertCubit(this.repo, this.roomSettleCubit)
     : super(RoomSettleUpsertInitial());
 
-  void addNewSettleExpense(RoomSettleModel data) async {
+  void addNewSettleExpense(
+    String id,
+    RoomSettleModel data,
+    String authToken,
+  ) async {
     emit(RoomSettleUpsertLoading());
     try {
-      final RoomSettleModel newData = await repo.createNewSettleExpense(data);
+      final RoomSettleModel newData = await repo.createNewSettleExpense(
+        id,
+        data,
+        authToken,
+      );
       roomSettleCubit.addNewSettleExpense(newData);
       return emit(RoomSettleUpsertSuccess(newData));
     } catch (e) {
@@ -23,10 +31,18 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
     }
   }
 
-  void updateSettleExpense(RoomSettleModel data) async {
+  void updateSettleExpense(
+    String id,
+    RoomSettleModel data,
+    String authToken,
+  ) async {
     emit(RoomSettleUpsertLoading());
     try {
-      final RoomSettleModel updateData = await repo.updateSettleExpense(data);
+      final RoomSettleModel updateData = await repo.updateSettleExpense(
+        id,
+        data,
+        authToken,
+      );
       roomSettleCubit.updateSettleExpense(updateData);
       return emit(RoomSettleUpsertSuccess(updateData));
     } catch (e) {
@@ -34,10 +50,18 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
     }
   }
 
-  void deleteSettleExpense(String settleExpenseID) async {
+  void deleteSettleExpense(
+    String id,
+    String settleExpenseID,
+    String authToken,
+  ) async {
     emit(RoomSettleUpsertLoading());
     try {
-      bool isDeleted = await repo.deleteSettleExpense(settleExpenseID);
+      bool isDeleted = await repo.deleteSettleExpense(
+        id,
+        settleExpenseID,
+        authToken,
+      );
       if (isDeleted) {
         roomSettleCubit.deleteSettleExpense(settleExpenseID);
         return emit(RoomSettleUpsertSuccess(RoomSettleModel.empty()));
