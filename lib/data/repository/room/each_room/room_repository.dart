@@ -78,7 +78,7 @@ class RoomRepository {
 
       for (int i = 0; i < data.length; i++) {
         data[i].sender = userMap[data[i].sender.id]!;
-        data[i].recevier = userMap[data[i].recevier.id]!;
+        data[i].receiver = userMap[data[i].receiver.id]!;
       }
       data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
@@ -189,10 +189,18 @@ class RoomRepository {
   Future<bool> deleteSettleExpense(
     String id,
     String expenseID,
+    String sender,
+    String receiver,
     String authToken,
   ) async {
     try {
-      return _dataProvider.deleteSettleExpense(id, expenseID, authToken);
+      return _dataProvider.deleteSettleExpense(
+        id,
+        expenseID,
+        sender,
+        receiver,
+        authToken,
+      );
     } catch (e) {
       rethrow;
     }

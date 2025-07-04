@@ -30,10 +30,10 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       for (int i = 0; i < settleArr.length; i++) {
         RoomSettleModel eachObj = settleArr[i];
         String senderUID = eachObj.sender.id;
-        String recevierUID = eachObj.recevier.id;
+        String receiverUID = eachObj.receiver.id;
 
         settleMap[senderUID] = (settleMap[senderUID] ?? 0) + eachObj.amount;
-        settleMap[recevierUID] = (settleMap[recevierUID] ?? 0) - eachObj.amount;
+        settleMap[receiverUID] = (settleMap[receiverUID] ?? 0) - eachObj.amount;
       }
 
       double totalCommonSplitAmount = 0;
@@ -271,7 +271,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     for (int i = 0; i < usersData.length; i++) {
       if (data.sender.id == usersData[i].user.id) {
         usersData[i].settle += data.amount;
-      } else if (data.recevier.id == usersData[i].user.id) {
+      } else if (data.receiver.id == usersData[i].user.id) {
         usersData[i].settle -= data.amount;
       }
     }
@@ -285,13 +285,13 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     for (int i = 0; i < usersData.length; i++) {
       if (oldData.sender.id == usersData[i].user.id) {
         usersData[i].settle -= oldData.amount;
-      } else if (oldData.recevier.id == usersData[i].user.id) {
+      } else if (oldData.receiver.id == usersData[i].user.id) {
         usersData[i].settle += oldData.amount;
       }
 
       if (data.sender.id == usersData[i].user.id) {
         usersData[i].settle += data.amount;
-      } else if (data.recevier.id == usersData[i].user.id) {
+      } else if (data.receiver.id == usersData[i].user.id) {
         usersData[i].settle -= data.amount;
       }
     }
@@ -305,7 +305,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     for (int i = 0; i < usersData.length; i++) {
       if (data.sender.id == usersData[i].user.id) {
         usersData[i].settle -= data.amount;
-      } else if (data.recevier.id == usersData[i].user.id) {
+      } else if (data.receiver.id == usersData[i].user.id) {
         usersData[i].settle += data.amount;
       }
     }

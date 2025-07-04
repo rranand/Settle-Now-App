@@ -230,26 +230,35 @@ class RoomDataProvider {
     RoomSettleModel data,
     String authToken,
   ) async {
-    try {
-      await Future.delayed(Duration(seconds: 2), () {});
+    final response = await createAPICall(
+      'room/$id/settle',
+      "patch",
+      authToken,
+      data.toSettleTransactionJSON(),
+    );
+
+    final respData = jsonDecode(response.body);
+    if (response.statusCode == 200) {
       data.modifiedOn = DateTime.now();
       return data;
-    } catch (e) {
-      rethrow;
+    } else {
+      throw Crypto.decrypt(respData['message']);
     }
   }
 
   Future<bool> deleteSettleExpense(
     String id,
     String expenseID,
+    String sender,
+    String receiver,
     String authToken,
   ) async {
-    final response = await createAPICall(
-      'room/$id/settle',
-      "delete",
-      authToken,
-      {"id": Crypto.encrypt(expenseID)},
-    );
+    final response =
+        await createAPICall('room/$id/settle', "delete", authToken, {
+          "id": Crypto.encrypt(expenseID),
+          "sender": Crypto.encrypt(sender),
+          "receiver": Crypto.encrypt(receiver),
+        });
 
     final respData = jsonDecode(response.body);
     if (response.statusCode == 200) {

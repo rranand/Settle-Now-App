@@ -94,13 +94,13 @@ class SettleCard extends StatelessWidget {
                 children: [
                   _userCard(
                     context,
-                    data.amount > 0 ? data.sender : data.recevier,
+                    data.amount > 0 ? data.sender : data.receiver,
                     false,
                   ),
                   Icon(Iconsax.arrow_right_14),
                   _userCard(
                     context,
-                    data.amount > 0 ? data.recevier : data.sender,
+                    data.amount > 0 ? data.receiver : data.sender,
                     true,
                   ),
                 ],

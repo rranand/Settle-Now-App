@@ -7,7 +7,7 @@ import 'package:settlenow_v2/util/handler/crypto.dart';
 class RoomSettleModel {
   bool hasData = true;
   String id = "";
-  UserModel recevier = UserModel.empty();
+  UserModel receiver = UserModel.empty();
   UserModel sender = UserModel.empty();
   double amount = 0;
   DateTime createdOn = DateTime.now();
@@ -15,7 +15,7 @@ class RoomSettleModel {
 
   RoomSettleModel({
     required this.id,
-    required this.recevier,
+    required this.receiver,
     required this.sender,
     required this.amount,
     required this.createdOn,
@@ -26,7 +26,7 @@ class RoomSettleModel {
 
   RoomSettleModel copyWith({
     String? id,
-    UserModel? recevier,
+    UserModel? receiver,
     UserModel? sender,
     double? amount,
     DateTime? createdOn,
@@ -34,7 +34,7 @@ class RoomSettleModel {
   }) {
     return RoomSettleModel(
       id: id ?? this.id,
-      recevier: recevier ?? this.recevier,
+      receiver: receiver ?? this.receiver,
       sender: sender ?? this.sender,
       amount: amount ?? this.amount,
       createdOn: createdOn ?? this.createdOn,
@@ -45,7 +45,7 @@ class RoomSettleModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'recevier': recevier.toMap(),
+      'receiver': receiver.toMap(),
       'sender': sender.toMap(),
       'amount': amount,
       'createdOn': createdOn.toString(),
@@ -56,8 +56,8 @@ class RoomSettleModel {
   factory RoomSettleModel.fromMap(Map<String, dynamic> map) {
     return RoomSettleModel(
       id: Crypto.decrypt(map['id']),
-      recevier: UserModel.fromBasicInfoMap(
-        map['recevier'] as Map<String, dynamic>,
+      receiver: UserModel.fromBasicInfoMap(
+        map['receiver'] as Map<String, dynamic>,
       ),
       sender: UserModel.fromBasicInfoMap(map['sender'] as Map<String, dynamic>),
       amount: double.parse(Crypto.decrypt(map['amount'])),
@@ -68,10 +68,10 @@ class RoomSettleModel {
 
   String toSettleTransactionJSON() {
     Map<String, String> data = {
-      'id': Crypto.encrypt(""),
+      'id': Crypto.encrypt(id),
       'amount': Crypto.encrypt(amount.toString()),
       'sender': Crypto.encrypt(sender.id),
-      'recevier': Crypto.encrypt(recevier.id),
+      'receiver': Crypto.encrypt(receiver.id),
     };
 
     return json.encode(data);
@@ -84,7 +84,7 @@ class RoomSettleModel {
 
   @override
   String toString() {
-    return 'RoomSettleModel(id: $id, recevier: $recevier, sender: $sender, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn)';
+    return 'RoomSettleModel(id: $id, receiver: $receiver, sender: $sender, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn)';
   }
 
   @override
@@ -92,7 +92,7 @@ class RoomSettleModel {
     if (identical(this, other)) return true;
 
     return other.id == id &&
-        other.recevier == recevier &&
+        other.receiver == receiver &&
         other.sender == sender &&
         other.amount == amount &&
         other.createdOn == createdOn &&
@@ -102,7 +102,7 @@ class RoomSettleModel {
   @override
   int get hashCode {
     return id.hashCode ^
-        recevier.hashCode ^
+        receiver.hashCode ^
         sender.hashCode ^
         amount.hashCode ^
         createdOn.hashCode ^

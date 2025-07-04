@@ -129,6 +129,8 @@ class _SettleExpenseState extends State<SettleExpense> {
                 context.read<RoomSettleUpsertCubit>().deleteSettleExpense(
                   widget.roomID,
                   widget.transactionData!.id,
+                  widget.transactionData!.sender.id,
+                  widget.transactionData!.receiver.id,
                   _loggedInUser.authToken,
                 );
               },
@@ -197,7 +199,7 @@ class _SettleExpenseState extends State<SettleExpense> {
       if (widget.transactionData == null) {
         RoomSettleModel newData = RoomSettleModel(
           id: "",
-          recevier: receiverData,
+          receiver: receiverData,
           sender: _loggedInUser,
           amount: (userCanPay > 0 ? -1 : 1) * amountToBeSettled.abs(),
           createdOn: DateTime.now(),
@@ -211,7 +213,7 @@ class _SettleExpenseState extends State<SettleExpense> {
       } else {
         RoomSettleModel updatedData = RoomSettleModel(
           id: widget.transactionData!.id,
-          recevier: receiverData,
+          receiver: receiverData,
           sender: _loggedInUser,
           amount: (userCanPay > 0 ? -1 : 1) * amountToBeSettled.abs(),
           createdOn: widget.transactionData!.createdOn,
@@ -242,7 +244,7 @@ class _SettleExpenseState extends State<SettleExpense> {
     }
     for (int i = 0; i < data.length; i++) {
       if (widget.transactionData != null) {
-        if (widget.transactionData!.recevier.id == data[i].user.id) {
+        if (widget.transactionData!.receiver.id == data[i].user.id) {
           users.add(data[i]);
           break;
         }
@@ -277,7 +279,7 @@ class _SettleExpenseState extends State<SettleExpense> {
 
   void _populateEditForm(RoomSettleModel data) {
     _amountController.text = data.amount.toString();
-    _selectedUser.value = data.recevier.id;
+    _selectedUser.value = data.receiver.id;
   }
 
   @override
