@@ -51,7 +51,6 @@ import 'package:settlenow_v2/theme/themes.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
-
 // TODO : Bank Transaction - Expense
 // TODO : Bank Transaction - Add Expense To
 
@@ -59,7 +58,7 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 // TODO : Add Expense To Personal From Room/QuickSplit
 // TODO : Search, sort and filters in pages
 // TODO : Analysis Page
-// TODO : Join Room via Deeplink 
+// TODO : Join Room via Deeplink
 // TODO : Google Login In
 
 @pragma('vm:entry-point')
@@ -71,10 +70,6 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  String firebaseProjectName = '[DEFAULT]';
-  if (kDebugMode) {
-    firebaseProjectName = 'settlenow-dev';
-  }
   if (kIsWeb) {
     await Firebase.initializeApp(
       options:
@@ -84,7 +79,6 @@ Future<void> main() async {
     );
   } else {
     await Firebase.initializeApp(
-      name: firebaseProjectName,
       options:
           kDebugMode
               ? firebase_dev.DefaultFirebaseOptions.currentPlatform
