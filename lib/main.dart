@@ -66,24 +66,33 @@ Future<void> _firebaseMessagingBackgroundHandler(
   RemoteMessage remoteMessage,
 ) async {}
 
+Future<void> initializeFirebaseApp() async {
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options:
+            kDebugMode
+                ? firebase_dev.DefaultFirebaseOptions.currentPlatform
+                : firebase_prod.DefaultFirebaseOptions.currentPlatform,
+      );
+    } else {
+      Firebase.app();
+    }
+  } catch (e) {
+    if (e is FirebaseException && e.code == 'duplicate-app') {
+    } else {
+      rethrow;
+    }
+  }
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   GoRouter.optionURLReflectsImperativeAPIs = true;
 
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options:
-          kDebugMode
-              ? firebase_dev.DefaultFirebaseOptions.currentPlatform
-              : firebase_prod.DefaultFirebaseOptions.currentPlatform,
-    );
-  } else {
-    await Firebase.initializeApp(
-      options:
-          kDebugMode
-              ? firebase_dev.DefaultFirebaseOptions.currentPlatform
-              : firebase_prod.DefaultFirebaseOptions.currentPlatform,
-    );
+  await initializeFirebaseApp();
+
+  if (!kIsWeb) {
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
