@@ -15,3 +15,8 @@ final class RoomDashboardOnAddNewRoom extends RoomDashboardEvent {
   final bool isLoading;
   RoomDashboardOnAddNewRoom({required this.data, required this.isLoading});
 }
+
+final class RoomDashboardOnCloseRoom extends RoomDashboardEvent {
+  final RoomInfoModel data;
+  RoomDashboardOnCloseRoom({required this.data});
+}

@@ -319,6 +319,12 @@ class _AddTransactionState extends State<AddTransaction> {
             expenseType = "split";
           }
         }
+      case TransactionType.personal:
+        {
+          if (widget.transactionData != null) {
+            expenseType = "Personal";
+          }
+        }
       default:
         {}
     }

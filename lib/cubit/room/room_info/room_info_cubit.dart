@@ -46,7 +46,18 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       final oldState = (state as RoomInfoSuccess);
 
       if (oldState.data.id == id) {
-        return emit(RoomInfoSuccess(oldState.data.copyWith(users: userData)));
+        bool isActive = false;
+        for (int i = 0; i < userData.length; i++) {
+          isActive = isActive || userData[i].active;
+        }
+
+        RoomInfoModel updatedRoomInfo = oldState.data.copyWith(
+          users: userData,
+          active: isActive,
+          status: isActive ? "Partially Closed" : "Closed",
+        );
+        _roomDashboardBloc.add(RoomDashboardOnCloseRoom(data: updatedRoomInfo));
+        return emit(RoomInfoSuccess(updatedRoomInfo));
       }
     }
 

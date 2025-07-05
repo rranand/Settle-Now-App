@@ -34,7 +34,7 @@ class PersonalExpenseScreen extends StatefulWidget {
 
 class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(1);
+  final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
   final double _navBarHeight = 60;
   final DateTime _currentDate = DateTime.now();
   bool _isLivePersonalExpense = false;

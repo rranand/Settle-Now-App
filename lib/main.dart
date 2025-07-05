@@ -51,27 +51,15 @@ import 'package:settlenow_v2/theme/themes.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
-// TODO : Dashboard - QuickSplit
-// TODO : Dashboard - Room
-// TODO : Dashboard - CRUD QuickSplit
-// TODO : Dashboard - Create Room
-// TODO : Dashboard - Join Room
-// TODO : Room - CRUD Expense
-// TODO : Room - Create Room
 // TODO : Room - Join Room
-// TODO : Notification - Send/Receive
-// TODO : Personal Expense - Dashboard
-// TODO : Personal Expense - Monthly
-// TODO : Personal Expense - CRUD Expense
-// TODO : Len-Den - Dashboard
-// TODO : Len-Den - Create Join Room
-// TODO : Len-Den - CRUD Expense
-// TODO : Profile Page - Show Info / Login Info
+// TODO : Notification - Send/Receive Request
 // TODO : Bank Transaction - Expense
 // TODO : Bank Transaction - Add Expense To
+// TODO : Add Expense To Personal From Room/QuickSplit
+// TODO : Search, sort and filters in pages
 // TODO : Analysis Page
-// TODO : Join Room via Deeplink
-// FIXME: On Screen Size Change Notifier is not working
+// TODO : Join Room via Deeplink 
+// TODO : Google Login In
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

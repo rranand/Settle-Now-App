@@ -339,6 +339,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         bool isLoaded = false;
         String roomName = "";
         RoomUserModel roomUserModel = RoomUserModel.empty();
+        bool showSettleExpense = false;
 
         if (state is RoomInfoSuccess) {
           isRoomActive = state.data.active;
@@ -347,6 +348,14 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           roomUserModel = state.data.users.firstWhere(
             (ele) => _loggedInUser.id == ele.user.id,
           );
+
+          double unSettledAmount =
+              roomUserModel.contribution -
+              roomUserModel.spent +
+              roomUserModel.settle;
+          if (unSettledAmount.abs() >= 0.2) {
+            showSettleExpense = true;
+          }
         }
 
         return Scaffold(
@@ -430,7 +439,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         child: const Icon(Icons.arrow_outward),
                         backgroundColor: UiConstant.colors[1],
                         foregroundColor: Colors.white,
-                        visible: roomUserModel.active,
+                        visible: roomUserModel.active && showSettleExpense,
                         label: 'Add Settle Expense',
                         onTap: () {
                           context.push(

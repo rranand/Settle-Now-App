@@ -14,6 +14,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
   RoomDashboardBloc(this.repo) : super(RoomDashboardInitial()) {
     on<RoomDashboardFetch>(_roomFetch);
     on<RoomDashboardOnAddNewRoom>(_roomDashboardOnAddNewRoom);
+    on<RoomDashboardOnCloseRoom>(_roomDashboardOnCloseRoom);
   }
 
   void _roomFetch(
@@ -111,6 +112,33 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         inactiveStatus: allRoomState.inactiveStatus,
         activeData: data,
         inactiveData: allRoomState.inactiveData,
+      ),
+    );
+  }
+
+  void _roomDashboardOnCloseRoom(
+    RoomDashboardOnCloseRoom event,
+    Emitter<RoomDashboardState> emit,
+  ) async {
+    final allRoomState = (state as RoomDashboardFetchSuccess);
+    List<RoomInfoModel> activeRoomData = [];
+    List<RoomInfoModel> inactiveRoomData = [];
+
+    for (int i = 0; i < allRoomState.activeData.length; i++) {
+      if (allRoomState.activeData[i].id == event.data.id &&
+          !event.data.active) {
+        inactiveRoomData.add(event.data);
+      } else {
+        activeRoomData.add(allRoomState.activeData[i]);
+      }
+    }
+    inactiveRoomData.addAll(allRoomState.inactiveData);
+    return emit(
+      RoomDashboardFetchSuccess(
+        activeStatus: allRoomState.activeStatus,
+        inactiveStatus: allRoomState.inactiveStatus,
+        activeData: activeRoomData,
+        inactiveData: inactiveRoomData,
       ),
     );
   }
