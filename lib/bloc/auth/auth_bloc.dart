@@ -44,22 +44,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      UserModel authUserData = UserModel.empty();
-
       GoogleSignInAccount? userData = await GoogleOauth.login();
       if (userData == null) {
         return emit(AuthLoginFailure("Google SignIn Failed"));
       }
-      debugPrint(userData.toString());
-      // authUserData = UserModel.onLogin(
-      //   username: userData.email,
-      //   name: userData.displayName ?? userData.email.split('@')[0],
-      //   profileImage: [userData.photoUrl ?? ""],
-      // );
+      final GoogleSignInAuthentication googleAuth =
+          await userData.authentication;
+      final String email = userData.email;
+      final String idToken = googleAuth.idToken ?? "";
 
-      // if (!authUserData.hasData) {
-      //   return emit(AuthLoginFailure("Google SignIn Failed"));
-      // }
+      if (idToken.isEmpty) {
+        return emit(AuthLoginFailure("Google SignIn Failed"));
+      }
+
+      UserModel authUserData = await repo.loginUsingGoogle(email, idToken);
 
       return emit(AuthLoginSuccess(authUserData));
     } catch (e) {
@@ -123,7 +121,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       bool isLogoutSuccessful = await repo.logoutUser(userData.authToken);
       if (userData.isGoogle) {
-        // GoogleSignIN.logout();
+        await GoogleOauth.logout();
       }
       if (isLogoutSuccessful) {
         return emit(AuthInitial());
