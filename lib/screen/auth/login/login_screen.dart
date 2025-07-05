@@ -76,7 +76,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _googleLoginHandler() {}
+  void _googleLoginHandler() {
+    context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+  }
 
   void _handleOnSignUp() {
     context.go(RouterConstants.signupRouteName);

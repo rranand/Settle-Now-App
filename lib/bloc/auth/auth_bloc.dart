@@ -1,7 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -44,11 +46,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       UserModel authUserData = UserModel.empty();
 
-      // GoogleSignInAccount? userData = await GoogleSignIN.login();
-      // if (userData == null) {
-      //   return emit(AuthLoginFailure("Google SignIn Failed"));
-      // }
-
+      GoogleSignInAccount? userData = await GoogleOauth.login();
+      if (userData == null) {
+        return emit(AuthLoginFailure("Google SignIn Failed"));
+      }
+      debugPrint(userData.toString());
       // authUserData = UserModel.onLogin(
       //   username: userData.email,
       //   name: userData.displayName ?? userData.email.split('@')[0],

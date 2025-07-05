@@ -11,9 +11,9 @@ class AuthRepository {
   Future<UserModel> getLoggedInUser() async {
     try {
       String? authToken = await getStringPref('auth_token');
-      authToken ??=
-          "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIkY6nI5RKybxC2Es+pILJfI8IJzo9bKUyPsWuPGfFfq5hbCeZMsyZS8u72ARLr38Rg=";
-      final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
+      // authToken ??=
+      //     "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIkY6nI5RKybxC2Es+pILJfI8IJzo9bKUyPsWuPGfFfq5hbCeZMsyZS8u72ARLr38Rg=";
+      final UserModel userData = await _dataProvider.getOwnUserInfo(authToken!);
       return userData;
     } catch (e) {
       rethrow;

@@ -1,14 +1,17 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
-    id "com.android.application"
-    id "kotlin-android"
-    id 'com.google.gms.google-services'
-    id "dev.flutter.flutter-gradle-plugin"
+    id("com.android.application")
+    id("kotlin-android")
+    id("com.google.gms.google-services") version "4.4.3" apply false
+    id("dev.flutter.flutter-gradle-plugin")
 }
 
-def keystoreProperties = new Properties()
-def keystorePropertiesFile = rootProject.file('key.properties')
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -31,32 +34,33 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     signingConfigs {
-       release {
-           keyAlias keystoreProperties['keyAlias']
-           keyPassword keystoreProperties['keyPassword']
-           storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
-           storePassword keystoreProperties['storePassword']
-       }
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+            storePassword = keystoreProperties["storePassword"] as String?
+        }
     }
 
     buildTypes {
-        release {
-            signingConfig signingConfigs.release
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
-    flavorDimensions "default"
+    flavorDimensions += "default"
 
     productFlavors {
-        prod {
-            dimension "default"
+        create("prod") {
+            dimension = "default"
         }
-        dev {
-            dimension "default"
-            applicationIdSuffix ".dev"
+        create("dev") {
+            dimension = "default"
+            applicationIdSuffix = ".dev"
         }
     }
 }
@@ -66,11 +70,11 @@ flutter {
 }
 
 dependencies {
-  implementation platform('com.google.firebase:firebase-bom:33.9.0')
-  implementation 'com.google.firebase:firebase-analytics'
-  implementation 'com.android.support:multidex:1.0.3'
-  implementation 'com.google.android.recaptcha:recaptcha:18.4.0'
-  implementation 'com.google.firebase:firebase-perf'
-  implementation 'androidx.activity:activity:1.6.0-alpha05'
-  implementation 'com.google.android.play:integrity:1.4.0'
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-perf")
+    implementation("com.android.support:multidex:1.0.3")
+    implementation("com.google.android.recaptcha:recaptcha:18.4.0")
+    implementation("androidx.activity:activity:1.6.0-alpha05")
+    implementation("com.google.android.play:integrity:1.4.0")
 }
