@@ -46,9 +46,9 @@ class RoomDashboardRepository {
     }
   }
 
-  Future<bool> joinRoom(String roomKey) async {
+  Future<bool> joinRoom(String roomKey, String authToken) async {
     try {
-      bool isJoin = await _dataProvider.joinRoom(roomKey);
+      bool isJoin = await _dataProvider.joinRoom(roomKey, authToken);
       return isJoin;
     } catch (e) {
       rethrow;

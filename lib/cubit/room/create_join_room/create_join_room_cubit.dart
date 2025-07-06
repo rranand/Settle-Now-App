@@ -44,6 +44,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
   void joinNewRoom(
     BuildContext context,
     String roomKey,
+    String authToken,
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     showSnackbarWithChildWidget(
@@ -58,7 +59,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     );
     CreateJoinRoomLoading();
     try {
-      bool isRoomJoined = await repo.joinRoom(roomKey);
+      bool isRoomJoined = await repo.joinRoom(roomKey, authToken);
       if (isRoomJoined) {
         scaffoldMessenger.hideCurrentSnackBar();
         showSnackbarWithChildWidget(

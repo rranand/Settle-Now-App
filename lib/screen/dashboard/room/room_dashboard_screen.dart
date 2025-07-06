@@ -63,6 +63,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
         context.read<CreateJoinRoomCubit>().joinNewRoom(
           context,
           _roomJoinOrCreateController.text,
+          _loggedInUser.authToken,
           ScaffoldMessenger.of(context),
         );
       }
