@@ -56,7 +56,6 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 // TODO : Bank Transaction - Add Expense To
 
 // TODO : Notification - Send/Receive Request
-// TODO : Add Expense To Personal From Room/QuickSplit
 // TODO : Search, sort and filters in pages
 // TODO : Analysis Page
 // TODO : Join Room via Deeplink
