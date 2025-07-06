@@ -281,6 +281,8 @@ class MyApp extends StatelessWidget {
                 (context) => AddToPersonalExpenseBloc(
                   quicksplitBloc: context.read<QuicksplitBloc>(),
                   quickSplitRepo: context.read<QuicksplitRepository>(),
+                  roomBloc: context.read<RoomBloc>(),
+                  roomRepository: context.read<RoomRepository>(),
                 ),
           ),
         ],

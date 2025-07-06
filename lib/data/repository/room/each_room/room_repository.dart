@@ -205,4 +205,22 @@ class RoomRepository {
       rethrow;
     }
   }
+
+  Future<bool> addToPersonalExpense(
+    String id,
+    String expenseID,
+    String splitType,
+    String authToken,
+  ) async {
+    try {
+      return _dataProvider.addToPersonalExpense(
+        id,
+        expenseID,
+        splitType,
+        authToken,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

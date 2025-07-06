@@ -6,6 +6,7 @@ sealed class AddToPersonalExpenseEvent {}
 class AddToPersonalExpenseRequested extends AddToPersonalExpenseEvent {
   final TransactionType transactionType;
   final String roomID;
+  final String splitType;
   final String transactionID;
   final String authToken;
 
@@ -14,5 +15,6 @@ class AddToPersonalExpenseRequested extends AddToPersonalExpenseEvent {
     required this.transactionID,
     required this.authToken,
     this.roomID = "",
+    this.splitType = "",
   });
 }

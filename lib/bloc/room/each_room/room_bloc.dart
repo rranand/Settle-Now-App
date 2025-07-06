@@ -18,6 +18,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     on<RoomUpdateTransaction>(_roomUpdateTransaction);
     on<RoomDeleteTransaction>(_roomDeleteTransaction);
     on<RoomBlocReset>(_roomBlocReset);
+    on<RoomAddToPersonalExpense>(_roomAddToPersonalExpense);
   }
 
   void _roomFetch(RoomFetch event, Emitter<RoomState> emit) async {
@@ -87,5 +88,24 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
 
   void _roomBlocReset(RoomBlocReset event, Emitter<RoomState> emit) {
     return emit(RoomLoading(""));
+  }
+
+  void _roomAddToPersonalExpense(
+    RoomAddToPersonalExpense event,
+    Emitter<RoomState> emit,
+  ) {
+    final oldState = state as RoomFetchSuccess;
+    if (oldState.id != event.id) {
+      return;
+    }
+    List<TransactionModel> oldData = List.from(oldState.data);
+
+    for (int i = 0; i < oldData.length; i++) {
+      if (oldData[i].id == event.expenseID) {
+        oldData[i].isAddedToPersonalExpense = true;
+      }
+    }
+
+    return emit(RoomFetchSuccess(oldState.id, oldData));
   }
 }

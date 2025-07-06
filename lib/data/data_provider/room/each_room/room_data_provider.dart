@@ -267,4 +267,32 @@ class RoomDataProvider {
       throw Crypto.decrypt(respData['message']);
     }
   }
+
+  Future<bool> addToPersonalExpense(
+    String id,
+    String expenseID,
+    String splitType,
+    String authToken,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'room/$id/transaction/personalExpense',
+        "post",
+        authToken,
+        {
+          "id": Crypto.encrypt(expenseID),
+          "splitType": Crypto.encrypt(splitType),
+        },
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

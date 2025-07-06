@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
@@ -91,6 +94,53 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
     );
   }
 
+  Widget addToPersonalExpenseWidget() {
+    if (widget.data.hasData && !widget.data.isAddedToPersonalExpense) {
+      return BlocBuilder<AddToPersonalExpenseBloc, AddToPersonalExpenseState>(
+        builder: (context, state) {
+          if (state.addingExpenseToPersonalExpense.contains(widget.data.id)) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: CustomShimmerEffect.loadingShimmerEffect(
+                Icon(Iconsax.profile_add5),
+              ),
+            );
+          } else {
+            String splitType = "";
+            if (!(widget.data.users.isNotEmpty ||
+                widget.data.amount == widget.data.createdBy.amount)) {
+              splitType = "equal";
+            } else {
+              splitType = "split";
+            }
+            return Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(
+                  UiConstant.cardBorderRadius,
+                ),
+                child: Icon(Iconsax.profile_add, color: Colors.grey),
+                onTap: () {
+                  context.read<AddToPersonalExpenseBloc>().add(
+                    AddToPersonalExpenseRequested(
+                      transactionType: TransactionType.room,
+                      transactionID: widget.data.id,
+                      authToken: widget.loggedInUser.authToken,
+                      roomID: widget.roomID,
+                      splitType: splitType,
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        },
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<String> tags = createTags();
@@ -147,19 +197,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                 ),
                 Row(
                   children: [
-                    Padding(
-                      padding:
-                          isManualSplit
-                              ? EdgeInsets.only(right: 6.0)
-                              : EdgeInsets.zero,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(
-                          UiConstant.cardBorderRadius,
-                        ),
-                        child: Icon(Iconsax.profile_add, color: Colors.grey),
-                        onTap: () {},
-                      ),
-                    ),
+                    addToPersonalExpenseWidget(),
                     Visibility(
                       visible: isManualSplit,
                       child: InkWell(

@@ -120,26 +120,30 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     RoomDashboardOnCloseRoom event,
     Emitter<RoomDashboardState> emit,
   ) async {
-    final allRoomState = (state as RoomDashboardFetchSuccess);
-    List<RoomInfoModel> activeRoomData = [];
-    List<RoomInfoModel> inactiveRoomData = [];
+    if (state is RoomDashboardFetchSuccess) {
+      final allRoomState = (state as RoomDashboardFetchSuccess);
+      List<RoomInfoModel> activeRoomData = [];
+      List<RoomInfoModel> inactiveRoomData = [];
 
-    for (int i = 0; i < allRoomState.activeData.length; i++) {
-      if (allRoomState.activeData[i].id == event.data.id &&
-          !event.data.active) {
-        inactiveRoomData.add(event.data);
-      } else {
-        activeRoomData.add(allRoomState.activeData[i]);
+      for (int i = 0; i < allRoomState.activeData.length; i++) {
+        if (allRoomState.activeData[i].id == event.data.id &&
+            !event.data.active) {
+          inactiveRoomData.add(event.data);
+        } else {
+          activeRoomData.add(allRoomState.activeData[i]);
+        }
       }
+      inactiveRoomData.addAll(allRoomState.inactiveData);
+      return emit(
+        RoomDashboardFetchSuccess(
+          activeStatus: allRoomState.activeStatus,
+          inactiveStatus: allRoomState.inactiveStatus,
+          activeData: activeRoomData,
+          inactiveData: inactiveRoomData,
+        ),
+      );
+    } else {
+      return;
     }
-    inactiveRoomData.addAll(allRoomState.inactiveData);
-    return emit(
-      RoomDashboardFetchSuccess(
-        activeStatus: allRoomState.activeStatus,
-        inactiveStatus: allRoomState.inactiveStatus,
-        activeData: activeRoomData,
-        inactiveData: inactiveRoomData,
-      ),
-    );
   }
 }
