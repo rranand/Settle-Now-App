@@ -46,4 +46,12 @@ class QuicksplitRepository {
       rethrow;
     }
   }
+
+  Future<bool> addToPersonalExpense(String expenseID, String authToken) async {
+    try {
+      return _dataProvider.addToPersonalExpense(expenseID, authToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -14,6 +14,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     on<QuicksplitAddNewTransaction>(_quicksplitAddNewTransaction);
     on<QuicksplitUpdateTransaction>(_quicksplitUpdateTransaction);
     on<QuicksplitDeleteTransaction>(_quicksplitDeleteTransaction);
+    on<QuicksplitAddToPersonalExpense>(_quicksplitAddToPersonalExpense);
   }
 
   void _quicksplitFetch(
@@ -62,5 +63,21 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     List<TransactionModel> data = [...oldData.data];
     data.removeWhere((element) => element.id == event.expenseID);
     return emit(QuicksplitFetchSuccess(data));
+  }
+
+  void _quicksplitAddToPersonalExpense(
+    QuicksplitAddToPersonalExpense event,
+    Emitter<QuicksplitState> emit,
+  ) async {
+    final oldState = state as QuicksplitFetchSuccess;
+    List<TransactionModel> oldData = List.from(oldState.data);
+
+    for (int i = 0; i < oldData.length; i++) {
+      if (oldData[i].id == event.expenseID) {
+        oldData[i].isAddedToPersonalExpense = true;
+      }
+    }
+
+    return emit(QuicksplitFetchSuccess(oldData));
   }
 }

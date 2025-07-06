@@ -9,6 +9,7 @@ import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_dashboard_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/notification/notification_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/room_dashboard_screen.dart';
@@ -27,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _homeScreenkey = GlobalKey();
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   @override
@@ -194,6 +195,8 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       case 3:
         return LendenDashboardScreen(isSearchEnabled: _isSearchEnabled);
+      case 4:
+        return NotificationScreen();
       default:
         return RoomDashboardScreen(isSearchEnabled: _isSearchEnabled);
     }

@@ -18,6 +18,7 @@ class TransactionModel {
   List<UserAmountModel> users = [];
   DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
+  bool isAddedToPersonalExpense = false;
 
   TransactionModel({
     required this.id,
@@ -28,6 +29,7 @@ class TransactionModel {
     required this.createdBy,
     required this.createdOn,
     required this.modifiedOn,
+    required this.isAddedToPersonalExpense,
   });
 
   TransactionModel.empty({this.hasData = false});
@@ -41,6 +43,7 @@ class TransactionModel {
     UserAmountModel? createdBy,
     DateTime? createdOn,
     DateTime? modifiedOn,
+    bool? isAddedToPersonalExpense,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -51,6 +54,8 @@ class TransactionModel {
       createdBy: createdBy ?? this.createdBy,
       createdOn: createdOn ?? this.createdOn,
       modifiedOn: modifiedOn ?? this.modifiedOn,
+      isAddedToPersonalExpense:
+          isAddedToPersonalExpense ?? this.isAddedToPersonalExpense,
     );
   }
 
@@ -63,6 +68,7 @@ class TransactionModel {
       'createdBy': createdBy.toMap(),
       'createdOn': createdOn.toString(),
       'modifiedOn': modifiedOn.toString(),
+      'isAddedToPersonalExpense': isAddedToPersonalExpense,
     };
   }
 
@@ -76,6 +82,7 @@ class TransactionModel {
       createdBy: data.createdBy,
       createdOn: data.createdOn,
       modifiedOn: data.createdOn,
+      isAddedToPersonalExpense: false,
     );
   }
 
@@ -91,6 +98,7 @@ class TransactionModel {
       createdBy: UserAmountModel.empty(),
       createdOn: data.createdOn,
       modifiedOn: data.modifiedOn,
+      isAddedToPersonalExpense: false,
     );
   }
 
@@ -106,6 +114,7 @@ class TransactionModel {
       createdBy: UserAmountModel.copyFromUser(data.createdBy, 0),
       createdOn: data.createdOn,
       modifiedOn: data.modifiedOn,
+      isAddedToPersonalExpense: false,
     );
   }
 
@@ -121,6 +130,8 @@ class TransactionModel {
       createdBy: UserAmountModel.fromBasicInfoMap(map['createdBy']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
       modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
+      isAddedToPersonalExpense:
+          Crypto.decrypt(map['isAddedToPersonalExpense']) == 'true',
     );
   }
 

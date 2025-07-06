@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
@@ -59,7 +60,6 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 // TODO : Search, sort and filters in pages
 // TODO : Analysis Page
 // TODO : Join Room via Deeplink
-// TODO : Google Login In
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -201,7 +201,6 @@ class MyApp extends StatelessWidget {
                 (context) =>
                     UserUpdateProfileCubit(context.read<AuthRepository>()),
           ),
-
           BlocProvider<CreateJoinRoomCubit>(
             create:
                 (context) => CreateJoinRoomCubit(
@@ -275,6 +274,13 @@ class MyApp extends StatelessWidget {
                   context.read<PersonalMonthlyExpenseRepository>(),
                   context.read<LendenRoomRepository>(),
                   context.read<RoomRepository>(),
+                ),
+          ),
+          BlocProvider<AddToPersonalExpenseBloc>(
+            create:
+                (context) => AddToPersonalExpenseBloc(
+                  quicksplitBloc: context.read<QuicksplitBloc>(),
+                  quickSplitRepo: context.read<QuicksplitRepository>(),
                 ),
           ),
         ],

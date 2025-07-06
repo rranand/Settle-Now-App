@@ -145,17 +145,34 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     ),
                   ),
                 ),
-                Visibility(
-                  visible: isManualSplit,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(
-                      UiConstant.cardBorderRadius,
+                Row(
+                  children: [
+                    Padding(
+                      padding:
+                          isManualSplit
+                              ? EdgeInsets.only(right: 6.0)
+                              : EdgeInsets.zero,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                        child: Icon(Iconsax.profile_add, color: Colors.grey),
+                        onTap: () {},
+                      ),
                     ),
-                    child: Icon(Iconsax.info_circle, color: Colors.grey),
-                    onTap: () {
-                      isExpanded.value = !isExpanded.value;
-                    },
-                  ),
+                    Visibility(
+                      visible: isManualSplit,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                        child: Icon(Iconsax.info_circle, color: Colors.grey),
+                        onTap: () {
+                          isExpanded.value = !isExpanded.value;
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

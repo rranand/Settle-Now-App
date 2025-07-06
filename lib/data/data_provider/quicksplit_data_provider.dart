@@ -95,4 +95,24 @@ class QuicksplitDataProvider {
       rethrow;
     }
   }
+
+  Future<bool> addToPersonalExpense(String expenseID, String authToken) async {
+    try {
+      final response = await createAPICall(
+        'quicksplit/personalExpense',
+        "post",
+        authToken,
+        {"id": Crypto.encrypt(expenseID)},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

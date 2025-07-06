@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
@@ -9,6 +10,7 @@ import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
@@ -122,6 +124,44 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
     );
   }
 
+  Widget addToPersonalExpenseWidget() {
+    if (widget.data.hasData && !widget.data.isAddedToPersonalExpense) {
+      return BlocBuilder<AddToPersonalExpenseBloc, AddToPersonalExpenseState>(
+        builder: (context, state) {
+          if (state.addingExpenseToPersonalExpense.contains(widget.data.id)) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: CustomShimmerEffect.loadingShimmerEffect(
+                Icon(Iconsax.profile_add5),
+              ),
+            );
+          } else {
+            return Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(
+                  UiConstant.cardBorderRadius,
+                ),
+                child: Icon(Iconsax.profile_add, color: Colors.grey),
+                onTap: () {
+                  context.read<AddToPersonalExpenseBloc>().add(
+                    AddToPersonalExpenseRequested(
+                      transactionType: TransactionType.quicksplit,
+                      transactionID: widget.data.id,
+                      authToken: _loggedInUser.authToken,
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+        },
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -173,12 +213,13 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  addToPersonalExpenseWidget(),
                   Visibility(
                     visible:
                         widget.data.hasData &&
                         widget.data.createdBy.id == _loggedInUser.id,
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 10.0),
+                      padding: const EdgeInsets.only(right: 6.0),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(
                           UiConstant.cardBorderRadius,
