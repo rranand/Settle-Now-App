@@ -12,6 +12,7 @@ import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expens
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
+import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
@@ -200,10 +201,14 @@ class MyApp extends StatelessWidget {
                 (context) =>
                     UserUpdateProfileCubit(context.read<AuthRepository>()),
           ),
+          BlocProvider<NotificationBloc>(
+            create: (context) => NotificationBloc(),
+          ),
           BlocProvider<CreateJoinRoomCubit>(
             create:
                 (context) => CreateJoinRoomCubit(
                   context.read<RoomDashboardRepository>(),
+                  context.read<NotificationBloc>(),
                 ),
           ),
           BlocProvider<CreateRoomCubit>(

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
@@ -11,7 +13,9 @@ part 'create_join_room_state.dart';
 
 class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
   final RoomDashboardRepository repo;
-  CreateJoinRoomCubit(this.repo) : super(CreateJoinRoomInitial());
+  final NotificationBloc notificationBloc;
+  CreateJoinRoomCubit(this.repo, this.notificationBloc)
+    : super(CreateJoinRoomInitial());
 
   void createNewRoom(BuildContext context, String roomName) async {
     final roomDashboardCtx = context.read<RoomDashboardBloc>();
@@ -59,19 +63,18 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     );
     CreateJoinRoomLoading();
     try {
-      bool isRoomJoined = await repo.joinRoom(roomKey, authToken);
-      if (isRoomJoined) {
-        scaffoldMessenger.hideCurrentSnackBar();
-        showSnackbarWithChildWidget(
-          "Room Join Requested",
-          child: Icon(Iconsax.tick_circle5, color: Colors.green),
-          scaffoldMessenger: scaffoldMessenger,
-        );
-        return emit(CreateJoinRoomSuccess());
-      } else {
-        scaffoldMessenger.hideCurrentSnackBar();
-        return emit(CreateJoinRoomFailure("Something went wrong!"));
-      }
+      NotificationModel notificationData = await repo.joinRoom(
+        roomKey,
+        authToken,
+      );
+      notificationBloc.add(NotificationOnAdd(data: notificationData));
+      scaffoldMessenger.hideCurrentSnackBar();
+      showSnackbarWithChildWidget(
+        "Room Join Requested",
+        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        scaffoldMessenger: scaffoldMessenger,
+      );
+      return emit(CreateJoinRoomSuccess());
     } catch (e) {
       scaffoldMessenger.hideCurrentSnackBar();
       return emit(CreateJoinRoomFailure(e.toString()));

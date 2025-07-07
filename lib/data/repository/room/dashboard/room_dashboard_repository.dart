@@ -1,4 +1,5 @@
 import 'package:settlenow_v2/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
@@ -46,10 +47,13 @@ class RoomDashboardRepository {
     }
   }
 
-  Future<bool> joinRoom(String roomKey, String authToken) async {
+  Future<NotificationModel> joinRoom(String roomKey, String authToken) async {
     try {
-      bool isJoin = await _dataProvider.joinRoom(roomKey, authToken);
-      return isJoin;
+      NotificationModel notificationData = await _dataProvider.joinRoom(
+        roomKey,
+        authToken,
+      );
+      return notificationData;
     } catch (e) {
       rethrow;
     }

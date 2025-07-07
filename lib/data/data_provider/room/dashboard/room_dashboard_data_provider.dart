@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
@@ -68,7 +69,7 @@ class RoomDashboardDataProvider {
     }
   }
 
-  Future<bool> joinRoom(String roomKey, String authToken) async {
+  Future<NotificationModel> joinRoom(String roomKey, String authToken) async {
     try {
       final response = await createAPICall(
         'room/join/$roomKey',
@@ -79,9 +80,12 @@ class RoomDashboardDataProvider {
 
       final data = jsonDecode(response.body);
 
-      debugPrint(data.toString());
       if (response.statusCode == 200) {
-        return true;
+        NotificationModel notificationData = NotificationModel.fromMap(
+          data['data'],
+        );
+        debugPrint(notificationData.toString());
+        return notificationData;
       } else {
         throw Crypto.decrypt(data['message']);
       }
