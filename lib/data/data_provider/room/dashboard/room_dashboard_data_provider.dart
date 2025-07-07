@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
@@ -84,7 +83,6 @@ class RoomDashboardDataProvider {
         NotificationModel notificationData = NotificationModel.fromMap(
           data['data'],
         );
-        debugPrint(notificationData.toString());
         return notificationData;
       } else {
         throw Crypto.decrypt(data['message']);

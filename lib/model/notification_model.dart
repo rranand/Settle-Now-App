@@ -4,17 +4,22 @@ import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
 class NotificationModel {
+  bool hasData = true;
   String id = "";
-  String name = "";
+  String roomName = "";
   String type = "";
+  String roomID = "";
   UserModel by = UserModel.empty();
   UserModel user = UserModel.empty();
   DateTime createdOn = DateTime.now();
 
+  NotificationModel.empty({this.hasData = false});
+
   NotificationModel({
     required this.id,
-    required this.name,
+    required this.roomName,
     required this.type,
+    required this.roomID,
     required this.by,
     required this.user,
     required this.createdOn,
@@ -22,13 +27,14 @@ class NotificationModel {
 
   @override
   String toString() =>
-      'NotificationModel(id: $id, name: $name, type: $type, user: $user, by: $by)';
+      'NotificationModel(id: $id, roomName: $roomName, roomID: $roomID, type: $type, user: $user, by: $by)';
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'name': name,
+      'roomName': roomName,
       'type': type,
+      'roomID': roomID,
       'createdOn': createdOn,
       'by': by.toMap(),
       'user': user.toMap(),
@@ -38,8 +44,9 @@ class NotificationModel {
   factory NotificationModel.fromMap(Map<String, dynamic> map) {
     return NotificationModel(
       id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name']),
+      roomName: Crypto.decrypt(map['roomName']),
       type: Crypto.decrypt(map['type']),
+      roomID: Crypto.decrypt(map['roomID']),
       by: UserModel.fromBasicInfoMap(map['by']),
       user: UserModel.fromBasicInfoMap(map['user']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
@@ -56,8 +63,9 @@ class NotificationModel {
     if (identical(this, other)) return true;
 
     return other.id == id &&
-        other.name == name &&
+        other.roomName == roomName &&
         other.type == type &&
+        other.roomID == roomID &&
         other.by == by &&
         other.user == user &&
         other.createdOn == createdOn;
@@ -66,8 +74,9 @@ class NotificationModel {
   @override
   int get hashCode =>
       id.hashCode ^
-      name.hashCode ^
+      roomName.hashCode ^
       type.hashCode ^
+      roomID.hashCode ^
       by.hashCode ^
       user.hashCode ^
       createdOn.hashCode;

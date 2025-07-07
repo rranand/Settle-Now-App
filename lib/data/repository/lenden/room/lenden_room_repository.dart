@@ -2,6 +2,7 @@ import 'package:settlenow_v2/data/data_provider/lenden/room/lenden_room_data_pro
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
 
 class LendenRoomRepository {
@@ -58,6 +59,23 @@ class LendenRoomRepository {
   Future<bool> closeRoom(String roomID, String authToken) async {
     try {
       return _dataProvider.closeRoom(roomID, authToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<NotificationModel> inviteUser(
+    String roomID,
+    String uid,
+    String authToken,
+  ) async {
+    try {
+      NotificationModel notificationData = await _dataProvider.inviteUser(
+        roomID,
+        uid,
+        authToken,
+      );
+      return notificationData;
     } catch (e) {
       rethrow;
     }

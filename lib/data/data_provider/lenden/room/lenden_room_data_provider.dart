@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 import 'package:settlenow_v2/util/handler/network_call.dart';
 
@@ -118,6 +120,35 @@ class LendenRoomDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<NotificationModel> inviteUser(
+    String roomID,
+    String uid,
+    String authToken,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'lenden/$roomID',
+        'patch',
+        authToken,
+        {"id": Crypto.encrypt(uid)},
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        NotificationModel notificationData = NotificationModel.fromMap(
+          data['data'],
+        );
+        debugPrint(notificationData.toString());
+        return notificationData;
       } else {
         throw Crypto.decrypt(data['message']);
       }

@@ -349,6 +349,7 @@ class AppRouterConfig {
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,
+      //initialLocation: '/lenden/676ab9f177f9f0515ca7755e',
       observers: [observer],
       refreshListenable: StreamToListenable(authBloc.stream),
       redirect: (context, state) {

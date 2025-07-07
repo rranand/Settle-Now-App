@@ -93,9 +93,13 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       builder: (context) {
         return BlocBuilder<LendenRoomBloc, LendenRoomState>(
           builder: (context, state) {
+            bool showAddPerson = false;
             List<LendenUserModel> users = [];
             if (state is LendenRoomFetchSuccess) {
               users = state.roomData.users;
+              if (state.roomData.status == "Open" && users.length == 1) {
+                showAddPerson = true;
+              }
             } else {
               users = oldUsers;
             }
@@ -112,16 +116,25 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Text(
-                      "Users",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Users",
+                        textAlign: TextAlign.left,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
+                      Visibility(
+                        visible: showAddPerson,
+                        child: IconButton(
+                          icon: Icon(Iconsax.user_add),
+                          onPressed: () {},
+                        ),
+                      ),
+                    ],
                   ),
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 20.0),

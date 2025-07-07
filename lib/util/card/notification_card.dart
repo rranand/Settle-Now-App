@@ -1,0 +1,179 @@
+import 'package:flutter/material.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
+import 'package:settlenow_v2/util/widgets/image_widget.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
+
+class NotificationCard extends StatefulWidget {
+  final String loggedInUserID;
+  final NotificationModel data;
+  const NotificationCard({
+    super.key,
+    required this.loggedInUserID,
+    required this.data,
+  });
+
+  @override
+  State<NotificationCard> createState() => _NotificationCardState();
+}
+
+class _NotificationCardState extends State<NotificationCard> {
+  Widget leadingIcon() {
+    if (!widget.data.hasData) {
+      return CustomShimmerEffect.imageWidget(
+        shape: BoxShape.circle,
+        radius: 50,
+      );
+    }
+    if (widget.data.by.id == widget.data.user.id) {
+      if (widget.data.by.id != widget.loggedInUserID) {
+        return imageWidgetForCachedNetworkImage(
+          widget.data.by.profileImage,
+          boxShape: BoxShape.circle,
+          width: 50,
+          height: 50,
+        );
+      } else if (widget.data.type == "Room") {
+        return colouredIcon(
+          Icon(Icons.groups_outlined, size: 30),
+          Colors.redAccent.shade100,
+        );
+      } else {
+        return colouredIcon(
+          Icon(Icons.group, size: 30),
+          Colors.blueAccent.shade100,
+        );
+      }
+    } else if (widget.data.by.id == widget.loggedInUserID) {
+      return imageWidgetForCachedNetworkImage(
+        widget.data.user.profileImage,
+        boxShape: BoxShape.circle,
+        width: 50,
+        height: 50,
+      );
+    } else {
+      return imageWidgetForCachedNetworkImage(
+        widget.data.by.profileImage,
+        boxShape: BoxShape.circle,
+        width: 50,
+        height: 50,
+      );
+    }
+  }
+
+  Widget title() {
+    if (widget.data.by.id == widget.data.user.id) {
+      if (widget.data.by.id == widget.loggedInUserID) {
+        return Text.rich(
+          TextSpan(
+            text: "You requested to join",
+            children: [
+              TextSpan(text: " "),
+              TextSpan(
+                text: widget.data.roomName,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        );
+      } else {
+        return Text.rich(
+          TextSpan(
+            text: widget.data.by.name,
+            style: TextStyle(fontWeight: FontWeight.bold),
+            children: [
+              TextSpan(
+                text: " wants to join ",
+                style: TextStyle(fontWeight: FontWeight.normal),
+              ),
+              TextSpan(text: widget.data.roomName),
+            ],
+          ),
+        );
+      }
+    } else if (widget.data.by.id == widget.loggedInUserID) {
+      return Text.rich(
+        TextSpan(
+          text: "You invited ",
+          children: [
+            TextSpan(
+              text: widget.data.user.name,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: " to join ",
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            TextSpan(
+              text: widget.data.roomName,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return Text.rich(
+        TextSpan(
+          text: widget.data.by.name,
+          style: TextStyle(fontWeight: FontWeight.bold),
+          children: [
+            TextSpan(
+              text: " invited to join ",
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            TextSpan(text: widget.data.roomName),
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: UiConstant.cardElevation,
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(UiConstant.cardPadding),
+        child: Column(
+          children: [
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: leadingIcon(),
+              title:
+                  widget.data.hasData
+                      ? title()
+                      : CustomShimmerEffect.textWidget(width: 80),
+              subtitle:
+                  widget.data.hasData
+                      ? Text(
+                        widget.data.type,
+                        style: TextStyle(color: Colors.grey[600]),
+                      )
+                      : CustomShimmerEffect.textWidget(fontSize: 10, width: 80),
+            ),
+            Visibility(
+              visible: widget.data.hasData,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Visibility(
+                    visible:
+                        widget.data.user.id != widget.data.by.id &&
+                        widget.data.user.id == widget.loggedInUserID,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 24.0),
+                      child: Icon(Icons.check, color: Colors.green),
+                    ),
+                  ),
+                  Icon(Icons.close, color: Colors.red),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

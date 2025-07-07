@@ -33,6 +33,7 @@ import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/lenden/room/lenden_room_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/notification_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/dashboard/personal_expense_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
@@ -41,6 +42,7 @@ import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provide
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
+import 'package:settlenow_v2/data/repository/notification_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/dashboard/personal_expense_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
@@ -151,6 +153,10 @@ class MyApp extends StatelessWidget {
         RepositoryProvider<RoomRepository>(
           create: (context) => RoomRepository(RoomDataProvider()),
         ),
+        RepositoryProvider<NotificationRepository>(
+          create:
+              (context) => NotificationRepository(NotificationDataProvider()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -202,7 +208,9 @@ class MyApp extends StatelessWidget {
                     UserUpdateProfileCubit(context.read<AuthRepository>()),
           ),
           BlocProvider<NotificationBloc>(
-            create: (context) => NotificationBloc(),
+            create:
+                (context) =>
+                    NotificationBloc(context.read<NotificationRepository>()),
           ),
           BlocProvider<CreateJoinRoomCubit>(
             create:
