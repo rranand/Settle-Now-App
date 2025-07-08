@@ -13,7 +13,7 @@ final class NotificationOnAdd extends NotificationEvent {
   NotificationOnAdd({required this.data});
 }
 
-final class NotificationOnUpdate extends NotificationEvent {
-  final NotificationModel data;
-  NotificationOnUpdate({required this.data});
+final class NotificationOnDelete extends NotificationEvent {
+  final String id;
+  NotificationOnDelete({required this.id});
 }

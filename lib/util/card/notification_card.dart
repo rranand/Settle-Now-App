@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:settlenow_v2/bloc/notification_action/notification_action_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/notification_model.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -129,6 +132,60 @@ class _NotificationCardState extends State<NotificationCard> {
     }
   }
 
+  Widget actionButton() {
+    return BlocBuilder<NotificationActionBloc, NotificationActionState>(
+      builder: (context, state) {
+        if (state.processingNotification.contains(widget.data.id)) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 6.0),
+            child: CustomShimmerEffect.loadingShimmerEffect(
+              SizedBox(
+                height: 24.0,
+                width: 24.0,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ),
+          );
+        } else {
+          return Row(
+            children: [
+              Visibility(
+                visible:
+                    widget.data.user.id != widget.data.by.id &&
+                    widget.data.user.id == widget.loggedInUserID,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 24.0),
+                  child: InkWell(
+                    onTap: () {
+                      context.read<NotificationActionBloc>().add(
+                        NotificationActionAcceptRequested(
+                          id: widget.data.id,
+                          authToken: widget.loggedInUserID,
+                        ),
+                      );
+                    },
+                    child: Icon(Icons.check, color: Colors.green),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () {
+                  context.read<NotificationActionBloc>().add(
+                    NotificationActionDeclineRequested(
+                      id: widget.data.id,
+                      authToken: widget.loggedInUserID,
+                    ),
+                  );
+                },
+                child: Icon(Icons.close, color: Colors.red),
+              ),
+            ],
+          );
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -156,18 +213,16 @@ class _NotificationCardState extends State<NotificationCard> {
             Visibility(
               visible: widget.data.hasData,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Visibility(
-                    visible:
-                        widget.data.user.id != widget.data.by.id &&
-                        widget.data.user.id == widget.loggedInUserID,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 24.0),
-                      child: Icon(Icons.check, color: Colors.green),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      convertToMoment(widget.data.createdOn),
+                      style: TextStyle(color: Colors.grey[600]),
                     ),
                   ),
-                  Icon(Icons.close, color: Colors.red),
+                  actionButton(),
                 ],
               ),
             ),

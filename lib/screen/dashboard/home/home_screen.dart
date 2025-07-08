@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/user_model.dart';
@@ -46,6 +46,14 @@ class _HomeScreenState extends State<HomeScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+    }
+
+    final state = context.read<NotificationBloc>().state;
+
+    if (state is! NotificationFetchSuccess) {
+      context.read<NotificationBloc>().add(
+        NotificationFetch(authToken: _loggedInUser.authToken),
+      );
     }
   }
 
@@ -153,6 +161,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _notificationWithDot(int index) {
+    if (bottomNavigationButtonText[index] == "Notification") {
+      return Stack(
+        children: [
+          Consumer<NotificationBloc>(
+            builder: (context, notificationBloc, child) {
+              final state = notificationBloc.state;
+              if (state is NotificationFetchSuccess && state.data.isNotEmpty) {
+                return child!;
+              } else {
+                return SizedBox.shrink();
+              }
+            },
+            child: Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ),
+          Icon(bottomNavigationButtonIcon[index]),
+        ],
+      );
+    } else {
+      return Icon(bottomNavigationButtonIcon[index]);
+    }
+  }
+
   Widget _bottomNavigationBarWidget() {
     return Container(
       decoration: BoxDecoration(
@@ -176,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
           items: List.generate(
             bottomNavigationButtonText.length,
             (index) => BottomNavigationBarItem(
-              icon: Icon(bottomNavigationButtonIcon[index]),
+              icon: _notificationWithDot(index),
               label: bottomNavigationButtonText[index],
             ),
           ),
@@ -233,6 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       titleSpacing: _mainScreenPadding.left,
       title: Text("Settle Now"),
+      centerTitle: false,
       actions: appBarActionButton(context, appBarActions),
     );
   }

@@ -13,6 +13,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
+import 'package:settlenow_v2/bloc/notification_action/notification_action_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
@@ -291,10 +292,17 @@ class MyApp extends StatelessWidget {
           BlocProvider<AddToPersonalExpenseBloc>(
             create:
                 (context) => AddToPersonalExpenseBloc(
-                  quicksplitBloc: context.read<QuicksplitBloc>(),
-                  quickSplitRepo: context.read<QuicksplitRepository>(),
-                  roomBloc: context.read<RoomBloc>(),
-                  roomRepository: context.read<RoomRepository>(),
+                  context.read<QuicksplitBloc>(),
+                  context.read<QuicksplitRepository>(),
+                  context.read<RoomBloc>(),
+                  context.read<RoomRepository>(),
+                ),
+          ),
+          BlocProvider<NotificationActionBloc>(
+            create:
+                (context) => NotificationActionBloc(
+                  context.read<NotificationBloc>(),
+                  context.read<NotificationRepository>(),
                 ),
           ),
         ],

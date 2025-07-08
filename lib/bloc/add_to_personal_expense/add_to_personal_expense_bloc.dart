@@ -16,12 +16,12 @@ class AddToPersonalExpenseBloc
   final RoomBloc roomBloc;
   final RoomRepository roomRepository;
 
-  AddToPersonalExpenseBloc({
-    required this.quicksplitBloc,
-    required this.quickSplitRepo,
-    required this.roomBloc,
-    required this.roomRepository,
-  }) : super(AddToPersonalExpenseState()) {
+  AddToPersonalExpenseBloc(
+    this.quicksplitBloc,
+    this.quickSplitRepo,
+    this.roomBloc,
+    this.roomRepository,
+  ) : super(AddToPersonalExpenseState()) {
     on<AddToPersonalExpenseRequested>(_addToPersonalExpenseRequested);
   }
 

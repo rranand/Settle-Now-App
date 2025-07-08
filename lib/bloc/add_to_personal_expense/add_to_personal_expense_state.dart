@@ -16,6 +16,6 @@ class AddToPersonalExpenseState {
 
   @override
   String toString() {
-    return 'AddToPersonalExpenseState(isLoading: $addingExpenseToPersonalExpense)';
+    return 'AddToPersonalExpenseState(TransactionIDs: $addingExpenseToPersonalExpense)';
   }
 }

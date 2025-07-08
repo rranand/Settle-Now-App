@@ -10,6 +10,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final NotificationRepository repo;
   NotificationBloc(this.repo) : super(NotificationInitial()) {
     on<NotificationOnAdd>(_notificationOnAdd);
+    on<NotificationOnDelete>(_notificationOnDelete);
     on<NotificationFetch>(_notificationFetch);
   }
 
@@ -34,6 +35,20 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     if (state is NotificationFetchSuccess) {
       final oldState = state as NotificationFetchSuccess;
       data.addAll(oldState.data);
+    }
+    return emit(NotificationFetchSuccess(data));
+  }
+
+  void _notificationOnDelete(
+    NotificationOnDelete event,
+    Emitter<NotificationState> emit,
+  ) {
+    List<NotificationModel> data = [];
+    if (state is NotificationFetchSuccess) {
+      final oldState = state as NotificationFetchSuccess;
+      data.addAll(oldState.data);
+
+      data.removeWhere((ele) => ele.id == event.id);
     }
     return emit(NotificationFetchSuccess(data));
   }

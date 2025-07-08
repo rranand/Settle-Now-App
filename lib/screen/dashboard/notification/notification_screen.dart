@@ -66,12 +66,13 @@ class _NotificationScreenState extends State<NotificationScreen> {
             noOfCardsToBeShown =
                 (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
           }
-          return Padding(
+          return SingleChildScrollView(
             padding: EdgeInsets.only(
               top: UiConstant.spaceBetweenCard,
               bottom: UiConstant.spaceAtBottom,
             ),
             child: ListView.builder(
+              shrinkWrap: true,
               itemCount: noOfCardsToBeShown,
               itemBuilder: (context, index) {
                 NotificationModel eachNotificationData =

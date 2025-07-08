@@ -15,4 +15,23 @@ class NotificationRepository {
       rethrow;
     }
   }
+
+  Future<bool> acceptInvite(String id, String authToken) async {
+    try {
+      await _dataProvider.acceptInvite(id, authToken);
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> declineInvite(String id, String authToken) async {
+    try {
+      await Future.delayed(Duration(seconds: 5));
+      await _dataProvider.declineInvite(id, authToken);
+      return true;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -27,4 +27,39 @@ class NotificationDataProvider {
       rethrow;
     }
   }
+
+  Future<bool> acceptInvite(String id, String authToken) async {
+    try {
+      final response = await createAPICall('notification', "put", authToken, {
+        id: Crypto.encrypt(id),
+      });
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> declineInvite(String id, String authToken) async {
+    try {
+      final response = await createAPICall(
+        'notification',
+        "delete",
+        authToken,
+        {id: Crypto.encrypt(id)},
+      );
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
