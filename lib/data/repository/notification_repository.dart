@@ -27,7 +27,6 @@ class NotificationRepository {
 
   Future<bool> declineInvite(String id, String authToken) async {
     try {
-      await Future.delayed(Duration(seconds: 5));
       await _dataProvider.declineInvite(id, authToken);
       return true;
     } catch (e) {

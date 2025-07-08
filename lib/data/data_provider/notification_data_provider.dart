@@ -31,7 +31,7 @@ class NotificationDataProvider {
   Future<bool> acceptInvite(String id, String authToken) async {
     try {
       final response = await createAPICall('notification', "put", authToken, {
-        id: Crypto.encrypt(id),
+        "id": Crypto.encrypt(id),
       });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -50,7 +50,7 @@ class NotificationDataProvider {
         'notification',
         "delete",
         authToken,
-        {id: Crypto.encrypt(id)},
+        {"id": Crypto.encrypt(id)},
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {

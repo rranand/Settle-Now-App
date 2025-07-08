@@ -85,6 +85,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                         child: NotificationCard(
                           data: eachNotificationData,
                           loggedInUserID: _loggedInUser.id,
+                          authToken: _loggedInUser.authToken,
                         ),
                       ),
                       Expanded(
@@ -95,6 +96,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                 : NotificationCard(
                                   data: notificationData[2 * index + 1],
                                   loggedInUserID: _loggedInUser.id,
+                                  authToken: _loggedInUser.authToken,
                                 ),
                       ),
                     ],
@@ -103,6 +105,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   return NotificationCard(
                     data: eachNotificationData,
                     loggedInUserID: _loggedInUser.id,
+                    authToken: _loggedInUser.authToken,
                   );
                 }
               },
