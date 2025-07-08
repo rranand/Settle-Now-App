@@ -6,6 +6,7 @@ import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class NotificationCard extends StatefulWidget {
@@ -135,7 +136,12 @@ class _NotificationCardState extends State<NotificationCard> {
   }
 
   Widget actionButton() {
-    return BlocBuilder<NotificationActionBloc, NotificationActionState>(
+    return BlocConsumer<NotificationActionBloc, NotificationActionState>(
+      listener: (context, state) {
+        if (state.error != null) {
+          showNormalSnackBar(context, state.error!);
+        }
+      },
       builder: (context, state) {
         if (state.processingNotification.contains(widget.data.id)) {
           return Padding(

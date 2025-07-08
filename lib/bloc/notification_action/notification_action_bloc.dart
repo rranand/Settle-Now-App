@@ -27,14 +27,23 @@ class NotificationActionBloc
     Set<String> oldProcessingIDs = Set.from(state.processingNotification);
     oldProcessingIDs.add(event.id);
     try {
-      emit(state.copyWith(processingNotification: oldProcessingIDs));
+      emit(
+        state.copyWith(processingNotification: oldProcessingIDs, error: null),
+      );
       await notificationRepository.acceptInvite(event.id, event.authToken);
       oldProcessingIDs.remove(event.id);
       notificationBloc.add(NotificationOnDelete(id: event.id));
-      return emit(state.copyWith(processingNotification: oldProcessingIDs));
+      return emit(
+        state.copyWith(processingNotification: oldProcessingIDs, error: null),
+      );
     } catch (e) {
       oldProcessingIDs.remove(event.id);
-      return emit(state.copyWith(processingNotification: oldProcessingIDs));
+      return emit(
+        state.copyWith(
+          processingNotification: oldProcessingIDs,
+          error: e.toString(),
+        ),
+      );
     }
   }
 
@@ -48,14 +57,23 @@ class NotificationActionBloc
     Set<String> oldProcessingIDs = Set.from(state.processingNotification);
     oldProcessingIDs.add(event.id);
     try {
-      emit(state.copyWith(processingNotification: oldProcessingIDs));
+      emit(
+        state.copyWith(processingNotification: oldProcessingIDs, error: null),
+      );
       await notificationRepository.declineInvite(event.id, event.authToken);
       oldProcessingIDs.remove(event.id);
       notificationBloc.add(NotificationOnDelete(id: event.id));
-      return emit(state.copyWith(processingNotification: oldProcessingIDs));
+      return emit(
+        state.copyWith(processingNotification: oldProcessingIDs, error: null),
+      );
     } catch (e) {
       oldProcessingIDs.remove(event.id);
-      return emit(state.copyWith(processingNotification: oldProcessingIDs));
+      return emit(
+        state.copyWith(
+          processingNotification: oldProcessingIDs,
+          error: e.toString(),
+        ),
+      );
     }
   }
 }
