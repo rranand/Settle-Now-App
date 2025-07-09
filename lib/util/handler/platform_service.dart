@@ -3,10 +3,17 @@ import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
+
+Future<String> getAppVersion() async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  return packageInfo.version.toString();
+}
 
 Future<Map<String, String>> platformState() async {
   final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  String version = await getAppVersion();
 
   try {
     if (kIsWeb) {
@@ -16,6 +23,7 @@ Future<Map<String, String>> platformState() async {
         'device':
             "${capatilizeFirstLetter(data.browserName.name)} (${data.platform!})",
         'userAgent': data.userAgent!,
+        'version': version,
       };
     } else if (Platform.isAndroid) {
       AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
@@ -23,7 +31,8 @@ Future<Map<String, String>> platformState() async {
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
         'device':
             "${build.model} (Android ${build.version.release}, ${build.device})",
-        'userAgent': "Unknown",
+        'userAgent': "Android ${build.version.release}",
+        'version': version,
       };
     }
   } catch (_) {}

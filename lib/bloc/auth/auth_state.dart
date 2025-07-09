@@ -28,9 +28,7 @@ final class AuthSignUpFailure extends AuthState {
 }
 
 final class AuthSignUpSuccess extends AuthState {
-  final bool isSignUpSuccess;
-
-  AuthSignUpSuccess(this.isSignUpSuccess);
+  AuthSignUpSuccess();
 }
 
 final class AuthOTPSendSuccess extends AuthState {

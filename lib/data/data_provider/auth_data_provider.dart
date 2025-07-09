@@ -8,8 +8,6 @@ import 'package:settlenow_v2/util/handler/network_call.dart';
 import 'package:settlenow_v2/util/handler/platform_service.dart';
 import 'package:settlenow_v2/util/handler/sharedPrefParse.dart';
 
-//TODO: Incase of failure, Success state data is not showing.
-
 class AuthDataProvider {
   Future<UserModel> loginUser(String email, String otp) async {
     try {
@@ -34,6 +32,7 @@ class AuthDataProvider {
         'device': Crypto.encrypt(deviceInfo['device']!),
         'deviceToken': Crypto.encrypt(fcmToken),
         'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
+        'version': Crypto.encrypt(deviceInfo['version']!),
         'ip': Crypto.encrypt(deviceIP),
       };
 
@@ -80,6 +79,7 @@ class AuthDataProvider {
         'device': Crypto.encrypt(deviceInfo['device']!),
         'deviceToken': Crypto.encrypt(fcmToken),
         'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
+        'version': Crypto.encrypt(deviceInfo['version']!),
         'ip': Crypto.encrypt(deviceIP),
       };
 
@@ -108,9 +108,11 @@ class AuthDataProvider {
 
   Future<UserModel> getOwnUserInfo(String authToken) async {
     try {
-      final response = await createAPICall('auth', "get", authToken, {});
+      String version = await getAppVersion();
+      final response = await createAPICall('auth', "patch", authToken, {
+        'version': Crypto.encrypt(version),
+      });
       final data = jsonDecode(response.body);
-
       if (response.statusCode == 200) {
         UserModel userData = UserModel.forOwnerInfo(data['data'], authToken);
 
@@ -125,9 +127,37 @@ class AuthDataProvider {
 
   Future<bool> signUpUser(String name, String email) async {
     try {
-      await Future.delayed(Duration(seconds: 2), () {});
+      final deviceData = await Future.wait([
+        generateFCMToken(),
+        platformState(),
+        fetchIP(),
+      ]);
+      final String fcmToken = deviceData[0] as String;
+      final Map<String, String> deviceInfo =
+          deviceData[1] as Map<String, String>;
+      final String deviceIP = deviceData[2] as String;
 
-      return true;
+      final String token = Crypto.encrypt(
+        "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}",
+      );
+      final response = await createAPICall('auth/signup', "post", "", {
+        'name': Crypto.encrypt(name),
+        'email': Crypto.encrypt(email),
+        'token': Crypto.encrypt(token),
+        'device': Crypto.encrypt(deviceInfo['device']!),
+        'deviceToken': Crypto.encrypt(fcmToken),
+        'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
+        'version': Crypto.encrypt(deviceInfo['version']!),
+        'ip': Crypto.encrypt(deviceIP),
+      });
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }
@@ -212,6 +242,7 @@ class AuthDataProvider {
     }
   }
 
+  //TODO: Update Profile
   Future<bool> updateProfile(UserModel userData) async {
     try {
       await Future.delayed(Duration(seconds: 2));

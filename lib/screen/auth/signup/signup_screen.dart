@@ -39,14 +39,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
           AuthSignUpRequested(
             _nameController.text.trim(),
             _emailController.text.trim(),
-            _otpController.text.trim(),
           ),
         );
       }
     } else {
       if (_subSignupFormKey.currentState!.validate()) {
         context.read<AuthBloc>().add(
-          AuthOTPRequested(_emailController.text.trim()),
+          AuthSignUpRequested(
+            _nameController.text.trim(),
+            _emailController.text.trim(),
+          ),
         );
       }
     }

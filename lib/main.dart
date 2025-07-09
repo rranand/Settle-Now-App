@@ -56,10 +56,6 @@ import 'package:settlenow_v2/theme/themes.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
-// TODO : Bank Transaction - Expense
-// TODO : Bank Transaction - Add Expense To
-
-// TODO : Notification - Send/Receive Request
 // TODO : Search, sort and filters in pages
 // TODO : Analysis Page
 // TODO : Join Room via Deeplink

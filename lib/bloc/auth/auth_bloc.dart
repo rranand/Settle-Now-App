@@ -72,14 +72,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthSignUpLoading());
 
     try {
-      bool isSignUpSuccess = await repo.signUpUser(event.name, event.email);
-      if (isSignUpSuccess) {
-        return emit(AuthSignUpSuccess(isSignUpSuccess));
-      } else {
-        return emit(AuthSignUpFailure("SignUp Failed"));
-      }
+      await repo.signUpUser(event.name, event.email);
+      return emit(AuthSignUpSuccess());
     } catch (e) {
-      return emit(AuthSignUpFailure("Something Went Wrong!"));
+      return emit(AuthSignUpFailure(e.toString()));
     }
   }
 

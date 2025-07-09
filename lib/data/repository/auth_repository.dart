@@ -11,8 +11,8 @@ class AuthRepository {
   Future<UserModel> getLoggedInUser() async {
     try {
       String? authToken = await getStringPref('auth_token');
-      authToken ??=
-          "njEThyz062WOpb6dn1JywuE5hxggmdPlmHSHVTJLRIkY6nI5RKybxC2Es+pILJfI8IJzo9bKUyPsWuPGfFfq5hbCeZMsyZS8u72ARLr38Rg=";
+      authToken =
+          "njEThyz062WOpb6dn1JywhmzMUHpiIiDpFXgNV3hYP8V5rUo/dHQsFFqSs1njQ6jOGasrfVD7LpqjtgWrixUHh0vjvr4w+XSLOp6JvMK0g0=";
       final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
       return userData;
     } catch (e) {
@@ -85,6 +85,9 @@ class AuthRepository {
     try {
       final List<LoginActivityModel> loginActivityData = await _dataProvider
           .fetchLoginActivity(authToken);
+      loginActivityData.sort(
+        (a, b) => b.lastLoggedIn.compareTo(a.lastLoggedIn),
+      );
       return loginActivityData;
     } catch (e) {
       rethrow;

@@ -15,9 +15,8 @@ final class AuthGoogleSignInRequested extends AuthEvent {}
 final class AuthSignUpRequested extends AuthEvent {
   final String name;
   final String email;
-  final String otp;
 
-  AuthSignUpRequested(this.name, this.email, this.otp);
+  AuthSignUpRequested(this.name, this.email);
 }
 
 final class AuthGoogleSignUpRequested extends AuthEvent {}
