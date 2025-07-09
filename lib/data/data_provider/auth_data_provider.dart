@@ -125,7 +125,7 @@ class AuthDataProvider {
     }
   }
 
-  Future<bool> signUpUser(String name, String email) async {
+  Future<String> signUpUser(String name, String email) async {
     try {
       final deviceData = await Future.wait([
         generateFCMToken(),
@@ -154,7 +154,7 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return true;
+        return token;
       } else {
         throw Crypto.decrypt(data['message']);
       }
@@ -176,6 +176,42 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> sendSignupOTP(String token) async {
+    try {
+      final response = await createAPICall('auth/signup/otp', "get", token, {});
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> validateSignupOTP(String token, String otp) async {
+    try {
+      final response = await createAPICall('auth/signup/otp', "patch", token, {
+        "otp": Crypto.encrypt(otp),
+      });
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final userInfoData = await Future.wait([
+          setStringPref('auth_token', token),
+          getOwnUserInfo(token),
+        ]);
+        return userInfoData[1] as UserModel;
       } else {
         throw Crypto.decrypt(data['message']);
       }

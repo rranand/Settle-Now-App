@@ -11,8 +11,11 @@ class AuthRepository {
   Future<UserModel> getLoggedInUser() async {
     try {
       String? authToken = await getStringPref('auth_token');
+      if (authToken == null) {
+        return UserModel.empty();
+      }
       authToken =
-          "njEThyz062WOpb6dn1JywhmzMUHpiIiDpFXgNV3hYP8V5rUo/dHQsFFqSs1njQ6jOGasrfVD7LpqjtgWrixUHh0vjvr4w+XSLOp6JvMK0g0=";
+          "XinviKc2AiEyvlfJugaFBwUYFsX2e3PX6R1/uGL8zOH/xuekF4zb4dTVjWvD2yRUYGSFR2FO7ZWNuN0Nrj8UiQ==";
       final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
       return userData;
     } catch (e) {
@@ -20,7 +23,7 @@ class AuthRepository {
     }
   }
 
-  Future<UserModel> getLoginToken(String email, String otp) async {
+  Future<UserModel> loginUser(String email, String otp) async {
     try {
       final UserModel loginData = await _dataProvider.loginUser(email, otp);
       return loginData;
@@ -41,11 +44,11 @@ class AuthRepository {
     }
   }
 
-  Future<bool> signUpUser(String name, String email) async {
+  Future<String> signUpUser(String name, String email) async {
     try {
-      final isSignUpSuccessful = await _dataProvider.signUpUser(name, email);
+      final signupToken = await _dataProvider.signUpUser(name, email);
 
-      return isSignUpSuccessful;
+      return signupToken;
     } catch (e) {
       rethrow;
     }
@@ -55,6 +58,25 @@ class AuthRepository {
     try {
       final isOTPSend = await _dataProvider.sendOTP(email);
       return isOTPSend;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<bool> sendSignupOTP(String token) async {
+    try {
+      final isOTPSend = await _dataProvider.sendSignupOTP(token);
+      return isOTPSend;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> validateSignupOTP(String token, String otp) async {
+    try {
+      final userData = await _dataProvider.validateSignupOTP(token, otp);
+
+      return userData;
     } catch (e) {
       rethrow;
     }

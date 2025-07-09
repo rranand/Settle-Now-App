@@ -32,13 +32,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _subSignupFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
-  void _handleSignUpSubmit() {
+  void _handleSignUpSubmit(String token) {
     if (_isOTPSent.value) {
       if (_signupFormKey.currentState!.validate()) {
         context.read<AuthBloc>().add(
-          AuthSignUpRequested(
-            _nameController.text.trim(),
-            _emailController.text.trim(),
+          AuthSignupOTPValidationRequested(
+            token: token,
+            otp: _otpController.text.trim(),
           ),
         );
       }
@@ -54,10 +54,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _resendOTP() {
-    context.read<AuthBloc>().add(
-      AuthOTPRequested(_emailController.text.trim()),
-    );
+  void _resendOTP(String token) {
+    context.read<AuthBloc>().add(AuthSignupOTPRequested(token: token));
   }
 
   bool _isScreenLoading(AuthState state) {
@@ -69,17 +67,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
       if (_isScreenLoading(state)) {
         loadingWidget(context);
       } else {
-        context.pop();
+        while (context.canPop()) {
+          context.pop();
+        }
         if (state is AuthOTPSendFailure) {
           showNormalSnackBar(context, state.error);
         } else if (state is AuthSignUpFailure) {
           showNormalSnackBar(context, state.error);
-        } else if (state is AuthOTPSendSuccess) {
+        } else if (state is AuthLoginSuccess) {
+          context.go(RouterConstants.dashboardRouteName);
+        } else if (state is AuthSignUpSuccess) {
           if (_isOTPSent.value == false) {
             _isOTPSent.value = true;
           }
-        } else if (state is AuthSignUpSuccess) {
-          context.go(RouterConstants.dashboardRouteName);
         }
       }
     }
@@ -224,9 +224,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   child: Padding(
                                     padding: EdgeInsets.only(top: 8.0),
                                     child:
-                                        state is AuthOTPSendSuccess
+                                        state is AuthSignUpSuccess
                                             ? TimerButton(
-                                              onPressed: _resendOTP,
+                                              onPressed:
+                                                  () => _resendOTP(state.token),
                                               timerDuration: 5,
                                             )
                                             : SizedBox.shrink(),
@@ -246,7 +247,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       return Center(
                         child: CustomButton.customElevatedButton(
                           value ? "Sign Up" : "Send OTP",
-                          onPressed: _handleSignUpSubmit,
+                          onPressed:
+                              () => _handleSignUpSubmit(
+                                state is AuthSignUpSuccess ? state.token : "",
+                              ),
                           elevation: 8,
                           buttonHeight: 50,
                           buttonWidth: 155,

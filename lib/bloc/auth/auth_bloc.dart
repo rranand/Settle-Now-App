@@ -20,6 +20,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLogoutRequested>(_authLogoutRequested);
     on<AuthProfileUpdateRequested>(_authProfileUpdateRequested);
     on<AuthLoggedInUserRequested>(_authLoggedInUserRequested);
+    on<AuthSignupOTPRequested>(_authSignupOTPRequested);
+    on<AuthSignupOTPValidationRequested>(_authSignupOTPValidationRequested);
   }
 
   void _authLoginRequested(
@@ -29,7 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      UserModel userData = await repo.getLoginToken(event.email, event.otp);
+      UserModel userData = await repo.loginUser(event.email, event.otp);
 
       return emit(AuthLoginSuccess(userData));
     } catch (e) {
@@ -72,8 +74,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthSignUpLoading());
 
     try {
-      await repo.signUpUser(event.name, event.email);
-      return emit(AuthSignUpSuccess());
+      String signupToken = await repo.signUpUser(event.name, event.email);
+      return emit(AuthSignUpSuccess(token: signupToken));
     } catch (e) {
       return emit(AuthSignUpFailure(e.toString()));
     }
@@ -89,16 +91,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthOTPSendLoading());
-
     try {
-      bool isOTPSend = await repo.sendOTP(event.email);
-      if (isOTPSend) {
-        return emit(AuthOTPSendSuccess());
-      } else {
-        return emit(AuthOTPSendFailure("Email Sent Failed"));
-      }
+      await repo.sendOTP(event.email);
+      return emit(AuthOTPSendSuccess());
     } catch (e) {
-      return emit(AuthOTPSendFailure(e.toString()));
+      emit(AuthOTPSendFailure(e.toString()));
+      return emit(AuthOTPSendSuccess());
+    }
+  }
+
+  void _authSignupOTPRequested(
+    AuthSignupOTPRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthOTPSendLoading());
+    try {
+      await repo.sendSignupOTP(event.token);
+      emit(AuthOTPSendSuccess());
+      return emit(AuthSignUpSuccess(token: event.token));
+    } catch (e) {
+      emit(AuthOTPSendFailure(e.toString()));
+      return emit(AuthSignUpSuccess(token: event.token));
+    }
+  }
+
+  void _authSignupOTPValidationRequested(
+    AuthSignupOTPValidationRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthOTPSendLoading());
+    try {
+      UserModel userData = await repo.validateSignupOTP(event.token, event.otp);
+      return emit(AuthLoginSuccess(userData));
+    } catch (e) {
+      emit(AuthOTPSendFailure(e.toString()));
+      return emit(AuthSignUpSuccess(token: event.token));
     }
   }
 
@@ -144,7 +171,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
     try {
       UserModel userData = await repo.getLoggedInUser();
-      return emit(AuthLoginSuccess(userData));
+      if (userData.hasData) {
+        return emit(AuthLoginSuccess(userData));
+      } else {
+        return emit(AuthInitial());
+      }
     } catch (e) {
       return emit(AuthInitial());
     }

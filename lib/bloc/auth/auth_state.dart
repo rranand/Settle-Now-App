@@ -28,7 +28,8 @@ final class AuthSignUpFailure extends AuthState {
 }
 
 final class AuthSignUpSuccess extends AuthState {
-  AuthSignUpSuccess();
+  final String token;
+  AuthSignUpSuccess({required this.token});
 }
 
 final class AuthOTPSendSuccess extends AuthState {
