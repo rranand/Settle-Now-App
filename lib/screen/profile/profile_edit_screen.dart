@@ -25,8 +25,7 @@ class ProfileEditScreen extends StatefulWidget {
 
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  static final GlobalKey<FormState> _profileEditFormKey =
-      GlobalKey<FormState>();
+  final GlobalKey<FormState> _profileEditFormKey = GlobalKey<FormState>();
   final TextEditingController _name = TextEditingController();
   final TextEditingController _mobileNumber = TextEditingController();
   final TextEditingController _email = TextEditingController();

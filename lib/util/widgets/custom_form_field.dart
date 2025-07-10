@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
 
-
-
 class CustomFormField {
   static InputBorder _inputBorder(
     TextFormFieldInputBorder inputDecoration,

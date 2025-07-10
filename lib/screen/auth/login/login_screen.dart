@@ -29,8 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _otpController = TextEditingController();
   final ValueNotifier<bool> _isOTPSent = ValueNotifier(false);
 
-  static final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
-  static final GlobalKey<FormState> _loginEmailFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _loginEmailFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   void _handleLoginSubmit() {

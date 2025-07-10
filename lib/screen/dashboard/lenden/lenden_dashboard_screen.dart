@@ -30,7 +30,7 @@ class LendenDashboardScreen extends StatefulWidget {
 class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
-  static final GlobalKey<FormState> _createRoomKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _createRoomKey = GlobalKey<FormState>();
   final TextEditingController _createRoomController = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
 

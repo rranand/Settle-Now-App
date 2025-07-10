@@ -35,7 +35,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   final ValueNotifier<int> _navBarIndex = ValueNotifier(0);
   final TextEditingController _searchController = TextEditingController();
   final ValueNotifier<int> _roomJoinOrCreate = ValueNotifier(0);
-  static final GlobalKey<FormState> _roomJoinOrCreateKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _roomJoinOrCreateKey = GlobalKey<FormState>();
   final TextEditingController _roomJoinOrCreateController =
       TextEditingController();
   final ValueNotifier<bool> _isInActiveDataFetched = ValueNotifier(false);

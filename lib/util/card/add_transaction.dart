@@ -41,7 +41,7 @@ class _AddTransactionState extends State<AddTransaction> {
   final double _headerTextSize = 20;
   List<String> expenseCategories = [];
 
-  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final DateTime _currentDate = DateTime.now();
