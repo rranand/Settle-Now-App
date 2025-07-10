@@ -39,7 +39,7 @@ class _SettleExpenseState extends State<SettleExpense> {
   final double _userCardWidth = 110;
   final double _userImageRadius = 50;
   final TextEditingController _amountController = TextEditingController();
-  final GlobalKey<FormState> _formKey = GlobalKey();
+  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final ValueNotifier<String> _selectedUser = ValueNotifier("");
   double userCanPay = 0;
 

@@ -14,8 +14,8 @@ class AuthRepository {
       if (authToken == null) {
         return UserModel.empty();
       }
-      authToken =
-          "XinviKc2AiEyvlfJugaFBwUYFsX2e3PX6R1/uGL8zOH/xuekF4zb4dTVjWvD2yRUYGSFR2FO7ZWNuN0Nrj8UiQ==";
+      // authToken =
+      //     "XinviKc2AiEyvlfJugaFBwUYFsX2e3PX6R1/uGL8zOH/xuekF4zb4dTVjWvD2yRUYGSFR2FO7ZWNuN0Nrj8UiQ==";
       final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
       return userData;
     } catch (e) {
@@ -35,6 +35,18 @@ class AuthRepository {
   Future<UserModel> loginUsingGoogle(String email, String idToken) async {
     try {
       final UserModel loginData = await _dataProvider.loginUsingGoogle(
+        email,
+        idToken,
+      );
+      return loginData;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> signupUsingGoogle(String email, String idToken) async {
+    try {
+      final UserModel loginData = await _dataProvider.signupUsingGoogle(
         email,
         idToken,
       );

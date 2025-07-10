@@ -59,6 +59,53 @@ class AuthDataProvider {
     }
   }
 
+  Future<UserModel> signupUsingGoogle(String email, String idToken) async {
+    try {
+      final deviceData = await Future.wait([
+        generateFCMToken(),
+        platformState(),
+        fetchIP(),
+      ]);
+      final String fcmToken = deviceData[0] as String;
+      final Map<String, String> deviceInfo =
+          deviceData[1] as Map<String, String>;
+      final String deviceIP = deviceData[2] as String;
+
+      final String token = Crypto.encrypt("$email#@#$idToken");
+
+      Map<String, String> jsonInputData = {
+        'idToken': Crypto.encrypt(idToken),
+        'token': Crypto.encrypt(token),
+        'device': Crypto.encrypt(deviceInfo['device']!),
+        'deviceToken': Crypto.encrypt(fcmToken),
+        'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
+        'version': Crypto.encrypt(deviceInfo['version']!),
+        'ip': Crypto.encrypt(deviceIP),
+      };
+
+      final response = await createAPICall(
+        'auth/signup/google',
+        "post",
+        "",
+        jsonInputData,
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final userInfoData = await Future.wait([
+          setStringPref('auth_token', token),
+          getOwnUserInfo(token),
+        ]);
+
+        return userInfoData[1] as UserModel;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<UserModel> loginUsingGoogle(String email, String idToken) async {
     try {
       final deviceData = await Future.wait([

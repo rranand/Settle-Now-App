@@ -28,8 +28,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   final ValueNotifier<bool> _isOTPSent = ValueNotifier(false);
-  final _signupFormKey = GlobalKey<FormState>();
-  final _subSignupFormKey = GlobalKey<FormState>();
+  static final GlobalKey<FormState> _signupFormKey = GlobalKey<FormState>();
+  static final GlobalKey<FormState> _subSignupFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   void _handleSignUpSubmit(String token) {
@@ -85,7 +85,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _googleSignUpHandler() {}
+  void _googleSignUpHandler() {
+    context.read<AuthBloc>().add(AuthGoogleSignUpRequested());
+  }
 
   void _handleOnLogin() {
     context.go(RouterConstants.loginRouteName);

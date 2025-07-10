@@ -84,7 +84,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   void _authGoogleSignUpRequested(
     AuthGoogleSignUpRequested event,
     Emitter<AuthState> emit,
-  ) async {}
+  ) async {
+    emit(AuthSignUpLoading());
+
+    try {
+      GoogleSignInAccount? userData = await GoogleOauth.login();
+      if (userData == null) {
+        return emit(AuthSignUpFailure("Google Signup Failed"));
+      }
+      final GoogleSignInAuthentication googleAuth =
+          await userData.authentication;
+      final String email = userData.email;
+      final String idToken = googleAuth.idToken ?? "";
+
+      if (idToken.isEmpty) {
+        return emit(AuthSignUpFailure("Google Signup Failed"));
+      }
+      UserModel authUserData = await repo.signupUsingGoogle(email, idToken);
+      return emit(AuthLoginSuccess(authUserData));
+    } catch (e) {
+      return emit(AuthSignUpFailure(e.toString()));
+    }
+  }
 
   void _authOTPRequested(
     AuthOTPRequested event,
