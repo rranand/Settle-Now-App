@@ -194,6 +194,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                       key: _roomJoinOrCreateKey,
                       child: CustomFormField.textFormField(
                         _roomJoinOrCreateController,
+                        autofillHints: [],
                         hintText: hintText,
                         labelText: hintText,
                         validator: (value) {
