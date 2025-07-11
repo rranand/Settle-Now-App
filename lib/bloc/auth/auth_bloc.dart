@@ -162,18 +162,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final userData = (state as AuthLoginSuccess).userData;
     emit(AuthLogoutLoading(userData));
+
     try {
-      bool isLogoutSuccessful = await repo.logoutUser(userData.authToken);
+      await repo.logoutUser(userData.authToken);
       if (userData.isGoogle) {
         await GoogleOauth.logout();
       }
-      if (isLogoutSuccessful) {
-        return emit(AuthInitial());
-      } else {
-        return emit(AuthLogoutFailure(userData, "Logout Failed"));
-      }
+      return emit(AuthInitial());
     } catch (e) {
-      return emit(AuthLogoutFailure(userData, e.toString()));
+      emit(AuthLogoutFailure(userData, e.toString()));
+      return emit(AuthLoginSuccess(userData));
     }
   }
 

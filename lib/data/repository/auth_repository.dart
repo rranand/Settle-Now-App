@@ -94,10 +94,10 @@ class AuthRepository {
     }
   }
 
-  Future<bool> logoutUser(String authToken) async {
+  Future<void> logoutUser(String authToken) async {
     try {
-      final isLogoutSuccessful = await _dataProvider.logoutUser(authToken);
-      return isLogoutSuccessful;
+      await _dataProvider.logoutUser(authToken);
+      return;
     } catch (e) {
       rethrow;
     }

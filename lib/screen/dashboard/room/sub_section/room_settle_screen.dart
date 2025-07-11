@@ -49,10 +49,7 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
 
             if (data.isEmpty) {
               return SliverToBoxAdapter(
-                child: SizedBox(
-                  height: MediaQuery.of(context).size.height * .5,
-                  child: noRecordFoundWidget("No Record Found"),
-                ),
+                child: noRecordFoundWidget("No Record Found", context: context),
               );
             }
 

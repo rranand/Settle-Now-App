@@ -13,6 +13,7 @@ import 'package:settlenow_v2/util/card/quick_split_card.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class QuickSplitDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -79,68 +80,77 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
             noOfCardsToBeShown =
                 (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
           }
-          return CustomScrollView(
-            slivers: [
-              ValueListenableBuilder(
-                valueListenable: widget.isSearchEnabled,
-                builder: (BuildContext context, bool value, Widget? _) {
-                  if (!value) {
-                    return SliverToBoxAdapter(child: SizedBox.shrink());
-                  }
-                  return SliverPadding(
-                    padding: _mainScreenPadding,
-                    sliver: SliverAppBar(
-                      automaticallyImplyLeading: false,
-                      pinned: value,
-                      backgroundColor: Colors.white,
-                      surfaceTintColor: Colors.white,
-                      title: CustomFormField.searchBar(
-                        "Search",
-                        widget.isSearchEnabled,
-                        _searchController,
-                        (value) {
-                          // Add filter logic if needed
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-              SliverPadding(
-                padding: _mainScreenPadding.add(
-                  EdgeInsets.only(
-                    top: UiConstant.spaceBetweenSection,
-                    bottom: UiConstant.spaceAtBottom,
-                  ),
-                ),
-                sliver: SliverList.builder(
-                  itemCount: noOfCardsToBeShown,
-                  itemBuilder: (BuildContext context, int index) {
-                    TransactionModel eachSplitData = splitData[index];
-                    if (isWide) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: QuickSplitCard(data: eachSplitData)),
-                          Expanded(
-                            child:
-                                (index == noOfCardsToBeShown - 1 &&
-                                        splitData.length % 2 > 0)
-                                    ? SizedBox()
-                                    : QuickSplitCard(
-                                      data: splitData[2 * index + 1],
-                                    ),
-                          ),
-                        ],
-                      );
-                    } else {
-                      return QuickSplitCard(data: eachSplitData);
+          if (splitData.isEmpty) {
+            return noRecordFoundWidget(
+              "No Transaction Found",
+              context: context,
+            );
+          } else {
+            return CustomScrollView(
+              slivers: [
+                ValueListenableBuilder(
+                  valueListenable: widget.isSearchEnabled,
+                  builder: (BuildContext context, bool value, Widget? _) {
+                    if (!value) {
+                      return SliverToBoxAdapter(child: SizedBox.shrink());
                     }
+                    return SliverPadding(
+                      padding: _mainScreenPadding,
+                      sliver: SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        pinned: value,
+                        backgroundColor: Colors.white,
+                        surfaceTintColor: Colors.white,
+                        title: CustomFormField.searchBar(
+                          "Search",
+                          widget.isSearchEnabled,
+                          _searchController,
+                          (value) {
+                            // Add filter logic if needed
+                          },
+                        ),
+                      ),
+                    );
                   },
                 ),
-              ),
-            ],
-          );
+                SliverPadding(
+                  padding: _mainScreenPadding.add(
+                    EdgeInsets.only(
+                      top: UiConstant.spaceBetweenSection,
+                      bottom: UiConstant.spaceAtBottom,
+                    ),
+                  ),
+                  sliver: SliverList.builder(
+                    itemCount: noOfCardsToBeShown,
+                    itemBuilder: (BuildContext context, int index) {
+                      TransactionModel eachSplitData = splitData[index];
+                      if (isWide) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: QuickSplitCard(data: eachSplitData),
+                            ),
+                            Expanded(
+                              child:
+                                  (index == noOfCardsToBeShown - 1 &&
+                                          splitData.length % 2 > 0)
+                                      ? SizedBox()
+                                      : QuickSplitCard(
+                                        data: splitData[2 * index + 1],
+                                      ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return QuickSplitCard(data: eachSplitData);
+                      }
+                    },
+                  ),
+                ),
+              ],
+            );
+          }
         },
       ),
       floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {

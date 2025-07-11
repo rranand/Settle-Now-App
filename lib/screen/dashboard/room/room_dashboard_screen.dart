@@ -23,6 +23,7 @@ import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/rounded_navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -168,8 +169,11 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       ),
       backgroundColor: Colors.white,
       builder: (context) {
+        final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(
+            16.0,
+          ).add(EdgeInsets.only(bottom: keyboardHeight)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -313,30 +317,41 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                       (i) => RoomInfoModel.empty(),
                     );
                   }
-                  return SliverPadding(
-                    padding: _mainScreenPadding
-                        .add(EdgeInsets.only(bottom: UiConstant.spaceAtBottom))
-                        .add(
-                          EdgeInsets.only(
-                            top:
-                                widget.isSearchEnabled.value
-                                    ? 0
-                                    : UiConstant.spaceBetweenSection,
-                          ),
-                        ),
-                    sliver: SliverGrid.builder(
-                      itemCount: roomInfoData.length,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: cardSizeInfo[0],
-                        mainAxisSpacing: UiConstant.spaceBetweenCard,
-                        crossAxisSpacing: UiConstant.spaceBetweenCard,
-                        childAspectRatio: cardSizeInfo[1],
+                  if (roomInfoData.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: noRecordFoundWidget(
+                        "No Rooms Found",
+                        context: context,
                       ),
-                      itemBuilder: (BuildContext context, int index) {
-                        return RoomCard(data: roomInfoData[index]);
-                      },
-                    ),
-                  );
+                    );
+                  } else {
+                    return SliverPadding(
+                      padding: _mainScreenPadding
+                          .add(
+                            EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
+                          )
+                          .add(
+                            EdgeInsets.only(
+                              top:
+                                  widget.isSearchEnabled.value
+                                      ? 0
+                                      : UiConstant.spaceBetweenSection,
+                            ),
+                          ),
+                      sliver: SliverGrid.builder(
+                        itemCount: roomInfoData.length,
+                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: cardSizeInfo[0],
+                          mainAxisSpacing: UiConstant.spaceBetweenCard,
+                          crossAxisSpacing: UiConstant.spaceBetweenCard,
+                          childAspectRatio: cardSizeInfo[1],
+                        ),
+                        itemBuilder: (BuildContext context, int index) {
+                          return RoomCard(data: roomInfoData[index]);
+                        },
+                      ),
+                    );
+                  }
                 },
               );
             },

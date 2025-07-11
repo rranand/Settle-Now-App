@@ -141,8 +141,15 @@ Future<dynamic> loadingWidget(BuildContext context) {
   );
 }
 
-Widget noRecordFoundWidget(String txt) {
-  return Center(
-    child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
-  );
+Widget noRecordFoundWidget(String txt, {BuildContext? context}) {
+  if (context != null) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * .75,
+      child: noRecordFoundWidget(txt),
+    );
+  } else {
+    return Center(
+      child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
+    );
+  }
 }

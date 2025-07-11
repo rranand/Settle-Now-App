@@ -43,9 +43,9 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
         int noOfCardsToBeShown = (data.length / 2).toInt() + data.length % 2;
         return data.isEmpty
             ? SliverToBoxAdapter(
-              child: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: noRecordFoundWidget("No Transaction Found"),
+              child: noRecordFoundWidget(
+                "No Transaction Found",
+                context: context,
               ),
             )
             : SliverList.builder(

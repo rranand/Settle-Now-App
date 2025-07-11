@@ -267,12 +267,12 @@ class AuthDataProvider {
     }
   }
 
-  Future<bool> logoutUser(String authToken) async {
+  Future<void> logoutUser(String authToken) async {
     try {
       final response = await createAPICall('auth/logout', "get", authToken, {});
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
+        return;
       } else {
         throw Crypto.decrypt(data['message']);
       }
@@ -325,7 +325,6 @@ class AuthDataProvider {
     }
   }
 
-  //TODO: Update Profile
   Future<bool> updateProfile(UserModel userData) async {
     try {
       await Future.delayed(Duration(seconds: 2));

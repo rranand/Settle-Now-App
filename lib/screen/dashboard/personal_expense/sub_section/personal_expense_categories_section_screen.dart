@@ -8,8 +8,6 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 import '../../../../core.dart';
 
-// TODO : Sort By Option
-
 class PersonalExpenseCategoriesSectionScreen extends StatefulWidget {
   const PersonalExpenseCategoriesSectionScreen({super.key});
 

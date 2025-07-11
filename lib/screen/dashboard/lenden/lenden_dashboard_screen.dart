@@ -18,6 +18,7 @@ import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class LendenDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -89,8 +90,11 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
       ),
       backgroundColor: Colors.white,
       builder: (context) {
+        final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(
+            16.0,
+          ).add(EdgeInsets.only(bottom: keyboardHeight)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -197,28 +201,37 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                       (i) => LendenDashboardModel.empty(),
                     );
                   }
-                  return SliverPadding(
-                    padding: _mainScreenPadding.add(
-                      EdgeInsets.only(
-                        top: UiConstant.spaceBetweenSection,
-                        bottom: UiConstant.spaceAtBottom,
+                  if (lendenData.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: noRecordFoundWidget(
+                        "No Rooms Found",
+                        context: context,
                       ),
-                    ),
-                    sliver: SliverGrid.builder(
-                      itemCount: lendenData.length,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                        maxCrossAxisExtent: cardSizeInfo[0],
-                        mainAxisSpacing: UiConstant.spaceBetweenCard,
-                        crossAxisSpacing: UiConstant.spaceBetweenCard,
-                        childAspectRatio: cardSizeInfo[1],
+                    );
+                  } else {
+                    return SliverPadding(
+                      padding: _mainScreenPadding.add(
+                        EdgeInsets.only(
+                          top: UiConstant.spaceBetweenSection,
+                          bottom: UiConstant.spaceAtBottom,
+                        ),
                       ),
-                      itemBuilder:
-                          (context, index) => SizedBox(
-                            width: cardSizeInfo[0],
-                            child: LendenCard(data: lendenData[index]),
-                          ),
-                    ),
-                  );
+                      sliver: SliverGrid.builder(
+                        itemCount: lendenData.length,
+                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          maxCrossAxisExtent: cardSizeInfo[0],
+                          mainAxisSpacing: UiConstant.spaceBetweenCard,
+                          crossAxisSpacing: UiConstant.spaceBetweenCard,
+                          childAspectRatio: cardSizeInfo[1],
+                        ),
+                        itemBuilder:
+                            (context, index) => SizedBox(
+                              width: cardSizeInfo[0],
+                              child: LendenCard(data: lendenData[index]),
+                            ),
+                      ),
+                    );
+                  }
                 },
               );
             },

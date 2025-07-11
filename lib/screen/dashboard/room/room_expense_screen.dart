@@ -340,14 +340,19 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         String roomName = "";
         RoomUserModel roomUserModel = RoomUserModel.empty();
         bool showSettleExpense = false;
+        bool showCloseRoomRequest = false;
 
         if (state is RoomInfoSuccess) {
           isRoomActive = state.data.active;
           roomName = state.data.roomName;
           isLoaded = true;
-          roomUserModel = state.data.users.firstWhere(
-            (ele) => _loggedInUser.id == ele.user.id,
-          );
+          for (int i = 0; i < state.data.users.length; i++) {
+            if (_loggedInUser.id == state.data.users[i].user.id) {
+              roomUserModel = state.data.users[i];
+            } else if (state.data.users[i].active) {
+              showCloseRoomRequest = true;
+            }
+          }
 
           double unSettledAmount =
               roomUserModel.contribution -
@@ -472,7 +477,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         child: const Icon(Iconsax.message_question),
                         backgroundColor: UiConstant.colors[3],
                         foregroundColor: Colors.white,
-                        visible: isRoomActive,
+                        visible: isRoomActive && showCloseRoomRequest,
                         label: 'Close Room Request',
                         onTap: () {
                           context

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
@@ -13,7 +14,9 @@ import 'package:settlenow_v2/screen/dashboard/notification/notification_screen.d
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/room_dashboard_screen.dart';
+import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -283,12 +286,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _homeScreenkey,
-      appBar: _bottomNavigatorAppBarHandler(_selectedIndex),
-      body: _bottomNavigatorBodyHandler(_selectedIndex),
-      bottomNavigationBar: _bottomNavigationBarWidget(),
-      drawer: _drawerWidget(),
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLoginFailure) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showNormalSnackBar(context, state.error);
+          });
+        } else if (state is AuthLogoutFailure) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showNormalSnackBar(context, state.error);
+          });
+        } else if (state is AuthInitial) {
+          while (context.canPop()) {
+            context.pop();
+          }
+          context.pushReplacement(RouterConstants.loginRouteName);
+        }
+      },
+      builder: (context, state) {
+        if (state is AuthLogoutLoading) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: LoadingPage(),
+          );
+        } else {
+          return Scaffold(
+            key: _homeScreenkey,
+            appBar: _bottomNavigatorAppBarHandler(_selectedIndex),
+            body: _bottomNavigatorBodyHandler(_selectedIndex),
+            bottomNavigationBar: _bottomNavigationBarWidget(),
+            drawer: _drawerWidget(),
+          );
+        }
+      },
     );
   }
 }

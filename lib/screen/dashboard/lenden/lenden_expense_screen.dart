@@ -91,6 +91,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       ),
       backgroundColor: Colors.white,
       builder: (context) {
+        final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return BlocBuilder<LendenRoomBloc, LendenRoomState>(
           builder: (context, state) {
             bool showAddPerson = false;
@@ -104,7 +105,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
               users = oldUsers;
             }
             return Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(
+                16.0,
+              ).add(EdgeInsets.only(bottom: keyboardHeight)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -304,7 +307,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
             ),
             body:
                 lendenTransactionData.isEmpty
-                    ? noRecordFoundWidget("No Expense Found")
+                    ? noRecordFoundWidget("No Transaction Found")
                     : CustomScrollView(
                       slivers: [
                         SliverPadding(
