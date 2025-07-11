@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
@@ -89,54 +90,21 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
 
-    final state = context.read<RoomDashboardBloc>().state;
+      final state = context.read<RoomDashboardBloc>().state;
 
-    if (state is! RoomDashboardFetchSuccess) {
-      context.read<RoomDashboardBloc>().add(
-        RoomDashboardFetch(
-          authToken: _loggedInUser.authToken,
-          isActiveRoom: true,
-        ),
-      );
-    }
-
-    _createRoomListener = context.read<CreateJoinRoomCubit>().stream.listen((
-      state,
-    ) {
-      if (mounted && state is CreateJoinRoomFailure) {
-        showNormalSnackBar(context, state.error);
-      }
-    });
-
-    _navBarIndex.addListener(() {
-      if (!_isInActiveDataFetched.value) {
-        _isInActiveDataFetched.value = true;
+      if (state is! RoomDashboardFetchSuccess) {
         context.read<RoomDashboardBloc>().add(
           RoomDashboardFetch(
             authToken: _loggedInUser.authToken,
-            isActiveRoom: false,
+            isActiveRoom: true,
           ),
         );
       }
-    });
 
-    _gridViewScrollController.addListener(() {
-      if (_gridViewScrollController.position.pixels ==
-          _gridViewScrollController.position.maxScrollExtent) {
-        final roomDashboardState = context.read<RoomDashboardBloc>().state;
-        if (roomDashboardState is RoomDashboardLoading) {
-          return;
-        }
-        if (_navBarIndex.value == 0) {
-          context.read<RoomDashboardBloc>().add(
-            RoomDashboardFetch(
-              authToken: _loggedInUser.authToken,
-              isActiveRoom: true,
-            ),
-          );
-        } else {
+      _navBarIndex.addListener(() {
+        if (!_isInActiveDataFetched.value) {
+          _isInActiveDataFetched.value = true;
           context.read<RoomDashboardBloc>().add(
             RoomDashboardFetch(
               authToken: _loggedInUser.authToken,
@@ -144,6 +112,41 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
             ),
           );
         }
+      });
+
+      _gridViewScrollController.addListener(() {
+        if (_gridViewScrollController.position.pixels ==
+            _gridViewScrollController.position.maxScrollExtent) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            final roomDashboardState = context.read<RoomDashboardBloc>().state;
+            if (roomDashboardState is RoomDashboardLoading) {
+              return;
+            }
+            if (_navBarIndex.value == 0) {
+              context.read<RoomDashboardBloc>().add(
+                RoomDashboardFetch(
+                  authToken: _loggedInUser.authToken,
+                  isActiveRoom: true,
+                ),
+              );
+            } else {
+              context.read<RoomDashboardBloc>().add(
+                RoomDashboardFetch(
+                  authToken: _loggedInUser.authToken,
+                  isActiveRoom: false,
+                ),
+              );
+            }
+          });
+        }
+      });
+    }
+
+    _createRoomListener = context.read<CreateJoinRoomCubit>().stream.listen((
+      state,
+    ) {
+      if (mounted && state is CreateJoinRoomFailure) {
+        showNormalSnackBar(context, state.error);
       }
     });
   }
@@ -250,91 +253,95 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     );
 
     return Scaffold(
-      body: SingleChildScrollView(
+      body: CustomScrollView(
         controller: _gridViewScrollController,
-        padding: _mainScreenPadding.add(
-          EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
-        ),
-        child: Column(
-          children: [
-            ValueListenableBuilder(
-              valueListenable: _navBarIndex,
-              builder: (BuildContext context, int value, Widget? child) {
-                return SizedBox(
+        slivers: [
+          ValueListenableBuilder(
+            valueListenable: widget.isSearchEnabled,
+            builder: (BuildContext context, bool value, Widget? _) {
+              if (!value) {
+                return SliverToBoxAdapter(child: SizedBox.shrink());
+              }
+              return SliverPadding(
+                padding: _mainScreenPadding,
+                sliver: SliverAppBar(
+                  automaticallyImplyLeading: false,
+                  pinned: value,
+                  backgroundColor: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  title: CustomFormField.searchBar(
+                    "Search",
+                    widget.isSearchEnabled,
+                    _searchController,
+                    (value) {
+                      // Add filter logic if needed
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+          ValueListenableBuilder(
+            valueListenable: _navBarIndex,
+            builder: (BuildContext context, int value, Widget? child) {
+              return SliverToBoxAdapter(
+                child: SizedBox(
                   height: 40,
                   child: NavBarCard(
                     headerTitle: ["Live", "Close"],
                     selectedIndex: _navBarIndex,
                   ),
-                );
-              },
-            ),
-            ValueListenableBuilder(
-              valueListenable: widget.isSearchEnabled,
-              builder: (context, _, _) {
-                return Column(
-                  children: [
-                    widget.isSearchEnabled.value
-                        ? CustomFormField.searchBar(
-                          "Search",
-                          widget.isSearchEnabled,
-                          _searchController,
-                          (value) {},
-                        )
-                        : SizedBox.shrink(),
-                    ValueListenableBuilder(
-                      valueListenable: _navBarIndex,
-                      builder: (context, _, _) {
-                        return BlocConsumer<
-                          RoomDashboardBloc,
-                          RoomDashboardState
-                        >(
-                          listener: _blocListenerHandler,
-                          builder: (context, state) {
-                            List<RoomInfoModel> roomInfoData = [];
-                            if (state is RoomDashboardFetchSuccess) {
-                              roomInfoData =
-                                  _navBarIndex.value == 0
-                                      ? state.activeData
-                                      : state.inactiveData;
-                            } else if (state is RoomDashboardLoading) {
-                              roomInfoData = List.generate(
-                                11,
-                                (i) => RoomInfoModel.empty(),
-                              );
-                            }
-                            return GridView.builder(
-                              padding: EdgeInsets.only(
-                                top:
-                                    widget.isSearchEnabled.value
-                                        ? 0
-                                        : UiConstant.spaceBetweenSection,
-                              ),
-                              shrinkWrap: true,
-                              itemCount: roomInfoData.length,
-                              gridDelegate:
-                                  SliverGridDelegateWithMaxCrossAxisExtent(
-                                    maxCrossAxisExtent: cardSizeInfo[0],
-                                    mainAxisSpacing:
-                                        UiConstant.spaceBetweenCard,
-                                    crossAxisSpacing:
-                                        UiConstant.spaceBetweenCard,
-                                    childAspectRatio: cardSizeInfo[1],
-                                  ),
-                              itemBuilder: (BuildContext context, int index) {
-                                return RoomCard(data: roomInfoData[index]);
-                              },
-                            );
-                          },
-                        );
+                ),
+              );
+            },
+          ),
+          ValueListenableBuilder(
+            valueListenable: _navBarIndex,
+            builder: (context, _, _) {
+              return BlocConsumer<RoomDashboardBloc, RoomDashboardState>(
+                listener: _blocListenerHandler,
+                builder: (context, state) {
+                  List<RoomInfoModel> roomInfoData = [];
+                  if (state is RoomDashboardFetchSuccess) {
+                    roomInfoData =
+                        _navBarIndex.value == 0
+                            ? state.activeData
+                            : state.inactiveData;
+                  } else if (state is RoomDashboardLoading) {
+                    roomInfoData = List.generate(
+                      11,
+                      (i) => RoomInfoModel.empty(),
+                    );
+                  }
+                  return SliverPadding(
+                    padding: _mainScreenPadding
+                        .add(EdgeInsets.only(bottom: UiConstant.spaceAtBottom))
+                        .add(
+                          EdgeInsets.only(
+                            top:
+                                widget.isSearchEnabled.value
+                                    ? 0
+                                    : UiConstant.spaceBetweenSection,
+                          ),
+                        ),
+                    sliver: SliverGrid.builder(
+                      itemCount: roomInfoData.length,
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: cardSizeInfo[0],
+                        mainAxisSpacing: UiConstant.spaceBetweenCard,
+                        crossAxisSpacing: UiConstant.spaceBetweenCard,
+                        childAspectRatio: cardSizeInfo[1],
+                      ),
+                      itemBuilder: (BuildContext context, int index) {
+                        return RoomCard(data: roomInfoData[index]);
                       },
                     ),
-                  ],
-                );
-              },
-            ),
-          ],
-        ),
+                  );
+                },
+              );
+            },
+          ),
+        ],
       ),
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,

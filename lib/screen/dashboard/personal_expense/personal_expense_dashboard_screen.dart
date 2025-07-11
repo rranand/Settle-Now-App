@@ -49,8 +49,9 @@ class _PersonalExpenseDashboardScreenState
     List<PersonalExpenseInfoModel> monthlyPersonalTransaction,
   ) {
     monthlyPersonalTransaction.sort(
-      (a, b) => CalenderConstant.getIndexOfMonth(a.monthName)
-          .compareTo(CalenderConstant.getIndexOfMonth(b.monthName)),
+      (a, b) => CalenderConstant.getIndexOfMonth(
+        a.monthName,
+      ).compareTo(CalenderConstant.getIndexOfMonth(b.monthName)),
     );
     return SliverPadding(
       padding: _mainScreenPadding,
@@ -91,15 +92,16 @@ class _PersonalExpenseDashboardScreenState
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
-    final state = context.read<PersonalExpenseDashboardBloc>().state;
-    if (state is! PersonalExpenseDashboardFetchSuccess) {
-      context.read<PersonalExpenseDashboardBloc>().add(
-        PersonalExpenseDashboardFetch(
-          authToken: _loggedInUser.authToken,
-          alreadyHave: 0,
-        ),
-      );
+
+      final state = context.read<PersonalExpenseDashboardBloc>().state;
+      if (state is! PersonalExpenseDashboardFetchSuccess) {
+        context.read<PersonalExpenseDashboardBloc>().add(
+          PersonalExpenseDashboardFetch(
+            authToken: _loggedInUser.authToken,
+            alreadyHave: 0,
+          ),
+        );
+      }
     }
   }
 

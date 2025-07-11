@@ -1,4 +1,5 @@
 //import 'package:device_preview/device_preview.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -102,21 +103,26 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // if (kIsWeb) {
-  //   runApp(
-  //     DevicePreview(
-  //       enabled: !kReleaseMode && kIsWeb,
-  //       builder: (context) => MyApp(),
-  //     ),
-  //   );
-  // } else {
-  //   runApp(MyApp());
-  // }
-  runApp(MyApp());
+  final AuthRepository authRepository = AuthRepository(AuthDataProvider());
+  final AuthBloc authBloc = AuthBloc(authRepository);
+
+  AppRouterConfig.initializeRouter(authBloc);
+  if (kIsWeb) {
+    runApp(
+      DevicePreview(
+        enabled: !kReleaseMode && kIsWeb,
+        builder: (context) => MyApp(authBloc: authBloc),
+      ),
+    );
+  } else {
+    runApp(MyApp(authBloc: authBloc));
+  }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthBloc authBloc;
+
+  const MyApp({super.key, required this.authBloc});
 
   @override
   Widget build(BuildContext context) {
@@ -326,7 +332,7 @@ class MyApp extends StatelessWidget {
             ThemeProvider themeProvider = context.watch<ThemeProvider>();
 
             return MaterialApp.router(
-              routerConfig: AppRouterConfig.router(context),
+              routerConfig: AppRouterConfig.router,
               title: 'Settle Now',
               themeMode:
                   themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,

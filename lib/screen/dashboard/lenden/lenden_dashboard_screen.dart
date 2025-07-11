@@ -55,13 +55,14 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
-    final state = context.read<LendenDashboardBloc>().state;
 
-    if (state is! LendenDashboardFetchSuccess) {
-      context.read<LendenDashboardBloc>().add(
-        LendenDashboardFetch(authToken: _loggedInUser.authToken),
-      );
+      final state = context.read<LendenDashboardBloc>().state;
+
+      if (state is! LendenDashboardFetchSuccess) {
+        context.read<LendenDashboardBloc>().add(
+          LendenDashboardFetch(authToken: _loggedInUser.authToken),
+        );
+      }
     }
   }
 

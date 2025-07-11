@@ -402,30 +402,30 @@ class _AddTransactionState extends State<AddTransaction> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
 
-    transactionType = TransactionTypeExtension.fromPath(context);
+      transactionType = TransactionTypeExtension.fromPath(context);
 
-    switch (transactionType) {
-      case TransactionType.quicksplit:
-        {
-          _splitTypeIndex.value = _splitType.indexOf("Partial");
-          if (widget.transactionData == null) {
-            _selectedUserIDs.value.putIfAbsent(
-              _loggedInUser,
-              () => TextEditingController(),
-            );
-            _selectedUserIDSet.value.add(_loggedInUser.id);
+      switch (transactionType) {
+        case TransactionType.quicksplit:
+          {
+            _splitTypeIndex.value = _splitType.indexOf("Partial");
+            if (widget.transactionData == null) {
+              _selectedUserIDs.value.putIfAbsent(
+                _loggedInUser,
+                () => TextEditingController(),
+              );
+              _selectedUserIDSet.value.add(_loggedInUser.id);
+            }
           }
-        }
-      default:
-        {}
-    }
-    if (widget.transactionData != null) {
-      _appBarTitle = "Update Expense";
-      _populateEditForm(widget.transactionData!);
-    } else {
-      _appBarTitle = "Add New Expense";
+        default:
+          {}
+      }
+      if (widget.transactionData != null) {
+        _appBarTitle = "Update Expense";
+        _populateEditForm(widget.transactionData!);
+      } else {
+        _appBarTitle = "Add New Expense";
+      }
     }
   }
 

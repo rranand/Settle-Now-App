@@ -297,10 +297,10 @@ class _SettleExpenseState extends State<SettleExpense> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
 
-    if (widget.transactionData != null) {
-      _populateEditForm(widget.transactionData!);
+      if (widget.transactionData != null) {
+        _populateEditForm(widget.transactionData!);
+      }
     }
   }
 

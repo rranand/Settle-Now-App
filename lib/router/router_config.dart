@@ -27,6 +27,8 @@ class AppRouterConfig {
     analytics: analytics,
   );
 
+  static late final GoRouter _router;
+
   static _allRoutes() {
     List<RouteBase> allRoutes = [
       GoRoute(
@@ -338,10 +340,8 @@ class AppRouterConfig {
     return allRoutes;
   }
 
-  static GoRouter router(BuildContext context) {
-    final authBloc = BlocProvider.of<AuthBloc>(context);
-
-    return GoRouter(
+  static void initializeRouter(AuthBloc authBloc) {
+    _router = GoRouter(
       routes: _allRoutes(),
       //initialLocation: '/room/662c52edc67c51d882638463',
       //initialLocation: '/personal/2025/July',
@@ -376,6 +376,12 @@ class AppRouterConfig {
 
         return null;
       },
+      errorBuilder:
+          (context, state) => Scaffold(
+            body: Center(child: Text("Error Page")),
+          ), // Replace with your ErrorPage
     );
   }
+
+  static GoRouter get router => _router;
 }

@@ -49,13 +49,14 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
-    final state = context.read<QuicksplitBloc>().state;
 
-    if (state is! QuicksplitFetchSuccess) {
-      context.read<QuicksplitBloc>().add(
-        QuicksplitFetch(_loggedInUser.authToken),
-      );
+      final state = context.read<QuicksplitBloc>().state;
+
+      if (state is! QuicksplitFetchSuccess) {
+        context.read<QuicksplitBloc>().add(
+          QuicksplitFetch(_loggedInUser.authToken),
+        );
+      }
     }
   }
 

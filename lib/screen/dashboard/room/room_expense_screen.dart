@@ -234,15 +234,15 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
 
-    final state = context.read<RoomBloc>().state;
+      final state = context.read<RoomBloc>().state;
 
-    if (!(state is RoomFetchSuccess && state.id == widget.id)) {
-      context.read<RoomInfoCubit>().fetchData(
-        widget.id,
-        _loggedInUser.authToken,
-      );
+      if (!(state is RoomFetchSuccess && state.id == widget.id)) {
+        context.read<RoomInfoCubit>().fetchData(
+          widget.id,
+          _loggedInUser.authToken,
+        );
+      }
     }
 
     roomCloseRequestSubscription = context

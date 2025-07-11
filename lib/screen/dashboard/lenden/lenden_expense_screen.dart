@@ -261,14 +261,14 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
 
-    final state = context.read<LendenRoomBloc>().state;
+      final state = context.read<LendenRoomBloc>().state;
 
-    if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
-      context.read<LendenRoomBloc>().add(
-        LendenRoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
-      );
+      if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
+        context.read<LendenRoomBloc>().add(
+          LendenRoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
+        );
+      }
     }
   }
 

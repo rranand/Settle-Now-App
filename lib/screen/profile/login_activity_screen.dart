@@ -45,12 +45,12 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
 
-    final state = context.read<UserLoginActivityCubit>().state;
+      final state = context.read<UserLoginActivityCubit>().state;
 
-    if (state.data.isEmpty) {
-      context.read<UserLoginActivityCubit>().fetchLoginData(_loggedInUser);
+      if (state.data.isEmpty) {
+        context.read<UserLoginActivityCubit>().fetchLoginData(_loggedInUser);
+      }
     }
   }
 

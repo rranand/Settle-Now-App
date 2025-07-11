@@ -183,13 +183,13 @@ class _InviteMemberState extends State<InviteMember> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
 
-    if (TransactionType.quicksplit == widget.transactionType) {
-      _fetchFriendData();
-    }
+      if (TransactionType.quicksplit == widget.transactionType) {
+        _fetchFriendData();
+      }
 
-    _selectedUserIDs.value.addAll(widget.userID);
+      _selectedUserIDs.value.addAll(widget.userID);
+    }
   }
 
   @override

@@ -31,13 +31,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
-    final state = context.read<NotificationBloc>().state;
 
-    if (state is! NotificationFetchSuccess) {
-      context.read<NotificationBloc>().add(
-        NotificationFetch(authToken: _loggedInUser.authToken),
-      );
+      final state = context.read<NotificationBloc>().state;
+
+      if (state is! NotificationFetchSuccess) {
+        context.read<NotificationBloc>().add(
+          NotificationFetch(authToken: _loggedInUser.authToken),
+        );
+      }
     }
   }
 

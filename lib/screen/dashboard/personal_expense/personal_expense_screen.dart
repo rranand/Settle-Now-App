@@ -71,17 +71,18 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-    }
-    final state = context.read<PersonalMonthlyExpenseBloc>().state;
-    if (!(state is PersonalMonthlyExpenseFetchSuccess &&
-        state.id == (widget.year + widget.month).toLowerCase())) {
-      context.read<PersonalMonthlyExpenseBloc>().add(
-        PersonalMonthlyExpenseFetch(
-          authToken: _loggedInUser.authToken,
-          year: widget.year,
-          month: widget.month,
-        ),
-      );
+
+      final state = context.read<PersonalMonthlyExpenseBloc>().state;
+      if (!(state is PersonalMonthlyExpenseFetchSuccess &&
+          state.id == (widget.year + widget.month).toLowerCase())) {
+        context.read<PersonalMonthlyExpenseBloc>().add(
+          PersonalMonthlyExpenseFetch(
+            authToken: _loggedInUser.authToken,
+            year: widget.year,
+            month: widget.month,
+          ),
+        );
+      }
     }
   }
 
