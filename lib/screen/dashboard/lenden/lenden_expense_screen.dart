@@ -195,60 +195,6 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     );
   }
 
-  Widget _loadingScreen(EdgeInsets paddingInsets) {
-    List<LendenTransactionModel> lendenTransactionData = generateShimmerData();
-    return Scaffold(
-      appBar: AppBar(
-        title: CustomShimmerEffect.textWidget(width: 180, fontSize: 20),
-        titleSpacing: _mainScreenPadding.left,
-        centerTitle: false,
-        leading: appBarBackButton(context),
-      ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: paddingInsets.add(
-              EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
-            ),
-            sliver: SliverToBoxAdapter(
-              child: CustomShimmerEffect.placeHolderShimmerEffect(
-                Container(
-                  height: 95,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SliverPadding(
-            padding: _mainScreenPadding,
-            sliver: SliverList.builder(
-              itemCount: lendenTransactionData.length,
-              itemBuilder: (BuildContext context, int index) {
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom:
-                        index == lendenTransactionData.length - 1
-                            ? UiConstant.spaceAtBottom
-                            : 0,
-                  ),
-                  child: LendenExpenseCard(
-                    lendenID: widget.id,
-                    data: lendenTransactionData[index],
-                    loggedInUser: _loggedInUser,
-                    isEditable: false,
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -275,6 +221,44 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     }
   }
 
+  Future<void> onRefresh() async {
+    if (!_loggedInUser.hasData) {
+      showNormalSnackBar(context, "Please re-login...Session expired!");
+      return;
+    }
+    context.read<LendenRoomBloc>().add(
+      LendenRoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    final state = context.watch<LendenRoomBloc>().state;
+    if (state is LendenRoomFetchSuccess) {
+      return AppBar(
+        title: Text(state.roomData.roomName),
+        titleSpacing: _mainScreenPadding.left,
+        centerTitle: false,
+        leading: appBarBackButton(context),
+        actions: appBarActionButton(context, [
+          IconButton(
+            onPressed: () => _showBottomSheet(context, state.roomData.users),
+            icon: Icon(Iconsax.profile_2user),
+          ),
+        ]),
+      );
+    } else {
+      return AppBar(
+        title:
+            widget.roomName == null
+                ? CustomShimmerEffect.textWidget(width: 180, fontSize: 20)
+                : Text(widget.roomName!),
+        titleSpacing: _mainScreenPadding.left,
+        centerTitle: false,
+        leading: appBarBackButton(context),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
@@ -282,84 +266,88 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     if (!isWide) {
       paddingInsets = EdgeInsets.symmetric(horizontal: 8);
     }
-    return BlocConsumer<LendenRoomBloc, LendenRoomState>(
-      listener: _blocListenerHandler,
-      builder: (context, state) {
-        if (state is LendenRoomFetchSuccess) {
-          List<LendenTransactionModel> lendenTransactionData = state.data;
-          LendenUserModel loggedInUserData = state.roomData.users.firstWhere(
-            (ele) => ele.id == _loggedInUser.id,
-          );
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        child: BlocConsumer<LendenRoomBloc, LendenRoomState>(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            List<LendenTransactionModel> lendenTransactionData = [];
+            LendenUserModel loggedInUserData = LendenUserModel.empty();
+            if (state is LendenRoomFetchSuccess) {
+              lendenTransactionData = state.data;
+              loggedInUserData = state.roomData.users.firstWhere(
+                (ele) => ele.id == _loggedInUser.id,
+              );
+            } else {
+              lendenTransactionData = generateShimmerData();
+            }
 
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(state.roomData.roomName),
-              titleSpacing: _mainScreenPadding.left,
-              centerTitle: false,
-              leading: appBarBackButton(context),
-              actions: appBarActionButton(context, [
-                IconButton(
-                  onPressed:
-                      () => _showBottomSheet(context, state.roomData.users),
-                  icon: Icon(Iconsax.profile_2user),
-                ),
-              ]),
-            ),
-            body:
-                lendenTransactionData.isEmpty
-                    ? noRecordFoundWidget("No Transaction Found", context)
-                    : CustomScrollView(
-                      slivers: [
-                        SliverPadding(
-                          padding: paddingInsets.add(
-                            EdgeInsets.only(
-                              bottom: UiConstant.spaceBetweenSection,
-                            ),
-                          ),
-                          sliver: SliverToBoxAdapter(
-                            child: LendenSummaryCard(
-                              data: lendenTransactionData,
-                              loggedInUser: _loggedInUser,
-                            ),
-                          ),
-                        ),
-                        SliverPadding(
-                          padding: _mainScreenPadding,
-                          sliver: SliverList.builder(
-                            itemCount: lendenTransactionData.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  bottom:
-                                      index == lendenTransactionData.length - 1
-                                          ? UiConstant.spaceAtBottom
-                                          : 0,
-                                ),
-                                child: LendenExpenseCard(
-                                  lendenID: widget.id,
-                                  data: lendenTransactionData[index],
-                                  loggedInUser: _loggedInUser,
-                                  isEditable: !loggedInUserData.isClosed,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+            if (lendenTransactionData.isEmpty) {
+              return noRecordFoundWidget("No Transaction Found", context);
+            }
+
+            return CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: paddingInsets.add(
+                    EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: LendenSummaryCard(
+                      data: lendenTransactionData,
+                      loggedInUser: _loggedInUser,
                     ),
-            floatingActionButton:
-                loggedInUserData.isClosed
-                    ? null
-                    : CustomButton.customFloatingButton(Iconsax.add, () {
-                      context.push(
-                        "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
+                  ),
+                ),
+                SliverPadding(
+                  padding: _mainScreenPadding,
+                  sliver: SliverList.builder(
+                    itemCount: lendenTransactionData.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Padding(
+                        padding: EdgeInsets.only(
+                          bottom:
+                              index == lendenTransactionData.length - 1
+                                  ? UiConstant.spaceAtBottom
+                                  : 0,
+                        ),
+                        child: LendenExpenseCard(
+                          lendenID: widget.id,
+                          data: lendenTransactionData[index],
+                          loggedInUser: _loggedInUser,
+                          isEditable: !loggedInUserData.isClosed,
+                        ),
                       );
-                    }),
-          );
-        } else {
-          return _loadingScreen(paddingInsets);
-        }
-      },
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+      floatingActionButton: BlocBuilder<LendenRoomBloc, LendenRoomState>(
+        builder: (context, state) {
+          if (state is LendenRoomFetchSuccess) {
+            LendenUserModel loggedInUserData = state.roomData.users.firstWhere(
+              (ele) => ele.id == _loggedInUser.id,
+            );
+            if (loggedInUserData.isClosed) {
+              return SizedBox.shrink();
+            } else {
+              return CustomButton.customFloatingButton(Iconsax.add, () {
+                context.push(
+                  "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
+                );
+              });
+            }
+          } else {
+            return SizedBox.shrink();
+          }
+        },
+      ),
     );
   }
 }

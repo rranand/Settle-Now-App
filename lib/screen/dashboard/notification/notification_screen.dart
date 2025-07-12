@@ -58,8 +58,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
     return Scaffold(
       body: RefreshIndicator(
-        color: Colors.white,
-        backgroundColor: Colors.blue,
         onRefresh: onRefresh,
         child: BlocConsumer<NotificationBloc, NotificationState>(
           listener: _blocListenerHandler,

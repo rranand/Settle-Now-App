@@ -21,6 +21,7 @@ class LendenDashboardBloc
     LendenDashboardFetch event,
     Emitter<LendenDashboardState> emit,
   ) async {
+    if (state is LendenDashboardLoading) return;
     emit(LendenDashboardLoading());
     try {
       List<LendenDashboardModel> data = await repo.fetchData(event.authToken);

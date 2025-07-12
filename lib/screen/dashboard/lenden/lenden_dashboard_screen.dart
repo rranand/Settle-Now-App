@@ -147,6 +147,16 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     );
   }
 
+  Future<void> onRefresh() async {
+    if (!_loggedInUser.hasData) {
+      showNormalSnackBar(context, "Please re-login...Session expired!");
+      return;
+    }
+    context.read<LendenDashboardBloc>().add(
+      LendenDashboardFetch(authToken: _loggedInUser.authToken),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
@@ -155,90 +165,98 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     );
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          ValueListenableBuilder(
-            valueListenable: widget.isSearchEnabled,
-            builder: (BuildContext context, bool value, Widget? _) {
-              if (!value) {
-                return SliverToBoxAdapter(child: SizedBox.shrink());
-              }
-              return SliverPadding(
-                padding: _mainScreenPadding,
-                sliver: SliverAppBar(
-                  automaticallyImplyLeading: false,
-                  pinned: value,
-                  backgroundColor: Colors.white,
-                  surfaceTintColor: Colors.white,
-                  title: CustomFormField.searchBar(
-                    "Search",
-                    widget.isSearchEnabled,
-                    _searchController,
-                    (value) {
-                      // Add filter logic if needed
-                    },
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        notificationPredicate: (ScrollNotification notification) {
+          final state = context.read<LendenDashboardBloc>().state;
+          if (state is LendenDashboardFetchSuccess && state.data.isNotEmpty) {
+            return notification.depth == 0;
+          } else {
+            return notification.depth == 1;
+          }
+        },
+        child: CustomScrollView(
+          slivers: [
+            ValueListenableBuilder(
+              valueListenable: widget.isSearchEnabled,
+              builder: (BuildContext context, bool value, Widget? _) {
+                if (!value) {
+                  return SliverToBoxAdapter(child: SizedBox.shrink());
+                }
+                return SliverPadding(
+                  padding: _mainScreenPadding,
+                  sliver: SliverAppBar(
+                    automaticallyImplyLeading: false,
+                    pinned: value,
+                    backgroundColor: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    title: CustomFormField.searchBar(
+                      "Search",
+                      widget.isSearchEnabled,
+                      _searchController,
+                      (value) {
+                        // Add filter logic if needed
+                      },
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          BlocConsumer<CreateRoomCubit, CreateRoomState>(
-            listener: (context, state) {
-              if (state is CreateRoomFailure) {
-                showNormalSnackBar(context, state.error);
-              }
-            },
-            builder: (context, state) {
-              return BlocConsumer<LendenDashboardBloc, LendenDashboardState>(
-                listener: _blocListenerHandler,
-                builder: (context, state) {
-                  List<LendenDashboardModel> lendenData = [];
-                  if (state is LendenDashboardFetchSuccess) {
-                    lendenData = state.data;
-                  } else if (state is LendenDashboardLoading) {
-                    lendenData = List.generate(
-                      11,
-                      (i) => LendenDashboardModel.empty(),
-                    );
-                  }
-                  if (lendenData.isEmpty) {
-                    return SliverToBoxAdapter(
-                      child: noRecordFoundWidget(
-                        "No Rooms Found",
-                        context,
-                      ),
-                    );
-                  } else {
-                    return SliverPadding(
-                      padding: _mainScreenPadding.add(
-                        EdgeInsets.only(
-                          top: UiConstant.spaceBetweenSection,
-                          bottom: UiConstant.spaceAtBottom,
+                );
+              },
+            ),
+            BlocConsumer<CreateRoomCubit, CreateRoomState>(
+              listener: (context, state) {
+                if (state is CreateRoomFailure) {
+                  showNormalSnackBar(context, state.error);
+                }
+              },
+              builder: (context, state) {
+                return BlocConsumer<LendenDashboardBloc, LendenDashboardState>(
+                  listener: _blocListenerHandler,
+                  builder: (context, state) {
+                    List<LendenDashboardModel> lendenData = [];
+                    if (state is LendenDashboardFetchSuccess) {
+                      lendenData = state.data;
+                    } else if (state is LendenDashboardLoading) {
+                      lendenData = List.generate(
+                        11,
+                        (i) => LendenDashboardModel.empty(),
+                      );
+                    }
+                    if (lendenData.isEmpty) {
+                      return SliverToBoxAdapter(
+                        child: noRecordFoundWidget("No Room Found", context),
+                      );
+                    } else {
+                      return SliverPadding(
+                        padding: _mainScreenPadding.add(
+                          EdgeInsets.only(
+                            top: UiConstant.spaceBetweenSection,
+                            bottom: UiConstant.spaceAtBottom,
+                          ),
                         ),
-                      ),
-                      sliver: SliverGrid.builder(
-                        itemCount: lendenData.length,
-                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          maxCrossAxisExtent: cardSizeInfo[0],
-                          mainAxisSpacing: UiConstant.spaceBetweenCard,
-                          crossAxisSpacing: UiConstant.spaceBetweenCard,
-                          childAspectRatio: cardSizeInfo[1],
+                        sliver: SliverGrid.builder(
+                          itemCount: lendenData.length,
+                          gridDelegate:
+                              SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: cardSizeInfo[0],
+                                mainAxisSpacing: UiConstant.spaceBetweenCard,
+                                crossAxisSpacing: UiConstant.spaceBetweenCard,
+                                childAspectRatio: cardSizeInfo[1],
+                              ),
+                          itemBuilder:
+                              (context, index) => SizedBox(
+                                width: cardSizeInfo[0],
+                                child: LendenCard(data: lendenData[index]),
+                              ),
                         ),
-                        itemBuilder:
-                            (context, index) => SizedBox(
-                              width: cardSizeInfo[0],
-                              child: LendenCard(data: lendenData[index]),
-                            ),
-                      ),
-                    );
-                  }
-                },
-              );
-            },
-          ),
-        ],
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ],
+        ),
       ),
-
       floatingActionButton: CustomButton.customFloatingButton(
         Iconsax.add,
         () => _showBottomSheet(context),

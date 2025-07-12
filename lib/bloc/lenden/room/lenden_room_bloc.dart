@@ -28,6 +28,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     LendenRoomFetch event,
     Emitter<LendenRoomState> emit,
   ) async {
+    if (state is LendenRoomLoading) return;
     emit(LendenRoomLoading());
     try {
       Pair<LendenDashboardModel, List<LendenTransactionModel>> data = await repo
