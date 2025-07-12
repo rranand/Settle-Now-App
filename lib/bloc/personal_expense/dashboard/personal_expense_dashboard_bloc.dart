@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/data/repository/personal_expense/dashboard/personal_expense_dashboard_repository.dart';
 import 'package:settlenow_v2/model/personal_expense_info_model.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
@@ -19,12 +20,16 @@ class PersonalExpenseDashboardBloc
     on<PersonalExpenseDashboardFetch>(_personalExpenseFetch);
     on<PersonalExpenseDashboardUpdate>(_personalExpenseDashboardUpdate);
     on<PersonalExpenseDashboardReset>(_personalExpenseDashboardReset);
+    on<PersonalExpenseDashboardOnAdd>(_personalExpenseDashboardOnAdd);
   }
 
   void _personalExpenseFetch(
     PersonalExpenseDashboardFetch event,
     Emitter<PersonalExpenseDashboardState> emit,
   ) async {
+    if (state is PersonalExpenseDashboardLoading) {
+      return;
+    }
     emit(PersonalExpenseDashboardLoading());
     try {
       Map<int, List<PersonalExpenseInfoModel>> data = await repo.fetchData(
@@ -80,6 +85,35 @@ class PersonalExpenseDashboardBloc
     }
 
     return emit(PersonalExpenseDashboardFetchSuccess(newData));
+  }
+
+  void _personalExpenseDashboardOnAdd(
+    PersonalExpenseDashboardOnAdd event,
+    Emitter<PersonalExpenseDashboardState> emit,
+  ) {
+    DateTime now = DateTime.now();
+    int year = now.year;
+
+    PersonalExpenseInfoModel currentMonthPersonalExpense =
+        PersonalExpenseInfoModel(
+          id: "",
+          amount: 0,
+          monthName: CalenderConstant.monthName[now.month - 1],
+          transaction: [],
+          year: year.toString(),
+        );
+
+    Map<int, List<PersonalExpenseInfoModel>> data = {};
+    if (state is PersonalExpenseDashboardFetchSuccess) {
+      data = Map.from((state as PersonalExpenseDashboardFetchSuccess).data);
+    }
+
+    if (data.containsKey(year)) {
+      data[year]!.add(currentMonthPersonalExpense);
+    } else {
+      data[year] = [currentMonthPersonalExpense];
+    }
+    return emit(PersonalExpenseDashboardFetchSuccess(data));
   }
 
   void _personalExpenseDashboardReset(

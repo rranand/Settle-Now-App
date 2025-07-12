@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/calender_constant.dart';
@@ -12,9 +13,11 @@ import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/personal_expense_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class PersonalExpenseDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -111,137 +114,168 @@ class _PersonalExpenseDashboardScreenState
     super.dispose();
   }
 
+  Future<void> onRefresh() async {
+    if (!_loggedInUser.hasData) {
+      showNormalSnackBar(context, "Please re-login...Session expired!");
+      return;
+    }
+    context.read<PersonalExpenseDashboardBloc>().add(
+      PersonalExpenseDashboardFetch(
+        authToken: _loggedInUser.authToken,
+        alreadyHave: 0,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocConsumer<
-        PersonalExpenseDashboardBloc,
-        PersonalExpenseDashboardState
-      >(
-        listener: _blocListenerHandler,
-        builder: (context, state) {
-          List<int> years = [DateTime.now().year];
-          if (state is PersonalExpenseDashboardFetchSuccess) {
-            years = state.data.keys.toList();
-            years.sort((a, b) => a.compareTo(b));
-            int currentYear = DateTime.now().year;
-            if (years.isEmpty || years.last != currentYear) {
-              years.add(currentYear);
-            }
-
-            SchedulerBinding.instance.addPostFrameCallback((_) {
-              if (_scrollController.hasClients &&
-                  _scrollController.position.hasContentDimensions) {
-                _scrollController.jumpTo(
-                  _scrollController.position.maxScrollExtent,
-                );
-              }
-            });
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        notificationPredicate: (ScrollNotification notification) {
+          final state = context.read<PersonalExpenseDashboardBloc>().state;
+          if (state is PersonalExpenseDashboardFetchSuccess &&
+              state.data.isNotEmpty) {
+            return notification.depth == 0;
+          } else {
+            // When there's no data, allow refresh from the main scroll view
+            return notification.depth == 1;
           }
+        },
+        child: BlocConsumer<
+          PersonalExpenseDashboardBloc,
+          PersonalExpenseDashboardState
+        >(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            List<int> years = [DateTime.now().year];
+            if (state is PersonalExpenseDashboardFetchSuccess) {
+              years = state.data.keys.toList();
+              years.sort((a, b) => a.compareTo(b));
 
-          return CustomScrollView(
-            controller: _scrollController,
-            slivers: [
-              ValueListenableBuilder(
-                valueListenable: widget.isSearchEnabled,
-                builder: (BuildContext context, bool value, Widget? _) {
-                  if (!value) {
-                    return SliverToBoxAdapter(child: SizedBox.shrink());
-                  }
-                  return SliverPadding(
-                    padding: _mainScreenPadding,
-                    sliver: SliverAppBar(
-                      automaticallyImplyLeading: false,
-                      pinned: value,
-                      backgroundColor: Colors.white,
-                      surfaceTintColor: Colors.white,
-                      title: CustomFormField.searchBar(
-                        "Search",
-                        widget.isSearchEnabled,
-                        _searchController,
-                        (value) {
-                          // Add filter logic if needed
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-              ...List.generate(years.length, (index) {
-                List<PersonalExpenseInfoModel> monthlyPersonalTransaction = [];
-                if (state is PersonalExpenseDashboardFetchSuccess) {
-                  bool isCurrentPersonalExpense = state.data.containsKey(
-                    years[index],
-                  );
-                  int currentYear = DateTime.now().year;
-                  String currentMonthName =
-                      CalenderConstant.monthName[DateTime.now().month - 1];
-                  if (isCurrentPersonalExpense) {
-                    monthlyPersonalTransaction = state.data[years[index]]!;
-
-                    if (currentYear == years[index]) {
-                      isCurrentPersonalExpense =
-                          monthlyPersonalTransaction
-                              .firstWhere(
-                                (ele) => ele.monthName == currentMonthName,
-                                orElse: () {
-                                  return PersonalExpenseInfoModel.empty();
-                                },
-                              )
-                              .hasData;
-                    }
-                  }
-
-                  if (!isCurrentPersonalExpense) {
-                    monthlyPersonalTransaction.add(
-                      PersonalExpenseInfoModel(
-                        id: "",
-                        amount: 0,
-                        monthName: currentMonthName,
-                        year: years[index].toString(),
-                        transaction: [],
-                      ),
-                    );
-                  }
-                } else {
-                  monthlyPersonalTransaction = List.filled(
-                    12,
-                    PersonalExpenseInfoModel.empty(),
+              SchedulerBinding.instance.addPostFrameCallback((_) {
+                if (_scrollController.hasClients &&
+                    _scrollController.position.hasContentDimensions) {
+                  _scrollController.jumpTo(
+                    _scrollController.position.maxScrollExtent,
                   );
                 }
-                return SliverStickyHeader.builder(
-                  sticky: false,
-                  builder: (context, state) {
-                    return Container(
-                      margin: _mainScreenPadding,
-                      padding: EdgeInsets.symmetric(
-                        vertical: .5 * UiConstant.spaceBetweenSection,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(child: SizedBox()),
-                          SizedBox(
-                            width: 80,
-                            child: GradientWidget(
-                              text: years[index].toString(),
-                              gradientColors: GradientColorConstant.tealToGreen,
-                              textSize: 16,
-                              textColor: Colors.white,
-                            ),
-                          ),
-                          Expanded(child: SizedBox()),
-                        ],
+              });
+            }
+
+            return CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                ValueListenableBuilder(
+                  valueListenable: widget.isSearchEnabled,
+                  builder: (BuildContext context, bool value, Widget? _) {
+                    if (!value) {
+                      return SliverToBoxAdapter(child: SizedBox.shrink());
+                    }
+                    return SliverPadding(
+                      padding: _mainScreenPadding,
+                      sliver: SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        pinned: value,
+                        backgroundColor: Colors.white,
+                        surfaceTintColor: Colors.white,
+                        title: CustomFormField.searchBar(
+                          "Search",
+                          widget.isSearchEnabled,
+                          _searchController,
+                          (value) {
+                            // Add filter logic if needed
+                          },
+                        ),
                       ),
                     );
                   },
-                  sliver: monthWiseCardsWidget(monthlyPersonalTransaction),
+                ),
+                years.isEmpty
+                    ? SliverToBoxAdapter(
+                      child: noRecordFoundWidget(
+                        "No Personal Expense Found",
+                        context,
+                      ),
+                    )
+                    : SliverToBoxAdapter(child: SizedBox.shrink()),
+                ...List.generate(years.length, (index) {
+                  List<PersonalExpenseInfoModel> monthlyPersonalTransaction =
+                      [];
+                  if (state is PersonalExpenseDashboardFetchSuccess) {
+                    monthlyPersonalTransaction = state.data[years[index]]!;
+                  } else {
+                    monthlyPersonalTransaction = List.filled(
+                      12,
+                      PersonalExpenseInfoModel.empty(),
+                    );
+                  }
+                  return SliverStickyHeader.builder(
+                    sticky: false,
+                    builder: (context, state) {
+                      return Container(
+                        margin: _mainScreenPadding,
+                        padding: EdgeInsets.symmetric(
+                          vertical: .5 * UiConstant.spaceBetweenSection,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(child: SizedBox()),
+                            SizedBox(
+                              width: 80,
+                              child: GradientWidget(
+                                text: years[index].toString(),
+                                gradientColors:
+                                    GradientColorConstant.tealToGreen,
+                                textSize: 16,
+                                textColor: Colors.white,
+                              ),
+                            ),
+                            Expanded(child: SizedBox()),
+                          ],
+                        ),
+                      );
+                    },
+                    sliver: monthWiseCardsWidget(monthlyPersonalTransaction),
+                  );
+                }),
+                SliverPadding(
+                  padding: EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+      floatingActionButton: BlocBuilder<
+        PersonalExpenseDashboardBloc,
+        PersonalExpenseDashboardState
+      >(
+        builder: (context, state) {
+          if (state is PersonalExpenseDashboardFetchSuccess) {
+            DateTime now = DateTime.now();
+            int year = now.year;
+            int month = now.month - 1;
+
+            PersonalExpenseInfoModel currentMonthPersonalExpense =
+                (state.data[year] ?? []).firstWhere(
+                  (ele) =>
+                      CalenderConstant.getIndexOfMonth(ele.monthName) == month,
+                  orElse: () => PersonalExpenseInfoModel.empty(),
                 );
-              }),
-              SliverPadding(
-                padding: EdgeInsets.only(bottom: UiConstant.spaceAtBottom),
-              ),
-            ],
-          );
+
+            if (!currentMonthPersonalExpense.hasData) {
+              return CustomButton.customFloatingButton(Iconsax.add, () {
+                context.read<PersonalExpenseDashboardBloc>().add(
+                  PersonalExpenseDashboardOnAdd(),
+                );
+              });
+            } else {
+              return SizedBox.shrink();
+            }
+          } else {
+            return SizedBox.shrink();
+          }
         },
       ),
     );
