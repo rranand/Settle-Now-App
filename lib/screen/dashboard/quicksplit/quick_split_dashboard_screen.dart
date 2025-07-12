@@ -61,97 +61,107 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
     }
   }
 
+  Future<void> onRefresh() async {
+    if (!_loggedInUser.hasData) {
+      showNormalSnackBar(context, "Please re-login...Session expired!");
+      return;
+    }
+    context.read<QuicksplitBloc>().add(
+      QuicksplitFetch(_loggedInUser.authToken),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
 
     return Scaffold(
-      body: BlocConsumer<QuicksplitBloc, QuicksplitState>(
-        listener: _blocListenerHandler,
-        builder: (context, state) {
-          List<TransactionModel> splitData = [];
-          if (state is QuicksplitFetchSuccess) {
-            splitData = state.data;
-          } else if (state is QuicksplitLoading) {
-            splitData = List.generate(11, (i) => TransactionModel.empty());
-          }
-          int noOfCardsToBeShown = splitData.length;
-          if (isWide) {
-            noOfCardsToBeShown =
-                (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
-          }
-          if (splitData.isEmpty) {
-            return noRecordFoundWidget(
-              "No Transaction Found",
-           context,
-            );
-          } else {
-            return CustomScrollView(
-              slivers: [
-                ValueListenableBuilder(
-                  valueListenable: widget.isSearchEnabled,
-                  builder: (BuildContext context, bool value, Widget? _) {
-                    if (!value) {
-                      return SliverToBoxAdapter(child: SizedBox.shrink());
-                    }
-                    return SliverPadding(
-                      padding: _mainScreenPadding,
-                      sliver: SliverAppBar(
-                        automaticallyImplyLeading: false,
-                        pinned: value,
-                        backgroundColor: Colors.white,
-                        surfaceTintColor: Colors.white,
-                        title: CustomFormField.searchBar(
-                          "Search",
-                          widget.isSearchEnabled,
-                          _searchController,
-                          (value) {
-                            // Add filter logic if needed
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                SliverPadding(
-                  padding: _mainScreenPadding.add(
-                    EdgeInsets.only(
-                      top: UiConstant.spaceBetweenSection,
-                      bottom: UiConstant.spaceAtBottom,
-                    ),
-                  ),
-                  sliver: SliverList.builder(
-                    itemCount: noOfCardsToBeShown,
-                    itemBuilder: (BuildContext context, int index) {
-                      TransactionModel eachSplitData = splitData[index];
-                      if (isWide) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: QuickSplitCard(data: eachSplitData),
-                            ),
-                            Expanded(
-                              child:
-                                  (index == noOfCardsToBeShown - 1 &&
-                                          splitData.length % 2 > 0)
-                                      ? SizedBox()
-                                      : QuickSplitCard(
-                                        data: splitData[2 * index + 1],
-                                      ),
-                            ),
-                          ],
-                        );
-                      } else {
-                        return QuickSplitCard(data: eachSplitData);
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        child: BlocConsumer<QuicksplitBloc, QuicksplitState>(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            List<TransactionModel> splitData = [];
+            if (state is QuicksplitFetchSuccess) {
+              splitData = state.data;
+            } else if (state is QuicksplitLoading) {
+              splitData = List.generate(11, (i) => TransactionModel.empty());
+            }
+            int noOfCardsToBeShown = splitData.length;
+            if (isWide) {
+              noOfCardsToBeShown =
+                  (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
+            }
+            if (splitData.isEmpty) {
+              return noRecordFoundWidget("No Transaction Found", context);
+            } else {
+              return CustomScrollView(
+                slivers: [
+                  ValueListenableBuilder(
+                    valueListenable: widget.isSearchEnabled,
+                    builder: (BuildContext context, bool value, Widget? _) {
+                      if (!value) {
+                        return SliverToBoxAdapter(child: SizedBox.shrink());
                       }
+                      return SliverPadding(
+                        padding: _mainScreenPadding,
+                        sliver: SliverAppBar(
+                          automaticallyImplyLeading: false,
+                          pinned: value,
+                          backgroundColor: Colors.white,
+                          surfaceTintColor: Colors.white,
+                          title: CustomFormField.searchBar(
+                            "Search",
+                            widget.isSearchEnabled,
+                            _searchController,
+                            (value) {
+                              // Add filter logic if needed
+                            },
+                          ),
+                        ),
+                      );
                     },
                   ),
-                ),
-              ],
-            );
-          }
-        },
+                  SliverPadding(
+                    padding: _mainScreenPadding.add(
+                      EdgeInsets.only(
+                        top: UiConstant.spaceBetweenSection,
+                        bottom: UiConstant.spaceAtBottom,
+                      ),
+                    ),
+                    sliver: SliverList.builder(
+                      itemCount: noOfCardsToBeShown,
+                      itemBuilder: (BuildContext context, int index) {
+                        TransactionModel eachSplitData = splitData[index];
+                        if (isWide) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: QuickSplitCard(data: eachSplitData),
+                              ),
+                              Expanded(
+                                child:
+                                    (index == noOfCardsToBeShown - 1 &&
+                                            splitData.length % 2 > 0)
+                                        ? SizedBox()
+                                        : QuickSplitCard(
+                                          data: splitData[2 * index + 1],
+                                        ),
+                              ),
+                            ],
+                          );
+                        } else {
+                          return QuickSplitCard(data: eachSplitData);
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }
+          },
+        ),
       ),
       floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
         context.push(RouterConstants.quickSplitAddExpenseRouteName);

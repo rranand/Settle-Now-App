@@ -22,6 +22,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     QuicksplitFetch event,
     Emitter<QuicksplitState> emit,
   ) async {
+    if (state is QuicksplitLoading) return;
     emit(QuicksplitLoading());
 
     try {
