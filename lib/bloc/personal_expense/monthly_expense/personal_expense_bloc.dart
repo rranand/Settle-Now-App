@@ -25,6 +25,7 @@ class PersonalMonthlyExpenseBloc
     PersonalMonthlyExpenseFetch event,
     Emitter<PersonalMonthlyExpenseState> emit,
   ) async {
+    if (state is PersonalMonthlyExpenseLoading) return;
     emit(PersonalMonthlyExpenseLoading());
     try {
       List<PersonalExpenseTransactionModel> data = await repo.fetchData(
