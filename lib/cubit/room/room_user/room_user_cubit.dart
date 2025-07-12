@@ -19,6 +19,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     List<TransactionModel> transArr,
     List<RoomSettleModel> settleArr,
   ) async {
+    if (state is RoomUserLoading) return;
     emit(RoomUserLoading());
     try {
       Map<String, double> contributionMap = {};

@@ -83,58 +83,58 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
   Widget build(BuildContext context) {
     return BlocBuilder<RoomBloc, RoomState>(
       builder: (context, state) {
-        List<TransactionModel> data = [];
         if (state is RoomFetchSuccess) {
-          data = state.data;
-        }
+          List<TransactionModel> data = state.data;
 
-        if (data.isEmpty) {
-          return SliverToBoxAdapter(
-            child: noRecordFoundWidget(
-              "No Transaction Found",
-              context,
-            ),
-          );
-        } else {
-          return ValueListenableBuilder(
-            valueListenable: _selectedGraphIndex,
-            builder: (context, value, _) {
-              return SliverList(
-                delegate: SliverChildListDelegate([
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Wrap(
-                      spacing: UiConstant.spaceBetweenCard,
-                      children: List.generate(
-                        graphTitle.length,
-                        (index) => InkWell(
-                          borderRadius: BorderRadius.circular(60),
-                          onTap: () => _selectedGraphIndex.value = index,
-                          child: Chip(
-                            label: Text(graphTitle[index]),
-                            side: BorderSide(
-                              color:
+          if (data.isEmpty) {
+            return SliverToBoxAdapter(
+              child: noRecordFoundWidget("No Transaction Found", context),
+            );
+          } else {
+            return ValueListenableBuilder(
+              valueListenable: _selectedGraphIndex,
+              builder: (context, value, _) {
+                return SliverList(
+                  delegate: SliverChildListDelegate([
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Wrap(
+                        spacing: UiConstant.spaceBetweenCard,
+                        children: List.generate(
+                          graphTitle.length,
+                          (index) => InkWell(
+                            borderRadius: BorderRadius.circular(60),
+                            onTap: () => _selectedGraphIndex.value = index,
+                            child: Chip(
+                              label: Text(graphTitle[index]),
+                              side: BorderSide(
+                                color:
+                                    index == value
+                                        ? Colors.deepPurple.shade500
+                                        : Colors.black26,
+                              ),
+                              labelStyle:
                                   index == value
-                                      ? Colors.deepPurple.shade500
-                                      : Colors.black26,
+                                      ? TextStyle(
+                                        color: Colors.deepPurple.shade500,
+                                      )
+                                      : null,
+                              backgroundColor: Colors.white,
                             ),
-                            labelStyle:
-                                index == value
-                                    ? TextStyle(
-                                      color: Colors.deepPurple.shade500,
-                                    )
-                                    : null,
-                            backgroundColor: Colors.white,
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: UiConstant.spaceBetweenSection),
-                  _graphController(value, data),
-                ]),
-              );
-            },
+                    SizedBox(height: UiConstant.spaceBetweenSection),
+                    _graphController(value, data),
+                  ]),
+                );
+              },
+            );
+          }
+        } else {
+          return SliverToBoxAdapter(
+            child: Center(child: RefreshProgressIndicator()),
           );
         }
       },

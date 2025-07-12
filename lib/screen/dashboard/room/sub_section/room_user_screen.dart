@@ -146,6 +146,15 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
           data = List.filled(11, RoomUserModel.empty());
         }
 
+        if (data.isEmpty) {
+          return SliverToBoxAdapter(
+            child: noRecordFoundWidget(
+              "Something went wrong, Refresh!",
+              context,
+            ),
+          );
+        }
+
         return SliverGrid.builder(
           itemCount: data.length,
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(

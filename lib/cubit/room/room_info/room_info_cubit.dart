@@ -14,6 +14,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
   RoomInfoCubit(this._roomDashboardBloc, this.repo) : super(RoomInfoInitial());
 
   void fetchData(String id, String authToken) async {
+    if (state is RoomInfoLoading) return;
     emit(RoomInfoLoading());
     try {
       final roomDashboardState = _roomDashboardBloc.state;

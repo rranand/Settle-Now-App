@@ -229,6 +229,88 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     );
   }
 
+  Future<void> onRefresh() async {
+    if (!_loggedInUser.hasData) {
+      showNormalSnackBar(context, "Please re-login...Session expired!");
+      return;
+    }
+
+    final RoomInfoState roomInfoState = context.read<RoomInfoCubit>().state;
+    if (roomInfoState is RoomInfoSuccess) {
+      switch (_navbarSelectedIndex.value) {
+        case 0 || 2:
+          {
+            context.read<RoomBloc>().add(
+              RoomFetch(
+                id: widget.id,
+                authToken: _loggedInUser.authToken,
+                users: roomInfoState.data.users,
+              ),
+            );
+          }
+        case 1:
+          {
+            final RoomSettleState roomSettleState =
+                context.read<RoomSettleCubit>().state;
+            final RoomState roomState = context.read<RoomBloc>().state;
+            if (roomSettleState is RoomSettleSuccess &&
+                roomState is RoomFetchSuccess) {
+              context.read<RoomUserCubit>().fetchData(
+                roomInfoState.data.id,
+                roomInfoState.data.users,
+                roomState.data,
+                roomSettleState.data,
+              );
+            }
+          }
+        case 3:
+          {
+            context.read<RoomSettleCubit>().fetchData(
+              widget.id,
+              _loggedInUser.authToken,
+              roomInfoState.data.users,
+            );
+          }
+        default:
+          {}
+      }
+    }
+  }
+
+  bool notificationPredicateHandler(ScrollNotification notification) {
+    switch (_navbarSelectedIndex.value) {
+      case 0 || 2:
+        {
+          final state = context.read<RoomBloc>().state;
+          if (state is RoomFetchSuccess && state.data.isNotEmpty) {
+            return notification.depth == 0;
+          } else {
+            return notification.depth == 1;
+          }
+        }
+      case 1:
+        {
+          final state = context.read<RoomUserCubit>().state;
+          if (state is RoomUserSuccess && state.data.isNotEmpty) {
+            return notification.depth == 0;
+          } else {
+            return notification.depth == 1;
+          }
+        }
+      case 3:
+        {
+          final state = context.read<RoomSettleCubit>().state;
+          if (state is RoomSettleSuccess && state.data.isNotEmpty) {
+            return notification.depth == 0;
+          } else {
+            return notification.depth == 1;
+          }
+        }
+      default:
+        return notification.depth == 0;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -373,50 +455,54 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
           ),
-          body: CustomGestureDetector(
-            navBarIndex: _navbarSelectedIndex,
-            totalTitle: _navBarTitles.length,
-            child: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: paddingInsets,
-                  sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _navbarSelectedIndex,
-                  builder: (context, value, _) {
-                    return SliverPadding(
-                      padding: paddingInsets.add(EdgeInsets.only(top: 8)),
-                      sliver: SliverAppBar(
-                        pinned: true,
-                        toolbarHeight: _navBarHeight,
-                        automaticallyImplyLeading: false,
-                        backgroundColor: Colors.white,
-                        surfaceTintColor: Colors.transparent,
-                        flexibleSpace: FlexibleSpaceBar(
-                          centerTitle: true,
-                          title: NavBarCard(
-                            headerTitle: _navBarTitles,
-                            selectedIndex: _navbarSelectedIndex,
+          body: RefreshIndicator(
+            onRefresh: onRefresh,
+            notificationPredicate: notificationPredicateHandler,
+            child: CustomGestureDetector(
+              navBarIndex: _navbarSelectedIndex,
+              totalTitle: _navBarTitles.length,
+              child: CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: paddingInsets,
+                    sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
+                  ),
+                  ValueListenableBuilder(
+                    valueListenable: _navbarSelectedIndex,
+                    builder: (context, value, _) {
+                      return SliverPadding(
+                        padding: paddingInsets.add(EdgeInsets.only(top: 8)),
+                        sliver: SliverAppBar(
+                          pinned: true,
+                          toolbarHeight: _navBarHeight,
+                          automaticallyImplyLeading: false,
+                          backgroundColor: Colors.white,
+                          surfaceTintColor: Colors.transparent,
+                          flexibleSpace: FlexibleSpaceBar(
+                            centerTitle: true,
+                            title: NavBarCard(
+                              headerTitle: _navBarTitles,
+                              selectedIndex: _navbarSelectedIndex,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _navbarSelectedIndex,
-                  builder: (context, value, _) {
-                    return SliverPadding(
-                      padding: _mainScreenPadding,
-                      sliver: _navBarHandler(value),
-                    );
-                  },
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
-                ),
-              ],
+                      );
+                    },
+                  ),
+                  ValueListenableBuilder(
+                    valueListenable: _navbarSelectedIndex,
+                    builder: (context, value, _) {
+                      return SliverPadding(
+                        padding: _mainScreenPadding,
+                        sliver: _navBarHandler(value),
+                      );
+                    },
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
+                  ),
+                ],
+              ),
             ),
           ),
           floatingActionButton:
