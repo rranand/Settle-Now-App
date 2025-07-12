@@ -54,6 +54,14 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
     }
   }
 
+  Future<void> onRefresh() async {
+    if (!_loggedInUser.hasData) {
+      showNormalSnackBar(context, "Please re-login...Session expired!");
+      return;
+    }
+    context.read<UserLoginActivityCubit>().fetchLoginData(_loggedInUser);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,33 +70,43 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
         titleSpacing: _mainScreenPadding.left,
         leading: appBarBackButton(context),
       ),
-      body: BlocConsumer<UserLoginActivityCubit, UserLoginActivityState>(
-        listener: _blocListenerHandler,
-        builder: (context, state) {
-          List<LoginActivityModel> data = List.filled(
-            10,
-            LoginActivityModel.empty(),
-          );
+      body: RefreshIndicator(
+        onRefresh: onRefresh,
+        child: BlocConsumer<UserLoginActivityCubit, UserLoginActivityState>(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            List<LoginActivityModel> data = List.filled(
+              10,
+              LoginActivityModel.empty(),
+            );
 
-          if (!state.isLoading) {
-            data = state.data;
-          }
+            if (!state.isLoading) {
+              data = state.data;
+            }
 
-          return ListView.separated(
-            padding: _mainScreenPadding.add(
-              EdgeInsets.only(
-                top: UiConstant.spaceBetweenSection,
-                bottom: UiConstant.spaceAtBottom,
+            if (data.isEmpty) {
+              return noRecordFoundWidget(
+                "Something Went Wrong, Refresh!",
+                context,
+              );
+            }
+
+            return ListView.separated(
+              padding: _mainScreenPadding.add(
+                EdgeInsets.only(
+                  top: UiConstant.spaceBetweenSection,
+                  bottom: UiConstant.spaceAtBottom,
+                ),
               ),
-            ),
-            itemBuilder:
-                (context, index) => LoginActivityCard(data: data[index]),
-            separatorBuilder: (BuildContext context, int index) {
-              return SizedBox(height: .5 * UiConstant.spaceBetweenSection);
-            },
-            itemCount: data.length,
-          );
-        },
+              itemBuilder:
+                  (context, index) => LoginActivityCard(data: data[index]),
+              separatorBuilder: (BuildContext context, int index) {
+                return SizedBox(height: .5 * UiConstant.spaceBetweenSection);
+              },
+              itemCount: data.length,
+            );
+          },
+        ),
       ),
     );
   }

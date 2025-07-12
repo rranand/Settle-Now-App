@@ -12,6 +12,7 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
   UserLoginActivityCubit(this.repo) : super(UserLoginActivityState());
 
   void fetchLoginData(UserModel userdata) async {
+    if (state.isLoading == true) return;
     emit(UserLoginActivityState(isLoading: true));
 
     try {
