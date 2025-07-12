@@ -6,7 +6,7 @@ import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 import 'package:settlenow_v2/util/handler/network_call.dart';
 import 'package:settlenow_v2/util/handler/platform_service.dart';
-import 'package:settlenow_v2/util/handler/sharedPrefParse.dart';
+import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 
 class AuthDataProvider {
   Future<UserModel> loginUser(String email, String otp) async {
@@ -46,7 +46,7 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final userInfoData = await Future.wait([
-          setStringPref('auth_token', token),
+          LocalStoragePreference.setStringPref('auth_token', token),
           getOwnUserInfo(token),
         ]);
 
@@ -93,7 +93,7 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final userInfoData = await Future.wait([
-          setStringPref('auth_token', token),
+          LocalStoragePreference.setStringPref('auth_token', token),
           getOwnUserInfo(token),
         ]);
 
@@ -140,7 +140,7 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final userInfoData = await Future.wait([
-          setStringPref('auth_token', token),
+          LocalStoragePreference.setStringPref('auth_token', token),
           getOwnUserInfo(token),
         ]);
 
@@ -255,7 +255,7 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final userInfoData = await Future.wait([
-          setStringPref('auth_token', token),
+          LocalStoragePreference.setStringPref('auth_token', token),
           getOwnUserInfo(token),
         ]);
         return userInfoData[1] as UserModel;

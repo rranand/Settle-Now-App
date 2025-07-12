@@ -2,7 +2,7 @@ import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
-import 'package:settlenow_v2/util/handler/sharedPrefParse.dart';
+import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 
 class AuthRepository {
   final AuthDataProvider _dataProvider;
@@ -10,7 +10,9 @@ class AuthRepository {
 
   Future<UserModel> getLoggedInUser() async {
     try {
-      String? authToken = await getStringPref('auth_token');
+      String? authToken = await LocalStoragePreference.getStringPref(
+        'auth_token',
+      );
       // if (authToken == null) {
       //   return UserModel.empty();
       // }

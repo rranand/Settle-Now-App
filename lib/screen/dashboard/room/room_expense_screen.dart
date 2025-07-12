@@ -23,6 +23,7 @@ import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_analysis_scr
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
+import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
@@ -372,47 +373,51 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
           ),
-          body: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: paddingInsets,
-                sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
-              ),
-              ValueListenableBuilder(
-                valueListenable: _navbarSelectedIndex,
-                builder: (context, value, _) {
-                  return SliverPadding(
-                    padding: paddingInsets.add(EdgeInsets.only(top: 8)),
-                    sliver: SliverAppBar(
-                      pinned: true,
-                      toolbarHeight: _navBarHeight,
-                      automaticallyImplyLeading: false,
-                      backgroundColor: Colors.white,
-                      surfaceTintColor: Colors.transparent,
-                      flexibleSpace: FlexibleSpaceBar(
-                        centerTitle: true,
-                        title: NavBarCard(
-                          headerTitle: _navBarTitles,
-                          selectedIndex: _navbarSelectedIndex,
+          body: CustomGestureDetector(
+            navBarIndex: _navbarSelectedIndex,
+            totalTitle: _navBarTitles.length,
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: paddingInsets,
+                  sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _navbarSelectedIndex,
+                  builder: (context, value, _) {
+                    return SliverPadding(
+                      padding: paddingInsets.add(EdgeInsets.only(top: 8)),
+                      sliver: SliverAppBar(
+                        pinned: true,
+                        toolbarHeight: _navBarHeight,
+                        automaticallyImplyLeading: false,
+                        backgroundColor: Colors.white,
+                        surfaceTintColor: Colors.transparent,
+                        flexibleSpace: FlexibleSpaceBar(
+                          centerTitle: true,
+                          title: NavBarCard(
+                            headerTitle: _navBarTitles,
+                            selectedIndex: _navbarSelectedIndex,
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
-              ),
-              ValueListenableBuilder(
-                valueListenable: _navbarSelectedIndex,
-                builder: (context, value, _) {
-                  return SliverPadding(
-                    padding: _mainScreenPadding,
-                    sliver: _navBarHandler(value),
-                  );
-                },
-              ),
-              SliverPadding(
-                padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
-              ),
-            ],
+                    );
+                  },
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _navbarSelectedIndex,
+                  builder: (context, value, _) {
+                    return SliverPadding(
+                      padding: _mainScreenPadding,
+                      sliver: _navBarHandler(value),
+                    );
+                  },
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
+                ),
+              ],
+            ),
           ),
           floatingActionButton:
               isRoomActive

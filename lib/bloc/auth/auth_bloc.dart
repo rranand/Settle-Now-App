@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 
 part 'auth_event.dart';
@@ -168,6 +169,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (userData.isGoogle) {
         await GoogleOauth.logout();
       }
+      await LocalStoragePreference.clearAllPreferences();
       return emit(AuthInitial());
     } catch (e) {
       emit(AuthLogoutFailure(userData, e.toString()));
