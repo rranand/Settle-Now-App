@@ -19,6 +19,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationFetch event,
     Emitter<NotificationState> emit,
   ) async {
+    if (state is NotificationLoading) return;
     emit(NotificationLoading());
     try {
       List<NotificationModel> data = await repo.fetchData(event.authToken);

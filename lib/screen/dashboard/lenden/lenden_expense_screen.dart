@@ -307,7 +307,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
             ),
             body:
                 lendenTransactionData.isEmpty
-                    ? noRecordFoundWidget("No Transaction Found")
+                    ? noRecordFoundWidget("No Transaction Found", context)
                     : CustomScrollView(
                       slivers: [
                         SliverPadding(

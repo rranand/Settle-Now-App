@@ -326,7 +326,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                       return SliverToBoxAdapter(
                         child: noRecordFoundWidget(
                           "No Rooms Found",
-                          context: context,
+                           context,
                         ),
                       );
                     } else {

@@ -83,7 +83,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
           if (splitData.isEmpty) {
             return noRecordFoundWidget(
               "No Transaction Found",
-              context: context,
+           context,
             );
           } else {
             return CustomScrollView(

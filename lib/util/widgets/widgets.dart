@@ -141,15 +141,17 @@ Future<dynamic> loadingWidget(BuildContext context) {
   );
 }
 
-Widget noRecordFoundWidget(String txt, {BuildContext? context}) {
-  if (context != null) {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * .75,
-      child: noRecordFoundWidget(txt),
-    );
-  } else {
-    return Center(
-      child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
-    );
-  }
+Widget noRecordFoundWidget(String txt, BuildContext context) {
+  return ListView(
+    shrinkWrap: true,
+    physics: const AlwaysScrollableScrollPhysics(),
+    children: [
+      SizedBox(
+        height: MediaQuery.of(context).size.height * 0.75,
+        child: Center(
+          child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
+        ),
+      ),
+    ],
+  );
 }

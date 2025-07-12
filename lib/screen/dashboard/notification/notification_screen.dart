@@ -42,77 +42,94 @@ class _NotificationScreenState extends State<NotificationScreen> {
     }
   }
 
+  Future<void> onRefresh() async {
+    if (!_loggedInUser.hasData) {
+      showNormalSnackBar(context, "Please re-login...Session expired!");
+      return;
+    }
+    context.read<NotificationBloc>().add(
+      NotificationFetch(authToken: _loggedInUser.authToken),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
 
     return Scaffold(
-      body: BlocConsumer<NotificationBloc, NotificationState>(
-        listener: _blocListenerHandler,
-        builder: (context, state) {
-          List<NotificationModel> notificationData = [];
-          if (state is NotificationFetchSuccess) {
-            notificationData = state.data;
-          } else if (state is NotificationLoading) {
-            notificationData = List.generate(
-              11,
-              (i) => NotificationModel.empty(),
-            );
-          }
-          if (notificationData.isEmpty) {
-            return noRecordFoundWidget("No Notification Found");
-          }
-          int noOfCardsToBeShown = notificationData.length;
-          if (isWide) {
-            noOfCardsToBeShown =
-                (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
-          }
-          return SingleChildScrollView(
-            padding: EdgeInsets.only(
-              top: UiConstant.spaceBetweenCard,
-              bottom: UiConstant.spaceAtBottom,
-            ),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: noOfCardsToBeShown,
-              itemBuilder: (context, index) {
-                NotificationModel eachNotificationData =
-                    notificationData[index];
-                if (isWide) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: NotificationCard(
-                          data: eachNotificationData,
-                          loggedInUserID: _loggedInUser.id,
-                          authToken: _loggedInUser.authToken,
+      body: RefreshIndicator(
+        color: Colors.white,
+        backgroundColor: Colors.blue,
+        onRefresh: onRefresh,
+        child: BlocConsumer<NotificationBloc, NotificationState>(
+          listener: _blocListenerHandler,
+          builder: (context, state) {
+            List<NotificationModel> notificationData = [];
+            if (state is NotificationFetchSuccess) {
+              notificationData = state.data;
+            } else if (state is NotificationLoading) {
+              notificationData = List.generate(
+                11,
+                (i) => NotificationModel.empty(),
+              );
+            }
+            if (notificationData.isEmpty) {
+              return noRecordFoundWidget("No Notification Found", context);
+            }
+            int noOfCardsToBeShown = notificationData.length;
+            if (isWide) {
+              noOfCardsToBeShown =
+                  (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
+            }
+            return SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.only(
+                top: UiConstant.spaceBetweenCard,
+                bottom: UiConstant.spaceAtBottom,
+              ),
+              child: ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: noOfCardsToBeShown,
+                itemBuilder: (context, index) {
+                  NotificationModel eachNotificationData =
+                      notificationData[index];
+                  if (isWide) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: NotificationCard(
+                            data: eachNotificationData,
+                            loggedInUserID: _loggedInUser.id,
+                            authToken: _loggedInUser.authToken,
+                          ),
                         ),
-                      ),
-                      Expanded(
-                        child:
-                            (index == noOfCardsToBeShown - 1 &&
-                                    notificationData.length % 2 > 0)
-                                ? SizedBox()
-                                : NotificationCard(
-                                  data: notificationData[2 * index + 1],
-                                  loggedInUserID: _loggedInUser.id,
-                                  authToken: _loggedInUser.authToken,
-                                ),
-                      ),
-                    ],
-                  );
-                } else {
-                  return NotificationCard(
-                    data: eachNotificationData,
-                    loggedInUserID: _loggedInUser.id,
-                    authToken: _loggedInUser.authToken,
-                  );
-                }
-              },
-            ),
-          );
-        },
+                        Expanded(
+                          child:
+                              (index == noOfCardsToBeShown - 1 &&
+                                      notificationData.length % 2 > 0)
+                                  ? SizedBox()
+                                  : NotificationCard(
+                                    data: notificationData[2 * index + 1],
+                                    loggedInUserID: _loggedInUser.id,
+                                    authToken: _loggedInUser.authToken,
+                                  ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return NotificationCard(
+                      data: eachNotificationData,
+                      loggedInUserID: _loggedInUser.id,
+                      authToken: _loggedInUser.authToken,
+                    );
+                  }
+                },
+              ),
+            );
+          },
+        ),
       ),
     );
   }

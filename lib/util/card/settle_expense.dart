@@ -320,7 +320,7 @@ class _SettleExpenseState extends State<SettleExpense> {
           return _loadingScreen();
         }
         if (users.isEmpty) {
-          return _loadingScreen(child: noRecordFoundWidget("No User Found"));
+          return _loadingScreen(child: noRecordFoundWidget("No User Found", context));
         }
         return BlocConsumer<RoomSettleUpsertCubit, RoomSettleUpsertState>(
           listener: _blocListenerHandler,

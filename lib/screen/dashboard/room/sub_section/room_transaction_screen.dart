@@ -45,7 +45,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
             ? SliverToBoxAdapter(
               child: noRecordFoundWidget(
                 "No Transaction Found",
-                context: context,
+                 context,
               ),
             )
             : SliverList.builder(

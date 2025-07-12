@@ -205,7 +205,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                     return SliverToBoxAdapter(
                       child: noRecordFoundWidget(
                         "No Rooms Found",
-                        context: context,
+                        context,
                       ),
                     );
                   } else {
