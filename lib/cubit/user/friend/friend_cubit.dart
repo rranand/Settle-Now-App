@@ -21,4 +21,8 @@ class FriendCubit extends Cubit<FriendState> {
       return emit(FriendFailure(e.toString()));
     }
   }
+
+  void reset() {
+    return emit(FriendInitial());
+  }
 }

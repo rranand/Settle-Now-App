@@ -245,4 +245,8 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
       return emit(NewTransactionFailure(e.toString()));
     }
   }
+
+  void reset() {
+    return emit(NewTransactionInitial());
+  }
 }

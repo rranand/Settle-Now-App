@@ -18,3 +18,5 @@ class AddToPersonalExpenseRequested extends AddToPersonalExpenseEvent {
     this.splitType = "",
   });
 }
+
+class AddToPersonalExpenseReset extends AddToPersonalExpenseEvent {}

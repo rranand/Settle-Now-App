@@ -343,9 +343,9 @@ class AppRouterConfig {
   static void initializeRouter(AuthBloc authBloc) {
     _router = GoRouter(
       routes: _allRoutes(),
-      //initialLocation: '/room/662c52edc67c51d882638463',
+      initialLocation: '/room/687181b7277fe287cdfb2d38',
       //initialLocation: '/personal/2025/July',
-      initialLocation: RouterConstants.dashboardRouteName,
+      //initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,

@@ -33,3 +33,6 @@ final class PersonalMonthlyExpenseDelete extends PersonalMonthlyExpenseEvent {
 
   PersonalMonthlyExpenseDelete(this.isLoading, this.expenseID);
 }
+
+final class PersonalMonthlyExpenseReset extends PersonalMonthlyExpenseEvent {
+}

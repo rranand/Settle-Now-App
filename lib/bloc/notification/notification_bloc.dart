@@ -12,6 +12,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<NotificationOnAdd>(_notificationOnAdd);
     on<NotificationOnDelete>(_notificationOnDelete);
     on<NotificationFetch>(_notificationFetch);
+    on<NotificationReset>(_notificationReset);
   }
 
   void _notificationFetch(
@@ -51,5 +52,12 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
       data.removeWhere((ele) => ele.id == event.id);
     }
     return emit(NotificationFetchSuccess(data));
+  }
+
+  void _notificationReset(
+    NotificationReset event,
+    Emitter<NotificationState> emit,
+  ) {
+    return emit(NotificationInitial());
   }
 }

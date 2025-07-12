@@ -23,6 +23,7 @@ class AddToPersonalExpenseBloc
     this.roomRepository,
   ) : super(AddToPersonalExpenseState()) {
     on<AddToPersonalExpenseRequested>(_addToPersonalExpenseRequested);
+    on<AddToPersonalExpenseReset>(_addToPersonalExpenseReset);
   }
 
   void _addToPersonalExpenseRequested(
@@ -92,5 +93,12 @@ class AddToPersonalExpenseBloc
       default:
         {}
     }
+  }
+
+  void _addToPersonalExpenseReset(
+    AddToPersonalExpenseReset event,
+    Emitter<AddToPersonalExpenseState> emit,
+  ) {
+    return emit(AddToPersonalExpenseState());
   }
 }

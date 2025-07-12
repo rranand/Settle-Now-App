@@ -14,6 +14,7 @@ class LendenDashboardBloc
     on<LendenDashboardFetch>(_lendenDashboardFetch);
     on<LendenDashboardOnAddNewRoom>(_lendenDashboardOnAddNewRoom);
     on<LendenDashboardOnUpdateRoom>(_lendenDashboardOnUpdateRoom);
+    on<LendenDashboardReset>(_lendenDashboardReset);
   }
 
   void _lendenDashboardFetch(
@@ -70,5 +71,12 @@ class LendenDashboardBloc
       data = [event.data, ...data];
     }
     return emit(LendenDashboardFetchSuccess(data));
+  }
+
+  void _lendenDashboardReset(
+    LendenDashboardReset event,
+    Emitter<LendenDashboardState> emit,
+  ) {
+    return emit(LendenDashboardInitial());
   }
 }

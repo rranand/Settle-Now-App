@@ -51,4 +51,8 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       return emit(CreateRoomFailure(e.toString()));
     }
   }
+
+  void reset() {
+    return emit(CreateRoomInitial());
+  }
 }

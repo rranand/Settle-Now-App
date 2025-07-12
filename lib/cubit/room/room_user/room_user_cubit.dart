@@ -315,4 +315,8 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   void resetCubit() {
     return emit(RoomUserLoading());
   }
+
+  void reset() {
+    return emit(RoomUserInitial());
+  }
 }

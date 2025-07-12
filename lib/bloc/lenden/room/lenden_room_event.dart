@@ -34,3 +34,5 @@ final class LendenDeleteTransaction extends LendenRoomEvent {
 
   LendenDeleteTransaction(this.expenseID);
 }
+
+final class LendenRoomReset extends LendenRoomEvent {}

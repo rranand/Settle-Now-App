@@ -22,3 +22,5 @@ class NotificationActionDeclineRequested extends NotificationActionEvent {
     required this.authToken,
   });
 }
+
+class NotificationActionReset extends NotificationActionEvent {}

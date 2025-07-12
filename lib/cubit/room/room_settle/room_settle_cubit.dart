@@ -72,4 +72,8 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     }
     return emit(RoomSettleSuccess(roomSettleSuccessState.id, oldArr));
   }
+
+  void reset() {
+    return emit(RoomSettleInitial());
+  }
 }

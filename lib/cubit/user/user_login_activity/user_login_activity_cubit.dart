@@ -55,4 +55,8 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
       return emit(UserLoginActivityState(data: oldArr, error: e.toString()));
     }
   }
+
+  void reset() {
+    return emit(UserLoginActivityState());
+  }
 }

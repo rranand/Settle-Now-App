@@ -15,6 +15,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     on<QuicksplitUpdateTransaction>(_quicksplitUpdateTransaction);
     on<QuicksplitDeleteTransaction>(_quicksplitDeleteTransaction);
     on<QuicksplitAddToPersonalExpense>(_quicksplitAddToPersonalExpense);
+    on<QuicksplitReset>(_quicksplitReset);
   }
 
   void _quicksplitFetch(
@@ -79,5 +80,9 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     }
 
     return emit(QuicksplitFetchSuccess(oldData));
+  }
+
+  void _quicksplitReset(QuicksplitReset event, Emitter<QuicksplitState> emit) {
+    return emit(QuicksplitInitial());
   }
 }

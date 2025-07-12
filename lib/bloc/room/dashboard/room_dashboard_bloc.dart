@@ -15,6 +15,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     on<RoomDashboardFetch>(_roomFetch);
     on<RoomDashboardOnAddNewRoom>(_roomDashboardOnAddNewRoom);
     on<RoomDashboardOnCloseRoom>(_roomDashboardOnCloseRoom);
+    on<RoomDashboardReset>(_roomDashboardReset);
   }
 
   void _roomFetch(
@@ -145,5 +146,12 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     } else {
       return;
     }
+  }
+
+  void _roomDashboardReset(
+    RoomDashboardReset event,
+    Emitter<RoomDashboardState> emit,
+  ) {
+    return emit(RoomDashboardInitial());
   }
 }

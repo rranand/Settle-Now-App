@@ -21,3 +21,6 @@ final class PersonalExpenseDashboardUpdate
 
   PersonalExpenseDashboardUpdate({required this.id, required this.data});
 }
+
+final class PersonalExpenseDashboardReset
+    extends PersonalExpenseDashboardEvent {}

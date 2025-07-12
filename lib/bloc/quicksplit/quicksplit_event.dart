@@ -32,3 +32,5 @@ final class QuicksplitAddToPersonalExpense extends QuicksplitEvent {
 
   QuicksplitAddToPersonalExpense(this.expenseID);
 }
+
+final class QuicksplitReset extends QuicksplitEvent {}

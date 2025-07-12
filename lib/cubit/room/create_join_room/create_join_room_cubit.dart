@@ -80,4 +80,8 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       return emit(CreateJoinRoomFailure(e.toString()));
     }
   }
+  
+  void reset() {
+    return emit(CreateJoinRoomInitial());
+  }
 }

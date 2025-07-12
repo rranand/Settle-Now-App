@@ -18,6 +18,7 @@ class PersonalMonthlyExpenseBloc
     on<PersonalMonthlyExpenseAdd>(_personalMonthlyExpenseAdd);
     on<PersonalMonthlyExpenseUpdate>(_personalMonthlyExpenseUpdate);
     on<PersonalMonthlyExpenseDelete>(_personalMonthlyExpenseDelete);
+    on<PersonalMonthlyExpenseReset>(_personalMonthlyExpenseReset);
   }
 
   void _personalExpenseFetch(
@@ -92,5 +93,12 @@ class PersonalMonthlyExpenseBloc
       PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
     );
     return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
+  }
+
+  void _personalMonthlyExpenseReset(
+    PersonalMonthlyExpenseReset event,
+    Emitter<PersonalMonthlyExpenseState> emit,
+  ) {
+    return emit(PersonalMonthlyExpenseInitial());
   }
 }

@@ -18,6 +18,7 @@ class PersonalExpenseDashboardBloc
     : super(PersonalExpenseDashboardInitial()) {
     on<PersonalExpenseDashboardFetch>(_personalExpenseFetch);
     on<PersonalExpenseDashboardUpdate>(_personalExpenseDashboardUpdate);
+    on<PersonalExpenseDashboardReset>(_personalExpenseDashboardReset);
   }
 
   void _personalExpenseFetch(
@@ -79,5 +80,12 @@ class PersonalExpenseDashboardBloc
     }
 
     return emit(PersonalExpenseDashboardFetchSuccess(newData));
+  }
+
+  void _personalExpenseDashboardReset(
+    PersonalExpenseDashboardReset event,
+    Emitter<PersonalExpenseDashboardState> emit,
+  ) {
+    return emit(PersonalExpenseDashboardInitial());
   }
 }

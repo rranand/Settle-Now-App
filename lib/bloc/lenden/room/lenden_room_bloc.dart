@@ -21,6 +21,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     on<LendenAddNewTransaction>(_lendenAddNewTransaction);
     on<LendenUpdateTransaction>(_lendenUpdateTransaction);
     on<LendenDeleteTransaction>(_lendenDeleteTransaction);
+    on<LendenRoomReset>(_lendenRoomReset);
   }
 
   void _lendenRoomFetch(
@@ -121,5 +122,9 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         LendenRoomFetchSuccess(oldData.id, oldData.roomData, oldData.data),
       );
     }
+  }
+
+  void _lendenRoomReset(LendenRoomReset event, Emitter<LendenRoomState> emit) {
+    return emit(LendenRoomInitial());
   }
 }

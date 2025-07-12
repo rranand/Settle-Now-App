@@ -18,4 +18,8 @@ class UserUpdateProfileCubit extends Cubit<UserUpdateProfileState> {
       return emit(UserUpdateProfileState(error: e.toString()));
     }
   }
+
+  void reset() {
+    return emit(UserUpdateProfileState());
+  }
 }

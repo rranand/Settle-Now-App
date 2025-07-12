@@ -25,4 +25,8 @@ class RoomCloseRequestCubit extends Cubit<RoomCloseRequestState> {
       return emit(RoomCloseRequestFailure(id, e.toString()));
     }
   }
+
+  void reset() {
+    return emit(RoomCloseRequestInitial());
+  }
 }

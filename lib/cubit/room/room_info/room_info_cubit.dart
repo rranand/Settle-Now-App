@@ -63,4 +63,8 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
 
     return;
   }
+
+  void reset() {
+    return emit(RoomInfoInitial());
+  }
 }

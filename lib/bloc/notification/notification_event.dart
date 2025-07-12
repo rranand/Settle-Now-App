@@ -17,3 +17,5 @@ final class NotificationOnDelete extends NotificationEvent {
   final String id;
   NotificationOnDelete({required this.id});
 }
+
+final class NotificationReset extends NotificationEvent {}

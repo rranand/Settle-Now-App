@@ -18,3 +18,5 @@ final class LendenDashboardOnUpdateRoom extends LendenDashboardEvent {
   final LendenDashboardModel data;
   LendenDashboardOnUpdateRoom({required this.data});
 }
+
+final class LendenDashboardReset extends LendenDashboardEvent {}

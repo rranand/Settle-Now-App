@@ -15,6 +15,7 @@ class NotificationActionBloc
     : super(NotificationActionState()) {
     on<NotificationActionAcceptRequested>(_notificationActionAcceptRequested);
     on<NotificationActionDeclineRequested>(_notificationActionDeclineRequested);
+    on<NotificationActionReset>(_notificationActionReset);
   }
 
   void _notificationActionAcceptRequested(
@@ -75,5 +76,12 @@ class NotificationActionBloc
         ),
       );
     }
+  }
+
+  void _notificationActionReset(
+    NotificationActionReset event,
+    Emitter<NotificationActionState> emit,
+  ) {
+    return emit(NotificationActionState());
   }
 }

@@ -76,4 +76,8 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
       return emit(RoomSettleUpsertFailure(e.toString()));
     }
   }
+
+  void reset() {
+    return emit(RoomSettleUpsertInitial());
+  }
 }
