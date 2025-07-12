@@ -22,6 +22,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     RoomDashboardFetch event,
     Emitter<RoomDashboardState> emit,
   ) async {
+    if (state is RoomDashboardLoading) return;
+
     List<RoomInfoModel> oldRoomActiveData = [];
     List<RoomInfoModel> oldRoomInActiveData = [];
     FetchStatus oldRoomActiveStatus = FetchStatus.success;
@@ -34,8 +36,10 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
       oldRoomActiveStatus = oldState.activeStatus;
       oldRoomInActiveStatus = oldState.inactiveStatus;
 
-      if ((event.isActiveRoom && oldRoomActiveStatus == FetchStatus.done) ||
-          (!event.isActiveRoom && oldRoomInActiveStatus == FetchStatus.done)) {
+      if (!event.isFreshFetch &&
+          ((event.isActiveRoom && oldRoomActiveStatus == FetchStatus.done) ||
+              (!event.isActiveRoom &&
+                  oldRoomInActiveStatus == FetchStatus.done))) {
         return emit(
           RoomDashboardFetchSuccess(
             activeStatus: oldRoomActiveStatus,
@@ -51,30 +55,57 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     try {
       Pair<List<RoomInfoModel>, bool> data = await repo.fetchData(
         event.isActiveRoom,
-        event.isActiveRoom
-            ? oldRoomActiveData.length
-            : oldRoomInActiveData.length,
+        event.isFreshFetch
+            ? 0
+            : (event.isActiveRoom
+                ? oldRoomActiveData.length
+                : oldRoomInActiveData.length),
         event.authToken,
       );
       if (event.isActiveRoom) {
-        return emit(
-          RoomDashboardFetchSuccess(
-            activeStatus: data.second ? FetchStatus.success : FetchStatus.done,
-            inactiveStatus: oldRoomInActiveStatus,
-            activeData: [...oldRoomActiveData, ...data.first],
-            inactiveData: oldRoomActiveData,
-          ),
-        );
+        if (event.isFreshFetch) {
+          emit(
+            RoomDashboardFetchSuccess(
+              activeStatus:
+                  data.second ? FetchStatus.success : FetchStatus.done,
+              inactiveStatus: oldRoomInActiveStatus,
+              activeData: data.first,
+              inactiveData: oldRoomActiveData,
+            ),
+          );
+        } else {
+          return emit(
+            RoomDashboardFetchSuccess(
+              activeStatus:
+                  data.second ? FetchStatus.success : FetchStatus.done,
+              inactiveStatus: oldRoomInActiveStatus,
+              activeData: [...oldRoomActiveData, ...data.first],
+              inactiveData: oldRoomActiveData,
+            ),
+          );
+        }
       } else {
-        return emit(
-          RoomDashboardFetchSuccess(
-            activeStatus: oldRoomActiveStatus,
-            inactiveStatus:
-                data.second ? FetchStatus.success : FetchStatus.done,
-            activeData: oldRoomActiveData,
-            inactiveData: [...oldRoomInActiveData, ...data.first],
-          ),
-        );
+        if (event.isFreshFetch) {
+          return emit(
+            RoomDashboardFetchSuccess(
+              activeStatus: oldRoomActiveStatus,
+              inactiveStatus:
+                  data.second ? FetchStatus.success : FetchStatus.done,
+              activeData: oldRoomActiveData,
+              inactiveData: data.first,
+            ),
+          );
+        } else {
+          return emit(
+            RoomDashboardFetchSuccess(
+              activeStatus: oldRoomActiveStatus,
+              inactiveStatus:
+                  data.second ? FetchStatus.success : FetchStatus.done,
+              activeData: oldRoomActiveData,
+              inactiveData: [...oldRoomInActiveData, ...data.first],
+            ),
+          );
+        }
       }
     } catch (e) {
       emit(RoomDashboardFailure(e.toString()));

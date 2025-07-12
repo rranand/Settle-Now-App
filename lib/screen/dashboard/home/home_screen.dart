@@ -53,7 +53,7 @@ class _HomeScreenState extends State<HomeScreen> {
       GlobalKey<ScaffoldState>();
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   @override

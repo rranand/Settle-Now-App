@@ -6,8 +6,13 @@ sealed class RoomDashboardEvent {}
 final class RoomDashboardFetch extends RoomDashboardEvent {
   final bool isActiveRoom;
   final String authToken;
+  final bool isFreshFetch;
 
-  RoomDashboardFetch({required this.isActiveRoom, required this.authToken});
+  RoomDashboardFetch({
+    required this.isActiveRoom,
+    required this.authToken,
+    required this.isFreshFetch,
+  });
 }
 
 final class RoomDashboardOnAddNewRoom extends RoomDashboardEvent {
@@ -21,5 +26,4 @@ final class RoomDashboardOnCloseRoom extends RoomDashboardEvent {
   RoomDashboardOnCloseRoom({required this.data});
 }
 
-final class RoomDashboardReset extends RoomDashboardEvent {
-}
+final class RoomDashboardReset extends RoomDashboardEvent {}
