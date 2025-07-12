@@ -16,14 +16,14 @@ class NavBarCard extends StatelessWidget {
   }
 
   Widget _sectionTitle(int index) {
-    return Stack(
-      children: [
-        Center(
-          child: InkWell(
-            borderRadius: BorderRadius.circular(100),
-            onTap: () {
-              selectedIndex.value = index;
-            },
+    return InkWell(
+      borderRadius: BorderRadius.circular(100),
+      onTap: () {
+        selectedIndex.value = index;
+      },
+      child: Stack(
+        children: [
+          Center(
             child: Text(
               _textWithPaddingSpace(headerTitle[index]),
               maxLines: 1,
@@ -36,20 +36,20 @@ class NavBarCard extends StatelessWidget {
               ),
             ),
           ),
-        ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            height: 2,
-            color:
-                selectedIndex.value == index
-                    ? Colors.deepPurple
-                    : Colors.transparent,
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 2,
+              color:
+                  selectedIndex.value == index
+                      ? Colors.deepPurple
+                      : Colors.transparent,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
