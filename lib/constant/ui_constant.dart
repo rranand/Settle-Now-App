@@ -1,7 +1,4 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/model/user_model.dart';
 
 class UiConstant {
   static const double cardTitleTextSize = 18;
@@ -88,56 +85,5 @@ class UiConstant {
     Colors.lightBlue,
     Colors.red,
     Colors.yellow,
-  ];
-
-  static List<UserModel> users = [
-    UserModel.fromBasicInfo(
-      id: 'u2',
-      name: 'Aarav',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u3',
-      name: 'Meera Shah',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u4',
-      name: 'Kabir',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u5',
-      name: 'Anaya Sen',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u6',
-      name: 'Ishaan Malhotra Anaya',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u7',
-      name: 'Tara',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u8',
-      name: 'Dev Verma',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
-    UserModel.fromBasicInfo(
-      id: 'u9',
-      name: 'Zoya',
-      profileImage:
-          'https://picsum.photos/id/${1 + Random().nextInt(100)}/200/300',
-    ),
   ];
 }

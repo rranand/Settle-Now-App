@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/util/graph/horizontal_graph_card.dart';
+import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow_v2/model/category_amount_model.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
+import 'package:settlenow_v2/model/user_financial_model.dart';
+import 'package:settlenow_v2/util/graph/expense_by_user_data_screen.dart';
+import 'package:settlenow_v2/util/graph/expense_by_category_data_screen.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomAnalysisScreen extends StatefulWidget {
@@ -13,51 +21,123 @@ class RoomAnalysisScreen extends StatefulWidget {
 class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
   final List<String> graphTitle = ["Expense By Category", "Expense By User"];
   final ValueNotifier _selectedGraphIndex = ValueNotifier(0);
+  int _categoryHashCode = 0;
+  int _roomUserHashCode = 0;
+  List<CategoryAmountModel> categoryAmountModel = [];
+  List<UserFinancialData> userFinancialData = [];
 
-  final Map<String, double> categoryData = {
-    'Food & Dining': 2200.0,
-    'Housing': 0.0,
-    'Transportation': 150.0,
-    'Utilities': 75.5,
-    'Entertainment': 90.0,
-    'Health & Fitness': 45.0,
-    'Shopping': 130.0,
-    'Education': 80.0,
-    'Travel': 200.0,
-    'Miscellaneous': 60.0,
-  };
+  Widget expenseByCategoryGraph(List<TransactionModel> data) {
+    if (_categoryHashCode != data.hashCode) {
+      _categoryHashCode = data.hashCode;
+      final Map<String, double> categoryData = {};
+      for (final transaction in data) {
+        categoryData[transaction.category] =
+            (categoryData[transaction.category] ?? 0) + transaction.amount;
+      }
+      categoryAmountModel =
+          categoryData.entries
+              .map(
+                (entry) => CategoryAmountModel(
+                  category: entry.key,
+                  amount: entry.value,
+                ),
+              )
+              .toList();
+      _categoryHashCode = categoryAmountModel.hashCode;
+    }
+
+    return ExpenseByCategoryDataScreen(
+      categoryAmountModel: categoryAmountModel,
+    );
+  }
+
+  Widget expenseByUserGraph() {
+    if (_roomUserHashCode != userFinancialData.hashCode) {
+      final state = context.read<RoomUserCubit>().state;
+      List<RoomUserModel> data = [];
+      if (state is RoomUserSuccess) {
+        data = state.data;
+      }
+      userFinancialData =
+          data
+              .map((user) => UserFinancialData.fromRoomUserModel(user))
+              .toList();
+      _roomUserHashCode = userFinancialData.hashCode;
+    }
+
+    return ExpenseByUserDataScreen(userFinancialData: userFinancialData);
+  }
+
+  Widget _graphController(int index, List<TransactionModel> data) {
+    switch (index) {
+      case 0:
+        return expenseByCategoryGraph(data);
+      case 1:
+        return expenseByUserGraph();
+      default:
+        return SizedBox.shrink();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SliverToBoxAdapter(
-      child: noRecordFoundWidget("No Transaction Found", context: context),
-      // child: ValueListenableBuilder(
-      //   valueListenable: _selectedGraphIndex,
-      //   builder: (context, value, _) {
-      //     return Column(
-      //       children: [
-      //         Wrap(
-      //           spacing: UiConstant.spaceBetweenCard,
-      //           runSpacing: UiConstant.spaceBetweenCard,
-      //           children: List.generate(
-      //             graphTitle.length,
-      //             (index) => Chip(
-      //               label: Text(graphTitle[index]),
-      //               labelStyle:
-      //                   index == value ? TextStyle(color: Colors.white) : null,
-      //               backgroundColor:
-      //                   index == value
-      //                       ? Colors.deepPurple.shade500
-      //                       : Colors.white,
-      //             ),
-      //           ),
-      //         ),
-      //         SizedBox(height: UiConstant.spaceBetweenSection),
-      //         HorizontalGraphCard(data: categoryData),
-      //       ],
-      //     );
-      //   },
-      // ),
+    return BlocBuilder<RoomBloc, RoomState>(
+      builder: (context, state) {
+        List<TransactionModel> data = [];
+        if (state is RoomFetchSuccess) {
+          data = state.data;
+        }
+
+        if (data.isEmpty) {
+          return SliverToBoxAdapter(
+            child: noRecordFoundWidget(
+              "No Transaction Found",
+              context: context,
+            ),
+          );
+        } else {
+          return ValueListenableBuilder(
+            valueListenable: _selectedGraphIndex,
+            builder: (context, value, _) {
+              return SliverList(
+                delegate: SliverChildListDelegate([
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: UiConstant.spaceBetweenCard,
+                      children: List.generate(
+                        graphTitle.length,
+                        (index) => InkWell(
+                          borderRadius: BorderRadius.circular(60),
+                          onTap: () => _selectedGraphIndex.value = index,
+                          child: Chip(
+                            label: Text(graphTitle[index]),
+                            side: BorderSide(
+                              color:
+                                  index == value
+                                      ? Colors.deepPurple.shade500
+                                      : Colors.black26,
+                            ),
+                            labelStyle:
+                                index == value
+                                    ? TextStyle(
+                                      color: Colors.deepPurple.shade500,
+                                    )
+                                    : null,
+                            backgroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  _graphController(value, data),
+                ]),
+              );
+            },
+          );
+        }
+      },
     );
   }
 }

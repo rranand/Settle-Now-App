@@ -56,7 +56,7 @@ class CategoryParser {
   }
 
   static IconData getCategoryIconByCategory(String category) {
-    return getCategoryIconByIndex(_categoryToIndex[category]!);
+    return getCategoryIconByIndex(_categoryToIndex[category] ?? 13);
   }
 
   static int indexOfCategory(String category) {

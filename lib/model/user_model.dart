@@ -127,11 +127,22 @@ class UserModel {
     return other.id == id &&
         other.name == name &&
         other.email == email &&
-        other.profileImage == profileImage;
+        other.profileImage == profileImage &&
+        other.authToken == authToken &&
+        other.createdOn == createdOn &&
+        other.phoneNo == phoneNo &&
+        other.isGoogle == isGoogle;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^ name.hashCode ^ email.hashCode ^ profileImage.hashCode;
+    return id.hashCode ^
+        name.hashCode ^
+        email.hashCode ^
+        profileImage.hashCode ^
+        authToken.hashCode ^
+        createdOn.hashCode ^
+        phoneNo.hashCode ^
+        isGoogle.hashCode;
   }
 }
