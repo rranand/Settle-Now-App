@@ -67,8 +67,7 @@ class NotificationModel {
         other.type == type &&
         other.roomID == roomID &&
         other.by == by &&
-        other.user == user &&
-        other.createdOn == createdOn;
+        other.user == user;
   }
 
   @override
@@ -78,6 +77,5 @@ class NotificationModel {
       type.hashCode ^
       roomID.hashCode ^
       by.hashCode ^
-      user.hashCode ^
-      createdOn.hashCode;
+      user.hashCode;
 }

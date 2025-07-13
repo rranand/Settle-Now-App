@@ -134,7 +134,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                         visible: showAddPerson,
                         child: IconButton(
                           icon: Icon(Iconsax.user_add),
-                          onPressed: () {},
+                          onPressed: () {}, // TODO : Invite Member
                         ),
                       ),
                     ],

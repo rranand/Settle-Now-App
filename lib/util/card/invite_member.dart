@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/cubit/user/friend/friend_cubit.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
@@ -17,10 +19,12 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 class InviteMember extends StatefulWidget {
   final List<String> userID;
   final TransactionType transactionType;
+  final bool inviteMember;
   const InviteMember({
     super.key,
     required this.userID,
     required this.transactionType,
+    required this.inviteMember,
   });
 
   @override
@@ -33,6 +37,7 @@ class _InviteMemberState extends State<InviteMember> {
   final double _userImageRadius = 50;
   UserModel _loggedInUser = UserModel.empty();
   final ValueNotifier<Set<String>> _selectedUserIDs = ValueNotifier({});
+  final ValueNotifier<Set<String>> _alreadyInvited = ValueNotifier({});
   final ValueNotifier<bool> _isLoaded = ValueNotifier(false);
   final ValueNotifier<bool> isSearchEnabled = ValueNotifier(false);
   final TextEditingController _searchController = TextEditingController();
@@ -55,15 +60,17 @@ class _InviteMemberState extends State<InviteMember> {
   }
 
   void _toggleSelectedUser(user) {
-    final oldUserIDs = Set<String>.from(_selectedUserIDs.value);
+    if (!_alreadyInvited.value.contains(user.id)) {
+      final oldUserIDs = Set<String>.from(_selectedUserIDs.value);
 
-    if (oldUserIDs.contains(user.id)) {
-      oldUserIDs.remove(user.id);
-    } else {
-      oldUserIDs.add(user.id);
+      if (oldUserIDs.contains(user.id)) {
+        oldUserIDs.remove(user.id);
+      } else {
+        oldUserIDs.add(user.id);
+      }
+
+      _selectedUserIDs.value = oldUserIDs;
     }
-
-    _selectedUserIDs.value = oldUserIDs;
   }
 
   Widget _userCardWidget(UserModel user) {
@@ -121,8 +128,16 @@ class _InviteMemberState extends State<InviteMember> {
               bottom: 0,
               right: 0,
               child:
-                  _selectedUserIDs.value.contains(user.id)
-                      ? Icon(Icons.check_circle, color: Colors.green, size: 24)
+                  _selectedUserIDs.value.contains(user.id) ||
+                          _alreadyInvited.value.contains(user.id)
+                      ? Icon(
+                        Icons.check_circle,
+                        color:
+                            _alreadyInvited.value.contains(user.id)
+                                ? Colors.grey
+                                : Colors.green,
+                        size: 24,
+                      )
                       : SizedBox.shrink(),
             ),
           ],
@@ -136,28 +151,77 @@ class _InviteMemberState extends State<InviteMember> {
     _isLoaded.value = false;
 
     if (widget.transactionType == TransactionType.room) {
-      final roomUserState = context.read<RoomUserCubit>().state;
-      if (roomUserState is RoomUserSuccess) {
-        for (int i = 0; i < roomUserState.data.length; i++) {
-          if (roomUserState.data[i].user.id != _loggedInUser.id &&
-              roomUserState.data[i].active) {
-            users.add(roomUserState.data[i].user);
+      switch (widget.inviteMember) {
+        case true:
+          {
+            final roomUserState = context.watch<RoomUserCubit>().state;
+            final notificationState = context.watch<NotificationBloc>().state;
+            List<NotificationModel> notificationData = [];
+            if (notificationState is NotificationFetchSuccess) {
+              notificationData = notificationState.data;
+            }
+            Set<String> alreadyMember = {};
+            Set<String> alreadyInvited = {};
+            String roomID = "";
+
+            if (roomUserState is RoomUserSuccess) {
+              roomID = roomUserState.id;
+              for (int i = 0; i < roomUserState.data.length; i++) {
+                alreadyMember.add(roomUserState.data[i].user.id);
+              }
+            }
+            for (int i = 0; i < notificationData.length; i++) {
+              if (notificationData[i].roomID == roomID) {
+                alreadyInvited.add(notificationData[i].user.id);
+              }
+            }
+            _alreadyInvited.value = Set.from(alreadyInvited);
+
+            final friendState = context.watch<FriendCubit>().state;
+            if (friendState is FriendLoading) {
+              users = [];
+            } else {
+              if (friendState is FriendSuccess) {
+                for (int i = 0; i < friendState.data.length; i++) {
+                  if (!alreadyMember.contains(friendState.data[i].id)) {
+                    users.add(friendState.data[i]);
+                  }
+                }
+              } else if (friendState is FriendFailure) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  showNormalSnackBar(context, friendState.error);
+                });
+              }
+              _isLoaded.value = true;
+            }
           }
-        }
-        _isLoaded.value = true;
+        case false:
+          {
+            final roomUserState = context.watch<RoomUserCubit>().state;
+            if (roomUserState is RoomUserSuccess) {
+              for (int i = 0; i < roomUserState.data.length; i++) {
+                if (roomUserState.data[i].user.id != _loggedInUser.id &&
+                    roomUserState.data[i].active) {
+                  users.add(roomUserState.data[i].user);
+                }
+              }
+              _isLoaded.value = true;
+            }
+          }
       }
     } else if (widget.transactionType == TransactionType.quicksplit) {
       final friendState = context.watch<FriendCubit>().state;
-      if (friendState is FriendSuccess) {
-        users = friendState.data;
-        _isLoaded.value = true;
-      } else if (friendState is FriendFailure) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showNormalSnackBar(context, friendState.error);
-        });
-        _isLoaded.value = true;
-      } else {
+      if (friendState is FriendLoading) {
         users = [];
+      } else {
+        if (friendState is FriendSuccess) {
+          users = friendState.data;
+        } else if (friendState is FriendFailure) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showNormalSnackBar(context, friendState.error);
+          });
+        }
+        _isLoaded.value = true;
       }
     }
 
@@ -184,7 +248,8 @@ class _InviteMemberState extends State<InviteMember> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
 
-      if (TransactionType.quicksplit == widget.transactionType) {
+      if (TransactionType.quicksplit == widget.transactionType ||
+          widget.inviteMember) {
         _fetchFriendData();
       }
 

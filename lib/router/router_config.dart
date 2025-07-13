@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +28,13 @@ class AppRouterConfig {
   static FirebaseAnalyticsObserver observer = FirebaseAnalyticsObserver(
     analytics: analytics,
   );
+
+  static String getPreviousPath(Uri uri) {
+    String url = uri.toString();
+    List<String> urlArr = url.split("/");
+    urlArr = urlArr.getRange(0, max(1, urlArr.length - 1)).toList();
+    return urlArr.join("/");
+  }
 
   static late final GoRouter _router;
 
@@ -87,6 +96,30 @@ class AppRouterConfig {
             },
             routes: [
               GoRoute(
+                path: RouterConstants.inviteMember,
+                builder: (context, state) {
+                  Map<String, dynamic> data =
+                      state.extra as Map<String, dynamic>;
+                  return AuthGate(
+                    child: InviteMember(
+                      userID: [],
+                      transactionType: data["transactionType"],
+                      inviteMember: true,
+                    ),
+                  );
+                },
+                redirect: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  if (extra == null ||
+                      extra.isEmpty ||
+                      !extra.containsKey("transactionType")) {
+                    return getPreviousPath(state.uri);
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              GoRoute(
                 path: RouterConstants.roomAddExpenseRouteName,
                 builder: (context, state) {
                   return AuthGate(child: AddTransaction());
@@ -101,6 +134,7 @@ class AppRouterConfig {
                         child: InviteMember(
                           userID: data["userID"],
                           transactionType: data["transactionType"],
+                          inviteMember: false,
                         ),
                       );
                     },
@@ -110,7 +144,7 @@ class AppRouterConfig {
                           extra.isEmpty ||
                           !extra.containsKey("userID") ||
                           !extra.containsKey("transactionType")) {
-                        return RouterConstants.quickSplitAddExpenseRouteName;
+                        return getPreviousPath(state.uri);
                       } else {
                         return null;
                       }
@@ -143,6 +177,7 @@ class AppRouterConfig {
                         child: InviteMember(
                           userID: data["userID"],
                           transactionType: data["transactionType"],
+                          inviteMember: false,
                         ),
                       );
                     },
@@ -301,6 +336,7 @@ class AppRouterConfig {
                     child: InviteMember(
                       userID: data["userID"],
                       transactionType: data["transactionType"],
+                      inviteMember: false,
                     ),
                   );
                 },
@@ -343,7 +379,7 @@ class AppRouterConfig {
   static void initializeRouter(AuthBloc authBloc) {
     _router = GoRouter(
       routes: _allRoutes(),
-      initialLocation: '/room/662c52edc67c51d882638463',
+      initialLocation: '/room/67a30f5263595a7c917498d8',
       //initialLocation: '/personal/2025/July',
       //initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation:

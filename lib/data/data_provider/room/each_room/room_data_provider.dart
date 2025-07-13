@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 import 'package:settlenow_v2/util/handler/network_call.dart';
@@ -288,6 +289,35 @@ class RoomDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<NotificationModel>> inviteNewMember(
+    String id,
+    List<UserModel> users,
+    String authToken,
+  ) async {
+    try {
+      List<String> uid = users.map((e) => Crypto.encrypt(e.id)).toList();
+      final response = await createAPICall(
+        'room/invite/$id',
+        "put",
+        authToken,
+        {"users": uid},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        List<NotificationModel> arr = [];
+        for (int i = 0; i < data['data'].length; i++) {
+          arr.add(NotificationModel.fromMap(data['data'][i]));
+        }
+        return arr;
       } else {
         throw Crypto.decrypt(data['message']);
       }

@@ -5,16 +5,19 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
+import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 part 'create_join_room_state.dart';
 
 class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
   final RoomDashboardRepository repo;
+  final RoomRepository roomRepo;
   final NotificationBloc notificationBloc;
-  CreateJoinRoomCubit(this.repo, this.notificationBloc)
+  CreateJoinRoomCubit(this.repo, this.roomRepo, this.notificationBloc)
     : super(CreateJoinRoomInitial());
 
   void createNewRoom(BuildContext context, String roomName) async {
@@ -46,7 +49,6 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
   }
 
   void joinNewRoom(
-    BuildContext context,
     String roomKey,
     String authToken,
     ScaffoldMessengerState scaffoldMessenger,
@@ -67,7 +69,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
         roomKey,
         authToken,
       );
-      notificationBloc.add(NotificationOnAdd(data: notificationData));
+      notificationBloc.add(NotificationOnAdd(data: [notificationData]));
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Join Requested",
@@ -80,7 +82,52 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       return emit(CreateJoinRoomFailure(e.toString()));
     }
   }
-  
+
+  void inviteMember(
+    String roomID,
+    List<UserModel> users,
+    String authToken,
+    ScaffoldMessengerState scaffoldMessenger,
+  ) async {
+    String message = "";
+    if (users.isEmpty) {
+      return;
+    } else if (users.length == 1) {
+      message = "Inviting ${users.first.name}";
+    } else {
+      message = "Inviting ${users.first.name}, +${users.length - 1} Others";
+    }
+    showSnackbarWithChildWidget(
+      message,
+      child: SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
+      ),
+      duration: Duration(minutes: 2),
+      scaffoldMessenger: scaffoldMessenger,
+    );
+    CreateJoinRoomLoading();
+    try {
+      List<NotificationModel> notificationData = await roomRepo.inviteNewMember(
+        roomID,
+        users,
+        authToken,
+      );
+      notificationBloc.add(NotificationOnAdd(data: notificationData));
+      scaffoldMessenger.hideCurrentSnackBar();
+      showSnackbarWithChildWidget(
+        "${users.length} Members Invited",
+        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        scaffoldMessenger: scaffoldMessenger,
+      );
+      return emit(CreateJoinRoomSuccess());
+    } catch (e) {
+      scaffoldMessenger.hideCurrentSnackBar();
+      return emit(CreateJoinRoomFailure(e.toString()));
+    }
+  }
+
   void reset() {
     return emit(CreateJoinRoomInitial());
   }

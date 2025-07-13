@@ -226,6 +226,7 @@ class MyApp extends StatelessWidget {
             create:
                 (context) => CreateJoinRoomCubit(
                   context.read<RoomDashboardRepository>(),
+                  context.read<RoomRepository>(),
                   context.read<NotificationBloc>(),
                 ),
           ),

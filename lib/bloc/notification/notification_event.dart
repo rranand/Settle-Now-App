@@ -9,7 +9,7 @@ final class NotificationFetch extends NotificationEvent {
 }
 
 final class NotificationOnAdd extends NotificationEvent {
-  final NotificationModel data;
+  final List<NotificationModel> data;
   NotificationOnAdd({required this.data});
 }
 

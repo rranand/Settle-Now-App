@@ -9,6 +9,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close/room_close_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close_request/room_close_request_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
@@ -24,6 +25,7 @@ import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_scree
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
 import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
@@ -45,6 +47,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   UserModel _loggedInUser = UserModel.empty();
   late final StreamSubscription roomCloseRequestSubscription;
   late final StreamSubscription roomCloseSubscription;
+  String currentRoute = "";
 
   final List<String> _navBarTitles = [
     "Transactions",
@@ -314,6 +317,8 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    currentRoute =
+        GoRouter.of(context).routeInformationProvider.value.uri.toString();
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
@@ -455,6 +460,9 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
             centerTitle: false,
+            actions: appBarActionButton(context, [
+              IconButton(onPressed: () => {}, icon: Icon(Iconsax.info_circle)),
+            ]),
           ),
           body: RefreshIndicator(
             onRefresh: onRefresh,
@@ -545,8 +553,38 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         },
                       ),
                       SpeedDialChild(
-                        child: const Icon(Iconsax.lock),
+                        child: const Icon(Iconsax.profile_add),
                         backgroundColor: UiConstant.colors[2],
+                        foregroundColor: Colors.white,
+                        label: 'Add Member',
+                        visible: roomUserModel.active,
+                        onTap: () async {
+                          CreateJoinRoomCubit createJoinRoomCubit =
+                              context.read<CreateJoinRoomCubit>();
+                          ScaffoldMessengerState scaffoldMessengerState =
+                              ScaffoldMessenger.of(context);
+                          final userDataFromScreen =
+                              await context.push(
+                                    currentRoute + RouterConstants.inviteMember,
+                                    extra: {
+                                      "transactionType": TransactionType.room,
+                                    },
+                                  )
+                                  as List<UserModel>?;
+                          if (userDataFromScreen != null &&
+                              userDataFromScreen.isNotEmpty) {
+                            createJoinRoomCubit.inviteMember(
+                              widget.id,
+                              userDataFromScreen,
+                              _loggedInUser.authToken,
+                              scaffoldMessengerState,
+                            );
+                          }
+                        },
+                      ),
+                      SpeedDialChild(
+                        child: const Icon(Iconsax.lock),
+                        backgroundColor: UiConstant.colors[3],
                         foregroundColor: Colors.white,
                         visible: roomUserModel.active,
                         label: 'Close Room',
@@ -567,7 +605,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                       ),
                       SpeedDialChild(
                         child: const Icon(Iconsax.message_question),
-                        backgroundColor: UiConstant.colors[3],
+                        backgroundColor: UiConstant.colors[4],
                         foregroundColor: Colors.white,
                         visible: isRoomActive && showCloseRoomRequest,
                         label: 'Close Room Request',

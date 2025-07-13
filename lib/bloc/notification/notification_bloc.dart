@@ -33,11 +33,24 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     NotificationOnAdd event,
     Emitter<NotificationState> emit,
   ) {
-    List<NotificationModel> data = [event.data];
+    List<NotificationModel> data = [];
+    Set<int> notificationHashCode = {};
+
     if (state is NotificationFetchSuccess) {
       final oldState = state as NotificationFetchSuccess;
-      data.addAll(oldState.data);
+      for (int i = 0; i < oldState.data.length; i++) {
+        notificationHashCode.add(oldState.data[i].hashCode);
+        data.add(oldState.data[i]);
+      }
     }
+
+    for (int i = 0; i < event.data.length; i++) {
+      if (!notificationHashCode.contains(event.data[i].hashCode)) {
+        data.add(event.data[i]);
+      }
+    }
+
+    data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
     return emit(NotificationFetchSuccess(data));
   }
 

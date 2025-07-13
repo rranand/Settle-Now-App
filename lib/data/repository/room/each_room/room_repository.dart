@@ -1,5 +1,6 @@
 import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provider.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
+import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
@@ -219,6 +220,21 @@ class RoomRepository {
         splitType,
         authToken,
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<NotificationModel>> inviteNewMember(
+    String id,
+    List<UserModel> users,
+    String authToken,
+  ) async {
+    try {
+      List<NotificationModel> notificationData = await _dataProvider
+          .inviteNewMember(id, users, authToken);
+
+      return notificationData;
     } catch (e) {
       rethrow;
     }
