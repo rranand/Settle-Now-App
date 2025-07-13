@@ -232,8 +232,11 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<CreateRoomCubit>(
             create:
-                (context) =>
-                    CreateRoomCubit(context.read<LendenDashboardRepository>()),
+                (context) => CreateRoomCubit(
+                  context.read<LendenDashboardRepository>(),
+                  context.read<LendenRoomRepository>(),
+                  context.read<NotificationBloc>(),
+                ),
           ),
           BlocProvider<RoomInfoCubit>(
             create:

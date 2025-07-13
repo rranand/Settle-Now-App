@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +8,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
@@ -13,6 +16,7 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/lenden_expense_card.dart';
 import 'package:settlenow_v2/util/card/lenden_summary_card.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
@@ -33,6 +37,8 @@ class LendenExpenseScreen extends StatefulWidget {
 class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   UserModel _loggedInUser = UserModel.empty();
+  String currentRoute = "";
+  late final StreamSubscription _createRoomListener;
 
   void _blocListenerHandler(BuildContext context, LendenRoomState state) {
     if (state is LendenRoomFailure) {
@@ -134,7 +140,35 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                         visible: showAddPerson,
                         child: IconButton(
                           icon: Icon(Iconsax.user_add),
-                          onPressed: () {}, // TODO : Invite Member
+                          onPressed: () async {
+                            CreateRoomCubit createRoomCubit =
+                                context.read<CreateRoomCubit>();
+                            ScaffoldMessengerState scaffoldMessengerState =
+                                ScaffoldMessenger.of(context);
+                            final navigator = Navigator.of(context);
+
+                            final userDataFromScreen =
+                                await context.push(
+                                      currentRoute +
+                                          RouterConstants.inviteMember,
+                                      extra: {
+                                        "transactionType":
+                                            TransactionType.lenden,
+                                      },
+                                    )
+                                    as List<UserModel>?;
+                            if (userDataFromScreen != null &&
+                                userDataFromScreen.isNotEmpty &&
+                                userDataFromScreen.first.hasData) {
+                              navigator.pop();
+                              createRoomCubit.inviteMember(
+                                widget.id,
+                                userDataFromScreen.first,
+                                _loggedInUser.authToken,
+                                scaffoldMessengerState,
+                              );
+                            }
+                          },
                         ),
                       ),
                     ],
@@ -207,6 +241,8 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    currentRoute =
+        GoRouter.of(context).routeInformationProvider.value.uri.toString();
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
@@ -219,6 +255,20 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
         );
       }
     }
+
+    _createRoomListener = context.read<CreateRoomCubit>().stream.listen((
+      state,
+    ) {
+      if (mounted && state is CreateRoomFailure) {
+        showNormalSnackBar(context, state.error);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _createRoomListener.cancel();
+    super.dispose();
   }
 
   Future<void> onRefresh() async {

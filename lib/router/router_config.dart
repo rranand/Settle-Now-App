@@ -298,6 +298,30 @@ class AppRouterConfig {
             },
             routes: [
               GoRoute(
+                path: RouterConstants.inviteMember,
+                builder: (context, state) {
+                  Map<String, dynamic> data =
+                      state.extra as Map<String, dynamic>;
+                  return AuthGate(
+                    child: InviteMember(
+                      userID: [],
+                      transactionType: data["transactionType"],
+                      inviteMember: true,
+                    ),
+                  );
+                },
+                redirect: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  if (extra == null ||
+                      extra.isEmpty ||
+                      !extra.containsKey("transactionType")) {
+                    return getPreviousPath(state.uri);
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+              GoRoute(
                 path: RouterConstants.lendenAddExpenseRouteName,
                 builder: (context, state) {
                   return AuthGate(child: AddTransaction());
@@ -379,7 +403,7 @@ class AppRouterConfig {
   static void initializeRouter(AuthBloc authBloc) {
     _router = GoRouter(
       routes: _allRoutes(),
-      initialLocation: '/room/67a30f5263595a7c917498d8',
+      initialLocation: '/lenden/687282eb8ff06d02461abbc7',
       //initialLocation: '/personal/2025/July',
       //initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation:

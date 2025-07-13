@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
@@ -60,7 +61,12 @@ class _InviteMemberState extends State<InviteMember> {
   }
 
   void _toggleSelectedUser(user) {
-    if (!_alreadyInvited.value.contains(user.id)) {
+    if (_alreadyInvited.value.isNotEmpty) {
+      return;
+    }
+    if (widget.transactionType == TransactionType.lenden) {
+      _selectedUserIDs.value = {user.id};
+    } else if (!_alreadyInvited.value.contains(user.id)) {
       final oldUserIDs = Set<String>.from(_selectedUserIDs.value);
 
       if (oldUserIDs.contains(user.id)) {
@@ -210,6 +216,39 @@ class _InviteMemberState extends State<InviteMember> {
           }
       }
     } else if (widget.transactionType == TransactionType.quicksplit) {
+      final friendState = context.watch<FriendCubit>().state;
+      if (friendState is FriendLoading) {
+        users = [];
+      } else {
+        if (friendState is FriendSuccess) {
+          users = friendState.data;
+        } else if (friendState is FriendFailure) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showNormalSnackBar(context, friendState.error);
+          });
+        }
+        _isLoaded.value = true;
+      }
+    } else if (widget.transactionType == TransactionType.lenden) {
+      final notificationState = context.watch<NotificationBloc>().state;
+      final lendenRoomState = context.watch<LendenRoomBloc>().state;
+
+      List<NotificationModel> notificationData = [];
+      if (notificationState is NotificationFetchSuccess) {
+        notificationData = notificationState.data;
+      }
+      String roomID = "";
+      if (lendenRoomState is LendenRoomFetchSuccess) {
+        roomID = lendenRoomState.id;
+      }
+      Set<String> alreadyInvited = {};
+      for (int i = 0; i < notificationData.length; i++) {
+        if (notificationData[i].roomID == roomID) {
+          alreadyInvited.add(notificationData[i].user.id);
+        }
+      }
+      _alreadyInvited.value = Set.from(alreadyInvited);
+
       final friendState = context.watch<FriendCubit>().state;
       if (friendState is FriendLoading) {
         users = [];

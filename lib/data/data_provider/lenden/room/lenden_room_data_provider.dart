@@ -134,7 +134,7 @@ class LendenRoomDataProvider {
   ) async {
     try {
       final response = await createAPICall(
-        'lenden/$roomID',
+        'lenden/$roomID/addPerson',
         'patch',
         authToken,
         {"id": Crypto.encrypt(uid)},
