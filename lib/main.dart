@@ -59,7 +59,6 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Search, sort and filters in pages
 // TODO : Join Room via Deeplink
-// TODO : Invite Friends From Room
 // TODO : Setting for Room, Lenden
 // TODO : Update Profile
 
