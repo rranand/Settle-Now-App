@@ -29,10 +29,6 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     }
   }
 
-  void resetCubit() async {
-    return emit(RoomSettleLoading(""));
-  }
-
   void addNewSettleExpense(RoomSettleModel data) {
     final roomSettleSuccessState = state as RoomSettleSuccess;
     List<RoomSettleModel> newArr = [data, ...roomSettleSuccessState.data];

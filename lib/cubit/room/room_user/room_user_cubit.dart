@@ -313,10 +313,6 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
-  void resetCubit() {
-    return emit(RoomUserLoading());
-  }
-
   void reset() {
     return emit(RoomUserInitial());
   }

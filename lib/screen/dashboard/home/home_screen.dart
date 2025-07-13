@@ -319,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     context.read<QuicksplitBloc>().add(QuicksplitReset());
     context.read<RoomDashboardBloc>().add(RoomDashboardReset());
-    context.read<RoomBloc>().add(RoomReset());
+    context.read<RoomBloc>().add(RoomBlocReset());
     context.read<CreateRoomCubit>().reset();
     context.read<NewTransactionCubit>().reset();
     context.read<FriendCubit>().reset();

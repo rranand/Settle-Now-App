@@ -39,5 +39,3 @@ final class RoomAddToPersonalExpense extends RoomEvent {
 
   RoomAddToPersonalExpense(this.id, this.expenseID);
 }
-
-final class RoomReset extends RoomEvent {}

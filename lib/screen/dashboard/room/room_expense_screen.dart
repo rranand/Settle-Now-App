@@ -84,7 +84,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
     if (roomSettleState is RoomSettleSuccess &&
         roomSettleState.id != widget.id) {
-      context.read<RoomSettleCubit>().resetCubit();
+      context.read<RoomSettleCubit>().reset();
     }
 
     final RoomState roomState = context.watch<RoomBloc>().state;
@@ -94,7 +94,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
     final RoomUserState roomUserState = context.watch<RoomUserCubit>().state;
     if (roomUserState is RoomUserSuccess && roomUserState.id != widget.id) {
-      context.read<RoomUserCubit>().resetCubit();
+      context.read<RoomUserCubit>().reset();
     }
   }
 
@@ -204,7 +204,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                       ),
                       _summaryBox(
                         "Balance",
-                        "${balance < 0 ? "-" : "+"}${formatCurrency(balance, context)}",
+                        "${balance < 0 ? "" : "+"}${formatCurrency(balance, context)}",
                       ),
                     ],
                   ),
@@ -454,6 +454,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                     : CustomShimmerEffect.textWidget(width: 180, fontSize: 20),
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
+            centerTitle: false,
           ),
           body: RefreshIndicator(
             onRefresh: onRefresh,
