@@ -12,6 +12,7 @@ class LendenDashboardModel {
   String roomName = "";
   String status = "";
   DateTime createdOn = DateTime.now();
+  DateTime modifiedOn = DateTime.now();
   double amount = 0;
   List<LendenUserModel> users = [];
 
@@ -20,6 +21,7 @@ class LendenDashboardModel {
     required this.roomName,
     required this.status,
     required this.createdOn,
+    required this.modifiedOn,
     required this.amount,
     required this.users,
   });
@@ -40,6 +42,7 @@ class LendenDashboardModel {
       roomName: roomName ?? this.roomName,
       status: status ?? this.status,
       createdOn: createdOn ?? this.createdOn,
+      modifiedOn: modifiedOn ?? this.modifiedOn,
       amount: amount ?? this.amount,
       users: users ?? this.users,
     );
@@ -51,6 +54,7 @@ class LendenDashboardModel {
       'roomName': roomName,
       'status': status,
       'createdOn': createdOn.toString(),
+      'modifiedOn': modifiedOn.toString(),
       'amount': amount.toString(),
       'users': users.map((x) => x.toMap()).toList(),
     };
@@ -62,6 +66,7 @@ class LendenDashboardModel {
       roomName: Crypto.decrypt(map['roomName']),
       status: Crypto.decrypt(map['status']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
+      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
       amount: double.parse(Crypto.decrypt(map['amount'])),
       users: List<LendenUserModel>.from(
         (map['users']).map((x) => LendenUserModel.fromBasicInfoMap(x)),
@@ -87,6 +92,7 @@ class LendenDashboardModel {
         other.roomName == roomName &&
         other.status == status &&
         other.createdOn == createdOn &&
+        other.modifiedOn == modifiedOn &&
         other.amount == amount &&
         listEquals(other.users, users);
   }
@@ -97,6 +103,7 @@ class LendenDashboardModel {
         roomName.hashCode ^
         status.hashCode ^
         createdOn.hashCode ^
+        modifiedOn.hashCode ^
         amount.hashCode ^
         users.hashCode;
   }

@@ -37,6 +37,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
         roomName: roomName,
         status: "Open",
         createdOn: DateTime.now(),
+        modifiedOn: DateTime.now(),
         amount: 0,
         users: [LendenUserModel.fromUserModel(authLoginState.userData)],
       );

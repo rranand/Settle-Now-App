@@ -5,8 +5,10 @@ import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 import 'package:shimmer/shimmer.dart';
 
 class LendenCard extends StatelessWidget {
@@ -74,6 +76,11 @@ class LendenCard extends StatelessWidget {
                       )
                       : CustomShimmerEffect.textWidget(width: 250),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+                  dateOnCard(
+                    "Updated On ${convertDateTimeFormat(data.modifiedOn)}",
+                    isLoaded: data.hasData,
+                  ),
+                  const SizedBox(height: UiConstant.cardSpaceAfterSubText),
                   data.hasData
                       ? Text(
                         "${data.amount < 0 ? "-" : "+"} ${formatCurrency(data.amount.abs(), context)}",
