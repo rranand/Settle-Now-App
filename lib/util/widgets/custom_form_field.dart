@@ -144,7 +144,6 @@ class CustomFormField {
     String hintText,
     ValueNotifier<bool> isSearchEnabled,
     TextEditingController searchController,
-    void Function(String?)? onChanged,
   ) {
     return ValueListenableBuilder(
       valueListenable: isSearchEnabled,
@@ -164,7 +163,6 @@ class CustomFormField {
           borderRadius: 30,
           filled: true,
           fillColor: Colors.black.withAlpha(10),
-          onChanged: onChanged,
         ),
       ),
     );

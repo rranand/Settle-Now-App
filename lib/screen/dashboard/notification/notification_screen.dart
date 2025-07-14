@@ -5,12 +5,16 @@ import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/notification_card.dart';
+import 'package:settlenow_v2/util/handler/filter_sort.dart';
+import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  final ValueNotifier<bool> isSearchEnabled;
+  const NotificationScreen({super.key, required this.isSearchEnabled});
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -18,10 +22,21 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   UserModel _loggedInUser = UserModel.empty();
+  EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+  final TextEditingController _searchController = TextEditingController();
 
   void _blocListenerHandler(BuildContext context, NotificationState state) {
     if (state is NotificationFailure) {
       showNormalSnackBar(context, state.error);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -40,6 +55,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
         );
       }
     }
+    widget.isSearchEnabled.addListener(() {
+      _searchController.text = "";
+    });
   }
 
   Future<void> onRefresh() async {
@@ -59,74 +77,138 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: onRefresh,
-        child: BlocConsumer<NotificationBloc, NotificationState>(
-          listener: _blocListenerHandler,
-          builder: (context, state) {
-            List<NotificationModel> notificationData = [];
-            if (state is NotificationFetchSuccess) {
-              notificationData = state.data;
-            } else if (state is NotificationLoading) {
-              notificationData = List.generate(
-                11,
-                (i) => NotificationModel.empty(),
-              );
-            }
-            if (notificationData.isEmpty) {
-              return noRecordFoundWidget("No Notification Found", context);
-            }
-            int noOfCardsToBeShown = notificationData.length;
-            if (isWide) {
-              noOfCardsToBeShown =
-                  (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
-            }
-            return SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.only(
-                top: UiConstant.spaceBetweenCard,
-                bottom: UiConstant.spaceAtBottom,
-              ),
-              child: ListView.builder(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: noOfCardsToBeShown,
-                itemBuilder: (context, index) {
-                  NotificationModel eachNotificationData =
-                      notificationData[index];
-                  if (isWide) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: NotificationCard(
-                            data: eachNotificationData,
-                            loggedInUserID: _loggedInUser.id,
-                            authToken: _loggedInUser.authToken,
-                          ),
-                        ),
-                        Expanded(
-                          child:
-                              (index == noOfCardsToBeShown - 1 &&
-                                      notificationData.length % 2 > 0)
-                                  ? SizedBox()
-                                  : NotificationCard(
-                                    data: notificationData[2 * index + 1],
+        child: CustomScrollView(
+          slivers: [
+            ValueListenableBuilder(
+              valueListenable: widget.isSearchEnabled,
+              builder: (BuildContext context, bool value, Widget? _) {
+                if (!value) {
+                  return SliverToBoxAdapter(child: SizedBox.shrink());
+                }
+                return SliverPadding(
+                  padding: _mainScreenPadding,
+                  sliver: SliverAppBar(
+                    automaticallyImplyLeading: false,
+                    pinned: value,
+                    backgroundColor: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    title: CustomFormField.searchBar(
+                      "Search",
+                      widget.isSearchEnabled,
+                      _searchController,
+                    ),
+                  ),
+                );
+              },
+            ),
+            BlocConsumer<NotificationBloc, NotificationState>(
+              listener: _blocListenerHandler,
+              builder: (context, state) {
+                List<NotificationModel> notificationData = [];
+                if (state is NotificationFetchSuccess) {
+                  notificationData = state.data;
+                } else if (state is NotificationLoading) {
+                  notificationData = List.generate(
+                    11,
+                    (i) => NotificationModel.empty(),
+                  );
+                }
+                if (notificationData.isEmpty) {
+                  return SliverToBoxAdapter(
+                    child: noRecordFoundWidget(
+                      "No Notification Found",
+                      context,
+                    ),
+                  );
+                }
+
+                return SliverPadding(
+                  padding: _mainScreenPadding.add(
+                    EdgeInsets.only(
+                      top: UiConstant.spaceBetweenCard,
+                      bottom: UiConstant.spaceAtBottom,
+                    ),
+                  ),
+                  sliver: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _searchController,
+                    builder: (context, _, _) {
+                      List<NotificationModel> filterData = notificationData;
+                      if (state is NotificationFetchSuccess) {
+                        filterData = FilterSort.filteredSearchText(
+                          _searchController.text,
+                          notificationData,
+                          (notificationData) {
+                            String searchStr =
+                                "${notificationData.roomName} ${notificationData.type}";
+                            if (notificationData.by.id != _loggedInUser.id) {
+                              searchStr += " ${notificationData.by.name}";
+                            }
+                            if (notificationData.user.id != _loggedInUser.id) {
+                              searchStr += " ${notificationData.user.name}";
+                            }
+                            return searchStr;
+                          },
+                        );
+                      }
+
+                      if (filterData.isEmpty) {
+                        return noRecordFoundWidget(
+                          "No Matching Records",
+                          context,
+                        );
+                      }
+
+                      int noOfCardsToBeShown = filterData.length;
+                      if (isWide) {
+                        noOfCardsToBeShown =
+                            (noOfCardsToBeShown / 2).toInt() +
+                            noOfCardsToBeShown % 2;
+                      }
+                      return SliverList.builder(
+                        itemCount: noOfCardsToBeShown,
+
+                        itemBuilder: (context, index) {
+                          NotificationModel eachNotificationData =
+                              filterData[index];
+                          if (isWide) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: NotificationCard(
+                                    data: eachNotificationData,
                                     loggedInUserID: _loggedInUser.id,
                                     authToken: _loggedInUser.authToken,
                                   ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return NotificationCard(
-                      data: eachNotificationData,
-                      loggedInUserID: _loggedInUser.id,
-                      authToken: _loggedInUser.authToken,
-                    );
-                  }
-                },
-              ),
-            );
-          },
+                                ),
+                                Expanded(
+                                  child:
+                                      (index == noOfCardsToBeShown - 1 &&
+                                              filterData.length % 2 > 0)
+                                          ? SizedBox()
+                                          : NotificationCard(
+                                            data: filterData[2 * index + 1],
+                                            loggedInUserID: _loggedInUser.id,
+                                            authToken: _loggedInUser.authToken,
+                                          ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return NotificationCard(
+                              data: eachNotificationData,
+                              loggedInUserID: _loggedInUser.id,
+                              authToken: _loggedInUser.authToken,
+                            );
+                          }
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

@@ -10,6 +10,7 @@ import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/quick_split_card.dart';
+import 'package:settlenow_v2/util/handler/filter_sort.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
@@ -59,6 +60,10 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
         );
       }
     }
+
+    widget.isSearchEnabled.addListener(() {
+      _searchController.text = "";
+    });
   }
 
   Future<void> onRefresh() async {
@@ -87,11 +92,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
             } else if (state is QuicksplitLoading) {
               splitData = List.generate(11, (i) => TransactionModel.empty());
             }
-            int noOfCardsToBeShown = splitData.length;
-            if (isWide) {
-              noOfCardsToBeShown =
-                  (noOfCardsToBeShown / 2).toInt() + noOfCardsToBeShown % 2;
-            }
+
             if (splitData.isEmpty) {
               return noRecordFoundWidget("No Transaction Found", context);
             } else {
@@ -114,9 +115,6 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                             "Search",
                             widget.isSearchEnabled,
                             _searchController,
-                            (value) {
-                              // Add filter logic if needed
-                            },
                           ),
                         ),
                       );
@@ -129,31 +127,59 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                         bottom: UiConstant.spaceAtBottom,
                       ),
                     ),
-                    sliver: SliverList.builder(
-                      itemCount: noOfCardsToBeShown,
-                      itemBuilder: (BuildContext context, int index) {
-                        TransactionModel eachSplitData = splitData[index];
-                        if (isWide) {
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: QuickSplitCard(data: eachSplitData),
-                              ),
-                              Expanded(
-                                child:
-                                    (index == noOfCardsToBeShown - 1 &&
-                                            splitData.length % 2 > 0)
-                                        ? SizedBox()
-                                        : QuickSplitCard(
-                                          data: splitData[2 * index + 1],
-                                        ),
-                              ),
-                            ],
+                    sliver: ValueListenableBuilder<TextEditingValue>(
+                      valueListenable: _searchController,
+                      builder: (context, _, _) {
+                        List<TransactionModel> filterData = splitData;
+                        if (state is QuicksplitFetchSuccess) {
+                          filterData = FilterSort.filteredSearchText(
+                            _searchController.text,
+                            splitData,
+                            (roomData) => roomData.description,
                           );
-                        } else {
-                          return QuickSplitCard(data: eachSplitData);
                         }
+
+                        if (filterData.isEmpty) {
+                          return SliverToBoxAdapter(
+                            child: noRecordFoundWidget(
+                              "No Matching Records",
+                              context,
+                            ),
+                          );
+                        }
+                        int noOfCardsToBeShown = filterData.length;
+                        if (isWide) {
+                          noOfCardsToBeShown =
+                              (noOfCardsToBeShown / 2).toInt() +
+                              noOfCardsToBeShown % 2;
+                        }
+                        return SliverList.builder(
+                          itemCount: noOfCardsToBeShown,
+                          itemBuilder: (BuildContext context, int index) {
+                            TransactionModel eachSplitData = filterData[index];
+                            if (isWide) {
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: QuickSplitCard(data: eachSplitData),
+                                  ),
+                                  Expanded(
+                                    child:
+                                        (index == noOfCardsToBeShown - 1 &&
+                                                filterData.length % 2 > 0)
+                                            ? SizedBox()
+                                            : QuickSplitCard(
+                                              data: filterData[2 * index + 1],
+                                            ),
+                                  ),
+                                ],
+                              );
+                            } else {
+                              return QuickSplitCard(data: eachSplitData);
+                            }
+                          },
+                        );
                       },
                     ),
                   ),

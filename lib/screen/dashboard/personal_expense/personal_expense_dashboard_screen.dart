@@ -183,9 +183,6 @@ class _PersonalExpenseDashboardScreenState
                           "Search",
                           widget.isSearchEnabled,
                           _searchController,
-                          (value) {
-                            // Add filter logic if needed
-                          },
                         ),
                       ),
                     );

@@ -11,6 +11,7 @@ import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
+import 'package:settlenow_v2/util/handler/filter_sort.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
@@ -267,19 +268,6 @@ class _InviteMemberState extends State<InviteMember> {
     return users;
   }
 
-  List<UserModel> _filteredSearchText(
-    String searchText,
-    List<UserModel> users,
-  ) {
-    if (searchText.isEmpty) {
-      return users;
-    }
-    searchText = searchText.trim().toLowerCase();
-    return users
-        .where((ele) => ele.name.toLowerCase().contains(searchText))
-        .toList();
-  }
-
   @override
   void initState() {
     super.initState();
@@ -360,17 +348,24 @@ class _InviteMemberState extends State<InviteMember> {
                                       "Search",
                                       isSearchEnabled,
                                       _searchController,
-                                      (value) {},
                                     )
                                     : SizedBox.shrink(),
                                 ValueListenableBuilder<TextEditingValue>(
                                   valueListenable: _searchController,
                                   builder: (context, _, _) {
-                                    List<UserModel> filteredUsers =
-                                        _filteredSearchText(
+                                    List<UserModel> filterData =
+                                        FilterSort.filteredSearchText(
                                           _searchController.text,
                                           users,
+                                          (user) => user.name,
                                         );
+
+                                    if (filterData.isEmpty) {
+                                      return noRecordFoundWidget(
+                                        "No Matching Records",
+                                        context,
+                                      );
+                                    }
 
                                     return GridView.builder(
                                       padding: EdgeInsets.only(
@@ -381,7 +376,7 @@ class _InviteMemberState extends State<InviteMember> {
                                                     .spaceBetweenSection,
                                       ),
                                       shrinkWrap: true,
-                                      itemCount: filteredUsers.length,
+                                      itemCount: filterData.length,
                                       gridDelegate:
                                           SliverGridDelegateWithFixedCrossAxisCount(
                                             crossAxisCount: columns,
@@ -389,7 +384,7 @@ class _InviteMemberState extends State<InviteMember> {
                                             crossAxisSpacing: spacing,
                                           ),
                                       itemBuilder: (context, index) {
-                                        UserModel user = filteredUsers[index];
+                                        UserModel user = filterData[index];
                                         return ValueListenableBuilder(
                                           valueListenable: _selectedUserIDs,
                                           builder: (

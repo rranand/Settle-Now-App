@@ -18,6 +18,7 @@ import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
+import 'package:settlenow_v2/util/handler/filter_sort.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
@@ -140,6 +141,10 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       if (mounted && state is CreateJoinRoomFailure) {
         showNormalSnackBar(context, state.error);
       }
+    });
+
+    widget.isSearchEnabled.addListener(() {
+      _searchController.text = "";
     });
   }
 
@@ -302,9 +307,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                         "Search",
                         widget.isSearchEnabled,
                         _searchController,
-                        (value) {
-                          // Add filter logic if needed
-                        },
                       ),
                     ),
                   );
@@ -344,7 +346,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                       }
                       if (roomInfoData.isEmpty) {
                         return SliverToBoxAdapter(
-                          child: noRecordFoundWidget("No Rooms Found", context),
+                          child: noRecordFoundWidget("No Room Found", context),
                         );
                       } else {
                         return SliverPadding(
@@ -356,23 +358,44 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                               )
                               .add(
                                 EdgeInsets.only(
-                                  top:
-                                      widget.isSearchEnabled.value
-                                          ? 0
-                                          : UiConstant.spaceBetweenSection,
+                                  top: UiConstant.spaceBetweenSection,
                                 ),
                               ),
-                          sliver: SliverGrid.builder(
-                            itemCount: roomInfoData.length,
-                            gridDelegate:
-                                SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: cardSizeInfo[0],
-                                  mainAxisSpacing: UiConstant.spaceBetweenCard,
-                                  crossAxisSpacing: UiConstant.spaceBetweenCard,
-                                  childAspectRatio: cardSizeInfo[1],
-                                ),
-                            itemBuilder: (BuildContext context, int index) {
-                              return RoomCard(data: roomInfoData[index]);
+                          sliver: ValueListenableBuilder<TextEditingValue>(
+                            valueListenable: _searchController,
+                            builder: (context, _, _) {
+                              List<RoomInfoModel> filterData = roomInfoData;
+                              if (state is RoomDashboardFetchSuccess) {
+                                filterData = FilterSort.filteredSearchText(
+                                  _searchController.text,
+                                  roomInfoData,
+                                  (roomData) => roomData.roomName,
+                                );
+                              }
+
+                              if (filterData.isEmpty) {
+                                return SliverToBoxAdapter(
+                                  child: noRecordFoundWidget(
+                                    "No Matching Records",
+                                    context,
+                                  ),
+                                );
+                              }
+                              return SliverGrid.builder(
+                                itemCount: filterData.length,
+                                gridDelegate:
+                                    SliverGridDelegateWithMaxCrossAxisExtent(
+                                      maxCrossAxisExtent: cardSizeInfo[0],
+                                      mainAxisSpacing:
+                                          UiConstant.spaceBetweenCard,
+                                      crossAxisSpacing:
+                                          UiConstant.spaceBetweenCard,
+                                      childAspectRatio: cardSizeInfo[1],
+                                    ),
+                                itemBuilder: (BuildContext context, int index) {
+                                  return RoomCard(data: filterData[index]);
+                                },
+                              );
                             },
                           ),
                         );

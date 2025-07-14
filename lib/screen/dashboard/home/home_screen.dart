@@ -90,6 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _isSearchEnabled.dispose();
+    super.dispose();
+  }
+
   Widget _privacyPolicyVersionWidget() {
     return ListTile(
       title: Row(
@@ -263,7 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3:
         return LendenDashboardScreen(isSearchEnabled: _isSearchEnabled);
       case 4:
-        return NotificationScreen();
+        return NotificationScreen(isSearchEnabled: _isSearchEnabled);
       default:
         return RoomDashboardScreen(isSearchEnabled: _isSearchEnabled);
     }
@@ -272,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
   PreferredSizeWidget? _bottomNavigatorAppBarHandler(index) {
     List<Widget> appBarActions = [];
 
-    if (index <= 3) {
+    if (index <= 4) {
       appBarActions = [
         InkWell(
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),

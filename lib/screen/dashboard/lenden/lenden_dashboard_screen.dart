@@ -14,6 +14,7 @@ import 'package:settlenow_v2/util/card/lenden_card.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
+import 'package:settlenow_v2/util/handler/filter_sort.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
@@ -65,6 +66,9 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
         );
       }
     }
+    widget.isSearchEnabled.addListener(() {
+      _searchController.text = "";
+    });
   }
 
   void _createRoomHandler() {
@@ -194,9 +198,6 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                       "Search",
                       widget.isSearchEnabled,
                       _searchController,
-                      (value) {
-                        // Add filter logic if needed
-                      },
                     ),
                   ),
                 );
@@ -233,20 +234,57 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                             bottom: UiConstant.spaceAtBottom,
                           ),
                         ),
-                        sliver: SliverGrid.builder(
-                          itemCount: lendenData.length,
-                          gridDelegate:
-                              SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: cardSizeInfo[0],
-                                mainAxisSpacing: UiConstant.spaceBetweenCard,
-                                crossAxisSpacing: UiConstant.spaceBetweenCard,
-                                childAspectRatio: cardSizeInfo[1],
-                              ),
-                          itemBuilder:
-                              (context, index) => SizedBox(
-                                width: cardSizeInfo[0],
-                                child: LendenCard(data: lendenData[index]),
-                              ),
+                        sliver: ValueListenableBuilder<TextEditingValue>(
+                          valueListenable: _searchController,
+                          builder: (context, _, _) {
+                            List<LendenDashboardModel> filterData = lendenData;
+                            if (state is LendenDashboardFetchSuccess) {
+                              filterData = FilterSort.filteredSearchText(
+                                _searchController.text,
+                                lendenData,
+                                (roomData) {
+                                  String searchStr = roomData.roomName;
+                                  for (
+                                    int i = 0;
+                                    i < roomData.users.length;
+                                    i++
+                                  ) {
+                                    if (roomData.users[i].id !=
+                                        _loggedInUser.id) {
+                                      searchStr += " ${roomData.users[i].name}";
+                                    }
+                                  }
+                                  return searchStr;
+                                },
+                              );
+                            }
+
+                            if (filterData.isEmpty) {
+                              return SliverToBoxAdapter(
+                                child: noRecordFoundWidget(
+                                  "No Matching Records",
+                                  context,
+                                ),
+                              );
+                            }
+                            return SliverGrid.builder(
+                              itemCount: filterData.length,
+                              gridDelegate:
+                                  SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: cardSizeInfo[0],
+                                    mainAxisSpacing:
+                                        UiConstant.spaceBetweenCard,
+                                    crossAxisSpacing:
+                                        UiConstant.spaceBetweenCard,
+                                    childAspectRatio: cardSizeInfo[1],
+                                  ),
+                              itemBuilder:
+                                  (context, index) => SizedBox(
+                                    width: cardSizeInfo[0],
+                                    child: LendenCard(data: filterData[index]),
+                                  ),
+                            );
+                          },
                         ),
                       );
                     }
