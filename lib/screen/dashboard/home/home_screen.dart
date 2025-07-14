@@ -338,11 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: (context, state) {
-        if (state is AuthLoginFailure) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showNormalSnackBar(context, state.error);
-          });
-        } else if (state is AuthLogoutFailure) {
+        if (state is AuthLogoutFailure) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             showNormalSnackBar(context, state.error);
           });
@@ -355,7 +351,14 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
       builder: (context, state) {
-        if (state is AuthLogoutLoading) {
+        if (state is AuthLoginFailure) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: Scaffold(
+              body: Center(child: Text("Error Page: ${state.error}")),
+            ),
+          );
+        } else if (state is AuthLogoutLoading) {
           return Scaffold(
             appBar: AppBar(backgroundColor: Colors.transparent),
             body: LoadingPage(),

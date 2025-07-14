@@ -192,13 +192,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
     try {
       UserModel userData = await repo.getLoggedInUser();
-      if (userData.hasData) {
-        return emit(AuthLoginSuccess(userData));
-      } else {
-        return emit(AuthInitial());
-      }
+      return emit(AuthLoginSuccess(userData));
     } catch (e) {
-      return emit(AuthInitial());
+      if (e.toString().toLowerCase() == "unauthorized access") {
+        emit(AuthLogoutLoading(UserModel.empty()));
+        return emit(AuthInitial());
+      } else {
+        return emit(AuthLoginFailure(e.toString()));
+      }
     }
   }
 }

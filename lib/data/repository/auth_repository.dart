@@ -10,6 +10,8 @@ class AuthRepository {
 
   Future<UserModel> getLoggedInUser() async {
     try {
+      //await Future.delayed(Duration(seconds: 2));
+      //throw "Unauthorized Access";
       String? authToken = await LocalStoragePreference.getStringPref(
         'auth_token',
       );
