@@ -47,6 +47,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     List<LendenTransactionModel> data = [...oldData.data, event.data];
     LendenDashboardModel roomData = oldData.roomData.copyWith(
       amount: oldData.roomData.amount + event.data.amount,
+      modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
     return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
@@ -68,6 +69,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     }
     LendenDashboardModel roomData = oldData.roomData.copyWith(
       amount: updatedAmount,
+      modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
     return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
@@ -90,6 +92,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     });
     LendenDashboardModel roomData = oldData.roomData.copyWith(
       amount: updatedAmount,
+      modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
     return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
@@ -114,6 +117,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       LendenDashboardModel roomData = oldData.roomData.copyWith(
         status: isClosed ? "Closed" : "Partially Closed",
         users: users,
+        modifiedOn: DateTime.now(),
       );
       lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
       return emit(LendenRoomFetchSuccess(oldData.id, roomData, oldData.data));
