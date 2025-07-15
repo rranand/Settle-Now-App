@@ -14,6 +14,7 @@ class RoomInfoModel {
   String roomLink = "";
   String status = "";
   DateTime createdOn = DateTime.now();
+  DateTime modifiedOn = DateTime.now();
   List<RoomUserModel> users = [];
   bool active = true;
 
@@ -24,6 +25,7 @@ class RoomInfoModel {
     required this.roomLink,
     required this.status,
     required this.createdOn,
+    required this.modifiedOn,
     required this.users,
     required this.active,
   });
@@ -37,6 +39,7 @@ class RoomInfoModel {
     String? roomKey,
     String? roomLink,
     DateTime? createdOn,
+    DateTime? modifiedOn,
     List<RoomUserModel>? users,
     bool? active,
   }) {
@@ -45,6 +48,7 @@ class RoomInfoModel {
       roomName: roomName ?? this.roomName,
       status: status ?? this.status,
       createdOn: createdOn ?? this.createdOn,
+      modifiedOn: modifiedOn ?? this.modifiedOn,
       users: users ?? this.users,
       roomKey: roomKey ?? this.roomKey,
       roomLink: roomLink ?? this.roomLink,
@@ -60,6 +64,7 @@ class RoomInfoModel {
       'roomKey': roomKey,
       'roomLink': roomLink,
       'createdOn': createdOn.toString(),
+      'modifiedOn': modifiedOn.toString(),
       'users': users.map((x) => x.toMap()).toList(),
       'active': active,
     };
@@ -73,6 +78,7 @@ class RoomInfoModel {
       roomKey: Crypto.decrypt(map['roomKey']),
       roomLink: Crypto.decrypt(map['roomLink']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
+      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
       users: List<RoomUserModel>.from(
         (map['users']).map((x) => RoomUserModel.fromBasicInfoMap(x)),
       ),
@@ -101,6 +107,7 @@ class RoomInfoModel {
         other.roomLink == roomLink &&
         other.status == status &&
         other.createdOn == createdOn &&
+        other.modifiedOn == modifiedOn &&
         listEquals(other.users, users);
   }
 
@@ -113,6 +120,7 @@ class RoomInfoModel {
         roomLink.hashCode ^
         status.hashCode ^
         createdOn.hashCode ^
+        modifiedOn.hashCode ^
         users.hashCode;
   }
 }

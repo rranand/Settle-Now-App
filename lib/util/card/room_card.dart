@@ -79,7 +79,7 @@ class RoomCard extends StatelessWidget {
                       : CustomShimmerEffect.textWidget(width: 250),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
-                    "Updated On ${convertDateTimeFormat(data.createdOn)}",
+                    "Updated On ${convertDateTimeFormat(data.modifiedOn)}",
                     isLoaded: data.hasData,
                   ),
                   const SizedBox(height: UiConstant.cardSpaceAfterSubText),

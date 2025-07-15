@@ -77,7 +77,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
 
         data.add(eachObj);
       }
-      _roomInfoCubit.updateUserData(id, data);
+      _roomInfoCubit.updateRoomData(id);
       return emit(RoomUserSuccess(id, data));
     } catch (e) {
       return emit(RoomUserFailure(e.toString()));
@@ -142,6 +142,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         }
       }
     }
+    _roomInfoCubit.updateRoomData(roomUserState.id);
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
@@ -220,7 +221,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         }
       }
     }
-
+    _roomInfoCubit.updateRoomData(roomUserState.id);
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
@@ -262,6 +263,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         }
       }
     }
+    _roomInfoCubit.updateRoomData(roomUserState.id);
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
@@ -276,6 +278,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         usersData[i].settle -= data.amount;
       }
     }
+    _roomInfoCubit.updateRoomData(roomUserState.id);
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
@@ -296,6 +299,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         usersData[i].settle -= data.amount;
       }
     }
+    _roomInfoCubit.updateRoomData(roomUserState.id);
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
@@ -310,6 +314,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         usersData[i].settle += data.amount;
       }
     }
+    _roomInfoCubit.updateRoomData(roomUserState.id);
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 

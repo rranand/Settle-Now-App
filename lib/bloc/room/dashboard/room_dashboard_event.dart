@@ -26,4 +26,9 @@ final class RoomDashboardOnCloseRoom extends RoomDashboardEvent {
   RoomDashboardOnCloseRoom({required this.data});
 }
 
+final class RoomDashboardOnUpdateRoom extends RoomDashboardEvent {
+  final RoomInfoModel data;
+  RoomDashboardOnUpdateRoom({required this.data});
+}
+
 final class RoomDashboardReset extends RoomDashboardEvent {}

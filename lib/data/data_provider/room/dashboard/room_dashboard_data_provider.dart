@@ -54,6 +54,7 @@ class RoomDashboardDataProvider {
           roomName: roomName,
           status: "Open",
           createdOn: DateTime.now(),
+          modifiedOn: DateTime.now(),
           users: [],
           roomKey: Crypto.decrypt(data["data"]["roomKey"]),
           roomLink: Crypto.decrypt(data["data"]["roomLink"]),

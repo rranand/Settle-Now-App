@@ -42,7 +42,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     }
   }
 
-  void updateUserData(String id, List<RoomUserModel> userData) async {
+  void updateUserData(String id, List<RoomUserModel> userData) {
     if (state is RoomInfoSuccess) {
       final oldState = (state as RoomInfoSuccess);
 
@@ -56,8 +56,25 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
           users: userData,
           active: isActive,
           status: isActive ? "Partially Closed" : "Closed",
+          modifiedOn: DateTime.now(),
         );
         _roomDashboardBloc.add(RoomDashboardOnCloseRoom(data: updatedRoomInfo));
+        return emit(RoomInfoSuccess(updatedRoomInfo));
+      }
+    }
+
+    return;
+  }
+
+  void updateRoomData(String id) {
+    if (state is RoomInfoSuccess) {
+      final oldState = (state as RoomInfoSuccess);
+
+      if (oldState.data.id == id) {
+        RoomInfoModel updatedRoomInfo = oldState.data.copyWith(
+          modifiedOn: DateTime.now(),
+        );
+        _roomDashboardBloc.add(RoomDashboardOnUpdateRoom(data: updatedRoomInfo));
         return emit(RoomInfoSuccess(updatedRoomInfo));
       }
     }
