@@ -11,6 +11,7 @@ import 'package:settlenow_v2/constant/calender_constant.dart';
 import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/sub_section/personal_expense_categories_section_screen.dart';
@@ -73,7 +74,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     "Room",
   ];
 
-  final ValueNotifier<int> _filterSelectedIndex = ValueNotifier(1);
+  final ValueNotifier<int> _filterSelectedIndex = ValueNotifier(0);
   final ValueNotifier<SortBy> _selectedSortBy = ValueNotifier(
     SortBy.dateCreated,
   );
@@ -85,18 +86,16 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   final ValueNotifier<RangeValues> _selectedAmountRange = ValueNotifier(
     RangeValues(0, 0),
   );
-  final ValueNotifier<RangeValues> _selectedDateRange = ValueNotifier(
-    RangeValues(
-      DateTime.now().millisecondsSinceEpoch.toDouble(),
-      DateTime.now().millisecondsSinceEpoch.toDouble(),
-    ),
+  final ValueNotifier<bool> _isFilterApplied = ValueNotifier(false);
+  final ValueNotifier<DateTimeRange> _selectedDateRange = ValueNotifier(
+    DateTimeRange(start: DateTime.now(), end: DateTime.now()),
   );
   final TextEditingController _minController = TextEditingController(text: "0");
   final TextEditingController _maxController = TextEditingController(text: "0");
   RangeValues _amountRange = RangeValues(0, 0);
-  RangeValues _dateRange = RangeValues(
-    DateTime.now().millisecondsSinceEpoch.toDouble(),
-    DateTime.now().millisecondsSinceEpoch.toDouble(),
+  DateTimeRange _dateRange = DateTimeRange(
+    start: DateTime.now(),
+    end: DateTime.now(),
   );
 
   void _blocListenerHandler(
@@ -114,11 +113,19 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     Set<String> roomIDs = {};
     roomData = [];
     double maxAmount = 0;
-    int minDate = DateTime.now().millisecondsSinceEpoch;
+    DateTime minDate = DateTime.now();
+    DateTime maxDate = DateTime(1990);
 
     for (int i = 0; i < data.length; i++) {
       maxAmount = max(maxAmount, data[i].amount);
-      minDate = min(minDate, data[i].createdOn.millisecondsSinceEpoch);
+      if (minDate.millisecondsSinceEpoch >
+          data[i].createdOn.millisecondsSinceEpoch) {
+        minDate = data[i].createdOn;
+      }
+      if (maxDate.millisecondsSinceEpoch <
+          data[i].createdOn.millisecondsSinceEpoch) {
+        maxDate = data[i].createdOn;
+      }
 
       if (data[i].roomData.hasData) {
         String id =
@@ -131,12 +138,12 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     }
     maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
     _amountRange = RangeValues(0, maxAmount);
-    _dateRange = RangeValues(
-      minDate.toDouble(),
-      DateTime.now().millisecondsSinceEpoch.toDouble(),
-    );
-    _selectedAmountRange.value = _amountRange;
-    _selectedDateRange.value = _dateRange;
+    _dateRange = DateTimeRange(start: minDate, end: maxDate);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _selectedAmountRange.value = _amountRange;
+      _selectedDateRange.value = _dateRange;
+    });
   }
 
   Widget buildEnumRadioGroup<T extends Enum>(
@@ -192,23 +199,23 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       is24HourMode: false,
       isShowSeconds: false,
       type: OmniDateTimePickerType.date,
-      firstDate: DateTime.fromMillisecondsSinceEpoch(_dateRange.start.toInt()),
-      lastDate: DateTime.fromMillisecondsSinceEpoch(_dateRange.end.toInt()),
+      firstDate: _dateRange.start,
+      lastDate: _dateRange.end,
       initialDate: convertFromDateFormat(initialDate),
       borderRadius: BorderRadius.circular(16.0),
       padding: EdgeInsets.symmetric(vertical: 12),
     );
     if (dateTime != null && mounted) {
       if (isStartDate) {
-        _selectedDateRange.value = RangeValues(
-          dateTime.millisecondsSinceEpoch * 1.0,
-          _selectedDateRange.value.end,
+        _selectedDateRange.value = DateTimeRange(
+          start: dateTime,
+          end: _selectedDateRange.value.end,
         );
         _minController.text = convertInDateFormat(dateTime);
       } else {
-        _selectedDateRange.value = RangeValues(
-          _selectedDateRange.value.start,
-          dateTime.millisecondsSinceEpoch * 1.0,
+        _selectedDateRange.value = DateTimeRange(
+          start: _selectedDateRange.value.start,
+          end: dateTime,
         );
         _maxController.text = convertInDateFormat(dateTime);
       }
@@ -304,14 +311,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
         {
           final state = context.read<PersonalMonthlyExpenseBloc>().state;
           _minController.text = convertInDateFormat(
-            DateTime.fromMillisecondsSinceEpoch(
-              _selectedDateRange.value.start.toInt(),
-            ),
+            _selectedDateRange.value.start,
           );
           _maxController.text = convertInDateFormat(
-            DateTime.fromMillisecondsSinceEpoch(
-              _selectedDateRange.value.end.toInt(),
-            ),
+            _selectedDateRange.value.end,
           );
 
           if (state is PersonalMonthlyExpenseFetchSuccess) {
@@ -553,12 +556,8 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
         {
           _selectedDateRange.value = _dateRange;
           if (filterType == filterSections[_filterSelectedIndex.value]) {
-            _minController.text = convertInDateFormat(
-              DateTime.fromMillisecondsSinceEpoch(_dateRange.start.toInt()),
-            );
-            _maxController.text = convertInDateFormat(
-              DateTime.fromMillisecondsSinceEpoch(_dateRange.end.toInt()),
-            );
+            _minController.text = convertInDateFormat(_dateRange.start);
+            _maxController.text = convertInDateFormat(_dateRange.end);
           }
         }
       case "Room":
@@ -576,15 +575,59 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     }
   }
 
-  void filterModelBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+  void _applyFilter() {
+    configureFilter(true);
+    _isFilterApplied.value = isFilterApplied("");
+    context.pop(["Apply"]);
+  }
+
+  void _closeFilter(bool popContext) {
+    configureFilter(false);
+    _isFilterApplied.value = isFilterApplied("");
+    if (popContext) {
+      context.pop(["Close"]);
+    }
+  }
+
+  void configureFilter(bool updateState) {
+    final state = context.read<FilterCubit>().state;
+    String id = "${widget.month}~${widget.year}";
+
+    if (updateState || state.id != id) {
+      context.read<FilterCubit>().updateState(
+        FilterState(
+          id: id,
+          sortBy: _selectedSortBy.value,
+          sortRule: _selectedSortRule.value,
+          selectedCategories: _selectedCategory.value,
+          selectedRoom: _selectedRoom.value,
+          amountRange: _selectedAmountRange.value,
+          dateRange: _selectedDateRange.value,
+        ),
+      );
+    } else {
+      _selectedSortBy.value = state.sortBy!;
+      _selectedSortRule.value = state.sortRule!;
+      _selectedCategory.value = state.selectedCategories;
+      _selectedAmountRange.value = state.amountRange!;
+      _selectedDateRange.value = state.dateRange!;
+      _selectedRoom.value = state.selectedRoom;
+    }
+  }
+
+  void filterModelBottomSheet(BuildContext context) async {
+    final res = await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      enableDrag: false,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       backgroundColor: Colors.white,
       builder: (context) {
+        if (!_isFilterApplied.value && isFilterApplied("")) {
+          resetfilterHandler("");
+        }
         final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return Padding(
           padding: const EdgeInsets.all(
@@ -611,13 +654,15 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                           resetfilterHandler(
                             filterSections[_filterSelectedIndex.value],
                           );
+                          bool haveFilter = isFilterApplied("");
+                          if (_isFilterApplied.value != haveFilter) {
+                            _isFilterApplied.value = haveFilter;
+                          }
                         },
                         icon: Icon(Icons.refresh),
                       ),
                       IconButton(
-                        onPressed: () {
-                          context.pop();
-                        },
+                        onPressed: () => _closeFilter(true),
                         icon: Icon(Icons.close),
                       ),
                     ],
@@ -728,6 +773,8 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                     buttonTextColor: Colors.black,
                     onPressed: () {
                       resetfilterHandler("");
+                      configureFilter(true);
+                      _isFilterApplied.value = isFilterApplied("");
                     },
                   ),
                   CustomButton.customTextButton(
@@ -738,9 +785,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                     borderColor: Colors.deepPurpleAccent,
                     backgroundColor: Colors.deepPurpleAccent,
                     buttonTextColor: Colors.white,
-                    onPressed: () {
-                      //_filterSelectedIndex.value = index;
-                    },
+                    onPressed: _applyFilter,
                   ),
                 ],
               ),
@@ -749,6 +794,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
         );
       },
     );
+
+    if (res == null) {
+      _closeFilter(false);
+    }
   }
 
   @override
@@ -829,10 +878,21 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           ),
           Padding(
             padding: const EdgeInsets.only(left: 14.0),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-              child: Icon(Iconsax.filter),
-              onTap: () => filterModelBottomSheet(context),
+            child: ValueListenableBuilder(
+              valueListenable: _isFilterApplied,
+              builder: (context, _, _) {
+                bool haveFilter = _isFilterApplied.value;
+                return InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
+                  child: Icon(
+                    haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                    color: haveFilter ? Colors.green : null,
+                  ),
+                  onTap: () => filterModelBottomSheet(context),
+                );
+              },
             ),
           ),
         ]),
@@ -876,10 +936,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                       );
                     },
                   ),
-                  ValueListenableBuilder(
-                    valueListenable: isSearchEnabled,
-                    builder: (BuildContext context, bool value, Widget? _) {
-                      if (value) {
+                  MultiValueListenableBuilder(
+                    listenables: [isSearchEnabled, _isFilterApplied],
+                    builder: (BuildContext context) {
+                      if (isSearchEnabled.value || _isFilterApplied.value) {
                         return SliverToBoxAdapter(child: SizedBox.shrink());
                       }
                       return SliverPadding(
