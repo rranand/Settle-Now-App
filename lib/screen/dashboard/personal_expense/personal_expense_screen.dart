@@ -215,99 +215,65 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     }
   }
 
-  Widget filterTitle(String filterTitle) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          filterTitle,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
-        ),
-        IconButton(
-          onPressed: () {
-            resetfilterHandler(filterTitle);
-          },
-          icon: Icon(Icons.refresh),
-        ),
-      ],
-    );
-  }
-
   Widget _filterWidget(String filterType) {
     switch (filterType) {
       case "Sort By":
         {
-          return Column(
-            children: [
-              filterTitle(filterType),
-              SizedBox(
-                height: filterHeightSize,
-                child: MultiValueListenableBuilder(
-                  listenables: [_selectedSortBy, _selectedSortRule],
-                  builder: (context) {
-                    return ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: SortBy.values.length + SortRules.values.length,
-                      itemBuilder: (context, i) {
-                        if (SortBy.values.length <= i) {
-                          int newIndex = i - SortBy.values.length;
-                          final sortRuleValue = SortRules.values[newIndex];
-                          return newIndex == 0
-                              ? Column(
-                                children: [
-                                  Divider(),
-                                  buildEnumRadioGroup<SortRules>(
-                                    SortRules.values[newIndex].label,
-                                    sortRuleValue,
-                                    _selectedSortRule,
-                                  ),
-                                ],
-                              )
-                              : buildEnumRadioGroup<SortRules>(
-                                SortRules.values[newIndex].label,
-                                sortRuleValue,
-                                _selectedSortRule,
-                              );
-                        } else {
-                          final sortValue = SortBy.values[i];
-                          return buildEnumRadioGroup<SortBy>(
-                            SortBy.values[i].label,
-                            sortValue,
-                            _selectedSortBy,
-                          );
-                        }
-                      },
+          return MultiValueListenableBuilder(
+            listenables: [_selectedSortBy, _selectedSortRule],
+            builder: (context) {
+              return ListView.builder(
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: SortBy.values.length + SortRules.values.length,
+                itemBuilder: (context, i) {
+                  if (SortBy.values.length <= i) {
+                    int newIndex = i - SortBy.values.length;
+                    final sortRuleValue = SortRules.values[newIndex];
+                    return newIndex == 0
+                        ? Column(
+                          children: [
+                            Divider(),
+                            buildEnumRadioGroup<SortRules>(
+                              SortRules.values[newIndex].label,
+                              sortRuleValue,
+                              _selectedSortRule,
+                            ),
+                          ],
+                        )
+                        : buildEnumRadioGroup<SortRules>(
+                          SortRules.values[newIndex].label,
+                          sortRuleValue,
+                          _selectedSortRule,
+                        );
+                  } else {
+                    final sortValue = SortBy.values[i];
+                    return buildEnumRadioGroup<SortBy>(
+                      SortBy.values[i].label,
+                      sortValue,
+                      _selectedSortBy,
                     );
-                  },
-                ),
-              ),
-            ],
+                  }
+                },
+              );
+            },
           );
         }
       case "Category":
         {
-          return Column(
-            children: [
-              filterTitle(filterType),
-              SizedBox(
-                height: filterHeightSize,
-                child: ValueListenableBuilder(
-                  valueListenable: _selectedCategory,
-                  builder: (context, _, _) {
-                    return ListView.builder(
-                      itemCount: CategoryParser.expenseCategories.length,
-                      itemBuilder: (context, i) {
-                        return buildCheckBox<int>(
-                          CategoryParser.expenseCategories[i],
-                          _selectedCategory,
-                          i,
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+          return ValueListenableBuilder(
+            valueListenable: _selectedCategory,
+            builder: (context, _, _) {
+              return ListView.builder(
+                itemCount: CategoryParser.expenseCategories.length,
+                itemBuilder: (context, i) {
+                  return buildCheckBox<int>(
+                    CategoryParser.expenseCategories[i],
+                    _selectedCategory,
+                    i,
+                  );
+                },
+              );
+            },
           );
         }
       case "Room":
@@ -316,32 +282,23 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           bool isRecordFound =
               state is PersonalMonthlyExpenseFetchSuccess &&
               roomData.isNotEmpty;
-          return Column(
-            children: [
-              filterTitle(filterType),
-              SizedBox(
-                height: filterHeightSize,
-                child:
-                    isRecordFound
-                        ? ValueListenableBuilder(
-                          valueListenable: _selectedRoom,
-                          builder: (context, _, _) {
-                            return ListView.builder(
-                              itemCount: roomData.length,
-                              itemBuilder: (context, i) {
-                                return buildCheckBox<String>(
-                                  "${roomData[i].roomName} ${roomData[i].transactionType == "Quicksplit" ? "" : "(Room)"}",
-                                  _selectedRoom,
-                                  roomData[i].id,
-                                );
-                              },
-                            );
-                          },
-                        )
-                        : noRecordFoundWidget("No Data Found", context),
-              ),
-            ],
-          );
+          return isRecordFound
+              ? ValueListenableBuilder(
+                valueListenable: _selectedRoom,
+                builder: (context, _, _) {
+                  return ListView.builder(
+                    itemCount: roomData.length,
+                    itemBuilder: (context, i) {
+                      return buildCheckBox<String>(
+                        "${roomData[i].roomName} ${roomData[i].transactionType == "Quicksplit" ? "" : "(Room)"}",
+                        _selectedRoom,
+                        roomData[i].id,
+                      );
+                    },
+                  );
+                },
+              )
+              : noRecordFoundWidget("No Data Found", context);
         }
       case "Date Created":
         {
@@ -358,56 +315,46 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           );
 
           if (state is PersonalMonthlyExpenseFetchSuccess) {
-            return Column(
-              children: [
-                filterTitle(filterType),
-                SizedBox(
-                  height: filterHeightSize,
-                  child: ValueListenableBuilder(
-                    valueListenable: _selectedDateRange,
-                    builder: (context, _, _) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 15.0),
-                              child: CustomFormField.textFormField(
-                                _minController,
-                                readOnly: true,
-                                labelText: 'From Date',
-                                suffixIcon: Icon(Iconsax.calendar),
-                                inputDecoration:
-                                    TextFormFieldInputBorder.underLine,
-                                borderColor: Colors.black87,
-                                onTap: () async {
-                                  await selectDate(true, _minController.text);
-                                },
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 20.0),
-                              child: CustomFormField.textFormField(
-                                _maxController,
-                                readOnly: true,
-                                labelText: 'To Date',
-                                suffixIcon: Icon(Iconsax.calendar),
-                                inputDecoration:
-                                    TextFormFieldInputBorder.underLine,
-                                borderColor: Colors.black87,
-                                onTap: () async {
-                                  await selectDate(false, _maxController.text);
-                                },
-                              ),
-                            ),
-                          ],
+            return ValueListenableBuilder(
+              valueListenable: _selectedDateRange,
+              builder: (context, _, _) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 15.0),
+                        child: CustomFormField.textFormField(
+                          _minController,
+                          readOnly: true,
+                          labelText: 'From Date',
+                          suffixIcon: Icon(Iconsax.calendar),
+                          inputDecoration: TextFormFieldInputBorder.underLine,
+                          borderColor: Colors.black87,
+                          onTap: () async {
+                            await selectDate(true, _minController.text);
+                          },
                         ),
-                      );
-                    },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: CustomFormField.textFormField(
+                          _maxController,
+                          readOnly: true,
+                          labelText: 'To Date',
+                          suffixIcon: Icon(Iconsax.calendar),
+                          inputDecoration: TextFormFieldInputBorder.underLine,
+                          borderColor: Colors.black87,
+                          onTap: () async {
+                            await selectDate(false, _maxController.text);
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             );
           } else {
             return noRecordFoundWidget("No Data Found", context);
@@ -422,19 +369,98 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
               _selectedAmountRange.value.end.toInt().toString();
 
           if (state is PersonalMonthlyExpenseFetchSuccess) {
-            return Column(
-              children: [
-                filterTitle(filterType),
-                SizedBox(
-                  height: filterHeightSize,
-                  child: ValueListenableBuilder(
-                    valueListenable: _selectedAmountRange,
-                    builder: (context, _, _) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
+            return ValueListenableBuilder(
+              valueListenable: _selectedAmountRange,
+              builder: (context, _, _) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      CustomFormField.textFormField(
+                        _minController,
+                        labelText: 'Min Amount',
+                        textInputType: TextInputType.number,
+                        inputFormatters: [AmountInputFormatter()],
+                        onChanged: (value) {
+                          if (value != null) {
+                            String? res = CustomValidator.validateAmount(
+                              value,
+                              RangeValues(
+                                _amountRange.start,
+                                min(
+                                  _amountRange.end,
+                                  _selectedAmountRange.value.end,
+                                ),
+                              ),
+                            );
+                            if (res == null) {
+                              double amount = double.parse(value);
+                              _selectedAmountRange.value = RangeValues(
+                                amount,
+                                _selectedAmountRange.value.end,
+                              );
+                            }
+                          }
+                        },
+                        suffixIcon: UiConstant.indianRupeeSymbol,
+                        validator:
+                            (value) => CustomValidator.validateAmount(
+                              value,
+                              _amountRange,
+                            ),
+                        inputDecoration: TextFormFieldInputBorder.underLine,
+                        borderColor: Colors.black87,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: CustomFormField.textFormField(
+                          _maxController,
+                          labelText: 'Max Amount',
+                          textInputType: TextInputType.number,
+                          inputFormatters: [AmountInputFormatter()],
+                          onChanged: (value) {
+                            if (value != null) {
+                              String? res = CustomValidator.validateAmount(
+                                value,
+                                RangeValues(
+                                  max(
+                                    _amountRange.start,
+                                    _selectedAmountRange.value.start,
+                                  ),
+                                  _amountRange.end,
+                                ),
+                              );
+                              if (res == null) {
+                                double amount = double.parse(value);
+                                _selectedAmountRange.value = RangeValues(
+                                  _selectedAmountRange.value.start,
+                                  amount,
+                                );
+                              }
+                            }
+                          },
+                          suffixIcon: UiConstant.indianRupeeSymbol,
+                          validator:
+                              (value) => CustomValidator.validateAmount(
+                                value,
+                                _selectedAmountRange.value,
+                              ),
+                          inputDecoration: TextFormFieldInputBorder.underLine,
+                          borderColor: Colors.black87,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
                           children: [
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "Range",
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
                             RangeSlider(
                               values: _selectedAmountRange.value,
                               onChanged: (value) {
@@ -447,93 +473,13 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                               min: _amountRange.start,
                               max: _amountRange.end,
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 15.0),
-                              child: CustomFormField.textFormField(
-                                _minController,
-                                labelText: 'Min Amount',
-                                textInputType: TextInputType.number,
-                                inputFormatters: [AmountInputFormatter()],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    String? res =
-                                        CustomValidator.validateAmount(
-                                          value,
-                                          RangeValues(
-                                            _amountRange.start,
-                                            min(
-                                              _amountRange.end,
-                                              _selectedAmountRange.value.end,
-                                            ),
-                                          ),
-                                        );
-                                    if (res == null) {
-                                      double amount = double.parse(value);
-                                      _selectedAmountRange.value = RangeValues(
-                                        amount,
-                                        _selectedAmountRange.value.end,
-                                      );
-                                    }
-                                  }
-                                },
-                                suffixIcon: UiConstant.indianRupeeSymbol,
-                                validator:
-                                    (value) => CustomValidator.validateAmount(
-                                      value,
-                                      _amountRange,
-                                    ),
-                                inputDecoration:
-                                    TextFormFieldInputBorder.underLine,
-                                borderColor: Colors.black87,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 20.0),
-                              child: CustomFormField.textFormField(
-                                _maxController,
-                                labelText: 'Max Amount',
-                                textInputType: TextInputType.number,
-                                inputFormatters: [AmountInputFormatter()],
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    String? res =
-                                        CustomValidator.validateAmount(
-                                          value,
-                                          RangeValues(
-                                            max(
-                                              _amountRange.start,
-                                              _selectedAmountRange.value.start,
-                                            ),
-                                            _amountRange.end,
-                                          ),
-                                        );
-                                    if (res == null) {
-                                      double amount = double.parse(value);
-                                      _selectedAmountRange.value = RangeValues(
-                                        _selectedAmountRange.value.start,
-                                        amount,
-                                      );
-                                    }
-                                  }
-                                },
-                                suffixIcon: UiConstant.indianRupeeSymbol,
-                                validator:
-                                    (value) => CustomValidator.validateAmount(
-                                      value,
-                                      _selectedAmountRange.value,
-                                    ),
-                                inputDecoration:
-                                    TextFormFieldInputBorder.underLine,
-                                borderColor: Colors.black87,
-                              ),
-                            ),
                           ],
                         ),
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                );
+              },
             );
           } else {
             return noRecordFoundWidget("No Data Found", context);
@@ -542,6 +488,44 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       default:
         {
           return noRecordFoundWidget("Filter Not Found", context);
+        }
+    }
+  }
+
+  bool isFilterApplied(String filterType) {
+    switch (filterType) {
+      case "Sort By":
+        {
+          return !(_selectedSortBy.value == SortBy.dateCreated &&
+              _selectedSortRule.value == SortRules.mostRecent);
+        }
+      case "Amount":
+        {
+          return _selectedAmountRange.value.hashCode != _amountRange.hashCode;
+        }
+      case "Category":
+        {
+          return _selectedCategory.value.isNotEmpty;
+        }
+      case "Date Created":
+        {
+          return _selectedDateRange.value.hashCode != _dateRange.hashCode;
+        }
+      case "Room":
+        {
+          return _selectedRoom.value.isNotEmpty;
+        }
+      case "":
+        {
+          bool flag = false;
+          for (int i = 0; !flag && i < filterSections.length; i++) {
+            flag = flag || isFilterApplied(filterSections[i]);
+          }
+          return flag;
+        }
+      default:
+        {
+          return false;
         }
     }
   }
@@ -556,6 +540,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       case "Amount":
         {
           _selectedAmountRange.value = _amountRange;
+          if (filterType == filterSections[_filterSelectedIndex.value]) {
+            _minController.text = "0";
+            _maxController.text = _amountRange.end.toInt().toString();
+          }
         }
       case "Category":
         {
@@ -564,6 +552,14 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       case "Date Created":
         {
           _selectedDateRange.value = _dateRange;
+          if (filterType == filterSections[_filterSelectedIndex.value]) {
+            _minController.text = convertInDateFormat(
+              DateTime.fromMillisecondsSinceEpoch(_dateRange.start.toInt()),
+            );
+            _maxController.text = convertInDateFormat(
+              DateTime.fromMillisecondsSinceEpoch(_dateRange.end.toInt()),
+            );
+          }
         }
       case "Room":
         {
@@ -608,11 +604,23 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                     "Filters",
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w400),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      context.pop();
-                    },
-                    icon: Icon(Icons.close),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          resetfilterHandler(
+                            filterSections[_filterSelectedIndex.value],
+                          );
+                        },
+                        icon: Icon(Icons.refresh),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          context.pop();
+                        },
+                        icon: Icon(Icons.close),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -633,34 +641,70 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                                     index == _filterSelectedIndex.value;
                                 return Padding(
                                   padding: const EdgeInsets.only(bottom: 8.0),
-                                  child: CustomButton.customTextButton(
-                                    filterSections[index],
-                                    buttonWidth: 120,
-                                    buttonHeight: 40,
-                                    borderRadius: 10,
-                                    borderColor:
-                                        isSelected
-                                            ? Colors.deepPurpleAccent
-                                            : Colors.grey.shade100,
-                                    backgroundColor:
-                                        isSelected
-                                            ? Colors.deepPurpleAccent
-                                            : Colors.grey.shade100,
-                                    buttonTextColor:
-                                        isSelected
-                                            ? Colors.white
-                                            : Colors.black,
-                                    onPressed: () {
-                                      _filterSelectedIndex.value = index;
-                                    },
+                                  child: Stack(
+                                    children: [
+                                      CustomButton.customTextButton(
+                                        filterSections[index],
+                                        buttonWidth: 120,
+                                        buttonHeight: 40,
+                                        borderRadius: 10,
+                                        borderColor:
+                                            isSelected
+                                                ? Colors.deepPurpleAccent
+                                                : Colors.grey.shade100,
+                                        backgroundColor:
+                                            isSelected
+                                                ? Colors.deepPurpleAccent
+                                                : Colors.grey.shade100,
+                                        buttonTextColor:
+                                            isSelected
+                                                ? Colors.white
+                                                : Colors.black,
+                                        onPressed: () {
+                                          _filterSelectedIndex.value = index;
+                                        },
+                                      ),
+                                      MultiValueListenableBuilder(
+                                        listenables: [
+                                          _selectedSortBy,
+                                          _selectedSortRule,
+                                          _selectedAmountRange,
+                                          _selectedCategory,
+                                          _selectedDateRange,
+                                          _selectedRoom,
+                                        ],
+                                        builder: (context) {
+                                          bool haveFilter = isFilterApplied(
+                                            filterSections[index],
+                                          );
+                                          return haveFilter
+                                              ? Positioned(
+                                                top: 5,
+                                                right: 5,
+                                                child: Container(
+                                                  width: 8,
+                                                  height: 8,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.red,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                              )
+                                              : SizedBox();
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 );
                               }).toList(),
                         ),
                       ),
                       Expanded(
-                        child: _filterWidget(
-                          filterSections[_filterSelectedIndex.value],
+                        child: SizedBox(
+                          height: filterHeightSize,
+                          child: _filterWidget(
+                            filterSections[_filterSelectedIndex.value],
+                          ),
                         ),
                       ),
                     ],
