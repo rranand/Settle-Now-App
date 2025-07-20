@@ -147,7 +147,7 @@ Widget noRecordFoundWidget(String txt, BuildContext context) {
     physics: const AlwaysScrollableScrollPhysics(),
     children: [
       SizedBox(
-        height: MediaQuery.of(context).size.height * 0.75,
+        height: MediaQuery.of(context).size.height * 0.55,
         child: Center(
           child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
         ),

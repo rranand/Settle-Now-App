@@ -62,7 +62,6 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 // TODO : Setting for Room, Lenden
 // TODO : Update Profile
 // TODO : Handle Unauthoirze Access State
-// TODO : On any activity under room, modifiedOn should update
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

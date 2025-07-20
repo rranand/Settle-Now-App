@@ -404,8 +404,8 @@ class AppRouterConfig {
     _router = GoRouter(
       routes: _allRoutes(),
       //initialLocation: '/lenden/687282eb8ff06d02461abbc7',
-      //initialLocation: '/personal/2025/July',
-      initialLocation: RouterConstants.dashboardRouteName,
+      initialLocation: '/personal/2023/February',
+      //initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,

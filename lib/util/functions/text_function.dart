@@ -50,3 +50,7 @@ String convertDateTimeFormat(DateTime date) {
 String convertInDateFormat(DateTime date) {
   return DateFormat.yMMMd().format(date);
 }
+
+DateTime? convertFromDateFormat(String date) {
+  return DateFormat.yMMMd().tryParse(date);
+}

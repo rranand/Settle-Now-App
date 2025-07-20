@@ -1,4 +1,5 @@
 import 'package:email_validator/email_validator.dart';
+import 'package:flutter/material.dart';
 
 class CustomValidator {
   static String? validateEmail(String? value) {
@@ -60,5 +61,26 @@ class CustomValidator {
       return 'Invalid Room Key';
     }
     return null;
+  }
+
+  static String? validateAmount(String? value, RangeValues? rangeValue) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Amount is required';
+    } else if (RegExp(r"^\d{1,9}(\.\d{1,2})?$").hasMatch(value.trim())) {
+      if (rangeValue == null) {
+        return null;
+      } else {
+        double amount = double.parse(value);
+        if (amount <= rangeValue.end && amount >= rangeValue.start) {
+          return null;
+        } else if (amount <= rangeValue.end) {
+          return 'Amount should not be less than ${rangeValue.start}';
+        } else {
+          return 'Amount should not be greater than ${rangeValue.end}';
+        }
+      }
+    } else {
+      return 'Amount is Invalid';
+    }
   }
 }
