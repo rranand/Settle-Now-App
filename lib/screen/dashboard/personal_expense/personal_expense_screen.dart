@@ -19,6 +19,7 @@ import 'package:settlenow_v2/screen/dashboard/personal_expense/sub_section/perso
 import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
 import 'package:settlenow_v2/util/custom/multi_value_listenable_builder.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
@@ -108,8 +109,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   }
 
   void populateRoomDataFromTransaction(
+    String id,
     List<PersonalExpenseTransactionModel> data,
   ) {
+    context.read<FilterCubit>().filterPersonalExpenseTransaction(id, data);
     Set<String> roomIDs = {};
     roomData = [];
     double maxAmount = 0;
@@ -213,11 +216,14 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
         );
         _minController.text = convertInDateFormat(dateTime);
       } else {
+        DateTime newDateTime = dateTime
+            .add(Duration(days: 1))
+            .add(Duration(seconds: -1));
         _selectedDateRange.value = DateTimeRange(
           start: _selectedDateRange.value.start,
-          end: dateTime,
+          end: newDateTime,
         );
-        _maxController.text = convertInDateFormat(dateTime);
+        _maxController.text = convertInDateFormat(newDateTime);
       }
     }
   }
@@ -299,7 +305,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                       return buildCheckBox<String>(
                         "${roomData[i].roomName} ${roomData[i].transactionType == "Quicksplit" ? "" : "(Room)"}",
                         _selectedRoom,
-                        roomData[i].id,
+                        "${roomData[i].roomName}###${roomData[i].transactionType == "Quicksplit" ? "" : "Room"}",
                       );
                     },
                   );
@@ -591,7 +597,13 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
 
   void configureFilter(bool updateState) {
     final state = context.read<FilterCubit>().state;
-    String id = "${widget.month}~${widget.year}";
+    final personalExpState = context.read<PersonalMonthlyExpenseBloc>().state;
+    String id = "${widget.month}~${widget.year}".toLowerCase();
+
+    List<PersonalExpenseTransactionModel> data = [];
+    if (personalExpState is PersonalMonthlyExpenseFetchSuccess) {
+      data = personalExpState.data;
+    }
 
     if (updateState || state.id != id) {
       context.read<FilterCubit>().updateState(
@@ -603,14 +615,16 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           selectedRoom: _selectedRoom.value,
           amountRange: _selectedAmountRange.value,
           dateRange: _selectedDateRange.value,
+          data: data,
         ),
+        TransactionType.personal,
       );
     } else {
-      _selectedSortBy.value = state.sortBy!;
-      _selectedSortRule.value = state.sortRule!;
+      _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
+      _selectedSortRule.value = state.sortRule ?? SortRules.mostRecent;
       _selectedCategory.value = state.selectedCategories;
-      _selectedAmountRange.value = state.amountRange!;
-      _selectedDateRange.value = state.dateRange!;
+      _selectedAmountRange.value = state.amountRange ?? _amountRange;
+      _selectedDateRange.value = state.dateRange ?? _dateRange;
       _selectedRoom.value = state.selectedRoom;
     }
   }
@@ -813,6 +827,12 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   void initState() {
     super.initState();
 
+    String id = "${widget.month}~${widget.year}".toLowerCase();
+    context.read<FilterCubit>().updateState(
+      FilterState(id: id),
+      TransactionType.personal,
+    );
+
     if (_currentDate.year.toString() == widget.year &&
         CalenderConstant.getIndexOfMonth(widget.month) + 1 ==
             _currentDate.month) {
@@ -955,7 +975,10 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                               builder: (context) {
                                 if (state
                                     is PersonalMonthlyExpenseFetchSuccess) {
-                                  populateRoomDataFromTransaction(state.data);
+                                  populateRoomDataFromTransaction(
+                                    state.id,
+                                    state.data,
+                                  );
                                   return LinearGraphCard(
                                     expenses:
                                         state.data

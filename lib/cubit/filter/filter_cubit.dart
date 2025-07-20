@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
+import 'package:settlenow_v2/util/custom/category_parser.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 
 part 'filter_state.dart';
 
@@ -30,7 +32,22 @@ class FilterCubit extends Cubit<FilterState> {
 
   void updateRoom(Set<String> room) => emit(state.copyWith(selectedRoom: room));
 
-  void updateState(FilterState filterState) => emit(filterState);
+  void updateState(FilterState filterState, TransactionType transactionType) {
+    emit(filterState);
+    if (filterState.data.isNotEmpty) {
+      switch (transactionType) {
+        case TransactionType.personal:
+          {
+            filterPersonalExpenseTransaction(
+              filterState.id!,
+              filterState.data.cast<PersonalExpenseTransactionModel>(),
+            );
+          }
+        default:
+          {}
+      }
+    }
+  }
 
   void filterPersonalExpenseTransaction(
     String id,
@@ -38,7 +55,35 @@ class FilterCubit extends Cubit<FilterState> {
   ) {
     List<PersonalExpenseTransactionModel> filteredData = [];
 
-    for (int i = 0; i < data.length; i++) {}
+    for (int i = 0; i < data.length; i++) {
+      if (state.selectedCategories.isNotEmpty &&
+          !state.selectedCategories.contains(
+            CategoryParser.indexOfCategory(data[i].category),
+          )) {
+        continue;
+      }
+      if (data[i].roomData.hasData && state.selectedRoom.isNotEmpty) {
+        String id =
+            "${data[i].roomData.roomName}###${data[i].roomData.transactionType == "Quicksplit" ? "" : "Room"}";
+        if (!state.selectedRoom.contains(id)) {
+          continue;
+        }
+      }
+      if (state.amountRange != null &&
+          !(state.amountRange!.start <= data[i].amount &&
+              data[i].amount <= state.amountRange!.end)) {
+        continue;
+      }
+      if (state.dateRange != null &&
+          !(state.dateRange!.start.millisecondsSinceEpoch <=
+                  data[i].createdOn.millisecondsSinceEpoch &&
+              data[i].createdOn.millisecondsSinceEpoch <=
+                  state.dateRange!.end.millisecondsSinceEpoch)) {
+        continue;
+      }
+
+      filteredData.add(data[i]);
+    }
 
     return emit(state.copyWith(id: id, data: filteredData));
   }

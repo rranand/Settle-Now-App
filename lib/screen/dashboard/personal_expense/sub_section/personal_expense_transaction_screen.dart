@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/constant/calender_constant.dart';
+import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/util/card/transaction_card.dart';
 import 'package:settlenow_v2/util/handler/filter_sort.dart';
@@ -21,13 +22,24 @@ class PersonalExpenseTransactionScreen extends StatefulWidget {
 
 class _PersonalExpenseTransactionScreenState
     extends State<PersonalExpenseTransactionScreen> {
+  Widget transactionCardDisplay(
+    List<PersonalExpenseTransactionModel> data,
+    bool isEditable,
+  ) {
+    return SliverList.builder(
+      itemCount: data.length,
+      itemBuilder:
+          (context, index) =>
+              TransactionCard(data: data[index], isEditable: isEditable),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<
+    return BlocBuilder<
       PersonalMonthlyExpenseBloc,
       PersonalMonthlyExpenseState
     >(
-      listener: (context, state) {},
       builder: (context, state) {
         bool isEditable = false;
         List<PersonalExpenseTransactionModel> data = List.filled(
@@ -36,6 +48,7 @@ class _PersonalExpenseTransactionScreenState
         );
         if (state is PersonalMonthlyExpenseFetchSuccess) {
           data = state.data;
+
           DateTime currentDate = DateTime.now();
           int year = int.parse(state.id.substring(0, 4));
           String month = state.id.substring(4);
@@ -44,36 +57,39 @@ class _PersonalExpenseTransactionScreenState
                   currentDate.month) {
             isEditable = true;
           }
+
+          return BlocBuilder<FilterCubit, FilterState>(
+            builder: (context, filterState) {
+              return ValueListenableBuilder<TextEditingValue>(
+                valueListenable: widget.searchController,
+                builder: (context, _, _) {
+                  List<PersonalExpenseTransactionModel> searchedData =
+                      filterState.data.cast<PersonalExpenseTransactionModel>();
+
+                  searchedData = FilterSort.filteredSearchText(
+                    widget.searchController.text,
+                    searchedData,
+                    (transData) =>
+                        "${transData.description} ${transData.amount} ${transData.category} ${transData.roomData.roomName}",
+                  );
+
+                  if (searchedData.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: noRecordFoundWidget(
+                        "No Matching Records",
+                        context,
+                      ),
+                    );
+                  }
+
+                  return transactionCardDisplay(searchedData, isEditable);
+                },
+              );
+            },
+          );
+        } else {
+          return transactionCardDisplay(data, isEditable);
         }
-        return ValueListenableBuilder<TextEditingValue>(
-          valueListenable: widget.searchController,
-          builder: (context, _, _) {
-            List<PersonalExpenseTransactionModel> filterData = data;
-            if (state is PersonalMonthlyExpenseFetchSuccess) {
-              filterData = FilterSort.filteredSearchText(
-                widget.searchController.text,
-                data,
-                (transData) =>
-                    "${transData.description} ${transData.amount} ${transData.category} ${transData.roomData.roomName}",
-              );
-            }
-
-            if (filterData.isEmpty) {
-              return SliverToBoxAdapter(
-                child: noRecordFoundWidget("No Matching Records", context),
-              );
-            }
-
-            return SliverList.builder(
-              itemCount: filterData.length,
-              itemBuilder:
-                  (context, index) => TransactionCard(
-                    data: filterData[index],
-                    isEditable: isEditable,
-                  ),
-            );
-          },
-        );
       },
     );
   }
