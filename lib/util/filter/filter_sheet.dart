@@ -585,12 +585,6 @@ class _FilterSheetState extends State<FilterSheet> {
                     resetfilterHandler(
                       widget.filterSections[_filterSelectedIndex.value],
                     );
-                    context.read<FilterCubit>().updateFilterApplied(
-                      widget.id,
-                      isFilterApplied(
-                        widget.filterSections[_filterSelectedIndex.value],
-                      ),
-                    );
                   },
                   icon: Icon(Icons.refresh),
                 ),
