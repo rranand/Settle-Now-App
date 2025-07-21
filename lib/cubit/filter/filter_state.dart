@@ -10,6 +10,7 @@ class FilterState {
   final Set<String> createdByUsers;
   final String? splitType;
   final Set<String> selectedRoom;
+  final bool isFilterApplied;
   final List<dynamic> data;
 
   const FilterState({
@@ -22,6 +23,7 @@ class FilterState {
     this.dateRange,
     this.createdByUsers = const {},
     this.splitType,
+    this.isFilterApplied = false,
     this.data = const [],
   });
 
@@ -35,6 +37,7 @@ class FilterState {
     DateTimeRange? dateRange,
     Set<String>? createdByUsers,
     String? splitType,
+    bool? isFilterApplied,
     List<dynamic>? data,
   }) {
     return FilterState(
@@ -47,7 +50,9 @@ class FilterState {
       dateRange: dateRange ?? this.dateRange,
       createdByUsers: createdByUsers ?? this.createdByUsers,
       splitType: splitType ?? this.splitType,
+      isFilterApplied: isFilterApplied ?? this.isFilterApplied,
       data: data ?? this.data,
     );
   }
+
 }

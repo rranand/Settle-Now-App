@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/util/custom/category_parser.dart';
-import 'package:settlenow_v2/util/enum/enums.dart';
+import 'package:settlenow_v2/util/enum/filter_enums.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 
 part 'filter_state.dart';
@@ -31,6 +31,13 @@ class FilterCubit extends Cubit<FilterState> {
       emit(state.copyWith(splitType: splitType));
 
   void updateRoom(Set<String> room) => emit(state.copyWith(selectedRoom: room));
+  void updateFilterApplied(String id, bool isFilterApplied) {
+    if (state.id == id) {
+      return emit(state.copyWith(id: id, isFilterApplied: isFilterApplied));
+    } else {
+      return emit(FilterState(id: id, isFilterApplied: false));
+    }
+  }
 
   void updateState(FilterState filterState, TransactionType transactionType) {
     emit(filterState);

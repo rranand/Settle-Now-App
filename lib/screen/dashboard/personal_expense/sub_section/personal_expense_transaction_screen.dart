@@ -36,10 +36,7 @@ class _PersonalExpenseTransactionScreenState
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<
-      PersonalMonthlyExpenseBloc,
-      PersonalMonthlyExpenseState
-    >(
+    return BlocBuilder<PersonalMonthlyExpenseBloc, PersonalMonthlyExpenseState>(
       builder: (context, state) {
         bool isEditable = false;
         List<PersonalExpenseTransactionModel> data = List.filled(
@@ -56,6 +53,12 @@ class _PersonalExpenseTransactionScreenState
               CalenderConstant.getIndexOfMonth(month) + 1 ==
                   currentDate.month) {
             isEditable = true;
+          }
+
+          if (data.isEmpty) {
+            return SliverToBoxAdapter(
+              child: noRecordFoundWidget("No Transaction Found", context),
+            );
           }
 
           return BlocBuilder<FilterCubit, FilterState>(

@@ -17,7 +17,9 @@ import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/lenden_expense_card.dart';
 import 'package:settlenow_v2/util/card/lenden_summary_card.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
+import 'package:settlenow_v2/util/handler/filter_sort.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
+import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
@@ -35,10 +37,14 @@ class LendenExpenseScreen extends StatefulWidget {
 }
 
 class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
+  final ValueNotifier<bool> isSearchEnabled = ValueNotifier(false);
+  final TextEditingController _searchController = TextEditingController();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   UserModel _loggedInUser = UserModel.empty();
   String currentRoute = "";
   late final StreamSubscription _createRoomListener;
+
+  final ValueNotifier<bool> _isFilterApplied = ValueNotifier(false);
 
   void _blocListenerHandler(BuildContext context, LendenRoomState state) {
     if (state is LendenRoomFailure) {
@@ -294,6 +300,27 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
             onPressed: () => _showBottomSheet(context, state.roomData.users),
             icon: Icon(Iconsax.profile_2user),
           ),
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: () {
+              isSearchEnabled.value = !isSearchEnabled.value;
+              _searchController.text = "";
+            },
+          ),
+          ValueListenableBuilder(
+            valueListenable: _isFilterApplied,
+            builder: (context, _, _) {
+              bool haveFilter = _isFilterApplied.value;
+              return IconButton(
+                icon: Icon(
+                  haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                  color: haveFilter ? Colors.green : null,
+                ),
+                onPressed: () {},
+                // onPressed: () => filterModelBottomSheet(context),
+              );
+            },
+          ),
         ]),
       );
     } else {
@@ -340,35 +367,93 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
 
             return CustomScrollView(
               slivers: [
-                SliverPadding(
-                  padding: paddingInsets.add(
-                    EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: LendenSummaryCard(
-                      data: lendenTransactionData,
-                      loggedInUser: _loggedInUser,
-                    ),
-                  ),
+                ValueListenableBuilder(
+                  valueListenable: isSearchEnabled,
+                  builder: (BuildContext context, _, _) {
+                    if (!isSearchEnabled.value) {
+                      return SliverToBoxAdapter(child: SizedBox.shrink());
+                    }
+                    return SliverPadding(
+                      padding: _mainScreenPadding,
+                      sliver: SliverAppBar(
+                        automaticallyImplyLeading: false,
+                        pinned: isSearchEnabled.value,
+                        backgroundColor: Colors.white,
+                        surfaceTintColor: Colors.white,
+                        title: CustomFormField.searchBar(
+                          "Search",
+                          isSearchEnabled,
+                          _searchController,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                ValueListenableBuilder(
+                  valueListenable: isSearchEnabled,
+                  builder: (context, _, _) {
+                    if (isSearchEnabled.value) {
+                      return SliverToBoxAdapter(child: SizedBox.shrink());
+                    }
+                    return SliverPadding(
+                      padding: paddingInsets.add(
+                        EdgeInsets.only(bottom: UiConstant.spaceBetweenSection),
+                      ),
+                      sliver: SliverToBoxAdapter(
+                        child: LendenSummaryCard(
+                          data: lendenTransactionData,
+                          loggedInUser: _loggedInUser,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 SliverPadding(
                   padding: _mainScreenPadding,
-                  sliver: SliverList.builder(
-                    itemCount: lendenTransactionData.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Padding(
-                        padding: EdgeInsets.only(
-                          bottom:
-                              index == lendenTransactionData.length - 1
-                                  ? UiConstant.spaceAtBottom
-                                  : 0,
-                        ),
-                        child: LendenExpenseCard(
-                          lendenID: widget.id,
-                          data: lendenTransactionData[index],
-                          loggedInUser: _loggedInUser,
-                          isEditable: !loggedInUserData.isClosed,
-                        ),
+                  sliver: ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _searchController,
+                    builder: (context, _, _) {
+                      List<LendenTransactionModel> filterData =
+                          lendenTransactionData;
+                      if (state is LendenRoomFetchSuccess) {
+                        filterData = FilterSort.filteredSearchText(
+                          _searchController.text,
+                          lendenTransactionData,
+                          (transData) {
+                            String searchStr = transData.description;
+                            searchStr += " ${transData.createdBy.name}";
+                            searchStr += " ${transData.amount}";
+                            return searchStr;
+                          },
+                        );
+                      }
+
+                      if (filterData.isEmpty) {
+                        return SliverToBoxAdapter(
+                          child: noRecordFoundWidget(
+                            "No Matching Records",
+                            context,
+                          ),
+                        );
+                      }
+                      return SliverList.builder(
+                        itemCount: filterData.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              bottom:
+                                  index == filterData.length - 1
+                                      ? UiConstant.spaceAtBottom
+                                      : 0,
+                            ),
+                            child: LendenExpenseCard(
+                              lendenID: widget.id,
+                              data: filterData[index],
+                              loggedInUser: _loggedInUser,
+                              isEditable: !loggedInUserData.isClosed,
+                            ),
+                          );
+                        },
                       );
                     },
                   ),

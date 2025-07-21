@@ -86,6 +86,11 @@ class _PersonalExpenseCategoriesSectionScreenState
         );
 
         if (state is PersonalMonthlyExpenseFetchSuccess) {
+          if (state.data.isEmpty) {
+            return SliverToBoxAdapter(
+              child: noRecordFoundWidget("No Transaction Found", context),
+            );
+          }
           return BlocBuilder<FilterCubit, FilterState>(
             builder: (context, filterState) {
               categoryWiseExpense = List.generate(
@@ -101,6 +106,11 @@ class _PersonalExpenseCategoriesSectionScreenState
 
                 categoryWiseExpense[index].first += eachExpense.amount;
                 categoryWiseExpense[index].second += 1;
+              }
+              if (filterState.data.isEmpty) {
+                return SliverToBoxAdapter(
+                  child: noRecordFoundWidget("No Matching Records", context),
+                );
               }
               return categoryCardDisplay(true, categoryWiseExpense);
             },

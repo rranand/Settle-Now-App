@@ -403,13 +403,12 @@ class AppRouterConfig {
   static void initializeRouter(AuthBloc authBloc) {
     _router = GoRouter(
       routes: _allRoutes(),
-      //initialLocation: '/lenden/687282eb8ff06d02461abbc7',
+      //initialLocation: '/lenden/65ed5d6323ad06005178de58',
       initialLocation: '/personal/2023/February',
       //initialLocation: RouterConstants.dashboardRouteName,
       //initialLocation:
       //  RouterConstants.profileRouteName +
       //RouterConstants.loginActivityRouteName,
-      //initialLocation: '/lenden/676ab9f177f9f0515ca7755e',
       observers: [observer],
       refreshListenable: StreamToListenable(authBloc.stream),
       redirect: (context, state) {
