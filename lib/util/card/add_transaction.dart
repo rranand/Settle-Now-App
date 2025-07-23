@@ -16,6 +16,7 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
+import 'package:settlenow_v2/util/enum/filter_enums.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
@@ -53,10 +54,11 @@ class _AddTransactionState extends State<AddTransaction> {
   String expenseType = "";
 
   final List<String> _splitType = ["Equal", "Partial", "Self"];
-  final List<String> _lendenTransactionType = ["Gave", "Owe"];
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
   final ValueNotifier<int> _splitTypeIndex = ValueNotifier(0);
-  final ValueNotifier<int> _lendenTransactionTypeIndex = ValueNotifier(0);
+  final ValueNotifier<LendenType> _lendenTransactionType = ValueNotifier(
+    LendenType.gave,
+  );
   final ValueNotifier<UserWithEditControlTD> _selectedUserIDs = ValueNotifier(
     {},
   );
@@ -157,7 +159,10 @@ class _AddTransactionState extends State<AddTransaction> {
         padding: EdgeInsets.all(8),
         child:
             icon == null
-                ? Padding(padding: const EdgeInsets.all(8.0), child: Text(text))
+                ? Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Text(text),
+                )
                 : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -300,7 +305,7 @@ class _AddTransactionState extends State<AddTransaction> {
       case TransactionType.lenden:
         {
           if (transactionData.amount < 0) {
-            _lendenTransactionTypeIndex.value = 1;
+            _lendenTransactionType.value = LendenType.owe;
           }
         }
       case TransactionType.room:
@@ -477,7 +482,7 @@ class _AddTransactionState extends State<AddTransaction> {
       switch (transactionType) {
         case TransactionType.lenden:
           {
-            if (_lendenTransactionTypeIndex.value == 1) {
+            if (_lendenTransactionType.value == LendenType.owe) {
               data.amount = -1 * data.amount;
             }
           }
@@ -739,7 +744,7 @@ class _AddTransactionState extends State<AddTransaction> {
                   Visibility(
                     visible: transactionType == TransactionType.lenden,
                     child: ValueListenableBuilder(
-                      valueListenable: _lendenTransactionTypeIndex,
+                      valueListenable: _lendenTransactionType,
                       builder: (context, value, _) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -755,20 +760,28 @@ class _AddTransactionState extends State<AddTransaction> {
                               spacing: UiConstant.spaceBetweenCard,
                               runSpacing: UiConstant.spaceBetweenCard,
                               children: List.generate(
-                                _lendenTransactionType.length,
-                                (index) => InkWell(
-                                  borderRadius: BorderRadius.circular(100),
-                                  onTap:
-                                      () =>
-                                          _lendenTransactionTypeIndex.value =
-                                              index,
-                                  child: _cardWidget(
-                                    index,
-                                    value,
-                                    _lendenTransactionType[index],
-                                    null,
-                                  ),
-                                ),
+                                LendenType.values.length,
+                                (index) {
+                                  final value = LendenType.values[index];
+                                  if (value == LendenType.none) {
+                                    return SizedBox.shrink();
+                                  }
+                                  return InkWell(
+                                    borderRadius: BorderRadius.circular(100),
+                                    onTap:
+                                        () =>
+                                            _lendenTransactionType.value =
+                                                value,
+                                    child: _cardWidget(
+                                      index,
+                                      LendenType.values.indexOf(
+                                        _lendenTransactionType.value,
+                                      ),
+                                      value.label,
+                                      null,
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ],

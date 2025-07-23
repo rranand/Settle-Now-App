@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
+import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/custom/category_parser.dart';
 import 'package:settlenow_v2/util/custom/multi_value_listenable_builder.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
@@ -23,13 +27,11 @@ import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class FilterSheet extends StatefulWidget {
-  final List<String> filterSections;
   final String id;
   final TransactionType transactionType;
 
   const FilterSheet({
     super.key,
-    required this.filterSections,
     required this.id,
     required this.transactionType,
   });
@@ -39,7 +41,10 @@ class FilterSheet extends StatefulWidget {
 }
 
 class _FilterSheetState extends State<FilterSheet> {
+  String loggedInUserID = "";
+  List<String> filterSections = [];
   List<RoomLinkedModel> roomData = [];
+  List<UserModel> userData = [];
   final ValueNotifier<int> _filterSelectedIndex = ValueNotifier(0);
   final ValueNotifier<SortBy> _selectedSortBy = ValueNotifier(
     SortBy.dateCreated,
@@ -47,8 +52,12 @@ class _FilterSheetState extends State<FilterSheet> {
   final ValueNotifier<SortRules> _selectedSortRule = ValueNotifier(
     SortRules.mostRecent,
   );
+  final ValueNotifier<LendenType> _selectedLendenType = ValueNotifier(
+    LendenType.none,
+  );
   final ValueNotifier<Set<int>> _selectedCategory = ValueNotifier({});
   final ValueNotifier<Set<String>> _selectedRoom = ValueNotifier({});
+  final ValueNotifier<Set<String>> _selectedUser = ValueNotifier({});
   final ValueNotifier<RangeValues> _selectedAmountRange = ValueNotifier(
     RangeValues(0, 0),
   );
@@ -87,11 +96,19 @@ class _FilterSheetState extends State<FilterSheet> {
         {
           return _selectedRoom.value.isNotEmpty;
         }
+      case "Type":
+        {
+          return _selectedLendenType.value != LendenType.none;
+        }
+      case "Created By":
+        {
+          return _selectedUser.value.isNotEmpty;
+        }
       case "":
         {
           bool flag = false;
-          for (int i = 0; !flag && i < widget.filterSections.length; i++) {
-            flag = flag || isFilterApplied(widget.filterSections[i]);
+          for (int i = 0; !flag && i < filterSections.length; i++) {
+            flag = flag || isFilterApplied(filterSections[i]);
           }
           return flag;
         }
@@ -112,7 +129,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case "Amount":
         {
           _selectedAmountRange.value = _amountRange;
-          if (filterType == widget.filterSections[_filterSelectedIndex.value]) {
+          if (filterType == filterSections[_filterSelectedIndex.value]) {
             _minController.text = "0";
             _maxController.text = _amountRange.end.toInt().toString();
           }
@@ -124,7 +141,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case "Date Created":
         {
           _selectedDateRange.value = _dateRange;
-          if (filterType == widget.filterSections[_filterSelectedIndex.value]) {
+          if (filterType == filterSections[_filterSelectedIndex.value]) {
             _minController.text = convertInDateFormat(_dateRange.start);
             _maxController.text = convertInDateFormat(_dateRange.end);
           }
@@ -133,10 +150,18 @@ class _FilterSheetState extends State<FilterSheet> {
         {
           _selectedRoom.value = {};
         }
+      case "Type":
+        {
+          _selectedLendenType.value = LendenType.none;
+        }
+      case "Created By":
+        {
+          _selectedUser.value = {};
+        }
       case "":
         {
-          for (int i = 0; i < widget.filterSections.length; i++) {
-            resetfilterHandler(widget.filterSections[i]);
+          for (int i = 0; i < filterSections.length; i++) {
+            resetfilterHandler(filterSections[i]);
           }
         }
       default:
@@ -202,6 +227,68 @@ class _FilterSheetState extends State<FilterSheet> {
             });
           }
         }
+
+      case (TransactionType.lenden):
+        {
+          final state = context.read<LendenRoomBloc>().state;
+          List<LendenTransactionModel> data = [];
+
+          if (state is LendenRoomFetchSuccess) {
+            data = state.data;
+            double maxAmount = 0;
+            DateTime minDate = DateTime.now();
+            DateTime maxDate = DateTime(1990);
+
+            for (int i = 0; i < data.length; i++) {
+              maxAmount = max(maxAmount, data[i].amount.abs());
+              if (minDate.millisecondsSinceEpoch >
+                  data[i].createdOn.millisecondsSinceEpoch) {
+                minDate = data[i].createdOn;
+              }
+              if (maxDate.millisecondsSinceEpoch <
+                  data[i].createdOn.millisecondsSinceEpoch) {
+                maxDate = data[i].createdOn;
+              }
+            }
+            userData = state.roomData.users.map((e) => e as UserModel).toList();
+            maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
+            _amountRange = RangeValues(0, maxAmount);
+            _dateRange = DateTimeRange(start: minDate, end: maxDate);
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _selectedAmountRange.value = _amountRange;
+              _selectedDateRange.value = _dateRange;
+              copyFilter();
+            });
+          }
+        }
+      default:
+        {}
+    }
+  }
+
+  void filterSectionHandler() {
+    switch (widget.transactionType) {
+      case (TransactionType.personal):
+        {
+          filterSections = [
+            "Sort By",
+            "Amount",
+            "Category",
+            "Date Created",
+            "Room",
+          ];
+        }
+      case (TransactionType.lenden):
+        {
+          filterSections = [
+            "Sort By",
+            "Amount",
+            "Created By",
+            "Date Created",
+            "Type",
+          ];
+        }
       default:
         {}
     }
@@ -210,7 +297,13 @@ class _FilterSheetState extends State<FilterSheet> {
   @override
   void initState() {
     super.initState();
+    filterSectionHandler();
     populateData();
+    final state = context.read<AuthBloc>().state;
+
+    if (state is AuthLoginSuccess) {
+      loggedInUserID = state.userData.id;
+    }
   }
 
   void copyFilter() {
@@ -230,6 +323,15 @@ class _FilterSheetState extends State<FilterSheet> {
           _selectedDateRange.value = state.dateRange ?? _dateRange;
           _selectedRoom.value = state.selectedRoom;
         }
+      case (TransactionType.lenden):
+        {
+          _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
+          _selectedSortRule.value = state.sortRule ?? SortRules.mostRecent;
+          _selectedAmountRange.value = state.amountRange ?? _amountRange;
+          _selectedDateRange.value = state.dateRange ?? _dateRange;
+          _selectedUser.value = state.selectedUsers;
+          _selectedLendenType.value = state.lendenType ?? LendenType.none;
+        }
       default:
         {}
     }
@@ -240,11 +342,10 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.personal):
         {
           final state = context.read<FilterCubit>().state;
-          final personalExpState =
-              context.read<PersonalMonthlyExpenseBloc>().state;
+          final expenseState = context.read<PersonalMonthlyExpenseBloc>().state;
           List<PersonalExpenseTransactionModel> data = [];
-          if (personalExpState is PersonalMonthlyExpenseFetchSuccess) {
-            data = personalExpState.data;
+          if (expenseState is PersonalMonthlyExpenseFetchSuccess) {
+            data = expenseState.data;
           }
 
           if (updateState || state.id != widget.id) {
@@ -260,6 +361,36 @@ class _FilterSheetState extends State<FilterSheet> {
                 data: data,
                 isFilterApplied: isFilterApplied(""),
               ),
+              loggedInUserID,
+              widget.transactionType,
+            );
+          } else {
+            copyFilter();
+          }
+        }
+      case (TransactionType.lenden):
+        {
+          final state = context.read<FilterCubit>().state;
+          final expenseState = context.read<LendenRoomBloc>().state;
+          List<LendenTransactionModel> data = [];
+          if (expenseState is LendenRoomFetchSuccess) {
+            data = expenseState.data;
+          }
+
+          if (updateState || state.id != widget.id) {
+            context.read<FilterCubit>().updateState(
+              FilterState(
+                id: widget.id,
+                sortBy: _selectedSortBy.value,
+                sortRule: _selectedSortRule.value,
+                selectedUsers: _selectedUser.value,
+                lendenType: _selectedLendenType.value,
+                amountRange: _selectedAmountRange.value,
+                dateRange: _selectedDateRange.value,
+                data: data,
+                isFilterApplied: isFilterApplied(""),
+              ),
+              loggedInUserID,
               widget.transactionType,
             );
           } else {
@@ -290,21 +421,21 @@ class _FilterSheetState extends State<FilterSheet> {
                           children: [
                             Divider(),
                             FilterWidget.buildEnumRadioGroup<SortRules>(
-                              SortRules.values[newIndex].label,
+                              sortRuleValue.label,
                               sortRuleValue,
                               _selectedSortRule,
                             ),
                           ],
                         )
                         : FilterWidget.buildEnumRadioGroup<SortRules>(
-                          SortRules.values[newIndex].label,
+                          sortRuleValue.label,
                           sortRuleValue,
                           _selectedSortRule,
                         );
                   } else {
                     final sortValue = SortBy.values[i];
                     return FilterWidget.buildEnumRadioGroup<SortBy>(
-                      SortBy.values[i].label,
+                      sortValue.label,
                       sortValue,
                       _selectedSortBy,
                     );
@@ -326,6 +457,7 @@ class _FilterSheetState extends State<FilterSheet> {
                     CategoryParser.expenseCategories[i],
                     _selectedCategory,
                     i,
+                    CategoryParser.expenseCategories.length,
                   );
                 },
               );
@@ -345,6 +477,7 @@ class _FilterSheetState extends State<FilterSheet> {
                         "${roomData[i].roomName} ${roomData[i].transactionType == "Quicksplit" ? "" : "(Room)"}",
                         _selectedRoom,
                         "${roomData[i].roomName}###${roomData[i].transactionType == "Quicksplit" ? "" : "Room"}",
+                        roomData.length,
                       );
                     },
                   );
@@ -354,7 +487,6 @@ class _FilterSheetState extends State<FilterSheet> {
         }
       case "Date Created":
         {
-          final state = context.read<PersonalMonthlyExpenseBloc>().state;
           _minController.text = convertInDateFormat(
             _selectedDateRange.value.start,
           );
@@ -362,96 +494,204 @@ class _FilterSheetState extends State<FilterSheet> {
             _selectedDateRange.value.end,
           );
 
-          if (state is PersonalMonthlyExpenseFetchSuccess) {
-            return ValueListenableBuilder(
-              valueListenable: _selectedDateRange,
-              builder: (context, _, _) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 15.0),
-                        child: CustomFormField.textFormField(
-                          _minController,
-                          readOnly: true,
-                          labelText: 'From Date',
-                          suffixIcon: Icon(Iconsax.calendar),
-                          inputDecoration: TextFormFieldInputBorder.underLine,
-                          borderColor: Colors.black87,
-                          onTap: () async {
-                            DateTimeRange? updatedRange =
-                                await FilterWidget.selectDate(
-                                  context,
-                                  _selectedDateRange.value,
-                                  _dateRange,
-                                  true,
-                                );
-                            if (updatedRange != null) {
-                              _selectedDateRange.value = updatedRange;
-                              _minController.text = convertInDateFormat(
-                                updatedRange.start,
+          return ValueListenableBuilder(
+            valueListenable: _selectedDateRange,
+            builder: (context, _, _) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15.0),
+                      child: CustomFormField.textFormField(
+                        _minController,
+                        readOnly: true,
+                        labelText: 'From Date',
+                        suffixIcon: Icon(Iconsax.calendar),
+                        inputDecoration: TextFormFieldInputBorder.underLine,
+                        borderColor: Colors.black87,
+                        onTap: () async {
+                          DateTimeRange? updatedRange =
+                              await FilterWidget.selectDate(
+                                context,
+                                _selectedDateRange.value,
+                                _dateRange,
+                                true,
                               );
-                            }
-                          },
-                        ),
+                          if (updatedRange != null) {
+                            _selectedDateRange.value = updatedRange;
+                            _minController.text = convertInDateFormat(
+                              updatedRange.start,
+                            );
+                          }
+                        },
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: CustomFormField.textFormField(
-                          _maxController,
-                          readOnly: true,
-                          labelText: 'To Date',
-                          suffixIcon: Icon(Iconsax.calendar),
-                          inputDecoration: TextFormFieldInputBorder.underLine,
-                          borderColor: Colors.black87,
-                          onTap: () async {
-                            DateTimeRange? updatedRange =
-                                await FilterWidget.selectDate(
-                                  context,
-                                  _selectedDateRange.value,
-                                  _dateRange,
-                                  false,
-                                );
-                            if (updatedRange != null) {
-                              _selectedDateRange.value = updatedRange;
-                              _maxController.text = convertInDateFormat(
-                                updatedRange.end,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: CustomFormField.textFormField(
+                        _maxController,
+                        readOnly: true,
+                        labelText: 'To Date',
+                        suffixIcon: Icon(Iconsax.calendar),
+                        inputDecoration: TextFormFieldInputBorder.underLine,
+                        borderColor: Colors.black87,
+                        onTap: () async {
+                          DateTimeRange? updatedRange =
+                              await FilterWidget.selectDate(
+                                context,
+                                _selectedDateRange.value,
+                                _dateRange,
+                                false,
                               );
-                            }
-                          },
-                        ),
+                          if (updatedRange != null) {
+                            _selectedDateRange.value = updatedRange;
+                            _maxController.text = convertInDateFormat(
+                              updatedRange.end,
+                            );
+                          }
+                        },
                       ),
-                    ],
-                  ),
-                );
-              },
-            );
-          } else {
-            return noRecordFoundWidget("No Data Found", context);
-          }
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        }
+      case "Type":
+        {
+          return ValueListenableBuilder(
+            valueListenable: _selectedLendenType,
+            builder: (context, _, _) {
+              return Wrap(
+                spacing: UiConstant.spaceBetweenCard,
+                children: List.generate(LendenType.values.length, (i) {
+                  final value = LendenType.values[i];
+                  if (value.label == "None") {
+                    return SizedBox.shrink();
+                  }
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(
+                      UiConstant.cardBorderRadius,
+                    ),
+                    onTap: () => _selectedLendenType.value = value,
+                    child: FilterWidget.buildCardWidget<LendenType>(
+                      value,
+                      _selectedLendenType.value,
+                      value.label,
+                    ),
+                  );
+                }),
+              );
+            },
+          );
+        }
+      case "Created By":
+        {
+          return userData.isNotEmpty
+              ? ValueListenableBuilder(
+                valueListenable: _selectedUser,
+                builder: (context, _, _) {
+                  return Wrap(
+                    spacing: UiConstant.spaceBetweenCard,
+                    children: List.generate(userData.length, (index) {
+                      bool isSelected = _selectedUser.value.contains(
+                        userData[index].id,
+                      );
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                        onTap: () {
+                          Set<String> updatedSet = Set<String>.from(
+                            _selectedUser.value,
+                          );
+                          if (_selectedUser.value.contains(
+                            userData[index].id,
+                          )) {
+                            updatedSet.remove(userData[index].id);
+                          } else {
+                            updatedSet.add(userData[index].id);
+                          }
+                          if (updatedSet.length == userData.length) {
+                            _selectedUser.value = {};
+                          } else {
+                            _selectedUser.value = updatedSet;
+                          }
+                        },
+                        child: FilterWidget.buildCardWidget<int>(
+                          index,
+                          isSelected ? index : -1,
+                          userData[index].id == loggedInUserID ? "You" : "",
+                          user:
+                              userData[index].id == loggedInUserID
+                                  ? null
+                                  : userData[index],
+                        ),
+                      );
+                    }),
+                  );
+                },
+              )
+              : noRecordFoundWidget("No Data Found", context);
         }
       case "Amount":
         {
-          final state = context.read<PersonalMonthlyExpenseBloc>().state;
           _minController.text =
               _selectedAmountRange.value.start.toInt().toString();
           _maxController.text =
               _selectedAmountRange.value.end.toInt().toString();
 
-          if (state is PersonalMonthlyExpenseFetchSuccess) {
-            return ValueListenableBuilder(
-              valueListenable: _selectedAmountRange,
-              builder: (context, _, _) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 10.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      CustomFormField.textFormField(
-                        _minController,
-                        labelText: 'Min Amount',
+          return ValueListenableBuilder(
+            valueListenable: _selectedAmountRange,
+            builder: (context, _, _) {
+              return Padding(
+                padding: const EdgeInsets.only(top: 10.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    CustomFormField.textFormField(
+                      _minController,
+                      labelText: 'Min Amount',
+                      textInputType: TextInputType.number,
+                      inputFormatters: [AmountInputFormatter()],
+                      onChanged: (value) {
+                        if (value != null) {
+                          String? res = CustomValidator.validateAmount(
+                            value,
+                            RangeValues(
+                              _amountRange.start,
+                              min(
+                                _amountRange.end,
+                                _selectedAmountRange.value.end,
+                              ),
+                            ),
+                          );
+                          if (res == null) {
+                            double amount = double.parse(value);
+                            _selectedAmountRange.value = RangeValues(
+                              amount,
+                              _selectedAmountRange.value.end,
+                            );
+                          }
+                        }
+                      },
+                      suffixIcon: UiConstant.indianRupeeSymbol,
+                      validator:
+                          (value) => CustomValidator.validateAmount(
+                            value,
+                            _amountRange,
+                          ),
+                      inputDecoration: TextFormFieldInputBorder.underLine,
+                      borderColor: Colors.black87,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: CustomFormField.textFormField(
+                        _maxController,
+                        labelText: 'Max Amount',
                         textInputType: TextInputType.number,
                         inputFormatters: [AmountInputFormatter()],
                         onChanged: (value) {
@@ -459,18 +699,18 @@ class _FilterSheetState extends State<FilterSheet> {
                             String? res = CustomValidator.validateAmount(
                               value,
                               RangeValues(
-                                _amountRange.start,
-                                min(
-                                  _amountRange.end,
-                                  _selectedAmountRange.value.end,
+                                max(
+                                  _amountRange.start,
+                                  _selectedAmountRange.value.start,
                                 ),
+                                _amountRange.end,
                               ),
                             );
                             if (res == null) {
                               double amount = double.parse(value);
                               _selectedAmountRange.value = RangeValues(
+                                _selectedAmountRange.value.start,
                                 amount,
-                                _selectedAmountRange.value.end,
                               );
                             }
                           }
@@ -479,83 +719,43 @@ class _FilterSheetState extends State<FilterSheet> {
                         validator:
                             (value) => CustomValidator.validateAmount(
                               value,
-                              _amountRange,
+                              _selectedAmountRange.value,
                             ),
                         inputDecoration: TextFormFieldInputBorder.underLine,
                         borderColor: Colors.black87,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: CustomFormField.textFormField(
-                          _maxController,
-                          labelText: 'Max Amount',
-                          textInputType: TextInputType.number,
-                          inputFormatters: [AmountInputFormatter()],
-                          onChanged: (value) {
-                            if (value != null) {
-                              String? res = CustomValidator.validateAmount(
-                                value,
-                                RangeValues(
-                                  max(
-                                    _amountRange.start,
-                                    _selectedAmountRange.value.start,
-                                  ),
-                                  _amountRange.end,
-                                ),
-                              );
-                              if (res == null) {
-                                double amount = double.parse(value);
-                                _selectedAmountRange.value = RangeValues(
-                                  _selectedAmountRange.value.start,
-                                  amount,
-                                );
-                              }
-                            }
-                          },
-                          suffixIcon: UiConstant.indianRupeeSymbol,
-                          validator:
-                              (value) => CustomValidator.validateAmount(
-                                value,
-                                _selectedAmountRange.value,
-                              ),
-                          inputDecoration: TextFormFieldInputBorder.underLine,
-                          borderColor: Colors.black87,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: Column(
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "Range",
-                                style: TextStyle(fontSize: 16),
-                              ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Column(
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "Range",
+                              style: TextStyle(fontSize: 16),
                             ),
-                            RangeSlider(
-                              values: _selectedAmountRange.value,
-                              onChanged: (value) {
-                                _selectedAmountRange.value = value;
-                                _minController.text =
-                                    value.start.toInt().toString();
-                                _maxController.text =
-                                    value.end.toInt().toString();
-                              },
-                              min: _amountRange.start,
-                              max: _amountRange.end,
-                            ),
-                          ],
-                        ),
+                          ),
+                          RangeSlider(
+                            values: _selectedAmountRange.value,
+                            onChanged: (value) {
+                              _selectedAmountRange.value = value;
+                              _minController.text =
+                                  value.start.toInt().toString();
+                              _maxController.text =
+                                  value.end.toInt().toString();
+                            },
+                            min: _amountRange.start,
+                            max: _amountRange.end,
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                );
-              },
-            );
-          } else {
-            return noRecordFoundWidget("No Data Found", context);
-          }
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
         }
       default:
         {
@@ -583,7 +783,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 IconButton(
                   onPressed: () {
                     resetfilterHandler(
-                      widget.filterSections[_filterSelectedIndex.value],
+                      filterSections[_filterSelectedIndex.value],
                     );
                   },
                   icon: Icon(Icons.refresh),
@@ -608,14 +808,14 @@ class _FilterSheetState extends State<FilterSheet> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children:
-                        List.generate(widget.filterSections.length, (index) {
+                        List.generate(filterSections.length, (index) {
                           bool isSelected = index == _filterSelectedIndex.value;
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Stack(
                               children: [
                                 CustomButton.customTextButton(
-                                  widget.filterSections[index],
+                                  filterSections[index],
                                   buttonWidth: 120,
                                   buttonHeight: 40,
                                   borderRadius: 10,
@@ -637,6 +837,8 @@ class _FilterSheetState extends State<FilterSheet> {
                                   listenables: [
                                     _selectedSortBy,
                                     _selectedSortRule,
+                                    _selectedLendenType,
+                                    _selectedUser,
                                     _selectedAmountRange,
                                     _selectedCategory,
                                     _selectedDateRange,
@@ -644,7 +846,7 @@ class _FilterSheetState extends State<FilterSheet> {
                                   ],
                                   builder: (context) {
                                     bool haveFilter = isFilterApplied(
-                                      widget.filterSections[index],
+                                      filterSections[index],
                                     );
                                     return haveFilter
                                         ? Positioned(
@@ -672,7 +874,7 @@ class _FilterSheetState extends State<FilterSheet> {
                   child: SizedBox(
                     height: 400,
                     child: _filterWidget(
-                      widget.filterSections[_filterSelectedIndex.value],
+                      filterSections[_filterSelectedIndex.value],
                     ),
                   ),
                 ),

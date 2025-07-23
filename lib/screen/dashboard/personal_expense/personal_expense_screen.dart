@@ -50,24 +50,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
   List<RoomLinkedModel> roomData = [];
   final double filterHeightSize = 400;
 
-  // final List<String> filterSections = [
-  //   "Sort By",
-  //   "Amount",
-  //   "Category",
-  //   "Created By",
-  //   "Date Created",
-  //   "Split With",
-  //   "Room",
-  // ];
-
-  final List<String> filterSections = [
-    "Sort By",
-    "Amount",
-    "Category",
-    "Date Created",
-    "Room",
-  ];
-
   void _blocListenerHandler(
     BuildContext context,
     PersonalMonthlyExpenseState state,
@@ -93,7 +75,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
             16.0,
           ).add(EdgeInsets.only(bottom: keyboardHeight)),
           child: FilterSheet(
-            filterSections: filterSections,
             id: '${widget.year}${widget.month}'.toLowerCase(),
             transactionType: TransactionType.personal,
           ),
@@ -124,6 +105,12 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+
+      context.read<FilterCubit>().updateState(
+        FilterState(id: widget.year + widget.month.toLowerCase()),
+        _loggedInUser.id,
+        TransactionType.personal,
+      );
 
       final state = context.read<PersonalMonthlyExpenseBloc>().state;
       if (!(state is PersonalMonthlyExpenseFetchSuccess &&
@@ -212,6 +199,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                 } else {
                   context.read<FilterCubit>().updateState(
                     FilterState(id: state.id, data: state.data),
+                    _loggedInUser.id,
                     TransactionType.personal,
                   );
                 }

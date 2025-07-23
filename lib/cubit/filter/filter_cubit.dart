@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
-import 'package:settlenow_v2/util/custom/category_parser.dart';
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/util/enum/filter_enums.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 
@@ -10,27 +9,6 @@ part 'filter_state.dart';
 class FilterCubit extends Cubit<FilterState> {
   FilterCubit() : super(FilterState());
 
-  void updateSortBy(SortBy? sortBy) => emit(state.copyWith(sortBy: sortBy));
-
-  void updateSortRule(SortRules? sortRule) =>
-      emit(state.copyWith(sortRule: sortRule));
-
-  void updateCategories(Set<int> categories) =>
-      emit(state.copyWith(selectedCategories: categories));
-
-  void updateAmountRange(RangeValues? range) =>
-      emit(state.copyWith(amountRange: range));
-
-  void updateDateRange(DateTimeRange? range) =>
-      emit(state.copyWith(dateRange: range));
-
-  void updateCreatedByUser(Set<String> createdByUsers) =>
-      emit(state.copyWith(createdByUsers: createdByUsers));
-
-  void updateSplitType(String splitType) =>
-      emit(state.copyWith(splitType: splitType));
-
-  void updateRoom(Set<String> room) => emit(state.copyWith(selectedRoom: room));
   void updateFilterApplied(String id, bool isFilterApplied) {
     if (state.id == id) {
       return emit(state.copyWith(id: id, isFilterApplied: isFilterApplied));
@@ -39,7 +17,11 @@ class FilterCubit extends Cubit<FilterState> {
     }
   }
 
-  void updateState(FilterState filterState, TransactionType transactionType) {
+  void updateState(
+    FilterState filterState,
+    String uid,
+    TransactionType transactionType,
+  ) {
     emit(filterState);
     if (filterState.data.isNotEmpty) {
       switch (transactionType) {
@@ -50,10 +32,62 @@ class FilterCubit extends Cubit<FilterState> {
               filterState.data.cast<PersonalExpenseTransactionModel>(),
             );
           }
+        case TransactionType.lenden:
+          {
+            filterLendenTransaction(
+              filterState.id!,
+              uid,
+              filterState.data.cast<LendenTransactionModel>(),
+            );
+          }
         default:
           {}
       }
     }
+  }
+
+  void filterLendenTransaction(
+    String id,
+    String uid,
+    List<LendenTransactionModel> data,
+  ) {
+    List<LendenTransactionModel> filteredData = [];
+    for (int i = 0; i < data.length; i++) {
+      if (state.lendenType != null && state.lendenType != LendenType.none) {
+        final isCreatedByUser = data[i].createdBy.id == uid;
+        final isOwe = state.lendenType == LendenType.owe;
+        final isGave = state.lendenType == LendenType.gave;
+        final amount = data[i].amount;
+
+        final isValid =
+            isCreatedByUser
+                ? (amount < 0 && isOwe) || (amount >= 0 && isGave)
+                : (amount >= 0 && isOwe) || (amount <= 0 && isGave);
+
+        if (!isValid) continue;
+      }
+
+      if (state.selectedUsers.isNotEmpty &&
+          !state.selectedUsers.contains(data[i].createdBy.id)) {
+        continue;
+      }
+      if (state.amountRange != null &&
+          !(state.amountRange!.start <= data[i].amount.abs() &&
+              data[i].amount.abs() <= state.amountRange!.end)) {
+        continue;
+      }
+      if (state.dateRange != null &&
+          !(state.dateRange!.start.millisecondsSinceEpoch <=
+                  data[i].createdOn.millisecondsSinceEpoch &&
+              data[i].createdOn.millisecondsSinceEpoch <=
+                  state.dateRange!.end.millisecondsSinceEpoch)) {
+        continue;
+      }
+
+      filteredData.add(data[i]);
+    }
+
+    return emit(state.copyWith(id: id, data: filteredData));
   }
 
   void filterPersonalExpenseTransaction(

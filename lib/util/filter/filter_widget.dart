@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
+import 'package:settlenow_v2/constant/gradient_color_constant.dart';
+import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
+import 'package:settlenow_v2/util/widgets/image_widget.dart';
 
 class FilterWidget {
   static Widget buildEnumRadioGroup<T extends Enum>(
@@ -25,7 +29,8 @@ class FilterWidget {
   static Widget buildCheckBox<T>(
     String displayValue,
     ValueNotifier<Set<T>> valueNotifier,
-    T value,
+    T id,
+    int totalData,
   ) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
@@ -33,18 +38,61 @@ class FilterWidget {
       leading: Checkbox(
         checkColor: Colors.white,
         activeColor: Colors.deepPurpleAccent,
-        value: valueNotifier.value.contains(value),
+        value: valueNotifier.value.contains(id),
         onChanged: (bool? selected) {
           if (selected != null) {
             final updated = Set<T>.from(valueNotifier.value);
             if (selected) {
-              updated.add(value);
+              updated.add(id);
             } else {
-              updated.remove(value);
+              updated.remove(id);
             }
-            valueNotifier.value = updated;
+            if (totalData == updated.length) {
+              valueNotifier.value = {};
+            } else {
+              valueNotifier.value = updated;
+            }
           }
         },
+      ),
+    );
+  }
+
+  static Widget buildCardWidget<T>(
+    T eachObject,
+    T selected,
+    String text, {
+    UserModel? user,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: GradientBorderCard(
+        borderRadius: 50,
+        borderWidth: 1,
+        gradientColors:
+            eachObject == selected
+                ? GradientColorConstant.vibrantGradient
+                : [Colors.grey.shade300, Colors.grey.shade300],
+        child: user == null
+            ? Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Text(text),
+            )
+            : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                imageWidgetForCachedNetworkImage(
+                  user.profileImage,
+                  boxShape: BoxShape.circle,
+                  width: 30,
+                  height: 30,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Text(user.name),
+                ),
+              ],
+            ),
       ),
     );
   }

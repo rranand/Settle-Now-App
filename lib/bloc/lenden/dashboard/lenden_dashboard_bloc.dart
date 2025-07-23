@@ -56,22 +56,24 @@ class LendenDashboardBloc
     LendenDashboardOnUpdateRoom event,
     Emitter<LendenDashboardState> emit,
   ) async {
-    final allLendenRoomState = (state as LendenDashboardFetchSuccess);
-    List<LendenDashboardModel> data = allLendenRoomState.data;
-    int index = -1;
+    if (state is LendenDashboardFetchSuccess) {
+      final allLendenRoomState = (state as LendenDashboardFetchSuccess);
+      List<LendenDashboardModel> data = allLendenRoomState.data;
+      int index = -1;
 
-    for (int i = 0; i < data.length; i++) {
-      if (data[i].id == event.data.id) {
-        index = i;
-        data[i] = event.data;
-        break;
+      for (int i = 0; i < data.length; i++) {
+        if (data[i].id == event.data.id) {
+          index = i;
+          data[i] = event.data;
+          break;
+        }
       }
-    }
 
-    if (index == -1) {
-      data = [event.data, ...data];
+      if (index == -1) {
+        data = [event.data, ...data];
+      }
+      return emit(LendenDashboardFetchSuccess(data));
     }
-    return emit(LendenDashboardFetchSuccess(data));
   }
 
   void _lendenDashboardReset(

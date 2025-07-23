@@ -1,10 +1,8 @@
-enum SortBy { dateCreated, amount, name, category }
+enum SortBy { dateCreated, amount, name }
 
 extension SortByExtension on SortBy {
   String get label {
     switch (this) {
-      case SortBy.category:
-        return 'Category';
       case SortBy.dateCreated:
         return 'Date Created';
       case SortBy.amount:
@@ -24,6 +22,21 @@ extension SortRulesExtension on SortRules {
         return 'Most Recent';
       case SortRules.leastRecent:
         return 'Least Recent';
+    }
+  }
+}
+
+enum LendenType { gave, owe, none }
+
+extension LendenTypeExtension on LendenType {
+  String get label {
+    switch (this) {
+      case LendenType.gave:
+        return 'Gave';
+      case LendenType.owe:
+        return 'Owe';
+      case LendenType.none:
+        return 'None';
     }
   }
 }
