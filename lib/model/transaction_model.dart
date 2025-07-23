@@ -2,23 +2,27 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:settlenow_v2/model/common_transaction_field.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
-class TransactionModel {
+class TransactionModel implements CommonTransactionField {
   bool hasData = true;
   String id = "";
-  String description = "";
-  double amount = 0;
   String category = "";
   UserAmountModel createdBy = UserAmountModel.empty();
   List<UserAmountModel> users = [];
-  DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
   bool isAddedToPersonalExpense = false;
+  @override
+  String description = "";
+  @override
+  double amount = 0;
+  @override
+  DateTime createdOn = DateTime.now();
 
   TransactionModel({
     required this.id,

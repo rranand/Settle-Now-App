@@ -13,15 +13,15 @@ extension SortByExtension on SortBy {
   }
 }
 
-enum SortRules { mostRecent, leastRecent }
+enum SortRules { ascending, descending }
 
 extension SortRulesExtension on SortRules {
   String get label {
     switch (this) {
-      case SortRules.mostRecent:
-        return 'Most Recent';
-      case SortRules.leastRecent:
-        return 'Least Recent';
+      case SortRules.ascending:
+        return 'Ascending';
+      case SortRules.descending:
+        return 'Descending';
     }
   }
 }

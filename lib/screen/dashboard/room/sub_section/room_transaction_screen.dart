@@ -4,13 +4,22 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/util/card/room_transaction_card.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
+import 'package:settlenow_v2/util/handler/filter_sort.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class RoomTransactionScreen extends StatefulWidget {
   final String roomID;
-  const RoomTransactionScreen({super.key, required this.roomID});
+  final TextEditingController searchController;
+
+  const RoomTransactionScreen({
+    super.key,
+    required this.roomID,
+    required this.searchController,
+  });
 
   @override
   State<RoomTransactionScreen> createState() => _RoomTransactionScreenState();
@@ -29,58 +38,103 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
+  void dispose() {
+    super.dispose();
+  }
 
+  Widget transactionCardDisplay(List<TransactionModel> data) {
+    bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
+    int noOfCardsToBeShown = (data.length / 2).toInt() + data.length % 2;
+
+    return SliverList.builder(
+      itemCount: isWide ? noOfCardsToBeShown : data.length,
+      itemBuilder: (BuildContext context, int index) {
+        if (isWide) {
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: RoomTransactionCard(
+                  roomID: widget.roomID,
+                  data: data[index],
+                  loggedInUser: _loggedInUser,
+                ),
+              ),
+              Expanded(
+                child:
+                    (index == noOfCardsToBeShown - 1 && data.length % 2 > 0)
+                        ? SizedBox()
+                        : RoomTransactionCard(
+                          roomID: widget.roomID,
+                          data: data[index],
+                          loggedInUser: _loggedInUser,
+                        ),
+              ),
+            ],
+          );
+        } else {
+          return RoomTransactionCard(
+            roomID: widget.roomID,
+            data: data[index],
+            loggedInUser: _loggedInUser,
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocConsumer<RoomBloc, RoomState>(
       builder: (context, state) {
         List<TransactionModel> data = [];
         if (state is RoomFetchSuccess) {
           data = state.data;
-        } else {
-          data = List.filled(11, TransactionModel.empty());
-        }
-        int noOfCardsToBeShown = (data.length / 2).toInt() + data.length % 2;
-        return data.isEmpty
-            ? SliverToBoxAdapter(
+          context.read<FilterCubit>().updateState(
+            FilterState(id: state.id, data: state.data),
+            _loggedInUser.id,
+            TransactionType.room,
+          );
+
+          if (data.isEmpty) {
+            return SliverToBoxAdapter(
               child: noRecordFoundWidget("No Transaction Found", context),
-            )
-            : SliverList.builder(
-              itemCount: isWide ? noOfCardsToBeShown : data.length,
-              itemBuilder: (BuildContext context, int index) {
-                if (isWide) {
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: RoomTransactionCard(
-                          roomID: widget.roomID,
-                          data: data[index],
-                          loggedInUser: _loggedInUser,
-                        ),
-                      ),
-                      Expanded(
-                        child:
-                            (index == noOfCardsToBeShown - 1 &&
-                                    data.length % 2 > 0)
-                                ? SizedBox()
-                                : RoomTransactionCard(
-                                  roomID: widget.roomID,
-                                  data: data[index],
-                                  loggedInUser: _loggedInUser,
-                                ),
-                      ),
-                    ],
-                  );
-                } else {
-                  return RoomTransactionCard(
-                    roomID: widget.roomID,
-                    data: data[index],
-                    loggedInUser: _loggedInUser,
-                  );
-                }
-              },
             );
+          }
+
+          return BlocBuilder<FilterCubit, FilterState>(
+            builder: (context, filterState) {
+              return ValueListenableBuilder<TextEditingValue>(
+                valueListenable: widget.searchController,
+                builder: (context, _, _) {
+                  List<TransactionModel> searchedData =
+                      filterState.data.cast<TransactionModel>();
+
+                  searchedData = FilterSort.filteredSearchText(
+                    widget.searchController.text,
+                    searchedData,
+                    (transData) =>
+                        "${transData.description} ${transData.amount} ${transData.category} ${transData.createdBy.name}",
+                  );
+
+                  if (searchedData.isEmpty) {
+                    return SliverToBoxAdapter(
+                      child: noRecordFoundWidget(
+                        "No Matching Records",
+                        context,
+                      ),
+                    );
+                  }
+                  return transactionCardDisplay(searchedData);
+                },
+              );
+            },
+          );
+        } else {
+          return transactionCardDisplay(
+            List.filled(11, TransactionModel.empty()),
+          );
+        }
       },
       listener: (BuildContext context, RoomState state) {
         if (state is RoomFailure) {

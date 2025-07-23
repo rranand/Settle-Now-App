@@ -73,26 +73,32 @@ class FilterWidget {
             eachObject == selected
                 ? GradientColorConstant.vibrantGradient
                 : [Colors.grey.shade300, Colors.grey.shade300],
-        child: user == null
-            ? Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Text(text),
-            )
-            : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                imageWidgetForCachedNetworkImage(
-                  user.profileImage,
-                  boxShape: BoxShape.circle,
-                  width: 30,
-                  height: 30,
+        child:
+            user == null
+                ? Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Text(text),
+                )
+                : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: imageWidgetForCachedNetworkImage(
+                        user.profileImage,
+                        boxShape: BoxShape.circle,
+                        width: 35,
+                        height: 35,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                      ).add(EdgeInsets.only(right: 8, left: 2)),
+                      child: Text(user.name),
+                    ),
+                  ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Text(user.name),
-                ),
-              ],
-            ),
       ),
     );
   }

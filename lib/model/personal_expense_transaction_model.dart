@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
+import 'package:settlenow_v2/model/common_transaction_field.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
@@ -45,15 +46,19 @@ class RoomLinkedModel {
   }
 }
 
-class PersonalExpenseTransactionModel {
+class PersonalExpenseTransactionModel implements CommonTransactionField {
   bool hasData = true;
   String id = "";
-  double amount = 0;
-  String description = "";
   String category = "";
-  DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
   RoomLinkedModel roomData = RoomLinkedModel.empty();
+
+  @override
+  double amount = 0;
+  @override
+  String description = "";
+  @override
+  DateTime createdOn = DateTime.now();
 
   PersonalExpenseTransactionModel({
     required this.id,

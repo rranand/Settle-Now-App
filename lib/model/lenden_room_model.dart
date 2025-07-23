@@ -1,17 +1,21 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/model/common_transaction_field.dart';
 import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
-class LendenTransactionModel {
+class LendenTransactionModel implements CommonTransactionField {
   bool hasData = true;
   String id = "";
-  double amount = 0;
-  String description = "";
-  DateTime createdOn = DateTime.now();
   LendenUserModel createdBy = LendenUserModel.empty();
   DateTime modifiedOn = DateTime.now();
+  @override
+  double amount = 0;
+  @override
+  String description = "";
+  @override
+  DateTime createdOn = DateTime.now();
 
   LendenTransactionModel({
     required this.id,

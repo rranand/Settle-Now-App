@@ -7,11 +7,14 @@ import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
+import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/custom/category_parser.dart';
 import 'package:settlenow_v2/util/custom/multi_value_listenable_builder.dart';
@@ -50,7 +53,7 @@ class _FilterSheetState extends State<FilterSheet> {
     SortBy.dateCreated,
   );
   final ValueNotifier<SortRules> _selectedSortRule = ValueNotifier(
-    SortRules.mostRecent,
+    SortRules.ascending,
   );
   final ValueNotifier<LendenType> _selectedLendenType = ValueNotifier(
     LendenType.none,
@@ -58,6 +61,7 @@ class _FilterSheetState extends State<FilterSheet> {
   final ValueNotifier<Set<int>> _selectedCategory = ValueNotifier({});
   final ValueNotifier<Set<String>> _selectedRoom = ValueNotifier({});
   final ValueNotifier<Set<String>> _selectedUser = ValueNotifier({});
+  final ValueNotifier<Set<String>> _selectedSplitWith = ValueNotifier({});
   final ValueNotifier<RangeValues> _selectedAmountRange = ValueNotifier(
     RangeValues(0, 0),
   );
@@ -78,7 +82,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case "Sort By":
         {
           return !(_selectedSortBy.value == SortBy.dateCreated &&
-              _selectedSortRule.value == SortRules.mostRecent);
+              _selectedSortRule.value == SortRules.ascending);
         }
       case "Amount":
         {
@@ -104,6 +108,10 @@ class _FilterSheetState extends State<FilterSheet> {
         {
           return _selectedUser.value.isNotEmpty;
         }
+      case "Split With":
+        {
+          return _selectedSplitWith.value.isNotEmpty;
+        }
       case "":
         {
           bool flag = false;
@@ -124,7 +132,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case "Sort By":
         {
           _selectedSortBy.value = SortBy.dateCreated;
-          _selectedSortRule.value = SortRules.mostRecent;
+          _selectedSortRule.value = SortRules.ascending;
         }
       case "Amount":
         {
@@ -157,6 +165,10 @@ class _FilterSheetState extends State<FilterSheet> {
       case "Created By":
         {
           _selectedUser.value = {};
+        }
+      case "Split With":
+        {
+          _selectedSplitWith.value = {};
         }
       case "":
         {
@@ -227,7 +239,6 @@ class _FilterSheetState extends State<FilterSheet> {
             });
           }
         }
-
       case (TransactionType.lenden):
         {
           final state = context.read<LendenRoomBloc>().state;
@@ -251,6 +262,43 @@ class _FilterSheetState extends State<FilterSheet> {
               }
             }
             userData = state.roomData.users.map((e) => e as UserModel).toList();
+            maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
+            _amountRange = RangeValues(0, maxAmount);
+            _dateRange = DateTimeRange(start: minDate, end: maxDate);
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _selectedAmountRange.value = _amountRange;
+              _selectedDateRange.value = _dateRange;
+              copyFilter();
+            });
+          }
+        }
+      case (TransactionType.room):
+        {
+          final state = context.read<RoomBloc>().state;
+          final roomInfoState = context.read<RoomInfoCubit>().state;
+          List<TransactionModel> data = [];
+
+          if (state is RoomFetchSuccess) {
+            data = state.data;
+            double maxAmount = 0;
+            DateTime minDate = DateTime.now();
+            DateTime maxDate = DateTime(1990);
+
+            for (int i = 0; i < data.length; i++) {
+              maxAmount = max(maxAmount, data[i].amount);
+              if (minDate.millisecondsSinceEpoch >
+                  data[i].createdOn.millisecondsSinceEpoch) {
+                minDate = data[i].createdOn;
+              }
+              if (maxDate.millisecondsSinceEpoch <
+                  data[i].createdOn.millisecondsSinceEpoch) {
+                maxDate = data[i].createdOn;
+              }
+            }
+            if (roomInfoState is RoomInfoSuccess) {
+              userData = roomInfoState.data.users.map((e) => e.user).toList();
+            }
             maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
             _amountRange = RangeValues(0, maxAmount);
             _dateRange = DateTimeRange(start: minDate, end: maxDate);
@@ -289,6 +337,17 @@ class _FilterSheetState extends State<FilterSheet> {
             "Type",
           ];
         }
+      case (TransactionType.room):
+        {
+          filterSections = [
+            "Sort By",
+            "Amount",
+            "Category",
+            "Created By",
+            "Date Created",
+            "Split With",
+          ];
+        }
       default:
         {}
     }
@@ -317,7 +376,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.personal):
         {
           _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
-          _selectedSortRule.value = state.sortRule ?? SortRules.mostRecent;
+          _selectedSortRule.value = state.sortRule ?? SortRules.ascending;
           _selectedCategory.value = state.selectedCategories;
           _selectedAmountRange.value = state.amountRange ?? _amountRange;
           _selectedDateRange.value = state.dateRange ?? _dateRange;
@@ -326,11 +385,21 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.lenden):
         {
           _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
-          _selectedSortRule.value = state.sortRule ?? SortRules.mostRecent;
+          _selectedSortRule.value = state.sortRule ?? SortRules.ascending;
           _selectedAmountRange.value = state.amountRange ?? _amountRange;
           _selectedDateRange.value = state.dateRange ?? _dateRange;
           _selectedUser.value = state.selectedUsers;
           _selectedLendenType.value = state.lendenType ?? LendenType.none;
+        }
+      case (TransactionType.room):
+        {
+          _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
+          _selectedSortRule.value = state.sortRule ?? SortRules.ascending;
+          _selectedAmountRange.value = state.amountRange ?? _amountRange;
+          _selectedDateRange.value = state.dateRange ?? _dateRange;
+          _selectedUser.value = state.selectedUsers;
+          _selectedCategory.value = state.selectedCategories;
+          _selectedSplitWith.value = state.splitWith;
         }
       default:
         {}
@@ -388,6 +457,36 @@ class _FilterSheetState extends State<FilterSheet> {
                 amountRange: _selectedAmountRange.value,
                 dateRange: _selectedDateRange.value,
                 data: data,
+                isFilterApplied: isFilterApplied(""),
+              ),
+              loggedInUserID,
+              widget.transactionType,
+            );
+          } else {
+            copyFilter();
+          }
+        }
+      case (TransactionType.room):
+        {
+          final state = context.read<FilterCubit>().state;
+          final expenseState = context.read<RoomBloc>().state;
+          List<TransactionModel> data = [];
+          if (expenseState is RoomFetchSuccess) {
+            data = expenseState.data;
+          }
+
+          if (updateState || state.id != widget.id) {
+            context.read<FilterCubit>().updateState(
+              FilterState(
+                id: widget.id,
+                sortBy: _selectedSortBy.value,
+                sortRule: _selectedSortRule.value,
+                selectedUsers: _selectedUser.value,
+                selectedCategories: _selectedCategory.value,
+                amountRange: _selectedAmountRange.value,
+                dateRange: _selectedDateRange.value,
+                data: data,
+                splitWith: _selectedSplitWith.value,
                 isFilterApplied: isFilterApplied(""),
               ),
               loggedInUserID,
@@ -619,6 +718,55 @@ class _FilterSheetState extends State<FilterSheet> {
                             _selectedUser.value = {};
                           } else {
                             _selectedUser.value = updatedSet;
+                          }
+                        },
+                        child: FilterWidget.buildCardWidget<int>(
+                          index,
+                          isSelected ? index : -1,
+                          userData[index].id == loggedInUserID ? "You" : "",
+                          user:
+                              userData[index].id == loggedInUserID
+                                  ? null
+                                  : userData[index],
+                        ),
+                      );
+                    }),
+                  );
+                },
+              )
+              : noRecordFoundWidget("No Data Found", context);
+        }
+      case "Split With":
+        {
+          return userData.isNotEmpty
+              ? ValueListenableBuilder(
+                valueListenable: _selectedSplitWith,
+                builder: (context, _, _) {
+                  return Wrap(
+                    spacing: UiConstant.spaceBetweenCard,
+                    children: List.generate(userData.length, (index) {
+                      bool isSelected = _selectedSplitWith.value.contains(
+                        userData[index].id,
+                      );
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                        onTap: () {
+                          Set<String> updatedSet = Set<String>.from(
+                            _selectedSplitWith.value,
+                          );
+                          if (_selectedSplitWith.value.contains(
+                            userData[index].id,
+                          )) {
+                            updatedSet.remove(userData[index].id);
+                          } else {
+                            updatedSet.add(userData[index].id);
+                          }
+                          if (updatedSet.length == userData.length) {
+                            _selectedSplitWith.value = {};
+                          } else {
+                            _selectedSplitWith.value = updatedSet;
                           }
                         },
                         child: FilterWidget.buildCardWidget<int>(

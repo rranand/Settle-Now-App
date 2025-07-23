@@ -9,6 +9,7 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close/room_close_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close_request/room_close_request_cubit.dart';
@@ -25,7 +26,10 @@ import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_settle_scree
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_transaction_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/sub_section/room_user_screen.dart';
 import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
+import 'package:settlenow_v2/util/custom/multi_value_listenable_builder.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
+import 'package:settlenow_v2/util/filter/filter_sheet.dart';
+import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
@@ -40,6 +44,8 @@ class RoomExpenseScreen extends StatefulWidget {
 }
 
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
+  final ValueNotifier<bool> isSearchEnabled = ValueNotifier(false);
+  final TextEditingController _searchController = TextEditingController();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _navBarHeight = 60;
   final ValueNotifier<int> _navbarSelectedIndex = ValueNotifier(0);
@@ -77,7 +83,10 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       case 3:
         return RoomSettleScreen(roomID: widget.id);
       default:
-        return RoomTransactionScreen(roomID: widget.id);
+        return RoomTransactionScreen(
+          roomID: widget.id,
+          searchController: _searchController,
+        );
     }
   }
 
@@ -314,6 +323,30 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     }
   }
 
+  void filterModelBottomSheet(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      enableDrag: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Colors.white,
+      builder: (context) {
+        final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+        return Padding(
+          padding: const EdgeInsets.all(
+            16.0,
+          ).add(EdgeInsets.only(bottom: keyboardHeight)),
+          child: FilterSheet(
+            id: widget.id,
+            transactionType: TransactionType.room,
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -324,6 +357,11 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       _loggedInUser = authState.userData;
 
       final state = context.read<RoomBloc>().state;
+      context.read<FilterCubit>().updateState(
+        FilterState(id: widget.id),
+        _loggedInUser.id,
+        TransactionType.room,
+      );
 
       if (!(state is RoomFetchSuccess && state.id == widget.id)) {
         context.read<RoomInfoCubit>().fetchData(
@@ -373,6 +411,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
   @override
   void dispose() {
+    isSearchEnabled.dispose();
     roomCloseRequestSubscription.cancel();
     roomCloseSubscription.cancel();
     super.dispose();
@@ -461,7 +500,36 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             leading: appBarBackButton(context),
             centerTitle: false,
             actions: appBarActionButton(context, [
-              IconButton(onPressed: () => {}, icon: Icon(Iconsax.info_circle)),
+              //IconButton(onPressed: () => {}, icon: Icon(Iconsax.info_circle)),
+              ValueListenableBuilder(
+                valueListenable: _navbarSelectedIndex,
+                builder: (context, _, _) {
+                  return Visibility(
+                    visible: _navbarSelectedIndex.value == 0,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(
+                        UiConstant.cardBorderRadius,
+                      ),
+                      child: Icon(Icons.search),
+                      onTap: () {
+                        isSearchEnabled.value = !isSearchEnabled.value;
+                      },
+                    ),
+                  );
+                },
+              ),
+              IconButton(
+                icon: BlocBuilder<FilterCubit, FilterState>(
+                  builder: (context, state) {
+                    bool haveFilter = state.isFilterApplied;
+                    return Icon(
+                      haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                      color: haveFilter ? Colors.green : null,
+                    );
+                  },
+                ),
+                onPressed: () => filterModelBottomSheet(context),
+              ),
             ]),
           ),
           body: RefreshIndicator(
@@ -472,9 +540,32 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
               totalTitle: _navBarTitles.length,
               child: CustomScrollView(
                 slivers: [
-                  SliverPadding(
-                    padding: paddingInsets,
-                    sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
+                  MultiValueListenableBuilder(
+                    listenables: [isSearchEnabled, _navbarSelectedIndex],
+                    builder: (BuildContext context) {
+                      if (isSearchEnabled.value &&
+                          _navbarSelectedIndex.value == 0) {
+                        return SliverPadding(
+                          padding: _mainScreenPadding,
+                          sliver: SliverAppBar(
+                            automaticallyImplyLeading: false,
+                            pinned: isSearchEnabled.value,
+                            backgroundColor: Colors.white,
+                            surfaceTintColor: Colors.white,
+                            title: CustomFormField.searchBar(
+                              "Search",
+                              isSearchEnabled,
+                              _searchController,
+                            ),
+                          ),
+                        );
+                      } else {
+                        return SliverPadding(
+                          padding: paddingInsets,
+                          sliver: SliverToBoxAdapter(child: _roomSummaryCard()),
+                        );
+                      }
+                    },
                   ),
                   ValueListenableBuilder(
                     valueListenable: _navbarSelectedIndex,

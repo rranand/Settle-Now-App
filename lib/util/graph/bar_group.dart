@@ -28,10 +28,9 @@ class BarGroup extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
-            width: 40,
+            width: 50,
             child: Text(
               user,
-              textAlign: TextAlign.right,
               maxLines: 4,
               style: const TextStyle(
                 fontSize: 14,

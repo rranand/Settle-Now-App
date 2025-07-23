@@ -12,6 +12,7 @@ class FilterState {
   final Set<String> selectedUsers;
   final String? splitType;
   final Set<String> selectedRoom;
+  final Set<String> splitWith;
   final bool isFilterApplied;
   final List<dynamic> data;
 
@@ -25,6 +26,7 @@ class FilterState {
     this.amountRange,
     this.dateRange,
     this.selectedUsers = const {},
+    this.splitWith = const {},
     this.splitType,
     this.isFilterApplied = false,
     this.data = const [],
@@ -40,6 +42,7 @@ class FilterState {
     RangeValues? amountRange,
     DateTimeRange? dateRange,
     Set<String>? selectedUsers,
+    Set<String>? splitWith,
     String? splitType,
     bool? isFilterApplied,
     List<dynamic>? data,
@@ -54,14 +57,10 @@ class FilterState {
       amountRange: amountRange ?? this.amountRange,
       dateRange: dateRange ?? this.dateRange,
       selectedUsers: selectedUsers ?? this.selectedUsers,
+      splitWith: splitWith ?? this.splitWith,
       splitType: splitType ?? this.splitType,
       isFilterApplied: isFilterApplied ?? this.isFilterApplied,
       data: data ?? this.data,
     );
-  }
-
-  @override
-  String toString() {
-    return 'FilterState(id: $id, sortBy: $sortBy, sortRule: $sortRule, lendenType: $lendenType, selectedCategories: $selectedCategories, amountRange: $amountRange, dateRange: $dateRange, selectedUsers: $selectedUsers, splitType: $splitType, selectedRoom: $selectedRoom, isFilterApplied: $isFilterApplied, data: $data)';
   }
 }
