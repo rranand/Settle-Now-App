@@ -281,6 +281,21 @@ class AuthDataProvider {
     }
   }
 
+  Future<void> deleteAccount(String authToken) async {
+    try {
+      final response = await createAPICall('user', "delete", authToken, {});
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<bool> logoutDifferentDevice(String authToken, String sessionID) async {
     try {
       final response = await createAPICall(
@@ -325,10 +340,21 @@ class AuthDataProvider {
     }
   }
 
-  Future<bool> updateProfile(UserModel userData) async {
+  Future<void> updateProfile(UserModel userData) async {
     try {
-      await Future.delayed(Duration(seconds: 2));
-      return true;
+      final response = await createAPICall(
+        'user',
+        "patch",
+        userData.authToken,
+        userData.updateProfileJSON(),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
     } catch (e) {
       rethrow;
     }

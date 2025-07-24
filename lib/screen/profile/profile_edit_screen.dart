@@ -39,6 +39,9 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       showNormalSnackBar(context, state.error!);
     }
     if (state.isUpdated == true) {
+      context.read<AuthBloc>().add(
+        AuthProfileUpdateRequested(state.newUserData!),
+      );
       context.pop();
     }
   }
@@ -48,6 +51,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       UserModel newData = UserModel.copyFromUser(_loggedInUser);
       newData.name = _name.text;
       newData.phoneNo = _mobileNumber.text;
+      newData.authToken = _loggedInUser.authToken;
       context.read<UserUpdateProfileCubit>().updateProfile(newData);
     }
   }
@@ -114,17 +118,24 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     inputDecoration: TextFormFieldInputBorder.underLine,
                     borderColor: Colors.black87,
                   ),
-                  SizedBox(height: UiConstant.spaceBetweenSection),
-                  CustomFormField.textFormField(
-                    _mobileNumber,
-                    textInputType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    hintText: 'Phone No',
-                    labelText: 'Phone No',
-                    validator: CustomValidator.validatePhoneNo,
-                    inputDecoration: TextFormFieldInputBorder.underLine,
-                    borderColor: Colors.black87,
-                    maxLength: 10,
+                  Visibility(
+                    visible: _mobileNumber.text.isNotEmpty,
+                    child: SizedBox(height: UiConstant.spaceBetweenSection),
+                  ),
+                  Visibility(
+                    visible: _mobileNumber.text.isNotEmpty,
+                    child: CustomFormField.textFormField(
+                      _mobileNumber,
+                      textInputType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      hintText: 'Phone No',
+                      labelText: 'Phone No',
+                      readOnly: true,
+                      validator: CustomValidator.validatePhoneNo,
+                      inputDecoration: TextFormFieldInputBorder.underLine,
+                      borderColor: Colors.black87,
+                      maxLength: 10,
+                    ),
                   ),
                   SizedBox(height: UiConstant.spaceBetweenSection),
                   CustomFormField.textFormField(

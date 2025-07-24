@@ -107,6 +107,15 @@ class AuthRepository {
     }
   }
 
+  Future<void> deleteAccount(String authToken) async {
+    try {
+      await _dataProvider.deleteAccount(authToken);
+      return;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<bool> logoutDifferentDevice(String authToken, String sessionID) async {
     try {
       final isLogoutSuccessful = await _dataProvider.logoutDifferentDevice(
@@ -132,10 +141,9 @@ class AuthRepository {
     }
   }
 
-  Future<bool> updateProfile(UserModel userData) async {
+  Future<void> updateProfile(UserModel userData) async {
     try {
-      final bool isUpdated = await _dataProvider.updateProfile(userData);
-      return isUpdated;
+      await _dataProvider.updateProfile(userData);
     } catch (e) {
       rethrow;
     }

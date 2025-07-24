@@ -60,7 +60,6 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
 // TODO : Setting for Room, Lenden
-// TODO : Update Profile
 // TODO : Handle Unauthorize Access State
 
 @pragma('vm:entry-point')

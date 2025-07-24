@@ -7,8 +7,11 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/card/loading_card.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -32,9 +35,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Iconsax.monitor_mobbile,
   ];
 
-  void _popMenuButtonHandler(int index) {}
+  void _popMenuButtonHandler(int index) {
+    switch (_popMenuTitle[index]) {
+      case "Delete My Account":
+        {
+          context.read<AuthBloc>().add(AuthProfileDeleteRequested());
+        }
+      default:
+        {}
+    }
+  }
 
-  void _blocListenerHandler(BuildContext context, AuthState state) {}
+  void _blocListenerHandler(BuildContext context, AuthState state) {
+    if (state is AuthLogoutFailure) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showNormalSnackBar(context, state.error);
+      });
+    } else if (state is AuthInitial) {
+      resetAllBlocs(context);
+      while (context.canPop()) {
+        context.pop();
+      }
+      context.pushReplacement(RouterConstants.loginRouteName);
+    }
+  }
 
   void _accountSectionButtonHandler(int index) {
     switch (index) {
@@ -70,6 +94,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return BlocConsumer<AuthBloc, AuthState>(
       listener: _blocListenerHandler,
       builder: (context, state) {
+        if (state is AuthLoginFailure) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: Scaffold(
+              body: Center(child: Text("Error Page: ${state.error}")),
+            ),
+          );
+        } else if (state is AuthLogoutLoading) {
+          return Scaffold(
+            appBar: AppBar(backgroundColor: Colors.transparent),
+            body: LoadingPage(),
+          );
+        }
         UserModel userData = UserModel.empty();
 
         if (state is AuthLoginSuccess) {

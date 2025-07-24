@@ -49,3 +49,5 @@ final class AuthProfileUpdateRequested extends AuthEvent {
 
   AuthProfileUpdateRequested(this.userData);
 }
+
+final class AuthProfileDeleteRequested extends AuthEvent {}

@@ -64,6 +64,10 @@ class UserModel {
     );
   }
 
+  Map<String, dynamic> updateProfileJSON() {
+    return <String, dynamic>{'name': Crypto.encrypt(name)};
+  }
+
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,

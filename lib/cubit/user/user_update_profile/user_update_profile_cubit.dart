@@ -13,7 +13,9 @@ class UserUpdateProfileCubit extends Cubit<UserUpdateProfileState> {
     emit(UserUpdateProfileState(isLoading: true));
     try {
       await repo.updateProfile(userData);
-      return emit(UserUpdateProfileState(isUpdated: true));
+      return emit(
+        UserUpdateProfileState(isUpdated: true, newUserData: userData),
+      );
     } catch (e) {
       return emit(UserUpdateProfileState(error: e.toString()));
     }

@@ -23,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthLoggedInUserRequested>(_authLoggedInUserRequested);
     on<AuthSignupOTPRequested>(_authSignupOTPRequested);
     on<AuthSignupOTPValidationRequested>(_authSignupOTPValidationRequested);
+    on<AuthProfileDeleteRequested>(_authProfileDeleteRequested);
   }
 
   void _authLoginRequested(
@@ -181,8 +182,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthProfileUpdateRequested event,
     Emitter<AuthState> emit,
   ) {
-    UserModel newUserData = UserModel.fromMap(event.userData.toMap());
-    return emit(AuthLoginSuccess(newUserData));
+    if (state is AuthLoginSuccess) {
+      UserModel oldUserData = (state as AuthLoginSuccess).userData;
+      UserModel newUserData = oldUserData.copyWith(name: event.userData.name);
+      return emit(AuthLoginSuccess(newUserData));
+    }
+  }
+
+  void _authProfileDeleteRequested(
+    AuthProfileDeleteRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    if (state is! AuthLoginSuccess) {
+      return emit(
+        AuthLogoutFailure(UserModel.empty(), "Invalid Logout Request"),
+      );
+    }
+
+    final userData = (state as AuthLoginSuccess).userData;
+    emit(AuthLogoutLoading(userData));
+
+    try {
+      await repo.deleteAccount(userData.authToken);
+      if (userData.isGoogle) {
+        await GoogleOauth.logout();
+      }
+      await LocalStoragePreference.clearAllPreferences();
+      return emit(AuthInitial());
+    } catch (e) {
+      emit(AuthLogoutFailure(userData, e.toString()));
+      return emit(AuthLoginSuccess(userData));
+    }
   }
 
   void _authLoggedInUserRequested(
