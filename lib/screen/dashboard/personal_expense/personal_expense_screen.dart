@@ -106,12 +106,15 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
 
-      context.read<FilterCubit>().updateState(
-        FilterState(id: widget.year + widget.month.toLowerCase()),
-        _loggedInUser.id,
-        TransactionType.personal,
-      );
-
+      final filterState = context.read<FilterCubit>().state;
+      String id = widget.year + widget.month.toLowerCase();
+      if (filterState.id != id) {
+        context.read<FilterCubit>().updateState(
+          FilterState(id: id),
+          _loggedInUser.id,
+          TransactionType.personal,
+        );
+      }
       final state = context.read<PersonalMonthlyExpenseBloc>().state;
       if (!(state is PersonalMonthlyExpenseFetchSuccess &&
           state.id == (widget.year + widget.month).toLowerCase())) {

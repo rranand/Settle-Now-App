@@ -278,12 +278,14 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
 
-      context.read<FilterCubit>().updateState(
-        FilterState(id: widget.id),
-        _loggedInUser.id,
-        TransactionType.lenden,
-      );
-
+      final filterState = context.read<FilterCubit>().state;
+      if (filterState.id != widget.id) {
+        context.read<FilterCubit>().updateState(
+          FilterState(id: widget.id),
+          _loggedInUser.id,
+          TransactionType.lenden,
+        );
+      }
       final state = context.read<LendenRoomBloc>().state;
 
       if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {

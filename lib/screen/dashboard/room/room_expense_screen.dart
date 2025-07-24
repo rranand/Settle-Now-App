@@ -18,6 +18,7 @@ import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -29,6 +30,7 @@ import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
 import 'package:settlenow_v2/util/custom/multi_value_listenable_builder.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/filter/filter_sheet.dart';
+import 'package:settlenow_v2/util/functions/room_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
@@ -166,63 +168,103 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       builder: (context, state) {
         if (state is RoomUserSuccess) {
           RoomUserModel data = RoomUserModel.empty();
+          RoomUserModel ogData = RoomUserModel.empty();
+
           double totalSpent = 0;
+          double ogTotalSpent = 0;
+
           for (int i = 0; i < state.data.length; i++) {
             if (_loggedInUser.id == state.data[i].user.id) {
               data = state.data[i];
             }
             totalSpent += state.data[i].contribution;
           }
+
+          ogTotalSpent = totalSpent;
+          ogData = data;
+
           double balance = data.contribution - data.spent + data.settle;
           balance = (balance.abs() < 1e-2) ? 0 : balance;
 
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 4,
-            child: Container(
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: GradientColorConstant.greenToTeal,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          return BlocBuilder<FilterCubit, FilterState>(
+            builder: (context, filterState) {
+              bool haveFilter = filterState.isFilterApplied;
+              debugPrint("Have Filter: $haveFilter");
+              if (haveFilter) {
+                List<RoomUserModel> filteredExpenseInfo =
+                    calculateUserExpenseInfo(
+                      state.data,
+                      filterState.data.cast<TransactionModel>(),
+                      [],
+                    );
+                totalSpent = 0;
+                for (int i = 0; i < filteredExpenseInfo.length; i++) {
+                  if (_loggedInUser.id == filteredExpenseInfo[i].user.id) {
+                    data = filteredExpenseInfo[i];
+                  }
+                  totalSpent += filteredExpenseInfo[i].contribution;
+                }
+              } else {
+                totalSpent = ogTotalSpent;
+                data = ogData;
+              }
+
+              return Stack(
                 children: [
-                  Text(
-                    "Room Overview",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 4,
+                    child: Container(
+                      padding: EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: GradientColorConstant.greenToTeal,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Room Overview",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _summaryBox(
+                                "Total Spent",
+                                formatCurrency(totalSpent, context),
+                              ),
+                              _summaryBox(
+                                "You Gave",
+                                formatCurrency(data.contribution, context),
+                              ),
+                              _summaryBox(
+                                "Balance",
+                                "${balance < 0 ? "" : "+"}${formatCurrency(balance, context)}",
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _summaryBox(
-                        "Total Spent",
-                        formatCurrency(totalSpent, context),
-                      ),
-                      _summaryBox(
-                        "You Gave",
-                        formatCurrency(data.contribution, context),
-                      ),
-                      _summaryBox(
-                        "Balance",
-                        "${balance < 0 ? "" : "+"}${formatCurrency(balance, context)}",
-                      ),
-                    ],
-                  ),
+                  haveFilter
+                      ? Positioned(top: 12, right: 12, child: dot())
+                      : SizedBox.shrink(),
                 ],
-              ),
-            ),
+              );
+            },
           );
         } else {
           return CustomShimmerEffect.placeHolderShimmerEffect(
@@ -356,13 +398,16 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
 
-      final state = context.read<RoomBloc>().state;
-      context.read<FilterCubit>().updateState(
-        FilterState(id: widget.id),
-        _loggedInUser.id,
-        TransactionType.room,
-      );
+      final filterState = context.read<FilterCubit>().state;
+      if (filterState.id != widget.id) {
+        context.read<FilterCubit>().updateState(
+          FilterState(id: widget.id),
+          _loggedInUser.id,
+          TransactionType.room,
+        );
+      }
 
+      final state = context.read<RoomBloc>().state;
       if (!(state is RoomFetchSuccess && state.id == widget.id)) {
         context.read<RoomInfoCubit>().fetchData(
           widget.id,
@@ -518,17 +563,25 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                   );
                 },
               ),
-              IconButton(
-                icon: BlocBuilder<FilterCubit, FilterState>(
-                  builder: (context, state) {
-                    bool haveFilter = state.isFilterApplied;
-                    return Icon(
-                      haveFilter ? Iconsax.filter_tick : Iconsax.filter,
-                      color: haveFilter ? Colors.green : null,
-                    );
-                  },
-                ),
-                onPressed: () => filterModelBottomSheet(context),
+              ValueListenableBuilder(
+                valueListenable: _navbarSelectedIndex,
+                builder: (context, _, _) {
+                  return Visibility(
+                    visible: _navbarSelectedIndex.value <= 1,
+                    child: IconButton(
+                      icon: BlocBuilder<FilterCubit, FilterState>(
+                        builder: (context, state) {
+                          bool haveFilter = state.isFilterApplied;
+                          return Icon(
+                            haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                            color: haveFilter ? Colors.green : null,
+                          );
+                        },
+                      ),
+                      onPressed: () => filterModelBottomSheet(context),
+                    ),
+                  );
+                },
               ),
             ]),
           ),

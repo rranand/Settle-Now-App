@@ -58,12 +58,10 @@ import 'package:settlenow_v2/theme/themes.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
-// TODO : Search, sort and filters in pages
-// FIXME : Fix graph getting rendering error and text at start looking very odd
 // TODO : Join Room via Deeplink
 // TODO : Setting for Room, Lenden
 // TODO : Update Profile
-// TODO : Handle Unauthoirze Access State
+// TODO : Handle Unauthorize Access State
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

@@ -37,11 +37,6 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Widget transactionCardDisplay(List<TransactionModel> data) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
     int noOfCardsToBeShown = (data.length / 2).toInt() + data.length % 2;
@@ -90,11 +85,16 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
         List<TransactionModel> data = [];
         if (state is RoomFetchSuccess) {
           data = state.data;
-          context.read<FilterCubit>().updateState(
-            FilterState(id: state.id, data: state.data),
-            _loggedInUser.id,
-            TransactionType.room,
-          );
+
+          final filterState = context.read<FilterCubit>().state;
+          if (!filterState.isFilterApplied &&
+              filterState.data.length != state.data.length) {
+            context.read<FilterCubit>().updateState(
+              FilterState(id: state.id, data: state.data),
+              _loggedInUser.id,
+              TransactionType.room,
+            );
+          }
 
           if (data.isEmpty) {
             return SliverToBoxAdapter(

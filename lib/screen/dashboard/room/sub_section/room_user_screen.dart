@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/functions/room_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -32,9 +35,8 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     return amount < 0 ? Colors.red : Colors.green;
   }
 
-  Widget _userExpenseWidget(RoomUserModel data) {
+  Widget _userExpenseWidget(RoomUserModel data, double amount) {
     UserModel user = data.user;
-    double amount = data.contribution - data.spent + data.settle;
 
     return Card(
       elevation: UiConstant.cardElevation,
@@ -129,44 +131,75 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget showUserExpenseInfo(
+    List<RoomUserModel> data,
+    Map<String, double> balanceMap,
+  ) {
     final cardSizeInfo = calculateCrossAspectRatio(
       MediaQuery.of(context).size.width,
       _mainScreenPadding,
       cardHeight: 135,
     );
+    return SliverGrid.builder(
+      itemCount: data.length,
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: cardSizeInfo[0],
+        mainAxisSpacing: UiConstant.spaceBetweenCard,
+        crossAxisSpacing: UiConstant.spaceBetweenCard,
+        childAspectRatio: cardSizeInfo[1],
+      ),
+      itemBuilder: (BuildContext context, int index) {
+        double amount = balanceMap[data[index].user.id] ?? 0;
+        return _userExpenseWidget(data[index], amount);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<RoomUserCubit, RoomUserState>(
       builder: (context, state) {
         List<RoomUserModel> data = [];
+        Map<String, double> balanceMap = {};
 
         if (state is RoomUserSuccess) {
           data = state.data;
-        } else {
-          data = List.filled(11, RoomUserModel.empty());
-        }
 
-        if (data.isEmpty) {
-          return SliverToBoxAdapter(
-            child: noRecordFoundWidget(
-              "Something went wrong, Refresh!",
-              context,
-            ),
+          for (int i = 0; i < data.length; i++) {
+            balanceMap[data[i].user.id] =
+                data[i].contribution - data[i].spent + data[i].settle;
+          }
+
+          if (data.isEmpty) {
+            return SliverToBoxAdapter(
+              child: noRecordFoundWidget(
+                "Something went wrong, Refresh!",
+                context,
+              ),
+            );
+          }
+
+          return BlocBuilder<FilterCubit, FilterState>(
+            builder: (context, filterState) {
+              bool haveFilter = filterState.isFilterApplied;
+              if (haveFilter) {
+                data = calculateUserExpenseInfo(
+                  state.data,
+                  filterState.data.cast<TransactionModel>(),
+                  [],
+                );
+              } else {
+                data = state.data;
+              }
+              return showUserExpenseInfo(data, balanceMap);
+            },
+          );
+        } else {
+          return showUserExpenseInfo(
+            List.filled(11, RoomUserModel.empty()),
+            balanceMap,
           );
         }
-
-        return SliverGrid.builder(
-          itemCount: data.length,
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: cardSizeInfo[0],
-            mainAxisSpacing: UiConstant.spaceBetweenCard,
-            crossAxisSpacing: UiConstant.spaceBetweenCard,
-            childAspectRatio: cardSizeInfo[1],
-          ),
-          itemBuilder: (BuildContext context, int index) {
-            return _userExpenseWidget(data[index]);
-          },
-        );
       },
     );
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/model/category_amount_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
@@ -92,52 +91,43 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
               child: noRecordFoundWidget("No Transaction Found", context),
             );
           } else {
-            return BlocBuilder<FilterCubit, FilterState>(
-              builder: (context, filterState) {
-                List<TransactionModel> filteredData =
-                    filterState.data.cast<TransactionModel>();
-                return ValueListenableBuilder(
-                  valueListenable: _selectedGraphIndex,
-                  builder: (context, _, _) {
-                    return SliverList(
-                      delegate: SliverChildListDelegate([
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Wrap(
-                            spacing: UiConstant.spaceBetweenCard,
-                            children: List.generate(
-                              graphTitle.length,
-                              (index) => InkWell(
-                                borderRadius: BorderRadius.circular(60),
-                                onTap: () => _selectedGraphIndex.value = index,
-                                child: Chip(
-                                  label: Text(graphTitle[index]),
-                                  side: BorderSide(
-                                    color:
-                                        index == _selectedGraphIndex.value
-                                            ? Colors.deepPurple.shade500
-                                            : Colors.black26,
-                                  ),
-                                  labelStyle:
-                                      index == _selectedGraphIndex.value
-                                          ? TextStyle(
-                                            color: Colors.deepPurple.shade500,
-                                          )
-                                          : null,
-                                  backgroundColor: Colors.white,
-                                ),
+            return ValueListenableBuilder(
+              valueListenable: _selectedGraphIndex,
+              builder: (context, _, _) {
+                return SliverList(
+                  delegate: SliverChildListDelegate([
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Wrap(
+                        spacing: UiConstant.spaceBetweenCard,
+                        children: List.generate(
+                          graphTitle.length,
+                          (index) => InkWell(
+                            borderRadius: BorderRadius.circular(60),
+                            onTap: () => _selectedGraphIndex.value = index,
+                            child: Chip(
+                              label: Text(graphTitle[index]),
+                              side: BorderSide(
+                                color:
+                                    index == _selectedGraphIndex.value
+                                        ? Colors.deepPurple.shade500
+                                        : Colors.black26,
                               ),
+                              labelStyle:
+                                  index == _selectedGraphIndex.value
+                                      ? TextStyle(
+                                        color: Colors.deepPurple.shade500,
+                                      )
+                                      : null,
+                              backgroundColor: Colors.white,
                             ),
                           ),
                         ),
-                        SizedBox(height: UiConstant.spaceBetweenSection),
-                        _graphController(
-                          _selectedGraphIndex.value,
-                          filteredData,
-                        ),
-                      ]),
-                    );
-                  },
+                      ),
+                    ),
+                    SizedBox(height: UiConstant.spaceBetweenSection),
+                    _graphController(_selectedGraphIndex.value, data),
+                  ]),
                 );
               },
             );

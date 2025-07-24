@@ -63,4 +63,9 @@ class FilterState {
       data: data ?? this.data,
     );
   }
+
+  @override
+  String toString() {
+    return 'FilterState(id: $id, sortBy: $sortBy, sortRule: $sortRule, lendenType: $lendenType, selectedCategories: $selectedCategories, amountRange: $amountRange, dateRange: $dateRange, selectedUsers: $selectedUsers, splitType: $splitType, selectedRoom: $selectedRoom, splitWith: $splitWith, isFilterApplied: $isFilterApplied, data: ${data.length})';
+  }
 }

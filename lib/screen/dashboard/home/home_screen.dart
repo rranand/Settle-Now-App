@@ -205,18 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return SizedBox.shrink();
               }
             },
-            child: Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.red,
-                ),
-              ),
-            ),
+            child: Positioned(top: 0, right: 0, child: dot()),
           ),
           Icon(bottomNavigationButtonIcon[index]),
         ],

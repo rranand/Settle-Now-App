@@ -155,3 +155,11 @@ Widget noRecordFoundWidget(String txt, BuildContext context) {
     ],
   );
 }
+
+Widget dot() {
+  return Container(
+    width: 8,
+    height: 8,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red),
+  );
+}
