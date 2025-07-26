@@ -36,3 +36,15 @@ final class LendenDeleteTransaction extends LendenRoomEvent {
 }
 
 final class LendenRoomReset extends LendenRoomEvent {}
+
+final class LendenRoomUpdate extends LendenRoomEvent {
+  final String roomName;
+  final String authToken;
+  final ScaffoldMessengerState scaffoldMessengerState;
+
+  LendenRoomUpdate({
+    required this.roomName,
+    required this.authToken,
+    required this.scaffoldMessengerState,
+  });
+}

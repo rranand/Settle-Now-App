@@ -223,7 +223,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         scaffoldMessenger: event.scaffoldMessenger,
       );
     } catch (e) {
-      event.scaffoldMessenger.hideCurrentSnackBar();
       emit(AuthLogoutFailure(userData, e.toString()));
     }
     return emit(AuthLoginSuccess(userData));

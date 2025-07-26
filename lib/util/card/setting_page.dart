@@ -52,6 +52,33 @@ class _SettingPageState extends State<SettingPage> {
     }
   }
 
+  void roomUpdateHandler() {
+    if (_roomUpdateFormKey.currentState!.validate()) {
+      switch (widget.transactionType) {
+        case (TransactionType.lenden):
+          {
+            context.read<LendenRoomBloc>().add(
+              LendenRoomUpdate(
+                roomName: _roomNameController.text,
+                authToken: _loggedInUser.authToken,
+                scaffoldMessengerState: ScaffoldMessenger.of(context),
+              ),
+            );
+          }
+        case (TransactionType.room):
+          {
+            context.read<RoomInfoCubit>().updateRoomName(
+              _loggedInUser.authToken,
+              _roomNameController.text,
+              ScaffoldMessenger.of(context),
+            );
+          }
+        default:
+          {}
+      }
+    }
+  }
+
   void populateData() {
     switch (widget.transactionType) {
       case (TransactionType.room):
@@ -160,7 +187,12 @@ class _SettingPageState extends State<SettingPage> {
             builder: (context, _, _) {
               return Visibility(
                 visible: _roomNameController.text != ogRoomName,
-                child: IconButton(icon: Icon(Icons.check), onPressed: () => {}),
+                child: IconButton(
+                  icon: Icon(Icons.check),
+                  onPressed: () {
+                    roomUpdateHandler();
+                  },
+                ),
               );
             },
           ),
