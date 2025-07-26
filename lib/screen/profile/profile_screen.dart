@@ -7,11 +7,8 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
-import 'package:settlenow_v2/util/card/loading_card.dart';
-import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
@@ -28,6 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     vertical: 18.0,
     horizontal: 14,
   );
+  UserModel _loggedInUser = UserModel.empty();
   final List<String> _popMenuTitle = ["Delete My Account"];
   final List<String> _accountSectionTitle = ["Edit Profile", "Login Activity"];
   final List<IconData> _accountSectionIconData = [
@@ -35,28 +33,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Iconsax.monitor_mobbile,
   ];
 
-  void _popMenuButtonHandler(int index) {
+  void _popMenuButtonHandler(int index) async {
     switch (_popMenuTitle[index]) {
       case "Delete My Account":
         {
-          context.read<AuthBloc>().add(AuthProfileDeleteRequested());
+          final AuthBloc authBloc = context.read<AuthBloc>();
+          final ScaffoldMessengerState scaffoldMessengerState =
+              ScaffoldMessenger.of(context);
+          bool isDeletePermitted = await deleteAccountDialog(
+            context,
+            _loggedInUser.email,
+          );
+          if (context.mounted && isDeletePermitted) {
+            authBloc.add(AuthProfileDeleteRequested(scaffoldMessengerState));
+          }
         }
       default:
         {}
-    }
-  }
-
-  void _blocListenerHandler(BuildContext context, AuthState state) {
-    if (state is AuthLogoutFailure) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showNormalSnackBar(context, state.error);
-      });
-    } else if (state is AuthInitial) {
-      resetAllBlocs(context);
-      while (context.canPop()) {
-        context.pop();
-      }
-      context.pushReplacement(RouterConstants.loginRouteName);
     }
   }
 
@@ -90,196 +83,178 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthLoginSuccess) {
+      _loggedInUser = authState.userData;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: _blocListenerHandler,
-      builder: (context, state) {
-        if (state is AuthLoginFailure) {
-          return Scaffold(
-            appBar: AppBar(backgroundColor: Colors.transparent),
-            body: Scaffold(
-              body: Center(child: Text("Error Page: ${state.error}")),
-            ),
-          );
-        } else if (state is AuthLogoutLoading) {
-          return Scaffold(
-            appBar: AppBar(backgroundColor: Colors.transparent),
-            body: LoadingPage(),
-          );
-        }
-        UserModel userData = UserModel.empty();
-
-        if (state is AuthLoginSuccess) {
-          userData = state.userData;
-        }
-
-        return Scaffold(
-          appBar: AppBar(
-            title: Text("Profile"),
-            titleSpacing: _mainScreenPadding.left,
-            leading: appBarBackButton(context),
-            actions: appBarActionButton(
-              context,
-              userData.hasData
-                  ? [
-                    PopupMenuButton<int>(
-                      icon: Icon(Icons.more_vert),
-                      onSelected: _popMenuButtonHandler,
-                      itemBuilder:
-                          (context) => List.generate(
-                            _popMenuTitle.length,
-                            (index) => PopupMenuItem(
-                              value: index,
-                              child: Text(_popMenuTitle[index]),
-                            ),
-                          ),
-                    ),
-                  ]
-                  : [],
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Profile"),
+        titleSpacing: _mainScreenPadding.left,
+        leading: appBarBackButton(context),
+        actions: appBarActionButton(
+          context,
+          _loggedInUser.hasData
+              ? [
+                PopupMenuButton<int>(
+                  icon: Icon(Icons.more_vert),
+                  onSelected: _popMenuButtonHandler,
+                  itemBuilder:
+                      (context) => List.generate(
+                        _popMenuTitle.length,
+                        (index) => PopupMenuItem(
+                          value: index,
+                          child: Text(_popMenuTitle[index]),
+                        ),
+                      ),
+                ),
+              ]
+              : [],
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: _mainScreenPadding.add(
+          EdgeInsets.only(
+            top: UiConstant.spaceBetweenSection,
+            bottom: 2 * UiConstant.spaceBetweenSection,
           ),
-          body: SingleChildScrollView(
-            padding: _mainScreenPadding.add(
-              EdgeInsets.only(
-                top: UiConstant.spaceBetweenSection,
-                bottom: 2 * UiConstant.spaceBetweenSection,
+        ),
+        child: Column(
+          children: [
+            Card(
+              elevation: UiConstant.cardElevation,
+              color: Colors.white,
+              child: Padding(
+                padding: _cardPadding,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _loggedInUser.hasData
+                        ? overlapUserImageWidget(
+                          context,
+                          [_loggedInUser],
+                          1,
+                          imageRadius: 100,
+                        )
+                        : CustomShimmerEffect.overlapImageWidget(
+                          noOfImages: 1,
+                          imageRadius: 100,
+                        ),
+                    SizedBox(width: UiConstant.spaceBetweenRowSection),
+                    _loggedInUser.hasData
+                        ? Text.rich(
+                          TextSpan(
+                            text: _loggedInUser.name,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: "\n",
+                                children: [
+                                  TextSpan(
+                                    text: _loggedInUser.email,
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontSize: kDefaultFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        )
+                        : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            CustomShimmerEffect.textWidget(
+                              fontSize: 24,
+                              width: 150,
+                            ),
+                            SizedBox(height: 4),
+                            CustomShimmerEffect.textWidget(width: 200),
+                          ],
+                        ),
+                  ],
+                ),
               ),
             ),
-            child: Column(
-              children: [
-                Card(
+            SizedBox(height: UiConstant.spaceBetweenSection),
+            _loggedInUser.hasData
+                ? Card(
                   elevation: UiConstant.cardElevation,
                   color: Colors.white,
                   child: Padding(
                     padding: _cardPadding,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        userData.hasData
-                            ? overlapUserImageWidget(
-                              context,
-                              [userData],
-                              1,
-                              imageRadius: 100,
-                            )
-                            : CustomShimmerEffect.overlapImageWidget(
-                              noOfImages: 1,
-                              imageRadius: 100,
+                        Text(
+                          "Account",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        ...List.generate(
+                          _accountSectionTitle.length,
+                          (index) => Padding(
+                            padding: EdgeInsets.only(
+                              top: UiConstant.spaceBetweenSection,
                             ),
-                        SizedBox(width: UiConstant.spaceBetweenRowSection),
-                        userData.hasData
-                            ? Text.rich(
-                              TextSpan(
-                                text: userData.name,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 24,
-                                ),
-                                children: [
-                                  TextSpan(
-                                    text: "\n",
-                                    children: [
-                                      TextSpan(
-                                        text: userData.email,
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: kDefaultFontSize,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
+                            child: ListTile(
+                              contentPadding: EdgeInsets.zero,
+                              leading: colouredIcon(
+                                Icon(_accountSectionIconData[index]),
+                                UiConstant.colorsWithShade100[index],
                               ),
-                            )
-                            : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                CustomShimmerEffect.textWidget(
-                                  fontSize: 24,
-                                  width: 150,
-                                ),
-                                SizedBox(height: 4),
-                                CustomShimmerEffect.textWidget(width: 200),
-                              ],
+                              title: Text(_accountSectionTitle[index]),
+                              trailing: Icon(Iconsax.arrow_right_34),
+                              onTap: () {
+                                _accountSectionButtonHandler(index);
+                              },
                             ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
-                SizedBox(height: UiConstant.spaceBetweenSection),
-                userData.hasData
-                    ? Card(
-                      elevation: UiConstant.cardElevation,
+                )
+                : CustomShimmerEffect.placeHolderShimmerEffect(
+                  Container(
+                    height: 190,
+                    padding: _cardPadding,
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      child: Padding(
-                        padding: _cardPadding,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Account",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            ...List.generate(
-                              _accountSectionTitle.length,
-                              (index) => Padding(
-                                padding: EdgeInsets.only(
-                                  top: UiConstant.spaceBetweenSection,
-                                ),
-                                child: ListTile(
-                                  contentPadding: EdgeInsets.zero,
-                                  leading: colouredIcon(
-                                    Icon(_accountSectionIconData[index]),
-                                    UiConstant.colorsWithShade100[index],
-                                  ),
-                                  title: Text(_accountSectionTitle[index]),
-                                  trailing: Icon(Iconsax.arrow_right_34),
-                                  onTap: () {
-                                    _accountSectionButtonHandler(index);
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                    : CustomShimmerEffect.placeHolderShimmerEffect(
-                      Container(
-                        height: 190,
-                        padding: _cardPadding,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                SizedBox(height: UiConstant.spaceBetweenSection),
-                Card(
-                  elevation: UiConstant.cardElevation,
-                  color: Colors.white,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 14.0,
-                      horizontal: 14,
-                    ),
-                    child: Center(
-                      child:
-                          userData.hasData
-                              ? Text(
-                                "Member Since ${convertInDateFormat(userData.createdOn)}",
-                                style: TextStyle(color: Colors.grey),
-                              )
-                              : CustomShimmerEffect.textWidget(width: 250),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
-              ],
+            SizedBox(height: UiConstant.spaceBetweenSection),
+            Card(
+              elevation: UiConstant.cardElevation,
+              color: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 14),
+                child: Center(
+                  child:
+                      _loggedInUser.hasData
+                          ? Text(
+                            "Member Since ${convertInDateFormat(_loggedInUser.createdOn)}",
+                            style: TextStyle(color: Colors.grey),
+                          )
+                          : CustomShimmerEffect.textWidget(width: 250),
+                ),
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }

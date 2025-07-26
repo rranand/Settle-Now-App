@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
 
 class AuthGate extends StatelessWidget {
@@ -9,18 +11,27 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.watch<AuthBloc>().state;
-
-    if (authState is AuthLoginLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: false,
-        ),
-        body: LoadingPage(),
-      );
-    }
-
-    return child;
+    return BlocConsumer<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthInitial) {
+          while (context.canPop()) {
+            context.pop();
+          }
+          return context.pushReplacement(RouterConstants.loginRouteName);
+        }
+      },
+      builder: (context, state) {
+        if (state is AuthLoginLoading) {
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              automaticallyImplyLeading: false,
+            ),
+            body: LoadingPage(),
+          );
+        }
+        return child;
+      },
+    );
   }
 }

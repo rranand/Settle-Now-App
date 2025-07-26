@@ -5,7 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
+import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/functions/validator.dart';
+import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
 Widget dateOnCard(String date, {bool isLoaded = true}) {
@@ -162,4 +165,97 @@ Widget dot() {
     height: 8,
     decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.red),
   );
+}
+
+Future<bool> deleteExpenseDialog(BuildContext context) async {
+  List<String>? res = await showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Delete Expense"),
+        content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context.pop(["No"]);
+            },
+            child: Text("No"),
+          ),
+          TextButton(
+            onPressed: () {
+              context.pop(["Yes"]);
+            },
+            child: Text("Yes"),
+          ),
+        ],
+      );
+    },
+  );
+  if (res == null) {
+    return false;
+  } else {
+    return res.contains("Yes");
+  }
+}
+
+Future<bool> deleteAccountDialog(
+  BuildContext context,
+  String loggedInEmail,
+) async {
+  final GlobalKey<FormState> accountDeleteFormKey = GlobalKey<FormState>();
+  final TextEditingController emailController = TextEditingController();
+
+  List<String>? res = await showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Delete Account"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Type your email to confirm", style: TextStyle(fontSize: 18)),
+            Form(
+              key: accountDeleteFormKey,
+              child: CustomFormField.textFormField(
+                emailController,
+                hintText: 'Email',
+                labelText: 'Your Email',
+                validator: (value) {
+                  String? error = CustomValidator.validateEmail(value);
+                  if (error == null && loggedInEmail != emailController.text) {
+                    return "Wrong Email";
+                  } else {
+                    return error;
+                  }
+                },
+                inputDecoration: TextFormFieldInputBorder.underLine,
+                borderColor: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context.pop(["No"]);
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              if (accountDeleteFormKey.currentState!.validate()) {
+                context.pop(["Yes"]);
+              }
+            },
+            child: Text("Confirm"),
+          ),
+        ],
+      );
+    },
+  );
+  if (res == null) {
+    return false;
+  } else {
+    return res.contains("Yes");
+  }
 }

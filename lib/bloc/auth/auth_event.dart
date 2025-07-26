@@ -50,4 +50,8 @@ final class AuthProfileUpdateRequested extends AuthEvent {
   AuthProfileUpdateRequested(this.userData);
 }
 
-final class AuthProfileDeleteRequested extends AuthEvent {}
+final class AuthProfileDeleteRequested extends AuthEvent {
+  final ScaffoldMessengerState scaffoldMessenger;
+
+  AuthProfileDeleteRequested(this.scaffoldMessenger);
+}

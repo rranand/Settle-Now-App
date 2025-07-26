@@ -31,38 +31,6 @@ class TransactionCard extends StatefulWidget {
 }
 
 class _TransactionCardState extends State<TransactionCard> {
-  void _deleteExpenseDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Delete Expense"),
-          content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop();
-              },
-              child: Text("No"),
-            ),
-            TextButton(
-              onPressed: () {
-                context.pop();
-                context.read<NewTransactionCubit>().deleteExpense(
-                  context,
-                  widget.data.id,
-                  TransactionType.personal,
-                  expenseType: widget.data.roomData.transactionType,
-                );
-              },
-              child: Text("Yes"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   bool showEdited() {
     return !isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn) ||
         !widget.data.hasData;
@@ -123,9 +91,21 @@ class _TransactionCardState extends State<TransactionCard> {
                         color: Colors.grey,
                         size: widget.data.roomData.hasData ? null : 20,
                       ),
-                      onTap: () {
+                      onTap: () async {
                         if (widget.data.roomData.hasData) {
-                          _deleteExpenseDialog();
+                          final NewTransactionCubit newTransactionCubit =
+                              context.read<NewTransactionCubit>();
+                          bool isDeleteAllowed = await deleteExpenseDialog(
+                            context,
+                          );
+                          if (context.mounted && isDeleteAllowed) {
+                            newTransactionCubit.deleteExpense(
+                              context,
+                              widget.data.id,
+                              TransactionType.personal,
+                              expenseType: widget.data.roomData.transactionType,
+                            );
+                          }
                         } else {
                           context.push(
                             "${RouterConstants.personalExpenseRouteName}/${widget.data.createdOn.year}/${CalenderConstant.monthName[widget.data.createdOn.month]}${RouterConstants.personalExpenseEditExpenseRouteName}",

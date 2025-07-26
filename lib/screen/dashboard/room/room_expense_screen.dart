@@ -189,7 +189,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           return BlocBuilder<FilterCubit, FilterState>(
             builder: (context, filterState) {
               bool haveFilter = filterState.isFilterApplied;
-              debugPrint("Have Filter: $haveFilter");
               if (haveFilter) {
                 List<RoomUserModel> filteredExpenseInfo =
                     calculateUserExpenseInfo(

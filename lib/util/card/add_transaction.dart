@@ -367,38 +367,6 @@ class _AddTransactionState extends State<AddTransaction> {
     _selectedUserIDSet.value = tempUserIDs;
   }
 
-  void _deleteExpenseDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Delete Expense"),
-          content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop();
-              },
-              child: Text("No"),
-            ),
-            TextButton(
-              onPressed: () {
-                context.pop();
-                context.read<NewTransactionCubit>().deleteExpense(
-                  context,
-                  widget.transactionData!.id,
-                  transactionType,
-                  expenseType: expenseType,
-                );
-              },
-              child: Text("Yes"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   void initState() {
     super.initState();
@@ -556,8 +524,20 @@ class _AddTransactionState extends State<AddTransaction> {
                     ? null
                     : [
                       IconButton(
-                        onPressed: () {
-                          _deleteExpenseDialog();
+                        onPressed: () async {
+                          final NewTransactionCubit newTransactionCubit =
+                              context.read<NewTransactionCubit>();
+                          bool isDeletePermitted = await deleteExpenseDialog(
+                            context,
+                          );
+                          if (context.mounted && isDeletePermitted) {
+                            newTransactionCubit.deleteExpense(
+                              context,
+                              widget.transactionData!.id,
+                              transactionType,
+                              expenseType: expenseType,
+                            );
+                          }
                         },
                         icon: Icon(Icons.delete_outline),
                       ),

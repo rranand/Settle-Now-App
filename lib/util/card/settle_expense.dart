@@ -109,39 +109,6 @@ class _SettleExpenseState extends State<SettleExpense> {
     );
   }
 
-  void _deleteExpenseDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Delete Expense"),
-          content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
-          actions: [
-            TextButton(
-              onPressed: () {
-                context.pop();
-              },
-              child: Text("No"),
-            ),
-            TextButton(
-              onPressed: () {
-                context.pop();
-                context.read<RoomSettleUpsertCubit>().deleteSettleExpense(
-                  widget.roomID,
-                  widget.transactionData!.id,
-                  widget.transactionData!.sender.id,
-                  widget.transactionData!.receiver.id,
-                  _loggedInUser.authToken,
-                );
-              },
-              child: Text("Yes"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   void _blocListenerHandler(BuildContext context, RoomSettleUpsertState state) {
     if (state is RoomSettleUpsertFailure) {
       showNormalSnackBar(context, state.error);
@@ -320,7 +287,9 @@ class _SettleExpenseState extends State<SettleExpense> {
           return _loadingScreen();
         }
         if (users.isEmpty) {
-          return _loadingScreen(child: noRecordFoundWidget("No User Found", context));
+          return _loadingScreen(
+            child: noRecordFoundWidget("No User Found", context),
+          );
         }
         return BlocConsumer<RoomSettleUpsertCubit, RoomSettleUpsertState>(
           listener: _blocListenerHandler,
@@ -340,8 +309,22 @@ class _SettleExpenseState extends State<SettleExpense> {
                         ? null
                         : [
                           IconButton(
-                            onPressed: () {
-                              _deleteExpenseDialog();
+                            onPressed: () async {
+                              final RoomSettleUpsertCubit
+                              roomSettleUpsertCubit =
+                                  context.read<RoomSettleUpsertCubit>();
+                              bool isDeleteAllowed = await deleteExpenseDialog(
+                                context,
+                              );
+                              if (isDeleteAllowed) {
+                                roomSettleUpsertCubit.deleteSettleExpense(
+                                  widget.roomID,
+                                  widget.transactionData!.id,
+                                  widget.transactionData!.sender.id,
+                                  widget.transactionData!.receiver.id,
+                                  _loggedInUser.authToken,
+                                );
+                              }
                             },
                             icon: Icon(Icons.delete_outline),
                           ),

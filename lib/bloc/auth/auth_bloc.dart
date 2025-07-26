@@ -1,10 +1,13 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -198,21 +201,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         AuthLogoutFailure(UserModel.empty(), "Invalid Logout Request"),
       );
     }
-
+    showSnackbarWithChildWidget(
+      "Requesting Account Delete",
+      child: SizedBox(
+        width: 16,
+        height: 16,
+        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
+      ),
+      duration: Duration(minutes: 2),
+      scaffoldMessenger: event.scaffoldMessenger,
+    );
     final userData = (state as AuthLoginSuccess).userData;
     emit(AuthLogoutLoading(userData));
 
     try {
       await repo.deleteAccount(userData.authToken);
-      if (userData.isGoogle) {
-        await GoogleOauth.logout();
-      }
-      await LocalStoragePreference.clearAllPreferences();
-      return emit(AuthInitial());
+      event.scaffoldMessenger.hideCurrentSnackBar();
+      showSnackbarWithChildWidget(
+        "Account Delete Requested",
+        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        scaffoldMessenger: event.scaffoldMessenger,
+      );
     } catch (e) {
+      event.scaffoldMessenger.hideCurrentSnackBar();
       emit(AuthLogoutFailure(userData, e.toString()));
-      return emit(AuthLoginSuccess(userData));
     }
+    return emit(AuthLoginSuccess(userData));
   }
 
   void _authLoggedInUserRequested(
@@ -222,10 +236,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
     try {
       UserModel userData = await repo.getLoggedInUser();
-      return emit(AuthLoginSuccess(userData));
+      if (userData.hasData) {
+        return emit(AuthLoginSuccess(userData));
+      } else {
+        return emit(AuthInitial());
+      }
     } catch (e) {
       if (e.toString().toLowerCase() == "unauthorized access") {
-        emit(AuthLogoutLoading(UserModel.empty()));
         return emit(AuthInitial());
       } else {
         return emit(AuthLoginFailure(e.toString()));

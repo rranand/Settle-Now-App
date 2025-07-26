@@ -405,8 +405,8 @@ class AppRouterConfig {
       routes: _allRoutes(),
       //initialLocation: '/lenden/66e572819665f6a43a541f0b',
       //initialLocation: '/personal/2023/February',
-      //initialLocation: RouterConstants.dashboardRouteName,
-      initialLocation: '/room/662c52edc67c51d882638463',
+      initialLocation: RouterConstants.dashboardRouteName,
+      //initialLocation: '/room/662c52edc67c51d882638463',
       observers: [observer],
       refreshListenable: StreamToListenable(authBloc.stream),
       redirect: (context, state) {
