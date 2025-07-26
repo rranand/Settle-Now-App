@@ -120,6 +120,30 @@ class RoomDataProvider {
     }
   }
 
+  Future<void> updateRoom(
+    String id,
+    String authToken,
+    String newRoomName,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'lenden/$id/update',
+        "patch",
+        authToken,
+        {"name": Crypto.encrypt(newRoomName)},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<TransactionModel> createExpense(
     String id,
     NewTransactionModel data,

@@ -18,15 +18,19 @@ class CustomButton {
       width: buttonWidth,
       height: buttonHeight,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          elevation: elevation,
-          backgroundColor: backgroundColor,
-          side: BorderSide(
-            width: borderWidth,
-            color: borderColor ?? Colors.transparent,
+        style: ButtonStyle(
+          elevation: WidgetStateProperty.all(elevation),
+          backgroundColor: WidgetStateProperty.all(backgroundColor),
+          side: WidgetStateProperty.all(
+            BorderSide(
+              width: borderWidth,
+              color: borderColor ?? Colors.transparent,
+            ),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(borderRadius ?? 100),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius ?? 100),
+            ),
           ),
         ),
         onPressed: onPressed,

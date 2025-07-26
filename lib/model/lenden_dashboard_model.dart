@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/model/lenden_user_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
@@ -11,6 +12,7 @@ class LendenDashboardModel {
   String id = "";
   String roomName = "";
   String status = "";
+  UserModel createdBy = UserModel.empty();
   DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
   double amount = 0;
@@ -20,6 +22,7 @@ class LendenDashboardModel {
     required this.id,
     required this.roomName,
     required this.status,
+    required this.createdBy,
     required this.createdOn,
     required this.modifiedOn,
     required this.amount,
@@ -32,6 +35,7 @@ class LendenDashboardModel {
     String? id,
     String? roomName,
     String? status,
+    UserModel? createdBy,
     DateTime? createdOn,
     DateTime? modifiedOn,
     double? amount,
@@ -42,6 +46,7 @@ class LendenDashboardModel {
       roomName: roomName ?? this.roomName,
       status: status ?? this.status,
       createdOn: createdOn ?? this.createdOn,
+      createdBy: createdBy ?? this.createdBy,
       modifiedOn: modifiedOn ?? this.modifiedOn,
       amount: amount ?? this.amount,
       users: users ?? this.users,
@@ -53,6 +58,7 @@ class LendenDashboardModel {
       'id': id,
       'roomName': roomName,
       'status': status,
+      'createdBy': createdBy.toMap(),
       'createdOn': createdOn.toString(),
       'modifiedOn': modifiedOn.toString(),
       'amount': amount.toString(),
@@ -65,6 +71,7 @@ class LendenDashboardModel {
       id: Crypto.decrypt(map['id']),
       roomName: Crypto.decrypt(map['roomName']),
       status: Crypto.decrypt(map['status']),
+      createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
       modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
       amount: double.parse(Crypto.decrypt(map['amount'])),
@@ -91,6 +98,7 @@ class LendenDashboardModel {
     return other.id == id &&
         other.roomName == roomName &&
         other.status == status &&
+        other.createdBy == createdBy &&
         other.createdOn == createdOn &&
         other.modifiedOn == modifiedOn &&
         other.amount == amount &&
@@ -102,6 +110,7 @@ class LendenDashboardModel {
     return id.hashCode ^
         roomName.hashCode ^
         status.hashCode ^
+        createdBy.hashCode ^
         createdOn.hashCode ^
         modifiedOn.hashCode ^
         amount.hashCode ^

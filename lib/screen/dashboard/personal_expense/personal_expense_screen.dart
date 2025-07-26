@@ -151,205 +151,230 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       paddingInsets = EdgeInsets.zero;
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("${capatilizeFirstLetter(widget.month)}, ${widget.year}"),
-        titleSpacing: _mainScreenPadding.left,
-        leading: appBarBackButton(context),
-        actions: appBarActionButton(context, [
-          InkWell(
-            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            child: Icon(Icons.search),
-            onTap: () {
-              isSearchEnabled.value = !isSearchEnabled.value;
-              _searchController.text = "";
-              if (isSearchEnabled.value && _navbarSelectedIndex.value == 0) {
-                _navbarSelectedIndex.value = 1;
-              }
-            },
+    return BlocConsumer<
+      PersonalMonthlyExpenseBloc,
+      PersonalMonthlyExpenseState
+    >(
+      listener: _blocListenerHandler,
+      builder: (context, state) {
+        List<PersonalExpenseTransactionModel> transactionArr = [];
+        bool isLoaded = false;
+
+        if (state is PersonalMonthlyExpenseFetchSuccess) {
+          isLoaded = true;
+          if (state.data.isNotEmpty) {
+            transactionArr = state.data;
+            context.read<FilterCubit>().updateState(
+              FilterState(id: state.id, data: state.data),
+              _loggedInUser.id,
+              TransactionType.personal,
+            );
+          }
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              "${capatilizeFirstLetter(widget.month)}, ${widget.year}",
+            ),
+            titleSpacing: _mainScreenPadding.left,
+            leading: appBarBackButton(context),
+            centerTitle: false,
+            actions:
+                (transactionArr.isEmpty || !isLoaded)
+                    ? null
+                    : appBarActionButton(context, [
+                      InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
+                        child: Icon(Icons.search),
+                        onTap: () {
+                          isSearchEnabled.value = !isSearchEnabled.value;
+                          _searchController.text = "";
+                          if (isSearchEnabled.value &&
+                              _navbarSelectedIndex.value == 0) {
+                            _navbarSelectedIndex.value = 1;
+                          }
+                        },
+                      ),
+                      IconButton(
+                        icon: BlocBuilder<FilterCubit, FilterState>(
+                          builder: (context, state) {
+                            bool haveFilter = state.isFilterApplied;
+                            return Icon(
+                              haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                              color: haveFilter ? Colors.green : null,
+                            );
+                          },
+                        ),
+                        onPressed: () => filterModelBottomSheet(context),
+                      ),
+                    ]),
           ),
-          Padding(
-            padding: const EdgeInsets.only(left: 14.0),
-            child: IconButton(
-              icon: BlocBuilder<FilterCubit, FilterState>(
-                builder: (context, state) {
-                  bool haveFilter = state.isFilterApplied;
-                  return Icon(
-                    haveFilter ? Iconsax.filter_tick : Iconsax.filter,
-                    color: haveFilter ? Colors.green : null,
-                  );
-                },
+          body: RefreshIndicator(
+            onRefresh: onRefresh,
+            child: CustomGestureDetector(
+              navBarIndex: _navbarSelectedIndex,
+              totalTitle: headerTitle.length,
+              child: CustomScrollView(
+                slivers:
+                    transactionArr.isEmpty && isLoaded
+                        ? [
+                          SliverToBoxAdapter(
+                            child: noRecordFoundWidget(
+                              "No Transaction Found",
+                              context,
+                            ),
+                          ),
+                        ]
+                        : [
+                          ValueListenableBuilder(
+                            valueListenable: isSearchEnabled,
+                            builder: (context, _, _) {
+                              if (!isSearchEnabled.value) {
+                                return SliverToBoxAdapter(
+                                  child: SizedBox.shrink(),
+                                );
+                              }
+                              return SliverPadding(
+                                padding: _mainScreenPadding,
+                                sliver: SliverAppBar(
+                                  automaticallyImplyLeading: false,
+                                  pinned: isSearchEnabled.value,
+                                  backgroundColor: Colors.white,
+                                  surfaceTintColor: Colors.white,
+                                  title: CustomFormField.searchBar(
+                                    "Search",
+                                    isSearchEnabled,
+                                    _searchController,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          ValueListenableBuilder(
+                            valueListenable: isSearchEnabled,
+                            builder: (BuildContext context, _, _) {
+                              return BlocBuilder<FilterCubit, FilterState>(
+                                builder: (context, filterState) {
+                                  if (filterState.isFilterApplied ||
+                                      isSearchEnabled.value) {
+                                    return SliverToBoxAdapter(
+                                      child: SizedBox.shrink(),
+                                    );
+                                  }
+                                  return SliverPadding(
+                                    padding: paddingInsets,
+                                    sliver: SliverAppBar(
+                                      toolbarHeight: 330,
+                                      automaticallyImplyLeading: false,
+                                      backgroundColor: Colors.transparent,
+                                      surfaceTintColor: Colors.transparent,
+                                      flexibleSpace: FlexibleSpaceBar(
+                                        centerTitle: false,
+                                        title:
+                                            isLoaded
+                                                ? LinearGraphCard(
+                                                  expenses:
+                                                      transactionArr
+                                                          .map(
+                                                            (ele) => ele.amount,
+                                                          )
+                                                          .toList(),
+                                                )
+                                                : CustomShimmerEffect.placeHolderShimmerEffect(
+                                                  Column(
+                                                    children: [
+                                                      Expanded(
+                                                        child: Container(
+                                                          padding:
+                                                              EdgeInsets.symmetric(
+                                                                vertical: 24,
+                                                                horizontal: 16,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius.only(
+                                                                  bottomLeft:
+                                                                      Radius.circular(
+                                                                        24,
+                                                                      ),
+                                                                  bottomRight:
+                                                                      Radius.circular(
+                                                                        24,
+                                                                      ),
+                                                                ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                          ValueListenableBuilder(
+                            valueListenable: _navbarSelectedIndex,
+                            builder: (context, value, _) {
+                              return SliverPadding(
+                                padding: paddingInsets,
+                                sliver: SliverAppBar(
+                                  pinned: true,
+                                  toolbarHeight: _navBarHeight,
+                                  automaticallyImplyLeading: false,
+                                  backgroundColor: Colors.white,
+                                  surfaceTintColor: Colors.transparent,
+                                  flexibleSpace: FlexibleSpaceBar(
+                                    centerTitle: true,
+                                    title: NavBarCard(
+                                      headerTitle: headerTitle,
+                                      selectedIndex: _navbarSelectedIndex,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          SliverPadding(
+                            padding: paddingInsets,
+                            sliver: ValueListenableBuilder(
+                              valueListenable: _navbarSelectedIndex,
+                              builder: (context, _, _) {
+                                if (_navbarSelectedIndex.value == 0) {
+                                  return PersonalExpenseCategoriesSectionScreen();
+                                } else {
+                                  return PersonalExpenseTransactionScreen(
+                                    searchController: _searchController,
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: UiConstant.spaceAtBottom + _navBarHeight,
+                            ),
+                          ),
+                        ],
               ),
-              onPressed: () => filterModelBottomSheet(context),
             ),
           ),
-        ]),
-      ),
-      body: RefreshIndicator(
-        onRefresh: onRefresh,
-        child: CustomGestureDetector(
-          navBarIndex: _navbarSelectedIndex,
-          totalTitle: headerTitle.length,
-          child: BlocConsumer<
-            PersonalMonthlyExpenseBloc,
-            PersonalMonthlyExpenseState
-          >(
-            listener: _blocListenerHandler,
-            builder: (context, state) {
-              if (state is PersonalMonthlyExpenseFetchSuccess) {
-                if (state.data.isEmpty) {
-                  return noRecordFoundWidget("No Transaction Found", context);
-                } else {
-                  context.read<FilterCubit>().updateState(
-                    FilterState(id: state.id, data: state.data),
-                    _loggedInUser.id,
-                    TransactionType.personal,
-                  );
-                }
-              }
-              return CustomScrollView(
-                slivers: [
-                  ValueListenableBuilder(
-                    valueListenable: isSearchEnabled,
-                    builder: (BuildContext context, bool value, Widget? _) {
-                      if (!value) {
-                        return SliverToBoxAdapter(child: SizedBox.shrink());
-                      }
-                      return SliverPadding(
-                        padding: _mainScreenPadding,
-                        sliver: SliverAppBar(
-                          automaticallyImplyLeading: false,
-                          pinned: value,
-                          backgroundColor: Colors.white,
-                          surfaceTintColor: Colors.white,
-                          title: CustomFormField.searchBar(
-                            "Search",
-                            isSearchEnabled,
-                            _searchController,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  ValueListenableBuilder(
-                    valueListenable: isSearchEnabled,
-                    builder: (BuildContext context, _, _) {
-                      return BlocBuilder<FilterCubit, FilterState>(
-                        builder: (context, filterState) {
-                          if (filterState.isFilterApplied ||
-                              isSearchEnabled.value) {
-                            return SliverToBoxAdapter(child: SizedBox.shrink());
-                          }
-                          return SliverPadding(
-                            padding: paddingInsets,
-                            sliver: SliverAppBar(
-                              toolbarHeight: 330,
-                              automaticallyImplyLeading: false,
-                              backgroundColor: Colors.transparent,
-                              surfaceTintColor: Colors.transparent,
-                              flexibleSpace: FlexibleSpaceBar(
-                                centerTitle: false,
-                                title: Builder(
-                                  builder: (context) {
-                                    if (state
-                                        is PersonalMonthlyExpenseFetchSuccess) {
-                                      return LinearGraphCard(
-                                        expenses:
-                                            state.data
-                                                .map((ele) => ele.amount)
-                                                .toList(),
-                                      );
-                                    } else {
-                                      return CustomShimmerEffect.placeHolderShimmerEffect(
-                                        Column(
-                                          children: [
-                                            Expanded(
-                                              child: Container(
-                                                padding: EdgeInsets.symmetric(
-                                                  vertical: 24,
-                                                  horizontal: 16,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                        bottomLeft:
-                                                            Radius.circular(24),
-                                                        bottomRight:
-                                                            Radius.circular(24),
-                                                      ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                  ValueListenableBuilder(
-                    valueListenable: _navbarSelectedIndex,
-                    builder: (context, value, _) {
-                      return SliverPadding(
-                        padding: paddingInsets,
-                        sliver: SliverAppBar(
-                          pinned: true,
-                          toolbarHeight: _navBarHeight,
-                          automaticallyImplyLeading: false,
-                          backgroundColor: Colors.white,
-                          surfaceTintColor: Colors.transparent,
-                          flexibleSpace: FlexibleSpaceBar(
-                            centerTitle: true,
-                            title: NavBarCard(
-                              headerTitle: headerTitle,
-                              selectedIndex: _navbarSelectedIndex,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  SliverPadding(
-                    padding: paddingInsets,
-                    sliver: ValueListenableBuilder(
-                      valueListenable: _navbarSelectedIndex,
-                      builder: (context, value, _) {
-                        if (value == 0) {
-                          return PersonalExpenseCategoriesSectionScreen();
-                        } else {
-                          return PersonalExpenseTransactionScreen(
-                            searchController: _searchController,
-                          );
-                        }
-                      },
-                    ),
-                  ),
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: UiConstant.spaceAtBottom + _navBarHeight,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-      floatingActionButton:
-          _isLivePersonalExpense
-              ? CustomButton.customFloatingButton(Iconsax.add, () {
-                context.push(
-                  "${RouterConstants.personalExpenseRouteName}/${widget.year}/${widget.month}${RouterConstants.personalExpenseAddExpenseRouteName}",
-                );
-              })
-              : null,
+          floatingActionButton:
+              _isLivePersonalExpense
+                  ? CustomButton.customFloatingButton(Iconsax.add, () {
+                    context.push(
+                      "${RouterConstants.personalExpenseRouteName}/${widget.year}/${widget.month}${RouterConstants.personalExpenseAddExpenseRouteName}",
+                    );
+                  })
+                  : null,
+        );
+      },
     );
   }
 }

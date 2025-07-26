@@ -229,6 +229,12 @@ class _FilterSheetState extends State<FilterSheet> {
               }
             }
             maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
+            if (maxAmount == 0) {
+              maxAmount = 1;
+            }
+            if (minDate.isAfter(maxDate)) {
+              maxDate = minDate.add(Duration(days: 1));
+            }
             _amountRange = RangeValues(0, maxAmount);
             _dateRange = DateTimeRange(start: minDate, end: maxDate);
 
@@ -263,6 +269,12 @@ class _FilterSheetState extends State<FilterSheet> {
             }
             userData = state.roomData.users.map((e) => e as UserModel).toList();
             maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
+            if (maxAmount == 0) {
+              maxAmount = 1;
+            }
+            if (minDate.isAfter(maxDate)) {
+              maxDate = minDate.add(Duration(days: 1));
+            }
             _amountRange = RangeValues(0, maxAmount);
             _dateRange = DateTimeRange(start: minDate, end: maxDate);
 
@@ -300,6 +312,12 @@ class _FilterSheetState extends State<FilterSheet> {
               userData = roomInfoState.data.users.map((e) => e.user).toList();
             }
             maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
+            if (maxAmount == 0) {
+              maxAmount = 1;
+            }
+            if (minDate.isAfter(maxDate)) {
+              maxDate = minDate.add(Duration(days: 1));
+            }
             _amountRange = RangeValues(0, maxAmount);
             _dateRange = DateTimeRange(start: minDate, end: maxDate);
 

@@ -91,6 +91,30 @@ class LendenRoomDataProvider {
     }
   }
 
+  Future<void> updateRoom(
+    String id,
+    String authToken,
+    String newRoomName,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'lenden/$id/update',
+        "put",
+        authToken,
+        {"name": Crypto.encrypt(newRoomName)},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<bool> delete(String id, String authToken, String expenseID) async {
     try {
       final response = await createAPICall('lenden/$id', "delete", authToken, {

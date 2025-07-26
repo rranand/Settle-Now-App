@@ -36,6 +36,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
         id: "",
         roomName: roomName,
         status: "Open",
+        createdBy: authLoginState.userData,
         createdOn: DateTime.now(),
         modifiedOn: DateTime.now(),
         amount: 0,

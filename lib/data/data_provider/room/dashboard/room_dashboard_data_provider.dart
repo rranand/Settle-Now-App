@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 import 'package:settlenow_v2/util/handler/network_call.dart';
@@ -53,6 +54,7 @@ class RoomDashboardDataProvider {
           id: Crypto.decrypt(data["data"]["id"]),
           roomName: roomName,
           status: "Open",
+          createdBy: UserModel.empty(),
           createdOn: DateTime.now(),
           modifiedOn: DateTime.now(),
           users: [],

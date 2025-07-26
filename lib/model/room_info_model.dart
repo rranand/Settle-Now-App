@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/model/user_model.dart';
 
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
@@ -13,6 +14,7 @@ class RoomInfoModel {
   String roomKey = "";
   String roomLink = "";
   String status = "";
+  UserModel createdBy = UserModel.empty();
   DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
   List<RoomUserModel> users = [];
@@ -24,6 +26,7 @@ class RoomInfoModel {
     required this.roomKey,
     required this.roomLink,
     required this.status,
+    required this.createdBy,
     required this.createdOn,
     required this.modifiedOn,
     required this.users,
@@ -38,6 +41,7 @@ class RoomInfoModel {
     String? status,
     String? roomKey,
     String? roomLink,
+    UserModel? createdBy,
     DateTime? createdOn,
     DateTime? modifiedOn,
     List<RoomUserModel>? users,
@@ -48,6 +52,7 @@ class RoomInfoModel {
       roomName: roomName ?? this.roomName,
       status: status ?? this.status,
       createdOn: createdOn ?? this.createdOn,
+      createdBy: createdBy ?? this.createdBy,
       modifiedOn: modifiedOn ?? this.modifiedOn,
       users: users ?? this.users,
       roomKey: roomKey ?? this.roomKey,
@@ -63,6 +68,7 @@ class RoomInfoModel {
       'status': status,
       'roomKey': roomKey,
       'roomLink': roomLink,
+      'createdBy': createdBy.toMap(),
       'createdOn': createdOn.toString(),
       'modifiedOn': modifiedOn.toString(),
       'users': users.map((x) => x.toMap()).toList(),
@@ -77,6 +83,7 @@ class RoomInfoModel {
       status: Crypto.decrypt(map['status']),
       roomKey: Crypto.decrypt(map['roomKey']),
       roomLink: Crypto.decrypt(map['roomLink']),
+      createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
       modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
       users: List<RoomUserModel>.from(
@@ -106,6 +113,7 @@ class RoomInfoModel {
         other.roomKey == roomKey &&
         other.roomLink == roomLink &&
         other.status == status &&
+        other.createdBy == createdBy &&
         other.createdOn == createdOn &&
         other.modifiedOn == modifiedOn &&
         listEquals(other.users, users);
@@ -118,6 +126,7 @@ class RoomInfoModel {
         roomName.hashCode ^
         roomKey.hashCode ^
         roomLink.hashCode ^
+        createdBy.hashCode ^
         status.hashCode ^
         createdOn.hashCode ^
         modifiedOn.hashCode ^

@@ -48,11 +48,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   void _onSubmitEditForm() {
     if (_profileEditFormKey.currentState!.validate()) {
-      UserModel newData = UserModel.copyFromUser(_loggedInUser);
-      newData.name = _name.text;
-      newData.phoneNo = _mobileNumber.text;
-      newData.authToken = _loggedInUser.authToken;
-      context.read<UserUpdateProfileCubit>().updateProfile(newData);
+      if (_name.text != _loggedInUser.name) {
+        UserModel newData = UserModel.copyFromUser(_loggedInUser);
+        newData.name = _name.text;
+        newData.authToken = _loggedInUser.authToken;
+        context.read<UserUpdateProfileCubit>().updateProfile(newData);
+      } else {
+        showNormalSnackBar(context, "Nothing to update!");
+      }
     }
   }
 
@@ -149,15 +152,23 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                     maxLength: 10,
                   ),
                   SizedBox(height: UiConstant.spaceBetweenSection),
-                  CustomButton.customElevatedButton(
-                    "Save",
-                    buttonHeight: 45,
-                    buttonWidth: 120,
-                    elevation: 4,
-                    borderRadius: 100,
-                    backgroundColor: Colors.deepPurple.shade500,
-                    borderColor: Colors.deepPurple.shade500,
-                    onPressed: _onSubmitEditForm,
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _name,
+                    builder: (context, _, _) {
+                      if (_name.text == _loggedInUser.name) {
+                        return SizedBox.shrink();
+                      }
+                      return CustomButton.customElevatedButton(
+                        "Save",
+                        buttonHeight: 45,
+                        buttonWidth: 120,
+                        elevation: 4,
+                        borderRadius: 100,
+                        backgroundColor: Colors.deepPurple.shade500,
+                        borderColor: Colors.deepPurple.shade500,
+                        onPressed: _onSubmitEditForm,
+                      );
+                    },
                   ),
                 ],
               ),

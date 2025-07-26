@@ -61,6 +61,18 @@ class RoomRepository {
     }
   }
 
+  Future<void> updateRoom(
+    String id,
+    String authToken,
+    String newRoomName,
+  ) async {
+    try {
+      return _dataProvider.updateRoom(id, authToken, newRoomName);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<RoomSettleModel>> fetchSettleData(
     String id,
     String authToken,

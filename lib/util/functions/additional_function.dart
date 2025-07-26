@@ -76,6 +76,9 @@ bool isDateTimeSame(DateTime d1, DateTime d2) {
 }
 
 int roundUpToPowerOfTen(int number) {
+  if (number == 0) {
+    return 0;
+  }
   int digits = log(number) ~/ ln10;
   int base = pow(10, digits).toInt();
 
@@ -84,32 +87,29 @@ int roundUpToPowerOfTen(int number) {
   return ((number ~/ base) + 1) * base;
 }
 
-
 void resetAllBlocs(BuildContext context) {
-    context.read<AddToPersonalExpenseBloc>().add(AddToPersonalExpenseReset());
-    context.read<LendenDashboardBloc>().add(LendenDashboardReset());
-    context.read<LendenRoomBloc>().add(LendenRoomReset());
-    context.read<NotificationBloc>().add(NotificationReset());
-    context.read<NotificationActionBloc>().add(NotificationActionReset());
-    context.read<PersonalExpenseDashboardBloc>().add(
-      PersonalExpenseDashboardReset(),
-    );
-    context.read<PersonalMonthlyExpenseBloc>().add(
-      PersonalMonthlyExpenseReset(),
-    );
-    context.read<QuicksplitBloc>().add(QuicksplitReset());
-    context.read<RoomDashboardBloc>().add(RoomDashboardReset());
-    context.read<RoomBloc>().add(RoomBlocReset());
-    context.read<CreateRoomCubit>().reset();
-    context.read<NewTransactionCubit>().reset();
-    context.read<FriendCubit>().reset();
-    context.read<UserLoginActivityCubit>().reset();
-    context.read<UserUpdateProfileCubit>().reset();
-    context.read<CreateJoinRoomCubit>().reset();
-    context.read<RoomCloseCubit>().reset();
-    context.read<RoomCloseRequestCubit>().reset();
-    context.read<RoomInfoCubit>().reset();
-    context.read<RoomSettleCubit>().reset();
-    context.read<RoomSettleUpsertCubit>().reset();
-    context.read<RoomUserCubit>().reset();
-  }
+  context.read<AddToPersonalExpenseBloc>().add(AddToPersonalExpenseReset());
+  context.read<LendenDashboardBloc>().add(LendenDashboardReset());
+  context.read<LendenRoomBloc>().add(LendenRoomReset());
+  context.read<NotificationBloc>().add(NotificationReset());
+  context.read<NotificationActionBloc>().add(NotificationActionReset());
+  context.read<PersonalExpenseDashboardBloc>().add(
+    PersonalExpenseDashboardReset(),
+  );
+  context.read<PersonalMonthlyExpenseBloc>().add(PersonalMonthlyExpenseReset());
+  context.read<QuicksplitBloc>().add(QuicksplitReset());
+  context.read<RoomDashboardBloc>().add(RoomDashboardReset());
+  context.read<RoomBloc>().add(RoomBlocReset());
+  context.read<CreateRoomCubit>().reset();
+  context.read<NewTransactionCubit>().reset();
+  context.read<FriendCubit>().reset();
+  context.read<UserLoginActivityCubit>().reset();
+  context.read<UserUpdateProfileCubit>().reset();
+  context.read<CreateJoinRoomCubit>().reset();
+  context.read<RoomCloseCubit>().reset();
+  context.read<RoomCloseRequestCubit>().reset();
+  context.read<RoomInfoCubit>().reset();
+  context.read<RoomSettleCubit>().reset();
+  context.read<RoomSettleUpsertCubit>().reset();
+  context.read<RoomUserCubit>().reset();
+}

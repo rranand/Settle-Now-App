@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
+import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/core.dart';
+import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
@@ -19,7 +21,9 @@ import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
 import 'package:settlenow_v2/util/card/invite_member.dart';
+import 'package:settlenow_v2/util/card/setting_page.dart';
 import 'package:settlenow_v2/util/card/settle_expense.dart';
+import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/handler/stream_to_listenable.dart';
 import 'package:settlenow_v2/util/widgets/auth_gate.dart';
 
@@ -95,6 +99,26 @@ class AppRouterConfig {
               }
             },
             routes: [
+              GoRoute(
+                path: RouterConstants.settingPage,
+                builder: (context, state) {
+                  return AuthGate(
+                    child: SettingPage(
+                      transactionType: TransactionType.room,
+                      id: state.pathParameters["id"]!,
+                    ),
+                  );
+                },
+                redirect: (context, state) {
+                  final roomState = context.read<RoomInfoCubit>().state;
+
+                  if (roomState is RoomInfoSuccess) {
+                    return null;
+                  } else {
+                    return getPreviousPath(state.uri);
+                  }
+                },
+              ),
               GoRoute(
                 path: RouterConstants.inviteMember,
                 builder: (context, state) {
@@ -297,6 +321,26 @@ class AppRouterConfig {
               }
             },
             routes: [
+              GoRoute(
+                path: RouterConstants.settingPage,
+                builder: (context, state) {
+                  return AuthGate(
+                    child: SettingPage(
+                      transactionType: TransactionType.lenden,
+                      id: state.pathParameters["id"]!,
+                    ),
+                  );
+                },
+                redirect: (context, state) {
+                  final roomState = context.read<LendenRoomBloc>().state;
+
+                  if (roomState is LendenRoomFetchSuccess) {
+                    return null;
+                  } else {
+                    return getPreviousPath(state.uri);
+                  }
+                },
+              ),
               GoRoute(
                 path: RouterConstants.inviteMember,
                 builder: (context, state) {

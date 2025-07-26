@@ -36,6 +36,9 @@ class RouterConstants {
   //Invite Friend
   static const String inviteMember = '/invite';
 
+  //Invite Friend
+  static const String settingPage = '/setting';
+
   //Error Route
   static const String errorPageRouteName = '/404';
 

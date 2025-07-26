@@ -34,6 +34,7 @@ class RoomDashboardRepository {
         user.authToken,
       );
       RoomInfoModel data = roomData.first;
+      data.createdBy = user;
       data.users = [
         RoomUserModel.fromBasicInfo(
           id: roomData.second,

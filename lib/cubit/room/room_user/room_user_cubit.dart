@@ -28,7 +28,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
         transArr,
         settleArr,
       );
-      _roomInfoCubit.updateRoomData(id);
+      _roomInfoCubit.updateUserData(id, data);
       return emit(RoomUserSuccess(id, data));
     } catch (e) {
       return emit(RoomUserFailure(e.toString()));

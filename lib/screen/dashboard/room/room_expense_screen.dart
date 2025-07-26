@@ -453,6 +453,75 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     });
   }
 
+  List<Widget>? appBarActionButtonHandler(
+    bool isLoaded,
+    bool isRoomActive,
+    bool hasTransactionData,
+  ) {
+    List<Widget> appBarAction = [];
+    final roomBlocState = context.watch<RoomBloc>().state;
+
+    if (roomBlocState is RoomFetchSuccess) {
+      appBarAction = [
+        ValueListenableBuilder(
+          valueListenable: _navbarSelectedIndex,
+          builder: (context, _, _) {
+            return Visibility(
+              visible: _navbarSelectedIndex.value == 0 && hasTransactionData,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(
+                  UiConstant.cardBorderRadius,
+                ),
+                child: Icon(Icons.search),
+                onTap: () {
+                  isSearchEnabled.value = !isSearchEnabled.value;
+                  _searchController.text = "";
+                },
+              ),
+            );
+          },
+        ),
+        ValueListenableBuilder(
+          valueListenable: _navbarSelectedIndex,
+          builder: (context, _, _) {
+            return Visibility(
+              visible: _navbarSelectedIndex.value <= 1 && hasTransactionData,
+              child: IconButton(
+                icon: BlocBuilder<FilterCubit, FilterState>(
+                  builder: (context, state) {
+                    bool haveFilter = state.isFilterApplied;
+                    return Icon(
+                      haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                      color: haveFilter ? Colors.green : null,
+                    );
+                  },
+                ),
+                onPressed: () => filterModelBottomSheet(context),
+              ),
+            );
+          },
+        ),
+      ];
+    }
+
+    if (isLoaded && isRoomActive) {
+      appBarAction = [
+        ...appBarAction,
+        InkWell(
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          child: Icon(Iconsax.setting),
+          onTap: () {
+            context.push(
+              "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.settingPage}",
+            );
+          },
+        ),
+      ];
+    }
+
+    return appBarActionButton(context, appBarAction);
+  }
+
   @override
   void dispose() {
     isSearchEnabled.dispose();
@@ -512,12 +581,15 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         RoomUserModel roomUserModel = RoomUserModel.empty();
         bool showSettleExpense = false;
         bool showCloseRoomRequest = false;
+        bool hasTransactionData = false;
 
         if (state is RoomInfoSuccess) {
           isRoomActive = state.data.active;
           roomName = state.data.roomName;
           isLoaded = true;
           for (int i = 0; i < state.data.users.length; i++) {
+            hasTransactionData =
+                hasTransactionData || (state.data.users[i].contribution > 0);
             if (_loggedInUser.id == state.data.users[i].user.id) {
               roomUserModel = state.data.users[i];
             } else if (state.data.users[i].active) {
@@ -543,46 +615,11 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
             centerTitle: false,
-            actions: appBarActionButton(context, [
-              //IconButton(onPressed: () => {}, icon: Icon(Iconsax.info_circle)),
-              ValueListenableBuilder(
-                valueListenable: _navbarSelectedIndex,
-                builder: (context, _, _) {
-                  return Visibility(
-                    visible: _navbarSelectedIndex.value == 0,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(
-                        UiConstant.cardBorderRadius,
-                      ),
-                      child: Icon(Icons.search),
-                      onTap: () {
-                        isSearchEnabled.value = !isSearchEnabled.value;
-                      },
-                    ),
-                  );
-                },
-              ),
-              ValueListenableBuilder(
-                valueListenable: _navbarSelectedIndex,
-                builder: (context, _, _) {
-                  return Visibility(
-                    visible: _navbarSelectedIndex.value <= 1,
-                    child: IconButton(
-                      icon: BlocBuilder<FilterCubit, FilterState>(
-                        builder: (context, state) {
-                          bool haveFilter = state.isFilterApplied;
-                          return Icon(
-                            haveFilter ? Iconsax.filter_tick : Iconsax.filter,
-                            color: haveFilter ? Colors.green : null,
-                          );
-                        },
-                      ),
-                      onPressed: () => filterModelBottomSheet(context),
-                    ),
-                  );
-                },
-              ),
-            ]),
+            actions: appBarActionButtonHandler(
+              isLoaded,
+              roomUserModel.active,
+              hasTransactionData,
+            ),
           ),
           body: RefreshIndicator(
             onRefresh: onRefresh,

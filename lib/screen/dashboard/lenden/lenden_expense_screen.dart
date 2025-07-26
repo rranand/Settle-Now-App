@@ -342,37 +342,63 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
-    final state = context.watch<LendenRoomBloc>().state;
-    if (state is LendenRoomFetchSuccess) {
+  PreferredSizeWidget _buildAppBar(
+    bool isLoaded,
+    bool isEditable,
+    bool isTransEmpty,
+    String roomName,
+    List<LendenUserModel> users,
+  ) {
+    if (isLoaded) {
       return AppBar(
-        title: Text(state.roomData.roomName),
+        title: Text(roomName),
         titleSpacing: _mainScreenPadding.left,
         centerTitle: false,
         leading: appBarBackButton(context),
         actions: appBarActionButton(context, [
-          IconButton(
-            onPressed: () => _showBottomSheet(context, state.roomData.users),
-            icon: Icon(Iconsax.profile_2user),
-          ),
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              isSearchEnabled.value = !isSearchEnabled.value;
-              _searchController.text = "";
-            },
-          ),
-          IconButton(
-            icon: BlocBuilder<FilterCubit, FilterState>(
-              builder: (context, state) {
-                bool haveFilter = state.isFilterApplied;
-                return Icon(
-                  haveFilter ? Iconsax.filter_tick : Iconsax.filter,
-                  color: haveFilter ? Colors.green : null,
-                );
+          Visibility(
+            visible: !isTransEmpty,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+              onTap: () {
+                isSearchEnabled.value = !isSearchEnabled.value;
+                _searchController.text = "";
               },
+              child: Icon(Icons.search),
             ),
-            onPressed: () => filterModelBottomSheet(context),
+          ),
+          Visibility(
+            visible: !isTransEmpty,
+            child: IconButton(
+              onPressed: () => filterModelBottomSheet(context),
+              icon: BlocBuilder<FilterCubit, FilterState>(
+                builder: (context, state) {
+                  bool haveFilter = state.isFilterApplied;
+                  return Icon(
+                    haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                    color: haveFilter ? Colors.green : null,
+                  );
+                },
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () => _showBottomSheet(context, users),
+            borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+            child: const Icon(Iconsax.profile_2user),
+          ),
+          Visibility(
+            visible: isEditable,
+            child: IconButton(
+              padding: EdgeInsets.symmetric(
+                vertical: 8,
+              ).add(EdgeInsets.only(left: 4)),
+              onPressed:
+                  () => context.push(
+                    "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.settingPage}",
+                  ),
+              icon: Icon(Iconsax.setting),
+            ),
           ),
         ]),
       );
@@ -396,165 +422,186 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     if (!isWide) {
       paddingInsets = EdgeInsets.symmetric(horizontal: 8);
     }
-    return Scaffold(
-      appBar: _buildAppBar(),
-      body: RefreshIndicator(
-        onRefresh: onRefresh,
-        child: BlocConsumer<LendenRoomBloc, LendenRoomState>(
-          listener: _blocListenerHandler,
-          builder: (context, state) {
-            List<LendenTransactionModel> lendenTransactionData = [];
-            LendenUserModel loggedInUserData = LendenUserModel.empty();
-            bool isEditable = false;
-            bool isLoaded = false;
+    return BlocConsumer<LendenRoomBloc, LendenRoomState>(
+      listener: _blocListenerHandler,
+      builder: (context, state) {
+        List<LendenTransactionModel> lendenTransactionData = [];
+        LendenUserModel loggedInUserData = LendenUserModel.empty();
+        bool isEditable = false;
+        bool isLoaded = false;
+        List<LendenUserModel> users = [];
+        String roomName = "";
 
-            if (state is LendenRoomFetchSuccess) {
-              isLoaded = true;
-              lendenTransactionData = state.data;
-              loggedInUserData = state.roomData.users.firstWhere(
-                (ele) => ele.id == _loggedInUser.id,
-              );
+        if (state is LendenRoomFetchSuccess) {
+          isLoaded = true;
+          lendenTransactionData = state.data;
+          loggedInUserData = state.roomData.users.firstWhere(
+            (ele) => ele.id == _loggedInUser.id,
+          );
+          roomName = state.roomData.roomName;
+          users = state.roomData.users;
 
-              isEditable = !loggedInUserData.isClosed;
+          isEditable = !loggedInUserData.isClosed;
 
-              context.read<FilterCubit>().updateState(
-                FilterState(id: state.id, data: state.data),
-                loggedInUserData.id,
-                TransactionType.lenden,
-              );
+          context.read<FilterCubit>().updateState(
+            FilterState(id: state.id, data: state.data),
+            loggedInUserData.id,
+            TransactionType.lenden,
+          );
+        }
 
-              if (lendenTransactionData.isEmpty) {
-                return noRecordFoundWidget("No Transaction Found", context);
-              }
-            }
-
-            return CustomScrollView(
+        return Scaffold(
+          appBar: _buildAppBar(
+            isLoaded,
+            isEditable,
+            lendenTransactionData.isEmpty,
+            roomName,
+            users,
+          ),
+          body: RefreshIndicator(
+            onRefresh: onRefresh,
+            child: CustomScrollView(
               slivers:
                   isLoaded
-                      ? [
-                        ValueListenableBuilder(
-                          valueListenable: isSearchEnabled,
-                          builder: (BuildContext context, _, _) {
-                            if (!isSearchEnabled.value) {
-                              return SliverToBoxAdapter(
-                                child: SizedBox.shrink(),
-                              );
-                            }
-                            return SliverPadding(
-                              padding: _mainScreenPadding,
-                              sliver: SliverAppBar(
-                                automaticallyImplyLeading: false,
-                                pinned: isSearchEnabled.value,
-                                backgroundColor: Colors.white,
-                                surfaceTintColor: Colors.white,
-                                title: CustomFormField.searchBar(
-                                  "Search",
-                                  isSearchEnabled,
-                                  _searchController,
-                                ),
+                      ? (lendenTransactionData.isEmpty
+                          ? [
+                            SliverToBoxAdapter(
+                              child: noRecordFoundWidget(
+                                "No Transaction Found",
+                                context,
                               ),
-                            );
-                          },
-                        ),
-                        ValueListenableBuilder(
-                          valueListenable: isSearchEnabled,
-                          builder: (context, _, _) {
-                            return BlocBuilder<FilterCubit, FilterState>(
-                              builder: (context, filterState) {
-                                if (filterState.isFilterApplied ||
-                                    isSearchEnabled.value) {
+                            ),
+                          ]
+                          : [
+                            ValueListenableBuilder(
+                              valueListenable: isSearchEnabled,
+                              builder: (BuildContext context, _, _) {
+                                if (!isSearchEnabled.value) {
                                   return SliverToBoxAdapter(
                                     child: SizedBox.shrink(),
                                   );
                                 }
                                 return SliverPadding(
-                                  padding: paddingInsets.add(
-                                    EdgeInsets.only(
-                                      bottom: UiConstant.spaceBetweenSection,
-                                    ),
-                                  ),
-                                  sliver: SliverToBoxAdapter(
-                                    child: LendenSummaryCard(
-                                      data: lendenTransactionData,
-                                      loggedInUser: _loggedInUser,
+                                  padding: _mainScreenPadding,
+                                  sliver: SliverAppBar(
+                                    automaticallyImplyLeading: false,
+                                    pinned: isSearchEnabled.value,
+                                    backgroundColor: Colors.white,
+                                    surfaceTintColor: Colors.white,
+                                    title: CustomFormField.searchBar(
+                                      "Search",
+                                      isSearchEnabled,
+                                      _searchController,
                                     ),
                                   ),
                                 );
                               },
-                            );
-                          },
-                        ),
-                        SliverPadding(
-                          padding: _mainScreenPadding,
-                          sliver: BlocBuilder<FilterCubit, FilterState>(
-                            builder: (context, filterState) {
-                              return ValueListenableBuilder<TextEditingValue>(
-                                valueListenable: _searchController,
-                                builder: (context, _, _) {
-                                  List<LendenTransactionModel> searchedData =
-                                      filterState.data
-                                          .cast<LendenTransactionModel>();
-
-                                  searchedData = FilterSort.filteredSearchText(
-                                    _searchController.text,
-                                    searchedData,
-                                    (transData) {
-                                      String searchStr = transData.description;
-                                      searchStr +=
-                                          " ${transData.createdBy.name}";
-                                      searchStr += " ${transData.amount}";
-                                      return searchStr;
-                                    },
-                                  );
-
-                                  if (searchedData.isEmpty) {
-                                    return SliverToBoxAdapter(
-                                      child: noRecordFoundWidget(
-                                        "No Matching Records",
-                                        context,
+                            ),
+                            ValueListenableBuilder(
+                              valueListenable: isSearchEnabled,
+                              builder: (context, _, _) {
+                                return BlocBuilder<FilterCubit, FilterState>(
+                                  builder: (context, filterState) {
+                                    if (filterState.isFilterApplied ||
+                                        isSearchEnabled.value) {
+                                      return SliverToBoxAdapter(
+                                        child: SizedBox.shrink(),
+                                      );
+                                    }
+                                    return SliverPadding(
+                                      padding: paddingInsets.add(
+                                        EdgeInsets.only(
+                                          bottom:
+                                              UiConstant.spaceBetweenSection,
+                                        ),
+                                      ),
+                                      sliver: SliverToBoxAdapter(
+                                        child: LendenSummaryCard(
+                                          data: lendenTransactionData,
+                                          loggedInUser: _loggedInUser,
+                                        ),
                                       ),
                                     );
-                                  }
-                                  return transactionCardDisplay(
-                                    searchedData,
-                                    isEditable,
+                                  },
+                                );
+                              },
+                            ),
+                            SliverPadding(
+                              padding: _mainScreenPadding,
+                              sliver: BlocBuilder<FilterCubit, FilterState>(
+                                builder: (context, filterState) {
+                                  return ValueListenableBuilder<
+                                    TextEditingValue
+                                  >(
+                                    valueListenable: _searchController,
+                                    builder: (context, _, _) {
+                                      List<LendenTransactionModel>
+                                      searchedData =
+                                          filterState.data
+                                              .cast<LendenTransactionModel>();
+
+                                      searchedData =
+                                          FilterSort.filteredSearchText(
+                                            _searchController.text,
+                                            searchedData,
+                                            (transData) {
+                                              String searchStr =
+                                                  transData.description;
+                                              searchStr +=
+                                                  " ${transData.createdBy.name}";
+                                              searchStr +=
+                                                  " ${transData.amount}";
+                                              return searchStr;
+                                            },
+                                          );
+
+                                      if (searchedData.isEmpty) {
+                                        return SliverToBoxAdapter(
+                                          child: noRecordFoundWidget(
+                                            "No Matching Records",
+                                            context,
+                                          ),
+                                        );
+                                      }
+                                      return transactionCardDisplay(
+                                        searchedData,
+                                        isEditable,
+                                      );
+                                    },
                                   );
                                 },
-                              );
-                            },
-                          ),
-                        ),
-                      ]
+                              ),
+                            ),
+                          ])
                       : [
                         transactionCardDisplay(
                           generateShimmerData(),
                           isEditable,
                         ),
                       ],
-            );
-          },
-        ),
-      ),
-      floatingActionButton: BlocBuilder<LendenRoomBloc, LendenRoomState>(
-        builder: (context, state) {
-          if (state is LendenRoomFetchSuccess) {
-            LendenUserModel loggedInUserData = state.roomData.users.firstWhere(
-              (ele) => ele.id == _loggedInUser.id,
-            );
-            if (loggedInUserData.isClosed) {
-              return SizedBox.shrink();
-            } else {
-              return CustomButton.customFloatingButton(Iconsax.add, () {
-                context.push(
-                  "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
-                );
-              });
-            }
-          } else {
-            return SizedBox.shrink();
-          }
-        },
-      ),
+            ),
+          ),
+          floatingActionButton: BlocBuilder<LendenRoomBloc, LendenRoomState>(
+            builder: (context, state) {
+              if (state is LendenRoomFetchSuccess) {
+                LendenUserModel loggedInUserData = state.roomData.users
+                    .firstWhere((ele) => ele.id == _loggedInUser.id);
+                if (loggedInUserData.isClosed) {
+                  return SizedBox.shrink();
+                } else {
+                  return CustomButton.customFloatingButton(Iconsax.add, () {
+                    context.push(
+                      "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
+                    );
+                  });
+                }
+              } else {
+                return SizedBox.shrink();
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }

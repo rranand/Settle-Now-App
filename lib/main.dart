@@ -60,7 +60,6 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
 // TODO : Setting for Room, Lenden
-// TODO : Delete will take 7 days, within that time, delete request can be cancelled
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
