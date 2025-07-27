@@ -105,25 +105,20 @@ class _SettingPageState extends State<SettingPage> {
     }
   }
 
-  List<Widget> bottomBarHandler() {
-    List<Widget> widgetArr = [
-      CustomButton.customElevatedButton(
+  Widget bottomBarHandler() {
+    if (createdBy.id == _loggedInUser.id) {
+      return CustomButton.customElevatedButton(
+        "Delete Room",
+        buttonHeight: 45,
+        backgroundColor: Colors.red,
+      );
+    } else {
+      return CustomButton.customElevatedButton(
         "Leave Room",
         buttonHeight: 45,
         backgroundColor: Colors.blueGrey.shade800,
-      ),
-    ];
-    if (createdBy.id == _loggedInUser.id) {
-      widgetArr.add(
-        CustomButton.customElevatedButton(
-          "Delete Room",
-          buttonHeight: 45,
-          backgroundColor: Colors.red,
-        ),
       );
     }
-
-    return widgetArr;
   }
 
   Widget infoRow(String label, String value) {
@@ -358,8 +353,8 @@ class _SettingPageState extends State<SettingPage> {
           right: _mainScreenPadding.right,
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: bottomBarHandler(),
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [bottomBarHandler()],
         ),
       ),
     );
