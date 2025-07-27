@@ -29,8 +29,11 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
   }
 
   void logoutDevice(BuildContext context, String sessionID) async {
-    final logInSuccessState =
-        context.read<AuthBloc>().state as AuthLoginSuccess;
+    final logInSuccessState = context.read<AuthBloc>().state;
+    if (logInSuccessState is! AuthLoginSuccess) {
+      return;
+    }
+
     List<LoginActivityModel> oldArr = [...state.data];
     try {
       for (int i = 0; i < oldArr.length; i++) {

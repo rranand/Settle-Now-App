@@ -30,6 +30,9 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   }
 
   void addNewSettleExpense(RoomSettleModel data) {
+    if (state is! RoomSettleSuccess) {
+      return;
+    }
     final roomSettleSuccessState = state as RoomSettleSuccess;
     List<RoomSettleModel> newArr = [data, ...roomSettleSuccessState.data];
     roomUserCubit.onAddNewSettleExpense(data);
@@ -37,6 +40,9 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   }
 
   void updateSettleExpense(RoomSettleModel data) {
+    if (state is! RoomSettleSuccess) {
+      return;
+    }
     final roomSettleSuccessState = state as RoomSettleSuccess;
     List<RoomSettleModel> oldArr = [...roomSettleSuccessState.data];
     RoomSettleModel oldData = RoomSettleModel.empty();
@@ -53,6 +59,9 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   }
 
   void deleteSettleExpense(String settleExpenseID) {
+    if (state is! RoomSettleSuccess) {
+      return;
+    }
     final roomSettleSuccessState = state as RoomSettleSuccess;
     List<RoomSettleModel> oldArr = [...roomSettleSuccessState.data];
 

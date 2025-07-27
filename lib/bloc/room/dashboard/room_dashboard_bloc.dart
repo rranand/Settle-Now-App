@@ -125,6 +125,9 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     RoomDashboardOnAddNewRoom event,
     Emitter<RoomDashboardState> emit,
   ) async {
+    if (state is! RoomDashboardFetchSuccess) {
+      return;
+    }
     final allRoomState = (state as RoomDashboardFetchSuccess);
     List<RoomInfoModel> data = [];
     if (event.isLoading) {

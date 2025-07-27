@@ -21,8 +21,13 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     : super(CreateJoinRoomInitial());
 
   void createNewRoom(BuildContext context, String roomName) async {
+    final authLoginState = context.read<AuthBloc>().state;
+
+    if (authLoginState is! AuthLoginSuccess) {
+      return;
+    }
     final roomDashboardCtx = context.read<RoomDashboardBloc>();
-    final authLoginState = context.read<AuthBloc>().state as AuthLoginSuccess;
+
     try {
       roomDashboardCtx.add(
         RoomDashboardOnAddNewRoom(data: RoomInfoModel.empty(), isLoading: true),

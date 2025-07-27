@@ -48,6 +48,9 @@ class PersonalMonthlyExpenseBloc
     PersonalMonthlyExpenseAdd event,
     Emitter<PersonalMonthlyExpenseState> emit,
   ) async {
+    if (state is! PersonalMonthlyExpenseFetchSuccess) {
+      return;
+    }
     final oldData = state as PersonalMonthlyExpenseFetchSuccess;
     List<PersonalExpenseTransactionModel> data = [event.data, ...oldData.data];
     dashboardBloc.add(
@@ -60,6 +63,9 @@ class PersonalMonthlyExpenseBloc
     PersonalMonthlyExpenseUpdate event,
     Emitter<PersonalMonthlyExpenseState> emit,
   ) async {
+    if (state is! PersonalMonthlyExpenseFetchSuccess) {
+      return;
+    }
     final oldData = state as PersonalMonthlyExpenseFetchSuccess;
     List<PersonalExpenseTransactionModel> data = [...oldData.data];
     for (int i = 0; i < data.length; i++) {
@@ -78,6 +84,9 @@ class PersonalMonthlyExpenseBloc
     PersonalMonthlyExpenseDelete event,
     Emitter<PersonalMonthlyExpenseState> emit,
   ) async {
+    if (state is! PersonalMonthlyExpenseFetchSuccess) {
+      return;
+    }
     final oldData = state as PersonalMonthlyExpenseFetchSuccess;
     List<PersonalExpenseTransactionModel> data = [...oldData.data];
     if (event.isLoading) {

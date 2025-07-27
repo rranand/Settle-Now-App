@@ -35,6 +35,9 @@ class LendenDashboardBloc
     LendenDashboardOnAddNewRoom event,
     Emitter<LendenDashboardState> emit,
   ) async {
+    if (state is! LendenDashboardFetchSuccess) {
+      return;
+    }
     final allLendenRoomState = (state as LendenDashboardFetchSuccess);
     List<LendenDashboardModel> data = [];
     if (event.isLoading) {

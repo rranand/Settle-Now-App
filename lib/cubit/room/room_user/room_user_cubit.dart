@@ -56,6 +56,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   }
 
   void onAddNewTransaction(TransactionModel data) {
+    if (state is! RoomUserSuccess) {
+      return;
+    }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 
@@ -98,6 +101,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   }
 
   void onUpdateTransaction(TransactionModel oldExpense, TransactionModel data) {
+    if (state is! RoomUserSuccess) {
+      return;
+    }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 
@@ -177,6 +183,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   }
 
   void onDeleteTransaction(TransactionModel data) {
+    if (state is! RoomUserSuccess) {
+      return;
+    }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 
@@ -219,6 +228,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   }
 
   void onAddNewSettleExpense(RoomSettleModel data) {
+    if (state is! RoomUserSuccess) {
+      return;
+    }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 
@@ -234,6 +246,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   }
 
   void updateSettleExpense(RoomSettleModel oldData, RoomSettleModel data) {
+    if (state is! RoomUserSuccess) {
+      return;
+    }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 
@@ -255,6 +270,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   }
 
   void deleteSettleExpense(RoomSettleModel data) {
+    if (state is! RoomUserSuccess) {
+      return;
+    }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 

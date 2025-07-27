@@ -40,7 +40,6 @@ class _SettingPageState extends State<SettingPage> {
   int totalMemberCount = 0;
   UserModel createdBy = UserModel.empty();
   DateTime createdOn = DateTime.now();
-  String ogRoomName = "";
 
   @override
   void didChangeDependencies() {
@@ -89,7 +88,6 @@ class _SettingPageState extends State<SettingPage> {
             totalMemberCount = state.data.users.length;
             createdBy = state.data.createdBy;
             createdOn = state.data.createdOn;
-            ogRoomName = state.data.roomName;
           }
         }
       case (TransactionType.lenden):
@@ -100,7 +98,6 @@ class _SettingPageState extends State<SettingPage> {
             totalMemberCount = state.roomData.users.length;
             createdBy = state.roomData.createdBy;
             createdOn = state.roomData.createdOn;
-            ogRoomName = state.roomData.roomName;
           }
         }
       default:
@@ -174,6 +171,49 @@ class _SettingPageState extends State<SettingPage> {
     focusNode = FocusNode();
   }
 
+  Widget saveHandler() {
+    String ogRoomName = "";
+
+    switch (widget.transactionType) {
+      case (TransactionType.lenden):
+        {
+          final state = context.watch<LendenRoomBloc>().state;
+          if (state is LendenRoomFetchSuccess && state.id == widget.id) {
+            ogRoomName = state.roomData.roomName;
+          }
+        }
+      case (TransactionType.room):
+        {
+          final state = context.watch<RoomInfoCubit>().state;
+          if (state is RoomInfoSuccess && state.data.id == widget.id) {
+            ogRoomName = state.data.roomName;
+          }
+        }
+      default:
+        {
+          return SizedBox.shrink();
+        }
+    }
+
+    if (ogRoomName.isEmpty) {
+      return SizedBox.shrink();
+    }
+
+    if (ogRoomName == _roomNameController.text && _roomEditListener.value) {
+      _roomEditListener.value = false;
+    }
+
+    return Visibility(
+      visible: _roomNameController.text != ogRoomName,
+      child: IconButton(
+        icon: Icon(Icons.check),
+        onPressed: () {
+          roomUpdateHandler();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,15 +225,7 @@ class _SettingPageState extends State<SettingPage> {
           ValueListenableBuilder<TextEditingValue>(
             valueListenable: _roomNameController,
             builder: (context, _, _) {
-              return Visibility(
-                visible: _roomNameController.text != ogRoomName,
-                child: IconButton(
-                  icon: Icon(Icons.check),
-                  onPressed: () {
-                    roomUpdateHandler();
-                  },
-                ),
-              );
+              return saveHandler();
             },
           ),
         ]),

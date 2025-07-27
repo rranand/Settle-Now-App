@@ -42,6 +42,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     RoomAddNewTransaction event,
     Emitter<RoomState> emit,
   ) async {
+    if (state is! RoomFetchSuccess) {
+      return;
+    }
     final oldData = state as RoomFetchSuccess;
     List<TransactionModel> data = [event.data, ...oldData.data];
     roomUserCubit.onAddNewTransaction(event.data);
@@ -52,6 +55,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     RoomUpdateTransaction event,
     Emitter<RoomState> emit,
   ) async {
+    if (state is! RoomFetchSuccess) {
+      return;
+    }
     final oldData = state as RoomFetchSuccess;
     List<TransactionModel> data = [...oldData.data];
     TransactionModel oldExpense = TransactionModel.empty();
@@ -71,6 +77,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     RoomDeleteTransaction event,
     Emitter<RoomState> emit,
   ) async {
+    if (state is! RoomFetchSuccess) {
+      return;
+    }
     final oldData = state as RoomFetchSuccess;
     List<TransactionModel> data = [...oldData.data];
     int index = -1;
@@ -94,6 +103,9 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     RoomAddToPersonalExpense event,
     Emitter<RoomState> emit,
   ) {
+    if (state is! RoomFetchSuccess) {
+      return;
+    }
     final oldState = state as RoomFetchSuccess;
     if (oldState.id != event.id) {
       return;

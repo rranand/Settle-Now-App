@@ -29,9 +29,14 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     NewTransactionModel data,
     TransactionType transactionType,
   ) async {
+    final authLoginState = context.read<AuthBloc>().state;
+    UserModel loggedInUser = UserModel.empty();
+    if (authLoginState is! AuthLoginSuccess) {
+      return;
+    } else {
+      loggedInUser = authLoginState.userData;
+    }
     emit(NewTransactionLoading());
-    final loggedInUser =
-        (context.read<AuthBloc>().state as AuthLoginSuccess).userData;
 
     try {
       switch (transactionType) {
@@ -61,7 +66,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.lenden:
           {
             final bloc = context.read<LendenRoomBloc>();
-            final roomID = (bloc.state as LendenRoomFetchSuccess).id;
+            final blocState = bloc.state;
+            if (blocState is! LendenRoomFetchSuccess) {
+              return;
+            }
+            final roomID = blocState.id;
             final LendenTransactionModel newData = await repoLD.create(
               roomID,
               loggedInUser.authToken,
@@ -75,7 +84,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final roomID = (bloc.state as RoomFetchSuccess).id;
+            final blocState = bloc.state;
+            if (blocState is! RoomFetchSuccess) {
+              return;
+            }
+            final roomID = blocState.id;
             final TransactionModel newData = await repoRD.createExpense(
               roomID,
               data,
@@ -96,9 +109,14 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     TransactionType transactionType, {
     String expenseType = "Personal",
   }) async {
+    final authLoginState = context.read<AuthBloc>().state;
+    UserModel loggedInUser = UserModel.empty();
+    if (authLoginState is! AuthLoginSuccess) {
+      return;
+    } else {
+      loggedInUser = authLoginState.userData;
+    }
     emit(NewTransactionLoading());
-    final loggedInUser =
-        (context.read<AuthBloc>().state as AuthLoginSuccess).userData;
 
     try {
       switch (transactionType) {
@@ -125,7 +143,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.lenden:
           {
             final bloc = context.read<LendenRoomBloc>();
-            final roomID = (bloc.state as LendenRoomFetchSuccess).id;
+            final blocState = bloc.state;
+            if (blocState is! LendenRoomFetchSuccess) {
+              return;
+            }
+            final roomID = blocState.id;
             final LendenTransactionModel updatedData = await repoLD.update(
               roomID,
               loggedInUser.authToken,
@@ -139,7 +161,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.room:
           {
             final bloc = context.read<RoomBloc>();
-            final roomID = (bloc.state as RoomFetchSuccess).id;
+            final blocState = bloc.state;
+            if (blocState is! RoomFetchSuccess) {
+              return;
+            }
+            final roomID = blocState.id;
             final TransactionModel newData = await repoRD.updateExpense(
               roomID,
               data,
@@ -161,11 +187,15 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     TransactionType transactionType, {
     String expenseType = "Personal",
   }) async {
+    final authLoginState = context.read<AuthBloc>().state;
+    UserModel loggedInUser = UserModel.empty();
+    if (authLoginState is! AuthLoginSuccess) {
+      return;
+    } else {
+      loggedInUser = authLoginState.userData;
+    }
     emit(NewTransactionLoading());
     dynamic bloc;
-
-    final loggedInUser =
-        (context.read<AuthBloc>().state as AuthLoginSuccess).userData;
 
     try {
       switch (transactionType) {
@@ -204,8 +234,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.lenden:
           {
             bloc = context.read<LendenRoomBloc>();
-            bloc.add(LendenDeleteTransaction(expenseID));
-            final roomID = (bloc.state as LendenRoomFetchSuccess).id;
+            final blocState = bloc.state;
+            if (blocState is! LendenRoomFetchSuccess) {
+              return;
+            }
+            final roomID = blocState.id;
             final bool isDeleted = await repoLD.delete(
               roomID,
               loggedInUser.authToken,
@@ -221,8 +254,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           }
         case TransactionType.room:
           {
-            final bloc = context.read<RoomBloc>();
-            final roomID = (bloc.state as RoomFetchSuccess).id;
+            bloc = context.read<RoomBloc>();
+            final blocState = bloc.state;
+            if (blocState is! RoomFetchSuccess) {
+              return;
+            }
+            final roomID = blocState.id;
             final bool isDeleted = await repoRD.deleteExpense(
               roomID,
               expenseID,

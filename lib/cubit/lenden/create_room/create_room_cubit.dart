@@ -22,8 +22,11 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
     : super(CreateRoomInitial());
 
   void createNewRoom(BuildContext context, String roomName) async {
+    final authLoginState = context.read<AuthBloc>().state;
+    if (authLoginState is! AuthLoginSuccess) {
+      return;
+    }
     final lendenDashboardCtx = context.read<LendenDashboardBloc>();
-    final authLoginState = context.read<AuthBloc>().state as AuthLoginSuccess;
     try {
       lendenDashboardCtx.add(
         LendenDashboardOnAddNewRoom(
