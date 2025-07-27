@@ -115,6 +115,26 @@ class LendenRoomDataProvider {
     }
   }
 
+  Future<void> deleteRoom(String id, String authToken) async {
+    try {
+      final response = await createAPICall(
+        'lenden/$id/room',
+        "delete",
+        authToken,
+        {},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<bool> delete(String id, String authToken, String expenseID) async {
     try {
       final response = await createAPICall('lenden/$id', "delete", authToken, {

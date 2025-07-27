@@ -24,6 +24,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     on<LendenAddNewTransaction>(_lendenAddNewTransaction);
     on<LendenUpdateTransaction>(_lendenUpdateTransaction);
     on<LendenDeleteTransaction>(_lendenDeleteTransaction);
+    on<LendenRoomDelete>(_lendenRoomDelete);
     on<LendenRoomReset>(_lendenRoomReset);
     on<LendenRoomUpdate>(_lendenRoomUpdate);
   }
@@ -179,6 +180,40 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       return emit(
         LendenRoomFetchSuccess(oldData.id, updatedData, oldData.data),
       );
+    } catch (e) {
+      event.scaffoldMessengerState.hideCurrentSnackBar();
+      emit(LendenRoomFailure(e.toString()));
+      return emit(
+        LendenRoomFetchSuccess(oldData.id, oldData.roomData, oldData.data),
+      );
+    }
+  }
+
+  void _lendenRoomDelete(
+    LendenRoomDelete event,
+    Emitter<LendenRoomState> emit,
+  ) async {
+    if (state is! LendenRoomFetchSuccess) {
+      return;
+    }
+    final oldData = state as LendenRoomFetchSuccess;
+
+    showSnackbarWithChildWidget(
+      event.isRemoving ? "Leaving Room" : "Deleting Room",
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
+      duration: Duration(minutes: 2),
+      scaffoldMessenger: event.scaffoldMessengerState,
+    );
+    try {
+      await repo.deleteRoom(oldData.id, event.authToken);
+      lendenDashboardBloc.add(LendenDashboardOnDeleteRoom(id: event.id));
+      event.scaffoldMessengerState.hideCurrentSnackBar();
+      showSnackbarWithChildWidget(
+        event.isRemoving ? "You’ve left the room" : "Room deleted successfully",
+        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        scaffoldMessenger: event.scaffoldMessengerState,
+      );
+      return emit(LendenRoomInitial());
     } catch (e) {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       emit(LendenRoomFailure(e.toString()));

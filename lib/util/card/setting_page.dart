@@ -108,7 +108,7 @@ class _SettingPageState extends State<SettingPage> {
         }
       }
     }
-    
+
     return true;
   }
 
@@ -178,37 +178,45 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   Widget bottomBarHandler() {
-    if (createdBy.id == _loggedInUser.id) {
-      return CustomButton.customElevatedButton(
-        "Delete Room",
-        buttonHeight: 45,
-        backgroundColor: Colors.red,
-        onPressed: () {
-          if (isDeletable) {
-          } else {
-            showNormalSnackBar(
-              context,
-              "Delete blocked due to existing records",
-            );
-          }
-        },
-      );
-    } else {
-      return CustomButton.customElevatedButton(
-        "Leave Room",
-        buttonHeight: 45,
-        backgroundColor: Colors.blueGrey.shade800,
-        onPressed: () {
-          if (isLeavable) {
-          } else {
-            showNormalSnackBar(
-              context,
-              "Leave request denied due to existing records",
-            );
-          }
-        },
-      );
+    Color bgColor = Colors.red;
+    String btnTxt = "Delete Room";
+    bool isActionable = isDeletable;
+    String errTxt = "Delete blocked due to existing records";
+
+    if (createdBy.id != _loggedInUser.id) {
+      bgColor = Colors.blueGrey.shade800;
+      btnTxt = "Leave Room";
+      isActionable = isLeavable;
+      errTxt = "Leave request denied due to existing records";
     }
+
+    return CustomButton.customElevatedButton(
+      btnTxt,
+      buttonHeight: 45,
+      backgroundColor: bgColor,
+      onPressed: () {
+        if (isActionable) {
+          if (widget.transactionType == TransactionType.lenden) {
+            context.read<LendenRoomBloc>().add(
+              LendenRoomDelete(
+                id: widget.id,
+                authToken: _loggedInUser.authToken,
+                isRemoving: createdBy.id != _loggedInUser.id,
+                scaffoldMessengerState: ScaffoldMessenger.of(context),
+              ),
+            );
+          } else if (widget.transactionType == TransactionType.room) {
+            context.read<RoomInfoCubit>().deleteRoom(
+              widget.id,
+              _loggedInUser.authToken,
+              ScaffoldMessenger.of(context),
+            );
+          }
+        } else {
+          showNormalSnackBar(context, errTxt);
+        }
+      },
+    );
   }
 
   Widget infoRow(String label, String value) {

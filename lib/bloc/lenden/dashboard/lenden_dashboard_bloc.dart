@@ -15,6 +15,7 @@ class LendenDashboardBloc
     on<LendenDashboardOnAddNewRoom>(_lendenDashboardOnAddNewRoom);
     on<LendenDashboardOnUpdateRoom>(_lendenDashboardOnUpdateRoom);
     on<LendenDashboardReset>(_lendenDashboardReset);
+    on<LendenDashboardOnDeleteRoom>(_lendenDashboardOnDeleteRoom);
   }
 
   void _lendenDashboardFetch(
@@ -75,6 +76,18 @@ class LendenDashboardBloc
       if (index == -1) {
         data = [event.data, ...data];
       }
+      return emit(LendenDashboardFetchSuccess(data));
+    }
+  }
+
+  void _lendenDashboardOnDeleteRoom(
+    LendenDashboardOnDeleteRoom event,
+    Emitter<LendenDashboardState> emit,
+  ) async {
+    if (state is LendenDashboardFetchSuccess) {
+      final allLendenRoomState = (state as LendenDashboardFetchSuccess);
+      List<LendenDashboardModel> data = [...allLendenRoomState.data];
+      data.removeWhere((ele) => ele.id == event.id);
       return emit(LendenDashboardFetchSuccess(data));
     }
   }

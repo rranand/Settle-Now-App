@@ -76,6 +76,17 @@ class LendenRoomRepository {
     }
   }
 
+  Future<void> deleteRoom(
+    String id,
+    String authToken,
+  ) async {
+    try {
+      return _dataProvider.deleteRoom(id, authToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<NotificationModel> inviteUser(
     String roomID,
     String uid,

@@ -133,4 +133,12 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       return emit(RoomInfoSuccess(oldData.data));
     }
   }
+
+  void deleteRoom(
+    String id,
+    String authToken,
+    ScaffoldMessengerState scaffoldMessengerState,
+  ) {
+    debugPrint("Unimpletemented Error");
+  }
 }

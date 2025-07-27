@@ -48,3 +48,17 @@ final class LendenRoomUpdate extends LendenRoomEvent {
     required this.scaffoldMessengerState,
   });
 }
+
+final class LendenRoomDelete extends LendenRoomEvent {
+  final String id;
+  final String authToken;
+  final bool isRemoving;
+  final ScaffoldMessengerState scaffoldMessengerState;
+
+  LendenRoomDelete({
+    required this.id,
+    required this.authToken,
+    required this.isRemoving,
+    required this.scaffoldMessengerState,
+  });
+}
