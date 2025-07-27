@@ -254,7 +254,9 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   void dispose() {
-    _sub.cancel();
+    try {
+      _sub.cancel();
+    } catch (_) {}
     focusNode.dispose();
     super.dispose();
   }
