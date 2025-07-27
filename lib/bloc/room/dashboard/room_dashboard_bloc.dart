@@ -17,6 +17,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     on<RoomDashboardOnCloseRoom>(_roomDashboardOnCloseRoom);
     on<RoomDashboardReset>(_roomDashboardReset);
     on<RoomDashboardOnUpdateRoom>(_roomDashboardOnUpdateRoom);
+    on<RoomDashboardOnDeleteRoom>(_roomDashboardOnDeleteRoom);
   }
 
   void _roomFetch(
@@ -215,5 +216,27 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     Emitter<RoomDashboardState> emit,
   ) {
     return emit(RoomDashboardInitial());
+  }
+
+  void _roomDashboardOnDeleteRoom(
+    RoomDashboardOnDeleteRoom event,
+    Emitter<RoomDashboardState> emit,
+  ) async {
+    if (state is! RoomDashboardFetchSuccess) {
+      return;
+    }
+    final allRoomState = (state as RoomDashboardFetchSuccess);
+    List<RoomInfoModel> data = [...allRoomState.activeData];
+
+    data.removeWhere((ele) => ele.id == event.id);
+
+    return emit(
+      RoomDashboardFetchSuccess(
+        activeStatus: allRoomState.activeStatus,
+        inactiveStatus: allRoomState.inactiveStatus,
+        activeData: data,
+        inactiveData: allRoomState.inactiveData,
+      ),
+    );
   }
 }

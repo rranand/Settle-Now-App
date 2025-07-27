@@ -198,6 +198,10 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     }
     final oldData = state as LendenRoomFetchSuccess;
 
+    if (oldData.id != event.id) {
+      return;
+    }
+
     showSnackbarWithChildWidget(
       event.isRemoving ? "Leaving Room" : "Deleting Room",
       child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),

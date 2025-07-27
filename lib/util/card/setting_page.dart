@@ -214,6 +214,7 @@ class _SettingPageState extends State<SettingPage> {
             context.read<RoomInfoCubit>().deleteRoom(
               widget.id,
               _loggedInUser.authToken,
+              createdBy.id != _loggedInUser.id,
               ScaffoldMessenger.of(context),
             );
           }
@@ -279,7 +280,13 @@ class _SettingPageState extends State<SettingPage> {
             });
           }
         case (TransactionType.room):
-          {}
+          {
+            _sub = context.read<RoomInfoCubit>().stream.listen((state) {
+              if (context.mounted && mounted && state is RoomInfoInitial) {
+                context.pop();
+              }
+            });
+          }
         default:
           {}
       }

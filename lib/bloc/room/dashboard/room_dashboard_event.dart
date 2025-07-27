@@ -32,3 +32,8 @@ final class RoomDashboardOnUpdateRoom extends RoomDashboardEvent {
 }
 
 final class RoomDashboardReset extends RoomDashboardEvent {}
+
+final class RoomDashboardOnDeleteRoom extends RoomDashboardEvent {
+  final String id;
+  RoomDashboardOnDeleteRoom({required this.id});
+}

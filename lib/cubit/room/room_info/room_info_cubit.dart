@@ -137,8 +137,38 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
   void deleteRoom(
     String id,
     String authToken,
+    bool isRemoving,
     ScaffoldMessengerState scaffoldMessengerState,
-  ) {
-    debugPrint("Unimpletemented Error");
+  ) async {
+    if (state is! RoomInfoSuccess) {
+      return;
+    }
+    final oldData = state as RoomInfoSuccess;
+
+    if (oldData.data.id != id) {
+      return;
+    }
+
+    showSnackbarWithChildWidget(
+      isRemoving ? "Leaving Room" : "Deleting Room",
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
+      duration: Duration(minutes: 2),
+      scaffoldMessenger: scaffoldMessengerState,
+    );
+    try {
+      await repo.deleteRoom(id, authToken);
+      _roomDashboardBloc.add(RoomDashboardOnDeleteRoom(id: id));
+      scaffoldMessengerState.hideCurrentSnackBar();
+      showSnackbarWithChildWidget(
+        isRemoving ? "You’ve left the room" : "Room deleted successfully",
+        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        scaffoldMessenger: scaffoldMessengerState,
+      );
+      return emit(RoomInfoInitial());
+    } catch (e) {
+      scaffoldMessengerState.hideCurrentSnackBar();
+      emit(RoomInfoFailure(e.toString()));
+      return emit(RoomInfoSuccess(oldData.data));
+    }
   }
 }

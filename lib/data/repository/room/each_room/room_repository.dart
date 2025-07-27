@@ -73,6 +73,17 @@ class RoomRepository {
     }
   }
 
+  Future<void> deleteRoom(
+    String id,
+    String authToken,
+  ) async {
+    try {
+      return _dataProvider.deleteRoom(id, authToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<List<RoomSettleModel>> fetchSettleData(
     String id,
     String authToken,

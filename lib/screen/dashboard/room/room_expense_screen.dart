@@ -572,6 +572,8 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       listener: (context, state) {
         if (state is RoomInfoFailure) {
           showNormalSnackBar(context, state.error);
+        } else if (state is RoomInfoInitial) {
+          context.pop();
         }
       },
       builder: (context, state) {

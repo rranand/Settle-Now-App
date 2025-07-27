@@ -144,6 +144,21 @@ class RoomDataProvider {
     }
   }
 
+  Future<void> deleteRoom(String id, String authToken) async {
+    try {
+      final response = await createAPICall('room/$id', "delete", authToken, {});
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<TransactionModel> createExpense(
     String id,
     NewTransactionModel data,
