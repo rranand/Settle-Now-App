@@ -10,6 +10,7 @@ import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 part 'create_room_state.dart';
@@ -74,11 +75,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
   ) async {
     showSnackbarWithChildWidget(
       "Inviting ${user.name}",
-      child: SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
-      ),
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
       duration: Duration(minutes: 2),
       scaffoldMessenger: scaffoldMessenger,
     );

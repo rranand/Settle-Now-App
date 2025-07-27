@@ -15,11 +15,48 @@ class CustomShimmerEffect {
     );
   }
 
-  static Widget loadingShimmerEffect(Widget child) {
+  static Widget loadingShimmerEffect(
+    Widget child, {
+    Color? baseColor,
+    Color? highlightColor,
+  }) {
     return Shimmer.fromColors(
-      baseColor: Color.fromARGB(255, 2, 148, 181),
-      highlightColor: Color(0xFFf64f59),
+      baseColor: baseColor ?? Color.fromARGB(255, 2, 148, 181),
+      highlightColor: highlightColor ?? Color(0xFFf64f59),
       child: child,
+    );
+  }
+
+  static Widget shimmerCircularProgressIndicator({
+    double radius = 16,
+    double strokeWidth = 4,
+    Color? indicatorColor,
+    Color? baseColor,
+    Color? highlightColor,
+  }) {
+    return CustomShimmerEffect.loadingShimmerEffect(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      SizedBox(
+        height: radius,
+        width: radius,
+        child: Center(
+          child: CircularProgressIndicator(
+            strokeWidth: strokeWidth,
+            color: indicatorColor,
+          ),
+        ),
+      ),
+    );
+  }
+
+  static Widget shimmerCircularProgressIndicatorForSnackbar() {
+    return shimmerCircularProgressIndicator(
+      baseColor: Color(0xFF86A8E7),
+      highlightColor: Colors.green,
+      radius: 16,
+      strokeWidth: 2,
+      indicatorColor: Colors.green,
     );
   }
 

@@ -1,5 +1,4 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
@@ -8,6 +7,7 @@ import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/model/lenden_room_model.dart';
 import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 part 'lenden_room_event.dart';
@@ -157,13 +157,10 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       return;
     }
     final oldData = state as LendenRoomFetchSuccess;
+
     showSnackbarWithChildWidget(
       "Updating Name",
-      child: SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
-      ),
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
       duration: Duration(minutes: 2),
       scaffoldMessenger: event.scaffoldMessengerState,
     );

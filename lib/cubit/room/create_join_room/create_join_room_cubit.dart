@@ -9,6 +9,7 @@ import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart
 import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 part 'create_join_room_state.dart';
@@ -60,11 +61,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
   ) async {
     showSnackbarWithChildWidget(
       "Joining Room",
-      child: SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
-      ),
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
       duration: Duration(minutes: 2),
       scaffoldMessenger: scaffoldMessenger,
     );
@@ -104,11 +101,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     }
     showSnackbarWithChildWidget(
       message,
-      child: SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
-      ),
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
       duration: Duration(minutes: 2),
       scaffoldMessenger: scaffoldMessenger,
     );

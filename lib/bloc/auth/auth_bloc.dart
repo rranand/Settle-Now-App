@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 part 'auth_event.dart';
@@ -203,11 +203,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
     showSnackbarWithChildWidget(
       "Requesting Account Delete",
-      child: SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
-      ),
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
       duration: Duration(minutes: 2),
       scaffoldMessenger: event.scaffoldMessenger,
     );

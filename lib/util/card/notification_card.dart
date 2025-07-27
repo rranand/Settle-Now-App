@@ -146,12 +146,8 @@ class _NotificationCardState extends State<NotificationCard> {
         if (state.processingNotification.contains(widget.data.id)) {
           return Padding(
             padding: const EdgeInsets.only(right: 6.0),
-            child: CustomShimmerEffect.loadingShimmerEffect(
-              SizedBox(
-                height: 24.0,
-                width: 24.0,
-                child: Center(child: CircularProgressIndicator()),
-              ),
+            child: CustomShimmerEffect.shimmerCircularProgressIndicator(
+              radius: 24,
             ),
           );
         } else {

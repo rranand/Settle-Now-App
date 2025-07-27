@@ -1,11 +1,11 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 
 part 'room_info_state.dart';
@@ -109,11 +109,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     final oldData = state as RoomInfoSuccess;
     showSnackbarWithChildWidget(
       "Updating Name",
-      child: SizedBox(
-        width: 16,
-        height: 16,
-        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.green),
-      ),
+      child: CustomShimmerEffect.shimmerCircularProgressIndicatorForSnackbar(),
       duration: Duration(minutes: 2),
       scaffoldMessenger: scaffoldMessengerState,
     );

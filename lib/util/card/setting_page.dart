@@ -3,8 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
+import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
+import 'package:settlenow_v2/model/lenden_room_model.dart';
+import 'package:settlenow_v2/model/room_settle_model.dart';
+import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
@@ -13,6 +18,7 @@ import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class SettingPage extends StatefulWidget {
@@ -40,6 +46,8 @@ class _SettingPageState extends State<SettingPage> {
   int totalMemberCount = 0;
   UserModel createdBy = UserModel.empty();
   DateTime createdOn = DateTime.now();
+  bool isDeletable = false;
+  bool isLeavable = false;
 
   @override
   void didChangeDependencies() {
@@ -78,6 +86,43 @@ class _SettingPageState extends State<SettingPage> {
     }
   }
 
+  bool calculateIsLeavableForRoom(
+    List<RoomSettleModel> roomSettleData,
+    List<TransactionModel> transData,
+  ) {
+    for (int i = 0; i < roomSettleData.length; i++) {
+      if (roomSettleData[i].sender.id == _loggedInUser.id ||
+          roomSettleData[i].receiver.id == _loggedInUser.id) {
+        return false;
+      }
+    }
+
+    for (int i = 0; i < transData.length; i++) {
+      if (transData[i].createdBy.id == _loggedInUser.id) {
+        return false;
+      }
+
+      for (int j = 0; j < transData[i].users.length; j++) {
+        if (transData[i].users[j].id == _loggedInUser.id) {
+          return false;
+        }
+      }
+    }
+    
+    return true;
+  }
+
+  bool calculateIsLeavableForLendenRoom(
+    List<LendenTransactionModel> transData,
+  ) {
+    for (int i = 0; i < transData.length; i++) {
+      if (transData[i].createdBy.id == _loggedInUser.id) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   void populateData() {
     switch (widget.transactionType) {
       case (TransactionType.room):
@@ -88,6 +133,26 @@ class _SettingPageState extends State<SettingPage> {
             totalMemberCount = state.data.users.length;
             createdBy = state.data.createdBy;
             createdOn = state.data.createdOn;
+
+            final roomSettleState = context.read<RoomSettleCubit>().state;
+            final roomBlocState = context.read<RoomBloc>().state;
+
+            if (roomSettleState is RoomSettleSuccess &&
+                roomBlocState is RoomFetchSuccess &&
+                roomSettleState.id == widget.id &&
+                roomBlocState.id == widget.id) {
+              isDeletable =
+                  roomSettleState.data.isEmpty && roomBlocState.data.isEmpty;
+
+              if (state.data.createdBy.id != _loggedInUser.id) {
+                isLeavable = calculateIsLeavableForRoom(
+                  roomSettleState.data,
+                  roomBlocState.data,
+                );
+              } else {
+                isLeavable = false;
+              }
+            }
           }
         }
       case (TransactionType.lenden):
@@ -98,6 +163,13 @@ class _SettingPageState extends State<SettingPage> {
             totalMemberCount = state.roomData.users.length;
             createdBy = state.roomData.createdBy;
             createdOn = state.roomData.createdOn;
+            isDeletable = state.data.isEmpty;
+
+            if (state.roomData.createdBy.id != _loggedInUser.id) {
+              isLeavable = calculateIsLeavableForLendenRoom(state.data);
+            } else {
+              isLeavable = false;
+            }
           }
         }
       default:
@@ -111,12 +183,30 @@ class _SettingPageState extends State<SettingPage> {
         "Delete Room",
         buttonHeight: 45,
         backgroundColor: Colors.red,
+        onPressed: () {
+          if (isDeletable) {
+          } else {
+            showNormalSnackBar(
+              context,
+              "Delete blocked due to existing records",
+            );
+          }
+        },
       );
     } else {
       return CustomButton.customElevatedButton(
         "Leave Room",
         buttonHeight: 45,
         backgroundColor: Colors.blueGrey.shade800,
+        onPressed: () {
+          if (isLeavable) {
+          } else {
+            showNormalSnackBar(
+              context,
+              "Leave request denied due to existing records",
+            );
+          }
+        },
       );
     }
   }
