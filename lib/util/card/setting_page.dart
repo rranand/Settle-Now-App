@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
@@ -42,6 +45,8 @@ class _SettingPageState extends State<SettingPage> {
   final GlobalKey<FormState> _roomUpdateFormKey = GlobalKey<FormState>();
   final TextEditingController _roomNameController = TextEditingController();
   late FocusNode focusNode;
+
+  late final StreamSubscription _sub;
 
   int totalMemberCount = 0;
   UserModel createdBy = UserModel.empty();
@@ -249,6 +254,7 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   void dispose() {
+    _sub.cancel();
     focusNode.dispose();
     super.dispose();
   }
@@ -260,6 +266,21 @@ class _SettingPageState extends State<SettingPage> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
       populateData();
+
+      switch (widget.transactionType) {
+        case (TransactionType.lenden):
+          {
+            _sub = context.read<LendenRoomBloc>().stream.listen((state) {
+              if (context.mounted && mounted && state is LendenRoomInitial) {
+                context.pop();
+              }
+            });
+          }
+        case (TransactionType.room):
+          {}
+        default:
+          {}
+      }
     }
     focusNode = FocusNode();
   }

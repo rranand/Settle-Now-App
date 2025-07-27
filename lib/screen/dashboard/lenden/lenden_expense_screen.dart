@@ -49,6 +49,8 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   void _blocListenerHandler(BuildContext context, LendenRoomState state) {
     if (state is LendenRoomFailure) {
       showNormalSnackBar(context, state.error);
+    } else if (state is LendenRoomInitial) {
+      context.pop();
     }
   }
 
