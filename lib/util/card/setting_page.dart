@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
@@ -23,6 +27,7 @@ import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SettingPage extends StatefulWidget {
   final String id;
@@ -42,6 +47,7 @@ class _SettingPageState extends State<SettingPage> {
   UserModel _loggedInUser = UserModel.empty();
   final ValueNotifier<bool> _roomEditListener = ValueNotifier(false);
   final ValueNotifier<bool> _isNotificationEnabled = ValueNotifier(false);
+  final ValueNotifier<XFile?> imagePreviewFile = ValueNotifier(null);
   final GlobalKey<FormState> _roomUpdateFormKey = GlobalKey<FormState>();
   final TextEditingController _roomNameController = TextEditingController();
   late FocusNode focusNode;
@@ -51,6 +57,9 @@ class _SettingPageState extends State<SettingPage> {
   int totalMemberCount = 0;
   UserModel createdBy = UserModel.empty();
   DateTime createdOn = DateTime.now();
+  String roomKey = "";
+  String roomName = "";
+  String roomLink = "";
   bool isDeletable = false;
   bool isLeavable = false;
 
@@ -135,9 +144,12 @@ class _SettingPageState extends State<SettingPage> {
           final state = context.read<RoomInfoCubit>().state;
           if (state is RoomInfoSuccess) {
             _roomNameController.text = state.data.roomName;
+            roomName = state.data.roomName;
             totalMemberCount = state.data.users.length;
             createdBy = state.data.createdBy;
             createdOn = state.data.createdOn;
+            roomKey = state.data.roomKey;
+            roomLink = state.data.roomLink;
 
             final roomSettleState = context.read<RoomSettleCubit>().state;
             final roomBlocState = context.read<RoomBloc>().state;
@@ -237,6 +249,24 @@ class _SettingPageState extends State<SettingPage> {
           value,
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
         ),
+        Visibility(
+          visible: label == "Room Key:",
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: value));
+              if (context.mounted && mounted) {
+                showSnackbarWithChildWidget(
+                  "Room Key Copied",
+                  child: Icon(Iconsax.tick_circle5, color: Colors.green),
+                  duration: Duration(seconds: 1),
+                  scaffoldMessenger: ScaffoldMessenger.of(context),
+                );
+              }
+            },
+            icon: Icon(Iconsax.copy),
+          ),
+        ),
       ],
     );
   }
@@ -265,6 +295,8 @@ class _SettingPageState extends State<SettingPage> {
   @override
   void initState() {
     super.initState();
+    shareAssetImage();
+
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
@@ -310,6 +342,7 @@ class _SettingPageState extends State<SettingPage> {
           final state = context.watch<RoomInfoCubit>().state;
           if (state is RoomInfoSuccess && state.data.id == widget.id) {
             ogRoomName = state.data.roomName;
+            roomName = ogRoomName;
           }
         }
       default:
@@ -331,6 +364,24 @@ class _SettingPageState extends State<SettingPage> {
         },
       ),
     );
+  }
+
+  Future<void> shareAssetImage() async {
+    if (kIsWeb) {
+      return;
+    }
+    try {
+      final byteData = await rootBundle.load('assets/sn/SN_WBG.png');
+
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/SN_WBG.png');
+
+      await file.writeAsBytes(byteData.buffer.asUint8List());
+
+      imagePreviewFile.value = XFile(file.path);
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   @override
@@ -446,25 +497,71 @@ class _SettingPageState extends State<SettingPage> {
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black38),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    infoRow(
-                      'Created By:',
-                      _loggedInUser.id == createdBy.id ? "You" : createdBy.name,
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black38),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    SizedBox(height: 8),
-                    infoRow('Created On:', convertInDateFormat(createdOn)),
-                    SizedBox(height: 8),
-                    infoRow('Total Member:', totalMemberCount.toString()),
-                  ],
-                ),
+                    padding:
+                        widget.transactionType == TransactionType.room
+                            ? EdgeInsets.only(
+                              bottom: 8,
+                              left: 8,
+                              right: 8,
+                              top: 4,
+                            )
+                            : EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        widget.transactionType == TransactionType.room
+                            ? infoRow('Room Key:', roomKey)
+                            : SizedBox.shrink(),
+                        infoRow(
+                          'Created By:',
+                          _loggedInUser.id == createdBy.id
+                              ? "You"
+                              : createdBy.name,
+                        ),
+                        SizedBox(height: 8),
+                        infoRow('Created On:', convertInDateFormat(createdOn)),
+                        SizedBox(height: 8),
+                        infoRow('Total Member:', totalMemberCount.toString()),
+                      ],
+                    ),
+                  ),
+                  Visibility(
+                    visible: widget.transactionType == TransactionType.room,
+                    child: Positioned(
+                      right: 8,
+                      child: ValueListenableBuilder(
+                        valueListenable: imagePreviewFile,
+                        builder: (context, value, child) {
+                          return IconButton(
+                            padding: EdgeInsets.only(
+                              top: 8,
+                              bottom: 8,
+                              left: 8,
+                              right: 8,
+                            ),
+                            onPressed: () async {
+                              SharePlus.instance.share(
+                                ShareParams(
+                                  title: "Join $roomName",
+                                  text: "Room Key: $roomKey\n$roomLink",
+                                  previewThumbnail: imagePreviewFile.value,
+                                ),
+                              );
+                            },
+                            icon: Icon(Iconsax.send_2),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
