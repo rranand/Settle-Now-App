@@ -10,13 +10,11 @@ class AuthRepository {
 
   Future<UserModel> getLoggedInUser() async {
     try {
-      //await Future.delayed(Duration(seconds: 2));
-      //throw "Unauthorized Access";
       String? authToken = await LocalStoragePreference.getStringPref(
         'auth_token',
       );
       authToken =
-          "njEThyz062WOpb6dn1JywtvIHGRQ95TFn2LeXb3sVzQ2/P3+eeun2P94M6mGpmenuhmJqfw8yavnFoC7ii2L0JsbOhalXvEr3CASMBavdNg=";
+          "njEThyz062WOpb6dn1JywtvIHGRQ95TFn2LeXb3sVzSXK6No/1SLOXSr3eeZ44BD+b+lWEkxlMtkHGiE3waf3sXn+J3eZLVCDG6NB5LZEhk=";
 
       if (authToken == null) {
         throw "Unauthorized Access";

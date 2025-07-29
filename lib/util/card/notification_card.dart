@@ -155,8 +155,10 @@ class _NotificationCardState extends State<NotificationCard> {
             children: [
               Visibility(
                 visible:
-                    widget.data.user.id != widget.data.by.id &&
-                    widget.data.user.id == widget.loggedInUserID,
+                    (widget.data.user.id != widget.data.by.id &&
+                        widget.data.user.id == widget.loggedInUserID) ||
+                    (widget.data.user.id == widget.data.by.id &&
+                        widget.data.user.id != widget.loggedInUserID),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 24.0),
                   child: InkWell(

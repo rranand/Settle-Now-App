@@ -322,10 +322,6 @@ class _SettingPageState extends State<SettingPage> {
       return SizedBox.shrink();
     }
 
-    if (ogRoomName == _roomNameController.text && _roomEditListener.value) {
-      _roomEditListener.value = false;
-    }
-
     return Visibility(
       visible: _roomNameController.text != ogRoomName,
       child: IconButton(
