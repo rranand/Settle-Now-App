@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
@@ -12,6 +13,7 @@ import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expe
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
+import 'package:settlenow_v2/bloc/update_info/update_info_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
@@ -25,6 +27,9 @@ import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/cubit/user/friend/friend_cubit.dart';
 import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
 import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_cubit.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 List<double> calculateCrossAspectRatio(
   double screenWidth,
@@ -112,4 +117,36 @@ void resetAllBlocs(BuildContext context) {
   context.read<RoomSettleCubit>().reset();
   context.read<RoomSettleUpsertCubit>().reset();
   context.read<RoomUserCubit>().reset();
+}
+
+void updateStateListener(BuildContext context, UpdateInfoState updateState) {
+  if (updateState is UpdateInfoSuccess) {
+    if (updateState.data.maintenance) {
+      while (context.canPop()) {
+        context.pop();
+      }
+      context.pushReplacement(RouterConstants.maintenancePage);
+    } else if (updateState.data.isUpdateRequired()) {
+      if (updateState.data.important) {
+        while (context.canPop()) {
+          context.pop();
+        }
+        context.pushReplacement(
+          RouterConstants.updatePage,
+          extra: updateState.data,
+        );
+      } else {
+        showSnackbarForUpdate(ScaffoldMessenger.of(context));
+      }
+    }
+  }
+}
+
+void updateHandler() {
+  launchUrl(
+    Uri.parse(
+      "https://play.google.com/store/apps/details?id=com.rohit.settlenow",
+    ),
+    mode: LaunchMode.externalApplication,
+  );
 }

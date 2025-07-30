@@ -379,9 +379,7 @@ class _SettingPageState extends State<SettingPage> {
       await file.writeAsBytes(byteData.buffer.asUint8List());
 
       imagePreviewFile.value = XFile(file.path);
-    } catch (e) {
-      debugPrint(e.toString());
-    }
+    } catch (_) {}
   }
 
   @override

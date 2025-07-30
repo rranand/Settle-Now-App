@@ -3,11 +3,11 @@ import 'package:iconsax/iconsax.dart';
 
 const List<String> drawerTitle = [
   "Profile",
-  "Bank Transactions",
-  "Reminder",
-  "Import Contacts",
+  // "Bank Transactions",
+  // "Reminder",
+  // "Import Contacts",
   "Get Notified",
-  "Theme",
+  // "Theme",
   "Share",
   "About Us",
   "Contact Us",
@@ -17,11 +17,11 @@ const List<String> drawerTitle = [
 
 const List<IconData> drawerIcon = [
   Iconsax.profile_2user,
-  Iconsax.bank,
-  Iconsax.calendar_tick,
-  Iconsax.import,
+  // Iconsax.bank,
+  // Iconsax.calendar_tick,
+  // Iconsax.import,
   Icons.notifications_active_outlined,
-  Iconsax.sun_1,
+  // Iconsax.sun_1,
   Iconsax.share,
   Iconsax.archive_book,
   Iconsax.support,

@@ -168,7 +168,7 @@ class AuthDataProvider {
         throw Crypto.decrypt(data['message']);
       }
     } catch (e) {
-      throw e.toString();
+      rethrow;
     }
   }
 

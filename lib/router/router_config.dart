@@ -9,6 +9,7 @@ import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
+import 'package:settlenow_v2/model/update_info_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/signup_screen.dart';
@@ -26,6 +27,8 @@ import 'package:settlenow_v2/util/card/settle_expense.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/handler/stream_to_listenable.dart';
 import 'package:settlenow_v2/util/widgets/auth_gate.dart';
+import 'package:settlenow_v2/util/widgets/maintenance_page.dart';
+import 'package:settlenow_v2/util/widgets/update_page.dart';
 
 class AppRouterConfig {
   static FirebaseAnalytics analytics = FirebaseAnalytics.instance;
@@ -54,6 +57,28 @@ class AppRouterConfig {
         path: RouterConstants.signupRouteName,
         builder: (context, state) {
           return SignUpScreen();
+        },
+      ),
+      GoRoute(
+        path: RouterConstants.updatePage,
+        builder: (context, state) {
+          UpdateInfoModel data = state.extra as UpdateInfoModel;
+          return UpdatePage(data: data);
+        },
+        redirect: (context, state) {
+          final extra = state.extra;
+
+          if (extra == null) {
+            return RouterConstants.dashboardRouteName;
+          } else {
+            return null;
+          }
+        },
+      ),
+      GoRoute(
+        path: RouterConstants.maintenancePage,
+        builder: (context, state) {
+          return MaintenancePage();
         },
       ),
       GoRoute(

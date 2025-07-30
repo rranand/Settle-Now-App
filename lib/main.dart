@@ -20,6 +20,7 @@ import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expe
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
+import 'package:settlenow_v2/bloc/update_info/update_info_bloc.dart';
 import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
@@ -42,6 +43,7 @@ import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense
 import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provider.dart';
+import 'package:settlenow_v2/data/data_provider/update_info/update_info_data_provider.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
@@ -51,6 +53,7 @@ import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/pe
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
+import 'package:settlenow_v2/data/repository/update_info_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/provider/theme_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
@@ -59,8 +62,6 @@ import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
-// TODO : Update App Logic
-// TODO : Force App Update Logic
 // TODO : Impletement notification
 
 @pragma('vm:entry-point')
@@ -130,6 +131,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<UpdateInfoRepository>(
+          create: (context) => UpdateInfoRepository(UpdateInfoDataProvider()),
+        ),
         RepositoryProvider<AuthRepository>(
           create: (context) => AuthRepository(AuthDataProvider()),
         ),
@@ -170,6 +174,12 @@ class MyApp extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider<UpdateInfoBloc>(
+            create:
+                (context) =>
+                    UpdateInfoBloc(context.read<UpdateInfoRepository>())
+                      ..add(UpdateInfoFetchRequested()),
+          ),
           BlocProvider<AuthBloc>(
             create:
                 (context) =>

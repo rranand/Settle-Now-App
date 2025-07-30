@@ -8,7 +8,7 @@ import 'package:settlenow_v2/util/functions/text_function.dart';
 
 Future<String> getAppVersion() async {
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  return packageInfo.version.toString();
+  return '${packageInfo.version}+${packageInfo.buildNumber}';
 }
 
 Future<Map<String, String>> platformState() async {

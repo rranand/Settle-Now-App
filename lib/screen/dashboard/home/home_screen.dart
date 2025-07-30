@@ -16,6 +16,7 @@ import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_s
 import 'package:settlenow_v2/screen/dashboard/room/room_dashboard_screen.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/handler/platform_service.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
   UserModel _loggedInUser = UserModel.empty();
   int _selectedIndex = 0;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+  String appVersion = "";
 
   @override
   void didChangeDependencies() {
@@ -45,9 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void populateData() async {
+    appVersion = await getAppVersion();
+  }
+
   @override
   void initState() {
     super.initState();
+    populateData();
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
@@ -82,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "Version 1.0.0",
+            "Version $appVersion",
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12, color: Colors.white),
           ),
@@ -141,7 +148,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 14, color: Colors.white),
               ),
               trailing: Visibility(
-                visible: index == 3 || index == 4,
+                visible: index == -1,
                 child: Container(
                   width: 55,
                   height: 30,

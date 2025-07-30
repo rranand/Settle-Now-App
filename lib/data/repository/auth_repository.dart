@@ -13,8 +13,6 @@ class AuthRepository {
       String? authToken = await LocalStoragePreference.getStringPref(
         'auth_token',
       );
-      authToken =
-          "njEThyz062WOpb6dn1JywtvIHGRQ95TFn2LeXb3sVzSXK6No/1SLOXSr3eeZ44BD+b+lWEkxlMtkHGiE3waf3sXn+J3eZLVCDG6NB5LZEhk=";
 
       if (authToken == null) {
         throw "Unauthorized Access";
