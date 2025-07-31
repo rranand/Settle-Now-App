@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_cubit.dart';
@@ -39,8 +40,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       showNormalSnackBar(context, state.error!);
     }
     if (state.isUpdated == true) {
-      context.read<AuthBloc>().add(
-        AuthProfileUpdateRequested(state.newUserData!),
+      showSnackbar(
+        context,
+        "Profile Updated",
+        icon: Icon(Iconsax.tick_circle, color: Colors.green),
       );
       context.pop();
     }
@@ -51,7 +54,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (_name.text != _loggedInUser.name) {
         UserModel newData = UserModel.copyFromUser(_loggedInUser);
         newData.name = _name.text;
-        newData.authToken = _loggedInUser.authToken;
         context.read<UserUpdateProfileCubit>().updateProfile(newData);
       } else {
         showNormalSnackBar(context, "Nothing to update!");

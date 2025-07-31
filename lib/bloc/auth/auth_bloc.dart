@@ -185,11 +185,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthProfileUpdateRequested event,
     Emitter<AuthState> emit,
   ) {
-    if (state is AuthLoginSuccess) {
-      UserModel oldUserData = (state as AuthLoginSuccess).userData;
-      UserModel newUserData = oldUserData.copyWith(name: event.userData.name);
-      return emit(AuthLoginSuccess(newUserData));
-    }
+    return emit(AuthLoginSuccess(event.userData));
   }
 
   void _authProfileDeleteRequested(

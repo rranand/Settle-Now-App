@@ -224,8 +224,10 @@ class MyApp extends StatelessWidget {
           ),
           BlocProvider<UserUpdateProfileCubit>(
             create:
-                (context) =>
-                    UserUpdateProfileCubit(context.read<AuthRepository>()),
+                (context) => UserUpdateProfileCubit(
+                  context.read<AuthRepository>(),
+                  context.read<AuthBloc>(),
+                ),
           ),
           BlocProvider<NotificationBloc>(
             create:
