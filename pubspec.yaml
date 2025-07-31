@@ -47,6 +47,7 @@ dependencies:
   in_app_update: ^4.2.3
   in_app_review: ^2.0.10
   font_awesome_flutter: ^10.8.0
+  awesome_notifications: ^0.10.1
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3

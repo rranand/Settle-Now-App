@@ -1,8 +1,10 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/Notification/notification_interface_handler.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
@@ -60,6 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     populateData();
     InAppUpdateService.checkForUpdate();
+
+    NotificationInterfaceHandler.initateListeners(context);
+    NotificationInterfaceHandler.initializeChannels();
+
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
@@ -122,6 +128,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _drawerHandler(int index) {
     switch (drawerTitle[index]) {
+      case "Get Notified":
+        {
+          AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+            if (!isAllowed) {
+              AwesomeNotifications().requestPermissionToSendNotifications();
+            }
+          });
+        }
       case "Share":
         SharePlus.instance.share(
           ShareParams(
@@ -130,7 +144,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       case "Rate Us":
-        inAppReview.openStoreListing();
+        {
+          AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: 10,
+              channelKey: 'roomID',
+              actionType: ActionType.Default,
+              title: 'Hello World!',
+              body: 'This is my first notification!',
+            ),
+          );
+          //inAppReview.openStoreListing();
+        }
       case "About Us":
         context.push(RouterConstants.aboutUsPage);
       case "Profile":

@@ -61,6 +61,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final String idToken = googleAuth.idToken ?? "";
 
       if (idToken.isEmpty) {
+        await GoogleOauth.logout();
         return emit(AuthLoginFailure("Google SignIn Failed"));
       }
 
@@ -68,6 +69,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       return emit(AuthLoginSuccess(authUserData));
     } catch (e) {
+      await GoogleOauth.logout();
       return emit(AuthLoginFailure(e.toString()));
     }
   }
@@ -103,11 +105,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final String idToken = googleAuth.idToken ?? "";
 
       if (idToken.isEmpty) {
+        await GoogleOauth.logout();
         return emit(AuthSignUpFailure("Google Signup Failed"));
       }
       UserModel authUserData = await repo.signupUsingGoogle(email, idToken);
       return emit(AuthLoginSuccess(authUserData));
     } catch (e) {
+      await GoogleOauth.logout();
       return emit(AuthSignUpFailure(e.toString()));
     }
   }
