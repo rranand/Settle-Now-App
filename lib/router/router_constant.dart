@@ -42,8 +42,11 @@ class RouterConstants {
   //Setting Page
   static const String updatePage = '/update';
 
-  //Setting Page
+  //Maintenance Page
   static const String maintenancePage = '/maintenance';
+
+  //About Us Page
+  static const String aboutUsPage = '/about-us';
 
   //Error Route
   static const String errorPageRouteName = '/404';

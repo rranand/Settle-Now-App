@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
@@ -16,10 +17,12 @@ import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_s
 import 'package:settlenow_v2/screen/dashboard/room/room_dashboard_screen.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/functions/in_app_update_service.dart';
 import 'package:settlenow_v2/util/handler/platform_service.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -30,6 +33,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final InAppReview inAppReview = InAppReview.instance;
   static final GlobalKey<ScaffoldState> _homeScreenkey =
       GlobalKey<ScaffoldState>();
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
@@ -55,6 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     populateData();
+    InAppUpdateService.checkForUpdate();
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
@@ -117,6 +122,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   _drawerHandler(int index) {
     switch (drawerTitle[index]) {
+      case "Share":
+        SharePlus.instance.share(
+          ShareParams(
+            text:
+                "Settle Now\n\nSettle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about 'who owes who.'\n\nhttps://play.google.com/store/apps/details?id=com.rohit.settlenow",
+          ),
+        );
+      case "Rate Us":
+        inAppReview.openStoreListing();
+      case "About Us":
+        context.push(RouterConstants.aboutUsPage);
       case "Profile":
         context.push(RouterConstants.profileRouteName);
       case "Log Out":

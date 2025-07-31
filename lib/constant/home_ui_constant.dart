@@ -10,7 +10,7 @@ const List<String> drawerTitle = [
   // "Theme",
   "Share",
   "About Us",
-  "Contact Us",
+  //"Contact Us",
   "Rate Us",
   "Log Out",
 ];
@@ -24,7 +24,7 @@ const List<IconData> drawerIcon = [
   // Iconsax.sun_1,
   Iconsax.share,
   Iconsax.archive_book,
-  Iconsax.support,
+  //Iconsax.support,
   Iconsax.star,
   Iconsax.logout,
 ];

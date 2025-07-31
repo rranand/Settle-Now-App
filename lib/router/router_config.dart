@@ -20,6 +20,7 @@ import 'package:settlenow_v2/screen/dashboard/room/room_expense_screen.dart';
 import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
+import 'package:settlenow_v2/util/card/about_us.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
 import 'package:settlenow_v2/util/card/invite_member.dart';
 import 'package:settlenow_v2/util/card/setting_page.dart';
@@ -87,6 +88,12 @@ class AppRouterConfig {
           return AuthGate(child: HomeScreen());
         },
         routes: [
+          GoRoute(
+            path: RouterConstants.aboutUsPage,
+            builder: (context, state) {
+              return AboutUsPage();
+            },
+          ),
           GoRoute(
             path: RouterConstants.profileRouteName,
             builder: (context, state) {

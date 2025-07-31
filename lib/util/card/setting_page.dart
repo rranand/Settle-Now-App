@@ -544,11 +544,11 @@ class _SettingPageState extends State<SettingPage> {
                               left: 8,
                               right: 8,
                             ),
-                            onPressed: () async {
+                            onPressed: () {
                               SharePlus.instance.share(
                                 ShareParams(
-                                  title: "Join $roomName",
-                                  text: "Room Key: $roomKey\n$roomLink",
+                                  text:
+                                      "Join $roomName\nRoom Key: $roomKey\n$roomLink",
                                   previewThumbnail: imagePreviewFile.value,
                                 ),
                               );

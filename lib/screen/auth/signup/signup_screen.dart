@@ -10,6 +10,7 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow_v2/util/functions/in_app_update_service.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
@@ -102,6 +103,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    InAppUpdateService.checkForUpdate();
   }
 
   @override

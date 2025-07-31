@@ -37,6 +37,42 @@ class GradientWidget extends StatelessWidget {
   }
 }
 
+class GradientText extends StatelessWidget {
+  final List<Color> gradientColors;
+  final String text;
+  final double textSize;
+  final double? letterSpacing;
+
+  const GradientText({
+    super.key,
+    required this.gradientColors,
+    required this.text,
+    required this.textSize,
+    this.letterSpacing,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      shaderCallback:
+          (bounds) => LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ).createShader(bounds),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: textSize,
+          fontWeight: FontWeight.bold,
+          letterSpacing: letterSpacing,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+}
+
 class GradientBorderCard extends StatelessWidget {
   final Widget child;
   final double borderRadius;
