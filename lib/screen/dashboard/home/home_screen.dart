@@ -43,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   String appVersion = "";
+  bool isNotificationAllowed = true;
 
   @override
   void didChangeDependencies() {
@@ -54,6 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void populateData() async {
+    isNotificationAllowed =
+        await AwesomeNotifications().isNotificationAllowed();
     appVersion = await getAppVersion();
   }
 
@@ -179,6 +182,9 @@ class _HomeScreenState extends State<HomeScreen> {
             accountEmail: Text(_loggedInUser.email),
           ),
           ...List.generate(drawerTitle.length, (index) {
+            if (drawerTitle[index] == "Get Notified" && isNotificationAllowed) {
+              return SizedBox.shrink();
+            }
             return ListTile(
               onTap: () {
                 _drawerHandler(index);

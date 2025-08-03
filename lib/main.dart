@@ -62,7 +62,6 @@ import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
-// TODO : Impletement notification
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

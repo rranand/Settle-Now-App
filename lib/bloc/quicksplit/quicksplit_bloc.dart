@@ -56,7 +56,9 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     List<TransactionModel> data = [...oldData.data];
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
-        data[i] = event.data;
+        data[i] = event.data.copyWith(
+          isAddedToPersonalExpense: data[i].isAddedToPersonalExpense,
+        );
         break;
       }
     }

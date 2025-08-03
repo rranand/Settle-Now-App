@@ -469,6 +469,33 @@ class AppRouterConfig {
                 return null;
               }
             },
+            routes: [
+              GoRoute(
+                path: RouterConstants.inviteMember,
+                builder: (context, state) {
+                  Map<String, dynamic> data =
+                      state.extra as Map<String, dynamic>;
+                  return AuthGate(
+                    child: InviteMember(
+                      userID: data["userID"],
+                      transactionType: data["transactionType"],
+                      inviteMember: false,
+                    ),
+                  );
+                },
+                redirect: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>?;
+                  if (extra == null ||
+                      extra.isEmpty ||
+                      !extra.containsKey("userID") ||
+                      !extra.containsKey("transactionType")) {
+                    return RouterConstants.quickSplitAddExpenseRouteName;
+                  } else {
+                    return null;
+                  }
+                },
+              ),
+            ],
           ),
         ],
       ),
