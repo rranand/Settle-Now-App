@@ -15,6 +15,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     on<QuicksplitUpdateTransaction>(_quicksplitUpdateTransaction);
     on<QuicksplitDeleteTransaction>(_quicksplitDeleteTransaction);
     on<QuicksplitAddToPersonalExpense>(_quicksplitAddToPersonalExpense);
+    on<QuicksplitSettleRequest>(_quicksplitSettleRequest);
     on<QuicksplitReset>(_quicksplitReset);
   }
 
@@ -74,7 +75,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     }
     final oldData = state as QuicksplitFetchSuccess;
     List<TransactionModel> data = [...oldData.data];
-    data.removeWhere((element) => element.id == event.expenseID);
+    data.removeWhere((element) => element.id == event.transactionID);
     return emit(QuicksplitFetchSuccess(data));
   }
 
@@ -89,8 +90,42 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     List<TransactionModel> oldData = List.from(oldState.data);
 
     for (int i = 0; i < oldData.length; i++) {
-      if (oldData[i].id == event.expenseID) {
+      if (oldData[i].id == event.transactionID) {
         oldData[i].isAddedToPersonalExpense = true;
+      }
+    }
+
+    return emit(QuicksplitFetchSuccess(oldData));
+  }
+
+  void _quicksplitSettleRequest(
+    QuicksplitSettleRequest event,
+    Emitter<QuicksplitState> emit,
+  ) {
+    if (state is! QuicksplitFetchSuccess) {
+      return;
+    }
+    final oldState = state as QuicksplitFetchSuccess;
+    List<TransactionModel> oldData = List.from(oldState.data);
+
+    for (int i = 0; i < oldData.length; i++) {
+      if (oldData[i].id == event.transactionID) {
+        int settledUserCount = 0;
+        if (oldData[i].createdBy.id == event.uid) {
+          oldData[i].createdBy.isSettled = true;
+          settledUserCount++;
+        }
+
+        for (int j = 0; j < oldData[i].users.length; j++) {
+          if (oldData[i].users[j].id == event.uid) {
+            oldData[i].users[j].isSettled = true;
+          }
+          settledUserCount += oldData[i].users[j].isSettled ? 1 : 0;
+        }
+        if (settledUserCount == oldData[i].users.length + 1) {
+          oldData[i].active = false;
+        }
+        oldData[i].isClosedAny = true;
       }
     }
 

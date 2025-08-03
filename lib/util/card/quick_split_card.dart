@@ -5,14 +5,17 @@ import 'package:iconsax/iconsax.dart';
 import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/cubit/quicksplit/settle/settle_cubit.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/widgets/button_with_shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/stacked_image.dart';
 import 'package:settlenow_v2/util/widgets/widgets.dart';
@@ -28,11 +31,17 @@ class QuickSplitCard extends StatefulWidget {
 class _QuickSplitCardState extends State<QuickSplitCard> {
   UserModel _loggedInUser = UserModel.empty();
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
+  final ValueNotifier<bool> isSettledByYou = ValueNotifier(false);
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
     if (!isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
+    }
+    if (!widget.data.active) {
+      tags.add("Settled");
+    } else if (widget.data.isClosedAny) {
+      tags.add("Partial Settled");
     }
     return tags;
   }
@@ -104,6 +113,13 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                     overlapUserImageWidget(context, [user], 1),
                     SizedBox(width: 8),
                     Text(user.name),
+                    Visibility(
+                      visible: user.isSettled,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 6.0),
+                        child: Icon(Iconsax.tick_circle, color: Colors.green),
+                      ),
+                    ),
                   ],
                 ),
                 Text(
@@ -118,6 +134,64 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           },
           separatorBuilder: (BuildContext context, int index) {
             return Divider(thickness: 0.3);
+          },
+        ),
+        ValueListenableBuilder(
+          valueListenable: isSettledByYou,
+          builder: (context, _, _) {
+            return BlocBuilder<SettleCubit, SettleState>(
+              builder: (context, state) {
+                bool isLoading = false;
+                if (state.settlingExpense.contains(widget.data.id)) {
+                  isLoading = true;
+                }
+                return Visibility(
+                  visible: !isSettledByYou.value,
+                  child: Column(
+                    children: [
+                      Divider(thickness: 0.3),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ButtonWithShimmerEffect(
+                            isLoaded: isLoading,
+                            buttonText: "Settle",
+                            buttonType: CustomButtonType.customElevatedButton,
+                            buttonHeight: 40,
+                            buttonWidth: 110,
+                            elevation: 4,
+                            borderRadius: 100,
+                            buttonTextColor: Colors.green.shade400,
+                            backgroundColor: Colors.white,
+                            borderColor: Colors.green.shade400,
+                            onPressed: () {
+                              context.read<SettleCubit>().settleExpense(
+                                widget.data.id,
+                                _loggedInUser.id,
+                                _loggedInUser.authToken,
+                                context,
+                              );
+                            },
+                          ),
+                          ButtonWithShimmerEffect(
+                            isLoaded: isLoading,
+                            buttonText: "Opt Out",
+                            buttonType: CustomButtonType.customElevatedButton,
+                            buttonHeight: 40,
+                            buttonWidth: 110,
+                            elevation: 4,
+                            borderRadius: 100,
+                            buttonTextColor: Colors.red.shade400,
+                            backgroundColor: Colors.white,
+                            borderColor: Colors.red.shade400,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
           },
         ),
       ],
@@ -162,6 +236,19 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
     }
   }
 
+  bool calculateSettledFlag() {
+    if (_loggedInUser.id == widget.data.createdBy.id) {
+      return widget.data.createdBy.isSettled;
+    } else {
+      for (int i = 0; i < widget.data.users.length; i++) {
+        if (widget.data.users[i].id == _loggedInUser.id) {
+          return widget.data.users[i].isSettled;
+        }
+      }
+    }
+    return false;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -174,6 +261,8 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   @override
   Widget build(BuildContext context) {
     List<String> tags = createTags();
+    isSettledByYou.value = calculateSettledFlag();
+
     return Container(
       padding: EdgeInsets.all(UiConstant.cardPadding),
       margin: EdgeInsets.symmetric(vertical: 4),
@@ -213,6 +302,18 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  ValueListenableBuilder(
+                    valueListenable: isSettledByYou,
+                    builder: (context, _, _) {
+                      return Visibility(
+                        visible: isSettledByYou.value,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 6.0),
+                          child: Icon(Iconsax.tick_circle, color: Colors.green),
+                        ),
+                      );
+                    },
+                  ),
                   addToPersonalExpenseWidget(),
                   Visibility(
                     visible:

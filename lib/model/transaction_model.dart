@@ -17,6 +17,8 @@ class TransactionModel implements CommonTransactionField {
   List<UserAmountModel> users = [];
   DateTime modifiedOn = DateTime.now();
   bool isAddedToPersonalExpense = false;
+  bool active = true;
+  bool isClosedAny = false;
   @override
   String description = "";
   @override
@@ -34,6 +36,8 @@ class TransactionModel implements CommonTransactionField {
     required this.createdOn,
     required this.modifiedOn,
     required this.isAddedToPersonalExpense,
+    this.active = true,
+    this.isClosedAny = false,
   });
 
   TransactionModel.empty({this.hasData = false});
@@ -48,6 +52,8 @@ class TransactionModel implements CommonTransactionField {
     DateTime? createdOn,
     DateTime? modifiedOn,
     bool? isAddedToPersonalExpense,
+    bool? active,
+    bool? isClosedAny,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -60,6 +66,8 @@ class TransactionModel implements CommonTransactionField {
       modifiedOn: modifiedOn ?? this.modifiedOn,
       isAddedToPersonalExpense:
           isAddedToPersonalExpense ?? this.isAddedToPersonalExpense,
+      active: active ?? this.active,
+      isClosedAny: isClosedAny ?? this.isClosedAny,
     );
   }
 
@@ -136,6 +144,8 @@ class TransactionModel implements CommonTransactionField {
       modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
       isAddedToPersonalExpense:
           Crypto.decrypt(map['isAddedToPersonalExpense']) == 'true',
+      isClosedAny: Crypto.decrypt(map['isClosedAny']) == 'true',
+      active: Crypto.decrypt(map['active']) == 'true',
     );
   }
 

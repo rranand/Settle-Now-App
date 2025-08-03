@@ -22,15 +22,22 @@ final class QuicksplitUpdateTransaction extends QuicksplitEvent {
 }
 
 final class QuicksplitDeleteTransaction extends QuicksplitEvent {
-  final String expenseID;
+  final String transactionID;
 
-  QuicksplitDeleteTransaction(this.expenseID);
+  QuicksplitDeleteTransaction(this.transactionID);
 }
 
 final class QuicksplitAddToPersonalExpense extends QuicksplitEvent {
-  final String expenseID;
+  final String transactionID;
 
-  QuicksplitAddToPersonalExpense(this.expenseID);
+  QuicksplitAddToPersonalExpense(this.transactionID);
+}
+
+final class QuicksplitSettleRequest extends QuicksplitEvent {
+  final String transactionID;
+  final String uid;
+
+  QuicksplitSettleRequest(this.transactionID, this.uid);
 }
 
 final class QuicksplitReset extends QuicksplitEvent {}

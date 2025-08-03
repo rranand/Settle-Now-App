@@ -54,4 +54,12 @@ class QuicksplitRepository {
       rethrow;
     }
   }
+
+  Future<void> settleExpense(String expenseID, String authToken) async {
+    try {
+      return _dataProvider.settleExpense(expenseID, authToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

@@ -24,6 +24,7 @@ import 'package:settlenow_v2/bloc/update_info/update_info_bloc.dart';
 import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
+import 'package:settlenow_v2/cubit/quicksplit/settle/settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close/room_close_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_close_request/room_close_request_cubit.dart';
@@ -62,6 +63,8 @@ import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
+// TODO : Settle/Remove Me from Quicksplit
+// TODO : Room FCM Test Pending
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -327,6 +330,13 @@ class MyApp extends StatelessWidget {
                 (context) => NotificationActionBloc(
                   context.read<NotificationBloc>(),
                   context.read<NotificationRepository>(),
+                ),
+          ),
+          BlocProvider<SettleCubit>(
+            create:
+                (context) => SettleCubit(
+                  context.read<QuicksplitBloc>(),
+                  context.read<QuicksplitRepository>(),
                 ),
           ),
           BlocProvider<FilterCubit>(create: (context) => FilterCubit()),
