@@ -135,4 +135,24 @@ class QuicksplitDataProvider {
       rethrow;
     }
   }
+  
+  Future<void> optout(String expenseID, String authToken) async {
+    try {
+      final response = await createAPICall(
+        'quicksplit/optout',
+        "patch",
+        authToken,
+        {"id": Crypto.encrypt(expenseID)},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

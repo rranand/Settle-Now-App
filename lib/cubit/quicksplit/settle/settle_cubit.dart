@@ -38,4 +38,60 @@ class SettleCubit extends Cubit<SettleState> {
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
     }
   }
+
+  void optout(
+    String transactionID,
+    String uid,
+    String authToken,
+    BuildContext context,
+  ) async {
+    if (state.settlingExpense.contains(transactionID)) {
+      return;
+    }
+    Set<String> oldProcessingIDs = Set.from(state.settlingExpense);
+    oldProcessingIDs.add(transactionID);
+
+    emit(state.copyWith(settlingExpense: oldProcessingIDs));
+
+    try {
+      await repo.optout(transactionID, authToken);
+      oldProcessingIDs.remove(transactionID);
+      bloc.add(QuicksplitDeleteTransaction(transactionID));
+      return emit(state.copyWith(settlingExpense: oldProcessingIDs));
+    } catch (e) {
+      if (context.mounted) {
+        showNormalSnackBar(context, e.toString());
+      }
+      oldProcessingIDs.remove(transactionID);
+      return emit(state.copyWith(settlingExpense: oldProcessingIDs));
+    }
+  }
+
+  void delete(
+    String transactionID,
+    String uid,
+    String authToken,
+    BuildContext context,
+  ) async {
+    if (state.settlingExpense.contains(transactionID)) {
+      return;
+    }
+    Set<String> oldProcessingIDs = Set.from(state.settlingExpense);
+    oldProcessingIDs.add(transactionID);
+
+    emit(state.copyWith(settlingExpense: oldProcessingIDs));
+
+    try {
+      await repo.delete(transactionID, authToken);
+      oldProcessingIDs.remove(transactionID);
+      bloc.add(QuicksplitDeleteTransaction(transactionID));
+      return emit(state.copyWith(settlingExpense: oldProcessingIDs));
+    } catch (e) {
+      if (context.mounted) {
+        showNormalSnackBar(context, e.toString());
+      }
+      oldProcessingIDs.remove(transactionID);
+      return emit(state.copyWith(settlingExpense: oldProcessingIDs));
+    }
+  }
 }

@@ -63,8 +63,8 @@ import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
-// TODO : Settle/Remove Me from Quicksplit
 // TODO : Room FCM Test Pending
+// FIXME : Fix delete mapping for lenden/roommember
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

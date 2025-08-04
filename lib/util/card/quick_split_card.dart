@@ -146,7 +146,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   isLoading = true;
                 }
                 return Visibility(
-                  visible: !isSettledByYou.value,
+                  visible: widget.data.hasData && !isSettledByYou.value,
                   child: Column(
                     children: [
                       Divider(thickness: 0.3),
@@ -159,7 +159,6 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                             buttonType: CustomButtonType.customElevatedButton,
                             buttonHeight: 40,
                             buttonWidth: 110,
-                            elevation: 4,
                             borderRadius: 100,
                             buttonTextColor: Colors.green.shade400,
                             backgroundColor: Colors.white,
@@ -175,15 +174,35 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                           ),
                           ButtonWithShimmerEffect(
                             isLoaded: isLoading,
-                            buttonText: "Opt Out",
+                            buttonText:
+                                _loggedInUser.id == widget.data.createdBy.id
+                                    ? "Delete"
+                                    : "Opt Out",
                             buttonType: CustomButtonType.customElevatedButton,
                             buttonHeight: 40,
                             buttonWidth: 110,
-                            elevation: 4,
                             borderRadius: 100,
                             buttonTextColor: Colors.red.shade400,
                             backgroundColor: Colors.white,
                             borderColor: Colors.red.shade400,
+                            onPressed: () {
+                              if (_loggedInUser.id ==
+                                  widget.data.createdBy.id) {
+                                context.read<SettleCubit>().delete(
+                                  widget.data.id,
+                                  _loggedInUser.id,
+                                  _loggedInUser.authToken,
+                                  context,
+                                );
+                              } else {
+                                context.read<SettleCubit>().optout(
+                                  widget.data.id,
+                                  _loggedInUser.id,
+                                  _loggedInUser.authToken,
+                                  context,
+                                );
+                              }
+                            },
                           ),
                         ],
                       ),
@@ -318,7 +337,8 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   Visibility(
                     visible:
                         widget.data.hasData &&
-                        widget.data.createdBy.id == _loggedInUser.id,
+                        widget.data.createdBy.id == _loggedInUser.id &&
+                        !isSettledByYou.value,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 6.0),
                       child: InkWell(

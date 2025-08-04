@@ -62,4 +62,12 @@ class QuicksplitRepository {
       rethrow;
     }
   }
+
+  Future<void> optout(String expenseID, String authToken) async {
+    try {
+      return _dataProvider.optout(expenseID, authToken);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
