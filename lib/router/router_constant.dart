@@ -39,8 +39,11 @@ class RouterConstants {
   //Setting Page
   static const String settingPage = '/setting';
 
-  //Setting Page
+  //Update Page
   static const String updatePage = '/update';
+
+  //Notification Page
+  static const String notificationPage = '/get-notified';
 
   //Maintenance Page
   static const String maintenancePage = '/maintenance';

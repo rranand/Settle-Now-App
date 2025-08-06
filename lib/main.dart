@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/Notification/notification_interface_handler.dart';
 import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
@@ -63,8 +64,9 @@ import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
-// TODO : Room FCM Test Pending
-// FIXME : Fix delete mapping for lenden/roommember
+// TODO : Configure Notification
+// TODO : Room data is not updating on refresh
+// TODO : add refresh button for web
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -106,8 +108,6 @@ Future<void> main() async {
     );
   }
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
   final AuthRepository authRepository = AuthRepository(AuthDataProvider());
   final AuthBloc authBloc = AuthBloc(authRepository);
 
@@ -120,6 +120,9 @@ Future<void> main() async {
       ),
     );
   } else {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await NotificationInterfaceHandler.initializeChannels();
+
     runApp(MyApp(authBloc: authBloc));
   }
 }

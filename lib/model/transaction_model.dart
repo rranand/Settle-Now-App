@@ -144,8 +144,14 @@ class TransactionModel implements CommonTransactionField {
       modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
       isAddedToPersonalExpense:
           Crypto.decrypt(map['isAddedToPersonalExpense']) == 'true',
-      isClosedAny: Crypto.decrypt(map['isClosedAny']) == 'true',
-      active: Crypto.decrypt(map['active']) == 'true',
+      isClosedAny:
+          map.containsKey('isClosedAny')
+              ? Crypto.decrypt(map['isClosedAny']) == 'true'
+              : false,
+      active:
+          map.containsKey('active')
+              ? Crypto.decrypt(map['active']) == 'true'
+              : true,
     );
   }
 

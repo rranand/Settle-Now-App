@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
 class AmountInputFormatter extends TextInputFormatter {
-  final RegExp _regExp = RegExp(r'^(?!\.)(\d+)?(\.\d{0,2})?$');
+  final RegExp _regExp = RegExp(r'^(\d+)?(\.\d{1,2})?$');
 
   @override
   TextEditingValue formatEditUpdate(

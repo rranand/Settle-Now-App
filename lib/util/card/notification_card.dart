@@ -125,7 +125,15 @@ class _NotificationCardState extends State<NotificationCard> {
           style: TextStyle(fontWeight: FontWeight.bold),
           children: [
             TextSpan(
-              text: " invited to join ",
+              text: " invited ",
+              style: TextStyle(fontWeight: FontWeight.normal),
+            ),
+            TextSpan(
+              text: widget.data.user.name,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            TextSpan(
+              text: " to join ",
               style: TextStyle(fontWeight: FontWeight.normal),
             ),
             TextSpan(text: widget.data.roomName),

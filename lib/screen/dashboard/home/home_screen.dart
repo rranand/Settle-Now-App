@@ -28,7 +28,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final int? initalScreenIndex;
+  const HomeScreen({super.key, this.initalScreenIndex});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -43,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   String appVersion = "";
-  bool isNotificationAllowed = true;
+  final ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
 
   @override
   void didChangeDependencies() {
@@ -55,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void populateData() async {
-    isNotificationAllowed =
+    isNotificationAllowed.value =
         await AwesomeNotifications().isNotificationAllowed();
     appVersion = await getAppVersion();
   }
@@ -66,8 +67,14 @@ class _HomeScreenState extends State<HomeScreen> {
     populateData();
     InAppUpdateService.checkForUpdate();
 
+    NotificationInterfaceHandler.fcmConfiguration(context);
     NotificationInterfaceHandler.initateListeners(context);
-    NotificationInterfaceHandler.initializeChannels();
+
+    if (widget.initalScreenIndex != null &&
+        _selectedIndex >= 0 &&
+        _selectedIndex < bottomNavigationButtonText.length) {
+      _selectedIndex = widget.initalScreenIndex!;
+    }
 
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
@@ -129,42 +136,48 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _drawerHandler(int index) {
+  _drawerHandler(int index) async {
     switch (drawerTitle[index]) {
       case "Get Notified":
         {
-          AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
-            if (!isAllowed) {
-              AwesomeNotifications().requestPermissionToSendNotifications();
-            }
-          });
+          final notificationStatus =
+              await context.push(RouterConstants.notificationPage) as bool?;
+
+          if (notificationStatus != null) {
+            isNotificationAllowed.value = notificationStatus;
+          }
+          break;
         }
       case "Share":
-        SharePlus.instance.share(
-          ShareParams(
-            text:
-                "Settle Now\n\nSettle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about 'who owes who.'\n\nhttps://play.google.com/store/apps/details?id=com.rohit.settlenow",
-          ),
-        );
-      case "Rate Us":
         {
-          AwesomeNotifications().createNotification(
-            content: NotificationContent(
-              id: 10,
-              channelKey: 'roomID',
-              actionType: ActionType.Default,
-              title: 'Hello World!',
-              body: 'This is my first notification!',
+          SharePlus.instance.share(
+            ShareParams(
+              text:
+                  "Settle Now\n\nSettle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about 'who owes who.'\n\nhttps://play.google.com/store/apps/details?id=com.rohit.settlenow",
             ),
           );
-          //inAppReview.openStoreListing();
+          break;
+        }
+      case "Rate Us":
+        {
+          inAppReview.openStoreListing();
+          break;
         }
       case "About Us":
-        context.push(RouterConstants.aboutUsPage);
+        {
+          context.push(RouterConstants.aboutUsPage);
+          break;
+        }
       case "Profile":
-        context.push(RouterConstants.profileRouteName);
+        {
+          context.push(RouterConstants.profileRouteName);
+          break;
+        }
       case "Log Out":
-        context.read<AuthBloc>().add(AuthLogoutRequested());
+        {
+          context.read<AuthBloc>().add(AuthLogoutRequested());
+          break;
+        }
       default:
     }
   }
@@ -182,42 +195,52 @@ class _HomeScreenState extends State<HomeScreen> {
             accountEmail: Text(_loggedInUser.email),
           ),
           ...List.generate(drawerTitle.length, (index) {
-            if (drawerTitle[index] == "Get Notified" && isNotificationAllowed) {
-              return SizedBox.shrink();
-            }
-            return ListTile(
-              onTap: () {
-                _drawerHandler(index);
-              },
-              leading: Icon(drawerIcon[index], color: Colors.white, size: 22),
-              title: Text(
-                drawerTitle[index],
-                style: TextStyle(fontSize: 14, color: Colors.white),
-              ),
-              trailing: Visibility(
-                visible: index == -1,
-                child: Container(
-                  width: 55,
-                  height: 30,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.transparent,
-                    border: Border.all(color: Colors.white60),
-                    borderRadius: BorderRadius.all(Radius.circular(12)),
+            return ValueListenableBuilder(
+              valueListenable: isNotificationAllowed,
+              builder: (BuildContext context, _, _) {
+                if (drawerTitle[index] == "Get Notified" &&
+                    isNotificationAllowed.value) {
+                  return SizedBox.shrink();
+                }
+                return ListTile(
+                  onTap: () {
+                    _drawerHandler(index);
+                  },
+                  leading: Icon(
+                    drawerIcon[index],
+                    color: Colors.white,
+                    size: 22,
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Text(
-                      "Beta",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300,
+                  title: Text(
+                    drawerTitle[index],
+                    style: TextStyle(fontSize: 14, color: Colors.white),
+                  ),
+                  trailing: Visibility(
+                    visible: index == -1,
+                    child: Container(
+                      width: 55,
+                      height: 30,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border.all(color: Colors.white60),
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: Text(
+                          "Beta",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             );
           }),
           _privacyPolicyVersionWidget(),

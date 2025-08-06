@@ -22,6 +22,7 @@ import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
 import 'package:settlenow_v2/util/card/about_us.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
+import 'package:settlenow_v2/util/card/get_notified.dart';
 import 'package:settlenow_v2/util/card/invite_member.dart';
 import 'package:settlenow_v2/util/card/setting_page.dart';
 import 'package:settlenow_v2/util/card/settle_expense.dart';
@@ -85,9 +86,25 @@ class AppRouterConfig {
       GoRoute(
         path: RouterConstants.dashboardRouteName,
         builder: (context, state) {
-          return AuthGate(child: HomeScreen());
+          Map<String, dynamic>? data = state.extra as Map<String, dynamic>?;
+          if (data == null ||
+              data.isEmpty ||
+              !data.containsKey('initalIndex')) {
+            return AuthGate(child: HomeScreen());
+          }
+          return AuthGate(
+            child: HomeScreen(
+              initalScreenIndex: int.tryParse(data["initalIndex"]),
+            ),
+          );
         },
         routes: [
+          GoRoute(
+            path: RouterConstants.notificationPage,
+            builder: (context, state) {
+              return GetNotified();
+            },
+          ),
           GoRoute(
             path: RouterConstants.aboutUsPage,
             builder: (context, state) {

@@ -62,10 +62,10 @@ class _InviteMemberState extends State<InviteMember> {
   }
 
   void _toggleSelectedUser(user) {
-    if (_alreadyInvited.value.isNotEmpty) {
-      return;
-    }
     if (widget.transactionType == TransactionType.lenden) {
+      if (_alreadyInvited.value.isNotEmpty) {
+        return;
+      }
       _selectedUserIDs.value = {user.id};
     } else if (!_alreadyInvited.value.contains(user.id)) {
       final oldUserIDs = Set<String>.from(_selectedUserIDs.value);

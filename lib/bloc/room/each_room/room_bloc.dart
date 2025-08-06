@@ -64,7 +64,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
 
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
-        oldExpense = data[i];
+        oldExpense = data[i].copyWith();
         data[i] = event.data;
         break;
       }

@@ -87,8 +87,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
           data = state.data;
 
           final filterState = context.read<FilterCubit>().state;
-          if (!filterState.isFilterApplied &&
-              filterState.data.length != state.data.length) {
+          if (!filterState.isFilterApplied) {
             context.read<FilterCubit>().updateState(
               FilterState(id: state.id, data: state.data),
               _loggedInUser.id,
