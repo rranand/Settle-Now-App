@@ -18,6 +18,9 @@ class NotificationRepository {
 
   Future<bool> acceptInvite(String id, String authToken) async {
     try {
+      if (authToken.isEmpty) {
+        throw "Invalid Auth";
+      }
       await _dataProvider.acceptInvite(id, authToken);
       return true;
     } catch (e) {
@@ -27,6 +30,9 @@ class NotificationRepository {
 
   Future<bool> declineInvite(String id, String authToken) async {
     try {
+      if (authToken.isEmpty) {
+        throw "Invalid Auth";
+      }
       await _dataProvider.declineInvite(id, authToken);
       return true;
     } catch (e) {

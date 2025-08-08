@@ -1,4 +1,11 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:settlenow_v2/Notification/notification_interface_handler.dart';
+import 'package:settlenow_v2/data/repository/notification_repository.dart';
+import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 
 class NotificationController {
   /// Use this method to detect when a new notification or a schedule is created
@@ -28,11 +35,73 @@ class NotificationController {
   /// Use this method to detect when the user taps on a notification or action button
   @pragma("vm:entry-point")
   static Future<void> onActionReceivedMethod(
+    BuildContext context,
     ReceivedAction receivedAction,
   ) async {
-    // Your code goes here
+    String type = receivedAction.payload!["type"] ?? "";
+    String id = receivedAction.payload!["id"] ?? "";
 
-    // Navigate into pages, avoiding to open the notification details page over another details page already opened
-    
+    if (id.isNotEmpty && (type == "roomRequest" || type == "lendenRequest")) {
+      String? authToken = await LocalStoragePreference.getStringPref(
+        'auth_token',
+      );
+
+      switch (receivedAction.buttonKeyPressed) {
+        case "JOIN":
+          {
+            if (context.mounted) {
+              AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                  id: receivedAction.id!,
+                  channelKey: receivedAction.channelKey!,
+                  title: receivedAction.title,
+                  body: receivedAction.body,
+                  notificationLayout: NotificationLayout.ProgressBar,
+                  progress: 50,
+                ),
+              );
+              await context.read<NotificationRepository>().acceptInvite(
+                id,
+                authToken ?? "",
+              );
+              await AwesomeNotifications().dismiss(receivedAction.id!);
+            }
+          }
+        case "CANCEL":
+          {
+            if (context.mounted) {
+              AwesomeNotifications().createNotification(
+                content: NotificationContent(
+                  id: receivedAction.id!,
+                  channelKey: receivedAction.channelKey!,
+                  title: receivedAction.title,
+                  body: receivedAction.body,
+                  notificationLayout: NotificationLayout.ProgressBar,
+                  progress: 50,
+                ),
+              );
+              await context.read<NotificationRepository>().declineInvite(
+                id,
+                authToken ?? "",
+              );
+              await AwesomeNotifications().dismiss(receivedAction.id!);
+            }
+          }
+        default:
+          {
+            context.push(
+              RouterConstants.dashboardRouteName,
+              extra: {'initalIndex': 4},
+            );
+          }
+      }
+    } else {
+      Map<String, dynamic> data = {};
+      data["type"] = type;
+      data["id"] = id;
+      debugPrint("Data : $data");
+
+      NotificationInterfaceHandler.notificationProcessor(context, data);
+    }
   }
 }

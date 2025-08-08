@@ -64,9 +64,8 @@ import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
-// TODO : Configure Notification
 // TODO : Room data is not updating on refresh
-// TODO : add refresh button for web
+// TODO : On Notification Click, App is crashing
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

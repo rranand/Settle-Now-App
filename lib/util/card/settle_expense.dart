@@ -245,7 +245,7 @@ class _SettleExpenseState extends State<SettleExpense> {
   }
 
   void _populateEditForm(RoomSettleModel data) {
-    _amountController.text = data.amount.toString();
+    _amountController.text = data.amount.abs().toString();
     _selectedUser.value = data.receiver.id;
   }
 

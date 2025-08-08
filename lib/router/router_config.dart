@@ -93,9 +93,7 @@ class AppRouterConfig {
             return AuthGate(child: HomeScreen());
           }
           return AuthGate(
-            child: HomeScreen(
-              initalScreenIndex: int.tryParse(data["initalIndex"]),
-            ),
+            child: HomeScreen(initalScreenIndex: data["initalIndex"]),
           );
         },
         routes: [

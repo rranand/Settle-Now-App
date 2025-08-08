@@ -10,7 +10,7 @@ class NotificationInterfaceHandler {
   static Future<void> initateListeners(context) async {
     await AwesomeNotifications().setListeners(
       onActionReceivedMethod: (ReceivedAction receivedAction) async {
-        NotificationController.onActionReceivedMethod(receivedAction);
+        NotificationController.onActionReceivedMethod(context, receivedAction);
       },
       onNotificationCreatedMethod: (
         ReceivedNotification receivedNotification,
@@ -187,6 +187,21 @@ class NotificationInterfaceHandler {
           body: message.notification!.body,
           payload: data,
         ),
+        actionButtons:
+            channelKey == 'requestID'
+                ? [
+                  NotificationActionButton(
+                    key: 'JOIN',
+                    label: 'Join',
+                    isAuthenticationRequired: true,
+                  ),
+                  NotificationActionButton(
+                    key: 'CANCEL',
+                    label: 'Cancel',
+                    isAuthenticationRequired: true,
+                  ),
+                ]
+                : null,
       );
     }
   }
