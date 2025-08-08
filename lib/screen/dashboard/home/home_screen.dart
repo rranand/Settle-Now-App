@@ -37,8 +37,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final InAppReview inAppReview = InAppReview.instance;
-  static final GlobalKey<ScaffoldState> _homeScreenkey =
-      GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _homeScreenkey = GlobalKey<ScaffoldState>();
   final ValueNotifier<bool> _isSearchEnabled = ValueNotifier(false);
   UserModel _loggedInUser = UserModel.empty();
   int _selectedIndex = 0;

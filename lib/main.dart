@@ -65,7 +65,7 @@ import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Join Room via Deeplink
 // TODO : Room data is not updating on refresh
-// TODO : On Notification Click, App is crashing
+// TODO : Fix Settle Amount if updating, add old amount + new max limit
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

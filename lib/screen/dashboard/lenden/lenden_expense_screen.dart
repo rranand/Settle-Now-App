@@ -462,6 +462,14 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
           ),
           body: RefreshIndicator(
             onRefresh: onRefresh,
+            notificationPredicate: (ScrollNotification notification) {
+              final state = context.read<LendenRoomBloc>().state;
+              if (state is LendenRoomFetchSuccess && state.data.isNotEmpty) {
+                return notification.depth == 0;
+              } else {
+                return notification.depth == 1;
+              }
+            },
             child: CustomScrollView(
               slivers:
                   isLoaded

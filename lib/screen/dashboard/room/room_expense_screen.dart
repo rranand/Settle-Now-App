@@ -290,6 +290,11 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
     final RoomInfoState roomInfoState = context.read<RoomInfoCubit>().state;
     if (roomInfoState is RoomInfoSuccess) {
+      context.read<RoomInfoCubit>().fetchData(
+        widget.id,
+        _loggedInUser.authToken,
+        forceRefresh: true,
+      );
       switch (_navbarSelectedIndex.value) {
         case 0 || 2:
           {

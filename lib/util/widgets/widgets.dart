@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
@@ -150,7 +151,11 @@ Widget noRecordFoundWidget(String txt, BuildContext context) {
     physics: const AlwaysScrollableScrollPhysics(),
     children: [
       SizedBox(
-        height: MediaQuery.of(context).size.height * 0.55,
+        height:
+            MediaQuery.of(context).size.height -
+            kToolbarHeight -
+            kBottomNavigationBarHeight -
+            2 * UiConstant.spaceAtBottom,
         child: Center(
           child: Text(txt, style: TextStyle(fontSize: 20, color: Colors.grey)),
         ),

@@ -16,7 +16,11 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
 
   RoomInfoCubit(this._roomDashboardBloc, this.repo) : super(RoomInfoInitial());
 
-  void fetchData(String id, String authToken) async {
+  void fetchData(
+    String id,
+    String authToken, {
+    bool forceRefresh = false,
+  }) async {
     if (state is RoomInfoLoading) return;
     emit(RoomInfoLoading());
     try {
@@ -34,7 +38,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
         );
       }
 
-      if (oldData.hasData) {
+      if (oldData.hasData && !forceRefresh) {
         return emit(RoomInfoSuccess(oldData));
       } else {
         RoomInfoModel data = await repo.fetchRoomInfo(id, authToken);

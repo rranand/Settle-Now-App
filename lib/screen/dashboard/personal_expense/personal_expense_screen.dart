@@ -214,6 +214,15 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           ),
           body: RefreshIndicator(
             onRefresh: onRefresh,
+            notificationPredicate: (ScrollNotification notification) {
+              final state = context.read<PersonalMonthlyExpenseBloc>().state;
+              if (state is PersonalMonthlyExpenseFetchSuccess &&
+                  state.data.isNotEmpty) {
+                return notification.depth == 0;
+              } else {
+                return notification.depth == 1;
+              }
+            },
             child: CustomGestureDetector(
               navBarIndex: _navbarSelectedIndex,
               totalTitle: headerTitle.length,
