@@ -33,7 +33,7 @@ Future<Response> createAPICall(
   );
   Function httpType = getHttpMethod(methodName);
   try {
-    String host = "http://prod-api.settlenow.in/";
+    String host = "https://prod-api.settlenow.in/";
     String tokenization = Crypto.createJSONDataTOJWT(jsonData);
     Map<String, String> headersMap = <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
