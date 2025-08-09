@@ -7,7 +7,6 @@ import 'package:iconsax/iconsax.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
-import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
@@ -19,6 +18,7 @@ import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/enum/filter_enums.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
@@ -115,12 +115,8 @@ class _AddTransactionState extends State<AddTransaction> {
                   textInputType: TextInputType.numberWithOptions(decimal: true),
                   labelText: "",
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return "Invalid Amount";
-                    }
-                    return null;
+                    return CustomValidator.validateAmount(value, null);
                   },
-                  inputFormatters: [AmountInputFormatter()],
                   inputDecoration: TextFormFieldInputBorder.underLine,
                   borderColor: Colors.black54,
                   suffixIcon: UiConstant.indianRupeeSymbol,
@@ -560,14 +556,10 @@ class _AddTransactionState extends State<AddTransaction> {
                     textInputType: TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    inputFormatters: [AmountInputFormatter()],
                     hintText: 'Amount',
                     labelText: 'Amount',
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return "Please enter a amount.";
-                      }
-                      return null;
+                      return CustomValidator.validateAmount(value, null);
                     },
                     inputDecoration: TextFormFieldInputBorder.underLine,
                     borderColor: Colors.black87,

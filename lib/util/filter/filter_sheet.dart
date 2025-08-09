@@ -8,7 +8,6 @@ import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
-import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
@@ -822,7 +821,6 @@ class _FilterSheetState extends State<FilterSheet> {
                       _minController,
                       labelText: 'Min Amount',
                       textInputType: TextInputType.number,
-                      inputFormatters: [AmountInputFormatter()],
                       onChanged: (value) {
                         if (value != null) {
                           String? res = CustomValidator.validateAmount(
@@ -859,7 +857,6 @@ class _FilterSheetState extends State<FilterSheet> {
                         _maxController,
                         labelText: 'Max Amount',
                         textInputType: TextInputType.number,
-                        inputFormatters: [AmountInputFormatter()],
                         onChanged: (value) {
                           if (value != null) {
                             String? res = CustomValidator.validateAmount(

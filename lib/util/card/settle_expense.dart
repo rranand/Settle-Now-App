@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
-import 'package:settlenow_v2/constant/input_formatter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/room/room_settle_upsert/room_settle_upsert_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
@@ -16,6 +15,7 @@ import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
+import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
@@ -46,7 +46,11 @@ class _SettleExpenseState extends State<SettleExpense> {
   Widget _userCardWidget(RoomUserModel userData) {
     double unSettledAmount =
         userData.contribution - userData.spent + userData.settle;
-    double payableAmount = min(userCanPay.abs(), unSettledAmount.abs());
+    double payableAmount =
+        min(userCanPay.abs(), unSettledAmount.abs()) +
+        (widget.transactionData != null
+            ? widget.transactionData!.amount.abs()
+            : 0);
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
@@ -127,8 +131,10 @@ class _SettleExpenseState extends State<SettleExpense> {
 
   void _submitTransactionHandler(List<RoomUserModel> userData) {
     if (_formKey.currentState!.validate()) {
+      double oldAmount =
+          (widget.transactionData != null ? widget.transactionData!.amount : 0);
       double amountToBeSettled = double.parse(_amountController.text);
-      double userCanReceive = 0;
+      double userCanReceive = oldAmount;
       UserModel receiverData = UserModel.empty();
 
       if (_selectedUser.value.isEmpty) {
@@ -149,16 +155,16 @@ class _SettleExpenseState extends State<SettleExpense> {
       }
       if (!receiverData.hasData) {
         showNormalSnackBar(context, "Invalid User");
-      } else if (amountToBeSettled > userCanPay.abs()) {
+      } else if (amountToBeSettled > userCanPay.abs() + oldAmount.abs()) {
         showNormalSnackBar(
           context,
-          "You can pay ${formatCurrency(userCanPay.abs(), context)} at max!",
+          "You can pay ${formatCurrency(userCanPay.abs() + oldAmount.abs(), context)} at max!",
         );
         return;
-      } else if (amountToBeSettled > userCanReceive.abs()) {
+      } else if (amountToBeSettled > userCanReceive.abs() + oldAmount.abs()) {
         showNormalSnackBar(
           context,
-          "User can receive ${formatCurrency(userCanReceive.abs(), context)} at max!",
+          "User can receive ${formatCurrency(userCanReceive.abs() + oldAmount.abs(), context)} at max!",
         );
         return;
       }
@@ -182,7 +188,8 @@ class _SettleExpenseState extends State<SettleExpense> {
           id: widget.transactionData!.id,
           receiver: receiverData,
           sender: _loggedInUser,
-          amount: (userCanPay > 0 ? -1 : 1) * amountToBeSettled.abs(),
+          amount:
+              ((userCanPay - oldAmount) > 0 ? -1 : 1) * amountToBeSettled.abs(),
           createdOn: widget.transactionData!.createdOn,
           modifiedOn: widget.transactionData!.modifiedOn,
         );
@@ -346,14 +353,10 @@ class _SettleExpenseState extends State<SettleExpense> {
                         textInputType: TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        inputFormatters: [AmountInputFormatter()],
                         hintText: 'Amount',
                         labelText: 'Amount',
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return "Please enter a amount.";
-                          }
-                          return null;
+                          return CustomValidator.validateAmount(value, null);
                         },
                         inputDecoration: TextFormFieldInputBorder.underLine,
                         borderColor: Colors.black87,
