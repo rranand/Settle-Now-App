@@ -287,18 +287,22 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       showNormalSnackBar(context, "Please re-login...Session expired!");
       return;
     }
+    final roomInfoCubit = context.read<RoomInfoCubit>();
+    final roomBloc = context.read<RoomBloc>();
+    final roomUserCubit = context.read<RoomUserCubit>();
+    final roomSettleCubit = context.read<RoomSettleCubit>();
 
-    final RoomInfoState roomInfoState = context.read<RoomInfoCubit>().state;
+    await roomInfoCubit.fetchData(
+      widget.id,
+      _loggedInUser.authToken,
+      forceRefresh: true,
+    );
+    final RoomInfoState roomInfoState = roomInfoCubit.state;
     if (roomInfoState is RoomInfoSuccess) {
-      context.read<RoomInfoCubit>().fetchData(
-        widget.id,
-        _loggedInUser.authToken,
-        forceRefresh: true,
-      );
       switch (_navbarSelectedIndex.value) {
         case 0 || 2:
           {
-            context.read<RoomBloc>().add(
+            roomBloc.add(
               RoomFetch(
                 id: widget.id,
                 authToken: _loggedInUser.authToken,
@@ -308,12 +312,11 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           }
         case 1:
           {
-            final RoomSettleState roomSettleState =
-                context.read<RoomSettleCubit>().state;
-            final RoomState roomState = context.read<RoomBloc>().state;
+            final RoomSettleState roomSettleState = roomSettleCubit.state;
+            final RoomState roomState = roomBloc.state;
             if (roomSettleState is RoomSettleSuccess &&
                 roomState is RoomFetchSuccess) {
-              context.read<RoomUserCubit>().fetchData(
+              roomUserCubit.fetchData(
                 roomInfoState.data.id,
                 roomInfoState.data.users,
                 roomState.data,
@@ -323,7 +326,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           }
         case 3:
           {
-            context.read<RoomSettleCubit>().fetchData(
+            roomSettleCubit.fetchData(
               widget.id,
               _loggedInUser.authToken,
               roomInfoState.data.users,

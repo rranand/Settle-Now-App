@@ -5,6 +5,9 @@ import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/util/card/room_transaction_card.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/handler/filter_sort.dart';
@@ -85,6 +88,24 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
         List<TransactionModel> data = [];
         if (state is RoomFetchSuccess) {
           data = state.data;
+
+          final RoomInfoState roomInfoState =
+              context.read<RoomInfoCubit>().state;
+          final RoomSettleState roomSettleState =
+              context.read<RoomSettleCubit>().state;
+
+          if (roomInfoState is RoomInfoSuccess &&
+              roomInfoState.data.id == widget.roomID &&
+              roomSettleState is RoomSettleSuccess &&
+              roomSettleState.id == widget.roomID &&
+              state.id == widget.roomID) {
+            context.read<RoomUserCubit>().fetchData(
+              roomInfoState.data.id,
+              roomInfoState.data.users,
+              state.data,
+              roomSettleState.data,
+            );
+          }
 
           final filterState = context.read<FilterCubit>().state;
           if (!filterState.isFilterApplied) {

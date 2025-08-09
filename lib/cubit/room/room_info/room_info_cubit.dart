@@ -16,7 +16,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
 
   RoomInfoCubit(this._roomDashboardBloc, this.repo) : super(RoomInfoInitial());
 
-  void fetchData(
+  Future<void> fetchData(
     String id,
     String authToken, {
     bool forceRefresh = false,
