@@ -99,7 +99,6 @@ class NotificationController {
       Map<String, dynamic> data = {};
       data["type"] = type;
       data["id"] = id;
-      debugPrint("Data : $data");
 
       NotificationInterfaceHandler.notificationProcessor(context, data);
     }
