@@ -20,8 +20,9 @@ class UiConstant {
 
   static const String expenseDatetimeFormat = 'MMMM dd, yyyy hh:mm a';
 
-  static const Icon indianRupeeSymbol = Icon(
-    IconData(0x20B9, fontFamily: 'MaterialIcons'),
+  static const Widget indianRupeeSymbol = Text(
+    'Rs',
+    style: TextStyle(fontSize: 20),
   );
 
   static List<Color> colorsWithShade50 = [

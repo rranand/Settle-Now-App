@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
@@ -75,7 +75,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Join Requested",
-        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        child: Icon(Iconsax.tick_circle, color: Colors.green),
         scaffoldMessenger: scaffoldMessenger,
       );
       return emit(CreateJoinRoomSuccess());
@@ -116,7 +116,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "${users.length} Members Invited",
-        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        child: Icon(Iconsax.tick_circle, color: Colors.green),
         scaffoldMessenger: scaffoldMessenger,
       );
       return emit(CreateJoinRoomSuccess());

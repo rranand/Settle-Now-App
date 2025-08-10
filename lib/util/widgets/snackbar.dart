@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
@@ -10,7 +10,7 @@ void showSnackbar(
   Icon? icon,
   ScaffoldMessengerState? scaffoldMessenger,
 }) {
-  icon ??= Icon(Iconsax.tick_circle5, color: Colors.green);
+  icon ??= Icon(Iconsax.tick_circle, color: Colors.green);
   final snackBar = SnackBar(
     content: Row(
       children: [

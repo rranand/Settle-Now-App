@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 const List<String> drawerTitle = [
   "Profile",
@@ -38,7 +38,7 @@ const List<String> bottomNavigationButtonText = [
 ];
 const List<IconData> bottomNavigationButtonIcon = [
   Iconsax.home,
-  Iconsax.flash_11,
+  Iconsax.flash,
   Iconsax.wallet_1,
   Iconsax.money_change,
   Iconsax.notification,

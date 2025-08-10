@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
@@ -225,7 +225,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
             return Padding(
               padding: const EdgeInsets.only(right: 6.0),
               child: CustomShimmerEffect.loadingShimmerEffect(
-                Icon(Iconsax.profile_add5),
+                Icon(Iconsax.profile_add),
               ),
             );
           } else {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -81,36 +81,36 @@ class _AboutUsPageState extends State<AboutUsPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
-                      onPressed: () {
+                    InkWell(
+                      onTap: () {
                         launchUrl(
                           Uri.parse("mailto:info@settlenow.in"),
                           mode: LaunchMode.externalApplication,
                         );
                       },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.envelope,
-                        size: 28,
-                        color: Colors.black87,
+
+                      child: SvgPicture.asset(
+                        "assets/icon/email.svg",
+                        width: 28,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    IconButton(
-                      onPressed: () {
+                    InkWell(
+                      onTap: () {
                         launchUrl(
                           Uri.parse("http://github.com/rranand"),
                           mode: LaunchMode.externalApplication,
                         );
                       },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.github,
-                        size: 28,
-                        color: Colors.black87,
+
+                      child: SvgPicture.asset(
+                        "assets/icon/github.svg",
+                        width: 28,
                       ),
                     ),
                     const SizedBox(width: 16),
-                    IconButton(
-                      onPressed: () {
+                    InkWell(
+                      onTap: () {
                         launchUrl(
                           Uri.parse(
                             "https://www.linkedin.com/in/rohitanand99/",
@@ -118,10 +118,9 @@ class _AboutUsPageState extends State<AboutUsPage> {
                           mode: LaunchMode.externalApplication,
                         );
                       },
-                      icon: const FaIcon(
-                        FontAwesomeIcons.linkedin,
-                        size: 28,
-                        color: Colors.black87,
+                      child: SvgPicture.asset(
+                        "assets/icon/linkedin.svg",
+                        width: 28,
                       ),
                     ),
                   ],

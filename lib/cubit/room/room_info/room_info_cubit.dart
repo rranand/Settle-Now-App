@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
@@ -122,7 +122,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
-        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        child: Icon(Iconsax.tick_circle, color: Colors.green),
         scaffoldMessenger: scaffoldMessengerState,
       );
       RoomInfoModel updatedRoomInfo = oldData.data.copyWith(
@@ -165,7 +165,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         isRemoving ? "You’ve left the room" : "Room deleted successfully",
-        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        child: Icon(Iconsax.tick_circle, color: Colors.green),
         scaffoldMessenger: scaffoldMessengerState,
       );
       return emit(RoomInfoInitial());

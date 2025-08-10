@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
@@ -90,7 +90,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "${user.name} Invited",
-        child: Icon(Iconsax.tick_circle5, color: Colors.green),
+        child: Icon(Iconsax.tick_circle, color: Colors.green),
         scaffoldMessenger: scaffoldMessenger,
       );
       return emit(CreateRoomSuccess());

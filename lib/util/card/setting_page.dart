@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/room/lenden_room_bloc.dart';
@@ -258,7 +258,7 @@ class _SettingPageState extends State<SettingPage> {
               if (context.mounted && mounted) {
                 showSnackbarWithChildWidget(
                   "Room Key Copied",
-                  child: Icon(Iconsax.tick_circle5, color: Colors.green),
+                  child: Icon(Iconsax.tick_circle, color: Colors.green),
                   duration: Duration(seconds: 1),
                   scaffoldMessenger: ScaffoldMessenger.of(context),
                 );

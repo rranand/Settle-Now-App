@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
@@ -97,7 +97,7 @@ class SettleCard extends StatelessWidget {
                     data.amount > 0 ? data.sender : data.receiver,
                     false,
                   ),
-                  Icon(Iconsax.arrow_right_14),
+                  Icon(Iconsax.arrow_right_1),
                   _userCard(
                     context,
                     data.amount > 0 ? data.receiver : data.sender,
