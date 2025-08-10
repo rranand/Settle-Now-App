@@ -108,12 +108,16 @@ Future<void> main() async {
 
   AppRouterConfig.initializeRouter(authBloc);
   if (kIsWeb) {
-    runApp(
-      DevicePreview(
-        enabled: !kReleaseMode && kIsWeb,
-        builder: (context) => MyApp(authBloc: authBloc),
-      ),
-    );
+    if (kReleaseMode) {
+      runApp(MyApp(authBloc: authBloc));
+    } else {
+      runApp(
+        DevicePreview(
+          enabled: true,
+          builder: (context) => MyApp(authBloc: authBloc),
+        ),
+      );
+    }
   } else {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     await NotificationInterfaceHandler.initializeChannels();

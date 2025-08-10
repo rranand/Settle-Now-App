@@ -1,3 +1,5 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +37,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _loginEmailFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+  ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
+
+  void populateData() async {
+    if (kIsWeb) {
+      isNotificationAllowed.value = true;
+    } else {
+      isNotificationAllowed.value =
+          await AwesomeNotifications().isNotificationAllowed();
+    }
+  }
 
   void _handleLoginSubmit() {
     if (_isOTPSent.value) {
@@ -68,6 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void _blocListenerHandler(BuildContext context, AuthState state) {
     if (state is AuthLoginSuccess) {
       context.go(RouterConstants.dashboardRouteName);
+      if (!isNotificationAllowed.value) {
+        context.push(RouterConstants.notificationPage);
+      }
     } else if (state is AuthOTPSendFailure) {
       showNormalSnackBar(context, state.error);
     } else if (state is AuthLoginFailure) {
@@ -99,6 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
+    populateData();
     InAppUpdateService.checkForUpdate();
   }
 

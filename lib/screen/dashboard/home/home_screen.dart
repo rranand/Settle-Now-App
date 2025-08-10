@@ -1,4 +1,5 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -55,8 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void populateData() async {
-    isNotificationAllowed.value =
-        await AwesomeNotifications().isNotificationAllowed();
+    if (kIsWeb) {
+      isNotificationAllowed.value = true;
+    } else {
+      isNotificationAllowed.value =
+          await AwesomeNotifications().isNotificationAllowed();
+    }
     appVersion = await getAppVersion();
   }
 

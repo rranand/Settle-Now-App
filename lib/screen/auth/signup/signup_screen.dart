@@ -1,3 +1,5 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,6 +36,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> _signupFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _subSignupFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
+  ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
+
+  void populateData() async {
+    if (kIsWeb) {
+      isNotificationAllowed.value = true;
+    } else {
+      isNotificationAllowed.value =
+          await AwesomeNotifications().isNotificationAllowed();
+    }
+  }
 
   void _handleSignUpSubmit(String token) {
     if (_isOTPSent.value) {
@@ -79,6 +91,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           showNormalSnackBar(context, state.error);
         } else if (state is AuthLoginSuccess) {
           context.go(RouterConstants.dashboardRouteName);
+          if (!isNotificationAllowed.value) {
+            context.push(RouterConstants.notificationPage);
+          }
         } else if (state is AuthSignUpSuccess) {
           if (_isOTPSent.value == false) {
             _isOTPSent.value = true;
@@ -108,6 +123,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   void initState() {
     super.initState();
+    populateData();
     InAppUpdateService.checkForUpdate();
   }
 

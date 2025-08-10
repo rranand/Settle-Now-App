@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -61,15 +62,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final String idToken = googleAuth.idToken ?? "";
 
       if (idToken.isEmpty) {
-        await GoogleOauth.logout();
+        await additionalLogoutAction();
         return emit(AuthLoginFailure("Google SignIn Failed"));
       }
 
       UserModel authUserData = await repo.loginUsingGoogle(email, idToken);
-
       return emit(AuthLoginSuccess(authUserData));
     } catch (e) {
-      await GoogleOauth.logout();
+      await additionalLogoutAction();
       return emit(AuthLoginFailure(e.toString()));
     }
   }
@@ -105,13 +105,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final String idToken = googleAuth.idToken ?? "";
 
       if (idToken.isEmpty) {
-        await GoogleOauth.logout();
+        await additionalLogoutAction();
         return emit(AuthSignUpFailure("Google Signup Failed"));
       }
       UserModel authUserData = await repo.signupUsingGoogle(email, idToken);
       return emit(AuthLoginSuccess(authUserData));
     } catch (e) {
-      await GoogleOauth.logout();
+      await additionalLogoutAction();
       return emit(AuthSignUpFailure(e.toString()));
     }
   }
@@ -173,11 +173,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLogoutLoading(userData));
 
     try {
-      await repo.logoutUser(userData.authToken);
-      if (userData.isGoogle) {
-        await GoogleOauth.logout();
-      }
-      await LocalStoragePreference.clearAllPreferences();
+      await Future.wait([
+        repo.logoutUser(userData.authToken),
+        additionalLogoutAction(),
+      ]);
+
       return emit(AuthInitial());
     } catch (e) {
       emit(AuthLogoutFailure(userData, e.toString()));
@@ -238,10 +238,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       if (e.toString().toLowerCase() == "unauthorized access") {
+        try {
+          await additionalLogoutAction();
+        } catch (_) {}
         return emit(AuthInitial());
       } else {
         return emit(AuthLoginFailure(e.toString()));
       }
     }
+  }
+
+  Future<void> additionalLogoutAction() async {
+    try {
+      await Future.wait([
+        GoogleOauth.logout(),
+        FirebaseMessaging.instance.deleteToken(),
+        LocalStoragePreference.clearAllPreferences(),
+      ]);
+    } catch (_) {}
   }
 }
