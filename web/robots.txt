@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /main.dart.js/
+Disallow: /flutter.js/
+Disallow: /manifest.json/
+Disallow: /version.json/
+Disallow: /.last_build_id/
+Disallow: /flutter_service_worker.js/
+Disallow: /version.json/
+Allow: /.well-known/
+Sitemap: https://settlenow.in/sitemap.xml

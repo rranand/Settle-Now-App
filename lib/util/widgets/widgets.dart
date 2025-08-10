@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -41,30 +42,39 @@ Widget subTextOnCard(
 }
 
 Widget appBarBackButton(BuildContext context) {
-  EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
-  double notchPadding = max(max(viewPadding.left, viewPadding.right), 0);
-  double width = max(
-    context.watch<ScreenSizeProvider>().getPadding.left - notchPadding,
-    0,
-  );
+  double width = 0;
+  if (!kIsWeb) {
+    EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+    double notchPadding =
+        kIsWeb ? 0 : max(max(viewPadding.left, viewPadding.right), 0);
+
+    width = max(
+      context.watch<ScreenSizeProvider>().getPadding.left - notchPadding,
+      0,
+    );
+  }
 
   return Padding(
     padding: EdgeInsets.only(left: width),
-    child: InkWell(
-      borderRadius: BorderRadius.circular(100),
-      child: const Icon(Iconsax.arrow_left_2),
-      onTap: () => context.pop(),
+    child: IconButton(
+      icon: const Icon(Iconsax.arrow_left_2),
+      onPressed: () {
+        context.pop();
+      },
     ),
   );
 }
 
 Widget appBarLeadingButton(BuildContext context, Widget child) {
-  EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
-  double notchPadding = max(max(viewPadding.left, viewPadding.right), 0);
-  double width = max(
-    context.watch<ScreenSizeProvider>().getPadding.left - notchPadding,
-    0,
-  );
+  double width = 0;
+  if (!kIsWeb) {
+    EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
+    double notchPadding = max(max(viewPadding.left, viewPadding.right), 0);
+    width = max(
+      context.watch<ScreenSizeProvider>().getPadding.left - notchPadding,
+      0,
+    );
+  }
 
   return Padding(padding: EdgeInsets.only(left: width), child: child);
 }

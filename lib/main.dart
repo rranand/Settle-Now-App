@@ -1,5 +1,3 @@
-//import 'package:device_preview/device_preview.dart';
-import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow_v2/Notification/notification_interface_handler.dart';
@@ -63,6 +62,10 @@ import 'package:settlenow_v2/theme/themes.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
+// TODO : Add Perfernce Setting
+// TODO : Add split by /2, /3 in case of partial transcation
+// TODO : Add to new member in room transaction
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
   RemoteMessage remoteMessage,
@@ -101,6 +104,8 @@ Future<void> main() async {
         statusBarIconBrightness: Brightness.dark,
       ),
     );
+  } else {
+    usePathUrlStrategy();
   }
 
   final AuthRepository authRepository = AuthRepository(AuthDataProvider());
@@ -108,16 +113,7 @@ Future<void> main() async {
 
   AppRouterConfig.initializeRouter(authBloc);
   if (kIsWeb) {
-    if (kReleaseMode) {
-      runApp(MyApp(authBloc: authBloc));
-    } else {
-      runApp(
-        DevicePreview(
-          enabled: true,
-          builder: (context) => MyApp(authBloc: authBloc),
-        ),
-      );
-    }
+    runApp(MyApp(authBloc: authBloc));
   } else {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     await NotificationInterfaceHandler.initializeChannels();

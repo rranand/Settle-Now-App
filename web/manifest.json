@@ -1,11 +1,11 @@
 {
-    "name": "settlenow_v2",
-    "short_name": "settlenow_v2",
+    "name": "settlenow",
+    "short_name": "settlenow",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#00FFFFFF",
-    "theme_color": "#00FFFFFF",
-    "description": "A new Flutter project.",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A Finance Management App",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
