@@ -18,9 +18,9 @@ extension DeviceTypeExtension on DeviceType {
   IconData get icon {
     switch (this) {
       case DeviceType.mobile:
-        return Iconsax.mobile;
+        return Iconsax.mobile_copy;
       case DeviceType.web:
-        return Iconsax.monitor;
+        return Iconsax.monitor_copy;
       default:
         return Icons.devices_other_outlined;
     }

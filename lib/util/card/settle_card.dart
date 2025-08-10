@@ -97,7 +97,7 @@ class SettleCard extends StatelessWidget {
                     data.amount > 0 ? data.sender : data.receiver,
                     false,
                   ),
-                  Icon(Iconsax.arrow_right_1),
+                  Icon(Iconsax.arrow_right_1_copy),
                   _userCard(
                     context,
                     data.amount > 0 ? data.receiver : data.sender,

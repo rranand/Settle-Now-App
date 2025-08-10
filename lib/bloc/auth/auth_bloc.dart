@@ -215,7 +215,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       event.scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Account Delete Requested",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: event.scaffoldMessenger,
       );
     } catch (e) {

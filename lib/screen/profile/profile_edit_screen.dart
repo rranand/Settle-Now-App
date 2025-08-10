@@ -43,7 +43,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       showSnackbar(
         context,
         "Profile Updated",
-        icon: Icon(Iconsax.tick_circle, color: Colors.green),
+        icon: Icon(Iconsax.tick_circle_copy, color: Colors.green),
       );
       context.pop();
     }

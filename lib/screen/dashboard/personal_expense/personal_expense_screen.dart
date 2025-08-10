@@ -203,7 +203,9 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                           builder: (context, state) {
                             bool haveFilter = state.isFilterApplied;
                             return Icon(
-                              haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                              haveFilter
+                                  ? Iconsax.filter_tick_copy
+                                  : Iconsax.filter_copy,
                               color: haveFilter ? Colors.green : null,
                             );
                           },
@@ -376,7 +378,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           ),
           floatingActionButton:
               _isLivePersonalExpense
-                  ? CustomButton.customFloatingButton(Iconsax.add, () {
+                  ? CustomButton.customFloatingButton(Iconsax.add_copy, () {
                     context.push(
                       "${RouterConstants.personalExpenseRouteName}/${widget.year}/${widget.month}${RouterConstants.personalExpenseAddExpenseRouteName}",
                     );

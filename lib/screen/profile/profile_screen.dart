@@ -29,8 +29,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final List<String> _popMenuTitle = ["Delete My Account"];
   final List<String> _accountSectionTitle = ["Edit Profile", "Login Activity"];
   final List<IconData> _accountSectionIconData = [
-    Iconsax.edit,
-    Iconsax.monitor_mobbile,
+    Iconsax.edit_copy,
+    Iconsax.monitor_mobbile_copy,
   ];
 
   void _popMenuButtonHandler(int index) async {
@@ -214,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 UiConstant.colorsWithShade100[index],
                               ),
                               title: Text(_accountSectionTitle[index]),
-                              trailing: Icon(Iconsax.arrow_right_3),
+                              trailing: Icon(Iconsax.arrow_right_3_copy),
                               onTap: () {
                                 _accountSectionButtonHandler(index);
                               },

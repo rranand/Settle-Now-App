@@ -117,7 +117,10 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                       visible: user.isSettled,
                       child: Padding(
                         padding: const EdgeInsets.only(left: 6.0),
-                        child: Icon(Iconsax.tick_circle, color: Colors.green),
+                        child: Icon(
+                          Iconsax.tick_circle_copy,
+                          color: Colors.green,
+                        ),
                       ),
                     ),
                   ],
@@ -235,7 +238,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                 borderRadius: BorderRadius.circular(
                   UiConstant.cardBorderRadius,
                 ),
-                child: Icon(Iconsax.profile_add, color: Colors.grey),
+                child: Icon(Iconsax.profile_add_copy, color: Colors.grey),
                 onTap: () {
                   context.read<AddToPersonalExpenseBloc>().add(
                     AddToPersonalExpenseRequested(
@@ -328,7 +331,10 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                         visible: isSettledByYou.value,
                         child: Padding(
                           padding: const EdgeInsets.only(right: 6.0),
-                          child: Icon(Iconsax.tick_circle, color: Colors.green),
+                          child: Icon(
+                            Iconsax.tick_circle_copy,
+                            color: Colors.green,
+                          ),
                         ),
                       );
                     },
@@ -345,7 +351,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                         borderRadius: BorderRadius.circular(
                           UiConstant.cardBorderRadius,
                         ),
-                        child: Icon(Iconsax.edit, color: Colors.grey),
+                        child: Icon(Iconsax.edit_copy, color: Colors.grey),
                         onTap: () {
                           context.push(
                             RouterConstants.quickSplitEditExpenseRouteName,
@@ -361,7 +367,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                       borderRadius: BorderRadius.circular(
                         UiConstant.cardBorderRadius,
                       ),
-                      child: Icon(Iconsax.info_circle, color: Colors.grey),
+                      child: Icon(Iconsax.info_circle_copy, color: Colors.grey),
                       onTap: () {
                         isExpanded.value = !isExpanded.value;
                       },

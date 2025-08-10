@@ -90,7 +90,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "${user.name} Invited",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: scaffoldMessenger,
       );
       return emit(CreateRoomSuccess());

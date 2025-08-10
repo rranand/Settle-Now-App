@@ -499,7 +499,9 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                   builder: (context, state) {
                     bool haveFilter = state.isFilterApplied;
                     return Icon(
-                      haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                      haveFilter
+                          ? Iconsax.filter_tick_copy
+                          : Iconsax.filter_copy,
                       color: haveFilter ? Colors.green : null,
                     );
                   },
@@ -517,7 +519,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         ...appBarAction,
         InkWell(
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-          child: Icon(Iconsax.setting),
+          child: Icon(Iconsax.setting_copy),
           onTap: () {
             context.push(
               "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.settingPage}",
@@ -707,7 +709,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           floatingActionButton:
               isRoomActive
                   ? SpeedDial(
-                    icon: Iconsax.add,
+                    icon: Iconsax.add_copy,
                     activeIcon: Icons.close,
                     backgroundColor: Colors.deepPurpleAccent,
                     foregroundColor: Colors.white,
@@ -719,7 +721,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                     animationCurve: Curves.elasticInOut,
                     children: [
                       SpeedDialChild(
-                        child: const Icon(Iconsax.add),
+                        child: const Icon(Iconsax.add_copy),
                         backgroundColor: UiConstant.colors[0],
                         foregroundColor: Colors.white,
                         label: 'Add Expense',
@@ -743,7 +745,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         },
                       ),
                       SpeedDialChild(
-                        child: const Icon(Iconsax.profile_add),
+                        child: const Icon(Iconsax.profile_add_copy),
                         backgroundColor: UiConstant.colors[2],
                         foregroundColor: Colors.white,
                         label: 'Add Member',
@@ -773,7 +775,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         },
                       ),
                       SpeedDialChild(
-                        child: const Icon(Iconsax.lock),
+                        child: const Icon(Iconsax.lock_copy),
                         backgroundColor: UiConstant.colors[3],
                         foregroundColor: Colors.white,
                         visible: roomUserModel.active,
@@ -794,7 +796,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         },
                       ),
                       SpeedDialChild(
-                        child: const Icon(Iconsax.message_question),
+                        child: const Icon(Iconsax.message_question_copy),
                         backgroundColor: UiConstant.colors[4],
                         foregroundColor: Colors.white,
                         visible: isRoomActive && showCloseRoomRequest,

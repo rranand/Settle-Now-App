@@ -189,9 +189,12 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
           },
         ),
       ),
-      floatingActionButton: CustomButton.customFloatingButton(Iconsax.add, () {
-        context.push(RouterConstants.quickSplitAddExpenseRouteName);
-      }),
+      floatingActionButton: CustomButton.customFloatingButton(
+        Iconsax.add_copy,
+        () {
+          context.push(RouterConstants.quickSplitAddExpenseRouteName);
+        },
+      ),
     );
   }
 }

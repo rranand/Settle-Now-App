@@ -21,7 +21,7 @@ class UiConstant {
   static const String expenseDatetimeFormat = 'MMMM dd, yyyy hh:mm a';
 
   static const Widget indianRupeeSymbol = Text(
-    'Rs',
+    '₹',
     style: TextStyle(fontSize: 20),
   );
 

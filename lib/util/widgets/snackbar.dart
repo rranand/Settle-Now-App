@@ -10,7 +10,7 @@ void showSnackbar(
   Icon? icon,
   ScaffoldMessengerState? scaffoldMessenger,
 }) {
-  icon ??= Icon(Iconsax.tick_circle, color: Colors.green);
+  icon ??= Icon(Iconsax.tick_circle_copy, color: Colors.green);
   final snackBar = SnackBar(
     content: Row(
       children: [
@@ -79,7 +79,7 @@ void showSnackbarForUpdate(ScaffoldMessengerState scaffoldMessenger) {
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Iconsax.receive_square, color: Colors.green),
+            Icon(Iconsax.receive_square_copy, color: Colors.green),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
               child: Text(

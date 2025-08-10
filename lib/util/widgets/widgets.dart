@@ -57,7 +57,7 @@ Widget appBarBackButton(BuildContext context) {
   return Padding(
     padding: EdgeInsets.only(left: width),
     child: IconButton(
-      icon: const Icon(Iconsax.arrow_left_2),
+      icon: const Icon(Iconsax.arrow_left_2_copy),
       onPressed: () {
         context.pop();
       },

@@ -624,7 +624,7 @@ class _FilterSheetState extends State<FilterSheet> {
                         _minController,
                         readOnly: true,
                         labelText: 'From Date',
-                        suffixIcon: Icon(Iconsax.calendar),
+                        suffixIcon: Icon(Iconsax.calendar_copy),
                         inputDecoration: TextFormFieldInputBorder.underLine,
                         borderColor: Colors.black87,
                         onTap: () async {
@@ -650,7 +650,7 @@ class _FilterSheetState extends State<FilterSheet> {
                         _maxController,
                         readOnly: true,
                         labelText: 'To Date',
-                        suffixIcon: Icon(Iconsax.calendar),
+                        suffixIcon: Icon(Iconsax.calendar_copy),
                         inputDecoration: TextFormFieldInputBorder.underLine,
                         borderColor: Colors.black87,
                         onTap: () async {

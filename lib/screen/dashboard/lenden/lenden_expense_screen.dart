@@ -171,7 +171,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                       Visibility(
                         visible: showAddPerson,
                         child: IconButton(
-                          icon: Icon(Iconsax.user_add),
+                          icon: Icon(Iconsax.user_add_copy),
                           onPressed: () async {
                             CreateRoomCubit createRoomCubit =
                                 context.read<CreateRoomCubit>();
@@ -228,7 +228,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                               _loggedInUser.id == users[index].id &&
                                       !users[index].isClosed
                                   ? IconButton(
-                                    icon: Icon(Iconsax.unlock),
+                                    icon: Icon(Iconsax.unlock_copy),
                                     onPressed: () => _closeRoomPopupDialog(),
                                   )
                                   : null,
@@ -377,7 +377,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                 builder: (context, state) {
                   bool haveFilter = state.isFilterApplied;
                   return Icon(
-                    haveFilter ? Iconsax.filter_tick : Iconsax.filter,
+                    haveFilter ? Iconsax.filter_tick_copy : Iconsax.filter_copy,
                     color: haveFilter ? Colors.green : null,
                   );
                 },
@@ -387,7 +387,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
           InkWell(
             onTap: () => _showBottomSheet(context, users),
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            child: const Icon(Iconsax.profile_2user),
+            child: const Icon(Iconsax.profile_2user_copy),
           ),
           Visibility(
             visible: isEditable,
@@ -399,7 +399,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                   () => context.push(
                     "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.settingPage}",
                   ),
-              icon: Icon(Iconsax.setting),
+              icon: Icon(Iconsax.setting_copy),
             ),
           ),
         ]),
@@ -599,7 +599,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                 if (loggedInUserData.isClosed) {
                   return SizedBox.shrink();
                 } else {
-                  return CustomButton.customFloatingButton(Iconsax.add, () {
+                  return CustomButton.customFloatingButton(Iconsax.add_copy, () {
                     context.push(
                       "${RouterConstants.lendenRouteName}/${widget.id}${RouterConstants.lendenAddExpenseRouteName}",
                     );

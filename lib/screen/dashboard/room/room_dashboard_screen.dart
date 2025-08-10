@@ -409,7 +409,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
         ),
       ),
       floatingActionButton: CustomButton.customFloatingButton(
-        Iconsax.add,
+        Iconsax.add_copy,
         () => _showBottomSheet(context),
       ),
     );

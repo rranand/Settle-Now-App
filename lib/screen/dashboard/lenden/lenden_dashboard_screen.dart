@@ -296,7 +296,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
         ),
       ),
       floatingActionButton: CustomButton.customFloatingButton(
-        Iconsax.add,
+        Iconsax.add_copy,
         () => _showBottomSheet(context),
       ),
     );

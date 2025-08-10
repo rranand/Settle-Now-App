@@ -102,7 +102,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
             return Padding(
               padding: const EdgeInsets.only(right: 6.0),
               child: CustomShimmerEffect.loadingShimmerEffect(
-                Icon(Iconsax.profile_add),
+                Icon(Iconsax.profile_add_copy),
               ),
             );
           } else {
@@ -119,7 +119,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                 borderRadius: BorderRadius.circular(
                   UiConstant.cardBorderRadius,
                 ),
-                child: Icon(Iconsax.profile_add, color: Colors.grey),
+                child: Icon(Iconsax.profile_add_copy, color: Colors.grey),
                 onTap: () {
                   context.read<AddToPersonalExpenseBloc>().add(
                     AddToPersonalExpenseRequested(
@@ -204,7 +204,10 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                         borderRadius: BorderRadius.circular(
                           UiConstant.cardBorderRadius,
                         ),
-                        child: Icon(Iconsax.info_circle, color: Colors.grey),
+                        child: Icon(
+                          Iconsax.info_circle_copy,
+                          color: Colors.grey,
+                        ),
                         onTap: () {
                           isExpanded.value = !isExpanded.value;
                         },

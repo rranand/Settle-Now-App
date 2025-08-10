@@ -595,7 +595,7 @@ class _AddTransactionState extends State<AddTransaction> {
                         hintText: 'Creation Date',
                         inputDecoration: TextFormFieldInputBorder.underLine,
                         borderColor: Colors.black87,
-                        suffixIcon: Icon(Iconsax.calendar),
+                        suffixIcon: Icon(Iconsax.calendar_copy),
                         onTap: () async {
                           DateTime? dateTime = await showOmniDateTimePicker(
                             context: context,
@@ -676,7 +676,7 @@ class _AddTransactionState extends State<AddTransaction> {
                                   }
                                 }
                               },
-                              icon: Icon(Iconsax.profile_add),
+                              icon: Icon(Iconsax.profile_add_copy),
                             ),
                           ],
                         ),

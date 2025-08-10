@@ -75,7 +75,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Join Requested",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: scaffoldMessenger,
       );
       return emit(CreateJoinRoomSuccess());
@@ -116,7 +116,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "${users.length} Members Invited",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: scaffoldMessenger,
       );
       return emit(CreateJoinRoomSuccess());

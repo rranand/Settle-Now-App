@@ -262,7 +262,7 @@ class _PersonalExpenseDashboardScreenState
                 );
 
             if (!currentMonthPersonalExpense.hasData) {
-              return CustomButton.customFloatingButton(Iconsax.add, () {
+              return CustomButton.customFloatingButton(Iconsax.add_copy, () {
                 context.read<PersonalExpenseDashboardBloc>().add(
                   PersonalExpenseDashboardOnAdd(),
                 );

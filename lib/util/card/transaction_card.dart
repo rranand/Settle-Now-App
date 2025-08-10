@@ -87,7 +87,7 @@ class _TransactionCardState extends State<TransactionCard> {
                       child: Icon(
                         widget.data.roomData.hasData
                             ? Icons.delete_outline
-                            : Iconsax.edit,
+                            : Iconsax.edit_copy,
                         color: Colors.grey,
                         size: widget.data.roomData.hasData ? null : 20,
                       ),

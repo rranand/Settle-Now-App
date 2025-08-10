@@ -258,13 +258,13 @@ class _SettingPageState extends State<SettingPage> {
               if (context.mounted && mounted) {
                 showSnackbarWithChildWidget(
                   "Room Key Copied",
-                  child: Icon(Iconsax.tick_circle, color: Colors.green),
+                  child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
                   duration: Duration(seconds: 1),
                   scaffoldMessenger: ScaffoldMessenger.of(context),
                 );
               }
             },
-            icon: Icon(Iconsax.copy),
+            icon: Icon(Iconsax.copy_copy),
           ),
         ),
       ],
@@ -438,7 +438,7 @@ class _SettingPageState extends State<SettingPage> {
                         inputDecoration:
                             TextFormFieldInputBorder.outlineInputBorder,
                         borderColor: Colors.black38,
-                        suffixIcon: Icon(Iconsax.edit_2, size: 22),
+                        suffixIcon: Icon(Iconsax.edit_2_copy, size: 22),
                         onTap: () {
                           _roomEditListener.value = !_roomEditListener.value;
                           if (_roomEditListener.value) {
@@ -553,7 +553,7 @@ class _SettingPageState extends State<SettingPage> {
                                 ),
                               );
                             },
-                            icon: Icon(Iconsax.send_2),
+                            icon: Icon(Iconsax.send_2_copy),
                           );
                         },
                       ),

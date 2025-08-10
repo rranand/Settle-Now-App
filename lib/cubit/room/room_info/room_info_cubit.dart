@@ -122,7 +122,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: scaffoldMessengerState,
       );
       RoomInfoModel updatedRoomInfo = oldData.data.copyWith(
@@ -165,7 +165,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         isRemoving ? "You’ve left the room" : "Room deleted successfully",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: scaffoldMessengerState,
       );
       return emit(RoomInfoInitial());

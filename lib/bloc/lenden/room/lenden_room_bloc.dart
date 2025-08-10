@@ -174,7 +174,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: event.scaffoldMessengerState,
       );
       return emit(
@@ -214,7 +214,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         event.isRemoving ? "You’ve left the room" : "Room deleted successfully",
-        child: Icon(Iconsax.tick_circle, color: Colors.green),
+        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
         scaffoldMessenger: event.scaffoldMessengerState,
       );
       return emit(LendenRoomInitial());
