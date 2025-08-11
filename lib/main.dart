@@ -63,9 +63,7 @@ import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
-// TODO : Add Perfernce Setting
-// TODO : Add split by /2, /3 in case of partial transcation
-// TODO : Add to new member in room transaction
+// TODO : Add Prefrence Setting
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(

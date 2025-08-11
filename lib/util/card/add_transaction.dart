@@ -10,6 +10,7 @@ import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -64,6 +65,68 @@ class _AddTransactionState extends State<AddTransaction> {
   );
   String currentRoute = "";
   final ValueNotifier<Set<String>> _selectedUserIDSet = ValueNotifier({});
+  final ValueNotifier<bool> _futureJoinerBool = ValueNotifier(true);
+
+  final List<String> _gotoSplitType = [
+    "Split Equally",
+    "Split Equally (Exclude You)",
+  ];
+
+  void _handleGoToSplitType(int index) {
+    double? amount = double.tryParse(_amountController.text);
+    int userCount = _selectedUserIDs.value.length;
+
+    if (amount == null ||
+        amount.isNaN ||
+        amount == 0 ||
+        amount == double.infinity) {
+      return;
+    }
+    switch (index) {
+      case 0:
+        {
+          double equalSplit = amount / userCount;
+
+          UserWithEditControlTD newUserTDMap = {};
+
+          for (MapEntry<UserModel, TextEditingController> eachEntry
+              in _selectedUserIDs.value.entries) {
+            newUserTDMap.putIfAbsent(
+              eachEntry.key,
+              () => TextEditingController(text: equalSplit.toStringAsFixed(2)),
+            );
+          }
+
+          _selectedUserIDs.value = newUserTDMap;
+        }
+      case 1:
+        {
+          if (userCount == 1) {
+            showNormalSnackBar(context, "Add another user");
+          } else {
+            double equalSplit = amount / (userCount - 1);
+            UserWithEditControlTD newUserTDMap = {};
+
+            for (MapEntry<UserModel, TextEditingController> eachEntry
+                in _selectedUserIDs.value.entries) {
+              newUserTDMap.putIfAbsent(
+                eachEntry.key,
+                () => TextEditingController(
+                  text:
+                      _loggedInUser.id == eachEntry.key.id
+                          ? "0"
+                          : equalSplit.toStringAsFixed(2),
+                ),
+              );
+            }
+
+            _selectedUserIDs.value = newUserTDMap;
+          }
+        }
+      default:
+        {}
+    }
+  }
 
   void _removeUserFromSplitTransaction(UserModel user, bool skipRemoval) {
     {
@@ -211,7 +274,6 @@ class _AddTransactionState extends State<AddTransaction> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(height: UiConstant.spaceBetweenSection),
         Text("Split Type", style: TextStyle(fontSize: _headerTextSize)),
         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
         ValueListenableBuilder(
@@ -330,7 +392,7 @@ class _AddTransactionState extends State<AddTransaction> {
         {}
     }
 
-    _amountController.text = transactionData.amount.abs().toString();
+    _amountController.text = transactionData.amount.abs().toStringAsFixed(2);
     _descriptionController.text = transactionData.description;
     _createdOn = transactionData.createdOn;
     _creationDateController.text = convertDateTimeFormat(_createdOn);
@@ -345,14 +407,14 @@ class _AddTransactionState extends State<AddTransaction> {
     Set<String> tempUserIDs = {};
 
     tempMap[transactionData.createdBy] = TextEditingController(
-      text: transactionData.createdBy.amount.toString(),
+      text: transactionData.createdBy.amount.toStringAsFixed(2),
     );
     tempUserIDs.add(transactionData.createdBy.id);
 
     for (int i = 0; i < transactionData.users.length; i++) {
       final userWithAmountData = <UserModel, TextEditingController>{
         transactionData.users[i]: TextEditingController(
-          text: transactionData.users[i].amount.toString(),
+          text: transactionData.users[i].amount.toStringAsFixed(2),
         ),
       };
       tempMap.addAll(userWithAmountData);
@@ -431,6 +493,38 @@ class _AddTransactionState extends State<AddTransaction> {
             );
           }
         });
+      } else if (transactionType == TransactionType.room &&
+          _splitType[_splitTypeIndex.value] == "Equal" &&
+          !_futureJoinerBool.value) {
+        final roomUserState = context.read<RoomUserCubit>().state;
+
+        if (roomUserState is RoomUserSuccess) {
+          int activeUserCount = 0;
+
+          for (int i = 0; i < roomUserState.data.length; i++) {
+            if (roomUserState.data[i].active) {
+              activeUserCount++;
+            }
+          }
+          double eachAmount = totalAmount / activeUserCount;
+          for (int i = 0; i < roomUserState.data.length; i++) {
+            if (roomUserState.data[i].active) {
+              if (roomUserState.data[i].user.id == _loggedInUser.id) {
+                createdBy = UserAmountModel.copyFromUser(
+                  _loggedInUser,
+                  eachAmount,
+                );
+              } else {
+                userWithAmount.add(
+                  UserAmountModel.copyFromUser(
+                    roomUserState.data[i].user,
+                    eachAmount,
+                  ),
+                );
+              }
+            }
+          }
+        }
       }
 
       NewTransactionModel data = NewTransactionModel(
@@ -459,7 +553,7 @@ class _AddTransactionState extends State<AddTransaction> {
           {
             if (userWithAmount.isEmpty) {
               showNormalSnackBar(context, "Add Atleast One Member");
-            } else if (totalAmount != sumAmount) {
+            } else if ((totalAmount - sumAmount).abs() > 0.1) {
               showNormalSnackBar(context, "Total Amount does not match");
             } else if (!createdBy.hasData) {
               showNormalSnackBar(context, "You can't remove yourself");
@@ -627,9 +721,47 @@ class _AddTransactionState extends State<AddTransaction> {
                     visible:
                         TransactionType.room == transactionType &&
                         _isNewExpense,
-                    child: _splitTypeCardWidget(),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: _splitTypeIndex,
+                          builder: (context, value, child) {
+                            if (_splitType[value].contains("Equal")) {
+                              return child!;
+                            } else {
+                              return SizedBox(
+                                height: UiConstant.spaceBetweenSection,
+                              );
+                            }
+                          },
+                          child: ValueListenableBuilder(
+                            valueListenable: _futureJoinerBool,
+                            builder: (context, _, _) {
+                              return SwitchListTile(
+                                title: Text(
+                                  "Include Future Participants",
+                                  style: TextStyle(fontSize: _headerTextSize),
+                                ),
+                                contentPadding: const EdgeInsets.only(
+                                  top: 0.25 * UiConstant.spaceBetweenSection,
+                                ),
+                                inactiveThumbColor: Colors.black38,
+                                inactiveTrackColor: Colors.white,
+                                value: _futureJoinerBool.value,
+                                onChanged: (updatedValue) {
+                                  _futureJoinerBool.value = updatedValue;
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                        _splitTypeCardWidget(),
+                      ],
+                    ),
                   ),
-                  SizedBox(height: UiConstant.spaceBetweenSection),
+                  SizedBox(height: .5 * UiConstant.spaceBetweenSection),
                   ValueListenableBuilder(
                     valueListenable: _splitTypeIndex,
                     builder: (context, value, child) {
@@ -640,6 +772,7 @@ class _AddTransactionState extends State<AddTransaction> {
                       }
                     },
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
@@ -679,6 +812,28 @@ class _AddTransactionState extends State<AddTransaction> {
                               icon: Icon(Iconsax.profile_add_copy),
                             ),
                           ],
+                        ),
+                        Wrap(
+                          spacing: UiConstant.spaceBetweenCard,
+                          children: List.generate(
+                            _gotoSplitType.length,
+                            (index) => InkWell(
+                              onTap: () => _handleGoToSplitType(index),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 5,
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(100),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
+                                ),
+                                child: Text(_gotoSplitType[index]),
+                              ),
+                            ),
+                          ),
                         ),
                         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
                         ValueListenableBuilder(
