@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _drawerHandler(int index) async {
+  Future<void> _drawerHandler(int index) async {
     switch (drawerTitle[index]) {
       case "Get Notified":
         {

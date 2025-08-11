@@ -59,6 +59,7 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/provider/theme_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
 import 'package:settlenow_v2/theme/themes.dart';
+import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
@@ -100,6 +101,7 @@ Future<void> main() async {
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
+    await GoogleOauth.ensureGoogleSignInInitialized();
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,

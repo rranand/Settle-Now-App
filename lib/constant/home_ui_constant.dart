@@ -16,17 +16,17 @@ const List<String> drawerTitle = [
 ];
 
 const List<IconData> drawerIcon = [
-  Iconsax.profile_2user,
+  Iconsax.profile_2user_copy,
   // Iconsax.bank,
   // Iconsax.calendar_tick,
   // Iconsax.import,
   Icons.notifications_active_outlined,
   // Iconsax.sun_1,
-  Iconsax.share,
-  Iconsax.archive_book,
+  Iconsax.share_copy,
+  Iconsax.archive_book_copy,
   //Iconsax.support,
-  Iconsax.star,
-  Iconsax.logout,
+  Iconsax.star_copy,
+  Iconsax.logout_copy,
 ];
 
 const List<String> bottomNavigationButtonText = [
@@ -37,9 +37,9 @@ const List<String> bottomNavigationButtonText = [
   "Notification",
 ];
 const List<IconData> bottomNavigationButtonIcon = [
-  Iconsax.home,
-  Iconsax.flash,
-  Iconsax.wallet_1,
-  Iconsax.money_change,
-  Iconsax.notification,
+  Iconsax.home_copy,
+  Iconsax.flash_copy,
+  Iconsax.wallet_1_copy,
+  Iconsax.money_change_copy,
+  Iconsax.notification_copy,
 ];

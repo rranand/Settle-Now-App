@@ -52,7 +52,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      await GoogleOauth.ensureGoogleSignInInitialized();
       GoogleSignInAccount userData = await GoogleOauth.login();
 
       final GoogleSignInAuthentication googleAuth = userData.authentication;
@@ -104,6 +103,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
       UserModel authUserData = await repo.signupUsingGoogle(email, idToken);
       return emit(AuthLoginSuccess(authUserData));
+    } on GoogleSignInException catch (_) {
+      await additionalLogoutAction();
+      return emit(AuthSignUpFailure("Google Signup Failed"));
     } catch (e) {
       await additionalLogoutAction();
       return emit(AuthSignUpFailure(e.toString()));
