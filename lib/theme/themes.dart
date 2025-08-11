@@ -40,8 +40,8 @@ class CustomTheme {
       ),
       sliderTheme: SliderThemeData(
         thumbColor: Colors.deepPurpleAccent,
-        activeTrackColor: Colors.deepPurpleAccent.withOpacity(0.5),
-        valueIndicatorColor: Colors.grey.withOpacity(0.3),
+        activeTrackColor: Colors.deepPurpleAccent.withValues(alpha: 0.5),
+        valueIndicatorColor: Colors.grey.withValues(alpha: 0.3),
         valueIndicatorTextStyle: TextStyle(color: Colors.black),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -109,8 +109,8 @@ class CustomTheme {
     ),
     sliderTheme: SliderThemeData(
       thumbColor: Colors.greenAccent,
-      activeTrackColor: Colors.greenAccent.withOpacity(0.5),
-      valueIndicatorColor: Colors.grey.withOpacity(0.3),
+      activeTrackColor: Colors.greenAccent.withValues(alpha: 0.5),
+      valueIndicatorColor: Colors.grey.withValues(alpha: 0.3),
       valueIndicatorTextStyle: TextStyle(color: Colors.white),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

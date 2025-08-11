@@ -7,7 +7,7 @@ import 'package:settlenow_v2/Notification/notification_controller.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 
 class NotificationInterfaceHandler {
-  static Future<void> initateListeners(context) async {
+  static Future<void> initateListeners(BuildContext context) async {
     await AwesomeNotifications().setListeners(
       onActionReceivedMethod: (ReceivedAction receivedAction) async {
         NotificationController.onActionReceivedMethod(context, receivedAction);

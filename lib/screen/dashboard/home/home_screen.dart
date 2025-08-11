@@ -308,7 +308,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _bottomNavigatorBodyHandler(index) {
+  Widget _bottomNavigatorBodyHandler(int index) {
     switch (index) {
       case 1:
         return QuickSplitDashboardScreen(isSearchEnabled: _isSearchEnabled);
@@ -325,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  PreferredSizeWidget? _bottomNavigatorAppBarHandler(index) {
+  PreferredSizeWidget? _bottomNavigatorAppBarHandler(int index) {
     List<Widget> appBarActions = [];
 
     if (index <= 4) {

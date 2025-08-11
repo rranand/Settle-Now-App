@@ -141,6 +141,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 onPressed: _handleOnLogin,
                 buttonTextColor: Colors.black,
               ),
+              SizedBox(width: _mainScreenPadding.left),
             ]),
             forceMaterialTransparency: true,
           ),
@@ -304,21 +305,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           );
                         },
                       ),
-                      SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                      const Center(
-                        child: Text('Or sign up with social account'),
-                      ),
-                      SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomButton.socialButton(
-                            context,
-                            'assets/socialmedia/google.png',
-                            onPressed: _googleSignUpHandler,
-                          ),
-                        ],
-                      ),
+                      if (!kIsWeb) ...<Widget>[
+                        SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                        const Center(
+                          child: Text('Or sign up with social account'),
+                        ),
+                        SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomButton.socialButton(
+                              context,
+                              'assets/socialmedia/google.png',
+                              onPressed: _googleSignUpHandler,
+                            ),
+                          ],
+                        ),
+                      ],
 
                       SizedBox(height: UiConstant.spaceAtBottom),
                     ],

@@ -278,9 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                       ),
-                      if (kIsWeb)
-                        SizedBox.shrink()
-                      else ...<Widget>[
+                      if (!kIsWeb) ...<Widget>[
                         SizedBox(height: 2 * UiConstant.spaceBetweenSection),
                         const Center(
                           child: Text('Or sign in with social account'),

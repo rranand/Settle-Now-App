@@ -47,7 +47,7 @@ class AppRouterConfig {
 
   static late final GoRouter _router;
 
-  static _allRoutes() {
+  static List<RouteBase> _allRoutes() {
     List<RouteBase> allRoutes = [
       GoRoute(
         path: RouterConstants.loginRouteName,

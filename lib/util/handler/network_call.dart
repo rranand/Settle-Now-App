@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 
@@ -34,6 +35,9 @@ Future<Response> createAPICall(
   Function httpType = getHttpMethod(methodName);
   try {
     String host = "https://prod-api.settlenow.in/";
+    if (kDebugMode) {
+      host = "http://192.168.1.35:9008/";
+    }
     String tokenization = Crypto.createJSONDataTOJWT(jsonData);
     Map<String, String> headersMap = <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',

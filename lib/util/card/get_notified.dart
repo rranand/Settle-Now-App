@@ -16,7 +16,7 @@ class GetNotified extends StatefulWidget {
 class _GetNotifiedState extends State<GetNotified> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
-  initialization() async {
+  Future<void> initialization() async {
     bool isPermanent = await AwesomeNotifications().isNotificationAllowed();
 
     if (isPermanent && mounted) {

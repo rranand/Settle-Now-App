@@ -61,7 +61,7 @@ class _InviteMemberState extends State<InviteMember> {
     }
   }
 
-  void _toggleSelectedUser(user) {
+  void _toggleSelectedUser(UserModel user) {
     if (widget.transactionType == TransactionType.lenden) {
       if (_alreadyInvited.value.isNotEmpty) {
         return;
