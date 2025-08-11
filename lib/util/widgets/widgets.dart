@@ -82,6 +82,8 @@ Widget appBarLeadingButton(BuildContext context, Widget child) {
 List<Widget>? appBarActionButton(BuildContext context, List<Widget> widgets) {
   if (widgets.isEmpty) {
     return null;
+  } else if (kIsWeb) {
+    return widgets;
   } else {
     EdgeInsets viewPadding = MediaQuery.of(context).viewPadding;
     double notchPadding = max(max(viewPadding.left, viewPadding.right), 0);
