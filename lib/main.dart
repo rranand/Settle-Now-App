@@ -73,7 +73,7 @@ Future<void> _firebaseMessagingBackgroundHandler(
 
 Future<void> initializeFirebaseApp() async {
   try {
-    if (Firebase.apps.isEmpty) {
+    if (kIsWeb || Firebase.apps.isEmpty) {
       await Firebase.initializeApp(
         options:
             kDebugMode
@@ -97,15 +97,15 @@ Future<void> main() async {
 
   await initializeFirebaseApp();
 
-  if (!kIsWeb) {
+  if (kIsWeb) {
+    usePathUrlStrategy();
+  } else {
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.dark,
       ),
     );
-  } else {
-    usePathUrlStrategy();
   }
 
   final AuthRepository authRepository = AuthRepository(AuthDataProvider());
