@@ -34,7 +34,7 @@ dependencies:
   moment_dart: ^5.2.3
   flutter_bloc: ^9.1.0
   bloc: ^9.0.0
-  google_sign_in: ^6.3.0
+  google_sign_in: ^7.1.1
   firebase_analytics: ^11.4.5
   fl_chart: ^1.0.0
   flutter_sticky_header: ^0.8.0

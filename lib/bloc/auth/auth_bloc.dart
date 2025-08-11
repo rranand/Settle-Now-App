@@ -52,12 +52,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      GoogleSignInAccount? userData = await GoogleOauth.login();
-      if (userData == null) {
-        return emit(AuthLoginFailure("Google SignIn Failed"));
-      }
-      final GoogleSignInAuthentication googleAuth =
-          await userData.authentication;
+      await GoogleOauth.ensureGoogleSignInInitialized();
+      GoogleSignInAccount userData = await GoogleOauth.login();
+
+      final GoogleSignInAuthentication googleAuth = userData.authentication;
       final String email = userData.email;
       final String idToken = googleAuth.idToken ?? "";
 
@@ -70,7 +68,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return emit(AuthLoginSuccess(authUserData));
     } catch (e) {
       await additionalLogoutAction();
-      return emit(AuthLoginFailure(e.toString()));
+      return emit(AuthLoginFailure("Google SignIn Failed"));
     }
   }
 
@@ -96,11 +94,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       GoogleSignInAccount? userData = await GoogleOauth.login();
-      if (userData == null) {
-        return emit(AuthSignUpFailure("Google Signup Failed"));
-      }
-      final GoogleSignInAuthentication googleAuth =
-          await userData.authentication;
+      final GoogleSignInAuthentication googleAuth = userData.authentication;
       final String email = userData.email;
       final String idToken = googleAuth.idToken ?? "";
 

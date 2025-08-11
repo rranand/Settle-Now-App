@@ -14,6 +14,8 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+//Flutter Properties : /Users/rohitanand/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt
+
 android {
     namespace = "com.rohit.settlenow"
     compileSdk = flutter.compileSdkVersion

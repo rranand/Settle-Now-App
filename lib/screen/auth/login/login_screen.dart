@@ -278,21 +278,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                       ),
-                      SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                      const Center(
-                        child: Text('Or sign in with social account'),
-                      ),
-                      SizedBox(height: 2 * UiConstant.spaceBetweenSection),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CustomButton.socialButton(
-                            context,
-                            'assets/socialmedia/google.png',
-                            onPressed: _googleLoginHandler,
-                          ),
-                        ],
-                      ),
+                      if (kIsWeb)
+                        SizedBox.shrink()
+                      else ...<Widget>[
+                        SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                        const Center(
+                          child: Text('Or sign in with social account'),
+                        ),
+                        SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CustomButton.socialButton(
+                              context,
+                              'assets/socialmedia/google.png',
+                              onPressed: _googleLoginHandler,
+                            ),
+                          ],
+                        ),
+                      ],
 
                       SizedBox(height: UiConstant.spaceAtBottom),
                     ],
