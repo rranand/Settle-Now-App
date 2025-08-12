@@ -79,7 +79,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       duration: Duration(minutes: 2),
       scaffoldMessenger: scaffoldMessenger,
     );
-    CreateRoomLoading();
+
     try {
       NotificationModel notificationData = await roomRepo.inviteUser(
         roomID,

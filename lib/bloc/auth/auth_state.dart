@@ -15,8 +15,9 @@ final class AuthLoginFailure extends AuthState {
 
 final class AuthLoginSuccess extends AuthState {
   final UserModel userData;
+  final PreferenceModel preferenceData;
 
-  AuthLoginSuccess(this.userData);
+  AuthLoginSuccess(this.userData, this.preferenceData);
 }
 
 final class AuthSignUpLoading extends AuthState {}
@@ -45,13 +46,13 @@ final class AuthOTPSendFailure extends AuthState {
 final class AuthOTPSendLoading extends AuthState {}
 
 final class AuthLogoutLoading extends AuthLoginSuccess {
-  AuthLogoutLoading(super.userData);
+  AuthLogoutLoading(super.userData, super.preferenceData);
 }
 
 final class AuthLogoutFailure extends AuthLoginSuccess {
   final String error;
 
-  AuthLogoutFailure(super.userData, this.error);
+  AuthLogoutFailure(super.userData, super.preferenceData, this.error);
 }
 
 final class AuthProfileUpdateSuccess extends AuthState {

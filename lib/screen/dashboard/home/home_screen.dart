@@ -152,6 +152,11 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           break;
         }
+      case "Preference":
+        {
+          context.push(RouterConstants.preferencePage);
+          break;
+        }
       case "Share":
         {
           SharePlus.instance.share(
@@ -202,6 +207,11 @@ class _HomeScreenState extends State<HomeScreen> {
             return ValueListenableBuilder(
               valueListenable: isNotificationAllowed,
               builder: (BuildContext context, _, _) {
+                if (kIsWeb &&
+                    (drawerTitle[index] == "Get Notified" ||
+                        drawerTitle[index] == "Rate Us")) {
+                  return SizedBox.shrink();
+                }
                 if (drawerTitle[index] == "Get Notified" &&
                     isNotificationAllowed.value) {
                   return SizedBox.shrink();

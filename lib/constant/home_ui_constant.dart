@@ -3,6 +3,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 const List<String> drawerTitle = [
   "Profile",
+  "Preference",
   // "Bank Transactions",
   // "Reminder",
   // "Import Contacts",
@@ -17,6 +18,7 @@ const List<String> drawerTitle = [
 
 const List<IconData> drawerIcon = [
   Iconsax.profile_2user_copy,
+  Iconsax.setting_4_copy,
   // Iconsax.bank,
   // Iconsax.calendar_tick,
   // Iconsax.import,

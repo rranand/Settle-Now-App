@@ -1,6 +1,8 @@
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
+import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/custom/pair.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 
@@ -8,7 +10,7 @@ class AuthRepository {
   final AuthDataProvider _dataProvider;
   AuthRepository(this._dataProvider);
 
-  Future<UserModel> getLoggedInUser() async {
+  Future<Pair<UserModel, PreferenceModel>> getLoggedInUser() async {
     try {
       String? authToken = await LocalStoragePreference.getStringPref(
         'auth_token',
@@ -17,40 +19,45 @@ class AuthRepository {
       if (authToken == null) {
         throw "Unauthorized Access";
       }
-      final UserModel userData = await _dataProvider.getOwnUserInfo(authToken);
-      return userData;
+      final Pair<UserModel, PreferenceModel> pairData = await _dataProvider
+          .getOwnUserInfo(authToken);
+      return pairData;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<UserModel> loginUser(String email, String otp) async {
+  Future<Pair<UserModel, PreferenceModel>> loginUser(
+    String email,
+    String otp,
+  ) async {
     try {
-      final UserModel loginData = await _dataProvider.loginUser(email, otp);
+      final Pair<UserModel, PreferenceModel> pairData = await _dataProvider
+          .loginUser(email, otp);
+      return pairData;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Pair<UserModel, PreferenceModel>> loginUsingGoogle(
+    String email,
+    String idToken,
+  ) async {
+    try {
+      final loginData = await _dataProvider.loginUsingGoogle(email, idToken);
       return loginData;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<UserModel> loginUsingGoogle(String email, String idToken) async {
+  Future<Pair<UserModel, PreferenceModel>> signupUsingGoogle(
+    String email,
+    String idToken,
+  ) async {
     try {
-      final UserModel loginData = await _dataProvider.loginUsingGoogle(
-        email,
-        idToken,
-      );
-      return loginData;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<UserModel> signupUsingGoogle(String email, String idToken) async {
-    try {
-      final UserModel loginData = await _dataProvider.signupUsingGoogle(
-        email,
-        idToken,
-      );
+      final loginData = await _dataProvider.signupUsingGoogle(email, idToken);
       return loginData;
     } catch (e) {
       rethrow;
@@ -85,7 +92,10 @@ class AuthRepository {
     }
   }
 
-  Future<UserModel> validateSignupOTP(String token, String otp) async {
+  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(
+    String token,
+    String otp,
+  ) async {
     try {
       final userData = await _dataProvider.validateSignupOTP(token, otp);
 
@@ -150,6 +160,14 @@ class AuthRepository {
     try {
       final List<UserModel> data = await _dataProvider.fetchFriend(authToken);
       return data;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> savePreference(PreferenceModel data, String authToken) async {
+    try {
+      await _dataProvider.savePreference(data, authToken);
     } catch (e) {
       rethrow;
     }

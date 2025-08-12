@@ -742,7 +742,9 @@ class _AddTransactionState extends State<AddTransaction> {
                               return SwitchListTile(
                                 title: Text(
                                   "Include Future Participants",
-                                  style: TextStyle(fontSize: _headerTextSize),
+                                  style: TextStyle(
+                                    fontSize: _headerTextSize - 4,
+                                  ),
                                 ),
                                 contentPadding: const EdgeInsets.only(
                                   top: 0.25 * UiConstant.spaceBetweenSection,

@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
@@ -14,14 +13,16 @@ import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/signup_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/home/home_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/home/preference_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_expense_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/room_expense_screen.dart';
 import 'package:settlenow_v2/screen/profile/login_activity_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow_v2/screen/profile/profile_screen.dart';
-import 'package:settlenow_v2/util/card/about_us.dart';
+import 'package:settlenow_v2/screen/dashboard/home/about_us.dart';
 import 'package:settlenow_v2/util/card/add_transaction.dart';
+import 'package:settlenow_v2/util/card/error_page.dart';
 import 'package:settlenow_v2/util/card/get_notified.dart';
 import 'package:settlenow_v2/util/card/invite_member.dart';
 import 'package:settlenow_v2/util/card/setting_page.dart';
@@ -97,6 +98,12 @@ class AppRouterConfig {
           );
         },
         routes: [
+          GoRoute(
+            path: RouterConstants.preferencePage,
+            builder: (context, state) {
+              return AuthGate(child: PreferenceScreen());
+            },
+          ),
           GoRoute(
             path: RouterConstants.notificationPage,
             builder: (context, state) {
@@ -547,10 +554,7 @@ class AppRouterConfig {
 
         return null;
       },
-      errorBuilder:
-          (context, state) => Scaffold(
-            body: Center(child: Text("Error Page")),
-          ), // Replace with your ErrorPage
+      errorBuilder: (context, state) => ErrorPage(),
     );
   }
 

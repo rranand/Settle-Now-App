@@ -51,6 +51,9 @@ class RouterConstants {
   //About Us Page
   static const String aboutUsPage = '/about-us';
 
+  //Preference Page
+  static const String preferencePage = '/preference';
+
   //Error Route
   static const String errorPageRouteName = '/404';
 

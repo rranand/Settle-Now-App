@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
+import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/util/custom/pair.dart';
 import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
@@ -37,9 +39,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      UserModel userData = await repo.loginUser(event.email, event.otp);
+      Pair<UserModel, PreferenceModel> pairData = await repo.loginUser(
+        event.email,
+        event.otp,
+      );
 
-      return emit(AuthLoginSuccess(userData));
+      return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } catch (e) {
       return emit(AuthLoginFailure(e.toString()));
     }
@@ -63,8 +68,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return emit(AuthLoginFailure("Google SignIn Failed"));
       }
 
-      UserModel authUserData = await repo.loginUsingGoogle(email, idToken);
-      return emit(AuthLoginSuccess(authUserData));
+      Pair<UserModel, PreferenceModel> pairData = await repo.loginUsingGoogle(
+        email,
+        idToken,
+      );
+      return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } catch (e) {
       await additionalLogoutAction();
       return emit(AuthLoginFailure("Google SignIn Failed"));
@@ -101,8 +109,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await additionalLogoutAction();
         return emit(AuthSignUpFailure("Google Signup Failed"));
       }
-      UserModel authUserData = await repo.signupUsingGoogle(email, idToken);
-      return emit(AuthLoginSuccess(authUserData));
+      Pair<UserModel, PreferenceModel> pairData = await repo.signupUsingGoogle(
+        email,
+        idToken,
+      );
+      return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } on GoogleSignInException catch (_) {
       await additionalLogoutAction();
       return emit(AuthSignUpFailure("Google Signup Failed"));
@@ -147,8 +158,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      UserModel userData = await repo.validateSignupOTP(event.token, event.otp);
-      return emit(AuthLoginSuccess(userData));
+      Pair<UserModel, PreferenceModel> pairData = await repo.validateSignupOTP(
+        event.token,
+        event.otp,
+      );
+      return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
       return emit(AuthSignUpSuccess(token: event.token));
@@ -161,12 +175,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     if (state is! AuthLoginSuccess) {
       return emit(
-        AuthLogoutFailure(UserModel.empty(), "Invalid Logout Request"),
+        AuthLogoutFailure(
+          UserModel.empty(),
+          PreferenceModel.empty(),
+          "Invalid Logout Request",
+        ),
       );
     }
 
     final userData = (state as AuthLoginSuccess).userData;
-    emit(AuthLogoutLoading(userData));
+    final preferenceData = (state as AuthLoginSuccess).preferenceData;
+    emit(AuthLogoutLoading(userData, preferenceData));
 
     try {
       await Future.wait([
@@ -176,8 +195,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       return emit(AuthInitial());
     } catch (e) {
-      emit(AuthLogoutFailure(userData, e.toString()));
-      return emit(AuthLoginSuccess(userData));
+      emit(AuthLogoutFailure(userData, preferenceData, e.toString()));
+      return emit(AuthLoginSuccess(userData, preferenceData));
     }
   }
 
@@ -185,7 +204,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthProfileUpdateRequested event,
     Emitter<AuthState> emit,
   ) {
-    return emit(AuthLoginSuccess(event.userData));
+    return emit(AuthLoginSuccess(event.userData, event.preferenceData));
   }
 
   void _authProfileDeleteRequested(
@@ -194,7 +213,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     if (state is! AuthLoginSuccess) {
       return emit(
-        AuthLogoutFailure(UserModel.empty(), "Invalid Logout Request"),
+        AuthLogoutFailure(
+          UserModel.empty(),
+          PreferenceModel.empty(),
+          "Invalid Logout Request",
+        ),
       );
     }
     showSnackbarWithChildWidget(
@@ -204,7 +227,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       scaffoldMessenger: event.scaffoldMessenger,
     );
     final userData = (state as AuthLoginSuccess).userData;
-    emit(AuthLogoutLoading(userData));
+    final preferenceData = (state as AuthLoginSuccess).preferenceData;
+    emit(AuthLogoutLoading(userData, preferenceData));
 
     try {
       await repo.deleteAccount(userData.authToken);
@@ -215,9 +239,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         scaffoldMessenger: event.scaffoldMessenger,
       );
     } catch (e) {
-      emit(AuthLogoutFailure(userData, e.toString()));
+      emit(AuthLogoutFailure(userData, preferenceData, e.toString()));
     }
-    return emit(AuthLoginSuccess(userData));
+    return emit(AuthLoginSuccess(userData, preferenceData));
   }
 
   void _authLoggedInUserRequested(
@@ -226,9 +250,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoginLoading());
     try {
-      UserModel userData = await repo.getLoggedInUser();
+      Pair<UserModel, PreferenceModel> data = await repo.getLoggedInUser();
+      UserModel userData = data.first;
+      PreferenceModel preferenceData = data.second;
+
       if (userData.hasData) {
-        return emit(AuthLoginSuccess(userData));
+        return emit(AuthLoginSuccess(userData, preferenceData));
       } else {
         return emit(AuthInitial());
       }

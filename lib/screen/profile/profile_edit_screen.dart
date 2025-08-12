@@ -6,6 +6,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_cubit.dart';
+import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
@@ -31,6 +32,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   final TextEditingController _mobileNumber = TextEditingController();
   final TextEditingController _email = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
+  PreferenceModel _preferenceData = PreferenceModel.empty();
 
   void _blocListenerHandler(
     BuildContext context,
@@ -54,7 +56,10 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (_name.text != _loggedInUser.name) {
         UserModel newData = UserModel.copyFromUser(_loggedInUser);
         newData.name = _name.text;
-        context.read<UserUpdateProfileCubit>().updateProfile(newData);
+        context.read<UserUpdateProfileCubit>().updateProfile(
+          newData,
+          _preferenceData,
+        );
       } else {
         showNormalSnackBar(context, "Nothing to update!");
       }
@@ -75,6 +80,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.initState();
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
+      _preferenceData = authState.preferenceData;
       _loggedInUser = authState.userData;
       _name.text = _loggedInUser.name;
       _mobileNumber.text = _loggedInUser.phoneNo;

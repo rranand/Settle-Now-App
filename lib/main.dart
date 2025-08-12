@@ -33,6 +33,7 @@ import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_settle_upsert/room_settle_upsert_cubit.dart';
 import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
 import 'package:settlenow_v2/cubit/user/friend/friend_cubit.dart';
+import 'package:settlenow_v2/cubit/user/preference/preference_cubit.dart';
 import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
 import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_cubit.dart';
 import 'package:settlenow_v2/data/data_provider/auth_data_provider.dart';
@@ -64,6 +65,7 @@ import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
 // TODO : Add Prefrence Setting
+// TODO : Deep Link Config
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
@@ -338,6 +340,13 @@ class MyApp extends StatelessWidget {
                 ),
           ),
           BlocProvider<FilterCubit>(create: (context) => FilterCubit()),
+          BlocProvider<PreferenceCubit>(
+            create:
+                (context) => PreferenceCubit(
+                  context.read<AuthRepository>(),
+                  context.read<AuthBloc>(),
+                ),
+          ),
         ],
         child: MultiProvider(
           providers: [

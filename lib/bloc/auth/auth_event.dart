@@ -46,8 +46,9 @@ final class AuthLoggedInUserRequested extends AuthEvent {}
 
 final class AuthProfileUpdateRequested extends AuthEvent {
   final UserModel userData;
+  final PreferenceModel preferenceData;
 
-  AuthProfileUpdateRequested(this.userData);
+  AuthProfileUpdateRequested(this.userData, this.preferenceData);
 }
 
 final class AuthProfileDeleteRequested extends AuthEvent {

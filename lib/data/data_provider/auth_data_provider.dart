@@ -1,15 +1,19 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/firebase/firebase_messaging.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/util/handler/crypto.dart';
 import 'package:settlenow_v2/util/handler/network_call.dart';
 import 'package:settlenow_v2/util/handler/platform_service.dart';
 import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 
 class AuthDataProvider {
-  Future<UserModel> loginUser(String email, String otp) async {
+  Future<Pair<UserModel, PreferenceModel>> loginUser(
+    String email,
+    String otp,
+  ) async {
     try {
       final deviceData = await Future.wait([
         generateFCMToken(),
@@ -50,7 +54,10 @@ class AuthDataProvider {
           getOwnUserInfo(token),
         ]);
 
-        return userInfoData[1] as UserModel;
+        Pair<UserModel, PreferenceModel> pairData =
+            userInfoData[1] as Pair<UserModel, PreferenceModel>;
+
+        return Pair(pairData.first, pairData.second);
       } else {
         throw Crypto.decrypt(data['message']);
       }
@@ -59,7 +66,10 @@ class AuthDataProvider {
     }
   }
 
-  Future<UserModel> signupUsingGoogle(String email, String idToken) async {
+  Future<Pair<UserModel, PreferenceModel>> signupUsingGoogle(
+    String email,
+    String idToken,
+  ) async {
     try {
       final deviceData = await Future.wait([
         generateFCMToken(),
@@ -96,8 +106,9 @@ class AuthDataProvider {
           LocalStoragePreference.setStringPref('auth_token', token),
           getOwnUserInfo(token),
         ]);
-
-        return userInfoData[1] as UserModel;
+        Pair<UserModel, PreferenceModel> pairData =
+            userInfoData[1] as Pair<UserModel, PreferenceModel>;
+        return pairData;
       } else {
         throw Crypto.decrypt(data['message']);
       }
@@ -106,7 +117,10 @@ class AuthDataProvider {
     }
   }
 
-  Future<UserModel> loginUsingGoogle(String email, String idToken) async {
+  Future<Pair<UserModel, PreferenceModel>> loginUsingGoogle(
+    String email,
+    String idToken,
+  ) async {
     try {
       final deviceData = await Future.wait([
         generateFCMToken(),
@@ -143,8 +157,9 @@ class AuthDataProvider {
           LocalStoragePreference.setStringPref('auth_token', token),
           getOwnUserInfo(token),
         ]);
-
-        return userInfoData[1] as UserModel;
+        Pair<UserModel, PreferenceModel> pairData =
+            userInfoData[1] as Pair<UserModel, PreferenceModel>;
+        return pairData;
       } else {
         throw Crypto.decrypt(data['message']);
       }
@@ -153,7 +168,9 @@ class AuthDataProvider {
     }
   }
 
-  Future<UserModel> getOwnUserInfo(String authToken) async {
+  Future<Pair<UserModel, PreferenceModel>> getOwnUserInfo(
+    String authToken,
+  ) async {
     try {
       String version = await getAppVersion();
       final response = await createAPICall('auth', "patch", authToken, {
@@ -162,8 +179,11 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         UserModel userData = UserModel.forOwnerInfo(data['data'], authToken);
+        PreferenceModel preferenceData = PreferenceModel.fromJson(
+          data['data']['preference'],
+        );
 
-        return userData;
+        return Pair(userData, preferenceData);
       } else {
         throw Crypto.decrypt(data['message']);
       }
@@ -246,7 +266,10 @@ class AuthDataProvider {
     }
   }
 
-  Future<UserModel> validateSignupOTP(String token, String otp) async {
+  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(
+    String token,
+    String otp,
+  ) async {
     try {
       final response = await createAPICall('auth/signup/otp', "patch", token, {
         "otp": Crypto.encrypt(otp),
@@ -258,7 +281,9 @@ class AuthDataProvider {
           LocalStoragePreference.setStringPref('auth_token', token),
           getOwnUserInfo(token),
         ]);
-        return userInfoData[1] as UserModel;
+        Pair<UserModel, PreferenceModel> pairData =
+            userInfoData[1] as Pair<UserModel, PreferenceModel>;
+        return pairData;
       } else {
         throw Crypto.decrypt(data['message']);
       }
@@ -371,6 +396,29 @@ class AuthDataProvider {
           arr.add(UserModel.fromBasicInfoMap(data['data'][i]));
         }
         return arr;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> savePreference(
+    PreferenceModel preferenceData,
+    String authToken,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'user/preference',
+        "patch",
+        authToken,
+        preferenceData.toJson(),
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        return;
       } else {
         throw Crypto.decrypt(data['message']);
       }

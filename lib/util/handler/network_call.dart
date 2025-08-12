@@ -64,6 +64,6 @@ Future<Response> createAPICall(
 
     return newRes;
   } catch (_) {
-    rethrow;
+    throw "Something went wrong";
   }
 }
