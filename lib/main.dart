@@ -64,9 +64,6 @@ import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
-// TODO : Add Prefrence Setting
-// TODO : Deep Link Config
-
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
   RemoteMessage remoteMessage,

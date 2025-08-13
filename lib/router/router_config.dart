@@ -12,6 +12,7 @@ import 'package:settlenow_v2/model/update_info_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/screen/auth/login/login_screen.dart';
 import 'package:settlenow_v2/screen/auth/signup/signup_screen.dart';
+import 'package:settlenow_v2/screen/dashboard/home/deep_link_join.dart';
 import 'package:settlenow_v2/screen/dashboard/home/home_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/home/preference_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/lenden/lenden_expense_screen.dart';
@@ -28,6 +29,7 @@ import 'package:settlenow_v2/util/card/invite_member.dart';
 import 'package:settlenow_v2/util/card/setting_page.dart';
 import 'package:settlenow_v2/util/card/settle_expense.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
+import 'package:settlenow_v2/util/functions/validator.dart';
 import 'package:settlenow_v2/util/handler/stream_to_listenable.dart';
 import 'package:settlenow_v2/util/widgets/auth_gate.dart';
 import 'package:settlenow_v2/util/widgets/maintenance_page.dart';
@@ -98,6 +100,28 @@ class AppRouterConfig {
           );
         },
         routes: [
+          // GoRoute(
+          //   path: "${RouterConstants.deepLinkJoinLend}/:id",
+          //   builder: (context, state) {
+          //     return AuthGate(
+          //       child: DeepLinkJoin(
+          //         transactionType: TransactionType.lenden,
+          //         id: state.pathParameters["id"]!,
+          //       ),
+          //     );
+          //   },
+          // ),
+          GoRoute(
+            path: "${RouterConstants.deepLinkJoinRoom}/:id",
+            builder: (context, state) {
+              return AuthGate(
+                child: DeepLinkJoin(
+                  transactionType: TransactionType.room,
+                  id: state.pathParameters["id"]!,
+                ),
+              );
+            },
+          ),
           GoRoute(
             path: RouterConstants.preferencePage,
             builder: (context, state) {
@@ -145,11 +169,19 @@ class AppRouterConfig {
             },
             redirect: (context, state) {
               Map<String, String> param = state.pathParameters;
-
               if (param.isEmpty) {
                 return RouterConstants.dashboardRouteName;
               } else {
-                return null;
+                String? id = param['id'];
+                if (id == null) {
+                  return RouterConstants.dashboardRouteName;
+                } else if (CustomValidator.isValidObjectId(id)) {
+                  return null;
+                } else if (id.length == 7) {
+                  return "${RouterConstants.deepLinkJoinRoom}/$id";
+                } else {
+                  return RouterConstants.dashboardRouteName;
+                }
               }
             },
             routes: [
@@ -528,10 +560,7 @@ class AppRouterConfig {
   static void initializeRouter(AuthBloc authBloc) {
     _router = GoRouter(
       routes: _allRoutes(),
-      //initialLocation: '/lenden/66e572819665f6a43a541f0b',
-      //initialLocation: '/personal/2023/February',
       initialLocation: RouterConstants.dashboardRouteName,
-      //initialLocation: '/room/662c52edc67c51d882638463',
       observers: [observer],
       refreshListenable: StreamToListenable(authBloc.stream),
       redirect: (context, state) {

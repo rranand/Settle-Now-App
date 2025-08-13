@@ -83,4 +83,9 @@ class CustomValidator {
       return 'Amount is Invalid';
     }
   }
+
+  static bool isValidObjectId(String id) {
+    final objectIdRegex = RegExp(r'^[0-9a-fA-F]{24}$');
+    return objectIdRegex.hasMatch(id);
+  }
 }

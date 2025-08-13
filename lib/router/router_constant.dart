@@ -58,6 +58,6 @@ class RouterConstants {
   static const String errorPageRouteName = '/404';
 
   //Deep Link
-  static const String deepLinkJoinRoom = '/room';
+  static const String deepLinkJoinRoom = '/join';
   static const String deepLinkJoinLend = '/lend';
 }

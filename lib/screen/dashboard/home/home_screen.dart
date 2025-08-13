@@ -18,6 +18,7 @@ import 'package:settlenow_v2/screen/dashboard/notification/notification_screen.d
 import 'package:settlenow_v2/screen/dashboard/personal_expense/personal_expense_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/quicksplit/quick_split_dashboard_screen.dart';
 import 'package:settlenow_v2/screen/dashboard/room/room_dashboard_screen.dart';
+import 'package:settlenow_v2/util/card/error_page.dart';
 import 'package:settlenow_v2/util/card/loading_card.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/in_app_update_service.dart';
@@ -389,12 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       builder: (context, state) {
         if (state is AuthLoginFailure) {
-          return Scaffold(
-            appBar: AppBar(backgroundColor: Colors.transparent),
-            body: Scaffold(
-              body: Center(child: Text("Error Page: ${state.error}")),
-            ),
-          );
+          return ErrorPage();
         } else if (state is AuthLogoutLoading) {
           return Scaffold(
             appBar: AppBar(backgroundColor: Colors.transparent),
