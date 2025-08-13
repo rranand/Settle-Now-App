@@ -201,7 +201,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                               itemCount: noOfCardsToBeShown,
                               itemBuilder: (BuildContext context, int index) {
                                 TransactionModel eachSplitData =
-                                    filterData[index];
+                                    filterData[2 * index];
                                 if (isWide) {
                                   return Row(
                                     crossAxisAlignment:

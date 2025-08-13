@@ -54,7 +54,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
               Expanded(
                 child: RoomTransactionCard(
                   roomID: widget.roomID,
-                  data: data[index],
+                  data: data[2 * index],
                   loggedInUser: _loggedInUser,
                 ),
               ),
@@ -64,7 +64,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                         ? SizedBox()
                         : RoomTransactionCard(
                           roomID: widget.roomID,
-                          data: data[index],
+                          data: data[2 * index + 1],
                           loggedInUser: _loggedInUser,
                         ),
               ),
