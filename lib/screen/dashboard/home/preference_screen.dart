@@ -6,6 +6,7 @@ import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/user/preference/preference_cubit.dart';
 import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/provider/preference_provider.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
@@ -45,7 +46,7 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-      _preferenceData = authState.preferenceData;
+      _preferenceData = context.read<PreferenceProvider>().pref;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         preferenceNotifier.value = _preferenceData;
@@ -217,7 +218,7 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
                       context.read<PreferenceCubit>().savePreferenceData(
                         preferenceNotifier.value,
                         _loggedInUser,
-                        ScaffoldMessenger.of(context),
+                        context,
                       );
                     },
                   ),

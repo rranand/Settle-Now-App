@@ -11,6 +11,7 @@ import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
 import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/provider/preference_provider.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/lenden_card.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
@@ -37,7 +38,6 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   final GlobalKey<FormState> _createRoomKey = GlobalKey<FormState>();
   final TextEditingController _createRoomController = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
-  PreferenceModel _preferenceData = PreferenceModel.empty();
 
   void _blocListenerHandler(BuildContext context, LendenDashboardState state) {
     if (state is LendenDashboardFailure) {
@@ -60,7 +60,6 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-      _preferenceData = authState.preferenceData;
 
       final state = context.read<LendenDashboardBloc>().state;
 
@@ -168,7 +167,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   List<LendenDashboardModel> filterDataByPreference(
     List<LendenDashboardModel> oldData,
   ) {
-    PreferenceSection pref = _preferenceData.lenden;
+    PreferenceSection pref = context.watch<PreferenceProvider>().lendenPref;
 
     if (pref.isSettled) {
       return oldData;

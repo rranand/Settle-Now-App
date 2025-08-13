@@ -9,6 +9,7 @@ import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/provider/preference_provider.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/card/quick_split_card.dart';
@@ -31,7 +32,6 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
-  PreferenceModel _preferenceData = PreferenceModel.empty();
 
   void _blocListenerHandler(BuildContext context, QuicksplitState state) {
     if (state is QuicksplitFailure) {
@@ -54,7 +54,6 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-      _preferenceData = authState.preferenceData;
 
       final state = context.read<QuicksplitBloc>().state;
 
@@ -83,7 +82,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   List<TransactionModel> filterDataByPreference(
     List<TransactionModel> oldData,
   ) {
-    PreferenceSection pref = _preferenceData.quicksplit;
+    PreferenceSection pref = context.watch<PreferenceProvider>().quicksplitPref;
 
     if (pref.isSettled) {
       return oldData;

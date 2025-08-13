@@ -57,7 +57,7 @@ import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repos
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
 import 'package:settlenow_v2/data/repository/update_info_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/provider/theme_provider.dart';
+import 'package:settlenow_v2/provider/preference_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
 import 'package:settlenow_v2/theme/themes.dart';
 import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
@@ -350,8 +350,8 @@ class MyApp extends StatelessWidget {
             ChangeNotifierProvider<ScreenSizeProvider>(
               create: (_) => ScreenSizeProvider(),
             ),
-            ChangeNotifierProvider<ThemeProvider>(
-              create: (_) => ThemeProvider(),
+            ChangeNotifierProvider<PreferenceProvider>(
+              create: (_) => PreferenceProvider(),
             ),
           ],
           builder: (context, _) {
@@ -361,13 +361,13 @@ class MyApp extends StatelessWidget {
               MediaQuery.of(context).orientation,
               MediaQuery.of(context).viewPadding,
             );
-            ThemeProvider themeProvider = context.watch<ThemeProvider>();
+            // PreferenceProvider preferenceProvider =
+            //     context.watch<PreferenceProvider>();
 
             return MaterialApp.router(
               routerConfig: AppRouterConfig.router,
               title: 'Settle Now',
-              themeMode:
-                  themeProvider.isDarkTheme ? ThemeMode.dark : ThemeMode.light,
+              themeMode: ThemeMode.light,
               theme: CustomTheme.lightTheme(context),
               darkTheme: CustomTheme.darkTheme(context),
               locale: Locale('en', 'IN'),

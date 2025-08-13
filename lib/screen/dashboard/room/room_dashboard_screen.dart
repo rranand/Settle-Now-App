@@ -14,6 +14,7 @@ import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow_v2/provider/preference_provider.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/room_card.dart';
 import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
@@ -47,7 +48,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   final ValueNotifier<bool> _isInActiveDataFetched = ValueNotifier(false);
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   UserModel _loggedInUser = UserModel.empty();
-  PreferenceModel _preferenceData = PreferenceModel.empty();
   late final StreamSubscription _createRoomListener;
   final ScrollController _gridViewScrollController = ScrollController();
 
@@ -96,7 +96,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
-      _preferenceData = authState.preferenceData;
 
       final state = context.read<RoomDashboardBloc>().state;
 
@@ -264,7 +263,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   }
 
   List<RoomInfoModel> filterDataByPreference(List<RoomInfoModel> oldData) {
-    PreferenceSection pref = _preferenceData.room;
+    PreferenceSection pref = context.watch<PreferenceProvider>().roomPref;
 
     if (pref.isSettled) {
       return oldData;
