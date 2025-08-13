@@ -69,37 +69,30 @@ class PreferenceModel {
 class PreferenceSection {
   bool hasData = true;
   bool isSettled = true;
-  bool isNotSettled = true;
 
-  PreferenceSection({required this.isSettled, required this.isNotSettled});
+  PreferenceSection({required this.isSettled});
 
   PreferenceSection.empty({this.hasData = false});
 
   factory PreferenceSection.fromJson(Map<String, dynamic> json) {
-    return PreferenceSection(
-      isSettled: json['isSettled'] ?? false,
-      isNotSettled: json['isNotSettled'] ?? false,
-    );
+    return PreferenceSection(isSettled: json['isSettled'] ?? false);
   }
 
   Map<String, dynamic> toJson() {
-    return {'isSettled': isSettled, 'isNotSettled': isNotSettled};
+    return {'isSettled': isSettled};
   }
 
   @override
   bool operator ==(covariant PreferenceSection other) {
     if (identical(this, other)) return true;
 
-    return other.isSettled == isSettled && other.isNotSettled == isNotSettled;
+    return other.isSettled == isSettled;
   }
 
   @override
-  int get hashCode => isSettled.hashCode ^ isNotSettled.hashCode;
+  int get hashCode => isSettled.hashCode;
 
   PreferenceSection copyWith({bool? isSettled, bool? isNotSettled}) {
-    return PreferenceSection(
-      isSettled: isSettled ?? this.isSettled,
-      isNotSettled: isNotSettled ?? this.isNotSettled,
-    );
+    return PreferenceSection(isSettled: isSettled ?? this.isSettled);
   }
 }

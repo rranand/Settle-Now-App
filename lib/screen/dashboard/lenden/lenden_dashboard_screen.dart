@@ -8,6 +8,7 @@ import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
+import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/lenden_card.dart';
@@ -35,6 +36,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   final GlobalKey<FormState> _createRoomKey = GlobalKey<FormState>();
   final TextEditingController _createRoomController = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
+  PreferenceModel _preferenceData = PreferenceModel.empty();
 
   void _blocListenerHandler(BuildContext context, LendenDashboardState state) {
     if (state is LendenDashboardFailure) {
@@ -57,6 +59,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+      _preferenceData = authState.preferenceData;
 
       final state = context.read<LendenDashboardBloc>().state;
 
@@ -161,6 +164,30 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     );
   }
 
+  List<LendenDashboardModel> filterDataByPreference(
+    List<LendenDashboardModel> oldData,
+  ) {
+    PreferenceSection pref = _preferenceData.lenden;
+
+    if (pref.isSettled) {
+      return oldData;
+    }
+
+    List<LendenDashboardModel> data = [];
+
+    for (int i = 0; i < oldData.length; i++) {
+      bool isSettledByYou =
+          oldData[i].users
+              .firstWhere((ele) => ele.id == _loggedInUser.id)
+              .isClosed;
+      if (pref.isSettled != isSettledByYou) {
+        continue;
+      }
+      data.add(oldData[i]);
+    }
+    return data;
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
@@ -215,7 +242,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                   builder: (context, state) {
                     List<LendenDashboardModel> lendenData = [];
                     if (state is LendenDashboardFetchSuccess) {
-                      lendenData = state.data;
+                      lendenData = filterDataByPreference(state.data);
                     } else if (state is LendenDashboardLoading) {
                       lendenData = List.generate(
                         11,

@@ -48,4 +48,9 @@ class LendenUserModel extends UserModel {
       isClosed: Crypto.decrypt(map['isClosed']) == "true",
     );
   }
+
+  @override
+  String toString() {
+    return 'LendenUserModel(name: $name, id: $id, isClosed: $isClosed)';
+  }
 }

@@ -74,27 +74,6 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
     }
   }
 
-  bool getUnSettledValue(int index) {
-    switch (index) {
-      case 0:
-        {
-          return preferenceNotifier.value.room.isNotSettled;
-        }
-      case 1:
-        {
-          return preferenceNotifier.value.quicksplit.isNotSettled;
-        }
-      case 2:
-        {
-          return preferenceNotifier.value.lenden.isNotSettled;
-        }
-      default:
-        {
-          return false;
-        }
-    }
-  }
-
   void setSettledValue(int index, bool value) {
     final pref = preferenceNotifier.value;
 
@@ -112,28 +91,6 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
       case 2:
         preferenceNotifier.value = pref.copyWith(
           lenden: pref.lenden.copyWith(isSettled: value),
-        );
-        break;
-    }
-  }
-
-  void setUnSettledValue(int index, bool value) {
-    final pref = preferenceNotifier.value;
-
-    switch (index) {
-      case 0:
-        preferenceNotifier.value = pref.copyWith(
-          room: pref.room.copyWith(isNotSettled: value),
-        );
-        break;
-      case 1:
-        preferenceNotifier.value = pref.copyWith(
-          quicksplit: pref.quicksplit.copyWith(isNotSettled: value),
-        );
-        break;
-      case 2:
-        preferenceNotifier.value = pref.copyWith(
-          lenden: pref.lenden.copyWith(isNotSettled: value),
         );
         break;
     }
@@ -158,13 +115,6 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
             value: getSettledValue(index),
             onChanged: (value) {
               setSettledValue(index, value);
-            },
-          ),
-          SwitchListTile(
-            title: const Text("Show Not Settled"),
-            value: getUnSettledValue(index),
-            onChanged: (value) {
-              setUnSettledValue(index, value);
             },
           ),
         ],
