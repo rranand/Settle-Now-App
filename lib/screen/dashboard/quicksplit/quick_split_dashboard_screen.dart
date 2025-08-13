@@ -5,6 +5,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
+import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -29,6 +30,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
+  PreferenceModel _preferenceData = PreferenceModel.empty();
 
   void _blocListenerHandler(BuildContext context, QuicksplitState state) {
     if (state is QuicksplitFailure) {
@@ -51,6 +53,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+      _preferenceData = authState.preferenceData;
 
       final state = context.read<QuicksplitBloc>().state;
 
@@ -76,6 +79,36 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
     );
   }
 
+  List<TransactionModel> filterDataByPreference(
+    List<TransactionModel> oldData,
+  ) {
+    PreferenceSection pref = _preferenceData.quicksplit;
+
+    if (pref.isSettled) {
+      return oldData;
+    }
+
+    List<TransactionModel> data = [];
+
+    for (int i = 0; i < oldData.length; i++) {
+      bool isSettledByYou = false;
+      if (oldData[i].createdBy.id == _loggedInUser.id) {
+        isSettledByYou = oldData[i].createdBy.isSettled;
+      } else {
+        isSettledByYou =
+            oldData[i].users
+                .firstWhere((ele) => ele.id == _loggedInUser.id)
+                .isSettled;
+      }
+
+      if (pref.isSettled != isSettledByYou) {
+        continue;
+      }
+      data.add(oldData[i]);
+    }
+    return data;
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
@@ -88,7 +121,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
           builder: (context, state) {
             List<TransactionModel> splitData = [];
             if (state is QuicksplitFetchSuccess) {
-              splitData = state.data;
+              splitData = filterDataByPreference(state.data);
             } else if (state is QuicksplitLoading) {
               splitData = List.generate(11, (i) => TransactionModel.empty());
             }
