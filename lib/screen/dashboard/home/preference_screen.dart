@@ -164,42 +164,45 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
                   prefernceOption.length,
                   (index) => _buildSection(index),
                 ),
-                Card(
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 4,
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 12,
-                  ),
-                  child: ListTile(
-                    title: const Text("Theme"),
-                    trailing: DropdownButton<String>(
-                      dropdownColor: Colors.white,
-                      value: preferenceNotifier.value.theme,
-                      items:
-                          themeOptions.map((theme) {
-                            return DropdownMenuItem(
-                              value: theme,
-                              child: Row(
-                                children: [
-                                  Icon(_themeIconHandler(theme)),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(capatilizeFirstLetter(theme)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          preferenceNotifier.value = preferenceNotifier.value
-                              .copyWith(theme: value);
-                        }
-                      },
+                Visibility(
+                  visible: false,
+                  child: Card(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    elevation: 4,
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 12,
+                    ),
+                    child: ListTile(
+                      title: const Text("Theme"),
+                      trailing: DropdownButton<String>(
+                        dropdownColor: Colors.white,
+                        value: preferenceNotifier.value.theme,
+                        items:
+                            themeOptions.map((theme) {
+                              return DropdownMenuItem(
+                                value: theme,
+                                child: Row(
+                                  children: [
+                                    Icon(_themeIconHandler(theme)),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(capatilizeFirstLetter(theme)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            preferenceNotifier.value = preferenceNotifier.value
+                                .copyWith(theme: value);
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),

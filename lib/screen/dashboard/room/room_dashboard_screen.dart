@@ -10,7 +10,9 @@ import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/room/create_join_room/create_join_room_cubit.dart';
+import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/room_info_model.dart';
+import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/card/room_card.dart';
@@ -45,6 +47,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   final ValueNotifier<bool> _isInActiveDataFetched = ValueNotifier(false);
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   UserModel _loggedInUser = UserModel.empty();
+  PreferenceModel _preferenceData = PreferenceModel.empty();
   late final StreamSubscription _createRoomListener;
   final ScrollController _gridViewScrollController = ScrollController();
 
@@ -93,6 +96,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+      _preferenceData = authState.preferenceData;
 
       final state = context.read<RoomDashboardBloc>().state;
 
@@ -259,6 +263,33 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     );
   }
 
+  List<RoomInfoModel> filterDataByPreference(List<RoomInfoModel> oldData) {
+    PreferenceSection pref = _preferenceData.room;
+
+    if (pref.isSettled) {
+      return oldData;
+    }
+
+    List<RoomInfoModel> data = [];
+
+    for (int i = 0; i < oldData.length; i++) {
+      bool isSettledByYou =
+          !oldData[i].users
+              .firstWhere(
+                (ele) => ele.user.id == _loggedInUser.id,
+                orElse: () => RoomUserModel.empty(),
+              )
+              .active;
+
+      if (pref.isSettled != isSettledByYou) {
+        continue;
+      }
+      data.add(oldData[i]);
+    }
+
+    return data;
+  }
+
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
@@ -336,7 +367,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                       if (state is RoomDashboardFetchSuccess) {
                         roomInfoData =
                             _navBarIndex.value == 0
-                                ? state.activeData
+                                ? filterDataByPreference(state.activeData)
                                 : state.inactiveData;
                       } else if (state is RoomDashboardLoading) {
                         roomInfoData = List.generate(

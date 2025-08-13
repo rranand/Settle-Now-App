@@ -80,6 +80,11 @@ class LendenCard extends StatelessWidget {
                     "Updated On ${convertDateTimeFormat(data.modifiedOn)}",
                     isLoaded: data.hasData,
                   ),
+                  const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+                  dateOnCard(
+                    "Created By ${data.createdBy.name.split(' ').first}",
+                    isLoaded: data.hasData,
+                  ),
                   const SizedBox(height: UiConstant.cardSpaceAfterSubText),
                   data.hasData
                       ? Text(

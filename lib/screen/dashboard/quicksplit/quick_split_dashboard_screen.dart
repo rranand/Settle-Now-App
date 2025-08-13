@@ -7,6 +7,7 @@ import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
+import 'package:settlenow_v2/model/user_amount_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -97,7 +98,10 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       } else {
         isSettledByYou =
             oldData[i].users
-                .firstWhere((ele) => ele.id == _loggedInUser.id)
+                .firstWhere(
+                  (ele) => ele.id == _loggedInUser.id,
+                  orElse: () => UserAmountModel.empty(),
+                )
                 .isSettled;
       }
 

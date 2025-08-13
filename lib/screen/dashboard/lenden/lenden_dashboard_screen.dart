@@ -8,6 +8,7 @@ import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/lenden/create_room/create_room_cubit.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
+import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
@@ -178,7 +179,10 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     for (int i = 0; i < oldData.length; i++) {
       bool isSettledByYou =
           oldData[i].users
-              .firstWhere((ele) => ele.id == _loggedInUser.id)
+              .firstWhere(
+                (ele) => ele.id == _loggedInUser.id,
+                orElse: () => LendenUserModel.empty(),
+              )
               .isClosed;
       if (pref.isSettled != isSettledByYou) {
         continue;
@@ -193,6 +197,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     final cardSizeInfo = calculateCrossAspectRatio(
       MediaQuery.of(context).size.width,
       _mainScreenPadding,
+      cardHeight: UiConstant.cardFixedHeight + 10,
     );
 
     return Scaffold(

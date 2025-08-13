@@ -71,7 +71,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           child: const SizedBox(height: UiConstant.cardSpaceAfterSubText),
         ),
         subTextOnCard(
-          "Created By ${widget.data.createdBy.id == _loggedInUser.id ? "You" : widget.data.createdBy.name}",
+          "Created By ${widget.data.createdBy.id == _loggedInUser.id ? "You" : widget.data.createdBy.name.split(' ').first}",
           isLoaded: widget.data.hasData,
         ),
         subTextOnCard(
