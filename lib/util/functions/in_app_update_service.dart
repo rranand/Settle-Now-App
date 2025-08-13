@@ -10,9 +10,7 @@ class InAppUpdateService {
 
         if (updateInfo.updateAvailability ==
             UpdateAvailability.updateAvailable) {
-          if (updateInfo.immediateUpdateAllowed) {
-            await InAppUpdate.performImmediateUpdate();
-          } else if (updateInfo.flexibleUpdateAllowed) {
+          if (updateInfo.flexibleUpdateAllowed) {
             await InAppUpdate.startFlexibleUpdate();
             await InAppUpdate.completeFlexibleUpdate();
           }
