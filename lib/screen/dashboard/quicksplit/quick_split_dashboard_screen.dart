@@ -200,9 +200,9 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                             return SliverList.builder(
                               itemCount: noOfCardsToBeShown,
                               itemBuilder: (BuildContext context, int index) {
-                                TransactionModel eachSplitData =
-                                    filterData[2 * index];
                                 if (isWide) {
+                                  TransactionModel eachSplitData =
+                                      filterData[2 * index];
                                   return Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -225,7 +225,9 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                                     ],
                                   );
                                 } else {
-                                  return QuickSplitCard(data: eachSplitData);
+                                  return QuickSplitCard(
+                                    data: filterData[index],
+                                  );
                                 }
                               },
                             );

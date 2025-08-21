@@ -175,9 +175,9 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       return SliverList.builder(
                         itemCount: noOfCardsToBeShown,
                         itemBuilder: (context, index) {
-                          NotificationModel eachNotificationData =
-                              filterData[2 * index];
                           if (isWide) {
+                            NotificationModel eachNotificationData =
+                                filterData[2 * index];
                             return Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -203,7 +203,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             );
                           } else {
                             return NotificationCard(
-                              data: eachNotificationData,
+                              data: filterData[index],
                               loggedInUserID: _loggedInUser.id,
                               authToken: _loggedInUser.authToken,
                             );
