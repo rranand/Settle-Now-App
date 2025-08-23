@@ -95,7 +95,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             context.push(RouterConstants.notificationPage);
           }
         } else if (state is AuthSignUpSuccess) {
-          if (_isOTPSent.value == false) {
+          if (_isOTPSent.value == false && state.isSuccess) {
             _isOTPSent.value = true;
           }
         }
@@ -260,7 +260,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                       child: Padding(
                                         padding: EdgeInsets.only(top: 8.0),
                                         child:
-                                            state is AuthSignUpSuccess
+                                            (state is AuthSignUpSuccess &&
+                                                    state.isSuccess)
                                                 ? TimerButton(
                                                   onPressed:
                                                       () => _resendOTP(
@@ -291,7 +292,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               value ? "Sign Up" : "Send OTP",
                               onPressed:
                                   () => _handleSignUpSubmit(
-                                    state is AuthSignUpSuccess
+                                    (state is AuthSignUpSuccess &&
+                                            state.isSuccess)
                                         ? state.token
                                         : "",
                                   ),

@@ -87,7 +87,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     try {
       String signupToken = await repo.signUpUser(event.name, event.email);
-      return emit(AuthSignUpSuccess(token: signupToken));
+      return emit(AuthSignUpSuccess(token: signupToken, isSuccess: true));
     } catch (e) {
       return emit(AuthSignUpFailure(e.toString()));
     }
@@ -130,10 +130,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthOTPSendLoading());
     try {
       await repo.sendOTP(event.email);
-      return emit(AuthOTPSendSuccess());
+      return emit(AuthOTPSendSuccess(true));
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
-      return emit(AuthOTPSendSuccess());
+      return emit(AuthOTPSendSuccess(false));
     }
   }
 
@@ -144,11 +144,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthOTPSendLoading());
     try {
       await repo.sendSignupOTP(event.token);
-      emit(AuthOTPSendSuccess());
-      return emit(AuthSignUpSuccess(token: event.token));
+      emit(AuthOTPSendSuccess(true));
+      return emit(AuthSignUpSuccess(token: event.token, isSuccess: true));
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
-      return emit(AuthSignUpSuccess(token: event.token));
+      return emit(AuthSignUpSuccess(token: event.token, isSuccess: false));
     }
   }
 
@@ -165,7 +165,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
-      return emit(AuthSignUpSuccess(token: event.token));
+      return emit(AuthSignUpSuccess(token: event.token, isSuccess: false));
     }
   }
 

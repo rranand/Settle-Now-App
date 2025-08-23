@@ -88,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else if (state is AuthLoginFailure) {
       showNormalSnackBar(context, state.error);
     } else if (state is AuthOTPSendSuccess) {
-      if (_isOTPSent.value == false) {
+      if (_isOTPSent.value == false && state.isSuccess) {
         _isOTPSent.value = true;
       }
     }
@@ -241,7 +241,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                       child: Padding(
                                         padding: EdgeInsets.only(top: 8.0),
                                         child:
-                                            state is AuthOTPSendSuccess
+                                            (state is AuthOTPSendSuccess &&
+                                                    state.isSuccess)
                                                 ? TimerButton(
                                                   onPressed: _resendOTP,
                                                   timerDuration: 5,

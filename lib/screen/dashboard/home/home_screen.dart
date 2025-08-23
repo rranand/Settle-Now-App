@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   UserModel _loggedInUser = UserModel.empty();
   int _selectedIndex = 0;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
-  String appVersion = "";
+  final ValueNotifier<String> appVersion = ValueNotifier("");
   final ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
   String shareMessage = "";
 
@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
       isNotificationAllowed.value =
           await AwesomeNotifications().isNotificationAllowed();
     }
-    appVersion = await getAppVersion();
+    appVersion.value = await getAppVersion();
   }
 
   String getShareMessage() {
@@ -129,10 +129,15 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            "Version $appVersion",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.white),
+          ValueListenableBuilder(
+            valueListenable: appVersion,
+            builder: (context, _, _) {
+              return Text(
+                "Version ${appVersion.value}",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12, color: Colors.white),
+              );
+            },
           ),
           InkWell(
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
