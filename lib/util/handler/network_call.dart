@@ -42,7 +42,6 @@ Future<Response> createAPICall(
     Map<String, String> headersMap = <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': token,
-      'Access-Control-Allow-Origin': host,
     };
 
     Response res = await (methodName.contains("get")
