@@ -3,7 +3,7 @@ description: "A Finance Management App"
 
 publish_to: 'none'
 
-version: 2.0.1+203
+version: 2.0.1+204
 
 environment:
   sdk: ^3.7.2

@@ -5,17 +5,17 @@ import 'package:flutter/foundation.dart';
 import 'package:settlenow_v2/constant/remote_config_constant.dart';
 
 class FirebaseRemote extends ChangeNotifier {
-  final FirebaseRemoteConfig _remoteConfig;
-  Timer? _refreshTimer;
+  static final FirebaseRemoteConfig _remoteConfig =
+      FirebaseRemoteConfig.instance;
+  late final StreamSubscription<RemoteConfigUpdate> _updateSubscription;
 
-  FirebaseRemote._internal(this._remoteConfig) {
-    _startPeriodicRefresh();
-  }
+  FirebaseRemote();
 
-  static Future<FirebaseRemote> create() async {
-    final remoteConfig = FirebaseRemoteConfig.instance;
-
-    await remoteConfig.setConfigSettings(
+  Future<void> init() async {
+    if (kIsWeb) {
+      return;
+    }
+    await _remoteConfig.setConfigSettings(
       RemoteConfigSettings(
         fetchTimeout: const Duration(seconds: 10),
         minimumFetchInterval:
@@ -23,16 +23,16 @@ class FirebaseRemote extends ChangeNotifier {
       ),
     );
 
-    await remoteConfig.setDefaults({
+    await _remoteConfig.setDefaults({
       RemoteConfigConstant.shareMessageConstant:
           RemoteConfigValueConstant.shareMessageValueConstant,
       RemoteConfigConstant.versionInfoConstant:
           RemoteConfigValueConstant.versionInfoValueConstant,
     });
 
-    await remoteConfig.fetchAndActivate();
+    await _remoteConfig.fetchAndActivate();
 
-    return FirebaseRemote._internal(remoteConfig);
+    _listenForUpdates();
   }
 
   Future<void> refresh() async {
@@ -42,16 +42,20 @@ class FirebaseRemote extends ChangeNotifier {
     }
   }
 
-  void _startPeriodicRefresh() {
-    _refreshTimer?.cancel();
-    _refreshTimer = Timer.periodic(const Duration(minutes: 20), (_) async {
-      await refresh();
+  void _listenForUpdates() {
+    _updateSubscription = _remoteConfig.onConfigUpdated.listen((
+      RemoteConfigUpdate event,
+    ) async {
+      await _remoteConfig.activate();
+      notifyListeners();
     });
   }
 
   @override
   void dispose() {
-    _refreshTimer?.cancel();
+    if (!kIsWeb) {
+      _updateSubscription.cancel();
+    }
     super.dispose();
   }
 
@@ -65,6 +69,7 @@ class FirebaseRemote extends ChangeNotifier {
 
   Map<String, dynamic> getJSON(String key) {
     String jsonString = _remoteConfig.getString(key);
+
     if (jsonString.isEmpty || jsonString == "null") return {};
     try {
       return jsonDecode(jsonString);

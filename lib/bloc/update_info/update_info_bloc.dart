@@ -17,7 +17,7 @@ class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
     UpdateInfoFetchRequested event,
     Emitter<UpdateInfoState> emit,
   ) async {
-    if (state is UpdateInfoSuccess || state is UpdateInfoLoading) {
+    if (state is UpdateInfoLoading) {
       return;
     }
     emit(UpdateInfoLoading());
@@ -26,8 +26,10 @@ class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
       final versionInfoFromRemote = event.remoteConfigService.getJSON(
         RemoteConfigConstant.versionInfoConstant,
       );
+
       final UpdateInfoModel updateInfo = UpdateInfoModel.fromMap(
-        versionInfoFromRemote, version
+        versionInfoFromRemote,
+        version,
       );
       return emit(UpdateInfoSuccess(data: updateInfo));
     } catch (e) {

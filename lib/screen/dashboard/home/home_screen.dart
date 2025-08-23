@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/bloc/update_info/update_info_bloc.dart';
 import 'package:settlenow_v2/constant/remote_config_constant.dart';
 import 'package:settlenow_v2/firebase/firebase_remote.dart';
 import 'package:settlenow_v2/notification/notification_interface_handler.dart';
@@ -48,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final ValueNotifier<String> appVersion = ValueNotifier("");
   final ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
-  String shareMessage = "";
 
   @override
   void didChangeDependencies() {
@@ -70,15 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   String getShareMessage() {
-    if (shareMessage.isEmpty) {
-      final shareDataMap = context.read<FirebaseRemote>().getJSON(
-        RemoteConfigConstant.shareMessageConstant,
-      );
-      shareMessage =
-          "${shareDataMap['title']}\n\n${shareDataMap['subject']}\n\n${shareDataMap['playstore']}";
-    }
-
-    return shareMessage;
+    final shareDataMap = context.read<FirebaseRemote>().getJSON(
+      RemoteConfigConstant.shareMessageConstant,
+    );
+    return "${shareDataMap['title']}\n\n${shareDataMap['subject']}\n\n${shareDataMap['playstore']}";
   }
 
   @override
@@ -225,7 +220,8 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (BuildContext context, _, _) {
                 if (kIsWeb &&
                     (drawerTitle[index] == "Get Notified" ||
-                        drawerTitle[index] == "Rate Us")) {
+                        drawerTitle[index] == "Rate Us" ||
+                        drawerTitle[index] == "Share")) {
                   return SizedBox.shrink();
                 }
                 if (drawerTitle[index] == "Get Notified" &&
@@ -389,37 +385,44 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthLogoutFailure) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            showNormalSnackBar(context, state.error);
-          });
-        } else if (state is AuthInitial) {
-          resetAllBlocs(context);
-          while (context.canPop()) {
-            context.pop();
-          }
-          context.pushReplacement(RouterConstants.loginRouteName);
-        }
-      },
-      builder: (context, state) {
-        if (state is AuthLoginFailure) {
-          return ErrorPage();
-        } else if (state is AuthLogoutLoading) {
-          return Scaffold(
-            appBar: AppBar(backgroundColor: Colors.transparent),
-            body: LoadingPage(),
-          );
-        } else {
-          return Scaffold(
-            key: _homeScreenkey,
-            appBar: _bottomNavigatorAppBarHandler(_selectedIndex),
-            body: _bottomNavigatorBodyHandler(_selectedIndex),
-            bottomNavigationBar: _bottomNavigationBarWidget(),
-            drawer: _drawerWidget(),
-          );
-        }
+    return Consumer<FirebaseRemote>(
+      builder: (context, firebaseRemote, _) {
+        context.read<UpdateInfoBloc>().add(
+          UpdateInfoFetchRequested(firebaseRemote),
+        );
+        return BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthLogoutFailure) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showNormalSnackBar(context, state.error);
+              });
+            } else if (state is AuthInitial) {
+              resetAllBlocs(context);
+              while (context.canPop()) {
+                context.pop();
+              }
+              context.pushReplacement(RouterConstants.loginRouteName);
+            }
+          },
+          builder: (context, state) {
+            if (state is AuthLoginFailure) {
+              return ErrorPage();
+            } else if (state is AuthLogoutLoading) {
+              return Scaffold(
+                appBar: AppBar(backgroundColor: Colors.transparent),
+                body: LoadingPage(),
+              );
+            } else {
+              return Scaffold(
+                key: _homeScreenkey,
+                appBar: _bottomNavigatorAppBarHandler(_selectedIndex),
+                body: _bottomNavigatorBodyHandler(_selectedIndex),
+                bottomNavigationBar: _bottomNavigationBarWidget(),
+                drawer: _drawerWidget(),
+              );
+            }
+          },
+        );
       },
     );
   }

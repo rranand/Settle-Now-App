@@ -95,7 +95,8 @@ Future<void> main() async {
 
   await initializeFirebaseApp();
 
-  final remoteConfigService = await FirebaseRemote.create();
+  final remoteConfigService = FirebaseRemote();
+  await remoteConfigService.init();
 
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
@@ -122,15 +123,7 @@ Future<void> main() async {
 
   AppRouterConfig.initializeRouter(authBloc);
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => remoteConfigService,
-      child: MyApp(
-        authBloc: authBloc,
-        remoteConfigService: remoteConfigService,
-      ),
-    ),
-  );
+  runApp(MyApp(authBloc: authBloc, remoteConfigService: remoteConfigService));
 }
 
 class MyApp extends StatelessWidget {
@@ -366,6 +359,9 @@ class MyApp extends StatelessWidget {
             ),
             ChangeNotifierProvider<PreferenceProvider>(
               create: (_) => PreferenceProvider(),
+            ),
+            ChangeNotifierProvider<FirebaseRemote>(
+              create: (_) => FirebaseRemote(),
             ),
           ],
           builder: (context, _) {
