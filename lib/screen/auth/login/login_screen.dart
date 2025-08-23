@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     populateData();
-    InAppUpdateService.checkForUpdate();
+    InAppUpdateService.checkForUpdate(context);
   }
 
   @override

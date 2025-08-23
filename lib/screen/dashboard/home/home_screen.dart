@@ -85,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     populateData();
-    InAppUpdateService.checkForUpdate();
+    InAppUpdateService.checkForUpdate(context);
 
     NotificationInterfaceHandler.fcmConfiguration(context);
     NotificationInterfaceHandler.initateListeners(context);

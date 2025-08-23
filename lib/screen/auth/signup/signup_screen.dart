@@ -124,7 +124,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   void initState() {
     super.initState();
     populateData();
-    InAppUpdateService.checkForUpdate();
+    InAppUpdateService.checkForUpdate(context);
   }
 
   @override
