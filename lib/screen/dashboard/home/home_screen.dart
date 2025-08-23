@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow_v2/Notification/notification_interface_handler.dart';
+import 'package:settlenow_v2/constant/remote_config_constant.dart';
+import 'package:settlenow_v2/firebase/firebase_remote.dart';
+import 'package:settlenow_v2/notification/notification_interface_handler.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
 import 'package:settlenow_v2/constant/home_ui_constant.dart';
@@ -46,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   String appVersion = "";
   final ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
+  String shareMessage = "";
 
   @override
   void didChangeDependencies() {
@@ -64,6 +67,18 @@ class _HomeScreenState extends State<HomeScreen> {
           await AwesomeNotifications().isNotificationAllowed();
     }
     appVersion = await getAppVersion();
+  }
+
+  String getShareMessage() {
+    if (shareMessage.isEmpty) {
+      final shareDataMap = context.read<FirebaseRemote>().getJSON(
+        RemoteConfigConstant.shareMessageConstant,
+      );
+      shareMessage =
+          "${shareDataMap['title']}\n\n${shareDataMap['subject']}\n\n${shareDataMap['playstore']}";
+    }
+
+    return shareMessage;
   }
 
   @override
@@ -160,12 +175,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       case "Share":
         {
-          SharePlus.instance.share(
-            ShareParams(
-              text:
-                  "Settle Now\n\nSettle Now helps to split daily bills within your friends, roommates, flatmates, etc, and eliminate the stressing about 'who owes who.'\n\nhttps://play.google.com/store/apps/details?id=com.rohit.settlenow",
-            ),
-          );
+          SharePlus.instance.share(ShareParams(text: getShareMessage()));
           break;
         }
       case "Rate Us":

@@ -28,9 +28,11 @@ class AuthGate extends StatelessWidget {
           },
           builder: (context, state) {
             if (state is AuthLoginSuccess) {
-              context.read<PreferenceProvider>().updatePref(
-                state.preferenceData,
-              );
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.read<PreferenceProvider>().updatePref(
+                  state.preferenceData,
+                );
+              });
               return child;
             }
             return Scaffold(

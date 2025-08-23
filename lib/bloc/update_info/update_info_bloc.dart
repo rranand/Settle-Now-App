@@ -1,15 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/data/repository/update_info_repository.dart';
+import 'package:settlenow_v2/constant/remote_config_constant.dart';
+import 'package:settlenow_v2/firebase/firebase_remote.dart';
 import 'package:settlenow_v2/model/update_info_model.dart';
+import 'package:settlenow_v2/util/handler/platform_service.dart';
 
 part 'update_info_event.dart';
 part 'update_info_state.dart';
 
 class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
-  final UpdateInfoRepository repo;
-
-  UpdateInfoBloc(this.repo) : super(UpdateInfoInitial()) {
+  UpdateInfoBloc() : super(UpdateInfoInitial()) {
     on<UpdateInfoFetchRequested>(_updateInfoFetchRequested);
   }
 
@@ -22,7 +22,13 @@ class UpdateInfoBloc extends Bloc<UpdateInfoEvent, UpdateInfoState> {
     }
     emit(UpdateInfoLoading());
     try {
-      UpdateInfoModel updateInfo = await repo.fetchUpdateInfo();
+      final String version = await getAppVersion();
+      final versionInfoFromRemote = event.remoteConfigService.getJSON(
+        RemoteConfigConstant.versionInfoConstant,
+      );
+      final UpdateInfoModel updateInfo = UpdateInfoModel.fromMap(
+        versionInfoFromRemote, version
+      );
       return emit(UpdateInfoSuccess(data: updateInfo));
     } catch (e) {
       return emit(UpdateInfoFailure(e.toString()));

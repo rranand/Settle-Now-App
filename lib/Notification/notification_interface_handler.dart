@@ -3,7 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow_v2/Notification/notification_controller.dart';
+import 'package:settlenow_v2/notification/notification_controller.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 
 class NotificationInterfaceHandler {

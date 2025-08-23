@@ -2,7 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow_v2/Notification/notification_interface_handler.dart';
+import 'package:settlenow_v2/notification/notification_interface_handler.dart';
 import 'package:settlenow_v2/data/repository/notification_repository.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/handler/local_storage_preference.dart';

@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow_v2/Notification/notification_interface_handler.dart';
+import 'package:settlenow_v2/firebase/firebase_remote.dart';
+import 'package:settlenow_v2/notification/notification_interface_handler.dart';
 import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
@@ -45,7 +47,6 @@ import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense
 import 'package:settlenow_v2/data/data_provider/quicksplit_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
 import 'package:settlenow_v2/data/data_provider/room/each_room/room_data_provider.dart';
-import 'package:settlenow_v2/data/data_provider/update_info/update_info_data_provider.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
@@ -55,7 +56,6 @@ import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/pe
 import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
 import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow_v2/data/repository/update_info_repository.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/provider/preference_provider.dart';
 import 'package:settlenow_v2/router/router_config.dart';
@@ -95,9 +95,20 @@ Future<void> main() async {
 
   await initializeFirebaseApp();
 
+  final remoteConfigService = await FirebaseRemote.create();
+
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    await NotificationInterfaceHandler.initializeChannels();
     await GoogleOauth.ensureGoogleSignInInitialized();
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
@@ -106,33 +117,36 @@ Future<void> main() async {
       ),
     );
   }
-
   final AuthRepository authRepository = AuthRepository(AuthDataProvider());
   final AuthBloc authBloc = AuthBloc(authRepository);
 
   AppRouterConfig.initializeRouter(authBloc);
-  if (kIsWeb) {
-    runApp(MyApp(authBloc: authBloc));
-  } else {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await NotificationInterfaceHandler.initializeChannels();
 
-    runApp(MyApp(authBloc: authBloc));
-  }
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => remoteConfigService,
+      child: MyApp(
+        authBloc: authBloc,
+        remoteConfigService: remoteConfigService,
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final AuthBloc authBloc;
+  final FirebaseRemote remoteConfigService;
 
-  const MyApp({super.key, required this.authBloc});
+  const MyApp({
+    super.key,
+    required this.authBloc,
+    required this.remoteConfigService,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<UpdateInfoRepository>(
-          create: (context) => UpdateInfoRepository(UpdateInfoDataProvider()),
-        ),
         RepositoryProvider<AuthRepository>(
           create: (context) => AuthRepository(AuthDataProvider()),
         ),
@@ -176,8 +190,8 @@ class MyApp extends StatelessWidget {
           BlocProvider<UpdateInfoBloc>(
             create:
                 (context) =>
-                    UpdateInfoBloc(context.read<UpdateInfoRepository>())
-                      ..add(UpdateInfoFetchRequested()),
+                    UpdateInfoBloc()
+                      ..add(UpdateInfoFetchRequested(remoteConfigService)),
           ),
           BlocProvider<AuthBloc>(
             create:
@@ -375,6 +389,7 @@ class MyApp extends StatelessWidget {
               localizationsDelegates: [
                 GlobalMaterialLocalizations.delegate,
                 GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
               ],
             );
           },
