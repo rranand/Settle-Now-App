@@ -21,34 +21,38 @@ class NavBarCard extends StatelessWidget {
       onTap: () {
         selectedIndex.value = index;
       },
-      child: Stack(
-        children: [
-          Center(
-            child: Text(
-              _textWithPaddingSpace(headerTitle[index]),
-              maxLines: 1,
-              style: TextStyle(
-                fontSize: 18,
-                color:
-                    selectedIndex.value == index
-                        ? Colors.deepPurple
-                        : Colors.black,
+      child: Builder(
+        builder: (context) {
+          return Stack(
+            children: [
+              Center(
+                child: Text(
+                  _textWithPaddingSpace(headerTitle[index]),
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color:
+                        selectedIndex.value == index
+                            ? Theme.of(context).primaryColor
+                            : Theme.of(context).textTheme.bodyLarge!.color,
+                  ),
+                ),
               ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              height: 2,
-              color:
-                  selectedIndex.value == index
-                      ? Colors.deepPurple
-                      : Colors.transparent,
-            ),
-          ),
-        ],
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  height: 2,
+                  color:
+                      selectedIndex.value == index
+                          ? Theme.of(context).primaryColor
+                          : Colors.transparent,
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

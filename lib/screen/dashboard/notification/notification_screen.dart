@@ -98,8 +98,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   sliver: SliverAppBar(
                     automaticallyImplyLeading: false,
                     pinned: value,
-                    backgroundColor: Colors.white,
-                    surfaceTintColor: Colors.white,
                     title: CustomFormField.searchBar(
                       "Search",
                       widget.isSearchEnabled,

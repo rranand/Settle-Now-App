@@ -1,15 +1,17 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:settlenow_v2/model/preference_model.dart';
 
 class PreferenceProvider extends ChangeNotifier {
   PreferenceModel _preferenceData = PreferenceModel.empty();
 
-  bool isDarkTheme(BuildContext context) {
-    if (_preferenceData.theme == "system") {
-      return MediaQuery.of(context).platformBrightness == Brightness.dark;
-    } else {
-      return _preferenceData.theme == "dark";
+  ThemeMode get getTheme {
+    switch (_preferenceData.theme) {
+      case "dark":
+        return ThemeMode.dark;
+      case "light":
+        return ThemeMode.light;
+      default:
+        return ThemeMode.system;
     }
   }
 

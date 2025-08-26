@@ -115,7 +115,10 @@ class _GetNotifiedState extends State<GetNotified> {
                   },
                   child: Text(
                     "Give Permission",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
                   ),
                 ),
               ),
@@ -135,7 +138,13 @@ class _GetNotifiedState extends State<GetNotified> {
                   onPressed: () async {
                     context.pop(false);
                   },
-                  child: Text("Cancel", style: TextStyle(fontSize: 16)),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                  ),
                 ),
               ),
             ),

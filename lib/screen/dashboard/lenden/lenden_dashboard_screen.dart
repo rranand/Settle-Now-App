@@ -96,7 +96,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       builder: (context) {
         final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return Padding(
@@ -129,7 +129,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                     validator: CustomValidator.validateRoomName,
                     inputDecoration:
                         TextFormFieldInputBorder.outlineInputBorder,
-                    borderColor: Colors.black12,
+                    borderColor: GradientColorConstant.coolIndigoToBlue.last,
                   ),
                 ),
               ),
@@ -226,8 +226,6 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                       sliver: SliverAppBar(
                         automaticallyImplyLeading: false,
                         pinned: value,
-                        backgroundColor: Colors.white,
-                        surfaceTintColor: Colors.white,
                         title: CustomFormField.searchBar(
                           "Search",
                           widget.isSearchEnabled,

@@ -3,6 +3,7 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 void showSnackbar(
   BuildContext context,
@@ -10,15 +11,20 @@ void showSnackbar(
   Icon? icon,
   ScaffoldMessengerState? scaffoldMessenger,
 }) {
-  icon ??= Icon(Iconsax.tick_circle_copy, color: Colors.green);
   final snackBar = SnackBar(
     content: Row(
       children: [
-        Padding(padding: const EdgeInsets.only(right: 18.0), child: icon),
+        Padding(
+          padding: const EdgeInsets.only(right: 18.0),
+          child: icon ?? snackbarSuccessIcon(),
+        ),
         Text(
           txt,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyLarge!.color,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ],
     ),

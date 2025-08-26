@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/lenden/room/lenden_room_repository.dart';
 import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
@@ -9,6 +8,7 @@ import 'package:settlenow_v2/model/lenden_user_model.dart';
 import 'package:settlenow_v2/util/custom/pair.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 part 'lenden_room_event.dart';
 part 'lenden_room_state.dart';
@@ -174,7 +174,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
-        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
+        child: snackbarSuccessIcon(),
         scaffoldMessenger: event.scaffoldMessengerState,
       );
       return emit(
@@ -214,7 +214,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         event.isRemoving ? "You’ve left the room" : "Room deleted successfully",
-        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
+        child: snackbarSuccessIcon(),
         scaffoldMessenger: event.scaffoldMessengerState,
       );
       return emit(LendenRoomInitial());

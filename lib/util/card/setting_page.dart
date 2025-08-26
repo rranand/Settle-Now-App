@@ -258,7 +258,7 @@ class _SettingPageState extends State<SettingPage> {
               if (context.mounted && mounted) {
                 showSnackbarWithChildWidget(
                   "Room Key Copied",
-                  child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
+                  child: snackbarSuccessIcon(),
                   duration: Duration(seconds: 1),
                   scaffoldMessenger: ScaffoldMessenger.of(context),
                 );

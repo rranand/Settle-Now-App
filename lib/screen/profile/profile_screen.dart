@@ -128,8 +128,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             Card(
-              elevation: UiConstant.cardElevation,
-              color: Colors.white,
               child: Padding(
                 padding: _cardPadding,
                 child: Row(
@@ -189,8 +187,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SizedBox(height: UiConstant.spaceBetweenSection),
             _loggedInUser.hasData
                 ? Card(
-                  elevation: UiConstant.cardElevation,
-                  color: Colors.white,
                   child: Padding(
                     padding: _cardPadding,
                     child: Column(
@@ -237,8 +233,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
             SizedBox(height: UiConstant.spaceBetweenSection),
             Card(
-              elevation: UiConstant.cardElevation,
-              color: Colors.white,
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 14.0, horizontal: 14),
                 child: Center(

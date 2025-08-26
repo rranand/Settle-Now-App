@@ -146,7 +146,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   CustomButton.customTextButton(
                     "Login",
                     onPressed: _handleOnLogin,
-                    buttonTextColor: Colors.black,
+                    buttonTextColor:
+                        Theme.of(context).textTheme.bodyLarge!.color,
                   ),
                   SizedBox(width: _mainScreenPadding.left),
                 ]),
@@ -174,7 +175,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               'assets/sn/SN_WBG.png',
                               height: 150,
                               width: 150,
-                              color: Colors.black87,
                             ),
                           ),
                           SizedBox(height: UiConstant.spaceBetweenSection),
@@ -188,7 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           SizedBox(height: UiConstant.spaceBetweenSection),
                           const Text(
                             'Sign Up to contiue',
-                            style: TextStyle(fontWeight: FontWeight.w900),
+                            style: TextStyle(fontWeight: FontWeight.w700),
                           ),
                           SizedBox(height: 2 * UiConstant.spaceBetweenSection),
                           Form(
@@ -207,7 +207,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                         validator: CustomValidator.validateName,
                                         inputDecoration:
                                             TextFormFieldInputBorder.underLine,
-                                        borderColor: Colors.black87,
+                                        borderColor:
+                                            Theme.of(context)
+                                                .inputDecorationTheme
+                                                .enabledBorder!
+                                                .borderSide
+                                                .color,
                                       ),
                                       SizedBox(
                                         height: UiConstant.spaceBetweenSection,
@@ -226,7 +231,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                             CustomValidator.validateEmail,
                                         inputDecoration:
                                             TextFormFieldInputBorder.underLine,
-                                        borderColor: Colors.black87,
+                                        borderColor:
+                                            Theme.of(context)
+                                                .inputDecorationTheme
+                                                .enabledBorder!
+                                                .borderSide
+                                                .color,
                                       ),
                                     ],
                                   ),
@@ -263,7 +273,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                           inputDecoration:
                                               TextFormFieldInputBorder
                                                   .underLine,
-                                          borderColor: Colors.black87,
+                                          borderColor:
+                                              Theme.of(context)
+                                                  .inputDecorationTheme
+                                                  .enabledBorder!
+                                                  .borderSide
+                                                  .color,
                                           maxLength: 6,
                                         ),
                                         Align(
@@ -312,8 +327,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   buttonHeight: 50,
                                   buttonWidth: 155,
                                   borderRadius: 100,
-                                  borderColor: Colors.black87,
-                                  backgroundColor: Colors.black87,
                                 ),
                               );
                             },
@@ -323,7 +336,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               height: 2 * UiConstant.spaceBetweenSection,
                             ),
                             const Center(
-                              child: Text('Or sign up with social account'),
+                              child: Text('Or Sign up with social account'),
                             ),
                             SizedBox(
                               height: 2 * UiConstant.spaceBetweenSection,
@@ -357,6 +370,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     text: 'By signing up, You agree to the ',
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
                     children: [
                       TextSpan(
                         text: 'Terms of Use',

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/user/user_update_profile/user_update_profile_cubit.dart';
@@ -42,11 +41,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       showNormalSnackBar(context, state.error!);
     }
     if (state.isUpdated == true) {
-      showSnackbar(
-        context,
-        "Profile Updated",
-        icon: Icon(Iconsax.tick_circle_copy, color: Colors.green),
-      );
+      showSnackbar(context, "Profile Updated");
       context.pop();
     }
   }
@@ -172,8 +167,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                         buttonWidth: 120,
                         elevation: 4,
                         borderRadius: 100,
-                        backgroundColor: Colors.deepPurple.shade500,
-                        borderColor: Colors.deepPurple.shade500,
+                        backgroundColor: Theme.of(context).primaryColor,
+                        borderColor: Theme.of(context).primaryColor,
                         onPressed: _onSubmitEditForm,
                       );
                     },

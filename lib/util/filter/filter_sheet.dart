@@ -539,6 +539,7 @@ class _FilterSheetState extends State<FilterSheet> {
                             FilterWidget.buildEnumRadioGroup<SortRules>(
                               sortRuleValue.label,
                               sortRuleValue,
+                              context,
                               _selectedSortRule,
                             ),
                           ],
@@ -546,6 +547,7 @@ class _FilterSheetState extends State<FilterSheet> {
                         : FilterWidget.buildEnumRadioGroup<SortRules>(
                           sortRuleValue.label,
                           sortRuleValue,
+                          context,
                           _selectedSortRule,
                         );
                   } else {
@@ -553,6 +555,7 @@ class _FilterSheetState extends State<FilterSheet> {
                     return FilterWidget.buildEnumRadioGroup<SortBy>(
                       sortValue.label,
                       sortValue,
+                      context,
                       _selectedSortBy,
                     );
                   }
@@ -572,6 +575,7 @@ class _FilterSheetState extends State<FilterSheet> {
                   return FilterWidget.buildCheckBox<int>(
                     CategoryParser.expenseCategories[i],
                     _selectedCategory,
+                    context,
                     i,
                     CategoryParser.expenseCategories.length,
                   );
@@ -592,6 +596,7 @@ class _FilterSheetState extends State<FilterSheet> {
                       return FilterWidget.buildCheckBox<String>(
                         "${roomData[i].roomName} ${roomData[i].transactionType == "Quicksplit" ? "" : "(Room)"}",
                         _selectedRoom,
+                        context,
                         "${roomData[i].roomName}###${roomData[i].transactionType == "Quicksplit" ? "" : "Room"}",
                         roomData.length,
                       );
@@ -696,6 +701,7 @@ class _FilterSheetState extends State<FilterSheet> {
                     child: FilterWidget.buildCardWidget<LendenType>(
                       value,
                       _selectedLendenType.value,
+                      context,
                       value.label,
                     ),
                   );
@@ -740,6 +746,7 @@ class _FilterSheetState extends State<FilterSheet> {
                         child: FilterWidget.buildCardWidget<int>(
                           index,
                           isSelected ? index : -1,
+                          context,
                           userData[index].id == loggedInUserID ? "You" : "",
                           user:
                               userData[index].id == loggedInUserID
@@ -789,6 +796,7 @@ class _FilterSheetState extends State<FilterSheet> {
                         child: FilterWidget.buildCardWidget<int>(
                           index,
                           isSelected ? index : -1,
+                          context,
                           userData[index].id == loggedInUserID ? "You" : "",
                           user:
                               userData[index].id == loggedInUserID
@@ -984,14 +992,20 @@ class _FilterSheetState extends State<FilterSheet> {
                                   borderRadius: 10,
                                   borderColor:
                                       isSelected
-                                          ? Colors.deepPurpleAccent
-                                          : Colors.grey.shade100,
+                                          ? Theme.of(context).primaryColor
+                                          : Theme.of(
+                                            context,
+                                          ).scaffoldBackgroundColor,
                                   backgroundColor:
                                       isSelected
-                                          ? Colors.deepPurpleAccent
-                                          : Colors.grey.shade100,
+                                          ? Theme.of(context).primaryColor
+                                          : Theme.of(
+                                            context,
+                                          ).scaffoldBackgroundColor,
                                   buttonTextColor:
-                                      isSelected ? Colors.white : Colors.black,
+                                      Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge!.color,
                                   onPressed: () {
                                     _filterSelectedIndex.value = index;
                                   },
@@ -1070,8 +1084,8 @@ class _FilterSheetState extends State<FilterSheet> {
               buttonWidth: 120,
               buttonHeight: 40,
               borderRadius: 10,
-              borderColor: Colors.deepPurpleAccent,
-              backgroundColor: Colors.deepPurpleAccent,
+              borderColor: Theme.of(context).primaryColor,
+              backgroundColor: Theme.of(context).primaryColor,
               buttonTextColor: Colors.white,
               onPressed: _applyFilter,
             ),

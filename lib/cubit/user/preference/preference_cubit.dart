@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/model/preference_model.dart';
@@ -9,6 +7,7 @@ import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/provider/preference_provider.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 part 'preference_state.dart';
 
@@ -38,7 +37,7 @@ class PreferenceCubit extends Cubit<PreferenceState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Preference Saved",
-        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
+        child: snackbarSuccessIcon(),
         scaffoldMessenger: scaffoldMessenger,
       );
       prefProvider.updatePref(data);

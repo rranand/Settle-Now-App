@@ -106,20 +106,27 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
                             borderRadius: BorderRadius.circular(60),
                             onTap: () => _selectedGraphIndex.value = index,
                             child: Chip(
-                              label: Text(graphTitle[index]),
+                              label: Text(
+                                graphTitle[index],
+                                style: TextStyle(
+                                  color:
+                                      Theme.of(
+                                        context,
+                                      ).textTheme.bodyLarge!.color,
+                                ),
+                              ),
                               side: BorderSide(
                                 color:
                                     index == _selectedGraphIndex.value
-                                        ? Colors.deepPurple.shade500
+                                        ? Theme.of(context).primaryColor
                                         : Colors.black26,
                               ),
                               labelStyle:
                                   index == _selectedGraphIndex.value
-                                      ? TextStyle(
-                                        color: Colors.deepPurple.shade500,
-                                      )
+                                      ? TextStyle()
                                       : null,
-                              backgroundColor: Colors.white,
+                              backgroundColor:
+                                  Theme.of(context).scaffoldBackgroundColor,
                             ),
                           ),
                         ),

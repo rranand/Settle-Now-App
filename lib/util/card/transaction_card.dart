@@ -56,8 +56,6 @@ class _TransactionCardState extends State<TransactionCard> {
     List<String> tags = createTags();
 
     return Card(
-      elevation: UiConstant.cardElevation,
-      color: Colors.white,
       child: Padding(
         padding: EdgeInsets.all(UiConstant.cardPadding),
         child: Column(

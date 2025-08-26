@@ -126,7 +126,7 @@ class CustomButton {
     Color? iconBorderColor,
   }) {
     iconRadius ??= 20;
-    iconBorderColor ??= Colors.black26;
+    iconBorderColor ??= Theme.of(context).primaryColor.withAlpha(125);
 
     return InkWell(
       borderRadius: BorderRadius.circular(iconRadius),
@@ -154,7 +154,6 @@ class CustomButton {
     return FloatingActionButton(
       onPressed: onPressed,
       elevation: 1,
-      backgroundColor: Colors.deepPurpleAccent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
       child: Icon(icon, size: 24, color: Colors.white),
     );

@@ -39,8 +39,6 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     UserModel user = data.user;
 
     return Card(
-      elevation: UiConstant.cardElevation,
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(UiConstant.cardPadding + 2),
         child: Row(

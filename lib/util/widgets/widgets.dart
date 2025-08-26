@@ -10,6 +10,7 @@ import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/util/enum/enums.dart';
 import 'package:settlenow_v2/util/functions/text_function.dart';
 import 'package:settlenow_v2/util/functions/validator.dart';
+import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
@@ -129,6 +130,10 @@ Widget tagOnCard(
       : CustomShimmerEffect.textWidget(width: 100);
 }
 
+Widget snackbarSuccessIcon() {
+  return Icon(Iconsax.tick_circle_copy, color: Colors.green);
+}
+
 Future<dynamic> loadingWidget(BuildContext context) {
   return showDialog(
     context: context,
@@ -230,7 +235,18 @@ Future<bool> deleteAccountDialog(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Type your email to confirm", style: TextStyle(fontSize: 18)),
+            Padding(
+              padding: const EdgeInsets.only(
+                bottom: UiConstant.spaceBetweenCard,
+              ),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Type your email to confirm",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
             Form(
               key: accountDeleteFormKey,
               child: CustomFormField.textFormField(
@@ -246,25 +262,30 @@ Future<bool> deleteAccountDialog(
                   }
                 },
                 inputDecoration: TextFormFieldInputBorder.underLine,
-                borderColor: Colors.black87,
+                borderColor:
+                    Theme.of(
+                      context,
+                    ).inputDecorationTheme.enabledBorder!.borderSide.color,
               ),
             ),
           ],
         ),
         actions: [
-          TextButton(
+          CustomButton.customTextButton(
+            "Cancel",
             onPressed: () {
               context.pop(["No"]);
             },
-            child: Text("Cancel"),
+            buttonTextColor: Theme.of(context).textTheme.bodyLarge!.color,
           ),
-          TextButton(
+          CustomButton.customTextButton(
+            "Confirm",
             onPressed: () {
               if (accountDeleteFormKey.currentState!.validate()) {
                 context.pop(["Yes"]);
               }
             },
-            child: Text("Confirm"),
+            buttonTextColor: Theme.of(context).textTheme.bodyLarge!.color,
           ),
         ],
       );

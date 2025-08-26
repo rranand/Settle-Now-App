@@ -220,7 +220,12 @@ class _AddTransactionState extends State<AddTransaction> {
             icon == null
                 ? Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text(text),
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                  ),
                 )
                 : Row(
                   mainAxisSize: MainAxisSize.min,
@@ -231,7 +236,12 @@ class _AddTransactionState extends State<AddTransaction> {
                       radius: 40,
                     ),
                     SizedBox(width: 8),
-                    Text(text),
+                    Text(
+                      text,
+                      style: TextStyle(
+                        color: Theme.of(context).textTheme.bodyLarge!.color,
+                      ),
+                    ),
                   ],
                 ),
       ),
@@ -316,7 +326,12 @@ class _AddTransactionState extends State<AddTransaction> {
                         borderRadius: BorderRadius.circular(100),
                         border: Border.all(color: Colors.grey.shade300),
                       ),
-                      child: Text(_splitType[index]),
+                      child: Text(
+                        _splitType[index],
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -932,6 +947,8 @@ class _AddTransactionState extends State<AddTransaction> {
                           child: CustomButton.customOutlinedButton(
                             "${widget.transactionData == null ? "Add" : "Update"} Expense",
                             buttonHeight: 40,
+                            buttonTextColor:
+                                Theme.of(context).textTheme.bodyLarge!.color!,
                           ),
                         ),
                       ),

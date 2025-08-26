@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
 import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
@@ -12,6 +11,7 @@ import 'package:settlenow_v2/model/notification_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 part 'create_room_state.dart';
 
@@ -90,7 +90,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "${user.name} Invited",
-        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
+        child: snackbarSuccessIcon(),
         scaffoldMessenger: scaffoldMessenger,
       );
       return emit(CreateRoomSuccess());

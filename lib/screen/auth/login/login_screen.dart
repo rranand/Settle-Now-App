@@ -146,7 +146,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       CustomButton.customTextButton(
                         "Sign Up",
                         onPressed: _handleOnSignUp,
-                        buttonTextColor: Colors.black,
+                        buttonTextColor:
+                            Theme.of(context).textTheme.bodyLarge!.color,
                       ),
                       SizedBox(width: _mainScreenPadding.left),
                     ]),
@@ -174,7 +175,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               'assets/sn/SN_WBG.png',
                               height: 150,
                               width: 150,
-                              color: Colors.black87,
                             ),
                           ),
                           SizedBox(height: UiConstant.spaceBetweenSection),
@@ -212,7 +212,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                             CustomValidator.validateEmail,
                                         inputDecoration:
                                             TextFormFieldInputBorder.underLine,
-                                        borderColor: Colors.black87,
+                                        borderColor:
+                                            Theme.of(context)
+                                                .inputDecorationTheme
+                                                .enabledBorder!
+                                                .borderSide
+                                                .color,
                                       ),
                                 ),
                                 ValueListenableBuilder(
@@ -247,7 +252,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                           inputDecoration:
                                               TextFormFieldInputBorder
                                                   .underLine,
-                                          borderColor: Colors.black87,
+                                          borderColor:
+                                              Theme.of(context)
+                                                  .inputDecorationTheme
+                                                  .enabledBorder!
+                                                  .borderSide
+                                                  .color,
                                           maxLength: 6,
                                         ),
                                         Align(
@@ -287,8 +297,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                   buttonWidth: 155,
                                   buttonHeight: 50,
                                   borderRadius: 100,
-                                  backgroundColor: Colors.black87,
-                                  borderColor: Colors.black87,
                                 ),
                               );
                             },
@@ -298,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               height: 2 * UiConstant.spaceBetweenSection,
                             ),
                             const Center(
-                              child: Text('Or sign in with social account'),
+                              child: Text('Or Sign in with social account'),
                             ),
                             SizedBox(
                               height: 2 * UiConstant.spaceBetweenSection,
@@ -329,6 +337,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: RichText(
                       textAlign: TextAlign.center,
                       text: TextSpan(
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
                         text: 'By signing in, You agree to the ',
                         children: [
                           TextSpan(

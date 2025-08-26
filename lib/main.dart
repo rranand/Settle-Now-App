@@ -371,13 +371,13 @@ class MyApp extends StatelessWidget {
               MediaQuery.of(context).orientation,
               MediaQuery.of(context).viewPadding,
             );
-            // PreferenceProvider preferenceProvider =
-            //     context.watch<PreferenceProvider>();
+            PreferenceProvider preferenceProvider =
+                context.watch<PreferenceProvider>();
 
             return MaterialApp.router(
               routerConfig: AppRouterConfig.router,
               title: 'Settle Now',
-              themeMode: ThemeMode.light,
+              themeMode: preferenceProvider.getTheme,
               theme: CustomTheme.lightTheme(context),
               darkTheme: CustomTheme.darkTheme(context),
               locale: Locale('en', 'IN'),

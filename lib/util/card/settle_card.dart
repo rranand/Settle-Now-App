@@ -77,12 +77,10 @@ class SettleCard extends StatelessWidget {
         }
       },
       child: Card(
-        elevation: UiConstant.cardElevation,
-        color: Colors.white,
         child: Container(
           padding: EdgeInsets.all(UiConstant.cardPadding),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             border: Border.all(color: Colors.grey.withAlpha(51)),
           ),

@@ -177,8 +177,6 @@ class _PersonalExpenseDashboardScreenState
                       sliver: SliverAppBar(
                         automaticallyImplyLeading: false,
                         pinned: value,
-                        backgroundColor: Colors.white,
-                        surfaceTintColor: Colors.white,
                         title: CustomFormField.searchBar(
                           "Search",
                           widget.isSearchEnabled,

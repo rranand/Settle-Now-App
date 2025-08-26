@@ -117,10 +117,8 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                       visible: user.isSettled,
                       child: Padding(
                         padding: const EdgeInsets.only(left: 6.0),
-                        child: Icon(
-                          Iconsax.tick_circle_copy,
-                          color: Colors.green,
-                        ),
+
+                        child: snackbarSuccessIcon(),
                       ),
                     ),
                   ],
@@ -289,7 +287,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
       padding: EdgeInsets.all(UiConstant.cardPadding),
       margin: EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardTheme.color,
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
         border: Border.all(color: Colors.grey.withAlpha(51)),
         boxShadow: [
@@ -331,10 +329,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                         visible: isSettledByYou.value,
                         child: Padding(
                           padding: const EdgeInsets.only(right: 6.0),
-                          child: Icon(
-                            Iconsax.tick_circle_copy,
-                            color: Colors.green,
-                          ),
+                          child: snackbarSuccessIcon(),
                         ),
                       );
                     },

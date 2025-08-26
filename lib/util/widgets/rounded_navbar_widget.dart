@@ -11,7 +11,7 @@ class RoundedNavbarWidget extends StatelessWidget {
     required this.titleIndex,
   });
 
-  Expanded _tabButton(int index) {
+  Expanded _tabButton(int index, BuildContext context) {
     bool isActive = index == titleIndex.value;
 
     return Expanded(
@@ -34,7 +34,12 @@ class RoundedNavbarWidget extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             title[index],
-            style: TextStyle(color: isActive ? Colors.white : Colors.black87),
+            style: TextStyle(
+              color:
+                  isActive
+                      ? Colors.white
+                      : Theme.of(context).textTheme.bodyLarge!.color,
+            ),
           ),
         ),
       ),
@@ -45,12 +50,15 @@ class RoundedNavbarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Theme.of(context).scaffoldBackgroundColor,
         borderRadius: BorderRadius.circular(50),
       ),
       padding: EdgeInsets.all(4),
       child: Row(
-        children: List.generate(title.length, (index) => _tabButton(index)),
+        children: List.generate(
+          title.length,
+          (index) => _tabButton(index, context),
+        ),
       ),
     );
   }

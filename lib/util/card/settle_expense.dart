@@ -451,6 +451,10 @@ class _SettleExpenseState extends State<SettleExpense> {
                                   child: CustomButton.customOutlinedButton(
                                     "${widget.transactionData == null ? "Add" : "Update"} Amount",
                                     buttonHeight: 40,
+                                    buttonTextColor:
+                                        Theme.of(
+                                          context,
+                                        ).textTheme.bodyLarge!.color!,
                                   ),
                                 ),
                               ),

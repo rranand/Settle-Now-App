@@ -9,13 +9,13 @@ class InAppUpdateService {
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
       if (Platform.isAndroid) {
-        bool isImportantUpdate = false;
         final updateInfoState = context.read<UpdateInfoBloc>().state;
-        if (updateInfoState is UpdateInfoSuccess &&
+
+        bool isImportantUpdate =
+            updateInfoState is UpdateInfoSuccess &&
             updateInfoState.data.important &&
-            updateInfoState.data.isUpdateRequired()) {
-          isImportantUpdate = true;
-        }
+            updateInfoState.data.isUpdateRequired();
+
         final updateInfo = await InAppUpdate.checkForUpdate();
 
         if (updateInfo.updateAvailability ==

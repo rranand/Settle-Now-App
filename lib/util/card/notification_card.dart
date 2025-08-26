@@ -203,8 +203,6 @@ class _NotificationCardState extends State<NotificationCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: UiConstant.cardElevation,
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(UiConstant.cardPadding),
         child: Column(

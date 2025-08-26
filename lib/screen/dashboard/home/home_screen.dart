@@ -207,12 +207,21 @@ class _HomeScreenState extends State<HomeScreen> {
       child: ListView(
         children: [
           UserAccountsDrawerHeader(
+            decoration: BoxDecoration(
+              color: Theme.of(context).drawerTheme.backgroundColor,
+            ),
             currentAccountPicture: imageWidgetForCachedNetworkImage(
               _loggedInUser.profileImage,
               boxShape: BoxShape.circle,
             ),
-            accountName: Text(_loggedInUser.name),
-            accountEmail: Text(_loggedInUser.email),
+            accountName: Text(
+              _loggedInUser.name,
+              style: TextStyle(color: Colors.white),
+            ),
+            accountEmail: Text(
+              _loggedInUser.email,
+              style: TextStyle(color: Colors.white),
+            ),
           ),
           ...List.generate(drawerTitle.length, (index) {
             return ValueListenableBuilder(
@@ -312,8 +321,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Colors.deepPurpleAccent,
-          unselectedItemColor: Colors.black54,
           selectedFontSize: 12,
           unselectedFontSize: 10,
           showUnselectedLabels: true,

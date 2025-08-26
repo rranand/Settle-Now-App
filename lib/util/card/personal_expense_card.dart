@@ -95,11 +95,10 @@ class PersonalExpenseCard extends StatelessWidget {
         }
       },
       child: Card(
-        elevation: UiConstant.cardElevation,
         child: Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             border: Border.all(color: Colors.black.withAlpha(51)),
           ),

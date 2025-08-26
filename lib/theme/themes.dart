@@ -1,36 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:settlenow_v2/constant/ui_constant.dart';
 
 class CustomTheme {
   static ThemeData lightTheme(BuildContext context) {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primarySwatch: Colors.deepPurple,
-      primaryColor: Colors.deepPurple.shade900,
-      appBarTheme: AppBarTheme(),
-      drawerTheme: DrawerThemeData(backgroundColor: Colors.deepPurple),
-      textSelectionTheme: TextSelectionThemeData(
-        cursorColor: Colors.black,
-        selectionColor: Colors.deepPurple.withAlpha(70),
-        selectionHandleColor: Colors.deepPurple.withAlpha(70),
-      ),
-      textTheme: TextTheme(
-        bodyLarge: TextStyle(),
-        bodyMedium: TextStyle(),
-      ).apply(bodyColor: Colors.black87, displayColor: Colors.white),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: Colors.deepPurpleAccent,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.deepPurple,
+        brightness: Brightness.light,
       ),
       scaffoldBackgroundColor: Colors.white,
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
+        foregroundColor: Colors.black87,
+        surfaceTintColor: Colors.white,
+        elevation: 0,
       ),
-      inputDecorationTheme: InputDecorationTheme(
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: UiConstant.cardElevation,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      drawerTheme: DrawerThemeData(backgroundColor: Colors.deepPurple),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        menuStyle: MenuStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.white),
+        ),
+      ),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: Colors.black,
+        selectionColor: Colors.deepPurple.withAlpha(77),
+        selectionHandleColor: Colors.deepPurple.withAlpha(77),
+      ),
+      textTheme: const TextTheme(
+        bodyLarge: TextStyle(color: Colors.black),
+        bodyMedium: TextStyle(color: Colors.white),
+      ).apply(bodyColor: Colors.black87, displayColor: Colors.black87),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: Colors.deepPurpleAccent,
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        selectedItemColor: Colors.deepPurpleAccent,
+        unselectedItemColor: Colors.black54,
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
         enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.deepPurpleAccent),
+          borderSide: BorderSide(color: Colors.black87),
         ),
         focusedBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.deepPurpleAccent),
+          borderSide: BorderSide(color: Colors.black87),
         ),
         labelStyle: TextStyle(color: Colors.black),
       ),
@@ -40,13 +59,25 @@ class CustomTheme {
       ),
       sliderTheme: SliderThemeData(
         thumbColor: Colors.deepPurpleAccent,
-        activeTrackColor: Colors.deepPurpleAccent.withValues(alpha: 0.5),
-        valueIndicatorColor: Colors.grey.withValues(alpha: 0.3),
-        valueIndicatorTextStyle: TextStyle(color: Colors.black),
+        activeTrackColor: Colors.deepPurpleAccent.withAlpha(128),
+        valueIndicatorColor: Colors.grey.withAlpha(77),
+        valueIndicatorTextStyle: const TextStyle(color: Colors.black),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.deepPurple),
+        ),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.all(Colors.deepPurpleAccent),
+        trackColor: WidgetStateProperty.all(
+          Colors.deepPurpleAccent.withAlpha(60),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(backgroundColor: Colors.black87),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.all(Colors.black87),
         ),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
@@ -78,23 +109,36 @@ class CustomTheme {
       thickness: WidgetStateProperty.all(4),
       thumbColor: WidgetStateProperty.all(Color.fromARGB(255, 105, 240, 174)),
     ),
+    cardTheme: CardThemeData(
+      color: Colors.black38,
+      elevation: UiConstant.cardElevation,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    ),
+    snackBarTheme: SnackBarThemeData(backgroundColor: Colors.black38),
     textSelectionTheme: TextSelectionThemeData(
       cursorColor: Colors.white,
       selectionColor: Colors.greenAccent.withAlpha(70),
       selectionHandleColor: Colors.greenAccent.withAlpha(70),
     ),
     textTheme: TextTheme(
-      bodyLarge: TextStyle(),
-      bodyMedium: TextStyle(),
-    ).apply(bodyColor: Colors.white, displayColor: Colors.black),
+      bodyLarge: TextStyle(color: Colors.white),
+      bodyMedium: TextStyle(color: Colors.black),
+    ).apply(
+      bodyColor: Colors.white,
+      displayColor: Colors.white,
+      decorationColor: Colors.white,
+    ),
     progressIndicatorTheme: const ProgressIndicatorThemeData(
       color: Colors.greenAccent,
     ),
-    appBarTheme: AppBarTheme(
-      elevation: 0.0,
-      iconTheme: IconThemeData(color: Colors.white),
-      toolbarTextStyle: Theme.of(context).textTheme.bodyMedium,
-      titleTextStyle: TextStyle(color: Colors.white, fontSize: 22),
+    appBarTheme: const AppBarTheme(
+      surfaceTintColor: Colors.black87,
+      elevation: 0,
+    ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      menuStyle: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(Colors.black54),
+      ),
     ),
     drawerTheme: DrawerThemeData(),
     inputDecorationTheme: InputDecorationTheme(
@@ -105,6 +149,7 @@ class CustomTheme {
       focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.greenAccent),
       ),
+      outlineBorder: BorderSide(color: Colors.greenAccent),
       labelStyle: TextStyle(color: Colors.white),
     ),
     sliderTheme: SliderThemeData(
@@ -117,6 +162,19 @@ class CustomTheme {
       style: ButtonStyle(
         backgroundColor: WidgetStateProperty.all(Colors.greenAccent),
       ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: ButtonStyle(
+        textStyle: WidgetStateProperty.all(TextStyle(color: Colors.white)),
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.all(Colors.greenAccent),
+      trackColor: WidgetStateProperty.all(Colors.greenAccent.withAlpha(60)),
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      selectedItemColor: Colors.greenAccent,
+      unselectedItemColor: Colors.white,
     ),
   );
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
-import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/model/user_model.dart';
 import 'package:settlenow_v2/util/widgets/gradient_widget.dart';
 import 'package:settlenow_v2/util/widgets/image_widget.dart';
@@ -9,12 +8,14 @@ class FilterWidget {
   static Widget buildEnumRadioGroup<T extends Enum>(
     String displayValue,
     T enumValue,
+    BuildContext context,
     ValueNotifier<T> valueNotifier,
   ) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       title: Text(displayValue),
       leading: Radio<T>(
+        activeColor: Theme.of(context).primaryColor,
         value: enumValue,
         groupValue: valueNotifier.value,
         onChanged: (T? value) {
@@ -29,6 +30,7 @@ class FilterWidget {
   static Widget buildCheckBox<T>(
     String displayValue,
     ValueNotifier<Set<T>> valueNotifier,
+    BuildContext context,
     T id,
     int totalData,
   ) {
@@ -37,7 +39,7 @@ class FilterWidget {
       title: Text(displayValue),
       leading: Checkbox(
         checkColor: Colors.white,
-        activeColor: Colors.deepPurpleAccent,
+        activeColor: Theme.of(context).primaryColor,
         value: valueNotifier.value.contains(id),
         onChanged: (bool? selected) {
           if (selected != null) {
@@ -61,6 +63,7 @@ class FilterWidget {
   static Widget buildCardWidget<T>(
     T eachObject,
     T selected,
+    BuildContext context,
     String text, {
     UserModel? user,
   }) {
@@ -68,16 +71,28 @@ class FilterWidget {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: GradientBorderCard(
         borderRadius: 50,
-        borderWidth: 1,
+        borderWidth: 2,
         gradientColors:
             eachObject == selected
-                ? GradientColorConstant.vibrantGradient
-                : [Colors.grey.shade300, Colors.grey.shade300],
+                ? [
+                  Theme.of(context).primaryColor,
+                  Theme.of(context).primaryColor,
+                ]
+                : [
+                  Theme.of(context).scaffoldBackgroundColor,
+                  Theme.of(context).scaffoldBackgroundColor,
+                ],
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         child:
             user == null
                 ? Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Text(text),
+                  child: Text(
+                    text,
+                    style: TextStyle(
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
+                  ),
                 )
                 : Row(
                   mainAxisSize: MainAxisSize.min,
@@ -95,7 +110,12 @@ class FilterWidget {
                       padding: const EdgeInsets.symmetric(
                         vertical: 12,
                       ).add(EdgeInsets.only(right: 8, left: 2)),
-                      child: Text(user.name),
+                      child: Text(
+                        user.name,
+                        style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
+                      ),
                     ),
                   ],
                 ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
 import 'package:settlenow_v2/model/login_activity_model.dart';
 import 'package:settlenow_v2/util/enum/device_type.dart';
@@ -29,8 +28,6 @@ class LoginActivityCard extends StatelessWidget {
       );
     }
     return Card(
-      elevation: UiConstant.cardElevation,
-      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListTile(

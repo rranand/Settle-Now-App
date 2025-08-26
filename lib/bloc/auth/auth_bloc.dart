@@ -2,7 +2,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow_v2/data/repository/auth_repository.dart';
 import 'package:settlenow_v2/model/preference_model.dart';
 import 'package:settlenow_v2/model/user_model.dart';
@@ -11,6 +10,7 @@ import 'package:settlenow_v2/util/handler/local_storage_preference.dart';
 import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -235,7 +235,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       event.scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Account Delete Requested",
-        child: Icon(Iconsax.tick_circle_copy, color: Colors.green),
+        child: snackbarSuccessIcon(),
         scaffoldMessenger: event.scaffoldMessenger,
       );
     } catch (e) {

@@ -151,24 +151,27 @@ class CustomFormField {
   ) {
     return ValueListenableBuilder(
       valueListenable: isSearchEnabled,
-      builder: (BuildContext context, bool value, Widget? child) {
-        return Visibility(visible: isSearchEnabled.value, child: child!);
+      builder: (BuildContext context, bool _, Widget? _) {
+        return Visibility(
+          visible: isSearchEnabled.value,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: .5 * UiConstant.spaceBetweenSection,
+            ),
+            child: CustomFormField.textFormField(
+              searchController,
+              hintText: hintText,
+              prefixIcon: Icon(Icons.search),
+              inputDecoration: TextFormFieldInputBorder.outlineInputBorder,
+              borderColor:
+                  Theme.of(context).inputDecorationTheme.outlineBorder!.color,
+              borderRadius: 30,
+              filled: true,
+              fillColor: Colors.black.withAlpha(10),
+            ),
+          ),
+        );
       },
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          vertical: .5 * UiConstant.spaceBetweenSection,
-        ),
-        child: CustomFormField.textFormField(
-          searchController,
-          hintText: hintText,
-          prefixIcon: Icon(Icons.search),
-          inputDecoration: TextFormFieldInputBorder.outlineInputBorder,
-          borderColor: Colors.black12,
-          borderRadius: 30,
-          filled: true,
-          fillColor: Colors.black.withAlpha(10),
-        ),
-      ),
     );
   }
 }

@@ -30,8 +30,6 @@ class _PersonalExpenseCategoriesSectionScreenState
           return SizedBox.shrink();
         }
         return Card(
-          elevation: UiConstant.cardElevation,
-          color: Colors.white,
           child: Padding(
             padding: const EdgeInsets.all(UiConstant.cardPadding),
             child: ListTile(

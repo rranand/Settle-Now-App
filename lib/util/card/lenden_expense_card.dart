@@ -49,8 +49,8 @@ class LendenExpenseCard extends StatelessWidget {
     final bgColor =
         data.hasData
             ? (direction == 'gave'
-                ? Colors.green.shade100
-                : Colors.red.shade100)
+                ? Colors.green.shade300
+                : Colors.red.shade300)
             : Colors.white;
 
     return Align(
@@ -84,21 +84,27 @@ class LendenExpenseCard extends StatelessWidget {
               data.hasData
                   ? Text(
                     '${direction == 'gave' ? 'You gave' : 'You owe'} ${formatCurrency(data.amount.abs(), context)}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   )
                   : CustomShimmerEffect.textWidget(width: 90),
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child:
                     data.hasData
-                        ? Text(data.description, style: TextStyle(fontSize: 13))
+                        ? Text(
+                          data.description,
+                          style: TextStyle(fontSize: 13, color: Colors.white),
+                        )
                         : CustomShimmerEffect.textWidget(width: 50),
               ),
               SizedBox(height: 6),
               subTextOnCard(
                 'Created: ${convertDateTimeFormat(data.createdOn)}',
                 fontSize: 11,
-                textColor: Colors.grey.shade700,
+                textColor: Colors.white,
                 isLoaded: data.hasData,
               ),
               isDateTimeSame(data.createdOn, data.modifiedOn)
@@ -106,7 +112,7 @@ class LendenExpenseCard extends StatelessWidget {
                   : subTextOnCard(
                     'Updated: ${convertDateTimeFormat(data.modifiedOn)}',
                     fontSize: 11,
-                    textColor: Colors.grey.shade700,
+                    textColor: Colors.white,
                     isLoaded: data.hasData,
                   ),
             ],

@@ -72,7 +72,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       builder: (context) {
         final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return Padding(
@@ -127,7 +127,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       builder: (context) {
         final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return BlocBuilder<LendenRoomBloc, LendenRoomState>(
@@ -496,8 +496,6 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                   sliver: SliverAppBar(
                                     automaticallyImplyLeading: false,
                                     pinned: isSearchEnabled.value,
-                                    backgroundColor: Colors.white,
-                                    surfaceTintColor: Colors.white,
                                     title: CustomFormField.searchBar(
                                       "Search",
                                       isSearchEnabled,

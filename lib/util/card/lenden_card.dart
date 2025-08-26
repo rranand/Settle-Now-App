@@ -26,7 +26,7 @@ class LendenCard extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
           border:
               data.hasData

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -99,10 +100,6 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
 
   Widget _buildSection(int index) {
     return Card(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: Column(
         children: [
           ListTile(
@@ -166,21 +163,11 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
                   (index) => _buildSection(index),
                 ),
                 Visibility(
-                  visible: false,
+                  visible: kDebugMode,
                   child: Card(
-                    color: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 4,
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 12,
-                    ),
                     child: ListTile(
                       title: const Text("Theme"),
                       trailing: DropdownButton<String>(
-                        dropdownColor: Colors.white,
                         value: preferenceNotifier.value.theme,
                         items:
                             themeOptions.map((theme) {

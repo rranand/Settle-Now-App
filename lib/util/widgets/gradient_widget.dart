@@ -78,7 +78,7 @@ class GradientBorderCard extends StatelessWidget {
   final double borderRadius;
   final double borderWidth;
   final List<Color> gradientColors;
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   const GradientBorderCard({
     super.key,
@@ -86,7 +86,7 @@ class GradientBorderCard extends StatelessWidget {
     this.borderRadius = 16,
     this.borderWidth = 2,
     this.gradientColors = const [Color(0xFF4F46E5), Color(0xFF3B82F6)],
-    this.backgroundColor = Colors.white,
+    this.backgroundColor,
   });
 
   @override
@@ -99,7 +99,7 @@ class GradientBorderCard extends StatelessWidget {
       padding: EdgeInsets.all(borderWidth),
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
           borderRadius: BorderRadius.circular(borderRadius - 2),
         ),
         child: child,

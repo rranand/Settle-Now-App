@@ -67,7 +67,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       builder: (context) {
         final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return Padding(
@@ -253,8 +253,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                                 sliver: SliverAppBar(
                                   automaticallyImplyLeading: false,
                                   pinned: isSearchEnabled.value,
-                                  backgroundColor: Colors.white,
-                                  surfaceTintColor: Colors.white,
                                   title: CustomFormField.searchBar(
                                     "Search",
                                     isSearchEnabled,
@@ -280,8 +278,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                                     sliver: SliverAppBar(
                                       toolbarHeight: 330,
                                       automaticallyImplyLeading: false,
-                                      backgroundColor: Colors.transparent,
-                                      surfaceTintColor: Colors.transparent,
                                       flexibleSpace: FlexibleSpaceBar(
                                         centerTitle: false,
                                         title:
@@ -339,7 +335,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                                   pinned: true,
                                   toolbarHeight: _navBarHeight,
                                   automaticallyImplyLeading: false,
-                                  backgroundColor: Colors.white,
                                   surfaceTintColor: Colors.transparent,
                                   flexibleSpace: FlexibleSpaceBar(
                                     centerTitle: true,

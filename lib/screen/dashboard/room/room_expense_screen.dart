@@ -211,10 +211,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
               return Stack(
                 children: [
                   Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 4,
                     child: Container(
                       padding: EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -380,7 +376,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       builder: (context) {
         final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
         return Padding(
@@ -651,8 +647,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                           sliver: SliverAppBar(
                             automaticallyImplyLeading: false,
                             pinned: isSearchEnabled.value,
-                            backgroundColor: Colors.white,
-                            surfaceTintColor: Colors.white,
                             title: CustomFormField.searchBar(
                               "Search",
                               isSearchEnabled,
@@ -677,7 +671,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                           pinned: true,
                           toolbarHeight: _navBarHeight,
                           automaticallyImplyLeading: false,
-                          backgroundColor: Colors.white,
                           surfaceTintColor: Colors.transparent,
                           flexibleSpace: FlexibleSpaceBar(
                             centerTitle: true,
