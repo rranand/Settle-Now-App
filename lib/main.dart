@@ -371,22 +371,24 @@ class MyApp extends StatelessWidget {
               MediaQuery.of(context).orientation,
               MediaQuery.of(context).viewPadding,
             );
-            PreferenceProvider preferenceProvider =
-                context.watch<PreferenceProvider>();
 
-            return MaterialApp.router(
-              routerConfig: AppRouterConfig.router,
-              title: 'Settle Now',
-              themeMode: preferenceProvider.getTheme,
-              theme: CustomTheme.lightTheme(context),
-              darkTheme: CustomTheme.darkTheme(context),
-              locale: Locale('en', 'IN'),
-              supportedLocales: [Locale('en', 'IN')],
-              localizationsDelegates: [
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
+            return Consumer<PreferenceProvider>(
+              builder: (context, preferenceProvider, _) {
+                return MaterialApp.router(
+                  routerConfig: AppRouterConfig.router,
+                  title: 'Settle Now',
+                  themeMode: preferenceProvider.getTheme,
+                  theme: CustomTheme.lightTheme(context),
+                  darkTheme: CustomTheme.darkTheme(context),
+                  locale: Locale('en', 'IN'),
+                  supportedLocales: [Locale('en', 'IN')],
+                  localizationsDelegates: [
+                    GlobalMaterialLocalizations.delegate,
+                    GlobalWidgetsLocalizations.delegate,
+                    GlobalCupertinoLocalizations.delegate,
+                  ],
+                );
+              },
             );
           },
         ),

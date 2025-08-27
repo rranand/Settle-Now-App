@@ -292,7 +292,11 @@ class _SettleExpenseState extends State<SettleExpense> {
 
         if (state is RoomUserSuccess) {
           users = getSettleMember(state.data);
-          for (int i = 0; i < state.data.length; i++) {
+          for (
+            int i = 0;
+            widget.transactionData != null && i < state.data.length;
+            i++
+          ) {
             if (state.data[i].user.id == widget.transactionData!.sender.id) {
               isEditable = isEditable && state.data[i].active;
             }
@@ -369,7 +373,12 @@ class _SettleExpenseState extends State<SettleExpense> {
                           return CustomValidator.validateAmount(value, null);
                         },
                         inputDecoration: TextFormFieldInputBorder.underLine,
-                        borderColor: Colors.black87,
+                        borderColor:
+                            Theme.of(context)
+                                .inputDecorationTheme
+                                .enabledBorder!
+                                .borderSide
+                                .color,
                         suffixIcon: UiConstant.indianRupeeSymbol,
                       ),
                       ValueListenableBuilder(

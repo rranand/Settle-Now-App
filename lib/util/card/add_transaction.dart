@@ -181,7 +181,10 @@ class _AddTransactionState extends State<AddTransaction> {
                     return CustomValidator.validateAmount(value, null);
                   },
                   inputDecoration: TextFormFieldInputBorder.underLine,
-                  borderColor: Colors.black54,
+                  borderColor:
+                      Theme.of(
+                        context,
+                      ).inputDecorationTheme.enabledBorder!.borderSide.color,
                   suffixIcon: UiConstant.indianRupeeSymbol,
                 ),
               ),
@@ -671,7 +674,10 @@ class _AddTransactionState extends State<AddTransaction> {
                       return CustomValidator.validateAmount(value, null);
                     },
                     inputDecoration: TextFormFieldInputBorder.underLine,
-                    borderColor: Colors.black87,
+                    borderColor:
+                        Theme.of(
+                          context,
+                        ).inputDecorationTheme.enabledBorder!.borderSide.color,
                     suffixIcon: UiConstant.indianRupeeSymbol,
                   ),
                   SizedBox(height: UiConstant.spaceBetweenSection),
@@ -688,7 +694,10 @@ class _AddTransactionState extends State<AddTransaction> {
                       return null;
                     },
                     inputDecoration: TextFormFieldInputBorder.underLine,
-                    borderColor: Colors.black87,
+                    borderColor:
+                        Theme.of(
+                          context,
+                        ).inputDecorationTheme.enabledBorder!.borderSide.color,
                     maxLines: 2,
                   ),
                   Visibility(
@@ -703,7 +712,12 @@ class _AddTransactionState extends State<AddTransaction> {
                         labelText: 'Creation Date',
                         hintText: 'Creation Date',
                         inputDecoration: TextFormFieldInputBorder.underLine,
-                        borderColor: Colors.black87,
+                        borderColor:
+                            Theme.of(context)
+                                .inputDecorationTheme
+                                .enabledBorder!
+                                .borderSide
+                                .color,
                         suffixIcon: Icon(Iconsax.calendar_copy),
                         onTap: () async {
                           DateTime? dateTime = await showOmniDateTimePicker(
