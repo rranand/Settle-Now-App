@@ -162,7 +162,8 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                             buttonWidth: 110,
                             borderRadius: 100,
                             buttonTextColor: Colors.green.shade400,
-                            backgroundColor: Colors.white,
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
                             borderColor: Colors.green.shade400,
                             onPressed: () {
                               context.read<SettleCubit>().settleExpense(
@@ -184,7 +185,8 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                             buttonWidth: 110,
                             borderRadius: 100,
                             buttonTextColor: Colors.red.shade400,
-                            backgroundColor: Colors.white,
+                            backgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
                             borderColor: Colors.red.shade400,
                             onPressed: () {
                               if (_loggedInUser.id ==
