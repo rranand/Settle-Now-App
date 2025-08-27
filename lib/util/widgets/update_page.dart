@@ -11,7 +11,6 @@ class UpdatePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -24,7 +23,7 @@ class UpdatePage extends StatelessWidget {
                   Text(
                     'Update Available',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -32,7 +31,10 @@ class UpdatePage extends StatelessWidget {
                   Text(
                     data.description,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 16, color: Colors.black87),
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyLarge!.color,
+                    ),
                   ),
                   const SizedBox(height: 20),
                   Container(
@@ -44,7 +46,10 @@ class UpdatePage extends StatelessWidget {
                     child: Text(
                       'Current: ${data.currentVersion}\nLatest: ${data.version}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 14),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
