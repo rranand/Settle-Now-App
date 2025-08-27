@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -29,7 +28,12 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
   );
 
   final List<String> themeOptions = ["system", "light", "dark"];
-  final List<String> prefernceOption = ["Room", "Quicksplit", "Lenden"];
+  final List<String> prefernceOption = [
+    "Room",
+    "Quicksplit",
+    "Lenden",
+    "Personal Expense",
+  ];
 
   @override
   void didChangeDependencies() {
@@ -69,6 +73,10 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
         {
           return preferenceNotifier.value.lenden.isSettled;
         }
+      case 3:
+        {
+          return preferenceNotifier.value.personalExpense.showEmpty;
+        }
       default:
         {
           return false;
@@ -95,10 +103,19 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
           lenden: pref.lenden.copyWith(isSettled: value),
         );
         break;
+      case 3:
+        preferenceNotifier.value = pref.copyWith(
+          personalExpense: pref.personalExpense.copyWith(showEmpty: value),
+        );
+        break;
     }
   }
 
   Widget _buildSection(int index) {
+    String txt = "Show Settled";
+    if (index == 3) {
+      txt = "Show Empty Months";
+    }
     return Card(
       child: Column(
         children: [
@@ -109,7 +126,7 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
             ),
           ),
           SwitchListTile(
-            title: const Text("Show Settled"),
+            title: Text(txt),
             value: getSettledValue(index),
             onChanged: (value) {
               setSettledValue(index, value);

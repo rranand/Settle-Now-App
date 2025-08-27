@@ -18,6 +18,8 @@ class PreferenceProvider extends ChangeNotifier {
   PreferenceSection get roomPref => _preferenceData.room;
   PreferenceSection get quicksplitPref => _preferenceData.quicksplit;
   PreferenceSection get lendenPref => _preferenceData.lenden;
+  EmptyPreferenceSection get personalExpensePref =>
+      _preferenceData.personalExpense;
   PreferenceModel get pref => _preferenceData;
 
   void updatePref(PreferenceModel newData) {

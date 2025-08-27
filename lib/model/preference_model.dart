@@ -4,12 +4,14 @@ class PreferenceModel {
   PreferenceSection room = PreferenceSection.empty();
   PreferenceSection quicksplit = PreferenceSection.empty();
   PreferenceSection lenden = PreferenceSection.empty();
+  EmptyPreferenceSection personalExpense = EmptyPreferenceSection.empty();
   String theme = 'system';
 
   PreferenceModel({
     required this.room,
     required this.quicksplit,
     required this.lenden,
+    required this.personalExpense,
     required this.theme,
   });
 
@@ -20,6 +22,7 @@ class PreferenceModel {
       room: PreferenceSection.fromJson(json['room']),
       quicksplit: PreferenceSection.fromJson(json['quicksplit']),
       lenden: PreferenceSection.fromJson(json['lenden']),
+      personalExpense: EmptyPreferenceSection.fromJson(json['personalExpense']),
       theme: json['theme'] ?? 'system',
     );
   }
@@ -29,6 +32,7 @@ class PreferenceModel {
       'room': room.toJson(),
       'quicksplit': quicksplit.toJson(),
       'lenden': lenden.toJson(),
+      'personalExpense': personalExpense.toJson(),
       'theme': theme,
     };
   }
@@ -40,6 +44,7 @@ class PreferenceModel {
     return other.room == room &&
         other.quicksplit == quicksplit &&
         other.lenden == lenden &&
+        other.personalExpense == personalExpense &&
         other.theme == theme;
   }
 
@@ -48,6 +53,7 @@ class PreferenceModel {
     return room.hashCode ^
         quicksplit.hashCode ^
         lenden.hashCode ^
+        personalExpense.hashCode ^
         theme.hashCode;
   }
 
@@ -55,12 +61,14 @@ class PreferenceModel {
     PreferenceSection? room,
     PreferenceSection? quicksplit,
     PreferenceSection? lenden,
+    EmptyPreferenceSection? personalExpense,
     String? theme,
   }) {
     return PreferenceModel(
       room: room ?? this.room,
       quicksplit: quicksplit ?? this.quicksplit,
       lenden: lenden ?? this.lenden,
+      personalExpense: personalExpense ?? this.personalExpense,
       theme: theme ?? this.theme,
     );
   }
@@ -92,7 +100,38 @@ class PreferenceSection {
   @override
   int get hashCode => isSettled.hashCode;
 
-  PreferenceSection copyWith({bool? isSettled, bool? isNotSettled}) {
+  PreferenceSection copyWith({bool? isSettled}) {
     return PreferenceSection(isSettled: isSettled ?? this.isSettled);
+  }
+}
+
+class EmptyPreferenceSection {
+  bool hasData = true;
+  bool showEmpty = true;
+
+  EmptyPreferenceSection({required this.showEmpty});
+
+  EmptyPreferenceSection.empty({this.hasData = false});
+
+  factory EmptyPreferenceSection.fromJson(Map<String, dynamic> json) {
+    return EmptyPreferenceSection(showEmpty: json['showEmpty'] ?? false);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'showEmpty': showEmpty};
+  }
+
+  @override
+  bool operator ==(covariant EmptyPreferenceSection other) {
+    if (identical(this, other)) return true;
+
+    return other.showEmpty == showEmpty;
+  }
+
+  @override
+  int get hashCode => showEmpty.hashCode;
+
+  EmptyPreferenceSection copyWith({bool? showEmpty}) {
+    return EmptyPreferenceSection(showEmpty: showEmpty ?? this.showEmpty);
   }
 }
