@@ -97,7 +97,21 @@ List<Widget>? appBarActionButton(BuildContext context, List<Widget> widgets) {
   }
 }
 
-Widget colouredIcon(Widget child, Color color, {double radius = 50}) {
+Widget colouredIcon(
+  IconData child,
+  Color color, {
+  double radius = 50,
+  double? iconSize,
+}) {
+  return Container(
+    width: radius,
+    height: radius,
+    decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+    child: Center(child: Icon(child, color: Colors.black87, size: iconSize)),
+  );
+}
+
+Widget colouredWidget(Widget child, Color color, {double radius = 50}) {
   return Container(
     width: radius,
     height: radius,
@@ -197,17 +211,19 @@ Future<bool> deleteExpenseDialog(BuildContext context) async {
         title: Text("Delete Expense"),
         content: Text("Are You Sure?", style: TextStyle(fontSize: 18)),
         actions: [
-          TextButton(
+          CustomButton.customTextButton(
+            "No",
             onPressed: () {
               context.pop(["No"]);
             },
-            child: Text("No"),
+            buttonTextColor: Theme.of(context).textTheme.bodyLarge!.color,
           ),
-          TextButton(
+          CustomButton.customTextButton(
+            "Yes",
             onPressed: () {
               context.pop(["Yes"]);
             },
-            child: Text("Yes"),
+            buttonTextColor: Theme.of(context).textTheme.bodyLarge!.color,
           ),
         ],
       );

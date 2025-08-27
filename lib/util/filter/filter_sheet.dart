@@ -1003,9 +1003,11 @@ class _FilterSheetState extends State<FilterSheet> {
                                             context,
                                           ).scaffoldBackgroundColor,
                                   buttonTextColor:
-                                      Theme.of(
-                                        context,
-                                      ).textTheme.bodyLarge!.color,
+                                      isSelected
+                                          ? Colors.white
+                                          : Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge!.color,
                                   onPressed: () {
                                     _filterSelectedIndex.value = index;
                                   },

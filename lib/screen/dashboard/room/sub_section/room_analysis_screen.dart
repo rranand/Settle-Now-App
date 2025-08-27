@@ -119,7 +119,10 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
                                 color:
                                     index == _selectedGraphIndex.value
                                         ? Theme.of(context).primaryColor
-                                        : Colors.black26,
+                                        : Theme.of(context)
+                                            .textSelectionTheme
+                                            .cursorColor!
+                                            .withAlpha(50),
                               ),
                               labelStyle:
                                   index == _selectedGraphIndex.value

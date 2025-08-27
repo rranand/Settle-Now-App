@@ -222,10 +222,8 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
               leading:
                   widget.data.hasData
                       ? colouredIcon(
-                        Icon(
-                          CategoryParser.expenseCategoryIcons[categoryIndex %
-                              CategoryParser.expenseCategoryIcons.length],
-                        ),
+                        CategoryParser.expenseCategoryIcons[categoryIndex %
+                            CategoryParser.expenseCategoryIcons.length],
                         UiConstant.colorsWithShade100[categoryIndex %
                             CategoryParser.expenseCategoryIcons.length],
                       )

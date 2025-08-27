@@ -71,7 +71,7 @@ class FilterWidget {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: GradientBorderCard(
         borderRadius: 50,
-        borderWidth: 2,
+        borderWidth: 1,
         gradientColors:
             eachObject == selected
                 ? [
@@ -79,8 +79,12 @@ class FilterWidget {
                   Theme.of(context).primaryColor,
                 ]
                 : [
-                  Theme.of(context).scaffoldBackgroundColor,
-                  Theme.of(context).scaffoldBackgroundColor,
+                  Theme.of(
+                    context,
+                  ).textSelectionTheme.cursorColor!.withAlpha(50),
+                  Theme.of(
+                    context,
+                  ).textSelectionTheme.cursorColor!.withAlpha(50),
                 ],
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         child:
@@ -136,6 +140,12 @@ class FilterWidget {
       type: OmniDateTimePickerType.date,
       firstDate: dateRange.start,
       lastDate: dateRange.end,
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Theme.of(context).primaryColor,
+          brightness: Theme.brightnessOf(context),
+        ),
+      ),
       initialDate: isStartDate ? dateRange.start : dateRange.end,
       borderRadius: BorderRadius.circular(16.0),
       padding: EdgeInsets.symmetric(vertical: 12),

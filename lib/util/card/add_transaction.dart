@@ -231,7 +231,7 @@ class _AddTransactionState extends State<AddTransaction> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     colouredIcon(
-                      Icon(icon),
+                      icon,
                       UiConstant.colorsWithShade100[index],
                       radius: 40,
                     ),
@@ -720,6 +720,12 @@ class _AddTransactionState extends State<AddTransaction> {
                                     : null,
                             lastDate: DateTime.now(),
                             initialDate: _createdOn,
+                            theme: ThemeData.from(
+                              colorScheme: ColorScheme.fromSeed(
+                                seedColor: Theme.of(context).primaryColor,
+                                brightness: Theme.brightnessOf(context),
+                              ),
+                            ),
                             borderRadius: BorderRadius.circular(16.0),
                             padding: EdgeInsets.symmetric(vertical: 12),
                           );

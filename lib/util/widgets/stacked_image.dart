@@ -68,7 +68,7 @@ Widget errorImageWidget(UserModel user, double radius, bool isLast) {
     width: radius,
     height: radius,
     decoration: BoxDecoration(shape: BoxShape.circle),
-    child: colouredIcon(
+    child: colouredWidget(
       Text(
         nameInitial,
         textAlign: TextAlign.center,

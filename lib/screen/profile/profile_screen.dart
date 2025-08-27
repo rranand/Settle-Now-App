@@ -206,7 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             child: ListTile(
                               contentPadding: EdgeInsets.zero,
                               leading: colouredIcon(
-                                Icon(_accountSectionIconData[index]),
+                                _accountSectionIconData[index],
                                 UiConstant.colorsWithShade100[index],
                               ),
                               title: Text(_accountSectionTitle[index]),

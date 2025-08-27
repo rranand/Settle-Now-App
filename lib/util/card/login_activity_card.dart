@@ -32,7 +32,7 @@ class LoginActivityCard extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ListTile(
           leading: colouredIcon(
-            Icon(DeviceTypeExtension.fromString(data.deviceType).icon),
+            DeviceTypeExtension.fromString(data.deviceType).icon,
             DeviceTypeExtension.fromString(data.deviceType).color,
           ),
           title: Text(data.deviceName),

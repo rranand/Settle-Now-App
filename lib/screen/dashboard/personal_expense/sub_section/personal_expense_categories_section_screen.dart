@@ -37,7 +37,7 @@ class _PersonalExpenseCategoriesSectionScreenState
               leading:
                   isLoaded
                       ? colouredIcon(
-                        Icon(CategoryParser.expenseCategoryIcons[index]),
+                        CategoryParser.expenseCategoryIcons[index],
                         UiConstant.colorsWithShade100[index],
                       )
                       : CustomShimmerEffect.imageWidget(

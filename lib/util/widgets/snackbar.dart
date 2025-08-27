@@ -31,7 +31,10 @@ void showSnackbar(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     behavior: SnackBarBehavior.floating,
     shape: RoundedRectangleBorder(
-      side: BorderSide(color: Colors.deepPurple.shade50, width: 1),
+      side: BorderSide(
+        color: (Theme.of(context).primaryColor).withAlpha(40),
+        width: 1,
+      ),
       borderRadius: BorderRadius.circular(24),
     ),
   );

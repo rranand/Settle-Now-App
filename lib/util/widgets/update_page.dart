@@ -53,7 +53,7 @@ class UpdatePage extends StatelessWidget {
                     buttonWidth: double.infinity,
                     buttonHeight: 40,
                     borderRadius: 8,
-                    backgroundColor: Colors.deepPurpleAccent,
+                    backgroundColor: Theme.of(context).primaryColor,
                     onPressed: updateHandler,
                   ),
                 ],

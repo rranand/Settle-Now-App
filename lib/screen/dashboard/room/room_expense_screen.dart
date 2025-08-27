@@ -704,7 +704,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                   ? SpeedDial(
                     icon: Iconsax.add_copy,
                     activeIcon: Icons.close,
-                    backgroundColor: Colors.deepPurpleAccent,
+                    backgroundColor: Theme.of(context).primaryColor,
                     foregroundColor: Colors.white,
                     spacing: 3,
                     openCloseDial: isDialOpen,

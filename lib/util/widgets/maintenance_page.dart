@@ -8,7 +8,6 @@ class MaintenancePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -17,7 +16,7 @@ class MaintenancePage extends StatelessWidget {
             children: [
               Icon(
                 Icons.build_rounded,
-                color: Colors.deepPurpleAccent,
+                color: Theme.of(context).primaryColor,
                 size: 80,
               ),
               const SizedBox(height: 24),

@@ -468,7 +468,7 @@ class _SettingPageState extends State<SettingPage> {
                       builder: (context, value, child) {
                         return Checkbox(
                           value: _isNotificationEnabled.value,
-                          activeColor: Colors.deepPurpleAccent,
+                          activeColor: Theme.of(context).primaryColor,
                           shape: const CircleBorder(),
                           onChanged: (val) {
                             if (val != null) {

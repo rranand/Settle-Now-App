@@ -42,12 +42,14 @@ class _NotificationCardState extends State<NotificationCard> {
         );
       } else if (widget.data.type == "Room") {
         return colouredIcon(
-          Icon(Icons.groups_outlined, size: 30),
+          Icons.groups_outlined,
+          iconSize: 30,
           Colors.redAccent.shade100,
         );
       } else {
         return colouredIcon(
-          Icon(Icons.group, size: 30),
+          Icons.group,
+          iconSize: 30,
           Colors.blueAccent.shade100,
         );
       }
