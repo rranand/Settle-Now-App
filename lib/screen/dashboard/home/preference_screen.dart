@@ -162,35 +162,32 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
                   prefernceOption.length,
                   (index) => _buildSection(index),
                 ),
-                Visibility(
-                  visible: kDebugMode,
-                  child: Card(
-                    child: ListTile(
-                      title: const Text("Theme"),
-                      trailing: DropdownButton<String>(
-                        value: preferenceNotifier.value.theme,
-                        items:
-                            themeOptions.map((theme) {
-                              return DropdownMenuItem(
-                                value: theme,
-                                child: Row(
-                                  children: [
-                                    Icon(_themeIconHandler(theme)),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 8.0),
-                                      child: Text(capatilizeFirstLetter(theme)),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            preferenceNotifier.value = preferenceNotifier.value
-                                .copyWith(theme: value);
-                          }
-                        },
-                      ),
+                Card(
+                  child: ListTile(
+                    title: const Text("Theme"),
+                    trailing: DropdownButton<String>(
+                      value: preferenceNotifier.value.theme,
+                      items:
+                          themeOptions.map((theme) {
+                            return DropdownMenuItem(
+                              value: theme,
+                              child: Row(
+                                children: [
+                                  Icon(_themeIconHandler(theme)),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(capatilizeFirstLetter(theme)),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          preferenceNotifier.value = preferenceNotifier.value
+                              .copyWith(theme: value);
+                        }
+                      },
                     ),
                   ),
                 ),
