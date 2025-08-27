@@ -45,6 +45,7 @@ class CustomTheme {
         backgroundColor: Colors.deepPurpleAccent,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Colors.white,
         selectedItemColor: Colors.deepPurpleAccent,
         unselectedItemColor: Colors.black54,
       ),

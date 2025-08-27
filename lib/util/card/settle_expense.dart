@@ -288,8 +288,18 @@ class _SettleExpenseState extends State<SettleExpense> {
       },
       builder: (context, state) {
         List<RoomUserModel> users = [];
+        bool isEditable = true;
+
         if (state is RoomUserSuccess) {
           users = getSettleMember(state.data);
+          for (int i = 0; i < state.data.length; i++) {
+            if (state.data[i].user.id == widget.transactionData!.sender.id) {
+              isEditable = isEditable && state.data[i].active;
+            }
+            if (state.data[i].user.id == widget.transactionData!.receiver.id) {
+              isEditable = isEditable && state.data[i].active;
+            }
+          }
         } else {
           return _loadingScreen();
         }
@@ -312,7 +322,7 @@ class _SettleExpenseState extends State<SettleExpense> {
                 titleSpacing: _mainScreenPadding.left,
                 leading: appBarBackButton(context),
                 actions:
-                    widget.transactionData == null
+                    widget.transactionData == null || !isEditable
                         ? null
                         : [
                           IconButton(
@@ -435,26 +445,31 @@ class _SettleExpenseState extends State<SettleExpense> {
                             },
                           ),
                           SizedBox(height: UiConstant.spaceBetweenSection),
-                          Center(
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(100),
-                              onTap: () {
-                                _submitTransactionHandler(users);
-                              },
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.9,
-                                child: GradientBorderCard(
-                                  borderRadius: 100,
-                                  borderWidth: 1,
-                                  gradientColors:
-                                      GradientColorConstant.vibrantGradient,
-                                  child: CustomButton.customOutlinedButton(
-                                    "${widget.transactionData == null ? "Add" : "Update"} Amount",
-                                    buttonHeight: 40,
-                                    buttonTextColor:
-                                        Theme.of(
-                                          context,
-                                        ).textTheme.bodyLarge!.color!,
+                          Visibility(
+                            visible:
+                                widget.transactionData == null || isEditable,
+                            child: Center(
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(100),
+                                onTap: () {
+                                  _submitTransactionHandler(users);
+                                },
+                                child: SizedBox(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.9,
+                                  child: GradientBorderCard(
+                                    borderRadius: 100,
+                                    borderWidth: 1,
+                                    gradientColors:
+                                        GradientColorConstant.vibrantGradient,
+                                    child: CustomButton.customOutlinedButton(
+                                      "${widget.transactionData == null ? "Add" : "Update"} Amount",
+                                      buttonHeight: 40,
+                                      buttonTextColor:
+                                          Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge!.color!,
+                                    ),
                                   ),
                                 ),
                               ),
