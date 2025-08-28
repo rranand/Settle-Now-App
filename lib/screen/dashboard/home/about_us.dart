@@ -39,7 +39,10 @@ class _AboutUsPageState extends State<AboutUsPage> {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color:
+                  Theme.of(context).brightness == Brightness.light
+                      ? Colors.white
+                      : Colors.blueGrey.shade900,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -62,11 +65,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                 const SizedBox(height: 8),
                 const Text(
                   'Designed & Developed',
-                  style: TextStyle(
-                    fontSize: 15,
-                    letterSpacing: 0.8,
-                    color: Colors.black87,
-                  ),
+                  style: TextStyle(fontSize: 15, letterSpacing: 0.8),
                 ),
                 const SizedBox(height: 6),
                 const Text(
