@@ -79,7 +79,10 @@ class CustomTheme {
           Colors.deepPurpleAccent.withAlpha(60),
         ),
       ),
-      snackBarTheme: SnackBarThemeData(backgroundColor: Colors.black87),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: Colors.black87,
+        contentTextStyle: TextStyle(color: Colors.white),
+      ),
       textButtonTheme: TextButtonThemeData(
         style: ButtonStyle(
           backgroundColor: WidgetStateProperty.all(Colors.black87),
@@ -176,7 +179,10 @@ class CustomTheme {
       thumbColor: WidgetStateProperty.all(Colors.greenAccent),
       trackColor: WidgetStateProperty.all(Colors.greenAccent.withAlpha(60)),
     ),
-    snackBarTheme: SnackBarThemeData(backgroundColor: Colors.black38),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: Colors.black38,
+      contentTextStyle: TextStyle(color: Colors.white),
+    ),
     textButtonTheme: TextButtonThemeData(
       style: ButtonStyle(
         textStyle: WidgetStateProperty.all(TextStyle(color: Colors.white)),
