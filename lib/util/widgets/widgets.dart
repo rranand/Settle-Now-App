@@ -14,14 +14,15 @@ import 'package:settlenow_v2/util/widgets/custom_button.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
 
-Widget dateOnCard(String date, {bool isLoaded = true}) {
+Widget dateOnCard(String date, BuildContext context, {bool isLoaded = true}) {
   return isLoaded
       ? Text(date, style: TextStyle(color: Colors.grey))
-      : CustomShimmerEffect.textWidget(width: 200);
+      : CustomShimmerEffect.textWidget(context, width: 200);
 }
 
 Widget subTextOnCard(
-  String text, {
+  String text,
+  BuildContext context, {
   Color? textColor = Colors.grey,
   FontWeight? fontWeight = FontWeight.w400,
   double? fontSize = 12,
@@ -38,7 +39,11 @@ Widget subTextOnCard(
       )
       : Padding(
         padding: EdgeInsets.only(top: 6),
-        child: CustomShimmerEffect.textWidget(fontSize: 12, width: 120),
+        child: CustomShimmerEffect.textWidget(
+          context,
+          fontSize: 12,
+          width: 120,
+        ),
       );
 }
 
@@ -121,7 +126,8 @@ Widget colouredWidget(Widget child, Color color, {double radius = 50}) {
 }
 
 Widget tagOnCard(
-  String text, {
+  String text,
+  BuildContext context, {
   Color textColor = Colors.deepPurple,
   Color? backgroundColor,
   bool isFirst = false,
@@ -137,11 +143,12 @@ Widget tagOnCard(
         ),
         child: subTextOnCard(
           capatilizeFirstLetter(text),
+          context,
           textColor: textColor,
           fontWeight: FontWeight.bold,
         ),
       )
-      : CustomShimmerEffect.textWidget(width: 100);
+      : CustomShimmerEffect.textWidget(context, width: 100);
 }
 
 Widget snackbarSuccessIcon() {

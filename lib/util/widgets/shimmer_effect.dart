@@ -4,15 +4,25 @@ import 'package:shimmer/shimmer.dart';
 
 class CustomShimmerEffect {
   static Widget placeHolderShimmerEffect(
-    Widget child, {
+    Widget child,
+    BuildContext context, {
     ShimmerDirection shimmerDirection = ShimmerDirection.ltr,
   }) {
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      direction: shimmerDirection,
-      child: child,
-    );
+    if (Theme.brightnessOf(context) == Brightness.light) {
+      return Shimmer.fromColors(
+        baseColor: Colors.grey.shade300.withAlpha(210),
+        highlightColor: Colors.grey.shade300,
+        direction: shimmerDirection,
+        child: child,
+      );
+    } else {
+      return Shimmer.fromColors(
+        baseColor: Theme.of(context).colorScheme.surfaceTint.withAlpha(230),
+        highlightColor: Theme.of(context).colorScheme.surfaceTint,
+        direction: shimmerDirection,
+        child: child,
+      );
+    }
   }
 
   static Widget loadingShimmerEffect(
@@ -60,7 +70,8 @@ class CustomShimmerEffect {
     );
   }
 
-  static Widget imageWidget({
+  static Widget imageWidget(
+    BuildContext context, {
     BoxShape shape = BoxShape.rectangle,
     double radius = 12,
   }) {
@@ -77,10 +88,12 @@ class CustomShimmerEffect {
           color: Colors.white,
         ),
       ),
+      context,
     );
   }
 
-  static Widget overlapImageWidget({
+  static Widget overlapImageWidget(
+    BuildContext context, {
     int noOfImages = 4,
     double nextImageOffset = 22,
     double imageRadius = 30,
@@ -95,14 +108,19 @@ class CustomShimmerEffect {
           noOfImages,
           (i) => Positioned(
             left: i * nextImageOffset,
-            child: imageWidget(shape: BoxShape.circle, radius: imageRadius),
+            child: imageWidget(
+              context,
+              shape: BoxShape.circle,
+              radius: imageRadius,
+            ),
           ),
         ),
       ),
     );
   }
 
-  static Widget textWidget({
+  static Widget textWidget(
+    BuildContext context, {
     double fontSize = 14,
     int maxLines = 1,
     double? width,
@@ -115,7 +133,7 @@ class CustomShimmerEffect {
       return SizedBox(
         width: width,
         height: fontSize * 1.2 * maxLines + (maxLines - 1) * seperatorHeight,
-        child: imageWidget(radius: blockRadius),
+        child: imageWidget(context, radius: blockRadius),
       );
     }
 
@@ -141,10 +159,12 @@ class CustomShimmerEffect {
               ),
         ),
       ),
+      context,
     );
   }
 
   static Widget searchCardEvent(
+    BuildContext context,
     double horizontalPadding,
     double verticalPadding,
     double imageHeight,
@@ -173,17 +193,17 @@ class CustomShimmerEffect {
                   SizedBox(
                     width: double.infinity,
                     height: imageHeight,
-                    child: imageWidget(),
+                    child: imageWidget(context),
                   ),
                   SizedBox(height: UiConstant.spaceBetweenSection),
                   SizedBox(
                     width: 200,
-                    child: textWidget(fontSize: headerFontSize),
+                    child: textWidget(context, fontSize: headerFontSize),
                   ),
                   SizedBox(height: spaceBetweenEventDetail),
                   SizedBox(
                     width: 250,
-                    child: textWidget(fontSize: eventDetailFontSize),
+                    child: textWidget(context, fontSize: eventDetailFontSize),
                   ),
                   SizedBox(height: spaceBetweenEventDetail),
                   SizedBox(
@@ -194,7 +214,10 @@ class CustomShimmerEffect {
                       itemBuilder:
                           (context, index) => SizedBox(
                             width: index == 0 ? 80 : 50,
-                            child: textWidget(fontSize: eventCategoryFontSize),
+                            child: textWidget(
+                              context,
+                              fontSize: eventCategoryFontSize,
+                            ),
                           ),
                       separatorBuilder: (context, index) => SizedBox(width: 8),
                       itemCount: 4,
@@ -204,6 +227,7 @@ class CustomShimmerEffect {
               ),
             ),
       ),
+      context,
     );
   }
 }

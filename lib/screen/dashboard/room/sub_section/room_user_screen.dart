@@ -61,6 +61,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
                       imageRadius: 55,
                     )
                     : CustomShimmerEffect.overlapImageWidget(
+                      context,
                       noOfImages: 1,
                       imageRadius: 55,
                     ),
@@ -77,21 +78,25 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
                           ),
                         )
                         : CustomShimmerEffect.textWidget(
+                          context,
                           fontSize: UiConstant.cardTitleTextSize,
                           width: 150,
                         ),
                     subTextOnCard(
                       "Contributed: ${formatCurrency(data.contribution, context)}",
+                      context,
                       fontSize: subTextFontSize,
                       isLoaded: data.hasData,
                     ),
                     subTextOnCard(
                       "Spent: ${formatCurrency(data.spent, context)}",
+                      context,
                       fontSize: subTextFontSize,
                       isLoaded: data.hasData,
                     ),
                     subTextOnCard(
                       "Balance: ${formatCurrency(amount, context)}",
+                      context,
                       fontSize: subTextFontSize,
                       textColor: getAmountColor(amount),
                       isLoaded: data.hasData,

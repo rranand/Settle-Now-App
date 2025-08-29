@@ -36,6 +36,7 @@ class SettleCard extends StatelessWidget {
           user.hasData
               ? overlapUserImageWidget(context, [user], 1, imageRadius: 40)
               : CustomShimmerEffect.overlapImageWidget(
+                context,
                 noOfImages: 1,
                 imageRadius: 40,
               ),
@@ -48,7 +49,7 @@ class SettleCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               )
-              : CustomShimmerEffect.textWidget(width: 90),
+              : CustomShimmerEffect.textWidget(context, width: 90),
         ],
       ),
     );
@@ -117,6 +118,7 @@ class SettleCard extends StatelessWidget {
                           ),
                         )
                         : CustomShimmerEffect.textWidget(
+                          context,
                           fontSize: 20,
                           width: 80,
                         ),
@@ -127,6 +129,7 @@ class SettleCard extends StatelessWidget {
                 children: [
                   subTextOnCard(
                     convertDateTimeFormat(data.modifiedOn),
+                    context,
                     fontSize: 14,
                     isLoaded: data.hasData,
                   ),
@@ -134,6 +137,7 @@ class SettleCard extends StatelessWidget {
                     children: [
                       subTextOnCard(
                         _getAddedByString(),
+                        context,
                         fontSize: 14,
                         isLoaded: data.hasData,
                       ),

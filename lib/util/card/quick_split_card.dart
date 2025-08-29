@@ -65,17 +65,19 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                 nextImageOffset: 24,
               ),
             )
-            : CustomShimmerEffect.overlapImageWidget(),
+            : CustomShimmerEffect.overlapImageWidget(context),
         Visibility(
           visible: !value,
           child: const SizedBox(height: UiConstant.cardSpaceAfterSubText),
         ),
         subTextOnCard(
           "Created By ${widget.data.createdBy.id == _loggedInUser.id ? "You" : widget.data.createdBy.name.split(' ').first}",
+          context,
           isLoaded: widget.data.hasData,
         ),
         subTextOnCard(
           "Created ${convertDateTimeFormat(widget.data.createdOn)}",
+          context,
           isLoaded: widget.data.hasData,
         ),
         Visibility(
@@ -83,6 +85,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               !isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn),
           child: subTextOnCard(
             "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
+            context,
             isLoaded: widget.data.hasData,
           ),
         ),
@@ -304,6 +307,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   tags.length,
                   (index) => tagOnCard(
                     tags[index],
+                    context,
                     textColor:
                         UiConstant.colors[index % UiConstant.colors.length],
                     backgroundColor:
@@ -382,7 +386,10 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                               widget.data.description,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             )
-                            : CustomShimmerEffect.textWidget(width: 250),
+                            : CustomShimmerEffect.textWidget(
+                              context,
+                              width: 250,
+                            ),
                         ValueListenableBuilder(
                           valueListenable: isExpanded,
                           builder: (
@@ -415,6 +422,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                     );
                   } else {
                     return CustomShimmerEffect.textWidget(
+                      context,
                       width: 50,
                       fontSize: 16,
                     );

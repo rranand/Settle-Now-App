@@ -141,6 +141,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           imageRadius: 100,
                         )
                         : CustomShimmerEffect.overlapImageWidget(
+                          context,
                           noOfImages: 1,
                           imageRadius: 100,
                         ),
@@ -173,11 +174,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CustomShimmerEffect.textWidget(
+                              context,
                               fontSize: 24,
                               width: 150,
                             ),
                             SizedBox(height: 4),
-                            CustomShimmerEffect.textWidget(width: 200),
+                            CustomShimmerEffect.textWidget(context, width: 200),
                           ],
                         ),
                   ],
@@ -230,6 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
+                  context,
                 ),
             SizedBox(height: UiConstant.spaceBetweenSection),
             Card(
@@ -242,7 +245,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             "Member Since ${convertInDateFormat(_loggedInUser.createdOn)}",
                             style: TextStyle(color: Colors.grey),
                           )
-                          : CustomShimmerEffect.textWidget(width: 250),
+                          : CustomShimmerEffect.textWidget(context, width: 250),
                 ),
               ),
             ),

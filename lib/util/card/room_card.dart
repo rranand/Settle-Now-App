@@ -60,6 +60,7 @@ class RoomCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  context,
                   shimmerDirection: ShimmerDirection.ttb,
                 ),
             Padding(
@@ -77,22 +78,24 @@ class RoomCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       )
-                      : CustomShimmerEffect.textWidget(width: 250),
+                      : CustomShimmerEffect.textWidget(context, width: 250),
 
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
                     "Updated On ${convertDateTimeFormat(data.modifiedOn)}",
+                    context,
                     isLoaded: data.hasData,
                   ),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
                     "Created By ${data.createdBy.name.split(' ').first}",
+                    context,
                     isLoaded: data.hasData,
                   ),
                   const SizedBox(height: UiConstant.cardSpaceAfterSubText),
                   data.hasData
                       ? overlapUserImageWidget(context, users, 4)
-                      : CustomShimmerEffect.overlapImageWidget(),
+                      : CustomShimmerEffect.overlapImageWidget(context),
                 ],
               ),
             ),

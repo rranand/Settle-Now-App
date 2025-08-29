@@ -34,13 +34,14 @@ class LoginActivityCard extends StatelessWidget {
                     DeviceTypeExtension.fromString(data.deviceType).color,
                   )
                   : CustomShimmerEffect.imageWidget(
+                    context,
                     shape: BoxShape.circle,
                     radius: 50,
                   ),
           title:
               data.hasData
                   ? Text(data.deviceName)
-                  : CustomShimmerEffect.textWidget(width: 80),
+                  : CustomShimmerEffect.textWidget(context, width: 80),
           subtitle:
               data.hasData
                   ? Text.rich(
@@ -53,7 +54,11 @@ class LoginActivityCard extends StatelessWidget {
                       ],
                     ),
                   )
-                  : CustomShimmerEffect.textWidget(fontSize: 10, width: 80),
+                  : CustomShimmerEffect.textWidget(
+                    context,
+                    fontSize: 10,
+                    width: 80,
+                  ),
           trailing:
               data.hasData
                   ? (data.id.isEmpty
@@ -91,6 +96,7 @@ class LoginActivityCard extends StatelessWidget {
                       buttonHeight: 40,
                       buttonWidth: 100,
                     ),
+                    context,
                   ),
         ),
       ),

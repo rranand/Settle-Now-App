@@ -10,9 +10,10 @@ import 'package:settlenow_v2/util/widgets/widgets.dart';
 Widget imageWidgetForCachedNetworkimage(
   ImageProvider? imgProvider,
   bool isLast,
+  BuildContext context,
 ) {
   if (imgProvider == null) {
-    return CustomShimmerEffect.imageWidget(shape: BoxShape.circle);
+    return CustomShimmerEffect.imageWidget(context, shape: BoxShape.circle);
   } else {
     return Container(
       decoration: BoxDecoration(
@@ -99,13 +100,13 @@ Widget eachUserImageBuilder(
       height: imageRadius,
       progressIndicatorBuilder:
           (context, url, downloadProgress) =>
-              imageWidgetForCachedNetworkimage(null, isLast),
+              imageWidgetForCachedNetworkimage(null, isLast, context),
       errorWidget:
           (context, url, error) =>
               errorImageWidget(eachUser, imageRadius, isLast),
       imageBuilder:
           (context, imageProvider) =>
-              imageWidgetForCachedNetworkimage(imageProvider, isLast),
+              imageWidgetForCachedNetworkimage(imageProvider, isLast, context),
     );
   }
 

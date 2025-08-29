@@ -28,6 +28,7 @@ class _NotificationCardState extends State<NotificationCard> {
   Widget leadingIcon() {
     if (!widget.data.hasData) {
       return CustomShimmerEffect.imageWidget(
+        context,
         shape: BoxShape.circle,
         radius: 50,
       );
@@ -36,6 +37,7 @@ class _NotificationCardState extends State<NotificationCard> {
       if (widget.data.by.id != widget.loggedInUserID) {
         return imageWidgetForCachedNetworkImage(
           widget.data.by.profileImage,
+          context,
           boxShape: BoxShape.circle,
           width: 50,
           height: 50,
@@ -56,6 +58,7 @@ class _NotificationCardState extends State<NotificationCard> {
     } else if (widget.data.by.id == widget.loggedInUserID) {
       return imageWidgetForCachedNetworkImage(
         widget.data.user.profileImage,
+        context,
         boxShape: BoxShape.circle,
         width: 50,
         height: 50,
@@ -63,6 +66,7 @@ class _NotificationCardState extends State<NotificationCard> {
     } else {
       return imageWidgetForCachedNetworkImage(
         widget.data.by.profileImage,
+        context,
         boxShape: BoxShape.circle,
         width: 50,
         height: 50,
@@ -220,14 +224,18 @@ class _NotificationCardState extends State<NotificationCard> {
               title:
                   widget.data.hasData
                       ? title()
-                      : CustomShimmerEffect.textWidget(width: 80),
+                      : CustomShimmerEffect.textWidget(context, width: 80),
               subtitle:
                   widget.data.hasData
                       ? Text(
                         widget.data.type,
                         style: TextStyle(color: Colors.grey[600]),
                       )
-                      : CustomShimmerEffect.textWidget(fontSize: 10, width: 80),
+                      : CustomShimmerEffect.textWidget(
+                        context,
+                        fontSize: 10,
+                        width: 80,
+                      ),
             ),
             Visibility(
               visible: widget.data.hasData,

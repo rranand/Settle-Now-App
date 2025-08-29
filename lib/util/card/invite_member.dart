@@ -88,12 +88,12 @@ class _InviteMemberState extends State<InviteMember> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CustomShimmerEffect.imageWidget(
+                CustomShimmerEffect.imageWidget(context,
                   radius: 50,
                   shape: BoxShape.circle,
                 ),
                 SizedBox(height: 8),
-                CustomShimmerEffect.textWidget(width: 100),
+                CustomShimmerEffect.textWidget(context,width: 100),
               ],
             ),
             Positioned(

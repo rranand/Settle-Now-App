@@ -76,6 +76,7 @@ class _TransactionCardState extends State<TransactionCard> {
                     tags.length,
                     (index) => tagOnCard(
                       tags[index],
+                      context,
                       textColor: UiConstant.colors[index],
                       backgroundColor: UiConstant.colorsWithShade50[index],
                       isLoaded: widget.data.hasData,
@@ -133,27 +134,30 @@ class _TransactionCardState extends State<TransactionCard> {
                             CategoryParser.expenseCategoryIcons.length],
                       )
                       : CustomShimmerEffect.imageWidget(
+                        context,
                         shape: BoxShape.circle,
                         radius: 50,
                       ),
               title:
                   widget.data.hasData
                       ? Text(widget.data.description)
-                      : CustomShimmerEffect.textWidget(width: 100),
+                      : CustomShimmerEffect.textWidget(context, width: 100),
               subtitle: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   subTextOnCard(
                     "Created On ${convertDateTimeFormat(widget.data.createdOn)}",
+                    context,
                     isLoaded: widget.data.hasData,
                   ),
                   showEdited()
                       ? subTextOnCard(
                         "Updated On ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                        context,
                         isLoaded: widget.data.hasData,
                       )
-                      : subTextOnCard(""),
+                      : subTextOnCard("", context),
                 ],
               ),
               trailing:
@@ -165,7 +169,11 @@ class _TransactionCardState extends State<TransactionCard> {
                           fontWeight: FontWeight.w600,
                         ),
                       )
-                      : CustomShimmerEffect.textWidget(fontSize: 20, width: 40),
+                      : CustomShimmerEffect.textWidget(
+                        context,
+                        fontSize: 20,
+                        width: 40,
+                      ),
             ),
           ],
         ),

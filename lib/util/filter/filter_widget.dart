@@ -105,6 +105,7 @@ class FilterWidget {
                       padding: const EdgeInsets.all(4.0),
                       child: imageWidgetForCachedNetworkImage(
                         user.profileImage,
+                        context,
                         boxShape: BoxShape.circle,
                         width: 35,
                         height: 35,

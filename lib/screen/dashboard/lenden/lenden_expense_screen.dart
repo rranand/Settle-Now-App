@@ -212,6 +212,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                         return ListTile(
                           leading: imageWidgetForCachedNetworkImage(
                             users[index].profileImage,
+                            context,
                             width: 45,
                             height: 45,
                             boxShape: BoxShape.circle,
@@ -408,7 +409,11 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       return AppBar(
         title:
             widget.roomName == null
-                ? CustomShimmerEffect.textWidget(width: 180, fontSize: 20)
+                ? CustomShimmerEffect.textWidget(
+                  context,
+                  width: 180,
+                  fontSize: 20,
+                )
                 : Text(widget.roomName!),
         titleSpacing: _mainScreenPadding.left,
         centerTitle: false,

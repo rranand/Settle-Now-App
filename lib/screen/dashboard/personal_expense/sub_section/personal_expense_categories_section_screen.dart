@@ -46,19 +46,24 @@ class _PersonalExpenseCategoriesSectionScreenState
                         UiConstant.colorsWithShade100[index],
                       )
                       : CustomShimmerEffect.imageWidget(
+                        context,
                         shape: BoxShape.circle,
                         radius: 50,
                       ),
               title:
                   isLoaded
                       ? Text(CategoryParser.expenseCategories[index])
-                      : CustomShimmerEffect.textWidget(width: 80),
+                      : CustomShimmerEffect.textWidget(context, width: 80),
               subtitle:
                   isLoaded
                       ? Text(
                         "${categoryWiseExpense[index].second} transactions",
                       )
-                      : CustomShimmerEffect.textWidget(fontSize: 10, width: 80),
+                      : CustomShimmerEffect.textWidget(
+                        context,
+                        fontSize: 10,
+                        width: 80,
+                      ),
               trailing:
                   isLoaded
                       ? Text(
@@ -71,7 +76,11 @@ class _PersonalExpenseCategoriesSectionScreenState
                           fontWeight: FontWeight.w600,
                         ),
                       )
-                      : CustomShimmerEffect.textWidget(fontSize: 15, width: 80),
+                      : CustomShimmerEffect.textWidget(
+                        context,
+                        fontSize: 15,
+                        width: 80,
+                      ),
             ),
           ),
         );

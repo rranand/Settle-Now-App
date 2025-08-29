@@ -13,7 +13,8 @@ class PersonalExpenseCard extends StatelessWidget {
   const PersonalExpenseCard({super.key, required this.data});
 
   Widget textWidget(
-    String text, {
+    String text,
+    BuildContext context, {
     bool isCurrency = false,
     bool isLoaded = true,
   }) {
@@ -27,6 +28,7 @@ class PersonalExpenseCard extends StatelessWidget {
           ),
         )
         : CustomShimmerEffect.textWidget(
+          context,
           fontSize: 18,
           width: isCurrency ? 60 : 100,
         );
@@ -107,10 +109,11 @@ class PersonalExpenseCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              textWidget(data.monthName, isLoaded: data.hasData),
+              textWidget(data.monthName, context, isLoaded: data.hasData),
               const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
               textWidget(
                 formatCurrency(data.amount, context),
+                context,
                 isCurrency: true,
                 isLoaded: data.hasData,
               ),
@@ -145,6 +148,7 @@ class PersonalExpenseCard extends StatelessWidget {
                               ),
                             ),
                           ),
+                          context,
                         ),
               ),
             ],

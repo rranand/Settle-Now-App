@@ -212,6 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             currentAccountPicture: imageWidgetForCachedNetworkImage(
               _loggedInUser.profileImage,
+              context,
               boxShape: BoxShape.circle,
             ),
             accountName: Text(

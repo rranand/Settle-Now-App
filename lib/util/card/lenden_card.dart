@@ -59,6 +59,7 @@ class LendenCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  context,
                   shimmerDirection: ShimmerDirection.ttb,
                 ),
             Padding(
@@ -75,15 +76,17 @@ class LendenCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       )
-                      : CustomShimmerEffect.textWidget(width: 250),
+                      : CustomShimmerEffect.textWidget(context, width: 250),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
                     "Updated On ${convertDateTimeFormat(data.modifiedOn)}",
+                    context,
                     isLoaded: data.hasData,
                   ),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
                     "Created By ${data.createdBy.name.split(' ').first}",
+                    context,
                     isLoaded: data.hasData,
                   ),
                   const SizedBox(height: UiConstant.cardSpaceAfterSubText),
@@ -96,7 +99,7 @@ class LendenCard extends StatelessWidget {
                           fontSize: 20,
                         ),
                       )
-                      : CustomShimmerEffect.textWidget(width: 100),
+                      : CustomShimmerEffect.textWidget(context, width: 100),
                   const SizedBox(height: UiConstant.cardSpaceAfterSubText),
                   data.hasData
                       ? overlapUserImageWidget(
@@ -106,7 +109,10 @@ class LendenCard extends StatelessWidget {
                         imageRadius: 30,
                         nextImageOffset: 24,
                       )
-                      : CustomShimmerEffect.overlapImageWidget(noOfImages: 2),
+                      : CustomShimmerEffect.overlapImageWidget(
+                        context,
+                        noOfImages: 2,
+                      ),
                 ],
               ),
             ),

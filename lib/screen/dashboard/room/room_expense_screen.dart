@@ -272,6 +272,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                 color: Colors.white,
               ),
             ),
+            context,
           );
         }
       },
@@ -619,7 +620,11 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             title:
                 isLoaded
                     ? Text(roomName)
-                    : CustomShimmerEffect.textWidget(width: 180, fontSize: 20),
+                    : CustomShimmerEffect.textWidget(
+                      context,
+                      width: 180,
+                      fontSize: 20,
+                    ),
             titleSpacing: _mainScreenPadding.left,
             leading: appBarBackButton(context),
             centerTitle: false,

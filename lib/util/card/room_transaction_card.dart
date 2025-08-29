@@ -178,6 +178,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                     tags.length,
                     (index) => tagOnCard(
                       tags[index],
+                      context,
                       textColor:
                           UiConstant.colors[index % UiConstant.colors.length],
                       backgroundColor:
@@ -220,31 +221,39 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                             CategoryParser.expenseCategoryIcons.length],
                       )
                       : CustomShimmerEffect.imageWidget(
+                        context,
                         shape: BoxShape.circle,
                         radius: 50,
                       ),
               title:
                   widget.data.hasData
                       ? Text(widget.data.description)
-                      : CustomShimmerEffect.textWidget(width: 125),
+                      : CustomShimmerEffect.textWidget(context, width: 125),
               subtitle: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   subTextOnCard(
                     "Created By ${widget.loggedInUser.id == widget.data.createdBy.id ? "You" : widget.data.createdBy.name}",
+                    context,
                     isLoaded: widget.data.hasData,
                   ),
                   subTextOnCard(
                     "Created ${convertDateTimeFormat(widget.data.createdOn)}",
+                    context,
                     isLoaded: widget.data.hasData,
                   ),
                   !isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)
                       ? subTextOnCard(
                         "Updated ${convertDateTimeFormat(widget.data.modifiedOn)}",
+                        context,
                         isLoaded: widget.data.hasData,
                       )
-                      : subTextOnCard("", isLoaded: widget.data.hasData),
+                      : subTextOnCard(
+                        "",
+                        context,
+                        isLoaded: widget.data.hasData,
+                      ),
                 ],
               ),
               trailing:
@@ -256,7 +265,11 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                           fontWeight: FontWeight.w600,
                         ),
                       )
-                      : CustomShimmerEffect.textWidget(width: 50, fontSize: 16),
+                      : CustomShimmerEffect.textWidget(
+                        context,
+                        width: 50,
+                        fontSize: 16,
+                      ),
             ),
             ValueListenableBuilder(
               valueListenable: isExpanded,

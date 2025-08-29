@@ -89,7 +89,7 @@ class LendenExpenseCard extends StatelessWidget {
                       color: Colors.white,
                     ),
                   )
-                  : CustomShimmerEffect.textWidget(width: 90),
+                  : CustomShimmerEffect.textWidget(context, width: 90),
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child:
@@ -98,19 +98,21 @@ class LendenExpenseCard extends StatelessWidget {
                           data.description,
                           style: TextStyle(fontSize: 13, color: Colors.white),
                         )
-                        : CustomShimmerEffect.textWidget(width: 50),
+                        : CustomShimmerEffect.textWidget(context, width: 50),
               ),
               SizedBox(height: 6),
               subTextOnCard(
                 'Created: ${convertDateTimeFormat(data.createdOn)}',
+                context,
                 fontSize: 11,
                 textColor: Colors.white,
                 isLoaded: data.hasData,
               ),
               isDateTimeSame(data.createdOn, data.modifiedOn)
-                  ? subTextOnCard("")
+                  ? subTextOnCard("", context)
                   : subTextOnCard(
                     'Updated: ${convertDateTimeFormat(data.modifiedOn)}',
+                    context,
                     fontSize: 11,
                     textColor: Colors.white,
                     isLoaded: data.hasData,

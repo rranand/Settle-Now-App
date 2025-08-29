@@ -24,8 +24,8 @@ class LoadingPage extends StatelessWidget {
         SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Shimmer.fromColors(
-            baseColor: Colors.black12,
-            highlightColor: Colors.white,
+            baseColor: Theme.of(context).colorScheme.surfaceTint.withAlpha(50),
+            highlightColor: Theme.of(context).colorScheme.surfaceTint,
             direction: ShimmerDirection.ttb,
             period: Duration(seconds: 2),
             child: imageData(),
