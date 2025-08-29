@@ -56,8 +56,13 @@ class _TransactionCardState extends State<TransactionCard> {
     List<String> tags = createTags();
 
     return Card(
-      child: Padding(
+      child: Container(
         padding: EdgeInsets.all(UiConstant.cardPadding),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          boxShadow: getContainerBoxShadow(context),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,

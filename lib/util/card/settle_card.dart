@@ -82,7 +82,7 @@ class SettleCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            border: Border.all(color: Colors.grey.withAlpha(51)),
+            boxShadow: getContainerBoxShadow(context),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

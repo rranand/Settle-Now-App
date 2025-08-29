@@ -313,3 +313,25 @@ Future<bool> deleteAccountDialog(
     return res.contains("Yes");
   }
 }
+
+List<BoxShadow> getContainerBoxShadow(BuildContext context) {
+  if (Theme.brightnessOf(context) == Brightness.light) {
+    return [
+      BoxShadow(
+        color: Colors.black.withAlpha(1),
+        spreadRadius: 1,
+        blurRadius: 6,
+        offset: Offset(0, 3),
+      ),
+    ];
+  } else {
+    return [
+      BoxShadow(
+        color: Theme.of(context).colorScheme.shadow,
+        spreadRadius: 2,
+        blurRadius: 5,
+        offset: Offset(0, 3),
+      ),
+    ];
+  }
+}

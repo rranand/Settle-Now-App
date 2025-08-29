@@ -6,6 +6,7 @@ import 'package:settlenow_v2/internationalization/currency.dart';
 import 'package:settlenow_v2/model/personal_expense_info_model.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
 import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
+import 'package:settlenow_v2/util/widgets/widgets.dart';
 
 class PersonalExpenseCard extends StatelessWidget {
   final PersonalExpenseInfoModel data;
@@ -100,7 +101,7 @@ class PersonalExpenseCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Theme.of(context).cardTheme.color,
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-            border: Border.all(color: Colors.black.withAlpha(51)),
+            boxShadow: getContainerBoxShadow(context),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

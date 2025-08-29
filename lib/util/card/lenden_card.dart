@@ -37,6 +37,7 @@ class LendenCard extends StatelessWidget {
                     ),
                   )
                   : null,
+          boxShadow: getContainerBoxShadow(context),
         ),
         child: Stack(
           children: [

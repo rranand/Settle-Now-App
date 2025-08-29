@@ -30,8 +30,13 @@ class _PersonalExpenseCategoriesSectionScreenState
           return SizedBox.shrink();
         }
         return Card(
-          child: Padding(
+          child: Container(
             padding: const EdgeInsets.all(UiConstant.cardPadding),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardTheme.color,
+              borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+              boxShadow: getContainerBoxShadow(context),
+            ),
             child: ListTile(
               contentPadding: EdgeInsets.zero,
               leading:

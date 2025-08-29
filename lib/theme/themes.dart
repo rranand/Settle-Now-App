@@ -119,7 +119,11 @@ class CustomTheme {
       elevation: 0,
     ),
     cardTheme: CardThemeData(
-      color: Colors.black38,
+      color:
+          ColorScheme.fromSeed(
+            seedColor: Colors.greenAccent,
+            brightness: Brightness.dark,
+          ).surface,
       elevation: UiConstant.cardElevation,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
     ),

@@ -28,7 +28,7 @@ class RoomCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-          color: Colors.transparent,
+          color: Theme.of(context).cardTheme.color,
           border:
               data.hasData
                   ? Border(
@@ -38,6 +38,7 @@ class RoomCard extends StatelessWidget {
                     ),
                   )
                   : null,
+          boxShadow: getContainerBoxShadow(context),
         ),
         child: Stack(
           children: [

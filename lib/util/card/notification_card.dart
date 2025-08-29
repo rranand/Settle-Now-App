@@ -205,8 +205,13 @@ class _NotificationCardState extends State<NotificationCard> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.all(UiConstant.cardPadding),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          boxShadow: getContainerBoxShadow(context),
+        ),
         child: Column(
           children: [
             ListTile(

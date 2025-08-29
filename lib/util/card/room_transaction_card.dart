@@ -165,15 +165,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
         decoration: BoxDecoration(
           color: Theme.of(context).cardTheme.color,
           borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-          border: Border.all(color: Colors.grey.withAlpha(51)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withAlpha(51),
-              spreadRadius: 2,
-              blurRadius: 5,
-              offset: Offset(0, 3),
-            ),
-          ],
+          boxShadow: getContainerBoxShadow(context),
         ),
         child: Column(
           children: [

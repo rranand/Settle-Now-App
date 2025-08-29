@@ -117,22 +117,29 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
       txt = "Show Empty Months";
     }
     return Card(
-      child: Column(
-        children: [
-          ListTile(
-            title: Text(
-              prefernceOption[index],
-              style: const TextStyle(fontWeight: FontWeight.bold),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          boxShadow: getContainerBoxShadow(context),
+        ),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text(
+                prefernceOption[index],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
-          ),
-          SwitchListTile(
-            title: Text(txt),
-            value: getSettledValue(index),
-            onChanged: (value) {
-              setSettledValue(index, value);
-            },
-          ),
-        ],
+            SwitchListTile(
+              title: Text(txt),
+              value: getSettledValue(index),
+              onChanged: (value) {
+                setSettledValue(index, value);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -180,31 +187,40 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
                   (index) => _buildSection(index),
                 ),
                 Card(
-                  child: ListTile(
-                    title: const Text("Theme"),
-                    trailing: DropdownButton<String>(
-                      value: preferenceNotifier.value.theme,
-                      items:
-                          themeOptions.map((theme) {
-                            return DropdownMenuItem(
-                              value: theme,
-                              child: Row(
-                                children: [
-                                  Icon(_themeIconHandler(theme)),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(capatilizeFirstLetter(theme)),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          preferenceNotifier.value = preferenceNotifier.value
-                              .copyWith(theme: value);
-                        }
-                      },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).cardTheme.color,
+                      borderRadius: BorderRadius.circular(
+                        UiConstant.cardBorderRadius,
+                      ),
+                      boxShadow: getContainerBoxShadow(context),
+                    ),
+                    child: ListTile(
+                      title: const Text("Theme"),
+                      trailing: DropdownButton<String>(
+                        value: preferenceNotifier.value.theme,
+                        items:
+                            themeOptions.map((theme) {
+                              return DropdownMenuItem(
+                                value: theme,
+                                child: Row(
+                                  children: [
+                                    Icon(_themeIconHandler(theme)),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Text(capatilizeFirstLetter(theme)),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            preferenceNotifier.value = preferenceNotifier.value
+                                .copyWith(theme: value);
+                          }
+                        },
+                      ),
                     ),
                   ),
                 ),

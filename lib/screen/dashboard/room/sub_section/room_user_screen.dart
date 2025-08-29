@@ -39,8 +39,13 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     UserModel user = data.user;
 
     return Card(
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.all(UiConstant.cardPadding + 2),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardTheme.color,
+          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
+          boxShadow: getContainerBoxShadow(context),
+        ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
