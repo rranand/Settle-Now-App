@@ -82,12 +82,12 @@ class NotificationInterfaceHandler {
       switch (data["type"]) {
         case "room":
           {
-            context.push("${RouterConstants.roomRouteName}/${data["id"]!}");
+            context.go("${RouterConstants.roomRouteName}/${data["id"]!}");
             break;
           }
         case "lenden":
           {
-            context.push("${RouterConstants.lendenRouteName}/${data["id"]!}");
+            context.go("${RouterConstants.lendenRouteName}/${data["id"]!}");
             break;
           }
         case "account":
