@@ -72,7 +72,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
                   data.second ? FetchStatus.success : FetchStatus.done,
               inactiveStatus: oldRoomInActiveStatus,
               activeData: data.first,
-              inactiveData: oldRoomActiveData,
+              inactiveData: oldRoomInActiveData,
             ),
           );
         } else {
@@ -82,7 +82,7 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
                   data.second ? FetchStatus.success : FetchStatus.done,
               inactiveStatus: oldRoomInActiveStatus,
               activeData: [...oldRoomActiveData, ...data.first],
-              inactiveData: oldRoomActiveData,
+              inactiveData: oldRoomInActiveData,
             ),
           );
         }

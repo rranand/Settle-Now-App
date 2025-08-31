@@ -120,8 +120,11 @@ class NotificationInterfaceHandler {
     }
   }
 
-  static void fcmConfiguration(BuildContext context) async {
-    if (!kIsWeb) {
+  static void fcmConfiguration(
+    BuildContext context,
+    bool isNotificationAllowed,
+  ) async {
+    if (isNotificationAllowed) {
       FirebaseMessaging.instance.getInitialMessage().then((message) async {
         if (message != null && context.mounted) {
           notificationProcessor(context, message.data);
