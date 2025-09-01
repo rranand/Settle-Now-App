@@ -15,7 +15,6 @@ class PersonalMonthlyExpenseRepository {
     try {
       List<PersonalExpenseTransactionModel> data = await _dataProvider
           .fetchData(authToken, year, month);
-      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
     } catch (e) {
       rethrow;

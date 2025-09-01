@@ -57,11 +57,12 @@ class FilterCubit extends Cubit<FilterState> {
 
   List<T> sortTransactions<T extends CommonTransactionField>(List<T> data) {
     bool isMostRecent =
-        state.sortRule != null && state.sortRule == SortRules.ascending;
+        state.sortRule == null || state.sortRule == SortRules.descending;
+
     data.sort((a, b) {
       int result;
 
-      switch (state.sortBy) {
+      switch (state.sortBy ?? SortBy.dateCreated) {
         case SortBy.name:
           result = a.description.compareTo(b.description);
           break;
@@ -71,12 +72,9 @@ class FilterCubit extends Cubit<FilterState> {
         case SortBy.dateCreated:
           result = a.createdOn.compareTo(b.createdOn);
           break;
-        default:
-          result = 0;
-          break;
       }
 
-      return isMostRecent ? result : -result;
+      return isMostRecent ? -result : result;
     });
 
     return data;
@@ -196,6 +194,19 @@ class FilterCubit extends Cubit<FilterState> {
               data[i].createdOn.millisecondsSinceEpoch <=
                   state.dateRange!.end.millisecondsSinceEpoch)) {
         continue;
+      }
+
+      if (state.splitWith.isNotEmpty) {
+        bool isUserFound = false;
+
+        isUserFound = state.splitWith.contains(data[i].createdBy.id);
+
+        for (int j = 0; !isUserFound && j < data[i].users.length; j++) {
+          isUserFound = state.splitWith.contains(data[i].users[j].id);
+        }
+        if (!isUserFound) {
+          continue;
+        }
       }
 
       filteredData.add(data[i]);

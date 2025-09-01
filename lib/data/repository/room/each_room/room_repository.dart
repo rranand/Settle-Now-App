@@ -53,7 +53,6 @@ class RoomRepository {
           );
         }
       }
-      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
 
       return data;
     } catch (e) {
@@ -73,10 +72,7 @@ class RoomRepository {
     }
   }
 
-  Future<void> deleteRoom(
-    String id,
-    String authToken,
-  ) async {
+  Future<void> deleteRoom(String id, String authToken) async {
     try {
       return _dataProvider.deleteRoom(id, authToken);
     } catch (e) {

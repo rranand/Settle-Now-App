@@ -52,7 +52,7 @@ class _FilterSheetState extends State<FilterSheet> {
     SortBy.dateCreated,
   );
   final ValueNotifier<SortRules> _selectedSortRule = ValueNotifier(
-    SortRules.ascending,
+    SortRules.descending,
   );
   final ValueNotifier<LendenType> _selectedLendenType = ValueNotifier(
     LendenType.none,
@@ -81,7 +81,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case "Sort By":
         {
           return !(_selectedSortBy.value == SortBy.dateCreated &&
-              _selectedSortRule.value == SortRules.ascending);
+              _selectedSortRule.value == SortRules.descending);
         }
       case "Amount":
         {
@@ -131,7 +131,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case "Sort By":
         {
           _selectedSortBy.value = SortBy.dateCreated;
-          _selectedSortRule.value = SortRules.ascending;
+          _selectedSortRule.value = SortRules.descending;
         }
       case "Amount":
         {
@@ -393,7 +393,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.personal):
         {
           _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
-          _selectedSortRule.value = state.sortRule ?? SortRules.ascending;
+          _selectedSortRule.value = state.sortRule ?? SortRules.descending;
           _selectedCategory.value = state.selectedCategories;
           _selectedAmountRange.value = state.amountRange ?? _amountRange;
           _selectedDateRange.value = state.dateRange ?? _dateRange;
@@ -402,7 +402,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.lenden):
         {
           _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
-          _selectedSortRule.value = state.sortRule ?? SortRules.ascending;
+          _selectedSortRule.value = state.sortRule ?? SortRules.descending;
           _selectedAmountRange.value = state.amountRange ?? _amountRange;
           _selectedDateRange.value = state.dateRange ?? _dateRange;
           _selectedUser.value = state.selectedUsers;
@@ -411,7 +411,7 @@ class _FilterSheetState extends State<FilterSheet> {
       case (TransactionType.room):
         {
           _selectedSortBy.value = state.sortBy ?? SortBy.dateCreated;
-          _selectedSortRule.value = state.sortRule ?? SortRules.ascending;
+          _selectedSortRule.value = state.sortRule ?? SortRules.descending;
           _selectedAmountRange.value = state.amountRange ?? _amountRange;
           _selectedDateRange.value = state.dateRange ?? _dateRange;
           _selectedUser.value = state.selectedUsers;
