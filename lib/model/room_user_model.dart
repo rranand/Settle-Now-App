@@ -96,7 +96,7 @@ class RoomUserModel {
     if (identical(this, other)) return true;
 
     return other.id == id &&
-        other.user == user &&
+        other.user.id == user.id &&
         other.active == active &&
         other.contribution == contribution &&
         other.spent == spent &&
@@ -106,7 +106,7 @@ class RoomUserModel {
   @override
   int get hashCode {
     return id.hashCode ^
-        user.hashCode ^
+        user.id.hashCode ^
         active.hashCode ^
         contribution.hashCode ^
         spent.hashCode ^

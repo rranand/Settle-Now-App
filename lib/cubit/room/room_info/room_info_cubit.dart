@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
 import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
@@ -39,10 +40,10 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       }
 
       if (oldData.hasData && !forceRefresh) {
-        return emit(RoomInfoSuccess(oldData));
+        return emit(RoomInfoSuccess(oldData, false));
       } else {
         RoomInfoModel data = await repo.fetchRoomInfo(id, authToken);
-        return emit(RoomInfoSuccess(data));
+        return emit(RoomInfoSuccess(data, false));
       }
     } catch (e) {
       return emit(RoomInfoFailure(e.toString()));
@@ -53,7 +54,8 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     if (state is RoomInfoSuccess) {
       final oldState = (state as RoomInfoSuccess);
 
-      if (oldState.data.id == id) {
+      if (oldState.data.id == id &&
+          !listEquals(oldState.data.users, userData)) {
         int activeUserCount = 0;
         for (int i = 0; i < userData.length; i++) {
           if (userData[i].active) {
@@ -73,7 +75,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
           modifiedOn: DateTime.now(),
         );
         _roomDashboardBloc.add(RoomDashboardOnCloseRoom(data: updatedRoomInfo));
-        return emit(RoomInfoSuccess(updatedRoomInfo));
+        return emit(RoomInfoSuccess(updatedRoomInfo, true));
       }
     }
 
@@ -91,7 +93,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
         _roomDashboardBloc.add(
           RoomDashboardOnUpdateRoom(data: updatedRoomInfo),
         );
-        return emit(RoomInfoSuccess(updatedRoomInfo));
+        return emit(RoomInfoSuccess(updatedRoomInfo, true));
       }
     }
 
@@ -130,11 +132,11 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
         modifiedOn: DateTime.now(),
       );
       _roomDashboardBloc.add(RoomDashboardOnUpdateRoom(data: updatedRoomInfo));
-      return emit(RoomInfoSuccess(updatedRoomInfo));
+      return emit(RoomInfoSuccess(updatedRoomInfo, true));
     } catch (e) {
       scaffoldMessengerState.hideCurrentSnackBar();
       emit(RoomInfoFailure(e.toString()));
-      return emit(RoomInfoSuccess(oldData.data));
+      return emit(RoomInfoSuccess(oldData.data, true));
     }
   }
 
@@ -172,7 +174,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     } catch (e) {
       scaffoldMessengerState.hideCurrentSnackBar();
       emit(RoomInfoFailure(e.toString()));
-      return emit(RoomInfoSuccess(oldData.data));
+      return emit(RoomInfoSuccess(oldData.data, true));
     }
   }
 }

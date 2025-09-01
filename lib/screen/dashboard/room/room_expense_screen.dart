@@ -94,19 +94,19 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
   void _resetCubit() {
     final RoomSettleState roomSettleState =
-        context.watch<RoomSettleCubit>().state;
+        context.read<RoomSettleCubit>().state;
 
     if (roomSettleState is RoomSettleSuccess &&
         roomSettleState.id != widget.id) {
       context.read<RoomSettleCubit>().reset();
     }
 
-    final RoomState roomState = context.watch<RoomBloc>().state;
+    final RoomState roomState = context.read<RoomBloc>().state;
     if (roomState is RoomFetchSuccess && roomState.id != widget.id) {
       context.read<RoomBloc>().add(RoomBlocReset());
     }
 
-    final RoomUserState roomUserState = context.watch<RoomUserCubit>().state;
+    final RoomUserState roomUserState = context.read<RoomUserCubit>().state;
     if (roomUserState is RoomUserSuccess && roomUserState.id != widget.id) {
       context.read<RoomUserCubit>().reset();
     }
@@ -116,48 +116,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
-    _resetCubit();
-    final RoomInfoState roomInfoState = context.watch<RoomInfoCubit>().state;
-    if (roomInfoState is RoomInfoSuccess) {
-      final RoomSettleState roomSettleState =
-          context.watch<RoomSettleCubit>().state;
-      if (roomSettleState is! RoomSettleSuccess ||
-          (roomSettleState.id != widget.id)) {
-        context.read<RoomSettleCubit>().fetchData(
-          widget.id,
-          _loggedInUser.authToken,
-          roomInfoState.data.users,
-        );
-      }
-
-      final RoomState roomState = context.watch<RoomBloc>().state;
-      if (roomState is! RoomFetchSuccess || (roomState.id != widget.id)) {
-        context.read<RoomBloc>().add(
-          RoomFetch(
-            id: widget.id,
-            authToken: _loggedInUser.authToken,
-            users: roomInfoState.data.users,
-          ),
-        );
-      }
-
-      final RoomUserState roomUserState = context.watch<RoomUserCubit>().state;
-
-      if (roomSettleState is RoomSettleSuccess &&
-          roomSettleState.id == widget.id &&
-          roomState is RoomFetchSuccess &&
-          roomState.id == widget.id &&
-          (roomUserState is! RoomUserSuccess ||
-              roomUserState.id != widget.id)) {
-        context.read<RoomUserCubit>().fetchData(
-          roomInfoState.data.id,
-          roomInfoState.data.users,
-          roomState.data,
-          roomSettleState.data,
-        );
-      }
-    }
-
     if (mounted) {
       setState(() {});
     }
@@ -285,54 +243,12 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       return;
     }
     final roomInfoCubit = context.read<RoomInfoCubit>();
-    final roomBloc = context.read<RoomBloc>();
-    final roomUserCubit = context.read<RoomUserCubit>();
-    final roomSettleCubit = context.read<RoomSettleCubit>();
 
     await roomInfoCubit.fetchData(
       widget.id,
       _loggedInUser.authToken,
       forceRefresh: true,
     );
-    final RoomInfoState roomInfoState = roomInfoCubit.state;
-    if (roomInfoState is RoomInfoSuccess) {
-      switch (_navbarSelectedIndex.value) {
-        case 0 || 2:
-          {
-            roomBloc.add(
-              RoomFetch(
-                id: widget.id,
-                authToken: _loggedInUser.authToken,
-                users: roomInfoState.data.users,
-              ),
-            );
-          }
-        case 1:
-          {
-            final RoomSettleState roomSettleState = roomSettleCubit.state;
-            final RoomState roomState = roomBloc.state;
-            if (roomSettleState is RoomSettleSuccess &&
-                roomState is RoomFetchSuccess) {
-              roomUserCubit.fetchData(
-                roomInfoState.data.id,
-                roomInfoState.data.users,
-                roomState.data,
-                roomSettleState.data,
-              );
-            }
-          }
-        case 3:
-          {
-            roomSettleCubit.fetchData(
-              widget.id,
-              _loggedInUser.authToken,
-              roomInfoState.data.users,
-            );
-          }
-        default:
-          {}
-      }
-    }
   }
 
   bool notificationPredicateHandler(ScrollNotification notification) {
@@ -396,6 +312,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   @override
   void initState() {
     super.initState();
+    _resetCubit();
     currentRoute =
         GoRouter.of(context).routeInformationProvider.value.uri.toString();
     final authState = context.read<AuthBloc>().state;
@@ -413,10 +330,12 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
       final state = context.read<RoomBloc>().state;
       if (!(state is RoomFetchSuccess && state.id == widget.id)) {
-        context.read<RoomInfoCubit>().fetchData(
-          widget.id,
-          _loggedInUser.authToken,
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          context.read<RoomInfoCubit>().fetchData(
+            widget.id,
+            _loggedInUser.authToken,
+          );
+        });
       }
     }
 
@@ -581,6 +500,19 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           showNormalSnackBar(context, state.error);
         } else if (state is RoomInfoInitial) {
           context.pop();
+        } else if (state is RoomInfoSuccess && !state.isInternalUpdate) {
+          context.read<RoomSettleCubit>().fetchData(
+            widget.id,
+            _loggedInUser.authToken,
+            state.data.users,
+          );
+          context.read<RoomBloc>().add(
+            RoomFetch(
+              id: widget.id,
+              authToken: _loggedInUser.authToken,
+              users: state.data.users,
+            ),
+          );
         }
       },
       builder: (context, state) {

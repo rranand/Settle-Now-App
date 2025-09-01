@@ -9,8 +9,9 @@ final class RoomInfoLoading extends RoomInfoState {}
 
 final class RoomInfoSuccess extends RoomInfoState {
   final RoomInfoModel data;
+  final bool isInternalUpdate;
 
-  RoomInfoSuccess(this.data);
+  RoomInfoSuccess(this.data, this.isInternalUpdate);
 }
 
 final class RoomInfoFailure extends RoomInfoState {
