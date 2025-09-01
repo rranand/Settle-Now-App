@@ -377,6 +377,27 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
     });
   }
 
+  void callRoomUserBloc() {
+    final RoomInfoState roomInfoState = context.read<RoomInfoCubit>().state;
+    final RoomState roomState = context.read<RoomBloc>().state;
+    final RoomSettleState roomSettleState =
+        context.read<RoomSettleCubit>().state;
+
+    if (roomState is RoomFetchSuccess &&
+        roomState.id == widget.id &&
+        roomInfoState is RoomInfoSuccess &&
+        roomInfoState.data.id == widget.id &&
+        roomSettleState is RoomSettleSuccess &&
+        roomSettleState.id == widget.id) {
+      context.read<RoomUserCubit>().fetchData(
+        roomInfoState.data.id,
+        roomInfoState.data.users,
+        roomState.data,
+        roomSettleState.data,
+      );
+    }
+  }
+
   List<Widget>? appBarActionButtonHandler(
     bool isLoaded,
     bool isRoomActive,
@@ -620,14 +641,32 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                       );
                     },
                   ),
-                  ValueListenableBuilder(
-                    valueListenable: _navbarSelectedIndex,
-                    builder: (context, value, _) {
-                      return SliverPadding(
-                        padding: _mainScreenPadding,
-                        sliver: _navBarHandler(value),
-                      );
-                    },
+                  MultiBlocListener(
+                    listeners: [
+                      BlocListener<RoomBloc, RoomState>(
+                        listener: (context, state) {
+                          if (state is RoomFetchSuccess) {
+                            callRoomUserBloc();
+                          }
+                        },
+                      ),
+                      BlocListener<RoomSettleCubit, RoomSettleState>(
+                        listener: (context, state) {
+                          if (state is RoomSettleSuccess) {
+                            callRoomUserBloc();
+                          }
+                        },
+                      ),
+                    ],
+                    child: ValueListenableBuilder(
+                      valueListenable: _navbarSelectedIndex,
+                      builder: (context, value, _) {
+                        return SliverPadding(
+                          padding: _mainScreenPadding,
+                          sliver: _navBarHandler(value),
+                        );
+                      },
+                    ),
                   ),
                   SliverPadding(
                     padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),
