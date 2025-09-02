@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:settlenow_v2/model/room_settle_model.dart';
 import 'package:settlenow_v2/model/room_user_model.dart';
 import 'package:settlenow_v2/model/transaction_model.dart';
@@ -7,9 +8,9 @@ List<RoomUserModel> calculateUserExpenseInfo(
   List<TransactionModel> transArr,
   List<RoomSettleModel> settleArr,
 ) {
-  Map<String, double> contributionMap = {};
-  Map<String, double> spentMap = {};
-  Map<String, double> settleMap = {};
+  Map<String, Decimal> contributionMap = {};
+  Map<String, Decimal> spentMap = {};
+  Map<String, Decimal> settleMap = {};
 
   int n = userArr.length;
 
@@ -19,36 +20,60 @@ List<RoomUserModel> calculateUserExpenseInfo(
       String senderUID = eachObj.sender.id;
       String receiverUID = eachObj.receiver.id;
 
-      settleMap[senderUID] = (settleMap[senderUID] ?? 0) + eachObj.amount;
-      settleMap[receiverUID] = (settleMap[receiverUID] ?? 0) - eachObj.amount;
+      settleMap[senderUID] =
+          (settleMap[senderUID] ?? Decimal.zero) +
+          Decimal.parse(eachObj.amount.toString());
+      settleMap[receiverUID] =
+          (settleMap[receiverUID] ?? Decimal.zero) -
+          Decimal.parse(eachObj.amount.toString());
     }
   } else {
     for (int i = 0; i < userArr.length; i++) {
-      settleMap[userArr[i].user.id] = userArr[i].settle;
+      settleMap[userArr[i].user.id] = Decimal.parse(
+        userArr[i].settle.toString(),
+      );
     }
   }
-
-  double totalCommonSplitAmount = 0;
 
   for (int i = 0; i < transArr.length; i++) {
     TransactionModel eachObj = transArr[i];
     String createdBy = eachObj.createdBy.id;
 
     contributionMap[createdBy] =
-        (contributionMap[createdBy] ?? 0) + eachObj.amount;
+        (contributionMap[createdBy] ?? Decimal.zero) +
+        Decimal.parse(eachObj.amount.toString());
 
     if (eachObj.createdBy.amount == eachObj.amount) {
       spentMap[createdBy] =
-          (spentMap[createdBy] ?? 0) + eachObj.createdBy.amount;
+          (spentMap[createdBy] ?? Decimal.zero) +
+          Decimal.parse(eachObj.createdBy.amount.toString());
     } else if (eachObj.users.isEmpty) {
-      totalCommonSplitAmount += eachObj.amount / n;
+      int amountInPaisa =
+          (Decimal.parse(eachObj.amount.toString()) * Decimal.fromInt(100))
+              .toBigInt()
+              .toInt();
+
+      int remaining = amountInPaisa % n;
+      int equalSplit = (amountInPaisa / n).toInt();
+      for (int j = 0; j < n; j++) {
+        String userID = userArr[j].user.id;
+        spentMap[userID] =
+            (spentMap[userID] ?? Decimal.zero) +
+            Decimal.parse(
+              ((equalSplit + (remaining > 0 ? 1 : 0)) / 100).toString(),
+            );
+        remaining--;
+      }
     } else {
       spentMap[createdBy] =
-          (spentMap[createdBy] ?? 0) + eachObj.createdBy.amount;
+          (spentMap[createdBy] ?? Decimal.zero) +
+          Decimal.parse(eachObj.createdBy.amount.toString());
 
       for (int j = 0; j < eachObj.users.length; j++) {
         String userID = eachObj.users[j].id;
-        spentMap[userID] = (spentMap[userID] ?? 0) + eachObj.users[j].amount;
+        spentMap[userID] =
+            (spentMap[userID] ?? Decimal.zero) +
+            Decimal.parse(eachObj.users[j].amount.toString());
       }
     }
   }
@@ -57,15 +82,14 @@ List<RoomUserModel> calculateUserExpenseInfo(
 
   for (int i = 0; i < n; i++) {
     String userID = userArr[i].user.id;
-    spentMap[userID] = (spentMap[userID] ?? 0) + totalCommonSplitAmount;
 
     RoomUserModel eachObj = RoomUserModel(
       id: userArr[i].id,
       active: userArr[i].active,
       user: userArr[i].user,
-      contribution: contributionMap[userID] ?? 0,
-      spent: spentMap[userID] ?? 0,
-      settle: settleMap[userID] ?? 0,
+      contribution: (contributionMap[userID] ?? Decimal.zero).toDouble(),
+      spent: (spentMap[userID] ?? Decimal.zero).toDouble(),
+      settle: (settleMap[userID] ?? Decimal.zero).toDouble(),
     );
 
     data.add(eachObj);

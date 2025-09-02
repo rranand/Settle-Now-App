@@ -155,15 +155,13 @@ class _SettleExpenseState extends State<SettleExpense> {
       }
       if (!receiverData.hasData) {
         showNormalSnackBar(context, "Invalid User");
-      } else if (amountToBeSettled - (userCanPay.abs() + oldAmount.abs()) >=
-          0.1) {
+      } else if (amountToBeSettled > (userCanPay.abs() + oldAmount.abs())) {
         showNormalSnackBar(
           context,
           "You can pay ${formatCurrency(userCanPay.abs() + oldAmount.abs(), context)} at max!",
         );
         return;
-      } else if (amountToBeSettled - (userCanReceive.abs() + oldAmount.abs()) >=
-          0.1) {
+      } else if (amountToBeSettled > (userCanReceive.abs() + oldAmount.abs())) {
         showNormalSnackBar(
           context,
           "User can receive ${formatCurrency(userCanReceive.abs() + oldAmount.abs(), context)} at max!",
