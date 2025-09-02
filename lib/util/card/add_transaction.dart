@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -73,17 +74,17 @@ class _AddTransactionState extends State<AddTransaction> {
   ];
 
   void _handleGoToSplitType(int index) {
-    double? amount = double.tryParse(_amountController.text);
+    Decimal? amount = Decimal.tryParse(_amountController.text);
     int userCount = _selectedUserIDs.value.length;
 
-    if (amount == null ||
-        amount.isNaN ||
-        amount == 0 ||
-        amount == double.infinity) {
+    if (amount == null || amount == Decimal.zero) {
       return;
     }
-    int amountInPaisa = (amount * 100).toInt();
-    debugPrint("Amount In Paisa $amountInPaisa");
+
+    int amountInPaisa = (amount * Decimal.fromInt(100)).toBigInt().toInt();
+    debugPrint(
+      "Amount In Paisa $amountInPaisa ${_amountController.text} $amount",
+    );
 
     switch (index) {
       case 0:
