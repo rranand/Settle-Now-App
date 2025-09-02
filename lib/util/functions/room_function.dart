@@ -37,7 +37,10 @@ List<RoomUserModel> calculateUserExpenseInfo(
     contributionMap[createdBy] =
         (contributionMap[createdBy] ?? 0) + eachObj.amount;
 
-    if (eachObj.users.isEmpty) {
+    if (eachObj.createdBy.amount == eachObj.amount) {
+      spentMap[createdBy] =
+          (spentMap[createdBy] ?? 0) + eachObj.createdBy.amount;
+    } else if (eachObj.users.isEmpty) {
       totalCommonSplitAmount += eachObj.amount / n;
     } else {
       spentMap[createdBy] =

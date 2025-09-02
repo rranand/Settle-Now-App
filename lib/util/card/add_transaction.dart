@@ -82,18 +82,12 @@ class _AddTransactionState extends State<AddTransaction> {
     }
 
     int amountInPaisa = (amount * Decimal.fromInt(100)).toBigInt().toInt();
-    debugPrint(
-      "Amount In Paisa $amountInPaisa ${_amountController.text} $amount",
-    );
 
     switch (index) {
       case 0:
         {
           int remaining = amountInPaisa % userCount;
           int equalSplit = (amountInPaisa / userCount).toInt();
-
-          debugPrint("equalSplit In Paisa $equalSplit");
-
           UserWithEditControlTD newUserTDMap = {};
 
           for (MapEntry<UserModel, TextEditingController> eachEntry
