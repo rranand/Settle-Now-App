@@ -82,10 +82,16 @@ class _AddTransactionState extends State<AddTransaction> {
         amount == double.infinity) {
       return;
     }
+    int amountInPaisa = (amount * 100).toInt();
+    debugPrint("Amount In Paisa $amountInPaisa");
+
     switch (index) {
       case 0:
         {
-          double equalSplit = amount / userCount;
+          int remaining = amountInPaisa % userCount;
+          int equalSplit = (amountInPaisa / userCount).toInt();
+
+          debugPrint("equalSplit In Paisa $equalSplit");
 
           UserWithEditControlTD newUserTDMap = {};
 
@@ -93,8 +99,12 @@ class _AddTransactionState extends State<AddTransaction> {
               in _selectedUserIDs.value.entries) {
             newUserTDMap.putIfAbsent(
               eachEntry.key,
-              () => TextEditingController(text: equalSplit.toStringAsFixed(2)),
+              () => TextEditingController(
+                text: ((equalSplit + (remaining > 0 ? 1 : 0)) / 100)
+                    .toStringAsFixed(2),
+              ),
             );
+            remaining--;
           }
 
           _selectedUserIDs.value = newUserTDMap;
@@ -104,7 +114,8 @@ class _AddTransactionState extends State<AddTransaction> {
           if (userCount == 1) {
             showNormalSnackBar(context, "Add another user");
           } else {
-            double equalSplit = amount / (userCount - 1);
+            int remaining = amountInPaisa % (userCount - 1);
+            int equalSplit = (amountInPaisa / (userCount - 1)).toInt();
             UserWithEditControlTD newUserTDMap = {};
 
             for (MapEntry<UserModel, TextEditingController> eachEntry
@@ -115,9 +126,13 @@ class _AddTransactionState extends State<AddTransaction> {
                   text:
                       _loggedInUser.id == eachEntry.key.id
                           ? "0"
-                          : equalSplit.toStringAsFixed(2),
+                          : ((equalSplit + (remaining > 0 ? 1 : 0)) / 100)
+                              .toStringAsFixed(2),
                 ),
               );
+              if (_loggedInUser.id != eachEntry.key.id) {
+                remaining--;
+              }
             }
 
             _selectedUserIDs.value = newUserTDMap;
