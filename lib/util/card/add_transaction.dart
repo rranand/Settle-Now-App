@@ -534,22 +534,29 @@ class _AddTransactionState extends State<AddTransaction> {
               activeUserCount++;
             }
           }
-          double eachAmount = totalAmount / activeUserCount;
+          int amountInPaisa =
+              (Decimal.parse(totalAmount.toString()) * Decimal.fromInt(100))
+                  .toBigInt()
+                  .toInt();
+          int remaining = amountInPaisa % activeUserCount;
+          int eachAmount = (amountInPaisa / activeUserCount).toInt();
+
           for (int i = 0; i < roomUserState.data.length; i++) {
             if (roomUserState.data[i].active) {
               if (roomUserState.data[i].user.id == _loggedInUser.id) {
                 createdBy = UserAmountModel.copyFromUser(
                   _loggedInUser,
-                  eachAmount,
+                  ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
                 );
               } else {
                 userWithAmount.add(
                   UserAmountModel.copyFromUser(
                     roomUserState.data[i].user,
-                    eachAmount,
+                    ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
                   ),
                 );
               }
+              remaining--;
             }
           }
         }
