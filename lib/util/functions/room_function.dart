@@ -43,38 +43,15 @@ List<RoomUserModel> calculateUserExpenseInfo(
         (contributionMap[createdBy] ?? Decimal.zero) +
         Decimal.parse(eachObj.amount.toString());
 
-    if (eachObj.createdBy.amount == eachObj.amount) {
-      spentMap[createdBy] =
-          (spentMap[createdBy] ?? Decimal.zero) +
-          Decimal.parse(eachObj.createdBy.amount.toString());
-    } else if (eachObj.users.isEmpty) {
-      int amountInPaisa =
-          (Decimal.parse(eachObj.amount.toString()) * Decimal.fromInt(100))
-              .toBigInt()
-              .toInt();
+    spentMap[createdBy] =
+        (spentMap[createdBy] ?? Decimal.zero) +
+        Decimal.parse(eachObj.createdBy.amount.toString());
 
-      int remaining = amountInPaisa % n;
-      int equalSplit = (amountInPaisa / n).toInt();
-      for (int j = 0; j < n; j++) {
-        String userID = userArr[j].user.id;
-        spentMap[userID] =
-            (spentMap[userID] ?? Decimal.zero) +
-            Decimal.parse(
-              ((equalSplit + (remaining > 0 ? 1 : 0)) / 100).toString(),
-            );
-        remaining--;
-      }
-    } else {
-      spentMap[createdBy] =
-          (spentMap[createdBy] ?? Decimal.zero) +
-          Decimal.parse(eachObj.createdBy.amount.toString());
-
-      for (int j = 0; j < eachObj.users.length; j++) {
-        String userID = eachObj.users[j].id;
-        spentMap[userID] =
-            (spentMap[userID] ?? Decimal.zero) +
-            Decimal.parse(eachObj.users[j].amount.toString());
-      }
+    for (int j = 0; j < eachObj.users.length; j++) {
+      String userID = eachObj.users[j].id;
+      spentMap[userID] =
+          (spentMap[userID] ?? Decimal.zero) +
+          Decimal.parse(eachObj.users[j].amount.toString());
     }
   }
 

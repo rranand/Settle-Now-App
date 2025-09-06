@@ -12,6 +12,7 @@ class NewTransactionModel {
   String description = "";
   double amount = 0;
   String category = "";
+  String splitType = "";
   UserAmountModel createdBy = UserAmountModel.empty();
   List<UserAmountModel> members = [];
   DateTime createdOn = DateTime.now();
@@ -23,6 +24,7 @@ class NewTransactionModel {
     required this.members,
     required this.createdBy,
     required this.category,
+    required this.splitType,
   });
 
   NewTransactionModel.empty({this.hasData = false});
@@ -34,6 +36,7 @@ class NewTransactionModel {
     List<UserAmountModel>? members,
     UserAmountModel? createdBy,
     String? category,
+    String? splitType,
   }) {
     return NewTransactionModel(
       amount: amount ?? this.amount,
@@ -42,6 +45,7 @@ class NewTransactionModel {
       members: members ?? this.members,
       createdBy: createdBy ?? this.createdBy,
       category: category ?? this.category,
+      splitType: splitType ?? this.splitType,
     );
   }
 
@@ -53,6 +57,7 @@ class NewTransactionModel {
       'members': members.map((x) => x.toMap()).toList(),
       'createdBy': createdBy.toMap(),
       'category': category,
+      'splitType': splitType,
     };
   }
 
@@ -70,6 +75,7 @@ class NewTransactionModel {
         map['createdBy'] as Map<String, dynamic>,
       ),
       category: map['category'] as String,
+      splitType: map['splitType'] ?? "equal",
     );
   }
 
@@ -92,7 +98,8 @@ class NewTransactionModel {
         other.createdOn == createdOn &&
         listEquals(other.members, members) &&
         other.createdBy == createdBy &&
-        other.category == category;
+        other.category == category &&
+        other.splitType == splitType;
   }
 
   @override
@@ -102,6 +109,7 @@ class NewTransactionModel {
         createdOn.hashCode ^
         members.hashCode ^
         createdBy.hashCode ^
-        category.hashCode;
+        category.hashCode ^
+        splitType.hashCode;
   }
 }

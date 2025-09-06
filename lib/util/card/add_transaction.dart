@@ -11,7 +11,7 @@ import 'package:settlenow_v2/constant/gradient_color_constant.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/core.dart';
 import 'package:settlenow_v2/cubit/new_transaction/new_transaction_cubit.dart';
-import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow_v2/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow_v2/model/new_transaction_model.dart';
 import 'package:settlenow_v2/provider/screen_size_provider.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
@@ -396,25 +396,13 @@ class _AddTransactionState extends State<AddTransaction> {
         }
       case TransactionType.room:
         {
-          if (transactionData.users.isNotEmpty) {
-            _splitTypeIndex.value = _splitType.indexOf("Partial");
-          } else if (transactionData.createdBy.amount ==
-              transactionData.amount) {
-            _splitTypeIndex.value = _splitType.indexOf("Self");
-          }
-          if (!(widget.transactionData!.users.isNotEmpty ||
-              widget.transactionData!.amount ==
-                  widget.transactionData!.createdBy.amount)) {
-            expenseType = "equal";
-          } else {
-            expenseType = "split";
-          }
+          _splitTypeIndex.value = _splitType.indexOf(
+            capatilizeFirstLetter(transactionData.splitType),
+          );
         }
       case TransactionType.personal:
         {
-          if (widget.transactionData != null) {
-            expenseType = "Personal";
-          }
+          expenseType = "Personal";
         }
       default:
         {}
@@ -508,6 +496,9 @@ class _AddTransactionState extends State<AddTransaction> {
         _loggedInUser,
         _splitTypeIndex.value == _splitType.indexOf("Self") ? totalAmount : 0,
       );
+
+      String expenseSplitType = _splitType[_splitTypeIndex.value].toLowerCase();
+
       if (_splitType[_splitTypeIndex.value] == "Partial") {
         _selectedUserIDs.value.forEach((userData, amountTxt) {
           double tempAmount = double.parse(amountTxt.text);
@@ -522,15 +513,18 @@ class _AddTransactionState extends State<AddTransaction> {
           }
         });
       } else if (transactionType == TransactionType.room &&
-          _splitType[_splitTypeIndex.value] == "Equal" &&
-          !_futureJoinerBool.value) {
-        final roomUserState = context.read<RoomUserCubit>().state;
+          (_splitType[_splitTypeIndex.value] == "Equal" ||
+              !_futureJoinerBool.value)) {
+        if (!_futureJoinerBool.value) {
+          expenseSplitType = "partial";
+        }
+        final roomInfoState = context.read<RoomInfoCubit>().state;
 
-        if (roomUserState is RoomUserSuccess) {
+        if (roomInfoState is RoomInfoSuccess) {
           int activeUserCount = 0;
 
-          for (int i = 0; i < roomUserState.data.length; i++) {
-            if (roomUserState.data[i].active) {
+          for (int i = 0; i < roomInfoState.data.users.length; i++) {
+            if (roomInfoState.data.users[i].active) {
               activeUserCount++;
             }
           }
@@ -541,9 +535,9 @@ class _AddTransactionState extends State<AddTransaction> {
           int remaining = amountInPaisa % activeUserCount;
           int eachAmount = (amountInPaisa / activeUserCount).toInt();
 
-          for (int i = 0; i < roomUserState.data.length; i++) {
-            if (roomUserState.data[i].active) {
-              if (roomUserState.data[i].user.id == _loggedInUser.id) {
+          for (int i = 0; i < roomInfoState.data.users.length; i++) {
+            if (roomInfoState.data.users[i].active) {
+              if (roomInfoState.data.users[i].user.id == _loggedInUser.id) {
                 createdBy = UserAmountModel.copyFromUser(
                   _loggedInUser,
                   ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
@@ -551,7 +545,7 @@ class _AddTransactionState extends State<AddTransaction> {
               } else {
                 userWithAmount.add(
                   UserAmountModel.copyFromUser(
-                    roomUserState.data[i].user,
+                    roomInfoState.data.users[i].user,
                     ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
                   ),
                 );
@@ -568,6 +562,7 @@ class _AddTransactionState extends State<AddTransaction> {
         createdOn: _createdOn,
         members: userWithAmount,
         createdBy: createdBy,
+        splitType: expenseSplitType,
         category: expenseCategories[max(0, _categoryIndex.value)],
       );
       bool flag = false;

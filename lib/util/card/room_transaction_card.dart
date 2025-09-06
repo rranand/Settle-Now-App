@@ -35,10 +35,8 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
-    if (widget.data.createdBy.amount == widget.data.amount) {
-      tags.add("Self");
-    } else if (widget.data.users.isNotEmpty) {
-      tags.add("Partial");
+    if (widget.data.splitType != "equal") {
+      tags.add(widget.data.splitType);
     }
     if (!isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");

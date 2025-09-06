@@ -13,6 +13,7 @@ class TransactionModel implements CommonTransactionField {
   bool hasData = true;
   String id = "";
   String category = "";
+  String splitType = "";
   UserAmountModel createdBy = UserAmountModel.empty();
   List<UserAmountModel> users = [];
   DateTime modifiedOn = DateTime.now();
@@ -32,6 +33,7 @@ class TransactionModel implements CommonTransactionField {
     required this.amount,
     required this.category,
     required this.users,
+    required this.splitType,
     required this.createdBy,
     required this.createdOn,
     required this.modifiedOn,
@@ -54,6 +56,7 @@ class TransactionModel implements CommonTransactionField {
     bool? isAddedToPersonalExpense,
     bool? active,
     bool? isClosedAny,
+    String? splitType,
   }) {
     return TransactionModel(
       id: id ?? this.id,
@@ -68,6 +71,7 @@ class TransactionModel implements CommonTransactionField {
           isAddedToPersonalExpense ?? this.isAddedToPersonalExpense,
       active: active ?? this.active,
       isClosedAny: isClosedAny ?? this.isClosedAny,
+      splitType: splitType ?? this.splitType,
     );
   }
 
@@ -80,6 +84,7 @@ class TransactionModel implements CommonTransactionField {
       'createdBy': createdBy.toMap(),
       'createdOn': createdOn.toString(),
       'modifiedOn': modifiedOn.toString(),
+      'splitType': splitType.toString(),
       'isAddedToPersonalExpense': isAddedToPersonalExpense,
     };
   }
@@ -94,6 +99,7 @@ class TransactionModel implements CommonTransactionField {
       createdBy: data.createdBy,
       createdOn: data.createdOn,
       modifiedOn: data.createdOn,
+      splitType: data.splitType,
       isAddedToPersonalExpense: false,
     );
   }
@@ -110,6 +116,7 @@ class TransactionModel implements CommonTransactionField {
       createdBy: UserAmountModel.empty(),
       createdOn: data.createdOn,
       modifiedOn: data.modifiedOn,
+      splitType: "",
       isAddedToPersonalExpense: false,
     );
   }
@@ -126,6 +133,7 @@ class TransactionModel implements CommonTransactionField {
       createdBy: UserAmountModel.copyFromUser(data.createdBy, 0),
       createdOn: data.createdOn,
       modifiedOn: data.modifiedOn,
+      splitType: "",
       isAddedToPersonalExpense: false,
     );
   }
@@ -152,6 +160,8 @@ class TransactionModel implements CommonTransactionField {
           map.containsKey('active')
               ? Crypto.decrypt(map['active']) == 'true'
               : true,
+      splitType:
+          map.containsKey('splitType') ? Crypto.decrypt(map['splitType']) : "",
     );
   }
 
@@ -167,6 +177,7 @@ class TransactionModel implements CommonTransactionField {
       "createdOn": Crypto.encrypt(createdOn.toIso8601String()),
       "users": json.encode(userData),
       "createdBy": createdBy.toQuickSplitJson(),
+      "splitType": Crypto.encrypt(splitType),
     };
     return json.encode(data);
   }
@@ -180,6 +191,7 @@ class TransactionModel implements CommonTransactionField {
       "category": Crypto.encrypt(category),
       "users": json.encode(userData),
       "createdBy": createdBy.toQuickSplitJson(),
+      "splitType": Crypto.encrypt(splitType),
       ...extraData,
     };
     return json.encode(data);
@@ -203,7 +215,8 @@ class TransactionModel implements CommonTransactionField {
         listEquals(other.users, users) &&
         other.createdBy == createdBy &&
         other.createdOn == createdOn &&
-        other.modifiedOn == modifiedOn;
+        other.modifiedOn == modifiedOn &&
+        other.splitType == splitType;
   }
 
   @override
@@ -215,6 +228,7 @@ class TransactionModel implements CommonTransactionField {
         users.hashCode ^
         createdBy.hashCode ^
         createdOn.hashCode ^
-        modifiedOn.hashCode;
+        modifiedOn.hashCode ^
+        splitType.hashCode;
   }
 }

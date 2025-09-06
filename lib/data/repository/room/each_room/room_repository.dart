@@ -143,14 +143,12 @@ class RoomRepository {
   Future<TransactionModel> updateExpense(
     String id,
     NewTransactionModel data,
-    String expenseType,
     String authToken,
   ) async {
     try {
       TransactionModel updatedExpense = await _dataProvider.updateExpense(
         id,
         data,
-        expenseType,
         authToken,
       );
       return updatedExpense;

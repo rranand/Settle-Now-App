@@ -169,7 +169,6 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final TransactionModel newData = await repoRD.updateExpense(
               roomID,
               data,
-              expenseType,
               loggedInUser.authToken,
             );
             bloc.add(RoomUpdateTransaction(newData));
