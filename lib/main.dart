@@ -64,6 +64,7 @@ import 'package:settlenow_v2/util/oAuth/google_oauth.dart';
 import 'firebase/firebase_options.dart' as firebase_prod;
 import 'firebase/firebase_options_dev.dart' as firebase_dev;
 
+//TODO: Update app feature via notification
 //TODO: Room will split existing equal split transaction only if someone does not mark room as closed, else it will convert that transaction into partial
 
 @pragma('vm:entry-point')

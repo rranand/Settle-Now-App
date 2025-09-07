@@ -559,11 +559,14 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             }
           }
 
-          double unSettledAmount =
-              roomUserModel.contribution -
-              roomUserModel.spent +
-              roomUserModel.settle;
-          if (unSettledAmount.abs() >= 0.2) {
+          int unSettledPaisa =
+              ((roomUserModel.contribution -
+                          roomUserModel.spent +
+                          roomUserModel.settle) *
+                      100)
+                  .round();
+
+          if (unSettledPaisa != 0) {
             showSettleExpense = true;
           }
         }
@@ -753,11 +756,14 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                           if (!roomUserModel.hasData) {
                             return;
                           }
-                          double unSettledAmount =
-                              roomUserModel.contribution -
-                              roomUserModel.spent +
-                              roomUserModel.settle;
-                          if (unSettledAmount.abs() < 0.2) {
+
+                          int unSettledPaisa =
+                              ((roomUserModel.contribution -
+                                          roomUserModel.spent +
+                                          roomUserModel.settle) *
+                                      100)
+                                  .round();
+                          if (unSettledPaisa == 0) {
                             _closeRoomPopupDialog();
                           } else {
                             showNormalSnackBar(context, "Settle Your Spending");

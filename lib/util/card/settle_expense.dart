@@ -223,12 +223,15 @@ class _SettleExpenseState extends State<SettleExpense> {
           break;
         }
       } else {
-        double bal = data[i].contribution - data[i].spent + data[i].settle;
+        int bal =
+            ((data[i].contribution - data[i].spent + data[i].settle) * 100)
+                .round();
+
         bool isNega2 = false;
         if (bal < 0) {
           isNega2 = true;
         }
-        if (bal.abs() < 0.2) {
+        if (bal == 0) {
           continue;
         } else if (data[i].user.id != _loggedInUser.id && isNega2 != isNega) {
           users.add(data[i]);
