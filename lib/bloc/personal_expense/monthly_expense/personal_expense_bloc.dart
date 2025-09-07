@@ -28,17 +28,14 @@ class PersonalMonthlyExpenseBloc
     if (state is PersonalMonthlyExpenseLoading) return;
     emit(PersonalMonthlyExpenseLoading());
     try {
+      String id = (event.year + event.month).toLowerCase();
       List<PersonalExpenseTransactionModel> data = await repo.fetchData(
         event.authToken,
         event.year,
         event.month,
       );
-      return emit(
-        PersonalMonthlyExpenseFetchSuccess(
-          (event.year + event.month).toLowerCase(),
-          data,
-        ),
-      );
+      dashboardBloc.add(PersonalExpenseDashboardUpdate(id: id, data: data));
+      return emit(PersonalMonthlyExpenseFetchSuccess(id, data));
     } catch (e) {
       return emit(PersonalMonthlyExpenseFailure(e.toString()));
     }

@@ -308,7 +308,6 @@ class RoomDataProvider {
   Future<bool> addToPersonalExpense(
     String id,
     String expenseID,
-    String splitType,
     String authToken,
   ) async {
     try {
@@ -316,10 +315,7 @@ class RoomDataProvider {
         'room/$id/transaction/personalExpense',
         "post",
         authToken,
-        {
-          "id": Crypto.encrypt(expenseID),
-          "splitType": Crypto.encrypt(splitType),
-        },
+        {"id": Crypto.encrypt(expenseID)},
       );
 
       final data = jsonDecode(response.body);

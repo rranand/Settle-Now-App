@@ -32,6 +32,7 @@ class RoomTransactionCard extends StatefulWidget {
 
 class _RoomTransactionCardState extends State<RoomTransactionCard> {
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
+  final ValueNotifier<bool> userPartOfTransaction = ValueNotifier(false);
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
@@ -104,31 +105,33 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
               ),
             );
           } else {
-            String splitType = "";
-            if (!(widget.data.users.isNotEmpty ||
-                widget.data.amount == widget.data.createdBy.amount)) {
-              splitType = "equal";
-            } else {
-              splitType = "split";
-            }
-            return Padding(
-              padding: const EdgeInsets.only(right: 6.0),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(
-                  UiConstant.cardBorderRadius,
+            return ValueListenableBuilder(
+              valueListenable: userPartOfTransaction,
+              builder: (context, _, child) {
+                if (userPartOfTransaction.value) {
+                  return child!;
+                } else {
+                  return SizedBox.shrink();
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
+                  child: Icon(Iconsax.profile_add_copy, color: Colors.grey),
+                  onTap: () {
+                    context.read<AddToPersonalExpenseBloc>().add(
+                      AddToPersonalExpenseRequested(
+                        transactionType: TransactionType.room,
+                        transactionID: widget.data.id,
+                        authToken: widget.loggedInUser.authToken,
+                        roomID: widget.roomID,
+                      ),
+                    );
+                  },
                 ),
-                child: Icon(Iconsax.profile_add_copy, color: Colors.grey),
-                onTap: () {
-                  context.read<AddToPersonalExpenseBloc>().add(
-                    AddToPersonalExpenseRequested(
-                      transactionType: TransactionType.room,
-                      transactionID: widget.data.id,
-                      authToken: widget.loggedInUser.authToken,
-                      roomID: widget.roomID,
-                      splitType: splitType,
-                    ),
-                  );
-                },
               ),
             );
           }
@@ -136,6 +139,22 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
       );
     } else {
       return SizedBox.shrink();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.data.hasData) {
+      if (widget.data.createdBy.id == widget.loggedInUser.id) {
+        userPartOfTransaction.value = true;
+      } else {
+        for (int i = 0; i < widget.data.users.length; i++) {
+          if (widget.data.users[i].id == widget.loggedInUser.id) {
+            userPartOfTransaction.value = true;
+          }
+        }
+      }
     }
   }
 

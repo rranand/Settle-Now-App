@@ -73,7 +73,6 @@ class AddToPersonalExpenseBloc
             await roomRepository.addToPersonalExpense(
               event.roomID,
               event.transactionID,
-              event.splitType,
               event.authToken,
             );
             oldProcessingIDs.remove(event.transactionID);

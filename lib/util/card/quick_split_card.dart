@@ -32,6 +32,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   UserModel _loggedInUser = UserModel.empty();
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
   final ValueNotifier<bool> isSettledByYou = ValueNotifier(false);
+  final ValueNotifier<bool> isEditable = ValueNotifier(false);
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
@@ -274,6 +275,18 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
     return false;
   }
 
+  bool isEditableFlag() {
+    if (widget.data.createdBy.isSettled) {
+      return false;
+    }
+    for (int i = 0; i < widget.data.users.length; i++) {
+      if (widget.data.users[i].isSettled) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -287,6 +300,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   Widget build(BuildContext context) {
     List<String> tags = createTags();
     isSettledByYou.value = calculateSettledFlag();
+    isEditable.value = isEditableFlag();
 
     return Container(
       padding: EdgeInsets.all(UiConstant.cardPadding),
@@ -337,7 +351,8 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                     visible:
                         widget.data.hasData &&
                         widget.data.createdBy.id == _loggedInUser.id &&
-                        !isSettledByYou.value,
+                        !isSettledByYou.value &&
+                        isEditable.value,
                     child: Padding(
                       padding: const EdgeInsets.only(right: 6.0),
                       child: InkWell(

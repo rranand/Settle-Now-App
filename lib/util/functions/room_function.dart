@@ -29,9 +29,7 @@ List<RoomUserModel> calculateUserExpenseInfo(
     }
   } else {
     for (int i = 0; i < userArr.length; i++) {
-      settleMap[userArr[i].user.id] = Decimal.parse(
-        userArr[i].settle.toString(),
-      );
+      settleMap[userArr[i].user.id] = Decimal.zero;
     }
   }
 
