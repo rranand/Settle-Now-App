@@ -2,13 +2,14 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 
 String formatCurrency(
   double amount,
   BuildContext context, {
   String locale = "en_IN",
 }) {
-  amount = (amount.abs() < 1e-2) ? 0 : amount;
+  amount = getPrecisedAmount(amount);
 
   final locale = ui.Locale(
     Localizations.localeOf(context).languageCode,

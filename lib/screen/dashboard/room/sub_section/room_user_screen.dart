@@ -26,7 +26,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
   final double subTextFontSize = UiConstant.cardTitleTextSize - 3;
 
   Color? getAmountColor(double amount) {
-    amount = (amount.abs() < 1e-2) ? 0 : amount;
+    amount = getPrecisedAmount(amount);
 
     if (amount == 0) {
       return Colors.grey;

@@ -30,6 +30,7 @@ import 'package:settlenow_v2/util/custom/custom_gesture_detector.dart';
 import 'package:settlenow_v2/util/custom/multi_value_listenable_builder.dart';
 import 'package:settlenow_v2/util/enum/transaction_type.dart';
 import 'package:settlenow_v2/util/filter/filter_sheet.dart';
+import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/functions/room_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
 import 'package:settlenow_v2/util/widgets/navbar_widget.dart';
@@ -141,8 +142,9 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           ogTotalSpent = totalSpent;
           ogData = data;
 
-          double balance = data.contribution - data.spent + data.settle;
-          balance = (balance.abs() < 1e-2) ? 0 : balance;
+          double balance = getPrecisedAmount(
+            data.contribution - data.spent + data.settle,
+          );
 
           return BlocBuilder<FilterCubit, FilterState>(
             builder: (context, filterState) {
@@ -559,14 +561,13 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             }
           }
 
-          int unSettledPaisa =
-              ((roomUserModel.contribution -
-                          roomUserModel.spent +
-                          roomUserModel.settle) *
-                      100)
-                  .round();
+          double unSettled = getPrecisedAmount(
+            roomUserModel.contribution -
+                roomUserModel.spent +
+                roomUserModel.settle,
+          );
 
-          if (unSettledPaisa != 0) {
+          if (unSettled != 0) {
             showSettleExpense = true;
           }
         }
@@ -757,13 +758,12 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                             return;
                           }
 
-                          int unSettledPaisa =
-                              ((roomUserModel.contribution -
-                                          roomUserModel.spent +
-                                          roomUserModel.settle) *
-                                      100)
-                                  .round();
-                          if (unSettledPaisa == 0) {
+                          double unSettled = getPrecisedAmount(
+                            roomUserModel.contribution -
+                                roomUserModel.spent +
+                                roomUserModel.settle,
+                          );
+                          if (unSettled == 0) {
                             _closeRoomPopupDialog();
                           } else {
                             showNormalSnackBar(context, "Settle Your Spending");

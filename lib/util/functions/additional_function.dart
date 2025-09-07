@@ -150,3 +150,7 @@ void updateHandler() {
     mode: LaunchMode.externalApplication,
   );
 }
+
+double getPrecisedAmount(double amount) {
+  return (amount * 100).round() / 100;
+}
