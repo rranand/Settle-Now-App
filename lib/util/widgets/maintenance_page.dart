@@ -24,16 +24,13 @@ class MaintenancePage extends StatelessWidget {
                 'We\'ll be right back!',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               Text(
                 'Our app is currently under scheduled maintenance.\nWe\'re working hard to improve your experience.',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.black54),
+                style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
@@ -45,9 +42,7 @@ class MaintenancePage extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 'Please check back soon!',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: Colors.black45),
+                style: Theme.of(context).textTheme.labelMedium,
               ),
             ],
           ),
