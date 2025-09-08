@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow_v2/notification/notification_controller.dart';
 import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NotificationInterfaceHandler {
   static Future<void> initateListeners(BuildContext context) async {
@@ -108,6 +109,16 @@ class NotificationInterfaceHandler {
             context.push(
               RouterConstants.dashboardRouteName,
               extra: {'initalIndex': 4},
+            );
+            break;
+          }
+        case "update":
+          {
+            launchUrl(
+              Uri.parse(
+                "https://play.google.com/store/apps/details?id=com.rohit.settlenow&hl=en_IN",
+              ),
+              mode: LaunchMode.externalApplication,
             );
             break;
           }

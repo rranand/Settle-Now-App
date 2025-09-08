@@ -82,10 +82,13 @@ class _AboutUsPageState extends State<AboutUsPage> {
                             mode: LaunchMode.externalApplication,
                           );
                         },
-
                         child: SvgPicture.asset(
                           "assets/icon/email.svg",
                           width: 28,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context).iconTheme.color!,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -96,10 +99,13 @@ class _AboutUsPageState extends State<AboutUsPage> {
                             mode: LaunchMode.externalApplication,
                           );
                         },
-
                         child: SvgPicture.asset(
                           "assets/icon/github.svg",
                           width: 28,
+                          colorFilter: ColorFilter.mode(
+                            Theme.of(context).iconTheme.color!,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 16),
