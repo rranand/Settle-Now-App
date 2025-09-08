@@ -9,6 +9,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow_v2/data/data_provider/update_info_data_provider.dart';
+import 'package:settlenow_v2/data/repository/update_info_repository.dart';
 import 'package:settlenow_v2/firebase/firebase_remote.dart';
 import 'package:settlenow_v2/notification/notification_interface_handler.dart';
 import 'package:settlenow_v2/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
@@ -177,13 +179,16 @@ class MyApp extends StatelessWidget {
           create:
               (context) => NotificationRepository(NotificationDataProvider()),
         ),
+        RepositoryProvider<UpdateInfoRepository>(
+          create: (context) => UpdateInfoRepository(UpdateInfoDataProvider()),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider<UpdateInfoBloc>(
             create:
                 (context) =>
-                    UpdateInfoBloc()
+                    UpdateInfoBloc(context.read<UpdateInfoRepository>())
                       ..add(UpdateInfoFetchRequested(remoteConfigService)),
           ),
           BlocProvider<AuthBloc>(

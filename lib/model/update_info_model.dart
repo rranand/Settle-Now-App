@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:settlenow_v2/util/handler/crypto.dart';
+
 class UpdateInfoModel {
   bool hasData = true;
   String version = "";
@@ -59,6 +61,20 @@ class UpdateInfoModel {
       description: map['description'],
       important: map['important'],
       maintenance: map['maintenance'],
+      currentVersion: currentVersion,
+    );
+  }
+
+  factory UpdateInfoModel.fromAPI(
+    Map<String, dynamic> map,
+    String currentVersion,
+  ) {
+    return UpdateInfoModel(
+      version: Crypto.decrypt(map['version']),
+      link: Crypto.decrypt(map['link']),
+      description: Crypto.decrypt(map['description']),
+      important: Crypto.decrypt(map['important']) == 'true',
+      maintenance: Crypto.decrypt(map['maintenance']) == 'true',
       currentVersion: currentVersion,
     );
   }
