@@ -42,6 +42,8 @@ final class AuthSignupOTPValidationRequested extends AuthEvent {
 
 final class AuthLogoutRequested extends AuthEvent {}
 
+final class AuthRevokeSessionRequested extends AuthEvent {}
+
 final class AuthLoggedInUserRequested extends AuthEvent {}
 
 final class AuthProfileUpdateRequested extends AuthEvent {

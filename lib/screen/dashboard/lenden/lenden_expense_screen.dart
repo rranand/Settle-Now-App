@@ -50,7 +50,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     if (state is LendenRoomFailure) {
       showNormalSnackBar(context, state.error);
     } else if (state is LendenRoomInitial) {
-      context.pop();
+      if (context.canPop()) {
+        context.pop();
+      }
     }
   }
 

@@ -522,7 +522,9 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         if (state is RoomInfoFailure) {
           showNormalSnackBar(context, state.error);
         } else if (state is RoomInfoInitial) {
-          context.pop();
+          if (context.canPop()) {
+            context.pop();
+          }
         } else if (state is RoomInfoSuccess && !state.isInternalUpdate) {
           context.read<RoomSettleCubit>().fetchData(
             widget.id,

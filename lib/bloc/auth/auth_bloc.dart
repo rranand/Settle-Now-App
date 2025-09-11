@@ -1,4 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -25,6 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthGoogleSignUpRequested>(_authGoogleSignUpRequested);
     on<AuthOTPRequested>(_authOTPRequested);
     on<AuthLogoutRequested>(_authLogoutRequested);
+    on<AuthRevokeSessionRequested>(_authRevokeSessionRequested);
     on<AuthProfileUpdateRequested>(_authProfileUpdateRequested);
     on<AuthLoggedInUserRequested>(_authLoggedInUserRequested);
     on<AuthSignupOTPRequested>(_authSignupOTPRequested);
@@ -271,13 +273,30 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  void _authRevokeSessionRequested(
+    AuthRevokeSessionRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await additionalLogoutAction();
+    } catch (_) {}
+    return emit(AuthInitial());
+  }
+
   Future<void> additionalLogoutAction() async {
     try {
-      await Future.wait([
-        GoogleOauth.logout(),
-        FirebaseMessaging.instance.deleteToken(),
-        LocalStoragePreference.clearAllPreferences(),
-      ]);
+      if (kIsWeb) {
+        await Future.wait([
+          GoogleOauth.logout(),
+          LocalStoragePreference.clearAllPreferences(),
+        ]);
+      } else {
+        await Future.wait([
+          GoogleOauth.logout(),
+          FirebaseMessaging.instance.deleteToken(),
+          LocalStoragePreference.clearAllPreferences(),
+        ]);
+      }
     } catch (_) {}
   }
 }

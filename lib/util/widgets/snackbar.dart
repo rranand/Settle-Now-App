@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
 import 'package:settlenow_v2/constant/ui_constant.dart';
 import 'package:settlenow_v2/util/functions/additional_function.dart';
 import 'package:settlenow_v2/util/widgets/custom_button.dart';
@@ -140,5 +142,9 @@ void showNormalSnackBar(
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   } else {
     scaffoldMessenger.showSnackBar(snackBar);
+  }
+
+  if (txt.toLowerCase() == "unauthorized access") {
+    context.read<AuthBloc>().add(AuthRevokeSessionRequested());
   }
 }

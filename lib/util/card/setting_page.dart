@@ -306,7 +306,10 @@ class _SettingPageState extends State<SettingPage> {
         case (TransactionType.lenden):
           {
             _sub = context.read<LendenRoomBloc>().stream.listen((state) {
-              if (context.mounted && mounted && state is LendenRoomInitial) {
+              if (context.mounted &&
+                  mounted &&
+                  state is LendenRoomInitial &&
+                  context.canPop()) {
                 context.pop();
               }
             });
@@ -314,7 +317,10 @@ class _SettingPageState extends State<SettingPage> {
         case (TransactionType.room):
           {
             _sub = context.read<RoomInfoCubit>().stream.listen((state) {
-              if (context.mounted && mounted && state is RoomInfoInitial) {
+              if (context.mounted &&
+                  mounted &&
+                  state is RoomInfoInitial &&
+                  context.canPop()) {
                 context.pop();
               }
             });
