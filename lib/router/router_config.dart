@@ -100,17 +100,6 @@ class AppRouterConfig {
           );
         },
         routes: [
-          // GoRoute(
-          //   path: "${RouterConstants.deepLinkJoinLend}/:id",
-          //   builder: (context, state) {
-          //     return AuthGate(
-          //       child: DeepLinkJoin(
-          //         transactionType: TransactionType.lenden,
-          //         id: state.pathParameters["id"]!,
-          //       ),
-          //     );
-          //   },
-          // ),
           GoRoute(
             path: "${RouterConstants.deepLinkJoinRoom}/:id",
             builder: (context, state) {
