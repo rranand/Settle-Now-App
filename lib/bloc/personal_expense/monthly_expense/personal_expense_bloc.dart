@@ -1,8 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
-import 'package:settlenow_v2/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
-import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
+import 'package:settlenow/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
+import 'package:settlenow/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
+import 'package:settlenow/model/personal_expense_transaction_model.dart';
 
 part 'personal_expense_event.dart';
 part 'personal_expense_state.dart';

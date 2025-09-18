@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/model/new_transaction_model.dart';
-import 'package:settlenow_v2/model/transaction_model.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
-import 'package:settlenow_v2/util/handler/network_call.dart';
+import 'package:settlenow/model/new_transaction_model.dart';
+import 'package:settlenow/model/transaction_model.dart';
+import 'package:settlenow/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/network_call.dart';
 
 class QuicksplitDataProvider {
   Future<List<TransactionModel>> fetchData(String authToken) async {
@@ -135,7 +135,7 @@ class QuicksplitDataProvider {
       rethrow;
     }
   }
-  
+
   Future<void> optout(String expenseID, String authToken) async {
     try {
       final response = await createAPICall(

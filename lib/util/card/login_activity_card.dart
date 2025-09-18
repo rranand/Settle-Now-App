@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
-import 'package:settlenow_v2/model/login_activity_model.dart';
-import 'package:settlenow_v2/util/enum/device_type.dart';
-import 'package:settlenow_v2/util/enum/enums.dart';
-import 'package:settlenow_v2/util/functions/text_function.dart';
-import 'package:settlenow_v2/util/widgets/button_with_shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/custom_button.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/cubit/user/user_login_activity/user_login_activity_cubit.dart';
+import 'package:settlenow/model/login_activity_model.dart';
+import 'package:settlenow/util/enum/device_type.dart';
+import 'package:settlenow/util/enum/enums.dart';
+import 'package:settlenow/util/functions/text_function.dart';
+import 'package:settlenow/util/widgets/button_with_shimmer_effect.dart';
+import 'package:settlenow/util/widgets/custom_button.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class LoginActivityCard extends StatelessWidget {
   final LoginActivityModel data;

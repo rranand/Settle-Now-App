@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/room/room_settle/room_settle_cubit.dart';
-import 'package:settlenow_v2/model/room_settle_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/util/card/settle_card.dart';
-import 'package:settlenow_v2/util/functions/additional_function.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/cubit/room/room_settle/room_settle_cubit.dart';
+import 'package:settlenow/model/room_settle_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/card/settle_card.dart';
+import 'package:settlenow/util/functions/additional_function.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class RoomSettleScreen extends StatefulWidget {
   final String roomID;

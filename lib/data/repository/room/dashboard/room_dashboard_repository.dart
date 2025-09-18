@@ -1,9 +1,9 @@
-import 'package:settlenow_v2/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
-import 'package:settlenow_v2/model/notification_model.dart';
-import 'package:settlenow_v2/model/room_info_model.dart';
-import 'package:settlenow_v2/model/room_user_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/util/custom/pair.dart';
+import 'package:settlenow/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
+import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/model/room_info_model.dart';
+import 'package:settlenow/model/room_user_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/custom/pair.dart';
 
 class RoomDashboardRepository {
   final RoomDashboardDataProvider _dataProvider;

@@ -1,5 +1,5 @@
-import 'package:settlenow_v2/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
-import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
+import 'package:settlenow/data/data_provider/lenden/dashboard/lenden_dashboard_data_provider.dart';
+import 'package:settlenow/model/lenden_dashboard_model.dart';
 
 class LendenDashboardRepository {
   final LendenDashboardDataProvider _dataProvider;

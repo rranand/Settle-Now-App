@@ -2,10 +2,10 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 Widget imageWidgetForCachedNetworkimage(
   ImageProvider? imgProvider,

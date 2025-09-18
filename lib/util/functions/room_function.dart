@@ -1,7 +1,7 @@
 import 'package:decimal/decimal.dart';
-import 'package:settlenow_v2/model/room_settle_model.dart';
-import 'package:settlenow_v2/model/room_user_model.dart';
-import 'package:settlenow_v2/model/transaction_model.dart';
+import 'package:settlenow/model/room_settle_model.dart';
+import 'package:settlenow/model/room_user_model.dart';
+import 'package:settlenow/model/transaction_model.dart';
 
 List<RoomUserModel> calculateUserExpenseInfo(
   List<RoomUserModel> userArr,

@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/model/notification_model.dart';
-import 'package:settlenow_v2/model/room_info_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/util/custom/pair.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
-import 'package:settlenow_v2/util/handler/network_call.dart';
+import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/model/room_info_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/custom/pair.dart';
+import 'package:settlenow/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/network_call.dart';
 
 class RoomDashboardDataProvider {
   Future<Pair<List<RoomInfoModel>, bool>> fetchData(

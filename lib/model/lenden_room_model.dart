@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/model/common_transaction_field.dart';
-import 'package:settlenow_v2/model/lenden_user_model.dart';
-import 'package:settlenow_v2/model/new_transaction_model.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/model/common_transaction_field.dart';
+import 'package:settlenow/model/lenden_user_model.dart';
+import 'package:settlenow/model/new_transaction_model.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class LendenTransactionModel implements CommonTransactionField {
   bool hasData = true;

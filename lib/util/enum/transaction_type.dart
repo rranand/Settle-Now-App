@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow_v2/router/router_constant.dart';
+import 'package:settlenow/router/router_constant.dart';
 
 enum TransactionType { quicksplit, lenden, room, personal }
 

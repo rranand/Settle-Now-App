@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/constant/remote_config_constant.dart';
+import 'package:settlenow/constant/remote_config_constant.dart';
 
 class FirebaseRemote extends ChangeNotifier {
   static final FirebaseRemoteConfig _remoteConfig =

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/filter/filter_cubit.dart';
-import 'package:settlenow_v2/internationalization/currency.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/cubit/filter/filter_cubit.dart';
+import 'package:settlenow/internationalization/currency.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 import '../../../../core.dart';
 

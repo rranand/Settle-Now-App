@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class UserModel {
   bool hasData = true;

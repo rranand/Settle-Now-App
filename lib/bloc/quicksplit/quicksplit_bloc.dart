@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
-import 'package:settlenow_v2/model/transaction_model.dart';
+import 'package:settlenow/data/repository/quicksplit_repository.dart';
+import 'package:settlenow/model/transaction_model.dart';
 
 part 'quicksplit_event.dart';
 part 'quicksplit_state.dart';

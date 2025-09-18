@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
-import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
+import 'package:settlenow/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
+import 'package:settlenow/model/lenden_dashboard_model.dart';
 
 part 'lenden_dashboard_event.dart';
 part 'lenden_dashboard_state.dart';

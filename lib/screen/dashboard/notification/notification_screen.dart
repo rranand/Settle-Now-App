@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/model/notification_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/util/card/notification_card.dart';
-import 'package:settlenow_v2/util/handler/filter_sort.dart';
-import 'package:settlenow_v2/util/widgets/custom_form_field.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/bloc/notification/notification_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/util/card/notification_card.dart';
+import 'package:settlenow/util/handler/filter_sort.dart';
+import 'package:settlenow/util/widgets/custom_form_field.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class NotificationScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;

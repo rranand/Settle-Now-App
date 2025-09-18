@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/internationalization/currency.dart';
+import 'package:settlenow/internationalization/currency.dart';
 
 class BarGroup extends StatelessWidget {
   final String user;

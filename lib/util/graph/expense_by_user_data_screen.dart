@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/model/user_financial_model.dart';
-import 'package:settlenow_v2/util/graph/bar_group.dart';
-import 'package:settlenow_v2/util/graph/legend_item.dart';
+import 'package:settlenow/model/user_financial_model.dart';
+import 'package:settlenow/util/graph/bar_group.dart';
+import 'package:settlenow/util/graph/legend_item.dart';
 
 class ExpenseByUserDataScreen extends StatefulWidget {
   final List<UserFinancialData> userFinancialData;

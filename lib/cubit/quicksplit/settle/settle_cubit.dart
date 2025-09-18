@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/quicksplit/quicksplit_bloc.dart';
-import 'package:settlenow_v2/data/repository/quicksplit_repository.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
+import 'package:settlenow/bloc/quicksplit/quicksplit_bloc.dart';
+import 'package:settlenow/data/repository/quicksplit_repository.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
 
 part 'settle_state.dart';
 

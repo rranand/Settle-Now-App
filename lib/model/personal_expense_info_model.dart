@@ -2,8 +2,8 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/constant/calender_constant.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/constant/calender_constant.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class PersonalExpenseInfoModel {
   bool hasData = true;

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/constant/gradient_color_constant.dart';
+import 'package:settlenow/constant/gradient_color_constant.dart';
 
 class RoundedNavbarWidget extends StatelessWidget {
   final List<String> title;

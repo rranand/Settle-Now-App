@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/user/preference/preference_cubit.dart';
-import 'package:settlenow_v2/model/preference_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/provider/preference_provider.dart';
-import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/util/functions/text_function.dart';
-import 'package:settlenow_v2/util/widgets/custom_button.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/cubit/user/preference/preference_cubit.dart';
+import 'package:settlenow/model/preference_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/provider/preference_provider.dart';
+import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/util/functions/text_function.dart';
+import 'package:settlenow/util/widgets/custom_button.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class PreferenceScreen extends StatefulWidget {
   const PreferenceScreen({super.key});

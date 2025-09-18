@@ -1,9 +1,9 @@
-import 'package:settlenow_v2/data/data_provider/lenden/room/lenden_room_data_provider.dart';
-import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
-import 'package:settlenow_v2/model/lenden_room_model.dart';
-import 'package:settlenow_v2/model/new_transaction_model.dart';
-import 'package:settlenow_v2/model/notification_model.dart';
-import 'package:settlenow_v2/util/custom/pair.dart';
+import 'package:settlenow/data/data_provider/lenden/room/lenden_room_data_provider.dart';
+import 'package:settlenow/model/lenden_dashboard_model.dart';
+import 'package:settlenow/model/lenden_room_model.dart';
+import 'package:settlenow/model/new_transaction_model.dart';
+import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/util/custom/pair.dart';
 
 class LendenRoomRepository {
   final LendenRoomDataProvider _dataProvider;

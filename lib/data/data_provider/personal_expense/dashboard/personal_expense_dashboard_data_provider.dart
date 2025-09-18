@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/model/personal_expense_info_model.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
-import 'package:settlenow_v2/util/handler/network_call.dart';
+import 'package:settlenow/model/personal_expense_info_model.dart';
+import 'package:settlenow/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/network_call.dart';
 
 class PersonalExpenseDashboardDataProvider {
   Future<List<PersonalExpenseInfoModel>> fetchData(

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 Function getHttpMethod(String methodName) {
   switch (methodName.toLowerCase()) {

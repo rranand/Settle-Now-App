@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/model/lenden_dashboard_model.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
-import 'package:settlenow_v2/util/handler/network_call.dart';
+import 'package:settlenow/model/lenden_dashboard_model.dart';
+import 'package:settlenow/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/network_call.dart';
 
 class LendenDashboardDataProvider {
   Future<List<LendenDashboardModel>> fetchData(String authToken) async {

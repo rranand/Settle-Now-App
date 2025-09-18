@@ -1,12 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/internationalization/currency.dart';
-import 'package:settlenow_v2/model/personal_expense_info_model.dart';
-import 'package:settlenow_v2/router/router_constant.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/internationalization/currency.dart';
+import 'package:settlenow/model/personal_expense_info_model.dart';
+import 'package:settlenow/router/router_constant.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class PersonalExpenseCard extends StatelessWidget {
   final PersonalExpenseInfoModel data;

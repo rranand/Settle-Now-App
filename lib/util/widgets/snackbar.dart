@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/util/functions/additional_function.dart';
-import 'package:settlenow_v2/util/widgets/custom_button.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/util/functions/additional_function.dart';
+import 'package:settlenow/util/widgets/custom_button.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 void showSnackbar(
   BuildContext context,

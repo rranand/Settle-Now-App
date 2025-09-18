@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/router/router_constant.dart';
-import 'package:settlenow_v2/util/functions/text_function.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/stacked_image.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/router/router_constant.dart';
+import 'package:settlenow/util/functions/text_function.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/stacked_image.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

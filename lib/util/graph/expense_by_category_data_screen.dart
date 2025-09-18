@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/model/category_amount_model.dart';
-import 'package:settlenow_v2/util/graph/bar_group.dart';
-import 'package:settlenow_v2/util/graph/legend_item.dart';
-import 'package:settlenow_v2/util/widgets/app_colors.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/model/category_amount_model.dart';
+import 'package:settlenow/util/graph/bar_group.dart';
+import 'package:settlenow/util/graph/legend_item.dart';
+import 'package:settlenow/util/widgets/app_colors.dart';
 
 class ExpenseByCategoryDataScreen extends StatefulWidget {
   final List<CategoryAmountModel> categoryAmountModel;

@@ -4,7 +4,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import 'package:settlenow_v2/model/user_amount_model.dart';
+import 'package:settlenow/model/user_amount_model.dart';
 
 class NewTransactionModel {
   bool hasData = true;

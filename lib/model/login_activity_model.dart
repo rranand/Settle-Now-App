@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class LoginActivityModel {
   bool hasData = true;
@@ -52,7 +52,8 @@ class LoginActivityModel {
       id: Crypto.decrypt(map['id']),
       deviceName: Crypto.decrypt(map['deviceName']),
       deviceType: Crypto.decrypt(map['deviceType']),
-      lastLoggedIn: DateTime.parse(Crypto.decrypt(map['lastLoggedIn'])).toLocal(),
+      lastLoggedIn:
+          DateTime.parse(Crypto.decrypt(map['lastLoggedIn'])).toLocal(),
       createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
     );
   }

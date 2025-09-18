@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
-import 'package:settlenow_v2/model/room_info_model.dart';
-import 'package:settlenow_v2/util/custom/pair.dart';
-import 'package:settlenow_v2/util/enum/enums.dart';
+import 'package:settlenow/data/repository/room/dashboard/room_dashboard_repository.dart';
+import 'package:settlenow/model/room_info_model.dart';
+import 'package:settlenow/util/custom/pair.dart';
+import 'package:settlenow/util/enum/enums.dart';
 
 part 'room_dashboard_event.dart';
 part 'room_dashboard_state.dart';

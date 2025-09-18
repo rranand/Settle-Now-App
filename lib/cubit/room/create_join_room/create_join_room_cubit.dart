@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
-import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
-import 'package:settlenow_v2/data/repository/room/dashboard/room_dashboard_repository.dart';
-import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow_v2/model/notification_model.dart';
-import 'package:settlenow_v2/model/room_info_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/bloc/notification/notification_bloc.dart';
+import 'package:settlenow/bloc/room/dashboard/room_dashboard_bloc.dart';
+import 'package:settlenow/data/repository/room/dashboard/room_dashboard_repository.dart';
+import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
+import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/model/room_info_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 part 'create_join_room_state.dart';
 

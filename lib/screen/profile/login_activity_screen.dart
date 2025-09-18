@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/user/user_login_activity/user_login_activity_cubit.dart';
-import 'package:settlenow_v2/model/login_activity_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/provider/screen_size_provider.dart';
-import 'package:settlenow_v2/util/card/login_activity_card.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/cubit/user/user_login_activity/user_login_activity_cubit.dart';
+import 'package:settlenow/model/login_activity_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/util/card/login_activity_card.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class LoginActivityScreen extends StatefulWidget {
   const LoginActivityScreen({super.key});

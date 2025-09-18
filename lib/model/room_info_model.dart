@@ -2,10 +2,10 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/model/room_user_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow/model/room_user_model.dart';
+import 'package:settlenow/model/user_model.dart';
 
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class RoomInfoModel {
   bool hasData = true;

@@ -1,11 +1,11 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/model/new_transaction_model.dart';
-import 'package:settlenow_v2/model/notification_model.dart';
-import 'package:settlenow_v2/model/room_settle_model.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
-import 'package:settlenow_v2/util/handler/network_call.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/model/new_transaction_model.dart';
+import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/model/room_settle_model.dart';
+import 'package:settlenow/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/network_call.dart';
 
 class RoomDataProvider {
   Future<RoomInfoModel> fetchRoomInfo(String id, String authToken) async {

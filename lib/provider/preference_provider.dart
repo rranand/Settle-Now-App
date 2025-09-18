@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/model/preference_model.dart';
+import 'package:settlenow/model/preference_model.dart';
 
 class PreferenceProvider extends ChangeNotifier {
   PreferenceModel _preferenceData = PreferenceModel.empty();

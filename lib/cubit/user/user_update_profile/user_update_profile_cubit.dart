@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/data/repository/auth_repository.dart';
-import 'package:settlenow_v2/model/preference_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/data/repository/auth_repository.dart';
+import 'package:settlenow/model/preference_model.dart';
+import 'package:settlenow/model/user_model.dart';
 
 part 'user_update_profile_state.dart';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/router/router_constant.dart';
-import 'package:settlenow_v2/util/widgets/custom_button.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/router/router_constant.dart';
+import 'package:settlenow/util/widgets/custom_button.dart';
 
 class ErrorPage extends StatefulWidget {
   const ErrorPage({super.key});

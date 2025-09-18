@@ -1,5 +1,5 @@
-import 'package:settlenow_v2/data/data_provider/personal_expense/dashboard/personal_expense_dashboard_data_provider.dart';
-import 'package:settlenow_v2/model/personal_expense_info_model.dart';
+import 'package:settlenow/data/data_provider/personal_expense/dashboard/personal_expense_dashboard_data_provider.dart';
+import 'package:settlenow/model/personal_expense_info_model.dart';
 
 class PersonalExpenseDashboardRepository {
   final PersonalExpenseDashboardDataProvider _dataProvider;

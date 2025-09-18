@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/model/update_info_model.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
-import 'package:settlenow_v2/util/handler/network_call.dart';
-import 'package:settlenow_v2/util/handler/platform_service.dart';
+import 'package:settlenow/model/update_info_model.dart';
+import 'package:settlenow/util/handler/crypto.dart';
+import 'package:settlenow/util/handler/network_call.dart';
+import 'package:settlenow/util/handler/platform_service.dart';
 
 class UpdateInfoDataProvider {
   Future<UpdateInfoModel> fetchUpdateInfo() async {

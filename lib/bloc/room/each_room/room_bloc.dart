@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
-import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow_v2/model/room_user_model.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
+import 'package:settlenow/model/room_user_model.dart';
 
 part 'room_event.dart';
 part 'room_state.dart';

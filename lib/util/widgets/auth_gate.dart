@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/bloc/update_info/update_info_bloc.dart';
-import 'package:settlenow_v2/firebase/firebase_remote.dart';
-import 'package:settlenow_v2/provider/preference_provider.dart';
-import 'package:settlenow_v2/router/router_constant.dart';
-import 'package:settlenow_v2/util/card/loading_card.dart';
-import 'package:settlenow_v2/util/functions/additional_function.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/bloc/update_info/update_info_bloc.dart';
+import 'package:settlenow/firebase/firebase_remote.dart';
+import 'package:settlenow/provider/preference_provider.dart';
+import 'package:settlenow/router/router_constant.dart';
+import 'package:settlenow/util/card/loading_card.dart';
+import 'package:settlenow/util/functions/additional_function.dart';
 
 class AuthGate extends StatelessWidget {
   final Widget child;

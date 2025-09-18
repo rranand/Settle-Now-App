@@ -1,5 +1,5 @@
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class LendenUserModel extends UserModel {
   bool isClosed = false;

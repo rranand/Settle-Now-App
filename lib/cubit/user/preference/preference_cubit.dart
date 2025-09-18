@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/auth/auth_bloc.dart';
-import 'package:settlenow_v2/data/repository/auth_repository.dart';
-import 'package:settlenow_v2/model/preference_model.dart';
-import 'package:settlenow_v2/model/user_model.dart';
-import 'package:settlenow_v2/provider/preference_provider.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/auth/auth_bloc.dart';
+import 'package:settlenow/data/repository/auth_repository.dart';
+import 'package:settlenow/model/preference_model.dart';
+import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/provider/preference_provider.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 part 'preference_state.dart';
 

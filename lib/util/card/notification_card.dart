@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/notification_action/notification_action_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/model/notification_model.dart';
-import 'package:settlenow_v2/util/functions/text_function.dart';
-import 'package:settlenow_v2/util/widgets/image_widget.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/notification_action/notification_action_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/util/functions/text_function.dart';
+import 'package:settlenow/util/widgets/image_widget.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class NotificationCard extends StatefulWidget {
   final String loggedInUserID;

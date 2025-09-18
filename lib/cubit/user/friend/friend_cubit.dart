@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/data/repository/auth_repository.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/data/repository/auth_repository.dart';
 
 part 'friend_state.dart';
 

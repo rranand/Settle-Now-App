@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:in_app_update/in_app_update.dart';
-import 'package:settlenow_v2/bloc/update_info/update_info_bloc.dart';
+import 'package:settlenow/bloc/update_info/update_info_bloc.dart';
 
 class InAppUpdateService {
   static Future<void> checkForUpdate(BuildContext context) async {

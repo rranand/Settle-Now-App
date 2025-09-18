@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/room/each_room/room_bloc.dart';
-import 'package:settlenow_v2/constant/ui_constant.dart';
-import 'package:settlenow_v2/cubit/room/room_user/room_user_cubit.dart';
-import 'package:settlenow_v2/model/category_amount_model.dart';
-import 'package:settlenow_v2/model/room_user_model.dart';
-import 'package:settlenow_v2/model/transaction_model.dart';
-import 'package:settlenow_v2/model/user_financial_model.dart';
-import 'package:settlenow_v2/util/graph/expense_by_user_data_screen.dart';
-import 'package:settlenow_v2/util/graph/expense_by_category_data_screen.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/room/each_room/room_bloc.dart';
+import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow/model/category_amount_model.dart';
+import 'package:settlenow/model/room_user_model.dart';
+import 'package:settlenow/model/transaction_model.dart';
+import 'package:settlenow/model/user_financial_model.dart';
+import 'package:settlenow/util/graph/expense_by_user_data_screen.dart';
+import 'package:settlenow/util/graph/expense_by_category_data_screen.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 class RoomAnalysisScreen extends StatefulWidget {
   const RoomAnalysisScreen({super.key});

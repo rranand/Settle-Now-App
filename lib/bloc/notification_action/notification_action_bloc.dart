@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/bloc/notification/notification_bloc.dart';
-import 'package:settlenow_v2/data/repository/notification_repository.dart';
+import 'package:settlenow/bloc/notification/notification_bloc.dart';
+import 'package:settlenow/data/repository/notification_repository.dart';
 
 part 'notification_action_event.dart';
 part 'notification_action_state.dart';

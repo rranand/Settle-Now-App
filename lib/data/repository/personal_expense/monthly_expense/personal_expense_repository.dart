@@ -1,6 +1,6 @@
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
-import 'package:settlenow_v2/model/new_transaction_model.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/data/data_provider/personal_expense/monthly_expense/personal_expense_data_provider.dart';
+import 'package:settlenow/model/new_transaction_model.dart';
 
 class PersonalMonthlyExpenseRepository {
   final PersonalMonthlyExpenseDataProvider _dataProvider;

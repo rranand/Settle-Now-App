@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
+import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
 part 'room_close_request_state.dart';
 
 class RoomCloseRequestCubit extends Cubit<RoomCloseRequestState> {

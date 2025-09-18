@@ -2,11 +2,11 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow_v2/constant/calender_constant.dart';
-import 'package:settlenow_v2/data/repository/personal_expense/dashboard/personal_expense_dashboard_repository.dart';
-import 'package:settlenow_v2/model/personal_expense_info_model.dart';
-import 'package:settlenow_v2/model/personal_expense_transaction_model.dart';
-import 'package:settlenow_v2/util/functions/text_function.dart';
+import 'package:settlenow/constant/calender_constant.dart';
+import 'package:settlenow/data/repository/personal_expense/dashboard/personal_expense_dashboard_repository.dart';
+import 'package:settlenow/model/personal_expense_info_model.dart';
+import 'package:settlenow/model/personal_expense_transaction_model.dart';
+import 'package:settlenow/util/functions/text_function.dart';
 
 part 'personal_expense_dashboard_event.dart';
 part 'personal_expense_dashboard_state.dart';

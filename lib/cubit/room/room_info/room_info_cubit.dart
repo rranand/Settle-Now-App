@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow_v2/bloc/room/dashboard/room_dashboard_bloc.dart';
-import 'package:settlenow_v2/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow_v2/model/room_info_model.dart';
-import 'package:settlenow_v2/model/room_user_model.dart';
-import 'package:settlenow_v2/util/widgets/shimmer_effect.dart';
-import 'package:settlenow_v2/util/widgets/snackbar.dart';
-import 'package:settlenow_v2/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/room/dashboard/room_dashboard_bloc.dart';
+import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
+import 'package:settlenow/model/room_info_model.dart';
+import 'package:settlenow/model/room_user_model.dart';
+import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/widgets/widgets.dart';
 
 part 'room_info_state.dart';
 

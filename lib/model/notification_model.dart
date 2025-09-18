@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class NotificationModel {
   bool hasData = true;

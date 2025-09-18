@@ -1,8 +1,8 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/util/handler/crypto.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/util/handler/crypto.dart';
 
 class RoomUserModel {
   bool hasData = true;

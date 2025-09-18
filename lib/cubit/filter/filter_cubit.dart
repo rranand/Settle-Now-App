@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow_v2/core.dart';
-import 'package:settlenow_v2/model/common_transaction_field.dart';
-import 'package:settlenow_v2/util/enum/filter_enums.dart';
-import 'package:settlenow_v2/util/enum/transaction_type.dart';
+import 'package:settlenow/core.dart';
+import 'package:settlenow/model/common_transaction_field.dart';
+import 'package:settlenow/util/enum/filter_enums.dart';
+import 'package:settlenow/util/enum/transaction_type.dart';
 
 part 'filter_state.dart';
 
