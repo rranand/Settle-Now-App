@@ -36,7 +36,7 @@ Future<Response> createAPICall(
   try {
     String host = "https://prod-api.settlenow.in/";
     if (kDebugMode) {
-      host = "http://192.168.29.136:9008/";
+      host = "http://192.168.1.37:9008/";
     }
     String tokenization = Crypto.createJSONDataTOJWT(jsonData);
     Map<String, String> headersMap = <String, String>{

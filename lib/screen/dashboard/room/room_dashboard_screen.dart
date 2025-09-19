@@ -66,11 +66,11 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       if (_roomJoinOrCreate.value == 0) {
         context.read<CreateJoinRoomCubit>().createNewRoom(
           context,
-          _roomJoinOrCreateController.text,
+          _roomJoinOrCreateController.text.trim(),
         );
       } else {
         context.read<CreateJoinRoomCubit>().joinNewRoom(
-          _roomJoinOrCreateController.text,
+          _roomJoinOrCreateController.text.trim(),
           _loggedInUser.authToken,
           ScaffoldMessenger.of(context),
         );

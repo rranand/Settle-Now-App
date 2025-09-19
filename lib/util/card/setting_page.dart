@@ -80,7 +80,7 @@ class _SettingPageState extends State<SettingPage> {
           {
             context.read<LendenRoomBloc>().add(
               LendenRoomUpdate(
-                roomName: _roomNameController.text,
+                roomName: _roomNameController.text.trim(),
                 authToken: _loggedInUser.authToken,
                 scaffoldMessengerState: ScaffoldMessenger.of(context),
               ),
@@ -90,7 +90,7 @@ class _SettingPageState extends State<SettingPage> {
           {
             context.read<RoomInfoCubit>().updateRoomName(
               _loggedInUser.authToken,
-              _roomNameController.text,
+              _roomNameController.text.trim(),
               ScaffoldMessenger.of(context),
             );
           }

@@ -79,7 +79,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
     if (_createRoomKey.currentState!.validate()) {
       context.read<CreateRoomCubit>().createNewRoom(
         context,
-        _createRoomController.text,
+        _createRoomController.text.trim(),
       );
 
       if (context.canPop()) {

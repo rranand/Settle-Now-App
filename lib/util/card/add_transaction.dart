@@ -558,7 +558,7 @@ class _AddTransactionState extends State<AddTransaction> {
 
       NewTransactionModel data = NewTransactionModel(
         amount: totalAmount,
-        description: _descriptionController.text,
+        description: _descriptionController.text.trim(),
         createdOn: _createdOn,
         members: userWithAmount,
         createdBy: createdBy,
