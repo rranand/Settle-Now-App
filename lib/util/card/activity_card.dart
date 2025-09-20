@@ -160,7 +160,10 @@ class _ActivityCardState extends State<ActivityCard> {
       return SizedBox.shrink();
     }
 
-    return Column(children: updateAttributes);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: updateAttributes,
+    );
   }
 
   @override
