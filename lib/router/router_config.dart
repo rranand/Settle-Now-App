@@ -18,6 +18,7 @@ import 'package:settlenow/screen/dashboard/home/preference_screen.dart';
 import 'package:settlenow/screen/dashboard/lenden/lenden_expense_screen.dart';
 import 'package:settlenow/screen/dashboard/personal_expense/personal_expense_screen.dart';
 import 'package:settlenow/screen/dashboard/room/room_expense_screen.dart';
+import 'package:settlenow/screen/dashboard/room/sub_section/room_activity_page.dart';
 import 'package:settlenow/screen/profile/login_activity_screen.dart';
 import 'package:settlenow/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow/screen/profile/profile_screen.dart';
@@ -182,6 +183,23 @@ class AppRouterConfig {
                       transactionType: TransactionType.room,
                       id: state.pathParameters["id"]!,
                     ),
+                  );
+                },
+                redirect: (context, state) {
+                  final roomState = context.read<RoomInfoCubit>().state;
+
+                  if (roomState is RoomInfoSuccess) {
+                    return null;
+                  } else {
+                    return getPreviousPath(state.uri);
+                  }
+                },
+              ),
+              GoRoute(
+                path: RouterConstants.roomActivityRouteName,
+                builder: (context, state) {
+                  return AuthGate(
+                    child: RoomActivityPage(id: state.pathParameters["id"]!),
                   );
                 },
                 redirect: (context, state) {

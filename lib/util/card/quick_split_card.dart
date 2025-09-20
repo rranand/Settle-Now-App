@@ -315,19 +315,22 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: List.generate(
-                  tags.length,
-                  (index) => tagOnCard(
-                    tags[index],
-                    context,
-                    textColor:
-                        UiConstant.colors[index % UiConstant.colors.length],
-                    backgroundColor:
-                        UiConstant.colorsWithShade50[index %
-                            UiConstant.colors.length],
-                    isLoaded: widget.data.hasData,
+              Visibility(
+                visible: widget.data.hasData,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: List.generate(
+                    tags.length,
+                    (index) => tagOnCard(
+                      tags[index],
+                      context,
+                      textColor:
+                          UiConstant.colors[index % UiConstant.colors.length],
+                      backgroundColor:
+                          UiConstant.colorsWithShade50[index %
+                              UiConstant.colors.length],
+                      isLoaded: widget.data.hasData,
+                    ),
                   ),
                 ),
               ),

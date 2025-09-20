@@ -11,6 +11,7 @@ import 'package:settlenow/constant/gradient_color_constant.dart';
 import 'package:settlenow/constant/ui_constant.dart';
 import 'package:settlenow/cubit/filter/filter_cubit.dart';
 import 'package:settlenow/cubit/room/create_join_room/create_join_room_cubit.dart';
+import 'package:settlenow/cubit/room/room_activity/room_activity_cubit.dart';
 import 'package:settlenow/cubit/room/room_close/room_close_cubit.dart';
 import 'package:settlenow/cubit/room/room_close_request/room_close_request_cubit.dart';
 import 'package:settlenow/cubit/room/room_info/room_info_cubit.dart';
@@ -416,9 +417,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             return Visibility(
               visible: _navbarSelectedIndex.value == 0 && hasTransactionData,
               child: InkWell(
-                borderRadius: BorderRadius.circular(
-                  UiConstant.cardBorderRadius,
-                ),
                 child: Icon(Icons.search),
                 onTap: () {
                   isSearchEnabled.value = !isSearchEnabled.value;
@@ -453,19 +451,29 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       ];
     }
 
-    if (isLoaded && isRoomActive) {
-      appBarAction = [
-        ...appBarAction,
+    if (isLoaded) {
+      appBarAction.add(
         InkWell(
-          borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
-          child: Icon(Iconsax.setting_copy),
+          child: Icon(Iconsax.activity_copy),
           onTap: () {
             context.push(
-              "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.settingPage}",
+              "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomActivityRouteName}",
             );
           },
         ),
-      ];
+      );
+      if (isRoomActive) {
+        appBarAction.add(
+          IconButton(
+            icon: Icon(Iconsax.setting_copy),
+            onPressed: () {
+              context.push(
+                "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.settingPage}",
+              );
+            },
+          ),
+        );
+      }
     }
 
     return appBarActionButton(context, appBarAction);
@@ -537,6 +545,10 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
               authToken: _loggedInUser.authToken,
               users: state.data.users,
             ),
+          );
+          context.read<RoomActivityCubit>().fetchData(
+            widget.id,
+            _loggedInUser.authToken,
           );
         }
       },

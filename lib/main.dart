@@ -9,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:settlenow/cubit/room/room_activity/room_activity_cubit.dart';
 import 'package:settlenow/data/data_provider/update_info_data_provider.dart';
 import 'package:settlenow/data/repository/update_info_repository.dart';
 import 'package:settlenow/firebase/firebase_remote.dart';
@@ -307,6 +308,10 @@ class MyApp extends StatelessWidget {
                   context.read<RoomRepository>(),
                   context.read<RoomUserCubit>(),
                 ),
+          ),
+          BlocProvider<RoomActivityCubit>(
+            create:
+                (context) => RoomActivityCubit(context.read<RoomRepository>()),
           ),
           BlocProvider<UserLoginActivityCubit>(
             create:

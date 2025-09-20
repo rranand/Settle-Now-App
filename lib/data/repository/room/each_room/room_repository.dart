@@ -1,4 +1,5 @@
 import 'package:settlenow/data/data_provider/room/each_room/room_data_provider.dart';
+import 'package:settlenow/model/activity_model.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
 import 'package:settlenow/model/notification_model.dart';
 import 'package:settlenow/model/room_info_model.dart';
@@ -246,6 +247,19 @@ class RoomRepository {
           .inviteNewMember(id, users, authToken);
 
       return notificationData;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<ActivityModel>> fetchActivity(String id, String authToken) async {
+    try {
+      List<ActivityModel> activityData = await _dataProvider.fetchActivity(
+        id,
+        authToken,
+      );
+
+      return activityData;
     } catch (e) {
       rethrow;
     }

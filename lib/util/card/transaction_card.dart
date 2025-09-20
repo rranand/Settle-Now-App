@@ -70,16 +70,19 @@ class _TransactionCardState extends State<TransactionCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: List.generate(
-                    tags.length,
-                    (index) => tagOnCard(
-                      tags[index],
-                      context,
-                      textColor: UiConstant.colors[index],
-                      backgroundColor: UiConstant.colorsWithShade50[index],
-                      isLoaded: widget.data.hasData,
+                Visibility(
+                  visible: widget.data.hasData,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: List.generate(
+                      tags.length,
+                      (index) => tagOnCard(
+                        tags[index],
+                        context,
+                        textColor: UiConstant.colors[index],
+                        backgroundColor: UiConstant.colorsWithShade50[index],
+                        isLoaded: widget.data.hasData,
+                      ),
                     ),
                   ),
                 ),

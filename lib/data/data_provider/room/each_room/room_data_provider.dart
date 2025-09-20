@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:settlenow/core.dart';
+import 'package:settlenow/model/activity_model.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
 import 'package:settlenow/model/notification_model.dart';
 import 'package:settlenow/model/room_settle_model.dart';
@@ -348,6 +349,30 @@ class RoomDataProvider {
         List<NotificationModel> arr = [];
         for (int i = 0; i < data['data'].length; i++) {
           arr.add(NotificationModel.fromMap(data['data'][i]));
+        }
+        return arr;
+      } else {
+        throw Crypto.decrypt(data['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<List<ActivityModel>> fetchActivity(String id, String authToken) async {
+    try {
+      final response = await createAPICall(
+        'room/$id/activity',
+        "get",
+        authToken,
+        {},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        List<ActivityModel> arr = [];
+        for (int i = 0; i < data['data'].length; i++) {
+          arr.add(ActivityModel.fromMap(data['data'][i]));
         }
         return arr;
       } else {

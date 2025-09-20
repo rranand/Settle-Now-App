@@ -19,6 +19,7 @@ class RouterConstants {
   static const String lendenEditExpenseRouteName = '/edit';
 
   //Room Route
+  static const String roomActivityRouteName = '/activity';
   static const String roomAddExpenseRouteName = '/add';
   static const String roomEditExpenseRouteName = '/edit';
   static const String roomSettleAddRouteName = '/add-settle';

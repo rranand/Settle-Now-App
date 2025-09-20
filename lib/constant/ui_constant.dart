@@ -68,12 +68,9 @@ class UiConstant {
     Colors.green,
     Colors.blue,
     Colors.orange,
-    Colors.purple,
     Colors.teal,
     Colors.pink,
-    Colors.brown,
     Colors.grey,
-    Colors.indigo,
     Colors.lime,
     Colors.cyan,
     Colors.amber,
@@ -83,5 +80,8 @@ class UiConstant {
     Colors.lightBlue,
     Colors.red,
     Colors.yellow,
+    Colors.brown,
+    Colors.purple,
+    Colors.indigo,
   ];
 }
