@@ -23,7 +23,7 @@ class ActivityCard extends StatefulWidget {
 
 class _ActivityCardState extends State<ActivityCard> {
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
-  final TextStyle _textStyle = TextStyle(fontSize: 16, color: Colors.grey);
+  final TextStyle _textStyle = TextStyle(fontSize: 15, color: Colors.grey);
 
   String getText(BuildContext context) {
     switch (widget.data.type) {
@@ -213,7 +213,7 @@ class _ActivityCardState extends State<ActivityCard> {
                                 ? subTextOnCard(
                                   convertToMoment(widget.data.createdOn),
                                   context,
-                                  fontSize: 15,
+                                  fontSize: 14,
                                   isLoaded: widget.data.hasData,
                                 )
                                 : CustomShimmerEffect.textWidget(
