@@ -13,7 +13,8 @@ final class RoomActivityLoading extends RoomActivityState {
 final class RoomActivitySuccess extends RoomActivityState {
   final String id;
   final List<ActivityModel> data;
-  RoomActivitySuccess(this.id, this.data);
+  final Map<String, List<ActivityModel>> transactionWiseActivity;
+  RoomActivitySuccess(this.id, this.data, this.transactionWiseActivity);
 }
 
 final class RoomActivityFailure extends RoomActivityState {

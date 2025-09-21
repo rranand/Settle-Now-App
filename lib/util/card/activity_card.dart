@@ -82,17 +82,6 @@ class _ActivityCardState extends State<ActivityCard> {
     }
   }
 
-  bool showInfoIcon() {
-    switch (widget.data.type) {
-      case ActivityType.transactionUpdated:
-      case ActivityType.settlementUpdated:
-      case ActivityType.roomRenamed:
-        return true;
-      default:
-        return false;
-    }
-  }
-
   Widget activityInfoWidget() {
     List<Widget> updateAttributes = [Divider()];
 
@@ -156,9 +145,7 @@ class _ActivityCardState extends State<ActivityCard> {
         }
     }
 
-    if (updateAttributes.length == 1) {
-      updateAttributes.add(Text("No Change Detected", style: _textStyle));
-    } else if (updateAttributes.isEmpty) {
+    if (updateAttributes.length <= 1) {
       return SizedBox.shrink();
     }
 
@@ -171,9 +158,14 @@ class _ActivityCardState extends State<ActivityCard> {
   @override
   Widget build(BuildContext context) {
     String activityText = getText(context);
+    Widget extendedChangeWidget = activityInfoWidget();
+    bool showInfoIcon =
+        extendedChangeWidget.runtimeType == Column().runtimeType;
+
     if (activityText.isEmpty) {
       return SizedBox.shrink();
     }
+
     return Column(
       children: [
         Stack(
@@ -238,7 +230,7 @@ class _ActivityCardState extends State<ActivityCard> {
                                   return SizedBox.shrink();
                                 }
                               },
-                              child: activityInfoWidget(),
+                              child: extendedChangeWidget,
                             ),
                           ],
                         ),
@@ -252,7 +244,7 @@ class _ActivityCardState extends State<ActivityCard> {
               top: 8,
               right: 8,
               child: Visibility(
-                visible: showInfoIcon(),
+                visible: showInfoIcon,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(
                     UiConstant.cardBorderRadius,

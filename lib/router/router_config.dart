@@ -213,6 +213,28 @@ class AppRouterConfig {
                 },
               ),
               GoRoute(
+                path: "${RouterConstants.roomActivityRouteName}/:transactionID",
+                builder: (context, state) {
+                  String transactionID = state.pathParameters["transactionID"]!;
+                  return AuthGate(
+                    child: RoomActivityPage(
+                      id: state.pathParameters["id"]!,
+                      transactionID: transactionID,
+                    ),
+                  );
+                },
+                redirect: (context, state) {
+                  final roomState = context.read<RoomInfoCubit>().state;
+                  final transactionID = state.pathParameters['transactionID'];
+
+                  if (roomState is RoomInfoSuccess && transactionID != null) {
+                    return null;
+                  } else {
+                    return getPreviousPath(state.uri);
+                  }
+                },
+              ),
+              GoRoute(
                 path: RouterConstants.inviteMember,
                 builder: (context, state) {
                   Map<String, dynamic> data =

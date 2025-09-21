@@ -13,7 +13,8 @@ import 'package:settlenow/util/widgets/widgets.dart';
 
 class RoomActivityPage extends StatefulWidget {
   final String id;
-  const RoomActivityPage({super.key, required this.id});
+  final String? transactionID;
+  const RoomActivityPage({super.key, required this.id, this.transactionID});
 
   @override
   State<RoomActivityPage> createState() => _RoomActivityPageState();
@@ -107,11 +108,25 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
                       bottom: UiConstant.spaceAtBottom,
                     ),
                   ),
-                  itemBuilder:
-                      (context, index) => ActivityCard(
-                        data: data[data.length - index - 1],
+                  itemBuilder: (context, index) {
+                    ActivityModel activityData = data[data.length - index - 1];
+
+                    if (widget.transactionID != null) {
+                      if (widget.transactionID == activityData.entityId) {
+                        return ActivityCard(
+                          data: activityData,
+                          userMapping: userMapping,
+                        );
+                      } else {
+                        return SizedBox.shrink();
+                      }
+                    } else {
+                      return ActivityCard(
+                        data: activityData,
                         userMapping: userMapping,
-                      ),
+                      );
+                    }
+                  },
                   itemCount: data.length,
                 );
               },

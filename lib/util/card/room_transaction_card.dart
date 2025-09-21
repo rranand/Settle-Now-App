@@ -5,7 +5,9 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow/bloc/add_to_personal_expense/add_to_personal_expense_bloc.dart';
 import 'package:settlenow/constant/ui_constant.dart';
 import 'package:settlenow/core.dart';
+import 'package:settlenow/cubit/room/room_activity/room_activity_cubit.dart';
 import 'package:settlenow/internationalization/currency.dart';
+import 'package:settlenow/model/activity_model.dart';
 import 'package:settlenow/router/router_constant.dart';
 import 'package:settlenow/util/enum/transaction_type.dart';
 import 'package:settlenow/util/functions/additional_function.dart';
@@ -142,6 +144,39 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
     }
   }
 
+  Widget showTimeline() {
+    if (widget.data.hasData) {
+      return BlocBuilder<RoomActivityCubit, RoomActivityState>(
+        builder: (context, state) {
+          if (state is RoomActivitySuccess) {
+            List<ActivityModel>? data =
+                state.transactionWiseActivity[widget.data.id];
+
+            if (data != null && data.isNotEmpty) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 6.0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
+                  child: Icon(Icons.timeline_outlined, color: Colors.grey),
+                  onTap: () {
+                    context.push(
+                      "${RouterConstants.roomRouteName}/${widget.roomID}${RouterConstants.roomActivityRouteName}/${widget.data.id}",
+                    );
+                  },
+                ),
+              );
+            }
+          }
+          return SizedBox.shrink();
+        },
+      );
+    } else {
+      return SizedBox.shrink();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -211,6 +246,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                 Row(
                   children: [
                     addToPersonalExpenseWidget(),
+                    showTimeline(),
                     Visibility(
                       visible: isManualSplit,
                       child: InkWell(
