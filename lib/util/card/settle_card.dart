@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/cubit/room/room_activity/room_activity_cubit.dart';
 import 'package:settlenow/internationalization/currency.dart';
+import 'package:settlenow/model/activity_model.dart';
 import 'package:settlenow/model/room_settle_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/router/router_constant.dart';
@@ -65,6 +68,35 @@ class SettleCard extends StatelessWidget {
     return str;
   }
 
+  Widget showTimeline() {
+    return BlocBuilder<RoomActivityCubit, RoomActivityState>(
+      builder: (context, state) {
+        if (state is RoomActivitySuccess) {
+          List<ActivityModel>? activityData =
+              state.transactionWiseActivity[data.id];
+
+          if (activityData != null && activityData.isNotEmpty) {
+            return Padding(
+              padding: const EdgeInsets.only(right: 6.0),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(
+                  UiConstant.cardBorderRadius,
+                ),
+                child: Icon(Icons.timeline_outlined, color: Colors.grey),
+                onTap: () {
+                  context.push(
+                    "${RouterConstants.roomRouteName}/$roomID${RouterConstants.roomActivityRouteName}/${data.id}",
+                  );
+                },
+              ),
+            );
+          }
+        }
+        return SizedBox.shrink();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -109,13 +141,19 @@ class SettleCard extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 4.0),
                 child:
                     data.hasData
-                        ? Text(
-                          formatCurrency(data.amount.abs(), context),
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
+                        ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              formatCurrency(data.amount.abs(), context),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                            showTimeline(),
+                          ],
                         )
                         : CustomShimmerEffect.textWidget(
                           context,
