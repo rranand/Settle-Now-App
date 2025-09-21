@@ -29,55 +29,55 @@ class _ActivityCardState extends State<ActivityCard> {
     switch (widget.data.type) {
       case ActivityType.transactionAdded:
         {
-          return "${widget.userMapping[widget.data.user] ?? "Unknown"} added a transaction of ${formatCurrency(widget.data.details!.newValue!.amount ?? 0, context)}";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} added a transaction of ${formatCurrency(widget.data.details!.newValue!.amount ?? 0, context)}";
         }
       case ActivityType.transactionUpdated:
         {
-          return "${widget.userMapping[widget.data.user] ?? "Unknown"} updated a transaction";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} updated a transaction";
         }
       case ActivityType.transactionDeleted:
         {
-          return "${widget.userMapping[widget.data.user] ?? "Unknown"} deleted a transaction of ${formatCurrency(widget.data.details!.newValue!.amount ?? 0, context)}";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} deleted a transaction of ${formatCurrency(widget.data.details!.newValue!.amount ?? 0, context)}";
         }
       case ActivityType.settlementAdded:
         {
           double amount = widget.data.details!.newValue!.amount ?? 0;
           if (amount < 0) {
-            return "${widget.userMapping[widget.data.user] ?? "Unknown"} settled ${formatCurrency(amount * -1, context)} for ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
+            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} settled ${formatCurrency(amount * -1, context)} for ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
           } else {
-            return "${widget.userMapping[widget.data.user] ?? "Unknown"} settled ${formatCurrency(amount, context)} with ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
+            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} settled ${formatCurrency(amount, context)} with ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
           }
         }
       case ActivityType.settlementUpdated:
         {
           double amount = widget.data.details!.newValue!.amount ?? 0;
           if (amount < 0) {
-            return "${widget.userMapping[widget.data.user] ?? "Unknown"} updated settlement for ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
+            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} updated settlement for ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
           } else {
-            return "${widget.userMapping[widget.data.user] ?? "Unknown"} updated settlement with ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
+            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} updated settlement with ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
           }
         }
       case ActivityType.settlementDeleted:
         {
-          return "${widget.userMapping[widget.data.user] ?? "Unknown"} deleted settlement of ${formatCurrency(widget.data.details!.newValue!.amount ?? 0, context)}";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} deleted settlement of ${formatCurrency(widget.data.details!.newValue!.amount!.abs(), context)}";
         }
       case ActivityType.roomRenamed:
         {
-          return "${widget.userMapping[widget.data.user] ?? "Unknown"} renamed room";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} renamed room";
         }
       case ActivityType.memberAdded:
         {
-          return "${widget.userMapping[widget.data.entityId] ?? "Unknown"} joined room (approved by ${widget.userMapping[widget.data.user] ?? "Unknown"})";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} joined room (approved by ${widget.userMapping[widget.data.entityId] ?? "Unknown"})";
         }
       case ActivityType.memberRemoved:
         return widget.data.details!.newValue!.description ?? '';
       case ActivityType.roomClosed:
         {
-          return "${widget.userMapping[widget.data.user] ?? "Unknown"} closed room";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} closed room";
         }
       case ActivityType.roomCreated:
         {
-          return "${widget.userMapping[widget.data.user] ?? "Unknown"} created room";
+          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} created room";
         }
     }
   }
@@ -88,8 +88,8 @@ class _ActivityCardState extends State<ActivityCard> {
     switch (widget.data.type) {
       case ActivityType.transactionUpdated:
         {
-          double oldAmount = widget.data.details!.oldValue!.amount ?? 0;
-          double amount = widget.data.details!.newValue!.amount ?? 0;
+          double oldAmount = widget.data.details!.oldValue!.amount!.abs();
+          double amount = widget.data.details!.newValue!.amount!.abs();
           String oldDescription =
               widget.data.details!.oldValue!.description ?? "";
           String description = widget.data.details!.newValue!.description ?? "";

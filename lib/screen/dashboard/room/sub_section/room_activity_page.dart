@@ -75,8 +75,12 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
 
           if (infoState is RoomInfoSuccess) {
             for (int i = 0; i < infoState.data.users.length; i++) {
-              userMapping[infoState.data.users[i].user.id] =
-                  infoState.data.users[i].user.name.split(' ').first;
+              if (infoState.data.users[i].user.id == _loggedInUser.id) {
+                userMapping[infoState.data.users[i].user.id] = "you";
+              } else {
+                userMapping[infoState.data.users[i].user.id] =
+                    infoState.data.users[i].user.name.split(' ').first;
+              }
             }
           }
 
