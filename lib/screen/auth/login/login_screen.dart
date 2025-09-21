@@ -269,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                                         state.isSuccess)
                                                     ? TimerButton(
                                                       onPressed: _resendOTP,
-                                                      timerDuration: 5,
+                                                      timerDuration: UiConstant.timerDuration,
                                                     )
                                                     : SizedBox.shrink(),
                                           ),

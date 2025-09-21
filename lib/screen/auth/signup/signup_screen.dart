@@ -293,7 +293,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                           () => _resendOTP(
                                                             state.token,
                                                           ),
-                                                      timerDuration: 5,
+                                                      timerDuration:
+                                                          UiConstant
+                                                              .timerDuration,
                                                     )
                                                     : SizedBox.shrink(),
                                           ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class UiConstant {
+  static const int timerDuration = 45;
+
   static const double cardTitleTextSize = 18;
   static const double cardBorderLeftSideStripWidth = 6;
   static const double cardBorderRadius = 12;
