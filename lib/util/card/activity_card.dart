@@ -23,7 +23,7 @@ class ActivityCard extends StatefulWidget {
 
 class _ActivityCardState extends State<ActivityCard> {
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
-  final TextStyle _textStyle = TextStyle(fontSize: 16);
+  final TextStyle _textStyle = TextStyle(fontSize: 16, color: Colors.grey);
 
   String getText(BuildContext context) {
     switch (widget.data.type) {
@@ -108,7 +108,7 @@ class _ActivityCardState extends State<ActivityCard> {
           if (oldAmount != amount) {
             updateAttributes.add(
               Text(
-                "Amount changed from ${formatCurrency(oldAmount, context)} to ${formatCurrency(amount, context)}",
+                "Amount: ${formatCurrency(oldAmount, context)} → ${formatCurrency(amount, context)}",
                 style: _textStyle,
               ),
             );
@@ -116,7 +116,7 @@ class _ActivityCardState extends State<ActivityCard> {
           if (oldDescription != description) {
             updateAttributes.add(
               Text(
-                "Description changed from '$oldDescription' to '$description'",
+                "Description: '$oldDescription' → '$description'",
                 style: _textStyle,
               ),
             );
@@ -131,7 +131,7 @@ class _ActivityCardState extends State<ActivityCard> {
           if (oldDescription != description) {
             updateAttributes.add(
               Text(
-                "Name changed from '$oldDescription' to '$description'",
+                "Name: '$oldDescription' → '$description'",
                 style: _textStyle,
               ),
             );
@@ -144,7 +144,7 @@ class _ActivityCardState extends State<ActivityCard> {
           if (oldAmount != amount) {
             updateAttributes.add(
               Text(
-                "Amount changed from ${formatCurrency(oldAmount.abs(), context)} to ${formatCurrency(amount.abs(), context)}",
+                "Amount: ${formatCurrency(oldAmount.abs(), context)} → ${formatCurrency(amount.abs(), context)}",
                 style: _textStyle,
               ),
             );
@@ -156,7 +156,9 @@ class _ActivityCardState extends State<ActivityCard> {
         }
     }
 
-    if (updateAttributes.length <= 1) {
+    if (updateAttributes.length == 1) {
+      updateAttributes.add(Text("No Change Detected", style: _textStyle));
+    } else if (updateAttributes.isEmpty) {
       return SizedBox.shrink();
     }
 

@@ -115,5 +115,5 @@ class UserAmountModel extends UserModel {
   }
 
   @override
-  int get hashCode => amount.hashCode;
+  int get hashCode => amount.hashCode ^ isSettled.hashCode ^ id.hashCode;
 }

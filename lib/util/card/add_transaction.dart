@@ -43,6 +43,7 @@ class _AddTransactionState extends State<AddTransaction> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _headerTextSize = 20;
   List<String> expenseCategories = [];
+  int oldTransHashcode = 0;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _amountController = TextEditingController();
@@ -439,6 +440,18 @@ class _AddTransactionState extends State<AddTransaction> {
 
     _selectedUserIDs.value = tempMap;
     _selectedUserIDSet.value = tempUserIDs;
+
+    NewTransactionModel oldTrans = NewTransactionModel(
+      amount: transactionData.amount,
+      description: transactionData.description,
+      createdOn: transactionData.createdOn,
+      members: transactionData.users,
+      createdBy: transactionData.createdBy,
+      splitType: transactionData.splitType,
+      category: transactionData.category,
+    );
+
+    oldTransHashcode = oldTrans.hashCode;
   }
 
   @override
@@ -489,7 +502,11 @@ class _AddTransactionState extends State<AddTransaction> {
 
   void _submitTransactionHandler() {
     if (_formKey.currentState!.validate()) {
-      double sumAmount = 0;
+      int sumAmount = 0;
+      int amountInPaisa =
+          (Decimal.parse(_amountController.text) * Decimal.fromInt(100))
+              .toBigInt()
+              .toInt();
       double totalAmount = double.parse(_amountController.text);
       List<UserAmountModel> userWithAmount = [];
       UserAmountModel createdBy = UserAmountModel.copyFromUser(
@@ -502,7 +519,10 @@ class _AddTransactionState extends State<AddTransaction> {
       if (_splitType[_splitTypeIndex.value] == "Partial") {
         _selectedUserIDs.value.forEach((userData, amountTxt) {
           double tempAmount = double.parse(amountTxt.text);
-          sumAmount += tempAmount;
+          sumAmount +=
+              (Decimal.parse(amountTxt.text) * Decimal.fromInt(100))
+                  .toBigInt()
+                  .toInt();
 
           if (userData.id == _loggedInUser.id) {
             createdBy = UserAmountModel.copyFromUser(_loggedInUser, tempAmount);
@@ -528,10 +548,7 @@ class _AddTransactionState extends State<AddTransaction> {
               activeUserCount++;
             }
           }
-          int amountInPaisa =
-              (Decimal.parse(totalAmount.toString()) * Decimal.fromInt(100))
-                  .toBigInt()
-                  .toInt();
+
           int remaining = amountInPaisa % activeUserCount;
           int eachAmount = (amountInPaisa / activeUserCount).toInt();
 
@@ -583,7 +600,7 @@ class _AddTransactionState extends State<AddTransaction> {
           {
             if (userWithAmount.isEmpty) {
               showNormalSnackBar(context, "Add Atleast One Member");
-            } else if ((totalAmount - sumAmount).abs() > 0.1) {
+            } else if (amountInPaisa != sumAmount) {
               showNormalSnackBar(context, "Total Amount does not match");
             } else if (!createdBy.hasData) {
               showNormalSnackBar(context, "You can't remove yourself");
@@ -605,13 +622,17 @@ class _AddTransactionState extends State<AddTransaction> {
             transactionType,
           );
         } else {
-          data.id = widget.transactionData!.id;
-          context.read<NewTransactionCubit>().updateExpense(
-            context,
-            data,
-            transactionType,
-            expenseType: expenseType,
-          );
+          if (oldTransHashcode != data.hashCode) {
+            data.id = widget.transactionData!.id;
+            context.read<NewTransactionCubit>().updateExpense(
+              context,
+              data,
+              transactionType,
+              expenseType: expenseType,
+            );
+          } else {
+            showNormalSnackBar(context, "No Change Detected");
+          }
         }
       }
     }

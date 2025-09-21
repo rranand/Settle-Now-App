@@ -92,8 +92,8 @@ class RoomSettleModel {
     if (identical(this, other)) return true;
 
     return other.id == id &&
-        other.receiver == receiver &&
-        other.sender == sender &&
+        other.receiver.id == receiver.id &&
+        other.sender.id == sender.id &&
         other.amount == amount &&
         other.createdOn == createdOn &&
         other.modifiedOn == modifiedOn;
@@ -102,8 +102,8 @@ class RoomSettleModel {
   @override
   int get hashCode {
     return id.hashCode ^
-        receiver.hashCode ^
-        sender.hashCode ^
+        receiver.id.hashCode ^
+        sender.id.hashCode ^
         amount.hashCode ^
         createdOn.hashCode ^
         modifiedOn.hashCode;

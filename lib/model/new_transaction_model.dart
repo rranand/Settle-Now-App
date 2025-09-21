@@ -97,9 +97,17 @@ class NewTransactionModel {
         other.description == description &&
         other.createdOn == createdOn &&
         listEquals(other.members, members) &&
-        other.createdBy == createdBy &&
+        other.createdBy.id == createdBy.id &&
         other.category == category &&
         other.splitType == splitType;
+  }
+
+  int generateMembersHash(List<UserAmountModel> members) {
+    int result = 17;
+    for (var m in members) {
+      result = 37 * result + m.hashCode;
+    }
+    return result;
   }
 
   @override
@@ -107,8 +115,8 @@ class NewTransactionModel {
     return amount.hashCode ^
         description.hashCode ^
         createdOn.hashCode ^
-        members.hashCode ^
-        createdBy.hashCode ^
+        generateMembersHash(members) ^
+        createdBy.id.hashCode ^
         category.hashCode ^
         splitType.hashCode;
   }

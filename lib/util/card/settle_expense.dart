@@ -196,11 +196,16 @@ class _SettleExpenseState extends State<SettleExpense> {
           createdOn: widget.transactionData!.createdOn,
           modifiedOn: widget.transactionData!.modifiedOn,
         );
-        context.read<RoomSettleUpsertCubit>().updateSettleExpense(
-          widget.roomID,
-          updatedData,
-          _loggedInUser.authToken,
-        );
+
+        if (widget.transactionData.hashCode != updatedData.hashCode) {
+          context.read<RoomSettleUpsertCubit>().updateSettleExpense(
+            widget.roomID,
+            updatedData,
+            _loggedInUser.authToken,
+          );
+        } else {
+          showNormalSnackBar(context, "No Change Detected");
+        }
       }
     }
   }
