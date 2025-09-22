@@ -211,7 +211,7 @@ class _ActivityCardState extends State<ActivityCard> {
                                 ),
                             widget.data.hasData
                                 ? subTextOnCard(
-                                  convertToMoment(widget.data.createdOn),
+                                  convertDateTimeFormat(widget.data.createdOn),
                                   context,
                                   fontSize: 14,
                                   isLoaded: widget.data.hasData,
