@@ -28,12 +28,9 @@ class UiConstant {
     Colors.green.shade50,
     Colors.blue.shade50,
     Colors.orange.shade50,
-    Colors.purple.shade50,
     Colors.teal.shade50,
     Colors.pink.shade50,
-    Colors.brown.shade50,
     Colors.grey.shade50,
-    Colors.indigo.shade50,
     Colors.lime.shade50,
     Colors.cyan.shade50,
     Colors.amber.shade50,
@@ -43,18 +40,18 @@ class UiConstant {
     Colors.lightBlue.shade50,
     Colors.red.shade50,
     Colors.yellow.shade50,
+    Colors.purple.shade50,
+    Colors.brown.shade50,
+    Colors.indigo.shade50,
   ];
 
   static List<Color> colorsWithShade100 = [
     Colors.green.shade100,
     Colors.blue.shade100,
     Colors.orange.shade100,
-    Colors.purple.shade100,
     Colors.teal.shade100,
     Colors.pink.shade100,
-    Colors.brown.shade100,
     Colors.grey.shade100,
-    Colors.indigo.shade100,
     Colors.lime.shade100,
     Colors.cyan.shade100,
     Colors.amber.shade100,
@@ -64,6 +61,9 @@ class UiConstant {
     Colors.lightBlue.shade100,
     Colors.red.shade100,
     Colors.yellow.shade100,
+    Colors.purple.shade100,
+    Colors.brown.shade100,
+    Colors.indigo.shade100,
   ];
 
   static List<Color> colors = [
