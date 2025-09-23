@@ -38,6 +38,8 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     try {
       Pair<LendenDashboardModel, List<LendenTransactionModel>> data = await repo
           .fetchData(event.id, event.authToken);
+
+      lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
       return emit(LendenRoomFetchSuccess(event.id, data.first, data.second));
     } catch (e) {
       return emit(LendenRoomFailure(e.toString()));
