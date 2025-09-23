@@ -21,20 +21,28 @@ class _LoadingPageState extends State<LoadingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: CustomShimmer(
-          duration: const Duration(seconds: 3),
-          boxSize: _imageSize,
-          child: Image.asset(
-            'assets/sn/SN_WBG.png',
-            width: _imageSize,
-            height: _imageSize,
-            color: Colors.white,
-            colorBlendMode: BlendMode.srcIn,
+    double height = MediaQuery.of(context).size.height;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(height: height * .5 - _imageSize * 1.2),
+        SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: CustomShimmer(
+            duration: const Duration(seconds: 3),
+            boxSize: _imageSize,
+            child: Image.asset(
+              'assets/sn/SN_WBG.png',
+              width: _imageSize,
+              height: _imageSize,
+              color: Colors.white,
+              colorBlendMode: BlendMode.srcIn,
+            ),
           ),
         ),
-      ),
+        Expanded(child: SizedBox()),
+      ],
     );
   }
 }
