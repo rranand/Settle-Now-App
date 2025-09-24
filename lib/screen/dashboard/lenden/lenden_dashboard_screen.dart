@@ -194,6 +194,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
+      context,
       MediaQuery.of(context).size.width,
       _mainScreenPadding,
       cardHeight: UiConstant.cardFixedHeight + 10,

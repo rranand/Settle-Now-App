@@ -81,6 +81,7 @@ class _PersonalExpenseDashboardScreenState
     super.didChangeDependencies();
     _mainScreenPadding = context.watch<ScreenSizeProvider>().getPadding;
     cardSizeInfo = calculateCrossAspectRatio(
+      context,
       MediaQuery.of(context).size.width,
       _mainScreenPadding,
       cardWidth: UiConstant.cardFixedHeight + 20,

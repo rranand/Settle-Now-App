@@ -144,6 +144,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     Map<String, double> balanceMap,
   ) {
     final cardSizeInfo = calculateCrossAspectRatio(
+      context,
       MediaQuery.of(context).size.width,
       _mainScreenPadding,
       cardHeight: 135,

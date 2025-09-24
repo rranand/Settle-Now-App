@@ -34,6 +34,7 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
     return SliverLayoutBuilder(
       builder: (context, constraint) {
         final cardSizeInfo = calculateCrossAspectRatio(
+      context,
           constraint.crossAxisExtent,
           EdgeInsets.zero,
         );

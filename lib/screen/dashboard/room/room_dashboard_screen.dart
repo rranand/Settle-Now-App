@@ -295,6 +295,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final cardSizeInfo = calculateCrossAspectRatio(
+      context,
       MediaQuery.of(context).size.width,
       _mainScreenPadding,
     );

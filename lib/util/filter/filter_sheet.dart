@@ -988,7 +988,10 @@ class _FilterSheetState extends State<FilterSheet> {
                                 CustomButton.customTextButton(
                                   filterSections[index],
                                   buttonWidth: 120,
-                                  buttonHeight: 40,
+                                  buttonHeight: calculateCardHeight(
+                                    context,
+                                    40,
+                                  ),
                                   borderRadius: 10,
                                   borderColor:
                                       isSelected

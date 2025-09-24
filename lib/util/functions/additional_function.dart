@@ -31,13 +31,25 @@ import 'package:settlenow/router/router_constant.dart';
 import 'package:settlenow/util/widgets/snackbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+double calculateCardHeight(
+  BuildContext context,
+  double baseHeight, {
+  double weight = 0.5,
+}) {
+  final relativeChange =
+      (MediaQuery.of(context).textScaler.scale(1) - .85) / .85;
+  return baseHeight * (1 + relativeChange * weight);
+}
+
 List<double> calculateCrossAspectRatio(
+  BuildContext context,
   double screenWidth,
   EdgeInsets mainScreenPadding, {
   double cardHeight = UiConstant.cardFixedHeight,
   double cardWidth = -1,
 }) {
   final isWide = screenWidth >= UiConstant.maxWidth;
+  final dynamicHeight = calculateCardHeight(context, cardHeight);
 
   if (cardWidth > 0) {
     bool isWide = screenWidth >= UiConstant.maxWidth;
@@ -48,7 +60,7 @@ List<double> calculateCrossAspectRatio(
                 UiConstant.spaceBetweenCard * .5 -
                 mainScreenPadding.left;
 
-    return [boxWidth, boxWidth / cardHeight];
+    return [boxWidth, boxWidth / dynamicHeight];
   } else {
     final boxWidth =
         isWide
@@ -57,7 +69,7 @@ List<double> calculateCrossAspectRatio(
                 mainScreenPadding.left
             : screenWidth;
 
-    return [boxWidth, boxWidth / cardHeight];
+    return [boxWidth, boxWidth / dynamicHeight];
   }
 }
 

@@ -15,6 +15,7 @@ import 'package:settlenow/screen/dashboard/personal_expense/sub_section/personal
 import 'package:settlenow/util/custom/custom_gesture_detector.dart';
 import 'package:settlenow/util/enum/transaction_type.dart';
 import 'package:settlenow/util/filter/filter_sheet.dart';
+import 'package:settlenow/util/functions/additional_function.dart';
 import 'package:settlenow/util/functions/text_function.dart';
 import 'package:settlenow/util/graph/linear_graph_card.dart';
 import 'package:settlenow/util/widgets/custom_button.dart';
@@ -276,7 +277,11 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
                                   return SliverPadding(
                                     padding: paddingInsets,
                                     sliver: SliverAppBar(
-                                      toolbarHeight: 330,
+                                      toolbarHeight: calculateCardHeight(
+                                        context,
+                                        330,
+                                        weight: 0.1,
+                                      ),
                                       automaticallyImplyLeading: false,
                                       flexibleSpace: FlexibleSpaceBar(
                                         centerTitle: false,

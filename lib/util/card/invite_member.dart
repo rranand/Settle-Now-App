@@ -11,6 +11,7 @@ import 'package:settlenow/model/notification_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/provider/screen_size_provider.dart';
 import 'package:settlenow/util/enum/transaction_type.dart';
+import 'package:settlenow/util/functions/additional_function.dart';
 import 'package:settlenow/util/handler/filter_sort.dart';
 import 'package:settlenow/util/widgets/custom_form_field.dart';
 import 'package:settlenow/util/widgets/shimmer_effect.dart';
@@ -335,6 +336,10 @@ class _InviteMemberState extends State<InviteMember> {
                         final double spacing = 12.0;
                         final int columns =
                             (screenWidth / (_userCardWidth + spacing)).ceil();
+                        final cardHeight = calculateCardHeight(
+                          context,
+                          _userCardWidth,
+                        );
 
                         if (!isLoaded) {
                           users = List.filled(columns * 4, UserModel.empty());
@@ -383,6 +388,8 @@ class _InviteMemberState extends State<InviteMember> {
                                             crossAxisCount: columns,
                                             mainAxisSpacing: spacing,
                                             crossAxisSpacing: spacing,
+                                            childAspectRatio:
+                                                _userCardWidth / cardHeight,
                                           ),
                                       itemBuilder: (context, index) {
                                         UserModel user = filterData[index];

@@ -436,6 +436,10 @@ class _SettleExpenseState extends State<SettleExpense> {
                               final int columns =
                                   (screenWidth / (_userCardWidth + spacing))
                                       .ceil();
+                              final cardHeight = calculateCardHeight(
+                                context,
+                                _userCardWidth,
+                              );
 
                               return GridView.builder(
                                 padding: EdgeInsets.zero,
@@ -446,7 +450,8 @@ class _SettleExpenseState extends State<SettleExpense> {
                                       crossAxisCount: columns,
                                       mainAxisSpacing: spacing,
                                       crossAxisSpacing: spacing,
-                                      childAspectRatio: 0.85,
+                                      childAspectRatio:
+                                          _userCardWidth / cardHeight,
                                     ),
                                 itemBuilder: (context, index) {
                                   RoomUserModel userData = users[index];
