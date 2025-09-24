@@ -136,6 +136,9 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
               Padding(
                 padding: EdgeInsets.only(bottom: 20.0),
                 child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
                   onTap: _createRoomHandler,
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * .9,

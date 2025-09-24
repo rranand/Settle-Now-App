@@ -228,6 +228,9 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                     String buttonText =
                         _roomJoinOrCreate.value == 0 ? 'Create' : 'Join';
                     return InkWell(
+                      borderRadius: BorderRadius.circular(
+                        UiConstant.cardBorderRadius,
+                      ),
                       onTap: _roomJoinOrCreateHandler,
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * .9,

@@ -242,6 +242,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                   Padding(
                     padding: EdgeInsets.only(bottom: 20.0),
                     child: InkWell(
+                      borderRadius: BorderRadius.circular(
+                        UiConstant.cardBorderRadius,
+                      ),
                       onTap: () => context.pop(),
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * .9,

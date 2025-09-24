@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:math_expressions/math_expressions.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
 import 'package:settlenow/bloc/auth/auth_bloc.dart';
 import 'package:settlenow/constant/gradient_color_constant.dart';
@@ -46,6 +47,8 @@ class _AddTransactionState extends State<AddTransaction> {
   int oldTransHashcode = 0;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _expressionKey = GlobalKey<FormState>();
+  final TextEditingController _expressionController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final DateTime _currentDate = DateTime.now();
@@ -370,6 +373,7 @@ class _AddTransactionState extends State<AddTransaction> {
   void _resetForm() {
     _amountController.text = "";
     _descriptionController.text = "";
+    _expressionController.text = "";
     _createdOn = DateTime.now();
     _creationDateController.text = convertDateTimeFormat(_createdOn);
     _selectedUserIDs.value = {};
@@ -638,6 +642,97 @@ class _AddTransactionState extends State<AddTransaction> {
     }
   }
 
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      builder: (context) {
+        final double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+        return Padding(
+          padding: const EdgeInsets.all(
+            16.0,
+          ).add(EdgeInsets.only(bottom: keyboardHeight)),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(height: 4, width: 60, color: Colors.grey[300]),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  "Expression",
+                  textAlign: TextAlign.left,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 20.0),
+                child: Form(
+                  key: _expressionKey,
+                  child: CustomFormField.textFormField(
+                    _expressionController,
+                    hintText: "(3 + 5) * (2 - 1) / 4 + 7 - 2^3",
+                    labelText: "Expression",
+                    validator: CustomValidator.validateExpression,
+                    inputDecoration:
+                        TextFormFieldInputBorder.outlineInputBorder,
+                    borderColor: GradientColorConstant.coolIndigoToBlue.last,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0, top: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: subTextOnCard(
+                    "Supported Characters: 0123456789+-*/^().",
+                    context,
+                    fontSize: kDefaultFontSize,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(bottom: 20.0),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(
+                    UiConstant.cardBorderRadius,
+                  ),
+                  onTap: () {
+                    if (_expressionKey.currentState!.validate()) {
+                      ExpressionParser parser = ShuntingYardParser();
+                      Expression exp = parser.parse(_expressionController.text);
+                      var evaluator = RealEvaluator();
+                      _amountController.text = evaluator
+                          .evaluate(exp)
+                          .toStringAsFixed(2);
+
+                      context.pop();
+                    }
+                  },
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * .9,
+                    child: GradientWidget(
+                      text: "Calculate",
+                      gradientColors: GradientColorConstant.coolIndigoToBlue,
+                      textSize: 14,
+                      textColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<NewTransactionCubit, NewTransactionState>(
@@ -662,7 +757,12 @@ class _AddTransactionState extends State<AddTransaction> {
             leading: appBarBackButton(context),
             actions:
                 widget.transactionData == null
-                    ? null
+                    ? [
+                      IconButton(
+                        onPressed: () => _showBottomSheet(context),
+                        icon: Icon(Iconsax.calculator_copy),
+                      ),
+                    ]
                     : [
                       IconButton(
                         onPressed: () async {

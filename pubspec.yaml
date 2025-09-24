@@ -3,7 +3,7 @@ description: "A Finance Management App"
 
 publish_to: 'none'
 
-version: 2.1.6+225
+version: 2.1.7+226
 
 environment:
   sdk: ^3.7.2
@@ -53,6 +53,7 @@ dependencies:
   firebase_crashlytics: ^5.0.0
   firebase_remote_config: ^6.0.0
   decimal: ^3.2.4
+  math_expressions: ^3.1.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.3

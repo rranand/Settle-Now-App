@@ -76,6 +76,9 @@ class _AboutUsPageState extends State<AboutUsPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
                         onTap: () {
                           launchUrl(
                             Uri.parse("mailto:info@settlenow.in"),
@@ -93,6 +96,9 @@ class _AboutUsPageState extends State<AboutUsPage> {
                       ),
                       const SizedBox(width: 16),
                       InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
                         onTap: () {
                           launchUrl(
                             Uri.parse("http://github.com/rranand"),
@@ -110,6 +116,9 @@ class _AboutUsPageState extends State<AboutUsPage> {
                       ),
                       const SizedBox(width: 16),
                       InkWell(
+                        borderRadius: BorderRadius.circular(
+                          UiConstant.cardBorderRadius,
+                        ),
                         onTap: () {
                           launchUrl(
                             Uri.parse(
