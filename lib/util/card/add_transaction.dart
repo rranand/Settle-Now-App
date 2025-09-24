@@ -48,6 +48,7 @@ class _AddTransactionState extends State<AddTransaction> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _expressionKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _partialFormKey = GlobalKey<FormState>();
   final TextEditingController _expressionController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -505,6 +506,10 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _submitTransactionHandler() {
+    if (_splitType[_splitTypeIndex.value] == "Partial" &&
+        !_partialFormKey.currentState!.validate()) {
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       int sumAmount = 0;
       int amountInPaisa =
@@ -983,53 +988,77 @@ class _AddTransactionState extends State<AddTransaction> {
                             ),
                           ],
                         ),
-                        Wrap(
-                          spacing: UiConstant.spaceBetweenCard,
-                          children: List.generate(
-                            _gotoSplitType.length,
-                            (index) => InkWell(
-                              onTap: () => _handleGoToSplitType(index),
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                  vertical: 5,
-                                  horizontal: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(100),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Wrap(
+                              spacing: UiConstant.spaceBetweenCard,
+                              children: List.generate(
+                                _gotoSplitType.length,
+                                (index) => InkWell(
+                                  onTap: () => _handleGoToSplitType(index),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 5,
+                                      horizontal: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(100),
+                                      border: Border.all(
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    child: Text(_gotoSplitType[index]),
                                   ),
                                 ),
-                                child: Text(_gotoSplitType[index]),
                               ),
                             ),
-                          ),
+                            IconButton(
+                              onPressed: () {
+                                if (_partialFormKey.currentState!.validate()) {
+                                  Decimal amount = Decimal.zero;
+                                  _selectedUserIDs.value.forEach((
+                                    userData,
+                                    amountTxt,
+                                  ) {
+                                    amount += Decimal.parse(amountTxt.text);
+                                  });
+                                  _amountController.text = amount.toString();
+                                }
+                              },
+                              tooltip: "Set total to sum of splits",
+                              icon: Icon(Icons.functions_outlined),
+                            ),
+                          ],
                         ),
                         SizedBox(height: .5 * UiConstant.spaceBetweenSection),
-                        ValueListenableBuilder(
-                          valueListenable: _selectedUserIDs,
-                          builder: (
-                            BuildContext context,
-                            UserWithEditControlTD userWithEditControlTD,
-                            Widget? _,
-                          ) {
-                            List<UserModel> selectedUsers =
-                                userWithEditControlTD.keys.toList();
-                            if (userWithEditControlTD.isEmpty) {
-                              return SizedBox.shrink();
-                            } else {
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ...List.generate(selectedUsers.length, (i) {
-                                    return _userCardWithAmountWidget(
-                                      selectedUsers[i],
-                                    );
-                                  }),
-                                ],
-                              );
-                            }
-                          },
+                        Form(
+                          key: _partialFormKey,
+                          child: ValueListenableBuilder(
+                            valueListenable: _selectedUserIDs,
+                            builder: (
+                              BuildContext context,
+                              UserWithEditControlTD userWithEditControlTD,
+                              Widget? _,
+                            ) {
+                              List<UserModel> selectedUsers =
+                                  userWithEditControlTD.keys.toList();
+                              if (userWithEditControlTD.isEmpty) {
+                                return SizedBox.shrink();
+                              } else {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ...List.generate(selectedUsers.length, (i) {
+                                      return _userCardWithAmountWidget(
+                                        selectedUsers[i],
+                                      );
+                                    }),
+                                  ],
+                                );
+                              }
+                            },
+                          ),
                         ),
                       ],
                     ),
