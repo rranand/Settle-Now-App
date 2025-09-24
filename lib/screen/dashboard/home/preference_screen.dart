@@ -198,6 +198,7 @@ class _PreferenceScreenState extends State<PreferenceScreen> {
                     child: ListTile(
                       title: const Text("Theme"),
                       trailing: DropdownButton<String>(
+                        underline: SizedBox.shrink(),
                         value: preferenceNotifier.value.theme,
                         items:
                             themeOptions.map((theme) {

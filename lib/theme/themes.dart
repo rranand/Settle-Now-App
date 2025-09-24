@@ -50,12 +50,14 @@ class CustomTheme {
         unselectedItemColor: Colors.black54,
       ),
       inputDecorationTheme: const InputDecorationTheme(
+        focusColor: Colors.black87,
         enabledBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.black87),
         ),
         focusedBorder: UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.black87),
         ),
+        outlineBorder: BorderSide(color: Colors.black87),
         labelStyle: TextStyle(color: Colors.black),
       ),
       scrollbarTheme: ScrollbarThemeData(

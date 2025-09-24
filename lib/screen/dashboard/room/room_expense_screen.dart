@@ -720,8 +720,20 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         },
                       ),
                       SpeedDialChild(
-                        child: const Icon(Icons.arrow_outward),
+                        child: const Icon(Icons.library_add_outlined),
                         backgroundColor: UiConstant.colors[1],
+                        foregroundColor: Colors.white,
+                        label: 'Add Bulk Expense',
+                        visible: roomUserModel.active,
+                        onTap: () {
+                          context.push(
+                            "${RouterConstants.roomRouteName}/${widget.id}${RouterConstants.roomAddBulkExpenseRouteName}",
+                          );
+                        },
+                      ),
+                      SpeedDialChild(
+                        child: const Icon(Icons.arrow_outward),
+                        backgroundColor: UiConstant.colors[2],
                         foregroundColor: Colors.white,
                         visible: roomUserModel.active && showSettleExpense,
                         label: 'Add Settle Expense',
@@ -733,7 +745,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                       ),
                       SpeedDialChild(
                         child: const Icon(Iconsax.profile_add_copy),
-                        backgroundColor: UiConstant.colors[2],
+                        backgroundColor: UiConstant.colors[3],
                         foregroundColor: Colors.white,
                         label: 'Add Member',
                         visible: roomUserModel.active,
@@ -763,7 +775,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                       ),
                       SpeedDialChild(
                         child: const Icon(Iconsax.lock_copy),
-                        backgroundColor: UiConstant.colors[3],
+                        backgroundColor: UiConstant.colors[4],
                         foregroundColor: Colors.white,
                         visible: roomUserModel.active,
                         label: 'Close Room',
@@ -786,7 +798,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                       ),
                       SpeedDialChild(
                         child: const Icon(Iconsax.message_question_copy),
-                        backgroundColor: UiConstant.colors[4],
+                        backgroundColor: UiConstant.colors[5],
                         foregroundColor: Colors.white,
                         visible: isRoomActive && showCloseRoomRequest,
                         label: 'Close Room Request',

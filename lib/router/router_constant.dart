@@ -21,6 +21,7 @@ class RouterConstants {
   //Room Route
   static const String roomActivityRouteName = '/activity';
   static const String roomAddExpenseRouteName = '/add';
+  static const String roomAddBulkExpenseRouteName = '/bulk-add';
   static const String roomEditExpenseRouteName = '/edit';
   static const String roomSettleAddRouteName = '/add-settle';
   static const String roomSettleEditRouteName = '/edit-settle';

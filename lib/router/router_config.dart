@@ -24,6 +24,7 @@ import 'package:settlenow/screen/profile/profile_edit_screen.dart';
 import 'package:settlenow/screen/profile/profile_screen.dart';
 import 'package:settlenow/screen/dashboard/home/about_us.dart';
 import 'package:settlenow/util/card/add_transaction.dart';
+import 'package:settlenow/util/card/bulk_transaction.dart';
 import 'package:settlenow/util/card/error_page.dart';
 import 'package:settlenow/util/card/get_notified.dart';
 import 'package:settlenow/util/card/invite_member.dart';
@@ -290,6 +291,12 @@ class AppRouterConfig {
                     },
                   ),
                 ],
+              ),
+              GoRoute(
+                path: RouterConstants.roomAddBulkExpenseRouteName,
+                builder: (context, state) {
+                  return AuthGate(child: BulkTransaction());
+                },
               ),
               GoRoute(
                 path: RouterConstants.roomEditExpenseRouteName,

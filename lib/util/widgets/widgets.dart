@@ -325,7 +325,7 @@ List<BoxShadow> getContainerBoxShadow(BuildContext context) {
   if (Theme.brightnessOf(context) == Brightness.light) {
     return [
       BoxShadow(
-        color: Colors.black.withAlpha(1),
+        color: Colors.black.withAlpha(30),
         spreadRadius: 1,
         blurRadius: 6,
         offset: Offset(0, 3),
