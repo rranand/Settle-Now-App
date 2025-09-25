@@ -51,7 +51,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       showNormalSnackBar(context, state.error);
 
       if (state.error.contains("Room Not Found")) {
-        context.go(RouterConstants.dashboardRouteName);
+        while (context.canPop()) {
+          context.pop();
+        }
       }
     } else if (state is LendenRoomInitial) {
       if (context.canPop()) {

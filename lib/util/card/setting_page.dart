@@ -138,11 +138,13 @@ class _SettingPageState extends State<SettingPage> {
   }
 
   void populateData() {
+    bool dataPopulated = false;
     switch (widget.transactionType) {
       case (TransactionType.room):
         {
           final state = context.read<RoomInfoCubit>().state;
           if (state is RoomInfoSuccess) {
+            dataPopulated = true;
             _roomNameController.text = state.data.roomName;
             roomName = state.data.roomName;
             totalMemberCount = state.data.users.length;
@@ -176,6 +178,7 @@ class _SettingPageState extends State<SettingPage> {
         {
           final state = context.read<LendenRoomBloc>().state;
           if (state is LendenRoomFetchSuccess) {
+            dataPopulated = true;
             _roomNameController.text = state.roomData.roomName;
             totalMemberCount = state.roomData.users.length;
             createdBy = state.roomData.createdBy;
@@ -191,6 +194,12 @@ class _SettingPageState extends State<SettingPage> {
         }
       default:
         {}
+    }
+
+    if (!dataPopulated) {
+      if (context.canPop()) {
+        context.pop();
+      }
     }
   }
 

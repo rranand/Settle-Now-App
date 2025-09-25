@@ -208,18 +208,12 @@ class _ActivityCardState extends State<ActivityCard> {
                                   context,
                                   width: 80,
                                 ),
-                            widget.data.hasData
-                                ? subTextOnCard(
-                                  convertDateTimeFormat(widget.data.createdOn),
-                                  context,
-                                  fontSize: 14,
-                                  isLoaded: widget.data.hasData,
-                                )
-                                : CustomShimmerEffect.textWidget(
-                                  context,
-                                  fontSize: 10,
-                                  width: 80,
-                                ),
+                            subTextOnCard(
+                              convertDateTimeFormat(widget.data.createdOn),
+                              context,
+                              fontSize: 14,
+                              isLoaded: widget.data.hasData,
+                            ),
                             ValueListenableBuilder(
                               valueListenable: isExpanded,
                               builder: (context, _, child) {
