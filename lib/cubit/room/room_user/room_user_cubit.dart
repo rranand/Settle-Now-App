@@ -47,7 +47,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
             break;
           }
         }
-        _roomInfoCubit.updateUserData(id, userData);
+        _roomInfoCubit.updateUserData(id, userData, forceUpdate: true);
         return emit(RoomUserSuccess(id, userData));
       }
     }

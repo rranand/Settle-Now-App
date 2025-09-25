@@ -50,12 +50,17 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     }
   }
 
-  void updateUserData(String id, List<RoomUserModel> userData) {
+  void updateUserData(
+    String id,
+    List<RoomUserModel> userData, {
+    bool forceUpdate = false,
+  }) {
     if (state is RoomInfoSuccess) {
       final oldState = (state as RoomInfoSuccess);
 
-      if (oldState.data.id == id &&
-          !listEquals(oldState.data.users, userData)) {
+      if (forceUpdate ||
+          (oldState.data.id == id &&
+              !listEquals(oldState.data.users, userData))) {
         int activeUserCount = 0;
         for (int i = 0; i < userData.length; i++) {
           if (userData[i].active) {
