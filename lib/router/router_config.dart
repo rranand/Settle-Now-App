@@ -249,7 +249,12 @@ class AppRouterConfig {
                   );
                 },
                 redirect: (context, state) {
+                  final roomState = context.read<RoomInfoCubit>().state;
                   final extra = state.extra as Map<String, dynamic>?;
+
+                  if (roomState is! RoomInfoSuccess) {
+                    return getPreviousPath(state.uri);
+                  }
                   if (extra == null ||
                       extra.isEmpty ||
                       !extra.containsKey("transactionType")) {
@@ -279,6 +284,10 @@ class AppRouterConfig {
                       );
                     },
                     redirect: (context, state) {
+                      final roomState = context.read<RoomInfoCubit>().state;
+                      if (roomState is! RoomInfoSuccess) {
+                        return getPreviousPath(state.uri);
+                      }
                       final extra = state.extra as Map<String, dynamic>?;
                       if (extra == null ||
                           extra.isEmpty ||
@@ -297,6 +306,14 @@ class AppRouterConfig {
                 builder: (context, state) {
                   return AuthGate(child: BulkTransaction());
                 },
+                redirect: (context, state) {
+                  final roomState = context.read<RoomInfoCubit>().state;
+                  if (roomState is! RoomInfoSuccess) {
+                    return getPreviousPath(state.uri);
+                  } else {
+                    return null;
+                  }
+                },
               ),
               GoRoute(
                 path: RouterConstants.roomEditExpenseRouteName,
@@ -305,6 +322,11 @@ class AppRouterConfig {
                   return AuthGate(child: AddTransaction(transactionData: data));
                 },
                 redirect: (context, state) {
+                  final roomState = context.read<RoomInfoCubit>().state;
+                  if (roomState is! RoomInfoSuccess) {
+                    return getPreviousPath(state.uri);
+                  }
+
                   final extra = state.extra;
 
                   if (extra == null) {
@@ -328,6 +350,12 @@ class AppRouterConfig {
                       );
                     },
                     redirect: (context, state) {
+                      final roomState = context.read<RoomInfoCubit>().state;
+                      if (roomState is! RoomInfoSuccess) {
+                        return getPreviousPath(
+                          Uri.tryParse(getPreviousPath(state.uri))!,
+                        );
+                      }
                       final extra = state.extra as Map<String, dynamic>?;
                       if (extra == null ||
                           extra.isEmpty ||
@@ -349,6 +377,10 @@ class AppRouterConfig {
                 },
                 redirect: (context, state) {
                   final id = state.pathParameters['id'];
+                  final roomState = context.read<RoomInfoCubit>().state;
+                  if (roomState is! RoomInfoSuccess) {
+                    return getPreviousPath(state.uri);
+                  }
 
                   if (id == null) {
                     return RouterConstants.dashboardRouteName;
@@ -369,6 +401,10 @@ class AppRouterConfig {
                 redirect: (context, state) {
                   final id = state.pathParameters['id'];
                   final extra = state.extra;
+                  final roomState = context.read<RoomInfoCubit>().state;
+                  if (roomState is! RoomInfoSuccess) {
+                    return getPreviousPath(state.uri);
+                  }
 
                   if (id == null || extra == null) {
                     return RouterConstants.dashboardRouteName;

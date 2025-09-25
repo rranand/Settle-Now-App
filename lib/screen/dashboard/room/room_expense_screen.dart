@@ -529,6 +529,10 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       listener: (context, state) {
         if (state is RoomInfoFailure) {
           showNormalSnackBar(context, state.error);
+
+          if (state.error.contains("Room Not Found")) {
+            context.go(RouterConstants.dashboardRouteName);
+          }
         } else if (state is RoomInfoInitial) {
           if (context.canPop()) {
             context.pop();
