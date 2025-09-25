@@ -118,10 +118,7 @@ class _BulkTransactionState extends State<BulkTransaction> {
         );
       }
 
-      context.read<NewTransactionCubit>().createBulkExpense(
-        context,
-        transData,
-      );
+      context.read<NewTransactionCubit>().createBulkExpense(context, transData);
     } else {
       if (context.canPop()) {
         context.pop();
@@ -234,7 +231,7 @@ class _BulkTransactionState extends State<BulkTransaction> {
                 ),
                 CustomFormField.textFormField(
                   _inputTextController,
-                  hintText: "Paste your transactions",
+                  hintText: "100-Swiggy Grocery\n200-Amazon\n50-Zomato",
                   minLines: 4,
                   maxLines: 10,
                   textInputType: TextInputType.multiline,
