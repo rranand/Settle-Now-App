@@ -378,7 +378,18 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                       borderRadius: BorderRadius.circular(
                         UiConstant.cardBorderRadius,
                       ),
-                      child: Icon(Iconsax.info_circle_copy, color: Colors.grey),
+                      child: ValueListenableBuilder(
+                        valueListenable: isExpanded,
+                        builder: (context, _, _) {
+                          return Icon(
+                            isExpanded.value
+                                ? Icons.keyboard_arrow_up_outlined
+                                : Icons.keyboard_arrow_down_outlined,
+                            size: 28,
+                            color: Colors.grey,
+                          );
+                        },
+                      ),
                       onTap: () {
                         isExpanded.value = !isExpanded.value;
                       },

@@ -2,7 +2,10 @@
 
 import 'dart:convert';
 
+import 'package:decimal/decimal.dart';
 import 'package:flutter/foundation.dart';
+import 'package:settlenow/model/bulk_transaction_model.dart';
+import 'package:settlenow/model/room_user_model.dart';
 
 import 'package:settlenow/model/user_amount_model.dart';
 
@@ -59,6 +62,51 @@ class NewTransactionModel {
       'category': category,
       'splitType': splitType,
     };
+  }
+
+  factory NewTransactionModel.fromBulkTransaction(
+    BulkTransactionModel data,
+    String id,
+    String createdByUID,
+    List<RoomUserModel> users,
+  ) {
+    List<UserAmountModel> userWithAmount = [];
+    UserAmountModel createdBy = UserAmountModel.empty();
+    int amountInPaisa =
+        (Decimal.parse(data.amount.toString()) * Decimal.fromInt(100))
+            .toBigInt()
+            .toInt();
+    int remaining = amountInPaisa % users.length;
+    int eachAmount = (amountInPaisa / users.length).toInt();
+
+    for (int i = 0; i < users.length; i++) {
+      if (users[i].user.id == createdByUID) {
+        createdBy = UserAmountModel.copyFromUser(
+          users[i].user,
+          ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
+        );
+      } else {
+        userWithAmount.add(
+          UserAmountModel.copyFromUser(
+            users[i].user,
+            ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
+          ),
+        );
+      }
+      remaining--;
+    }
+    NewTransactionModel newTransData = NewTransactionModel(
+      amount: data.amount,
+      description: data.description,
+      createdOn: DateTime.now(),
+      members: userWithAmount,
+      createdBy: createdBy,
+      category: data.category,
+      splitType: "equal",
+    );
+
+    newTransData.id = id;
+    return newTransData;
   }
 
   factory NewTransactionModel.fromMap(Map<String, dynamic> map) {

@@ -141,6 +141,23 @@ class RoomRepository {
     }
   }
 
+  Future<List<TransactionModel>> createBulkExpense(
+    String id,
+    List<NewTransactionModel> data,
+    String authToken,
+  ) async {
+    try {
+      List<TransactionModel> newExpense = await _dataProvider.createBulkExpense(
+        id,
+        data,
+        authToken,
+      );
+      return newExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<TransactionModel> updateExpense(
     String id,
     NewTransactionModel data,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow/constant/ui_constant.dart';
 import 'package:settlenow/internationalization/currency.dart';
 import 'package:settlenow/model/activity_model.dart';
@@ -249,7 +248,18 @@ class _ActivityCardState extends State<ActivityCard> {
                   borderRadius: BorderRadius.circular(
                     UiConstant.cardBorderRadius,
                   ),
-                  child: Icon(Iconsax.info_circle_copy, color: Colors.grey),
+                  child: ValueListenableBuilder(
+                    valueListenable: isExpanded,
+                    builder: (context, _, _) {
+                      return Icon(
+                        isExpanded.value
+                            ? Icons.keyboard_arrow_up_outlined
+                            : Icons.keyboard_arrow_down_outlined,
+                        size: 28,
+                        color: Colors.grey,
+                      );
+                    },
+                  ),
                   onTap: () {
                     isExpanded.value = !isExpanded.value;
                   },

@@ -187,6 +187,38 @@ class RoomDataProvider {
     }
   }
 
+  Future<List<TransactionModel>> createBulkExpense(
+    String id,
+    List<NewTransactionModel> data,
+    String authToken,
+  ) async {
+    try {
+      List<TransactionModel> newExpense = [];
+      for (int i = 0; i < data.length; i++) {
+        newExpense.add(TransactionModel.fromNewTransaction(data[i]));
+      }
+      final response = await createAPICall(
+        'room/$id/bulk-transaction',
+        "post",
+        authToken,
+        {"data": newExpense.toQuickSplitJson()},
+      );
+
+      final respData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final transactionMapping = respData['data'];
+        for (int i = 0; i < data.length; i++) {
+          newExpense[i].id = Crypto.decrypt(transactionMapping[i.toString()]);
+        }
+        return newExpense;
+      } else {
+        throw Crypto.decrypt(respData['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<TransactionModel> updateExpense(
     String id,
     NewTransactionModel data,

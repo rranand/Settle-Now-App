@@ -5,7 +5,10 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:settlenow/bloc/auth/auth_bloc.dart';
 import 'package:settlenow/constant/ui_constant.dart';
 import 'package:settlenow/cubit/new_transaction/new_transaction_cubit.dart';
+import 'package:settlenow/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow/model/bulk_transaction_model.dart';
+import 'package:settlenow/model/new_transaction_model.dart';
+import 'package:settlenow/model/room_user_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/provider/screen_size_provider.dart';
 import 'package:settlenow/util/card/bulk_transaction_card.dart';
@@ -29,6 +32,7 @@ class BulkTransaction extends StatefulWidget {
 
 class _BulkTransactionState extends State<BulkTransaction> {
   UserModel _loggedInUser = UserModel.empty();
+  final int _maxTransactionCount = 100;
   TransactionType transactionType = TransactionType.room;
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   String currentRoute = "";
@@ -90,10 +94,51 @@ class _BulkTransactionState extends State<BulkTransaction> {
     _transactionArr.value = [];
   }
 
+  void _addExpenseHandler() {
+    final roomInfoState = context.read<RoomInfoCubit>().state;
+
+    if (roomInfoState is RoomInfoSuccess) {
+      List<RoomUserModel> activeUsers = [];
+      for (int i = 0; i < roomInfoState.data.users.length; i++) {
+        if (roomInfoState.data.users[i].active) {
+          activeUsers.add(roomInfoState.data.users[i]);
+        }
+      }
+
+      List<NewTransactionModel> transData = [];
+
+      for (int i = 0; i < _transactionArr.value.length; i++) {
+        transData.add(
+          NewTransactionModel.fromBulkTransaction(
+            _transactionArr.value[i],
+            i.toString(),
+            _loggedInUser.id,
+            activeUsers,
+          ),
+        );
+      }
+
+      context.read<NewTransactionCubit>().createBulkExpense(
+        context,
+        transData,
+      );
+    } else {
+      if (context.canPop()) {
+        context.pop();
+      }
+    }
+  }
+
   List<BulkTransactionModel> parseExpenseFromText() {
     String normalized = _inputTextController.text.replaceAll(r'\n', '\n');
     List<String> lines =
         normalized.split('\n').where((line) => line.trim().isNotEmpty).toList();
+
+    if (lines.length > _maxTransactionCount) {
+      throw Exception(
+        "You can’t create more than $_maxTransactionCount transactions at a time.",
+      );
+    }
 
     final List<BulkTransactionModel> result = [];
     final String sep = seperator[_selectedSeperator.value];
@@ -206,7 +251,7 @@ class _BulkTransactionState extends State<BulkTransaction> {
                       return SizedBox.shrink();
                     }
                     return Padding(
-                      padding: const EdgeInsets.only(left: 2.0),
+                      padding: const EdgeInsets.only(left: 2.0, top: 5),
                       child: Text(
                         _errorText.value,
                         style: TextStyle(color: Colors.redAccent),
@@ -321,49 +366,78 @@ class _BulkTransactionState extends State<BulkTransaction> {
                     ),
                   ],
                 ),
-                Align(
-                  alignment: Alignment.center,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: CustomButton.customElevatedButton(
-                      "Preview",
-                      buttonWidth: 155,
-                      buttonHeight: 40,
-                      onPressed: () {
-                        try {
-                          _transactionArr.value = parseExpenseFromText();
-                          _errorText.value = "";
-                        } catch (e) {
-                          _errorText.value = e.toString();
-                          _transactionArr.value = [];
-                        }
-                      },
-                    ),
-                  ),
-                ),
                 ValueListenableBuilder(
                   valueListenable: _transactionArr,
                   builder: (context, _, _) {
-                    if (_transactionArr.value.isEmpty) {
-                      return SizedBox.shrink();
-                    }
-                    return ListView.separated(
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(
-                        bottom: UiConstant.spaceAtBottom,
-                      ),
-                      itemBuilder:
-                          (context, index) => BulkTransactionCard(
-                            data: _transactionArr,
-                            index: index,
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment:
+                              _transactionArr.value.isEmpty
+                                  ? MainAxisAlignment.center
+                                  : MainAxisAlignment.spaceAround,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16.0,
+                              ),
+                              child: CustomButton.customElevatedButton(
+                                "Preview",
+                                buttonWidth: 155,
+                                buttonHeight: 40,
+                                onPressed: () {
+                                  try {
+                                    _transactionArr.value =
+                                        parseExpenseFromText();
+                                    _errorText.value = "";
+                                  } catch (e) {
+                                    _errorText.value = e.toString();
+                                    _transactionArr.value = [];
+                                  }
+                                },
+                              ),
+                            ),
+                            Visibility(
+                              visible: _transactionArr.value.isNotEmpty,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16.0,
+                                ),
+                                child: CustomButton.customElevatedButton(
+                                  "Add Expense",
+                                  buttonWidth: 155,
+                                  buttonHeight: 40,
+                                  onPressed: _addExpenseHandler,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Visibility(
+                          visible: _transactionArr.value.isNotEmpty,
+                          child: ListView.separated(
+                            physics: NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            padding: EdgeInsets.only(
+                              bottom: UiConstant.spaceAtBottom,
+                            ),
+                            itemBuilder:
+                                (context, index) => BulkTransactionCard(
+                                  data: _transactionArr,
+                                  index: index,
+                                ),
+                            separatorBuilder: (
+                              BuildContext context,
+                              int index,
+                            ) {
+                              return SizedBox(
+                                height: .5 * UiConstant.spaceBetweenSection,
+                              );
+                            },
+                            itemCount: _transactionArr.value.length,
                           ),
-                      separatorBuilder: (BuildContext context, int index) {
-                        return SizedBox(
-                          height: .5 * UiConstant.spaceBetweenSection,
-                        );
-                      },
-                      itemCount: _transactionArr.value.length,
+                        ),
+                      ],
                     );
                   },
                 ),

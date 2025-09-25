@@ -94,10 +94,42 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               data,
               loggedInUser.authToken,
             );
-            bloc.add(RoomAddNewTransaction(newData));
+            bloc.add(RoomAddNewTransaction([newData]));
             return emit(NewTransactionSuccess(newData));
           }
       }
+    } catch (e) {
+      return emit(NewTransactionFailure(e.toString()));
+    }
+  }
+
+  void createBulkExpense(
+    BuildContext context,
+    List<NewTransactionModel> data,
+  ) async {
+    final authLoginState = context.read<AuthBloc>().state;
+    UserModel loggedInUser = UserModel.empty();
+    if (authLoginState is! AuthLoginSuccess) {
+      return;
+    } else {
+      loggedInUser = authLoginState.userData;
+    }
+    emit(NewTransactionLoading());
+
+    try {
+      final bloc = context.read<RoomBloc>();
+      final blocState = bloc.state;
+      if (blocState is! RoomFetchSuccess) {
+        return;
+      }
+      final roomID = blocState.id;
+      final List<TransactionModel> newData = await repoRD.createBulkExpense(
+        roomID,
+        data,
+        loggedInUser.authToken,
+      );
+      bloc.add(RoomAddNewTransaction(newData));
+      return emit(NewTransactionSuccess(newData.first));
     } catch (e) {
       return emit(NewTransactionFailure(e.toString()));
     }

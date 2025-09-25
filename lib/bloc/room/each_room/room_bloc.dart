@@ -46,8 +46,11 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       return;
     }
     final oldData = state as RoomFetchSuccess;
-    List<TransactionModel> data = [event.data, ...oldData.data];
-    roomUserCubit.onAddNewTransaction(event.data);
+    List<TransactionModel> data = [...event.data, ...oldData.data];
+    for (int i = 0; i < event.data.length; i++) {
+      roomUserCubit.onAddNewTransaction(event.data[i]);
+    }
+
     return emit(RoomFetchSuccess(oldData.id, data));
   }
 

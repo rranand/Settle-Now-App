@@ -232,3 +232,9 @@ class TransactionModel implements CommonTransactionField {
         splitType.hashCode;
   }
 }
+
+extension ToQuickSplitJsonList on List<TransactionModel> {
+  String toQuickSplitJson() {
+    return json.encode(map((e) => e.toQuickSplitJson()).toList());
+  }
+}
