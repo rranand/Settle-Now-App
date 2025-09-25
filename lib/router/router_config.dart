@@ -4,9 +4,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/lenden/room/lenden_room_bloc.dart';
 import 'package:settlenow/core.dart';
-import 'package:settlenow/cubit/room/room_info/room_info_cubit.dart';
 import 'package:settlenow/model/room_settle_model.dart';
 import 'package:settlenow/model/update_info_model.dart';
 import 'package:settlenow/router/router_constant.dart';
@@ -186,15 +184,6 @@ class AppRouterConfig {
                     ),
                   );
                 },
-                redirect: (context, state) {
-                  final roomState = context.read<RoomInfoCubit>().state;
-
-                  if (roomState is RoomInfoSuccess) {
-                    return null;
-                  } else {
-                    return getPreviousPath(state.uri);
-                  }
-                },
               ),
               GoRoute(
                 path: RouterConstants.roomActivityRouteName,
@@ -202,15 +191,6 @@ class AppRouterConfig {
                   return AuthGate(
                     child: RoomActivityPage(id: state.pathParameters["id"]!),
                   );
-                },
-                redirect: (context, state) {
-                  final roomState = context.read<RoomInfoCubit>().state;
-
-                  if (roomState is RoomInfoSuccess) {
-                    return null;
-                  } else {
-                    return getPreviousPath(state.uri);
-                  }
                 },
               ),
               GoRoute(
@@ -223,16 +203,6 @@ class AppRouterConfig {
                       transactionID: transactionID,
                     ),
                   );
-                },
-                redirect: (context, state) {
-                  final roomState = context.read<RoomInfoCubit>().state;
-                  final transactionID = state.pathParameters['transactionID'];
-
-                  if (roomState is RoomInfoSuccess && transactionID != null) {
-                    return null;
-                  } else {
-                    return getPreviousPath(state.uri);
-                  }
                 },
               ),
               GoRoute(
@@ -249,12 +219,7 @@ class AppRouterConfig {
                   );
                 },
                 redirect: (context, state) {
-                  final roomState = context.read<RoomInfoCubit>().state;
                   final extra = state.extra as Map<String, dynamic>?;
-
-                  if (roomState is! RoomInfoSuccess) {
-                    return getPreviousPath(state.uri);
-                  }
                   if (extra == null ||
                       extra.isEmpty ||
                       !extra.containsKey("transactionType")) {
@@ -284,10 +249,6 @@ class AppRouterConfig {
                       );
                     },
                     redirect: (context, state) {
-                      final roomState = context.read<RoomInfoCubit>().state;
-                      if (roomState is! RoomInfoSuccess) {
-                        return getPreviousPath(state.uri);
-                      }
                       final extra = state.extra as Map<String, dynamic>?;
                       if (extra == null ||
                           extra.isEmpty ||
@@ -306,14 +267,6 @@ class AppRouterConfig {
                 builder: (context, state) {
                   return AuthGate(child: BulkTransaction());
                 },
-                redirect: (context, state) {
-                  final roomState = context.read<RoomInfoCubit>().state;
-                  if (roomState is! RoomInfoSuccess) {
-                    return getPreviousPath(state.uri);
-                  } else {
-                    return null;
-                  }
-                },
               ),
               GoRoute(
                 path: RouterConstants.roomEditExpenseRouteName,
@@ -322,11 +275,6 @@ class AppRouterConfig {
                   return AuthGate(child: AddTransaction(transactionData: data));
                 },
                 redirect: (context, state) {
-                  final roomState = context.read<RoomInfoCubit>().state;
-                  if (roomState is! RoomInfoSuccess) {
-                    return getPreviousPath(state.uri);
-                  }
-
                   final extra = state.extra;
 
                   if (extra == null) {
@@ -350,12 +298,6 @@ class AppRouterConfig {
                       );
                     },
                     redirect: (context, state) {
-                      final roomState = context.read<RoomInfoCubit>().state;
-                      if (roomState is! RoomInfoSuccess) {
-                        return getPreviousPath(
-                          Uri.tryParse(getPreviousPath(state.uri))!,
-                        );
-                      }
                       final extra = state.extra as Map<String, dynamic>?;
                       if (extra == null ||
                           extra.isEmpty ||
@@ -377,10 +319,6 @@ class AppRouterConfig {
                 },
                 redirect: (context, state) {
                   final id = state.pathParameters['id'];
-                  final roomState = context.read<RoomInfoCubit>().state;
-                  if (roomState is! RoomInfoSuccess) {
-                    return getPreviousPath(state.uri);
-                  }
 
                   if (id == null) {
                     return RouterConstants.dashboardRouteName;
@@ -401,10 +339,6 @@ class AppRouterConfig {
                 redirect: (context, state) {
                   final id = state.pathParameters['id'];
                   final extra = state.extra;
-                  final roomState = context.read<RoomInfoCubit>().state;
-                  if (roomState is! RoomInfoSuccess) {
-                    return getPreviousPath(state.uri);
-                  }
 
                   if (id == null || extra == null) {
                     return RouterConstants.dashboardRouteName;
@@ -488,15 +422,6 @@ class AppRouterConfig {
                       id: state.pathParameters["id"]!,
                     ),
                   );
-                },
-                redirect: (context, state) {
-                  final roomState = context.read<LendenRoomBloc>().state;
-
-                  if (roomState is LendenRoomFetchSuccess) {
-                    return null;
-                  } else {
-                    return getPreviousPath(state.uri);
-                  }
                 },
               ),
               GoRoute(
