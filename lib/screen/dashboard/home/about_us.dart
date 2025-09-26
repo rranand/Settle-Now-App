@@ -81,7 +81,7 @@ class _AboutUsPageState extends State<AboutUsPage> {
                         ),
                         onTap: () {
                           launchUrl(
-                            Uri.parse("mailto:info@settlenow.in"),
+                            Uri.parse("mailto:support@settlenow.in"),
                             mode: LaunchMode.externalApplication,
                           );
                         },
