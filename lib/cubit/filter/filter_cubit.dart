@@ -67,7 +67,7 @@ class FilterCubit extends Cubit<FilterState> {
           result = a.description.compareTo(b.description);
           break;
         case SortBy.amount:
-          result = a.amount.compareTo(b.amount);
+          result = a.amount.abs().compareTo(b.amount.abs());
           break;
         case SortBy.dateCreated:
           result = a.createdOn.compareTo(b.createdOn);
