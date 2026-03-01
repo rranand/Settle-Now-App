@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/core.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class RoomSettleModel {
   bool hasData = true;
@@ -54,23 +53,23 @@ class RoomSettleModel {
 
   factory RoomSettleModel.fromMap(Map<String, dynamic> map) {
     return RoomSettleModel(
-      id: Crypto.decrypt(map['id']),
+      id: map['id'],
       receiver: UserModel.fromBasicInfoMap(
         map['receiver'] as Map<String, dynamic>,
       ),
       sender: UserModel.fromBasicInfoMap(map['sender'] as Map<String, dynamic>),
-      amount: double.parse(Crypto.decrypt(map['amount'])),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
+      amount: double.parse(map['amount'].toString()),
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
     );
   }
 
   String toSettleTransactionJSON() {
     Map<String, String> data = {
-      'id': Crypto.encrypt(id),
-      'amount': Crypto.encrypt(amount.toString()),
-      'sender': Crypto.encrypt(sender.id),
-      'receiver': Crypto.encrypt(receiver.id),
+      'id': id,
+      'amount': amount.toString(),
+      'sender': sender.id,
+      'receiver': receiver.id,
     };
 
     return json.encode(data);

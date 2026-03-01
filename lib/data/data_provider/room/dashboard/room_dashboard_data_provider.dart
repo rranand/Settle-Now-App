@@ -4,7 +4,6 @@ import 'package:settlenow/model/notification_model.dart';
 import 'package:settlenow/model/room_info_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/util/custom/pair.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class RoomDashboardDataProvider {
@@ -25,13 +24,13 @@ class RoomDashboardDataProvider {
 
       if (response.statusCode == 200) {
         List<RoomInfoModel> arr = [];
-        bool hasMoreData = Crypto.decrypt(data['hasMore']) == 'true';
+        bool hasMoreData = data['hasMore'];
         for (int i = 0; i < data['data'].length; i++) {
           arr.add(RoomInfoModel.fromMap(data['data'][i]));
         }
         return Pair(arr, hasMoreData);
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -44,27 +43,27 @@ class RoomDashboardDataProvider {
   ) async {
     try {
       final response = await createAPICall('room', 'post', authToken, {
-        "roomName": Crypto.encrypt(roomName),
+        "roomName": roomName,
       });
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
         RoomInfoModel newRoomData = RoomInfoModel(
-          id: Crypto.decrypt(data["data"]["id"]),
+          id: data["data"]["id"],
           roomName: roomName,
           status: "Open",
           createdBy: UserModel.empty(),
           createdOn: DateTime.now(),
           modifiedOn: DateTime.now(),
           users: [],
-          roomKey: Crypto.decrypt(data["data"]["roomKey"]),
-          roomLink: Crypto.decrypt(data["data"]["roomLink"]),
+          roomKey: data["data"]["roomKey"],
+          roomLink: data["data"]["roomLink"],
           active: true,
         );
-        return Pair(newRoomData, Crypto.decrypt(data["data"]["roomMemberID"]));
+        return Pair(newRoomData, data["data"]["roomMemberID"]);
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -88,7 +87,7 @@ class RoomDashboardDataProvider {
         );
         return notificationData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

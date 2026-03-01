@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/core.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class RoomUserModel {
   bool hasData = true;
@@ -63,9 +62,9 @@ class RoomUserModel {
   @override
   factory RoomUserModel.fromBasicInfoMap(Map<String, dynamic> map) {
     return RoomUserModel.fromBasicInfo(
-      id: Crypto.decrypt(map['id']),
+      id: map['id'],
       user: UserModel.fromBasicInfoMap(map['user']),
-      active: Crypto.decrypt(map['active']) == 'true',
+      active: map['active'],
     );
   }
 

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:settlenow/core.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
 import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class LendenRoomDataProvider {
@@ -30,7 +29,7 @@ class LendenRoomDataProvider {
         }
         return Pair(roomData, arr);
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -54,10 +53,10 @@ class LendenRoomDataProvider {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.id = Crypto.decrypt(data['data']['id']);
+        newExpense.id = data['data']['id'];
         return newExpense;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -84,7 +83,7 @@ class LendenRoomDataProvider {
         newExpense.modifiedOn = DateTime.now();
         return newExpense;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -101,14 +100,14 @@ class LendenRoomDataProvider {
         'lenden/$id/update',
         "put",
         authToken,
-        {"name": Crypto.encrypt(newRoomName)},
+        {"name": newRoomName},
       );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -128,7 +127,7 @@ class LendenRoomDataProvider {
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -138,13 +137,13 @@ class LendenRoomDataProvider {
   Future<bool> delete(String id, String authToken, String expenseID) async {
     try {
       final response = await createAPICall('lenden/$id', "delete", authToken, {
-        "id": Crypto.encrypt(expenseID),
+        "id": expenseID,
       });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -164,7 +163,7 @@ class LendenRoomDataProvider {
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -181,7 +180,7 @@ class LendenRoomDataProvider {
         'lenden/$roomID/addPerson',
         'patch',
         authToken,
-        {"id": Crypto.encrypt(uid)},
+        {"id": uid},
       );
 
       final data = jsonDecode(response.body);
@@ -192,7 +191,7 @@ class LendenRoomDataProvider {
         );
         return notificationData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

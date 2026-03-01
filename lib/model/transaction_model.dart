@@ -7,7 +7,6 @@ import 'package:settlenow/model/lenden_room_model.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
 import 'package:settlenow/model/personal_expense_transaction_model.dart';
 import 'package:settlenow/model/user_amount_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class TransactionModel implements CommonTransactionField {
   bool hasData = true;
@@ -139,29 +138,22 @@ class TransactionModel implements CommonTransactionField {
   }
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
+    debugPrint(map['isClosedAny'].runtimeType.toString());
     return TransactionModel(
-      id: Crypto.decrypt(map['id']),
-      description: Crypto.decrypt(map['description']),
-      amount: double.parse(Crypto.decrypt(map['amount'])),
-      category: Crypto.decrypt(map['category']),
+      id: map['id'],
+      description: map['description'],
+      amount: double.parse(map['amount'].toString()),
+      category: map['category'],
       users: List<UserAmountModel>.from(
         (map['users']).map((x) => UserAmountModel.fromBasicInfoMap(x)),
       ),
       createdBy: UserAmountModel.fromBasicInfoMap(map['createdBy']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
-      isAddedToPersonalExpense:
-          Crypto.decrypt(map['isAddedToPersonalExpense']) == 'true',
-      isClosedAny:
-          map.containsKey('isClosedAny')
-              ? Crypto.decrypt(map['isClosedAny']) == 'true'
-              : false,
-      active:
-          map.containsKey('active')
-              ? Crypto.decrypt(map['active']) == 'true'
-              : true,
-      splitType:
-          map.containsKey('splitType') ? Crypto.decrypt(map['splitType']) : "",
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+      isAddedToPersonalExpense: map['isAddedToPersonalExpense'],
+      isClosedAny: map.containsKey('isClosedAny') ? map['isClosedAny'] : false,
+      active: map.containsKey('active') ? map['active'] : true,
+      splitType: map.containsKey('splitType') ? map['splitType'] : "",
     );
   }
 
@@ -170,14 +162,14 @@ class TransactionModel implements CommonTransactionField {
   String toQuickSplitJson() {
     List<String> userData = users.map((e) => e.toQuickSplitJson()).toList();
     Map<String, String> data = {
-      "id": Crypto.encrypt(id),
-      "description": Crypto.encrypt(description),
-      "amount": Crypto.encrypt(amount.toString()),
-      "category": Crypto.encrypt(category),
-      "createdOn": Crypto.encrypt(createdOn.toIso8601String()),
+      "id": id,
+      "description": description,
+      "amount": amount.toString(),
+      "category": category,
+      "createdOn": createdOn.toIso8601String(),
       "users": json.encode(userData),
       "createdBy": createdBy.toQuickSplitJson(),
-      "splitType": Crypto.encrypt(splitType),
+      "splitType": splitType,
     };
     return json.encode(data);
   }
@@ -185,13 +177,13 @@ class TransactionModel implements CommonTransactionField {
   String toQuickSplitUpdateJson({Map<String, String> extraData = const {}}) {
     List<String> userData = users.map((e) => e.toQuickSplitJson()).toList();
     Map<String, String> data = {
-      "id": Crypto.encrypt(id),
-      "description": Crypto.encrypt(description),
-      "amount": Crypto.encrypt(amount.toString()),
-      "category": Crypto.encrypt(category),
+      "id": id,
+      "description": description,
+      "amount": amount.toString(),
+      "category": category,
       "users": json.encode(userData),
       "createdBy": createdBy.toQuickSplitJson(),
-      "splitType": Crypto.encrypt(splitType),
+      "splitType": splitType,
       ...extraData,
     };
     return json.encode(data);

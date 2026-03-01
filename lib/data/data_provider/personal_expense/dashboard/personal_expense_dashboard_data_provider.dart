@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/model/personal_expense_info_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class PersonalExpenseDashboardDataProvider {
@@ -26,7 +25,7 @@ class PersonalExpenseDashboardDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

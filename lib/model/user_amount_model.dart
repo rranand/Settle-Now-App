@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class UserAmountModel extends UserModel {
   double amount = 0;
@@ -54,13 +53,13 @@ class UserAmountModel extends UserModel {
   @override
   factory UserAmountModel.fromBasicInfoMap(Map<String, dynamic> map) {
     UserAmountModel newData = UserAmountModel(
-      id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name'] ?? ""),
-      profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
-      amount: double.parse(Crypto.decrypt(map['amount'])),
+      id: map['id'],
+      name: map['name'] ?? "",
+      profileImage: map['profileImage'] ?? "",
+      amount: double.parse(map['amount'].toString()),
     );
     if (map.containsKey('isSettled')) {
-      newData.isSettled = Crypto.decrypt(map['isSettled']) == 'true';
+      newData.isSettled = map['isSettled'];
     }
     return newData;
   }
@@ -68,13 +67,13 @@ class UserAmountModel extends UserModel {
   @override
   factory UserAmountModel.fromMap(Map<String, dynamic> map) {
     UserAmountModel newData = UserAmountModel(
-      id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name']),
-      profileImage: Crypto.decrypt(map['profileImage']),
-      amount: double.parse(Crypto.decrypt(map['amount'])),
+      id: map['id'],
+      name: map['name'],
+      profileImage: map['profileImage'],
+      amount: double.parse(map['amount'].toString()),
     );
     if (map.containsKey('isSettled')) {
-      newData.isSettled = Crypto.decrypt(map['isSettled']) == 'true';
+      newData.isSettled = map['isSettled'];
     }
     return newData;
   }
@@ -85,10 +84,10 @@ class UserAmountModel extends UserModel {
   }
 
   String toQuickSplitJson() {
-    Map<String, String> data = {
-      'id': Crypto.encrypt(id),
-      'amount': Crypto.encrypt(amount.toString()),
-      'isSettled': Crypto.encrypt(isSettled.toString()),
+    Map<String, dynamic> data = {
+      'id': id,
+      'amount': amount.toString(),
+      'isSettled': isSettled,
     };
     return json.encode(data);
   }

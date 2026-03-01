@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/model/update_info_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 import 'package:settlenow/util/handler/platform_service.dart';
 
@@ -20,7 +19,7 @@ class UpdateInfoDataProvider {
         );
         return updateData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

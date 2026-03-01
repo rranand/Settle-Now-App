@@ -3,7 +3,6 @@ import 'package:settlenow/model/login_activity_model.dart';
 import 'package:settlenow/model/preference_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/util/custom/pair.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/local_storage_preference.dart';
 
 class AuthRepository {
@@ -127,7 +126,7 @@ class AuthRepository {
     try {
       final isLogoutSuccessful = await _dataProvider.logoutDifferentDevice(
         authToken,
-        Crypto.encrypt(sessionID),
+        sessionID,
       );
       return isLogoutSuccessful;
     } catch (e) {

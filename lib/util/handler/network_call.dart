@@ -26,17 +26,15 @@ Future<Response> createAPICall(
   dynamic jsonData,
 ) async {
   Response newRes = Response(
-    jsonEncode({
-      "status": false,
-      "Message": Crypto.encrypt("Something went wrong!"),
-    }),
+    jsonEncode({"message": "Something went wrong!"}),
     422,
   );
+
   Function httpType = getHttpMethod(methodName);
   try {
     String host = "https://prod-api.settlenow.in/";
     if (kDebugMode) {
-      host = "http://192.168.1.7:9008/";
+      host = "http://192.168.1.12:9008/";
     }
     String tokenization = Crypto.createJSONDataTOJWT(jsonData);
     Map<String, String> headersMap = <String, String>{

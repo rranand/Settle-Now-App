@@ -1,5 +1,4 @@
 import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class LendenUserModel extends UserModel {
   bool isClosed = false;
@@ -42,10 +41,10 @@ class LendenUserModel extends UserModel {
   @override
   factory LendenUserModel.fromBasicInfoMap(Map<String, dynamic> map) {
     return LendenUserModel(
-      id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name']),
-      profileImage: Crypto.decrypt(map['profileImage']),
-      isClosed: Crypto.decrypt(map['isClosed']) == "true",
+      id: map['id'],
+      name: map['name'],
+      profileImage: map['profileImage'],
+      isClosed: map['isClosed'] == "true",
     );
   }
 

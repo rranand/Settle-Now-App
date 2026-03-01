@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:settlenow/model/common_transaction_field.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class RoomLinkedModel {
   bool hasData = true;
@@ -29,9 +28,9 @@ class RoomLinkedModel {
 
   factory RoomLinkedModel.fromMap(Map<String, dynamic> map) {
     return RoomLinkedModel(
-      id: Crypto.decrypt(map['id']),
-      roomName: Crypto.decrypt(map['roomName']),
-      transactionType: Crypto.decrypt(map['transactionType']),
+      id: map['id'],
+      roomName: map['roomName'],
+      transactionType: map['transactionType'],
     );
   }
 
@@ -122,22 +121,22 @@ class PersonalExpenseTransactionModel implements CommonTransactionField {
   factory PersonalExpenseTransactionModel.fromMap(Map<String, dynamic> map) {
     if (map.containsKey('roomData') && map['roomData'] != null) {
       return PersonalExpenseTransactionModel(
-        id: Crypto.decrypt(map['id']),
-        amount: double.parse(Crypto.decrypt(map['amount'])),
-        description: Crypto.decrypt(map['description']),
-        category: Crypto.decrypt(map['category']),
-        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
+        id: map['id'],
+        amount: double.parse(map['amount'].toString()),
+        description: map['description'],
+        category: map['category'],
+        createdOn: DateTime.parse(map['createdOn']).toLocal(),
+        modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
         roomData: RoomLinkedModel.fromMap(map['roomData']),
       );
     } else {
       return PersonalExpenseTransactionModel(
-        id: Crypto.decrypt(map['id']),
-        amount: double.parse(Crypto.decrypt(map['amount'])),
-        description: Crypto.decrypt(map['description']),
-        category: Crypto.decrypt(map['category']),
-        createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-        modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
+        id: map['id'],
+        amount: double.parse(map['amount'].toString()),
+        description: map['description'],
+        category: map['category'],
+        createdOn: DateTime.parse(map['createdOn']).toLocal(),
+        modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
         roomData: RoomLinkedModel.empty(),
       );
     }
@@ -147,11 +146,11 @@ class PersonalExpenseTransactionModel implements CommonTransactionField {
 
   String toCreateNewExpenseJson() {
     Map<String, String> data = {
-      "id": Crypto.encrypt(id),
-      "description": Crypto.encrypt(description),
-      "amount": Crypto.encrypt(amount.toString()),
-      "category": Crypto.encrypt(category),
-      "createdOn": Crypto.encrypt(createdOn.toIso8601String()),
+      "id": id,
+      "description": description,
+      "amount": amount.toString(),
+      "category": category,
+      "createdOn": createdOn.toIso8601String(),
     };
     return json.encode(data);
   }

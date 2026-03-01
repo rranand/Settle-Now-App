@@ -5,8 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:settlenow/model/lenden_user_model.dart';
 import 'package:settlenow/model/user_model.dart';
 
-import 'package:settlenow/util/handler/crypto.dart';
-
 class LendenDashboardModel {
   bool hasData = true;
   String id = "";
@@ -68,13 +66,13 @@ class LendenDashboardModel {
 
   factory LendenDashboardModel.fromMap(Map<String, dynamic> map) {
     return LendenDashboardModel(
-      id: Crypto.decrypt(map['id']),
-      roomName: Crypto.decrypt(map['roomName']),
-      status: Crypto.decrypt(map['status']),
+      id: map['id'],
+      roomName: map['roomName'],
+      status: map['status'],
       createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
-      amount: double.parse(Crypto.decrypt(map['amount'])),
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+      amount: double.parse(map['amount'].toString()),
       users: List<LendenUserModel>.from(
         (map['users']).map((x) => LendenUserModel.fromBasicInfoMap(x)),
       ),

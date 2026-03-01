@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class NotificationDataProvider {
@@ -21,7 +20,7 @@ class NotificationDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -31,13 +30,13 @@ class NotificationDataProvider {
   Future<bool> acceptInvite(String id, String authToken) async {
     try {
       final response = await createAPICall('notification', "put", authToken, {
-        "id": Crypto.encrypt(id),
+        "id": id,
       });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -50,13 +49,13 @@ class NotificationDataProvider {
         'notification',
         "delete",
         authToken,
-        {"id": Crypto.encrypt(id)},
+        {"id": id},
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

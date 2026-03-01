@@ -5,8 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:settlenow/model/room_user_model.dart';
 import 'package:settlenow/model/user_model.dart';
 
-import 'package:settlenow/util/handler/crypto.dart';
-
 class RoomInfoModel {
   bool hasData = true;
   String id = "";
@@ -78,18 +76,18 @@ class RoomInfoModel {
 
   factory RoomInfoModel.fromMap(Map<String, dynamic> map) {
     return RoomInfoModel(
-      id: Crypto.decrypt(map['id']),
-      roomName: Crypto.decrypt(map['roomName']),
-      status: Crypto.decrypt(map['status']),
-      roomKey: Crypto.decrypt(map['roomKey']),
-      roomLink: Crypto.decrypt(map['roomLink']),
+      id: map['id'],
+      roomName: map['roomName'],
+      status: map['status'],
+      roomKey: map['roomKey'],
+      roomLink: map['roomLink'],
       createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
       users: List<RoomUserModel>.from(
         (map['users']).map((x) => RoomUserModel.fromBasicInfoMap(x)),
       ),
-      active: Crypto.decrypt(map['active']) == 'true',
+      active: map['active'],
     );
   }
 

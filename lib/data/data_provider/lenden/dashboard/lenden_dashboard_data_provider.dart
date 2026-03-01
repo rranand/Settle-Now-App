@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/model/lenden_dashboard_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class LendenDashboardDataProvider {
@@ -17,7 +16,7 @@ class LendenDashboardDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -30,15 +29,15 @@ class LendenDashboardDataProvider {
   ) async {
     try {
       final response = await createAPICall('lenden', "post", authToken, {
-        "name": Crypto.encrypt(roomData.roomName),
+        "name": roomData.roomName,
       });
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        roomData.id = Crypto.decrypt(data["data"]["id"]);
+        roomData.id = data["data"]["id"];
         return roomData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

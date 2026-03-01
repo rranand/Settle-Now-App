@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:settlenow/core.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class NotificationModel {
   bool hasData = true;
@@ -43,13 +42,13 @@ class NotificationModel {
 
   factory NotificationModel.fromMap(Map<String, dynamic> map) {
     return NotificationModel(
-      id: Crypto.decrypt(map['id']),
-      roomName: Crypto.decrypt(map['roomName']),
-      type: Crypto.decrypt(map['type']),
-      roomID: Crypto.decrypt(map['roomID']),
+      id: map['id'],
+      roomName: map['roomName'],
+      type: map['type'],
+      roomID: map['roomID'],
       by: UserModel.fromBasicInfoMap(map['by']),
       user: UserModel.fromBasicInfoMap(map['user']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
     );
   }
 

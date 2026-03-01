@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:settlenow/model/common_transaction_field.dart';
 import 'package:settlenow/model/lenden_user_model.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class LendenTransactionModel implements CommonTransactionField {
   bool hasData = true;
@@ -63,14 +62,12 @@ class LendenTransactionModel implements CommonTransactionField {
     List<LendenUserModel> users,
   ) {
     return LendenTransactionModel(
-      id: Crypto.decrypt(map['id']),
-      amount: double.parse(Crypto.decrypt(map['amount'])),
-      description: Crypto.decrypt(map['description']),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-      createdBy: users.firstWhere(
-        (user) => user.id == Crypto.decrypt(map['createdBy']),
-      ),
-      modifiedOn: DateTime.parse(Crypto.decrypt(map['modifiedOn'])).toLocal(),
+      id: map['id'],
+      amount: double.parse(map['amount'].toString()),
+      description: map['description'],
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      createdBy: users.firstWhere((user) => user.id == map['createdBy']),
+      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
     );
   }
 
@@ -88,9 +85,9 @@ class LendenTransactionModel implements CommonTransactionField {
 
   String toCreateExpenseJson() {
     Map<String, String> data = {
-      "amount": Crypto.encrypt(amount.toString()),
-      "description": Crypto.encrypt(description),
-      "createdOn": Crypto.encrypt(createdOn.toIso8601String()),
+      "amount": amount.toString(),
+      "description": description,
+      "createdOn": createdOn.toIso8601String(),
     };
 
     return json.encode(data);
@@ -98,9 +95,9 @@ class LendenTransactionModel implements CommonTransactionField {
 
   String toUpdateExpenseJson() {
     Map<String, String> data = {
-      "id": Crypto.encrypt(id),
-      "amount": Crypto.encrypt(amount.toString()),
-      "description": Crypto.encrypt(description),
+      "id": id,
+      "amount": amount.toString(),
+      "description": description,
     };
 
     return json.encode(data);

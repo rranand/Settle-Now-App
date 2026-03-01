@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:settlenow/core.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class PersonalMonthlyExpenseDataProvider {
@@ -28,7 +27,7 @@ class PersonalMonthlyExpenseDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -53,10 +52,10 @@ class PersonalMonthlyExpenseDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        newExpense.id = Crypto.decrypt(data['data']['id']);
+        newExpense.id = data['data']['id'];
         return newExpense;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -83,7 +82,7 @@ class PersonalMonthlyExpenseDataProvider {
         updatedExpense.modifiedOn = DateTime.now();
         return updatedExpense;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -97,8 +96,8 @@ class PersonalMonthlyExpenseDataProvider {
   ) async {
     try {
       final response = await createAPICall('personal', 'delete', authToken, {
-        "id": Crypto.encrypt(expenseID),
-        "transactionType": Crypto.encrypt(transactionType),
+        "id": expenseID,
+        "transactionType": transactionType,
       });
 
       final data = jsonDecode(response.body);
@@ -106,7 +105,7 @@ class PersonalMonthlyExpenseDataProvider {
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

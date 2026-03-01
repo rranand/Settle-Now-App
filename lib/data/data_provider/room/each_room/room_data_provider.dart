@@ -5,7 +5,6 @@ import 'package:settlenow/model/activity_model.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
 import 'package:settlenow/model/notification_model.dart';
 import 'package:settlenow/model/room_settle_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class RoomDataProvider {
@@ -23,7 +22,7 @@ class RoomDataProvider {
         RoomInfoModel roomData = RoomInfoModel.fromMap(data['data']);
         return roomData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -48,7 +47,7 @@ class RoomDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -76,7 +75,7 @@ class RoomDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -95,7 +94,7 @@ class RoomDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode != 200) {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -114,7 +113,7 @@ class RoomDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode != 200) {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -131,14 +130,14 @@ class RoomDataProvider {
         'room/$id/update',
         "patch",
         authToken,
-        {"name": Crypto.encrypt(newRoomName)},
+        {"name": newRoomName},
       );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -153,7 +152,7 @@ class RoomDataProvider {
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -177,10 +176,10 @@ class RoomDataProvider {
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.id = Crypto.decrypt(respData['data']['id']);
+        newExpense.id = respData['data']['id'];
         return newExpense;
       } else {
-        throw Crypto.decrypt(respData['message']);
+        throw respData['message'];
       }
     } catch (e) {
       rethrow;
@@ -208,11 +207,11 @@ class RoomDataProvider {
       if (response.statusCode == 200) {
         final transactionMapping = respData['data'];
         for (int i = 0; i < data.length; i++) {
-          newExpense[i].id = Crypto.decrypt(transactionMapping[i.toString()]);
+          newExpense[i].id = transactionMapping[i.toString()];
         }
         return newExpense;
       } else {
-        throw Crypto.decrypt(respData['message']);
+        throw respData['message'];
       }
     } catch (e) {
       rethrow;
@@ -239,7 +238,7 @@ class RoomDataProvider {
         newExpense.modifiedOn = DateTime.now();
         return newExpense;
       } else {
-        throw Crypto.decrypt(respData['message']);
+        throw respData['message'];
       }
     } catch (e) {
       rethrow;
@@ -256,17 +255,14 @@ class RoomDataProvider {
       'room/$id/transaction',
       "delete",
       authToken,
-      {
-        "id": Crypto.encrypt(expenseID),
-        "splitType": Crypto.encrypt(expenseType),
-      },
+      {"id": expenseID, "splitType": expenseType},
     );
 
     final respData = jsonDecode(response.body);
     if (response.statusCode == 200) {
       return true;
     } else {
-      throw Crypto.decrypt(respData['message']);
+      throw respData['message'];
     }
   }
 
@@ -285,10 +281,10 @@ class RoomDataProvider {
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        data.id = Crypto.decrypt(respData['data']['id']);
+        data.id = respData['data']['id'];
         return data;
       } else {
-        throw Crypto.decrypt(respData['message']);
+        throw respData['message'];
       }
     } catch (e) {
       rethrow;
@@ -312,7 +308,7 @@ class RoomDataProvider {
       data.modifiedOn = DateTime.now();
       return data;
     } else {
-      throw Crypto.decrypt(respData['message']);
+      throw respData['message'];
     }
   }
 
@@ -323,18 +319,18 @@ class RoomDataProvider {
     String receiver,
     String authToken,
   ) async {
-    final response =
-        await createAPICall('room/$id/settle', "delete", authToken, {
-          "id": Crypto.encrypt(expenseID),
-          "sender": Crypto.encrypt(sender),
-          "receiver": Crypto.encrypt(receiver),
-        });
+    final response = await createAPICall(
+      'room/$id/settle',
+      "delete",
+      authToken,
+      {"id": expenseID, "sender": sender, "receiver": receiver},
+    );
 
     final respData = jsonDecode(response.body);
     if (response.statusCode == 200) {
       return true;
     } else {
-      throw Crypto.decrypt(respData['message']);
+      throw respData['message'];
     }
   }
 
@@ -348,14 +344,14 @@ class RoomDataProvider {
         'room/$id/transaction/personalExpense',
         "post",
         authToken,
-        {"id": Crypto.encrypt(expenseID)},
+        {"id": expenseID},
       );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -368,7 +364,7 @@ class RoomDataProvider {
     String authToken,
   ) async {
     try {
-      List<String> uid = users.map((e) => Crypto.encrypt(e.id)).toList();
+      List<String> uid = users.map((e) => e.id).toList();
       final response = await createAPICall(
         'room/invite/$id',
         "put",
@@ -384,7 +380,7 @@ class RoomDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -408,7 +404,7 @@ class RoomDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;

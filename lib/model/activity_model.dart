@@ -1,5 +1,4 @@
 import 'package:settlenow/util/enum/activity_type.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 
 class ActivityModel {
   bool hasData = true;
@@ -41,11 +40,11 @@ class ActivityModel {
 
   factory ActivityModel.fromMap(Map<String, dynamic> map) {
     return ActivityModel(
-      id: Crypto.decrypt(map['id']),
-      user: Crypto.decrypt(map['user']),
-      type: activityTypeFromApi(Crypto.decrypt(map['type'])),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-      entityId: Crypto.decrypt(map['entityId']),
+      id: map['id'],
+      user: map['user'],
+      type: activityTypeFromApi(map['type']),
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      entityId: map['entityId'],
       details:
           map['details'] != null
               ? ActivityDetails.fromMap(map['details'] as Map<String, dynamic>)
@@ -142,15 +141,9 @@ class ActivityDetailValue {
 
   factory ActivityDetailValue.fromMap(Map<String, dynamic> map) {
     return ActivityDetailValue(
-      description:
-          map['description'] != null
-              ? Crypto.decrypt(map['description'])
-              : null,
-      amount:
-          map['amount'] != null
-              ? double.parse(Crypto.decrypt(map['amount']))
-              : null,
-      user: map['user'] != null ? Crypto.decrypt(map['user']) : null,
+      description: map['description'],
+      amount: map['amount'] != null ? double.parse(map['amount'].toString()) : null,
+      user: map['user'],
     );
   }
 

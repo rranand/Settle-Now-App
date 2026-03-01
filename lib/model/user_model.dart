@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:settlenow/util/handler/crypto.dart';
-
 class UserModel {
   bool hasData = true;
   String id = "";
@@ -65,7 +63,7 @@ class UserModel {
   }
 
   Map<String, dynamic> updateProfileJSON() {
-    return <String, dynamic>{'name': Crypto.encrypt(name)};
+    return <String, dynamic>{'name': name};
   }
 
   Map<String, dynamic> toMap() {
@@ -79,38 +77,37 @@ class UserModel {
 
   factory UserModel.fromBasicInfoMap(Map<String, dynamic> map) {
     return UserModel.fromBasicInfo(
-      id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name'] ?? ""),
-      profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
+      id: map['id'],
+      name: map['name'] ?? "",
+      profileImage: map['profileImage'] ?? "",
     );
   }
 
   factory UserModel.forOwnerInfo(Map<String, dynamic> map, String authToken) {
     UserModel userData = UserModel.fromBasicInfo(
-      id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name']),
-      profileImage: Crypto.decrypt(map['profileImage']),
+      id: map['id'],
+      name: map['name'],
+      profileImage: map['profileImage'],
     );
 
-    userData.phoneNo = Crypto.decrypt(map['phoneNo']);
-    userData.createdOn =
-        DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal();
+    userData.phoneNo = map['phoneNo'];
+    userData.createdOn = DateTime.parse(map['createdOn']).toLocal();
 
-    userData.email = Crypto.decrypt(map['email']);
-    userData.isGoogle = Crypto.decrypt(map['isGoogle']) == "true";
+    userData.email = map['email'];
+    userData.isGoogle = map['isGoogle'] == "true";
     userData.authToken = authToken;
     return userData;
   }
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: Crypto.decrypt(map['id']),
-      name: Crypto.decrypt(map['name']),
-      email: Crypto.decrypt(map['email'] ?? ""),
-      profileImage: Crypto.decrypt(map['profileImage'] ?? ""),
-      createdOn: DateTime.parse(Crypto.decrypt(map['createdOn'])).toLocal(),
-      authToken: Crypto.decrypt(map['authToken'] ?? ""),
-      phoneNo: Crypto.decrypt(map['phoneNo'] ?? ""),
+      id: map['id'],
+      name: map['name'],
+      email: map['email'] ?? "",
+      profileImage: map['profileImage'] ?? "",
+      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      authToken: map['authToken'] ?? "",
+      phoneNo: map['phoneNo'] ?? "",
     );
   }
 

@@ -4,7 +4,6 @@ import 'package:settlenow/core.dart';
 import 'package:settlenow/firebase/firebase_messaging.dart';
 import 'package:settlenow/model/login_activity_model.dart';
 import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 import 'package:settlenow/util/handler/platform_service.dart';
 import 'package:settlenow/util/handler/local_storage_preference.dart';
@@ -25,19 +24,17 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = Crypto.encrypt(
-        "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}",
-      );
+      final String token = "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}";
 
       Map<String, String> jsonInputData = {
-        'email': Crypto.encrypt(email),
-        'otp': Crypto.encrypt(otp),
-        'token': Crypto.encrypt(token),
-        'device': Crypto.encrypt(deviceInfo['device']!),
-        'deviceToken': Crypto.encrypt(fcmToken),
-        'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
-        'version': Crypto.encrypt(deviceInfo['version']!),
-        'ip': Crypto.encrypt(deviceIP),
+        'email': email,
+        'otp': otp,
+        'token': token,
+        'device': deviceInfo['device']!,
+        'deviceToken': fcmToken,
+        'userAgent': deviceInfo['userAgent']!,
+        'version': deviceInfo['version']!,
+        'ip': deviceIP,
       };
 
       final response = await createAPICall(
@@ -59,7 +56,7 @@ class AuthDataProvider {
 
         return Pair(pairData.first, pairData.second);
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -81,16 +78,16 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = Crypto.encrypt("$email#@#$idToken");
+      final String token = "$email#@#$idToken";
 
       Map<String, String> jsonInputData = {
-        'idToken': Crypto.encrypt(idToken),
-        'token': Crypto.encrypt(token),
-        'device': Crypto.encrypt(deviceInfo['device']!),
-        'deviceToken': Crypto.encrypt(fcmToken),
-        'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
-        'version': Crypto.encrypt(deviceInfo['version']!),
-        'ip': Crypto.encrypt(deviceIP),
+        'idToken': idToken,
+        'token': token,
+        'device': deviceInfo['device']!,
+        'deviceToken': fcmToken,
+        'userAgent': deviceInfo['userAgent']!,
+        'version': deviceInfo['version']!,
+        'ip': deviceIP,
       };
 
       final response = await createAPICall(
@@ -110,7 +107,7 @@ class AuthDataProvider {
             userInfoData[1] as Pair<UserModel, PreferenceModel>;
         return pairData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -132,16 +129,16 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = Crypto.encrypt("$email#@#$idToken");
+      final String token = "$email#@#$idToken";
 
       Map<String, String> jsonInputData = {
-        'idToken': Crypto.encrypt(idToken),
-        'token': Crypto.encrypt(token),
-        'device': Crypto.encrypt(deviceInfo['device']!),
-        'deviceToken': Crypto.encrypt(fcmToken),
-        'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
-        'version': Crypto.encrypt(deviceInfo['version']!),
-        'ip': Crypto.encrypt(deviceIP),
+        'idToken': idToken,
+        'token': token,
+        'device': deviceInfo['device']!,
+        'deviceToken': fcmToken,
+        'userAgent': deviceInfo['userAgent']!,
+        'version': deviceInfo['version']!,
+        'ip': deviceIP,
       };
 
       final response = await createAPICall(
@@ -161,7 +158,7 @@ class AuthDataProvider {
             userInfoData[1] as Pair<UserModel, PreferenceModel>;
         return pairData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -174,7 +171,7 @@ class AuthDataProvider {
     try {
       String version = await getAppVersion();
       final response = await createAPICall('auth', "patch", authToken, {
-        'version': Crypto.encrypt(version),
+        'version': version,
       });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -185,7 +182,7 @@ class AuthDataProvider {
 
         return Pair(userData, preferenceData);
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -204,18 +201,17 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = Crypto.encrypt(
-        "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}",
-      );
+      final String token = "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}";
+
       final response = await createAPICall('auth/signup', "post", "", {
-        'name': Crypto.encrypt(name),
-        'email': Crypto.encrypt(email),
-        'token': Crypto.encrypt(token),
-        'device': Crypto.encrypt(deviceInfo['device']!),
-        'deviceToken': Crypto.encrypt(fcmToken),
-        'userAgent': Crypto.encrypt(deviceInfo['userAgent']!),
-        'version': Crypto.encrypt(deviceInfo['version']!),
-        'ip': Crypto.encrypt(deviceIP),
+        'name': name,
+        'email': email,
+        'token': token,
+        'device': deviceInfo['device']!,
+        'deviceToken': fcmToken,
+        'userAgent': deviceInfo['userAgent']!,
+        'version': deviceInfo['version']!,
+        'ip': deviceIP,
       });
 
       final data = jsonDecode(response.body);
@@ -223,7 +219,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return token;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -232,7 +228,7 @@ class AuthDataProvider {
 
   Future<bool> sendOTP(String email) async {
     try {
-      Map<String, String> jsonInputData = {'email': Crypto.encrypt(email)};
+      Map<String, String> jsonInputData = {'email': email};
       final response = await createAPICall(
         'auth/otp',
         "post",
@@ -244,7 +240,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -259,7 +255,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -272,7 +268,7 @@ class AuthDataProvider {
   ) async {
     try {
       final response = await createAPICall('auth/signup/otp', "patch", token, {
-        "otp": Crypto.encrypt(otp),
+        "otp": otp,
       });
 
       final data = jsonDecode(response.body);
@@ -285,7 +281,7 @@ class AuthDataProvider {
             userInfoData[1] as Pair<UserModel, PreferenceModel>;
         return pairData;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -299,7 +295,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -314,7 +310,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -333,7 +329,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return true;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -358,7 +354,7 @@ class AuthDataProvider {
 
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       throw e.toString();
@@ -378,7 +374,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -397,7 +393,7 @@ class AuthDataProvider {
         }
         return arr;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
@@ -420,7 +416,7 @@ class AuthDataProvider {
       if (response.statusCode == 200) {
         return;
       } else {
-        throw Crypto.decrypt(data['message']);
+        throw data['message'];
       }
     } catch (e) {
       rethrow;
