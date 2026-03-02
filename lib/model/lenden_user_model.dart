@@ -44,7 +44,7 @@ class LendenUserModel extends UserModel {
       id: map['id'],
       name: map['name'],
       profileImage: map['profileImage'],
-      isClosed: map['isClosed'] == "true",
+      isClosed: map['isClosed'],
     );
   }
 

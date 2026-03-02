@@ -94,7 +94,7 @@ class UserModel {
     userData.createdOn = DateTime.parse(map['createdOn']).toLocal();
 
     userData.email = map['email'];
-    userData.isGoogle = map['isGoogle'] == "true";
+    userData.isGoogle = map['isGoogle'];
     userData.authToken = authToken;
     return userData;
   }
