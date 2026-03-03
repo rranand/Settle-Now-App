@@ -2,7 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:settlenow/model/api_response_model.dart';
 import 'package:settlenow/util/handler/crypto.dart';
+
+final ApiResponseModel newRes = ApiResponseModel(
+  body: "{\"message\": \"Something went wrong!\"}",
+  statusCode: 422,
+);
 
 Function getHttpMethod(String methodName) {
   switch (methodName.toLowerCase()) {
@@ -19,17 +25,12 @@ Function getHttpMethod(String methodName) {
   }
 }
 
-Future<Response> createAPICall(
+Future<ApiResponseModel> createAPICall(
   String url,
   String methodName,
   String token,
   dynamic jsonData,
 ) async {
-  Response newRes = Response(
-    jsonEncode({"message": "Something went wrong!"}),
-    422,
-  );
-
   Function httpType = getHttpMethod(methodName);
   try {
     String host = "https://prod-api.settlenow.in/";
@@ -54,13 +55,14 @@ Future<Response> createAPICall(
     var resData = jsonDecode(res.body);
 
     if (resData['data'] != null) {
-      String jsonJWTData = jsonDecode(res.body)['data'];
+      String jsonJWTData = resData['data'];
       String responseBody = Crypto.extractJSONfromJWT(jsonJWTData);
-      newRes = Response(responseBody, res.statusCode);
+
+      return ApiResponseModel(body: responseBody, statusCode: res.statusCode);
     }
 
     return newRes;
-  } catch (_) {
+  } catch (e) {
     throw "Something went wrong";
   }
 }
