@@ -208,9 +208,12 @@ lib/
 
 ## Backend & Services
 
-- Firebase
-- REST APIs
-- Push Notification Services
+- Node.js + Express.js (REST API)
+- Go (async processing, notification workflows)
+- AWS Lambda (serverless deployment)
+- AWS SQS (message queue)
+- Redis (caching layer)
+- MongoDB (primary database)
 
 ## Analytics & Monitoring
 
