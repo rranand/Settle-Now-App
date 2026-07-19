@@ -28,7 +28,6 @@ class LendenUserModel extends UserModel {
         phoneNo: "",
       );
 
-  @override
   factory LendenUserModel.fromUserModel(UserModel user) {
     return LendenUserModel(
       id: user.id,
@@ -38,7 +37,6 @@ class LendenUserModel extends UserModel {
     );
   }
 
-  @override
   factory LendenUserModel.fromBasicInfoMap(Map<String, dynamic> map) {
     return LendenUserModel(
       id: map['id'],

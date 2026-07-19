@@ -40,7 +40,6 @@ class UserAmountModel extends UserModel {
     return map;
   }
 
-  @override
   factory UserAmountModel.copyFromUser(UserModel user, double amount) {
     return UserAmountModel(
       id: user.id,
@@ -50,7 +49,6 @@ class UserAmountModel extends UserModel {
     );
   }
 
-  @override
   factory UserAmountModel.fromBasicInfoMap(Map<String, dynamic> map) {
     UserAmountModel newData = UserAmountModel(
       id: map['id'],
@@ -64,7 +62,6 @@ class UserAmountModel extends UserModel {
     return newData;
   }
 
-  @override
   factory UserAmountModel.fromMap(Map<String, dynamic> map) {
     UserAmountModel newData = UserAmountModel(
       id: map['id'],
@@ -92,7 +89,6 @@ class UserAmountModel extends UserModel {
     return json.encode(data);
   }
 
-  @override
   factory UserAmountModel.fromJson(String source) =>
       UserAmountModel.fromMap(json.decode(source) as Map<String, dynamic>);
 

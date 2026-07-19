@@ -18,8 +18,7 @@ class Crypto {
       key = '${data.browserName.name}###${data.platform!}###$email';
     } else if (Platform.isAndroid) {
       AndroidDeviceInfo build = await deviceInfoPlugin.androidInfo;
-      key =
-          '${build.id}###${build.serialNumber}###${build.fingerprint}###$email';
+      key = '${build.id}###${build.board}###${build.fingerprint}###$email';
     } else if (Platform.isIOS) {
       IosDeviceInfo build = await deviceInfoPlugin.iosInfo;
       key =

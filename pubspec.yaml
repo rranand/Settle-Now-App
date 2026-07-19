@@ -3,7 +3,7 @@ description: "A Finance Management App"
 
 publish_to: 'none'
 
-version: 2.2.0+233
+version: 2.2.1+234
 
 environment:
   sdk: ^3.7.2
@@ -19,7 +19,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   firebase_core: ^4.0.0
   firebase_messaging: ^16.0.0
-  go_router: ^16.1.0
+  go_router: ^17.3.0
   email_validator: ^3.0.0
   iconsax_flutter: ^1.0.1
   auto_size_text: ^3.0.0
@@ -39,14 +39,14 @@ dependencies:
   fl_chart: ^1.0.0
   flutter_sticky_header: ^0.8.0
   flutter_speed_dial: ^7.0.0
-  device_info_plus: ^11.4.0
+  device_info_plus: ^13.2.0
   dart_jsonwebtoken: ^3.1.1
-  package_info_plus: ^8.3.0
-  share_plus: ^11.0.0
+  package_info_plus: ^10.2.1
+  share_plus: ^13.2.1
   path_provider: ^2.1.5
-  in_app_update: ^4.2.3
+  in_app_update: ^5.0.0
   in_app_review: ^2.0.10
-  awesome_notifications: ^0.10.1
+  awesome_notifications: ^0.12.1
   permission_handler: ^12.0.1
   flutter_svg: ^2.2.0
   firebase_crashlytics: ^5.0.0

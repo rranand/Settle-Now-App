@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
@@ -62,7 +64,15 @@ Future<ApiResponseModel> createAPICall(
     }
 
     return newRes;
-  } catch (e) {
-    throw "Something went wrong";
+  } on TimeoutException catch (_) {
+    throw "The request timed out. Please check your internet connection and try again.";
+  } on SocketException catch (_) {
+    throw "Unable to connect. Please check your internet connection and try again.";
+  } on ClientException catch (_) {
+    throw "Unable to connect to the server. Please try again.";
+  } on FormatException catch (_) {
+    throw "Received an invalid response from the server.";
+  } catch (_) {
+    throw "Something went wrong. Please try again.";
   }
 }

@@ -56,7 +56,6 @@ class LendenTransactionModel implements CommonTransactionField {
     };
   }
 
-  @override
   factory LendenTransactionModel.fromMap(
     Map<String, dynamic> map,
     List<LendenUserModel> users,
@@ -71,7 +70,6 @@ class LendenTransactionModel implements CommonTransactionField {
     );
   }
 
-  @override
   factory LendenTransactionModel.fromNewTransaction(NewTransactionModel data) {
     return LendenTransactionModel(
       id: data.id,

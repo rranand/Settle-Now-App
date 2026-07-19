@@ -52,14 +52,12 @@ class RoomUserModel {
     };
   }
 
-  @override
   RoomUserModel.fromBasicInfo({
     required this.id,
     required this.user,
     required this.active,
   });
 
-  @override
   factory RoomUserModel.fromBasicInfoMap(Map<String, dynamic> map) {
     return RoomUserModel.fromBasicInfo(
       id: map['id'],
@@ -68,7 +66,6 @@ class RoomUserModel {
     );
   }
 
-  @override
   factory RoomUserModel.fromMap(Map<String, dynamic> map) {
     return RoomUserModel(
       id: map['id'] as String,

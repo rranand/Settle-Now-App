@@ -117,7 +117,6 @@ class PersonalExpenseTransactionModel implements CommonTransactionField {
     );
   }
 
-  @override
   factory PersonalExpenseTransactionModel.fromMap(Map<String, dynamic> map) {
     if (map.containsKey('roomData') && map['roomData'] != null) {
       return PersonalExpenseTransactionModel(
