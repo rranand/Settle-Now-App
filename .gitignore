@@ -19,8 +19,10 @@ migrate_working_dir/
 *.ipr
 *.iws
 .idea/
-.*
-.*/
+.dart_tool/
+.firebase/
+.idea/
+.vercel/
 !.gitignore
 
 # The .vscode folder contains launch configuration and tasks you configure in
@@ -48,3 +50,5 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+.vercel
+.env*
