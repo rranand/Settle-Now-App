@@ -108,12 +108,13 @@ Future<void> main() async {
     return true;
   };
 
+  await GoogleOauth.ensureGoogleSignInInitialized();
+
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
     await NotificationInterfaceHandler.initializeChannels();
-    await GoogleOauth.ensureGoogleSignInInitialized();
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,

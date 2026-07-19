@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/bloc/auth/auth_bloc.dart';
 import 'package:settlenow/bloc/update_info/update_info_bloc.dart';
@@ -16,12 +19,15 @@ import 'package:settlenow/util/enum/enums.dart';
 import 'package:settlenow/util/functions/additional_function.dart';
 import 'package:settlenow/util/functions/in_app_update_service.dart';
 import 'package:settlenow/util/functions/validator.dart';
+import 'package:settlenow/util/oAuth/google_oauth.dart';
 import 'package:settlenow/util/widgets/custom_button.dart';
 import 'package:settlenow/util/widgets/custom_form_field.dart';
 import 'package:settlenow/util/widgets/snackbar.dart';
 import 'package:settlenow/util/widgets/timer_button.dart';
 import 'package:settlenow/util/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../util/google_signin_web.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -39,6 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final GlobalKey<FormState> _subSignupFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _googleSub;
 
   void populateData() async {
     if (kIsWeb) {
@@ -109,6 +116,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     context.read<AuthBloc>().add(AuthGoogleSignUpRequested());
   }
 
+  void _googleWebSignUpHandler(GoogleSignInAuthenticationEvent event) {
+    context.read<AuthBloc>().add(AuthWebGoogleSignUpRequested(event));
+  }
+
   void _handleOnLogin() {
     context.go(RouterConstants.loginRouteName);
   }
@@ -127,6 +138,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.initState();
     populateData();
     InAppUpdateService.checkForUpdate(context);
+    if (kIsWeb) {
+      _googleSub = GoogleOauth.getInstance().authenticationEvents.listen((
+        event,
+      ) {
+        _googleWebSignUpHandler(event);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kIsWeb && _googleSub != null) {
+      _googleSub?.cancel();
+    }
+    super.dispose();
   }
 
   @override
@@ -333,28 +359,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               );
                             },
                           ),
-                          if (!kIsWeb) ...<Widget>[
-                            SizedBox(
-                              height: 2 * UiConstant.spaceBetweenSection,
-                            ),
-                            const Center(
-                              child: Text('Or Sign up with social account'),
-                            ),
-                            SizedBox(
-                              height: 2 * UiConstant.spaceBetweenSection,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CustomButton.socialButton(
-                                  context,
-                                  'assets/socialmedia/google.png',
-                                  onPressed: _googleSignUpHandler,
-                                ),
-                              ],
-                            ),
-                          ],
-
+                          SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                          const Center(
+                            child: Text('Or Sign up with social account'),
+                          ),
+                          SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              kIsWeb
+                                  ? renderGoogleButton()
+                                  : CustomButton.socialButton(
+                                    context,
+                                    'assets/socialmedia/google.png',
+                                    onPressed: _googleSignUpHandler,
+                                  ),
+                            ],
+                          ),
                           SizedBox(height: UiConstant.spaceAtBottom),
                         ],
                       ),

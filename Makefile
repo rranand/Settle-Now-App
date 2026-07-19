@@ -1,3 +1,5 @@
+.PHONY: release dev web
+
 release:
 	flutter build appbundle --release --flavor prod
 

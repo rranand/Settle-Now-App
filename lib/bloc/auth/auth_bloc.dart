@@ -22,8 +22,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc(this.repo) : super(AuthInitial()) {
     on<AuthLoginRequested>(_authLoginRequested);
     on<AuthGoogleSignInRequested>(_authGoogleSignInRequested);
+    on<AuthWebGoogleSignInRequested>(_authWebGoogleSignInRequested);
     on<AuthSignUpRequested>(_authSignUpRequested);
     on<AuthGoogleSignUpRequested>(_authGoogleSignUpRequested);
+    on<AuthWebGoogleSignUpRequested>(_authWebGoogleSignUpRequested);
     on<AuthOTPRequested>(_authOTPRequested);
     on<AuthLogoutRequested>(_authLogoutRequested);
     on<AuthRevokeSessionRequested>(_authRevokeSessionRequested);
@@ -49,6 +51,39 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } catch (e) {
       return emit(AuthLoginFailure(e.toString()));
+    }
+  }
+
+  void _authWebGoogleSignInRequested(
+    AuthWebGoogleSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final ev = event.authEvent;
+
+    if (ev is GoogleSignInAuthenticationEventSignIn) {
+      emit(AuthLoginLoading());
+
+      try {
+        GoogleSignInAccount userData = ev.user;
+
+        final GoogleSignInAuthentication googleAuth = userData.authentication;
+        final String email = userData.email;
+        final String idToken = googleAuth.idToken ?? "";
+
+        if (idToken.isEmpty) {
+          await additionalLogoutAction();
+          return emit(AuthLoginFailure("Google SignIn Failed"));
+        }
+
+        Pair<UserModel, PreferenceModel> pairData = await repo.loginUsingGoogle(
+          email,
+          idToken,
+        );
+        return emit(AuthLoginSuccess(pairData.first, pairData.second));
+      } catch (e) {
+        await additionalLogoutAction();
+        return emit(AuthLoginFailure("Google SignIn Failed"));
+      }
     }
   }
 
@@ -122,6 +157,39 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       await additionalLogoutAction();
       return emit(AuthSignUpFailure(e.toString()));
+    }
+  }
+
+  void _authWebGoogleSignUpRequested(
+    AuthWebGoogleSignUpRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final ev = event.authEvent;
+
+    if (ev is GoogleSignInAuthenticationEventSignIn) {
+      emit(AuthLoginLoading());
+
+      try {
+        GoogleSignInAccount userData = ev.user;
+
+        final GoogleSignInAuthentication googleAuth = userData.authentication;
+        final String email = userData.email;
+        final String idToken = googleAuth.idToken ?? "";
+
+        if (idToken.isEmpty) {
+          await additionalLogoutAction();
+          return emit(AuthSignUpFailure("Google Signup Failed"));
+        }
+        Pair<UserModel, PreferenceModel> pairData = await repo
+            .signupUsingGoogle(email, idToken);
+        return emit(AuthLoginSuccess(pairData.first, pairData.second));
+      } on GoogleSignInException catch (_) {
+        await additionalLogoutAction();
+        return emit(AuthSignUpFailure("Google Signup Failed"));
+      } catch (e) {
+        await additionalLogoutAction();
+        return emit(AuthSignUpFailure(e.toString()));
+      }
     }
   }
 

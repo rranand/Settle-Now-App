@@ -23,6 +23,16 @@
 				"--flavor",
 				"dev"
 			]
+		},
+		{
+			"name": "web",
+			"request": "launch",
+			"type": "dart",
+			"program": "lib/main.dart",
+			"args": [
+				"--web-port",
+				"52314"
+			]
 		}
 	]
 }

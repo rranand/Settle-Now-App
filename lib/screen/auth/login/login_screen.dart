@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/bloc/auth/auth_bloc.dart';
 import 'package:settlenow/bloc/update_info/update_info_bloc.dart';
@@ -12,11 +15,13 @@ import 'package:settlenow/constant/ui_constant.dart';
 import 'package:settlenow/firebase/firebase_remote.dart';
 import 'package:settlenow/provider/screen_size_provider.dart';
 import 'package:settlenow/router/router_constant.dart';
+import 'package:settlenow/screen/auth/util/google_signin_web.dart';
 import 'package:settlenow/util/card/loading_card.dart';
 import 'package:settlenow/util/enum/enums.dart';
 import 'package:settlenow/util/functions/additional_function.dart';
 import 'package:settlenow/util/functions/in_app_update_service.dart';
 import 'package:settlenow/util/functions/validator.dart';
+import 'package:settlenow/util/oAuth/google_oauth.dart';
 import 'package:settlenow/util/widgets/custom_button.dart';
 import 'package:settlenow/util/widgets/custom_form_field.dart';
 import 'package:settlenow/util/widgets/snackbar.dart';
@@ -40,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _loginEmailFormKey = GlobalKey<FormState>();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   ValueNotifier<bool> isNotificationAllowed = ValueNotifier(false);
+  StreamSubscription<GoogleSignInAuthenticationEvent>? _googleSub;
 
   void populateData() async {
     if (kIsWeb) {
@@ -100,6 +106,10 @@ class _LoginScreenState extends State<LoginScreen> {
     context.read<AuthBloc>().add(AuthGoogleSignInRequested());
   }
 
+  void _googleWebLoginHandler(GoogleSignInAuthenticationEvent event) {
+    context.read<AuthBloc>().add(AuthWebGoogleSignInRequested(event));
+  }
+
   void _handleOnSignUp() {
     context.go(RouterConstants.signupRouteName);
   }
@@ -118,6 +128,22 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     populateData();
     InAppUpdateService.checkForUpdate(context);
+
+    if (kIsWeb) {
+      _googleSub = GoogleOauth.getInstance().authenticationEvents.listen((
+        event,
+      ) {
+        _googleWebLoginHandler(event);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    if (kIsWeb && _googleSub != null) {
+      _googleSub?.cancel();
+    }
+    super.dispose();
   }
 
   @override
@@ -303,27 +329,23 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             },
                           ),
-                          if (!kIsWeb) ...<Widget>[
-                            SizedBox(
-                              height: 2 * UiConstant.spaceBetweenSection,
-                            ),
-                            const Center(
-                              child: Text('Or Sign in with social account'),
-                            ),
-                            SizedBox(
-                              height: 2 * UiConstant.spaceBetweenSection,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CustomButton.socialButton(
-                                  context,
-                                  'assets/socialmedia/google.png',
-                                  onPressed: _googleLoginHandler,
-                                ),
-                              ],
-                            ),
-                          ],
+                          SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                          const Center(
+                            child: Text('Or Sign in with social account'),
+                          ),
+                          SizedBox(height: 2 * UiConstant.spaceBetweenSection),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              kIsWeb
+                                  ? renderGoogleButton()
+                                  : CustomButton.socialButton(
+                                    context,
+                                    'assets/socialmedia/google.png',
+                                    onPressed: _googleLoginHandler,
+                                  ),
+                            ],
+                          ),
 
                           SizedBox(height: UiConstant.spaceAtBottom),
                         ],

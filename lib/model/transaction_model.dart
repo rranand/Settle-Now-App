@@ -138,7 +138,6 @@ class TransactionModel implements CommonTransactionField {
   }
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
-    debugPrint(map['isClosedAny'].runtimeType.toString());
     return TransactionModel(
       id: map['id'],
       description: map['description'],

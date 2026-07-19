@@ -12,11 +12,23 @@ final class AuthLoginRequested extends AuthEvent {
 
 final class AuthGoogleSignInRequested extends AuthEvent {}
 
+final class AuthWebGoogleSignInRequested extends AuthEvent {
+  final GoogleSignInAuthenticationEvent authEvent;
+
+  AuthWebGoogleSignInRequested(this.authEvent);
+}
+
 final class AuthSignUpRequested extends AuthEvent {
   final String name;
   final String email;
 
   AuthSignUpRequested(this.name, this.email);
+}
+
+final class AuthWebGoogleSignUpRequested extends AuthEvent {
+  final GoogleSignInAuthenticationEvent authEvent;
+
+  AuthWebGoogleSignUpRequested(this.authEvent);
 }
 
 final class AuthGoogleSignUpRequested extends AuthEvent {}
