@@ -72,10 +72,17 @@ plus anything pulled in from Rooms or QuickSplit.
 
 ## Known Open Items / Things Any Agent Should Know
 
-- **Settlement algorithm needs validation.** The debt-settlement/netting logic
-  (who pays whom, minimizing number of transactions) hasn't been benchmarked
-  against Splitwise's approach. Don't assume the current algorithm is optimal —
-  flag if you're touching this code, it's a known area of uncertainty.
+- **Balance/settlement algorithm — core math confirmed correct, one narrower
+  question remains open.** The Contribution/Spent/Balance model (per-user
+  Gain/Loss, Loss pays Gain, computed as MongoDB virtuals from transaction
+  records) is documented and verified in `BACKEND_CONTEXT.md`. What's still
+  unverified: whether/how the app minimizes the *number* of settlement
+  transactions when multiple users owe each other (the "who pays whom"
+  optimization Splitwise does) — settlement today may simply be user-initiated
+  (pick a person + amount) rather than auto-suggested. Confirm which before
+  assuming Splitwise-style optimization is in scope. See `BACKEND_CONTEXT.md`
+  for full algorithm detail and remaining open questions (rounding-remainder
+  determinism, SQS idempotency).
 - **Go/PostgreSQL migration is paused, not abandoned.** There was an active
   effort to migrate the backend from Node/Express/MongoDB to Go/PostgreSQL.
   It's currently paused due to time constraints, not cancelled. Do not assume
