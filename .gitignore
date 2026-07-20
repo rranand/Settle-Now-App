@@ -23,6 +23,8 @@ migrate_working_dir/
 .firebase/
 .idea/
 .vercel/
+.firebase/
+.metadata
 !.gitignore
 
 # The .vscode folder contains launch configuration and tasks you configure in

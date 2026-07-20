@@ -56,10 +56,6 @@
         "appAssociation": "AUTO",
         "rewrites": [
             {
-                "source": "/invite/**",
-                "dynamicLinks": true
-            },
-            {
                 "source": "/privacy-policy",
                 "destination": "/privacy-policy.html"
             },
