@@ -109,11 +109,9 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = "$email#@#$idToken";
-
       Map<String, String> jsonInputData = {
         'idToken': idToken,
-        'token': token,
+        'device': deviceInfo['device']!,
         'fcm_token': fcmToken,
         'user_agent': deviceInfo['userAgent']!,
         'version': deviceInfo['version']!,
