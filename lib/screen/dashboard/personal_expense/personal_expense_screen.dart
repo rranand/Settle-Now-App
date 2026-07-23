@@ -121,7 +121,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
           state.id == (widget.year + widget.month).toLowerCase())) {
         context.read<PersonalMonthlyExpenseBloc>().add(
           PersonalMonthlyExpenseFetch(
-            authToken: _loggedInUser.authToken,
             year: widget.year,
             month: widget.month,
           ),
@@ -137,7 +136,6 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
     }
     context.read<PersonalMonthlyExpenseBloc>().add(
       PersonalMonthlyExpenseFetch(
-        authToken: _loggedInUser.authToken,
         year: widget.year,
         month: widget.month,
       ),

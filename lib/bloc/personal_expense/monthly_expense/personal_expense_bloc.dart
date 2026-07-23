@@ -30,7 +30,6 @@ class PersonalMonthlyExpenseBloc
     try {
       String id = (event.year + event.month).toLowerCase();
       List<PersonalExpenseTransactionModel> data = await repo.fetchData(
-        event.authToken,
         event.year,
         event.month,
       );

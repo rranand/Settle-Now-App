@@ -5,10 +5,9 @@ sealed class RoomEvent {}
 
 class RoomFetch extends RoomEvent {
   final String id;
-  final String authToken;
   final List<RoomUserModel> users;
 
-  RoomFetch({required this.id, required this.authToken, required this.users});
+  RoomFetch({required this.id, required this.users});
 }
 
 final class RoomAddNewTransaction extends RoomEvent {

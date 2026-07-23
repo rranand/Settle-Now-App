@@ -49,7 +49,7 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
       final state = context.read<UserLoginActivityCubit>().state;
 
       if (state.data.isEmpty) {
-        context.read<UserLoginActivityCubit>().fetchLoginData(_loggedInUser);
+        context.read<UserLoginActivityCubit>().fetchLoginData();
       }
     }
   }
@@ -59,7 +59,7 @@ class _LoginActivityScreenState extends State<LoginActivityScreen> {
       showNormalSnackBar(context, "Please re-login...Session expired!");
       return;
     }
-    context.read<UserLoginActivityCubit>().fetchLoginData(_loggedInUser);
+    context.read<UserLoginActivityCubit>().fetchLoginData();
   }
 
   @override

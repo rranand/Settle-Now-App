@@ -30,11 +30,8 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     TransactionType transactionType,
   ) async {
     final authLoginState = context.read<AuthBloc>().state;
-    UserModel loggedInUser = UserModel.empty();
     if (authLoginState is! AuthLoginSuccess) {
       return;
-    } else {
-      loggedInUser = authLoginState.userData;
     }
     emit(NewTransactionLoading());
 
@@ -43,10 +40,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.quicksplit:
           {
             final bloc = context.read<QuicksplitBloc>();
-            final TransactionModel newData = await repo.create(
-              data,
-              loggedInUser.authToken,
-            );
+            final TransactionModel newData = await repo.create(data);
             bloc.add(QuicksplitAddNewTransaction(newData));
             return emit(NewTransactionSuccess(newData));
           }
@@ -54,7 +48,6 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
             final PersonalExpenseTransactionModel newData = await repoPS.add(
-              loggedInUser.authToken,
               data,
             );
 
@@ -73,7 +66,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final roomID = blocState.id;
             final LendenTransactionModel newData = await repoLD.create(
               roomID,
-              loggedInUser.authToken,
+
               data,
             );
             bloc.add(LendenAddNewTransaction(newData));
@@ -92,7 +85,6 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final TransactionModel newData = await repoRD.createExpense(
               roomID,
               data,
-              loggedInUser.authToken,
             );
             bloc.add(RoomAddNewTransaction([newData]));
             return emit(NewTransactionSuccess(newData));
@@ -108,11 +100,8 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     List<NewTransactionModel> data,
   ) async {
     final authLoginState = context.read<AuthBloc>().state;
-    UserModel loggedInUser = UserModel.empty();
     if (authLoginState is! AuthLoginSuccess) {
       return;
-    } else {
-      loggedInUser = authLoginState.userData;
     }
     emit(NewTransactionLoading());
 
@@ -126,7 +115,6 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
       final List<TransactionModel> newData = await repoRD.createBulkExpense(
         roomID,
         data,
-        loggedInUser.authToken,
       );
       bloc.add(RoomAddNewTransaction(newData));
       return emit(NewTransactionSuccess(newData.first));
@@ -142,12 +130,10 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     String expenseType = "Personal",
   }) async {
     final authLoginState = context.read<AuthBloc>().state;
-    UserModel loggedInUser = UserModel.empty();
     if (authLoginState is! AuthLoginSuccess) {
       return;
-    } else {
-      loggedInUser = authLoginState.userData;
     }
+
     emit(NewTransactionLoading());
 
     try {
@@ -155,10 +141,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.quicksplit:
           {
             final bloc = context.read<QuicksplitBloc>();
-            final TransactionModel updatedData = await repo.update(
-              data,
-              loggedInUser.authToken,
-            );
+            final TransactionModel updatedData = await repo.update(data);
             bloc.add(QuicksplitUpdateTransaction(updatedData));
             return emit(NewTransactionSuccess(updatedData));
           }
@@ -166,7 +149,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
             final PersonalExpenseTransactionModel updatedData = await repoPS
-                .update(loggedInUser.authToken, data);
+                .update(data);
             bloc.add(PersonalMonthlyExpenseUpdate(updatedData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
@@ -182,7 +165,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final roomID = blocState.id;
             final LendenTransactionModel updatedData = await repoLD.update(
               roomID,
-              loggedInUser.authToken,
+
               data,
             );
             bloc.add(LendenUpdateTransaction(updatedData));
@@ -201,7 +184,6 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final TransactionModel newData = await repoRD.updateExpense(
               roomID,
               data,
-              loggedInUser.authToken,
             );
             bloc.add(RoomUpdateTransaction(newData));
             return emit(NewTransactionSuccess(newData));
@@ -219,12 +201,10 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     String expenseType = "Personal",
   }) async {
     final authLoginState = context.read<AuthBloc>().state;
-    UserModel loggedInUser = UserModel.empty();
     if (authLoginState is! AuthLoginSuccess) {
       return;
-    } else {
-      loggedInUser = authLoginState.userData;
     }
+
     emit(NewTransactionLoading());
     dynamic bloc;
 
@@ -233,10 +213,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.quicksplit:
           {
             bloc = context.read<QuicksplitBloc>();
-            final bool isDeleted = await repo.delete(
-              expenseID,
-              loggedInUser.authToken,
-            );
+            final bool isDeleted = await repo.delete(expenseID);
             if (isDeleted) {
               bloc.add(QuicksplitDeleteTransaction(expenseID));
               return emit(NewTransactionSuccess(TransactionModel.empty()));
@@ -248,11 +225,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
           {
             bloc = context.read<PersonalMonthlyExpenseBloc>();
             bloc.add(PersonalMonthlyExpenseDelete(true, expenseID));
-            final bool isDeleted = await repoPS.delete(
-              loggedInUser.authToken,
-              expenseID,
-              expenseType,
-            );
+            final bool isDeleted = await repoPS.delete(expenseID, expenseType);
 
             if (isDeleted) {
               bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
@@ -270,11 +243,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            final bool isDeleted = await repoLD.delete(
-              roomID,
-              loggedInUser.authToken,
-              expenseID,
-            );
+            final bool isDeleted = await repoLD.delete(roomID, expenseID);
 
             if (isDeleted) {
               bloc.add(LendenDeleteTransaction(expenseID));
@@ -295,7 +264,6 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               roomID,
               expenseID,
               expenseType,
-              loggedInUser.authToken,
             );
 
             if (isDeleted) {

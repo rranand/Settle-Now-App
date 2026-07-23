@@ -45,10 +45,7 @@ class AddToPersonalExpenseBloc
             emit(
               state.copyWith(addingExpenseToPersonalExpense: oldProcessingIDs),
             );
-            await quickSplitRepo.addToPersonalExpense(
-              event.transactionID,
-              event.authToken,
-            );
+            await quickSplitRepo.addToPersonalExpense(event.transactionID);
             oldProcessingIDs.remove(event.transactionID);
             quicksplitBloc.add(
               QuicksplitAddToPersonalExpense(event.transactionID),
@@ -73,7 +70,6 @@ class AddToPersonalExpenseBloc
             await roomRepository.addToPersonalExpense(
               event.roomID,
               event.transactionID,
-              event.authToken,
             );
             oldProcessingIDs.remove(event.transactionID);
             roomBloc.add(

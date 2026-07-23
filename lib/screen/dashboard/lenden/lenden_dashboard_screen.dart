@@ -65,9 +65,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
       final state = context.read<LendenDashboardBloc>().state;
 
       if (state is! LendenDashboardFetchSuccess) {
-        context.read<LendenDashboardBloc>().add(
-          LendenDashboardFetch(authToken: _loggedInUser.authToken),
-        );
+        context.read<LendenDashboardBloc>().add(LendenDashboardFetch());
       }
     }
     widget.isSearchEnabled.addListener(() {
@@ -163,9 +161,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
       showNormalSnackBar(context, "Please re-login...Session expired!");
       return;
     }
-    context.read<LendenDashboardBloc>().add(
-      LendenDashboardFetch(authToken: _loggedInUser.authToken),
-    );
+    context.read<LendenDashboardBloc>().add(LendenDashboardFetch());
   }
 
   List<LendenDashboardModel> filterDataByPreference(

@@ -39,17 +39,12 @@ final class AuthOTPRequested extends AuthEvent {
   AuthOTPRequested(this.email);
 }
 
-final class AuthSignupOTPRequested extends AuthEvent {
-  final String token;
-
-  AuthSignupOTPRequested({required this.token});
-}
+final class AuthSignupOTPRequested extends AuthEvent {}
 
 final class AuthSignupOTPValidationRequested extends AuthEvent {
-  final String token;
   final String otp;
 
-  AuthSignupOTPValidationRequested({required this.token, required this.otp});
+  AuthSignupOTPValidationRequested({required this.otp});
 }
 
 final class AuthLogoutRequested extends AuthEvent {}

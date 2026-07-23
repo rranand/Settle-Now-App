@@ -34,7 +34,6 @@ class PersonalExpenseDashboardBloc
     try {
       Map<int, List<PersonalExpenseInfoModel>> data = await repo.fetchData(
         event.alreadyHave,
-        event.authToken,
       );
       return emit(PersonalExpenseDashboardFetchSuccess(data));
     } catch (e) {

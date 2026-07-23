@@ -56,7 +56,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
 
   void joinNewRoom(
     String roomKey,
-    String authToken,
+    
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     showSnackbarWithChildWidget(
@@ -69,7 +69,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     try {
       NotificationModel notificationData = await repo.joinRoom(
         roomKey,
-        authToken,
+        
       );
       notificationBloc.add(NotificationOnAdd(data: [notificationData]));
       scaffoldMessenger.hideCurrentSnackBar();
@@ -88,7 +88,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
   void inviteMember(
     String roomID,
     List<UserModel> users,
-    String authToken,
+    
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     String message = "";
@@ -110,7 +110,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       List<NotificationModel> notificationData = await roomRepo.inviteNewMember(
         roomID,
         users,
-        authToken,
+        
       );
       notificationBloc.add(NotificationOnAdd(data: notificationData));
       scaffoldMessenger.hideCurrentSnackBar();

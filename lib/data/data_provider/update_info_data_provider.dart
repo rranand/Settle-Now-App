@@ -8,7 +8,11 @@ class UpdateInfoDataProvider {
   Future<UpdateInfoModel> fetchUpdateInfo() async {
     try {
       String version = await getAppVersion();
-      final response = await createAPICall('server', 'get', "", {});
+      final response = await createAPICall(
+        'server',
+        'get',
+        {},
+      );
 
       final data = jsonDecode(response.body);
 

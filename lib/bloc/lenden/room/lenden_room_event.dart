@@ -5,9 +5,8 @@ sealed class LendenRoomEvent {}
 
 final class LendenRoomFetch extends LendenRoomEvent {
   final String id;
-  final String authToken;
 
-  LendenRoomFetch({required this.id, required this.authToken});
+  LendenRoomFetch({required this.id});
 }
 
 final class LendenAddNewTransaction extends LendenRoomEvent {
@@ -18,9 +17,8 @@ final class LendenAddNewTransaction extends LendenRoomEvent {
 
 final class LendenCloseRoom extends LendenRoomEvent {
   final String uid;
-  final String authToken;
 
-  LendenCloseRoom({required this.uid, required this.authToken});
+  LendenCloseRoom({required this.uid});
 }
 
 final class LendenUpdateTransaction extends LendenRoomEvent {
@@ -39,25 +37,21 @@ final class LendenRoomReset extends LendenRoomEvent {}
 
 final class LendenRoomUpdate extends LendenRoomEvent {
   final String roomName;
-  final String authToken;
   final ScaffoldMessengerState scaffoldMessengerState;
 
   LendenRoomUpdate({
     required this.roomName,
-    required this.authToken,
     required this.scaffoldMessengerState,
   });
 }
 
 final class LendenRoomDelete extends LendenRoomEvent {
   final String id;
-  final String authToken;
   final bool isRemoving;
   final ScaffoldMessengerState scaffoldMessengerState;
 
   LendenRoomDelete({
     required this.id,
-    required this.authToken,
     required this.isRemoving,
     required this.scaffoldMessengerState,
   });

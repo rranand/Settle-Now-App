@@ -81,7 +81,6 @@ class _SettingPageState extends State<SettingPage> {
             context.read<LendenRoomBloc>().add(
               LendenRoomUpdate(
                 roomName: _roomNameController.text.trim(),
-                authToken: _loggedInUser.authToken,
                 scaffoldMessengerState: ScaffoldMessenger.of(context),
               ),
             );
@@ -89,7 +88,6 @@ class _SettingPageState extends State<SettingPage> {
         case (TransactionType.room):
           {
             context.read<RoomInfoCubit>().updateRoomName(
-              _loggedInUser.authToken,
               _roomNameController.text.trim(),
               ScaffoldMessenger.of(context),
             );
@@ -226,7 +224,6 @@ class _SettingPageState extends State<SettingPage> {
             context.read<LendenRoomBloc>().add(
               LendenRoomDelete(
                 id: widget.id,
-                authToken: _loggedInUser.authToken,
                 isRemoving: createdBy.id != _loggedInUser.id,
                 scaffoldMessengerState: ScaffoldMessenger.of(context),
               ),
@@ -234,7 +231,6 @@ class _SettingPageState extends State<SettingPage> {
           } else if (widget.transactionType == TransactionType.room) {
             context.read<RoomInfoCubit>().deleteRoom(
               widget.id,
-              _loggedInUser.authToken,
               createdBy.id != _loggedInUser.id,
               ScaffoldMessenger.of(context),
             );

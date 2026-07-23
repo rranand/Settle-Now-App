@@ -8,48 +8,39 @@ class PersonalMonthlyExpenseRepository {
   PersonalMonthlyExpenseRepository(this._dataProvider);
 
   Future<List<PersonalExpenseTransactionModel>> fetchData(
-    String authToken,
     String year,
     String month,
   ) async {
     try {
       List<PersonalExpenseTransactionModel> data = await _dataProvider
-          .fetchData(authToken, year, month);
+          .fetchData(year, month);
       return data;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<PersonalExpenseTransactionModel> add(
-    String authToken,
-    NewTransactionModel data,
-  ) async {
+  Future<PersonalExpenseTransactionModel> add(NewTransactionModel data) async {
     try {
-      return _dataProvider.add(authToken, data);
+      return _dataProvider.add(data);
     } catch (e) {
       rethrow;
     }
   }
 
   Future<PersonalExpenseTransactionModel> update(
-    String authToken,
     NewTransactionModel data,
   ) async {
     try {
-      return _dataProvider.update(authToken, data);
+      return _dataProvider.update(data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> delete(
-    String authToken,
-    String expenseID,
-    String transactionType,
-  ) async {
+  Future<bool> delete(String expenseID, String transactionType) async {
     try {
-      return _dataProvider.delete(authToken, expenseID, transactionType);
+      return _dataProvider.delete(expenseID, transactionType);
     } catch (e) {
       rethrow;
     }

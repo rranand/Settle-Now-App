@@ -4,9 +4,9 @@ import 'package:settlenow/model/lenden_dashboard_model.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class LendenDashboardDataProvider {
-  Future<List<LendenDashboardModel>> fetchData(String authToken) async {
+  Future<List<LendenDashboardModel>> fetchData() async {
     try {
-      final response = await createAPICall('lenden/all', "get", authToken, {});
+      final response = await createAPICall('lenden/all', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -23,12 +23,9 @@ class LendenDashboardDataProvider {
     }
   }
 
-  Future<LendenDashboardModel> createRoom(
-    LendenDashboardModel roomData,
-    String authToken,
-  ) async {
+  Future<LendenDashboardModel> createRoom(LendenDashboardModel roomData) async {
     try {
-      final response = await createAPICall('lenden', "post", authToken, {
+      final response = await createAPICall('lenden', "post", {
         "name": roomData.roomName,
       });
 

@@ -59,9 +59,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       final state = context.read<QuicksplitBloc>().state;
 
       if (state is! QuicksplitFetchSuccess) {
-        context.read<QuicksplitBloc>().add(
-          QuicksplitFetch(_loggedInUser.authToken),
-        );
+        context.read<QuicksplitBloc>().add(QuicksplitFetch());
       }
     }
 
@@ -75,9 +73,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       showNormalSnackBar(context, "Please re-login...Session expired!");
       return;
     }
-    context.read<QuicksplitBloc>().add(
-      QuicksplitFetch(_loggedInUser.authToken),
-    );
+    context.read<QuicksplitBloc>().add(QuicksplitFetch());
   }
 
   List<TransactionModel> filterDataByPreference(

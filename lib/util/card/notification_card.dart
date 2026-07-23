@@ -11,12 +11,10 @@ import 'package:settlenow/util/widgets/widgets.dart';
 
 class NotificationCard extends StatefulWidget {
   final String loggedInUserID;
-  final String authToken;
   final NotificationModel data;
   const NotificationCard({
     super.key,
     required this.loggedInUserID,
-    required this.authToken,
     required this.data,
   });
 
@@ -178,10 +176,7 @@ class _NotificationCardState extends State<NotificationCard> {
                   child: InkWell(
                     onTap: () {
                       context.read<NotificationActionBloc>().add(
-                        NotificationActionAcceptRequested(
-                          id: widget.data.id,
-                          authToken: widget.authToken,
-                        ),
+                        NotificationActionAcceptRequested(id: widget.data.id),
                       );
                     },
                     child: Icon(Icons.check, color: Colors.green),
@@ -191,10 +186,7 @@ class _NotificationCardState extends State<NotificationCard> {
               InkWell(
                 onTap: () {
                   context.read<NotificationActionBloc>().add(
-                    NotificationActionDeclineRequested(
-                      id: widget.data.id,
-                      authToken: widget.authToken,
-                    ),
+                    NotificationActionDeclineRequested(id: widget.data.id),
                   );
                 },
                 child: Icon(Icons.close, color: Colors.red),

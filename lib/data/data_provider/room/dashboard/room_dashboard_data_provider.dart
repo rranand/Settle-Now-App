@@ -10,13 +10,11 @@ class RoomDashboardDataProvider {
   Future<Pair<List<RoomInfoModel>, bool>> fetchData(
     bool isActiveRoom,
     int alreadyHave,
-    String authToken,
   ) async {
     try {
       final response = await createAPICall(
         'room${isActiveRoom ? "/open" : "/close"}?alreadyHave=$alreadyHave',
         "get",
-        authToken,
         {},
       );
 
@@ -37,12 +35,9 @@ class RoomDashboardDataProvider {
     }
   }
 
-  Future<Pair<RoomInfoModel, String>> createRoom(
-    String roomName,
-    String authToken,
-  ) async {
+  Future<Pair<RoomInfoModel, String>> createRoom(String roomName) async {
     try {
-      final response = await createAPICall('room', 'post', authToken, {
+      final response = await createAPICall('room', 'post', {
         "roomName": roomName,
       });
 
@@ -70,14 +65,9 @@ class RoomDashboardDataProvider {
     }
   }
 
-  Future<NotificationModel> joinRoom(String roomKey, String authToken) async {
+  Future<NotificationModel> joinRoom(String roomKey) async {
     try {
-      final response = await createAPICall(
-        'room/join/$roomKey',
-        'get',
-        authToken,
-        {},
-      );
+      final response = await createAPICall('room/join/$roomKey', 'get', {});
 
       final data = jsonDecode(response.body);
 

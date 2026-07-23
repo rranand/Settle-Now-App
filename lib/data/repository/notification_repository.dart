@@ -6,9 +6,9 @@ class NotificationRepository {
 
   NotificationRepository(this._dataProvider);
 
-  Future<List<NotificationModel>> fetchData(String authToken) async {
+  Future<List<NotificationModel>> fetchData() async {
     try {
-      List<NotificationModel> data = await _dataProvider.fetchData(authToken);
+      List<NotificationModel> data = await _dataProvider.fetchData();
       data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
     } catch (e) {
@@ -16,24 +16,18 @@ class NotificationRepository {
     }
   }
 
-  Future<bool> acceptInvite(String id, String authToken) async {
+  Future<bool> acceptInvite(String id) async {
     try {
-      if (authToken.isEmpty) {
-        throw "Invalid Auth";
-      }
-      await _dataProvider.acceptInvite(id, authToken);
+      await _dataProvider.acceptInvite(id);
       return true;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> declineInvite(String id, String authToken) async {
+  Future<bool> declineInvite(String id) async {
     try {
-      if (authToken.isEmpty) {
-        throw "Invalid Auth";
-      }
-      await _dataProvider.declineInvite(id, authToken);
+      await _dataProvider.declineInvite(id);
       return true;
     } catch (e) {
       rethrow;

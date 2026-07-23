@@ -8,13 +8,7 @@ class LendenUserModel extends UserModel {
     required super.name,
     required super.profileImage,
     required this.isClosed,
-  }) : super(
-         hasData: true,
-         createdOn: DateTime.now(),
-         authToken: "",
-         email: "",
-         phoneNo: "",
-       );
+  }) : super(hasData: true, createdOn: DateTime.now(), email: "", phoneNo: "");
 
   LendenUserModel.empty()
     : super(
@@ -24,7 +18,6 @@ class LendenUserModel extends UserModel {
         profileImage: "",
         hasData: false,
         createdOn: DateTime.now(),
-        authToken: "",
         phoneNo: "",
       );
 

@@ -8,10 +8,9 @@ import 'package:settlenow/util/handler/network_call.dart';
 class LendenRoomDataProvider {
   Future<Pair<LendenDashboardModel, List<LendenTransactionModel>>> fetchData(
     String id,
-    String authToken,
   ) async {
     try {
-      final response = await createAPICall('lenden/$id', "get", authToken, {});
+      final response = await createAPICall('lenden/$id', "get",  {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -38,7 +37,6 @@ class LendenRoomDataProvider {
 
   Future<LendenTransactionModel> create(
     String id,
-    String authToken,
     NewTransactionModel expenseData,
   ) async {
     try {
@@ -47,7 +45,6 @@ class LendenRoomDataProvider {
       final response = await createAPICall(
         'lenden/$id',
         "post",
-        authToken,
         newExpense.toCreateExpenseJson(),
       );
 
@@ -65,7 +62,6 @@ class LendenRoomDataProvider {
 
   Future<LendenTransactionModel> update(
     String id,
-    String authToken,
     NewTransactionModel expenseData,
   ) async {
     try {
@@ -74,7 +70,6 @@ class LendenRoomDataProvider {
       final response = await createAPICall(
         'lenden/$id',
         "patch",
-        authToken,
         newExpense.toUpdateExpenseJson(),
       );
 
@@ -92,14 +87,12 @@ class LendenRoomDataProvider {
 
   Future<void> updateRoom(
     String id,
-    String authToken,
     String newRoomName,
   ) async {
     try {
       final response = await createAPICall(
         'lenden/$id/update',
         "put",
-        authToken,
         {"name": newRoomName},
       );
 
@@ -114,12 +107,11 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<void> deleteRoom(String id, String authToken) async {
+  Future<void> deleteRoom(String id, ) async {
     try {
       final response = await createAPICall(
         'lenden/$id/room',
         "delete",
-        authToken,
         {},
       );
 
@@ -134,9 +126,9 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<bool> delete(String id, String authToken, String expenseID) async {
+  Future<bool> delete(String id, String expenseID) async {
     try {
-      final response = await createAPICall('lenden/$id', "delete", authToken, {
+      final response = await createAPICall('lenden/$id', "delete",  {
         "id": expenseID,
       });
       final data = jsonDecode(response.body);
@@ -150,12 +142,11 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<bool> closeRoom(String roomID, String authToken) async {
+  Future<bool> closeRoom(String roomID, ) async {
     try {
       final response = await createAPICall(
         'lenden/$roomID',
         "put",
-        authToken,
         {},
       );
 
@@ -173,13 +164,12 @@ class LendenRoomDataProvider {
   Future<NotificationModel> inviteUser(
     String roomID,
     String uid,
-    String authToken,
   ) async {
     try {
       final response = await createAPICall(
         'lenden/$roomID/addPerson',
         'patch',
-        authToken,
+        
         {"id": uid},
       );
 

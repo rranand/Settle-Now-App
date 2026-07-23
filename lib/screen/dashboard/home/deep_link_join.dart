@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow/bloc/auth/auth_bloc.dart';
 import 'package:settlenow/cubit/room/create_join_room/create_join_room_cubit.dart';
-import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/provider/screen_size_provider.dart';
 import 'package:settlenow/router/router_constant.dart';
 import 'package:settlenow/util/enum/transaction_type.dart';
@@ -24,7 +23,6 @@ class DeepLinkJoin extends StatefulWidget {
 }
 
 class _DeepLinkJoinState extends State<DeepLinkJoin> {
-  UserModel _loggedInUser = UserModel.empty();
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
 
   @override
@@ -42,14 +40,12 @@ class _DeepLinkJoinState extends State<DeepLinkJoin> {
     super.initState();
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
-      _loggedInUser = authState.userData;
 
       switch (widget.transactionType) {
         case TransactionType.room:
           {
             context.read<CreateJoinRoomCubit>().joinNewRoom(
               widget.id,
-              _loggedInUser.authToken,
               ScaffoldMessenger.of(context),
             );
             break;

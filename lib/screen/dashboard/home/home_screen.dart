@@ -105,9 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final state = context.read<NotificationBloc>().state;
 
       if (state is! NotificationFetchSuccess) {
-        context.read<NotificationBloc>().add(
-          NotificationFetch(authToken: _loggedInUser.authToken),
-        );
+        context.read<NotificationBloc>().add(NotificationFetch());
       }
     }
   }

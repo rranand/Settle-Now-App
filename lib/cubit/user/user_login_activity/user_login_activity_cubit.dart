@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow/bloc/auth/auth_bloc.dart';
 import 'package:settlenow/data/repository/auth_repository.dart';
 import 'package:settlenow/model/login_activity_model.dart';
-import 'package:settlenow/model/user_model.dart';
 
 part 'user_login_activity_state.dart';
 
@@ -11,14 +10,12 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
   final AuthRepository repo;
   UserLoginActivityCubit(this.repo) : super(UserLoginActivityState());
 
-  void fetchLoginData(UserModel userdata) async {
+  void fetchLoginData() async {
     if (state.isLoading == true) return;
     emit(UserLoginActivityState(isLoading: true));
 
     try {
-      final List<LoginActivityModel> data = await repo.fetchLoginActivity(
-        userdata.authToken,
-      );
+      final List<LoginActivityModel> data = await repo.fetchLoginActivity();
 
       return emit(UserLoginActivityState(data: data));
     } catch (e) {
@@ -43,10 +40,7 @@ class UserLoginActivityCubit extends Cubit<UserLoginActivityState> {
         }
       }
       emit(UserLoginActivityState(data: oldArr));
-      await repo.logoutDifferentDevice(
-        logInSuccessState.userData.authToken,
-        sessionID,
-      );
+      await repo.logoutDifferentDevice(sessionID);
       oldArr.removeWhere((element) => element.id == sessionID);
       return emit(UserLoginActivityState(data: oldArr));
     } catch (e) {

@@ -71,7 +71,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       } else {
         context.read<CreateJoinRoomCubit>().joinNewRoom(
           _roomJoinOrCreateController.text.trim(),
-          _loggedInUser.authToken,
           ScaffoldMessenger.of(context),
         );
       }
@@ -103,7 +102,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       if (state is! RoomDashboardFetchSuccess) {
         context.read<RoomDashboardBloc>().add(
           RoomDashboardFetch(
-            authToken: _loggedInUser.authToken,
             isActiveRoom: true,
             isFreshFetch: false,
           ),
@@ -115,7 +113,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
           _isInActiveDataFetched.value = true;
           context.read<RoomDashboardBloc>().add(
             RoomDashboardFetch(
-              authToken: _loggedInUser.authToken,
               isActiveRoom: false,
               isFreshFetch: false,
             ),
@@ -129,7 +126,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
           SchedulerBinding.instance.addPostFrameCallback((_) {
             context.read<RoomDashboardBloc>().add(
               RoomDashboardFetch(
-                authToken: _loggedInUser.authToken,
                 isActiveRoom: _navBarIndex.value == 0,
                 isFreshFetch: false,
               ),
@@ -260,7 +256,6 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
     }
     context.read<RoomDashboardBloc>().add(
       RoomDashboardFetch(
-        authToken: _loggedInUser.authToken,
         isActiveRoom: _navBarIndex.value == 0,
         isFreshFetch: true,
       ),

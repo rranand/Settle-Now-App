@@ -8,12 +8,11 @@ import 'package:settlenow/model/room_settle_model.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class RoomDataProvider {
-  Future<RoomInfoModel> fetchRoomInfo(String id, String authToken) async {
+  Future<RoomInfoModel> fetchRoomInfo(String id) async {
     try {
       final response = await createAPICall(
         'room/info/$id',
         "get",
-        authToken,
         {},
       );
 
@@ -29,12 +28,11 @@ class RoomDataProvider {
     }
   }
 
-  Future<List<TransactionModel>> fetchData(String id, String authToken) async {
+  Future<List<TransactionModel>> fetchData(String id) async {
     try {
       final response = await createAPICall(
         'room/$id/transaction',
         "get",
-        authToken,
         {},
       );
 
@@ -56,13 +54,11 @@ class RoomDataProvider {
 
   Future<List<RoomSettleModel>> fetchSettleData(
     String id,
-    String authToken,
   ) async {
     try {
       final response = await createAPICall(
         'room/$id/settle',
         "get",
-        authToken,
         {},
       );
 
@@ -82,12 +78,11 @@ class RoomDataProvider {
     }
   }
 
-  Future<void> closeRoomRequest(String id, String authToken) async {
+  Future<void> closeRoomRequest(String id) async {
     try {
       final response = await createAPICall(
         'room/close/$id/request',
         "get",
-        authToken,
         {},
       );
 
@@ -101,12 +96,11 @@ class RoomDataProvider {
     }
   }
 
-  Future<void> closeRoom(String id, String authToken) async {
+  Future<void> closeRoom(String id) async {
     try {
       final response = await createAPICall(
         'room/close/$id',
         "get",
-        authToken,
         {},
       );
 
@@ -122,14 +116,12 @@ class RoomDataProvider {
 
   Future<void> updateRoom(
     String id,
-    String authToken,
     String newRoomName,
   ) async {
     try {
       final response = await createAPICall(
         'room/$id/update',
         "patch",
-        authToken,
         {"name": newRoomName},
       );
 
@@ -144,9 +136,9 @@ class RoomDataProvider {
     }
   }
 
-  Future<void> deleteRoom(String id, String authToken) async {
+  Future<void> deleteRoom(String id) async {
     try {
-      final response = await createAPICall('room/$id', "delete", authToken, {});
+      final response = await createAPICall('room/$id', "delete", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -162,7 +154,6 @@ class RoomDataProvider {
   Future<TransactionModel> createExpense(
     String id,
     NewTransactionModel data,
-    String authToken,
   ) async {
     try {
       TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
@@ -170,7 +161,6 @@ class RoomDataProvider {
       final response = await createAPICall(
         'room/$id/transaction',
         "post",
-        authToken,
         newExpense.toQuickSplitJson(),
       );
 
@@ -189,7 +179,6 @@ class RoomDataProvider {
   Future<List<TransactionModel>> createBulkExpense(
     String id,
     List<NewTransactionModel> data,
-    String authToken,
   ) async {
     try {
       List<TransactionModel> newExpense = [];
@@ -199,7 +188,6 @@ class RoomDataProvider {
       final response = await createAPICall(
         'room/$id/bulk-transaction',
         "post",
-        authToken,
         {"data": newExpense.toQuickSplitJson()},
       );
 
@@ -221,7 +209,6 @@ class RoomDataProvider {
   Future<TransactionModel> updateExpense(
     String id,
     NewTransactionModel data,
-    String authToken,
   ) async {
     try {
       TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
@@ -229,7 +216,6 @@ class RoomDataProvider {
       final response = await createAPICall(
         'room/$id/transaction',
         "patch",
-        authToken,
         newExpense.toQuickSplitUpdateJson(),
       );
 
@@ -249,12 +235,10 @@ class RoomDataProvider {
     String id,
     String expenseID,
     String expenseType,
-    String authToken,
   ) async {
     final response = await createAPICall(
       'room/$id/transaction',
       "delete",
-      authToken,
       {"id": expenseID, "splitType": expenseType},
     );
 
@@ -269,13 +253,11 @@ class RoomDataProvider {
   Future<RoomSettleModel> createNewSettleExpense(
     String id,
     RoomSettleModel data,
-    String authToken,
   ) async {
     try {
       final response = await createAPICall(
         'room/$id/settle',
         "post",
-        authToken,
         data.toSettleTransactionJSON(),
       );
 
@@ -294,12 +276,10 @@ class RoomDataProvider {
   Future<RoomSettleModel> updateSettleExpense(
     String id,
     RoomSettleModel data,
-    String authToken,
   ) async {
     final response = await createAPICall(
       'room/$id/settle',
       "patch",
-      authToken,
       data.toSettleTransactionJSON(),
     );
 
@@ -317,12 +297,10 @@ class RoomDataProvider {
     String expenseID,
     String sender,
     String receiver,
-    String authToken,
   ) async {
     final response = await createAPICall(
       'room/$id/settle',
       "delete",
-      authToken,
       {"id": expenseID, "sender": sender, "receiver": receiver},
     );
 
@@ -337,13 +315,11 @@ class RoomDataProvider {
   Future<bool> addToPersonalExpense(
     String id,
     String expenseID,
-    String authToken,
   ) async {
     try {
       final response = await createAPICall(
         'room/$id/transaction/personalExpense',
         "post",
-        authToken,
         {"id": expenseID},
       );
 
@@ -361,14 +337,12 @@ class RoomDataProvider {
   Future<List<NotificationModel>> inviteNewMember(
     String id,
     List<UserModel> users,
-    String authToken,
   ) async {
     try {
       List<String> uid = users.map((e) => e.id).toList();
       final response = await createAPICall(
         'room/invite/$id',
         "put",
-        authToken,
         {"users": uid},
       );
 
@@ -387,12 +361,11 @@ class RoomDataProvider {
     }
   }
 
-  Future<List<ActivityModel>> fetchActivity(String id, String authToken) async {
+  Future<List<ActivityModel>> fetchActivity(String id) async {
     try {
       final response = await createAPICall(
         'room/$id/activity',
         "get",
-        authToken,
         {},
       );
 

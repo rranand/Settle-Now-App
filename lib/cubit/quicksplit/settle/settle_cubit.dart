@@ -14,7 +14,7 @@ class SettleCubit extends Cubit<SettleState> {
   void settleExpense(
     String transactionID,
     String uid,
-    String authToken,
+    
     BuildContext context,
   ) async {
     if (state.settlingExpense.contains(transactionID)) {
@@ -26,7 +26,7 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.settleExpense(transactionID, authToken);
+      await repo.settleExpense(transactionID, );
       oldProcessingIDs.remove(transactionID);
       bloc.add(QuicksplitSettleRequest(transactionID, uid));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
@@ -42,7 +42,7 @@ class SettleCubit extends Cubit<SettleState> {
   void optout(
     String transactionID,
     String uid,
-    String authToken,
+    
     BuildContext context,
   ) async {
     if (state.settlingExpense.contains(transactionID)) {
@@ -54,7 +54,7 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.optout(transactionID, authToken);
+      await repo.optout(transactionID, );
       oldProcessingIDs.remove(transactionID);
       bloc.add(QuicksplitDeleteTransaction(transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
@@ -70,7 +70,7 @@ class SettleCubit extends Cubit<SettleState> {
   void delete(
     String transactionID,
     String uid,
-    String authToken,
+    
     BuildContext context,
   ) async {
     if (state.settlingExpense.contains(transactionID)) {
@@ -82,7 +82,7 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.delete(transactionID, authToken);
+      await repo.delete(transactionID, );
       oldProcessingIDs.remove(transactionID);
       bloc.add(QuicksplitDeleteTransaction(transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));

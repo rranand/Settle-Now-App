@@ -8,12 +8,10 @@ class PersonalExpenseDashboardRepository {
 
   Future<Map<int, List<PersonalExpenseInfoModel>>> fetchData(
     int alreadyHave,
-    String authToken,
   ) async {
     try {
       List<PersonalExpenseInfoModel> data = await _dataProvider.fetchData(
         alreadyHave,
-        authToken,
       );
 
       Map<int, List<PersonalExpenseInfoModel>> yearWiseExpense = {};

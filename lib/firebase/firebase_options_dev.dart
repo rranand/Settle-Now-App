@@ -50,20 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-      apiKey: "AIzaSyCbZzOmzL2ihGAPdbLxadyIT9tu8kFwatY",
-      authDomain: "settlenow-dev.firebaseapp.com",
-      projectId: "settlenow-dev",
-      storageBucket: "settlenow-dev.firebasestorage.app",
-      messagingSenderId: "373327328514",
-      appId: "1:373327328514:web:7329624402a47fed577e1b",
-      measurementId: "G-0GBR0RT491");
+    apiKey: 'AIzaSyCbZzOmzL2ihGAPdbLxadyIT9tu8kFwatY',
+    appId: '1:373327328514:web:7329624402a47fed577e1b',
+    messagingSenderId: '373327328514',
+    projectId: 'settlenow-dev',
+    authDomain: 'settlenow-dev.firebaseapp.com',
+    storageBucket: 'settlenow-dev.firebasestorage.app',
+    measurementId: 'G-0GBR0RT491',
+  );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAE5v23Yn_sGYVtdicuCNxA8TMHR_AUzAE',
-    appId: '1:373327328514:android:3dab1f669dd307d0577e1b',
+    appId: '1:373327328514:android:8e696e79bc7d1249577e1b',
     messagingSenderId: '373327328514',
     projectId: 'settlenow-dev',
-    databaseURL: 'https://settlenow-dev-default-rtdb.firebaseio.com',
-    storageBucket: 'settlenow-dev.appspot.com',
+    storageBucket: 'settlenow-dev.firebasestorage.app',
   );
 }

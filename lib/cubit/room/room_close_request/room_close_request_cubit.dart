@@ -7,7 +7,7 @@ class RoomCloseRequestCubit extends Cubit<RoomCloseRequestState> {
   final RoomRepository repo;
   RoomCloseRequestCubit(this.repo) : super(RoomCloseRequestInitial());
 
-  void closeRoomRequest(String id, String authToken) async {
+  void closeRoomRequest(String id, ) async {
     if (state is RoomCloseRequestSuccess &&
         (state as RoomCloseRequestSuccess).roomID == id) {
       return emit(
@@ -19,7 +19,7 @@ class RoomCloseRequestCubit extends Cubit<RoomCloseRequestState> {
     }
     emit(RoomCloseRequestLoading());
     try {
-      await repo.closeRoomRequest(id, authToken);
+      await repo.closeRoomRequest(id, );
       return emit(RoomCloseRequestSuccess(id, 1));
     } catch (e) {
       return emit(RoomCloseRequestFailure(id, e.toString()));

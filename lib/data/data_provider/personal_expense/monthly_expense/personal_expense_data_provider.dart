@@ -6,7 +6,6 @@ import 'package:settlenow/util/handler/network_call.dart';
 
 class PersonalMonthlyExpenseDataProvider {
   Future<List<PersonalExpenseTransactionModel>> fetchData(
-    String authToken,
     String year,
     String month,
   ) async {
@@ -14,7 +13,7 @@ class PersonalMonthlyExpenseDataProvider {
       final response = await createAPICall(
         'personal/$year/$month',
         "get",
-        authToken,
+        
         {},
       );
 
@@ -35,7 +34,6 @@ class PersonalMonthlyExpenseDataProvider {
   }
 
   Future<PersonalExpenseTransactionModel> add(
-    String authToken,
     NewTransactionModel expenseData,
   ) async {
     try {
@@ -45,7 +43,7 @@ class PersonalMonthlyExpenseDataProvider {
       final response = await createAPICall(
         'personal',
         "post",
-        authToken,
+        
         newExpense.toCreateNewExpenseJson(),
       );
 
@@ -63,7 +61,6 @@ class PersonalMonthlyExpenseDataProvider {
   }
 
   Future<PersonalExpenseTransactionModel> update(
-    String authToken,
     NewTransactionModel expenseData,
   ) async {
     try {
@@ -72,7 +69,7 @@ class PersonalMonthlyExpenseDataProvider {
       final response = await createAPICall(
         'personal',
         'put',
-        authToken,
+        
         updatedExpense.toCreateNewExpenseJson(),
       );
 
@@ -90,12 +87,11 @@ class PersonalMonthlyExpenseDataProvider {
   }
 
   Future<bool> delete(
-    String authToken,
     String expenseID,
     String transactionType,
   ) async {
     try {
-      final response = await createAPICall('personal', 'delete', authToken, {
+      final response = await createAPICall('personal', 'delete',  {
         "id": expenseID,
         "transactionType": transactionType,
       });

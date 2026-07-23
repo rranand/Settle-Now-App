@@ -5,22 +5,14 @@ sealed class NotificationActionEvent {}
 
 class NotificationActionAcceptRequested extends NotificationActionEvent {
   final String id;
-  final String authToken;
 
-  NotificationActionAcceptRequested({
-    required this.id,
-    required this.authToken,
-  });
+  NotificationActionAcceptRequested({required this.id});
 }
 
 class NotificationActionDeclineRequested extends NotificationActionEvent {
   final String id;
-  final String authToken;
 
-  NotificationActionDeclineRequested({
-    required this.id,
-    required this.authToken,
-  });
+  NotificationActionDeclineRequested({required this.id});
 }
 
 class NotificationActionReset extends NotificationActionEvent {}

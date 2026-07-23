@@ -47,10 +47,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
         users: [LendenUserModel.fromUserModel(authLoginState.userData)],
       );
 
-      newData = await repo.createRoom(
-        newData,
-        authLoginState.userData.authToken,
-      );
+      newData = await repo.createRoom(newData);
 
       lendenDashboardCtx.add(
         LendenDashboardOnAddNewRoom(data: newData, isLoading: false),
@@ -70,7 +67,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
   void inviteMember(
     String roomID,
     UserModel user,
-    String authToken,
+
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     showSnackbarWithChildWidget(
@@ -84,7 +81,6 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       NotificationModel notificationData = await roomRepo.inviteUser(
         roomID,
         user.id,
-        authToken,
       );
       notificationBloc.add(NotificationOnAdd(data: [notificationData]));
       scaffoldMessenger.hideCurrentSnackBar();

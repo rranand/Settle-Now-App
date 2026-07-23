@@ -6,13 +6,11 @@ import 'package:settlenow/util/handler/network_call.dart';
 class PersonalExpenseDashboardDataProvider {
   Future<List<PersonalExpenseInfoModel>> fetchData(
     int alreadyHave,
-    String authToken,
   ) async {
     try {
       final response = await createAPICall(
         'personal/all?alreadyHave=${Uri.encodeQueryComponent(alreadyHave.toString())}',
         "get",
-        authToken,
         {},
       );
 

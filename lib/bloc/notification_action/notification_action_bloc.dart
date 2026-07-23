@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow/bloc/notification/notification_bloc.dart';
 import 'package:settlenow/data/repository/notification_repository.dart';
-
 part 'notification_action_event.dart';
 part 'notification_action_state.dart';
 
@@ -31,7 +30,7 @@ class NotificationActionBloc
       emit(
         state.copyWith(processingNotification: oldProcessingIDs, error: null),
       );
-      await notificationRepository.acceptInvite(event.id, event.authToken);
+      await notificationRepository.acceptInvite(event.id);
       oldProcessingIDs.remove(event.id);
       notificationBloc.add(NotificationOnDelete(id: event.id));
       return emit(
@@ -61,7 +60,7 @@ class NotificationActionBloc
       emit(
         state.copyWith(processingNotification: oldProcessingIDs, error: null),
       );
-      await notificationRepository.declineInvite(event.id, event.authToken);
+      await notificationRepository.declineInvite(event.id);
       oldProcessingIDs.remove(event.id);
       notificationBloc.add(NotificationOnDelete(id: event.id));
       return emit(

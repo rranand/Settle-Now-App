@@ -12,17 +12,12 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
   RoomSettleUpsertCubit(this.repo, this.roomSettleCubit)
     : super(RoomSettleUpsertInitial());
 
-  void addNewSettleExpense(
-    String id,
-    RoomSettleModel data,
-    String authToken,
-  ) async {
+  void addNewSettleExpense(String id, RoomSettleModel data) async {
     emit(RoomSettleUpsertLoading());
     try {
       final RoomSettleModel newData = await repo.createNewSettleExpense(
         id,
         data,
-        authToken,
       );
       roomSettleCubit.addNewSettleExpense(newData);
       return emit(RoomSettleUpsertSuccess(newData));
@@ -31,17 +26,12 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
     }
   }
 
-  void updateSettleExpense(
-    String id,
-    RoomSettleModel data,
-    String authToken,
-  ) async {
+  void updateSettleExpense(String id, RoomSettleModel data) async {
     emit(RoomSettleUpsertLoading());
     try {
       final RoomSettleModel updateData = await repo.updateSettleExpense(
         id,
         data,
-        authToken,
       );
       roomSettleCubit.updateSettleExpense(updateData);
       return emit(RoomSettleUpsertSuccess(updateData));
@@ -55,7 +45,6 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
     String settleExpenseID,
     String sender,
     String receiver,
-    String authToken,
   ) async {
     emit(RoomSettleUpsertLoading());
     try {
@@ -64,7 +53,6 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
         settleExpenseID,
         sender,
         receiver,
-        authToken,
       );
       if (isDeleted) {
         roomSettleCubit.deleteSettleExpense(settleExpenseID);

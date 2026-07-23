@@ -56,14 +56,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _handleSignUpSubmit(String token) {
+  void _handleSignUpSubmit() {
     if (_isOTPSent.value) {
       if (_signupFormKey.currentState!.validate()) {
         context.read<AuthBloc>().add(
-          AuthSignupOTPValidationRequested(
-            token: token,
-            otp: _otpController.text.trim(),
-          ),
+          AuthSignupOTPValidationRequested(otp: _otpController.text.trim()),
         );
       }
     } else {
@@ -78,8 +75,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  void _resendOTP(String token) {
-    context.read<AuthBloc>().add(AuthSignupOTPRequested(token: token));
+  void _resendOTP() {
+    context.read<AuthBloc>().add(AuthSignupOTPRequested());
   }
 
   bool _isScreenLoading(AuthState state) {
@@ -316,9 +313,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                                         state.isSuccess)
                                                     ? TimerButton(
                                                       onPressed:
-                                                          () => _resendOTP(
-                                                            state.token,
-                                                          ),
+                                                          () => _resendOTP(),
                                                       timerDuration:
                                                           UiConstant
                                                               .timerDuration,
@@ -344,13 +339,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               return Center(
                                 child: CustomButton.customElevatedButton(
                                   value ? "Sign Up" : "Send OTP",
-                                  onPressed:
-                                      () => _handleSignUpSubmit(
-                                        (state is AuthSignUpSuccess &&
-                                                state.isSuccess)
-                                            ? state.token
-                                            : "",
-                                      ),
+                                  onPressed: () => _handleSignUpSubmit(),
                                   elevation: 8,
                                   buttonHeight: 50,
                                   buttonWidth: 155,

@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:settlenow/core.dart';
 import 'package:settlenow/firebase/firebase_messaging.dart';
+import 'package:settlenow/model/auth_model.dart';
 import 'package:settlenow/model/login_activity_model.dart';
 import 'package:settlenow/model/preference_model.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 import 'package:settlenow/util/handler/platform_service.dart';
-import 'package:settlenow/util/handler/local_storage_preference.dart';
+import 'package:settlenow/util/token_manager/session_manager.dart';
 
 class AuthDataProvider {
   Future<Pair<UserModel, PreferenceModel>> loginUser(
@@ -24,37 +25,25 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}";
-
       Map<String, String> jsonInputData = {
         'email': email,
         'otp': otp,
-        'token': token,
         'device': deviceInfo['device']!,
-        'deviceToken': fcmToken,
-        'userAgent': deviceInfo['userAgent']!,
+        'fcm_token': fcmToken,
+        'user_agent': deviceInfo['userAgent']!,
         'version': deviceInfo['version']!,
         'ip': deviceIP,
       };
 
-      final response = await createAPICall(
-        'auth/login',
-        "post",
-        "",
-        jsonInputData,
-      );
+      final response = await createAPICall('auth/otp', "patch", jsonInputData);
 
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        final userInfoData = await Future.wait([
-          LocalStoragePreference.setStringPref('auth_token', token),
-          getOwnUserInfo(token),
-        ]);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        AuthModel authData = SessionManager.instance.getAuth().fromMap(data);
+        await SessionManager.instance.setAuth(authData);
 
-        Pair<UserModel, PreferenceModel> pairData =
-            userInfoData[1] as Pair<UserModel, PreferenceModel>;
-
-        return Pair(pairData.first, pairData.second);
+        final userInfoData = await getOwnUserInfo();
+        return userInfoData;
       } else {
         throw data['message'];
       }
@@ -78,14 +67,11 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = "$email#@#$idToken";
-
       Map<String, String> jsonInputData = {
         'idToken': idToken,
-        'token': token,
         'device': deviceInfo['device']!,
-        'deviceToken': fcmToken,
-        'userAgent': deviceInfo['userAgent']!,
+        'fcm_token': fcmToken,
+        'user_agent': deviceInfo['userAgent']!,
         'version': deviceInfo['version']!,
         'ip': deviceIP,
       };
@@ -93,19 +79,13 @@ class AuthDataProvider {
       final response = await createAPICall(
         'auth/signup/google',
         "post",
-        "",
         jsonInputData,
       );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        final userInfoData = await Future.wait([
-          LocalStoragePreference.setStringPref('auth_token', token),
-          getOwnUserInfo(token),
-        ]);
-        Pair<UserModel, PreferenceModel> pairData =
-            userInfoData[1] as Pair<UserModel, PreferenceModel>;
-        return pairData;
+        final userInfoData = await getOwnUserInfo();
+        return userInfoData;
       } else {
         throw data['message'];
       }
@@ -134,9 +114,8 @@ class AuthDataProvider {
       Map<String, String> jsonInputData = {
         'idToken': idToken,
         'token': token,
-        'device': deviceInfo['device']!,
-        'deviceToken': fcmToken,
-        'userAgent': deviceInfo['userAgent']!,
+        'fcm_token': fcmToken,
+        'user_agent': deviceInfo['userAgent']!,
         'version': deviceInfo['version']!,
         'ip': deviceIP,
       };
@@ -144,19 +123,13 @@ class AuthDataProvider {
       final response = await createAPICall(
         'auth/googleLogin',
         "post",
-        "",
         jsonInputData,
       );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        final userInfoData = await Future.wait([
-          LocalStoragePreference.setStringPref('auth_token', token),
-          getOwnUserInfo(token),
-        ]);
-        Pair<UserModel, PreferenceModel> pairData =
-            userInfoData[1] as Pair<UserModel, PreferenceModel>;
-        return pairData;
+        final userInfoData = await getOwnUserInfo();
+        return userInfoData;
       } else {
         throw data['message'];
       }
@@ -165,19 +138,43 @@ class AuthDataProvider {
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> getOwnUserInfo(
-    String authToken,
-  ) async {
+  Future<String> refreshToken() async {
+    try {
+      final ip = await fetchIP();
+      final authData = SessionManager.instance.getAuth();
+
+      final response = await createAPICall('auth/refresh', "post", {
+        "refresh_token": authData.refreshToken,
+        "ip": ip,
+      });
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 201) {
+        AuthModel newAuthData = authData.fromMap(data);
+        await SessionManager.instance.setAuth(newAuthData);
+
+        return newAuthData.accessToken;
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Pair<UserModel, PreferenceModel>> getOwnUserInfo() async {
     try {
       String version = await getAppVersion();
-      final response = await createAPICall('auth', "patch", authToken, {
-        'version': version,
-      });
+      final response = await createAPICall(
+        'auth/info?version=${Uri.encodeQueryComponent(version)}',
+        "get",
+        {},
+      );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        UserModel userData = UserModel.forOwnerInfo(data['data'], authToken);
+        UserModel userData = UserModel.forOwnerInfo(data);
         PreferenceModel preferenceData = PreferenceModel.fromJson(
-          data['data']['preference'],
+          data['preference'],
         );
 
         return Pair(userData, preferenceData);
@@ -189,7 +186,7 @@ class AuthDataProvider {
     }
   }
 
-  Future<String> signUpUser(String name, String email) async {
+  Future<void> signUpUser(String name, String email) async {
     try {
       final deviceData = await Future.wait([
         generateFCMToken(),
@@ -201,15 +198,11 @@ class AuthDataProvider {
           deviceData[1] as Map<String, String>;
       final String deviceIP = deviceData[2] as String;
 
-      final String token = "$email#@#${deviceInfo['id']!}#@#${DateTime.now()}";
-
-      final response = await createAPICall('auth/signup', "post", "", {
+      final response = await createAPICall('auth/signup', "post", {
         'name': name,
         'email': email,
-        'token': token,
-        'device': deviceInfo['device']!,
-        'deviceToken': fcmToken,
-        'userAgent': deviceInfo['userAgent']!,
+        'fcm_token': fcmToken,
+        'user_agent': deviceInfo['userAgent']!,
         'version': deviceInfo['version']!,
         'ip': deviceIP,
       });
@@ -217,7 +210,7 @@ class AuthDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return token;
+        return;
       } else {
         throw data['message'];
       }
@@ -229,12 +222,7 @@ class AuthDataProvider {
   Future<bool> sendOTP(String email) async {
     try {
       Map<String, String> jsonInputData = {'email': email};
-      final response = await createAPICall(
-        'auth/otp',
-        "post",
-        "",
-        jsonInputData,
-      );
+      final response = await createAPICall('auth/otp', "post", jsonInputData);
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -247,9 +235,9 @@ class AuthDataProvider {
     }
   }
 
-  Future<bool> sendSignupOTP(String token) async {
+  Future<bool> sendSignupOTP() async {
     try {
-      final response = await createAPICall('auth/signup/otp', "get", token, {});
+      final response = await createAPICall('auth/signup/otp', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -262,24 +250,16 @@ class AuthDataProvider {
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(
-    String token,
-    String otp,
-  ) async {
+  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(String otp) async {
     try {
-      final response = await createAPICall('auth/signup/otp', "patch", token, {
+      final response = await createAPICall('auth/signup/otp', "patch", {
         "otp": otp,
       });
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        final userInfoData = await Future.wait([
-          LocalStoragePreference.setStringPref('auth_token', token),
-          getOwnUserInfo(token),
-        ]);
-        Pair<UserModel, PreferenceModel> pairData =
-            userInfoData[1] as Pair<UserModel, PreferenceModel>;
-        return pairData;
+        final userInfoData = await getOwnUserInfo();
+        return userInfoData;
       } else {
         throw data['message'];
       }
@@ -288,9 +268,9 @@ class AuthDataProvider {
     }
   }
 
-  Future<void> logoutUser(String authToken) async {
+  Future<void> logoutUser() async {
     try {
-      final response = await createAPICall('auth/logout', "get", authToken, {});
+      final response = await createAPICall('auth/logout', "get", {});
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return;
@@ -302,9 +282,9 @@ class AuthDataProvider {
     }
   }
 
-  Future<void> deleteAccount(String authToken) async {
+  Future<void> deleteAccount() async {
     try {
-      final response = await createAPICall('user', "delete", authToken, {});
+      final response = await createAPICall('user', "delete", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -317,12 +297,11 @@ class AuthDataProvider {
     }
   }
 
-  Future<bool> logoutDifferentDevice(String authToken, String sessionID) async {
+  Future<bool> logoutDifferentDevice(String sessionID) async {
     try {
       final response = await createAPICall(
         'auth/logout?id=${Uri.encodeQueryComponent(sessionID)}',
         "get",
-        authToken,
         {},
       );
       final data = jsonDecode(response.body);
@@ -336,14 +315,9 @@ class AuthDataProvider {
     }
   }
 
-  Future<List<LoginActivityModel>> fetchLoginActivity(String authToken) async {
+  Future<List<LoginActivityModel>> fetchLoginActivity() async {
     try {
-      final response = await createAPICall(
-        'auth/login_activity',
-        "get",
-        authToken,
-        {},
-      );
+      final response = await createAPICall('auth/login_activity', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -366,7 +340,6 @@ class AuthDataProvider {
       final response = await createAPICall(
         'user',
         "patch",
-        userData.authToken,
         userData.updateProfileJSON(),
       );
 
@@ -381,9 +354,9 @@ class AuthDataProvider {
     }
   }
 
-  Future<List<UserModel>> fetchFriend(String authToken) async {
+  Future<List<UserModel>> fetchFriend() async {
     try {
-      final response = await createAPICall('friend', "get", authToken, {});
+      final response = await createAPICall('friend', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -400,15 +373,11 @@ class AuthDataProvider {
     }
   }
 
-  Future<void> savePreference(
-    PreferenceModel preferenceData,
-    String authToken,
-  ) async {
+  Future<void> savePreference(PreferenceModel preferenceData) async {
     try {
       final response = await createAPICall(
         'user/preference',
         "patch",
-        authToken,
         preferenceData.toJson(),
       );
 

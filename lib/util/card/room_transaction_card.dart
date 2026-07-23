@@ -128,7 +128,6 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                       AddToPersonalExpenseRequested(
                         transactionType: TransactionType.room,
                         transactionID: widget.data.id,
-                        authToken: widget.loggedInUser.authToken,
                         roomID: widget.roomID,
                       ),
                     );

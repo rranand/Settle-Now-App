@@ -62,7 +62,6 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
             : (event.isActiveRoom
                 ? oldRoomActiveData.length
                 : oldRoomInActiveData.length),
-        event.authToken,
       );
       if (event.isActiveRoom) {
         if (event.isFreshFetch) {

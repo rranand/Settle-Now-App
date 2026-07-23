@@ -1,14 +1,19 @@
+import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:settlenow/constant/api_constant.dart';
 import 'package:settlenow/data/repository/auth_repository.dart';
 import 'package:settlenow/model/preference_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/util/custom/pair.dart';
 import 'package:settlenow/util/handler/local_storage_preference.dart';
 import 'package:settlenow/util/oAuth/google_oauth.dart';
+import 'package:settlenow/util/token_manager/auth_event_bus.dart';
+import 'package:settlenow/util/token_manager/session_manager.dart';
 import 'package:settlenow/util/widgets/shimmer_effect.dart';
 import 'package:settlenow/util/widgets/snackbar.dart';
 import 'package:settlenow/util/widgets/widgets.dart';
@@ -20,6 +25,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository repo;
 
   AuthBloc(this.repo) : super(AuthInitial()) {
+    AuthEventBus.instance.stream.listen((event) {
+      if (event == AuthEventEnum.sessionExpired) {
+        add(AuthRevokeSessionRequested());
+      }
+    });
     on<AuthLoginRequested>(_authLoginRequested);
     on<AuthGoogleSignInRequested>(_authGoogleSignInRequested);
     on<AuthWebGoogleSignInRequested>(_authWebGoogleSignInRequested);
@@ -47,7 +57,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         event.email,
         event.otp,
       );
-
       return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } catch (e) {
       return emit(AuthLoginFailure(e.toString()));
@@ -123,8 +132,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthSignUpLoading());
 
     try {
-      String signupToken = await repo.signUpUser(event.name, event.email);
-      return emit(AuthSignUpSuccess(token: signupToken, isSuccess: true));
+      await repo.signUpUser(event.name, event.email);
+      return emit(AuthSignUpSuccess(isSuccess: true));
     } catch (e) {
       return emit(AuthSignUpFailure(e.toString()));
     }
@@ -213,12 +222,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      await repo.sendSignupOTP(event.token);
+      await repo.sendSignupOTP();
       emit(AuthOTPSendSuccess(true));
-      return emit(AuthSignUpSuccess(token: event.token, isSuccess: true));
+      return emit(AuthSignUpSuccess(isSuccess: true));
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
-      return emit(AuthSignUpSuccess(token: event.token, isSuccess: false));
+      return emit(AuthSignUpSuccess(isSuccess: false));
     }
   }
 
@@ -229,13 +238,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthOTPSendLoading());
     try {
       Pair<UserModel, PreferenceModel> pairData = await repo.validateSignupOTP(
-        event.token,
         event.otp,
       );
       return emit(AuthLoginSuccess(pairData.first, pairData.second));
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
-      return emit(AuthSignUpSuccess(token: event.token, isSuccess: false));
+      return emit(AuthSignUpSuccess(isSuccess: false));
     }
   }
 
@@ -255,13 +263,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final userData = (state as AuthLoginSuccess).userData;
     final preferenceData = (state as AuthLoginSuccess).preferenceData;
+
     emit(AuthLogoutLoading(userData, preferenceData));
 
     try {
-      await Future.wait([
-        repo.logoutUser(userData.authToken),
-        additionalLogoutAction(),
-      ]);
+      await Future.wait([repo.logoutUser(), additionalLogoutAction()]);
 
       return emit(AuthInitial());
     } catch (e) {
@@ -301,7 +307,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLogoutLoading(userData, preferenceData));
 
     try {
-      await repo.deleteAccount(userData.authToken);
+      await repo.deleteAccount();
       event.scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Account Delete Requested",
@@ -330,7 +336,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return emit(AuthInitial());
       }
     } catch (e) {
-      if (e.toString().toLowerCase() == "unauthorized access") {
+      if (e.toString() == ApiConstant.sessionExpired) {
         try {
           await additionalLogoutAction();
         } catch (_) {}
@@ -353,18 +359,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> additionalLogoutAction() async {
     try {
-      if (kIsWeb) {
-        await Future.wait([
-          GoogleOauth.logout(),
-          LocalStoragePreference.clearAllPreferences(),
-        ]);
-      } else {
-        await Future.wait([
-          GoogleOauth.logout(),
-          FirebaseMessaging.instance.deleteToken(),
-          LocalStoragePreference.clearAllPreferences(),
-        ]);
+      List<Future<void>> futures = [
+        SessionManager.instance.revoke(),
+        GoogleOauth.logout(),
+        LocalStoragePreference.clearAllPreferences(),
+      ];
+
+      if (!kIsWeb) {
+        futures.add(FirebaseMessaging.instance.deleteToken());
       }
+
+      await Future.wait(futures);
     } catch (_) {}
   }
 }

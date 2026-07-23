@@ -5,13 +5,9 @@ sealed class PersonalExpenseDashboardEvent {}
 
 final class PersonalExpenseDashboardFetch
     extends PersonalExpenseDashboardEvent {
-  final String authToken;
   final int alreadyHave;
 
-  PersonalExpenseDashboardFetch({
-    required this.authToken,
-    required this.alreadyHave,
-  });
+  PersonalExpenseDashboardFetch({required this.alreadyHave});
 }
 
 final class PersonalExpenseDashboardUpdate

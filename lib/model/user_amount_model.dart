@@ -12,13 +12,7 @@ class UserAmountModel extends UserModel {
     required super.name,
     required super.profileImage,
     required this.amount,
-  }) : super(
-         hasData: true,
-         createdOn: DateTime.now(),
-         authToken: "",
-         phoneNo: "",
-         email: "",
-       );
+  }) : super(hasData: true, createdOn: DateTime.now(), phoneNo: "", email: "");
 
   UserAmountModel.empty()
     : super(
@@ -28,7 +22,6 @@ class UserAmountModel extends UserModel {
         profileImage: "",
         hasData: false,
         createdOn: DateTime.now(),
-        authToken: "",
         phoneNo: "",
       );
 

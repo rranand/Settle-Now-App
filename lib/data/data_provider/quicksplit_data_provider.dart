@@ -5,9 +5,9 @@ import 'package:settlenow/model/transaction_model.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class QuicksplitDataProvider {
-  Future<List<TransactionModel>> fetchData(String authToken) async {
+  Future<List<TransactionModel>> fetchData() async {
     try {
-      final response = await createAPICall('quicksplit', "get", authToken, {});
+      final response = await createAPICall('quicksplit', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -24,17 +24,13 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<TransactionModel> create(
-    NewTransactionModel data,
-    String authToken,
-  ) async {
+  Future<TransactionModel> create(NewTransactionModel data) async {
     try {
       TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
 
       final response = await createAPICall(
         'quicksplit',
         "post",
-        authToken,
         newExpense.toQuickSplitJson(),
       );
 
@@ -50,10 +46,7 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<TransactionModel> update(
-    NewTransactionModel data,
-    String authToken,
-  ) async {
+  Future<TransactionModel> update(NewTransactionModel data) async {
     try {
       TransactionModel updatedExpense = TransactionModel.fromNewTransaction(
         data,
@@ -63,7 +56,6 @@ class QuicksplitDataProvider {
       final response = await createAPICall(
         'quicksplit',
         "put",
-        authToken,
         updatedExpense.toQuickSplitJson(),
       );
 
@@ -78,9 +70,9 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<bool> delete(String expenseID, String authToken) async {
+  Future<bool> delete(String expenseID) async {
     try {
-      final response = await createAPICall('quicksplit', "delete", authToken, {
+      final response = await createAPICall('quicksplit', "delete", {
         "id": expenseID,
       });
 
@@ -95,12 +87,11 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<bool> addToPersonalExpense(String expenseID, String authToken) async {
+  Future<bool> addToPersonalExpense(String expenseID) async {
     try {
       final response = await createAPICall(
         'quicksplit/personalExpense',
         "post",
-        authToken,
         {"id": expenseID},
       );
 
@@ -115,14 +106,11 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<void> settleExpense(String expenseID, String authToken) async {
+  Future<void> settleExpense(String expenseID) async {
     try {
-      final response = await createAPICall(
-        'quicksplit/settle',
-        "patch",
-        authToken,
-        {"id": expenseID},
-      );
+      final response = await createAPICall('quicksplit/settle', "patch", {
+        "id": expenseID,
+      });
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -135,14 +123,11 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<void> optout(String expenseID, String authToken) async {
+  Future<void> optout(String expenseID) async {
     try {
-      final response = await createAPICall(
-        'quicksplit/optout',
-        "patch",
-        authToken,
-        {"id": expenseID},
-      );
+      final response = await createAPICall('quicksplit/optout', "patch", {
+        "id": expenseID,
+      });
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {

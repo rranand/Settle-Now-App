@@ -103,10 +103,7 @@ class _PersonalExpenseDashboardScreenState
       final state = context.read<PersonalExpenseDashboardBloc>().state;
       if (state is! PersonalExpenseDashboardFetchSuccess) {
         context.read<PersonalExpenseDashboardBloc>().add(
-          PersonalExpenseDashboardFetch(
-            authToken: _loggedInUser.authToken,
-            alreadyHave: 0,
-          ),
+          PersonalExpenseDashboardFetch(alreadyHave: 0),
         );
       }
     }
@@ -124,10 +121,7 @@ class _PersonalExpenseDashboardScreenState
       return;
     }
     context.read<PersonalExpenseDashboardBloc>().add(
-      PersonalExpenseDashboardFetch(
-        authToken: _loggedInUser.authToken,
-        alreadyHave: 0,
-      ),
+      PersonalExpenseDashboardFetch(alreadyHave: 0),
     );
   }
 

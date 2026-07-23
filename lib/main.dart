@@ -64,23 +64,24 @@ import 'package:settlenow/provider/preference_provider.dart';
 import 'package:settlenow/router/router_config.dart';
 import 'package:settlenow/theme/themes.dart';
 import 'package:settlenow/util/oAuth/google_oauth.dart';
-import 'firebase/firebase_options.dart' as firebase_prod;
-import 'firebase/firebase_options_dev.dart' as firebase_dev;
+import 'package:settlenow/util/token_manager/session_manager.dart';
+import 'firebase/firebase_options.dart' as prod;
+import 'firebase/firebase_options_dev.dart' as dev;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(
   RemoteMessage remoteMessage,
 ) async {}
 
+FirebaseOptions get currentPlatformOptions =>
+    kDebugMode
+        ? dev.DefaultFirebaseOptions.currentPlatform
+        : prod.DefaultFirebaseOptions.currentPlatform;
+
 Future<void> initializeFirebaseApp() async {
   try {
     if (kIsWeb || Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(
-        options:
-            kDebugMode
-                ? firebase_dev.DefaultFirebaseOptions.currentPlatform
-                : firebase_prod.DefaultFirebaseOptions.currentPlatform,
-      );
+      await Firebase.initializeApp(options: currentPlatformOptions);
     } else {
       Firebase.app();
     }
@@ -98,9 +99,6 @@ Future<void> main() async {
 
   await initializeFirebaseApp();
 
-  final remoteConfigService = FirebaseRemote();
-  await remoteConfigService.init();
-
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -108,13 +106,10 @@ Future<void> main() async {
     return true;
   };
 
-  await GoogleOauth.ensureGoogleSignInInitialized();
-
   if (kIsWeb) {
     usePathUrlStrategy();
   } else {
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await NotificationInterfaceHandler.initializeChannels();
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -122,6 +117,16 @@ Future<void> main() async {
       ),
     );
   }
+
+  final remoteConfigService = FirebaseRemote();
+
+  await Future.wait([
+    remoteConfigService.init(),
+    GoogleOauth.ensureGoogleSignInInitialized(),
+    if (!kIsWeb) NotificationInterfaceHandler.initializeChannels(),
+    SessionManager.instance.initialize(),
+  ]);
+
   final AuthRepository authRepository = AuthRepository(AuthDataProvider());
   final AuthBloc authBloc = AuthBloc(authRepository);
 

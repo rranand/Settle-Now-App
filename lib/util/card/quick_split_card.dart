@@ -173,7 +173,6 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                               context.read<SettleCubit>().settleExpense(
                                 widget.data.id,
                                 _loggedInUser.id,
-                                _loggedInUser.authToken,
                                 context,
                               );
                             },
@@ -198,14 +197,12 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                                 context.read<SettleCubit>().delete(
                                   widget.data.id,
                                   _loggedInUser.id,
-                                  _loggedInUser.authToken,
                                   context,
                                 );
                               } else {
                                 context.read<SettleCubit>().optout(
                                   widget.data.id,
                                   _loggedInUser.id,
-                                  _loggedInUser.authToken,
                                   context,
                                 );
                               }
@@ -248,7 +245,6 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                     AddToPersonalExpenseRequested(
                       transactionType: TransactionType.quicksplit,
                       transactionID: widget.data.id,
-                      authToken: _loggedInUser.authToken,
                     ),
                   );
                 },

@@ -32,7 +32,7 @@ class PreferenceCubit extends Cubit<PreferenceState> {
     );
 
     try {
-      await repo.savePreference(data, loggedInUser.authToken);
+      await repo.savePreference(data);
       authBloc.add(AuthProfileUpdateRequested(loggedInUser, data));
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(

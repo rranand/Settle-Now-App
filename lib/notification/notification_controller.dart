@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:settlenow/notification/notification_interface_handler.dart';
 import 'package:settlenow/data/repository/notification_repository.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/util/handler/local_storage_preference.dart';
 
 class NotificationController {
   /// Use this method to detect when a new notification or a schedule is created
@@ -42,10 +41,6 @@ class NotificationController {
     String id = receivedAction.payload!["id"] ?? "";
 
     if (id.isNotEmpty && (type == "roomRequest" || type == "lendenRequest")) {
-      String? authToken = await LocalStoragePreference.getStringPref(
-        'auth_token',
-      );
-
       switch (receivedAction.buttonKeyPressed) {
         case "JOIN":
           {
@@ -60,10 +55,7 @@ class NotificationController {
                   progress: 50,
                 ),
               );
-              await context.read<NotificationRepository>().acceptInvite(
-                id,
-                authToken ?? "",
-              );
+              await context.read<NotificationRepository>().acceptInvite(id);
               await AwesomeNotifications().dismiss(receivedAction.id!);
             }
           }
@@ -80,10 +72,7 @@ class NotificationController {
                   progress: 50,
                 ),
               );
-              await context.read<NotificationRepository>().declineInvite(
-                id,
-                authToken ?? "",
-              );
+              await context.read<NotificationRepository>().declineInvite(id);
               await AwesomeNotifications().dismiss(receivedAction.id!);
             }
           }

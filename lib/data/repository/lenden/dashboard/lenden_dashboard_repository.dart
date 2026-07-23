@@ -6,11 +6,9 @@ class LendenDashboardRepository {
 
   LendenDashboardRepository(this._dataProvider);
 
-  Future<List<LendenDashboardModel>> fetchData(String authToken) async {
+  Future<List<LendenDashboardModel>> fetchData() async {
     try {
-      List<LendenDashboardModel> data = await _dataProvider.fetchData(
-        authToken,
-      );
+      List<LendenDashboardModel> data = await _dataProvider.fetchData();
       data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
     } catch (e) {
@@ -18,15 +16,9 @@ class LendenDashboardRepository {
     }
   }
 
-  Future<LendenDashboardModel> createRoom(
-    LendenDashboardModel roomData,
-    String authToken,
-  ) async {
+  Future<LendenDashboardModel> createRoom(LendenDashboardModel roomData) async {
     try {
-      LendenDashboardModel data = await _dataProvider.createRoom(
-        roomData,
-        authToken,
-      );
+      LendenDashboardModel data = await _dataProvider.createRoom(roomData);
       return data;
     } catch (e) {
       rethrow;

@@ -12,11 +12,10 @@ class LendenRoomRepository {
 
   Future<Pair<LendenDashboardModel, List<LendenTransactionModel>>> fetchData(
     String id,
-    String authToken,
   ) async {
     try {
       Pair<LendenDashboardModel, List<LendenTransactionModel>> lendenData =
-          await _dataProvider.fetchData(id, authToken);
+          await _dataProvider.fetchData(id);
       return lendenData;
     } catch (e) {
       rethrow;
@@ -25,11 +24,11 @@ class LendenRoomRepository {
 
   Future<LendenTransactionModel> create(
     String id,
-    String authToken,
+
     NewTransactionModel expenseData,
   ) async {
     try {
-      return _dataProvider.create(id, authToken, expenseData);
+      return _dataProvider.create(id, expenseData);
     } catch (e) {
       rethrow;
     }
@@ -37,62 +36,53 @@ class LendenRoomRepository {
 
   Future<LendenTransactionModel> update(
     String id,
-    String authToken,
+
     NewTransactionModel expenseData,
   ) async {
     try {
-      return _dataProvider.update(id, authToken, expenseData);
+      return _dataProvider.update(id, expenseData);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> delete(String id, String authToken, String expenseID) async {
+  Future<bool> delete(String id, String expenseID) async {
     try {
-      return _dataProvider.delete(id, authToken, expenseID);
+      return _dataProvider.delete(id, expenseID);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> closeRoom(String roomID, String authToken) async {
+  Future<bool> closeRoom(String roomID) async {
     try {
-      return _dataProvider.closeRoom(roomID, authToken);
+      return _dataProvider.closeRoom(roomID);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> updateRoom(
-    String id,
-    String authToken,
-    String newRoomName,
-  ) async {
+  Future<void> updateRoom(String id, String newRoomName) async {
     try {
-      return _dataProvider.updateRoom(id, authToken, newRoomName);
+      return _dataProvider.updateRoom(id, newRoomName);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> deleteRoom(String id, String authToken) async {
+  Future<void> deleteRoom(String id) async {
     try {
-      return _dataProvider.deleteRoom(id, authToken);
+      return _dataProvider.deleteRoom(id);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<NotificationModel> inviteUser(
-    String roomID,
-    String uid,
-    String authToken,
-  ) async {
+  Future<NotificationModel> inviteUser(String roomID, String uid) async {
     try {
       NotificationModel notificationData = await _dataProvider.inviteUser(
         roomID,
         uid,
-        authToken,
       );
       return notificationData;
     } catch (e) {

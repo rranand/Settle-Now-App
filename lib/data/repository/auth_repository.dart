@@ -3,7 +3,6 @@ import 'package:settlenow/model/login_activity_model.dart';
 import 'package:settlenow/model/preference_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/util/custom/pair.dart';
-import 'package:settlenow/util/handler/local_storage_preference.dart';
 
 class AuthRepository {
   final AuthDataProvider _dataProvider;
@@ -11,16 +10,9 @@ class AuthRepository {
 
   Future<Pair<UserModel, PreferenceModel>> getLoggedInUser() async {
     try {
-      String? authToken = await LocalStoragePreference.getStringPref(
-        'auth_token',
-      );
-
-      if (authToken == null) {
-        throw "Unauthorized Access";
-      }
-      final Pair<UserModel, PreferenceModel> pairData = await _dataProvider
-          .getOwnUserInfo(authToken);
-      return pairData;
+      final Pair<UserModel, PreferenceModel> data =
+          await _dataProvider.getOwnUserInfo();
+      return data;
     } catch (e) {
       rethrow;
     }
@@ -63,11 +55,9 @@ class AuthRepository {
     }
   }
 
-  Future<String> signUpUser(String name, String email) async {
+  Future<void> signUpUser(String name, String email) async {
     try {
-      final signupToken = await _dataProvider.signUpUser(name, email);
-
-      return signupToken;
+      await _dataProvider.signUpUser(name, email);
     } catch (e) {
       rethrow;
     }
@@ -82,21 +72,18 @@ class AuthRepository {
     }
   }
 
-  Future<bool> sendSignupOTP(String token) async {
+  Future<bool> sendSignupOTP() async {
     try {
-      final isOTPSend = await _dataProvider.sendSignupOTP(token);
+      final isOTPSend = await _dataProvider.sendSignupOTP();
       return isOTPSend;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(
-    String token,
-    String otp,
-  ) async {
+  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(String otp) async {
     try {
-      final userData = await _dataProvider.validateSignupOTP(token, otp);
+      final userData = await _dataProvider.validateSignupOTP(otp);
 
       return userData;
     } catch (e) {
@@ -104,28 +91,27 @@ class AuthRepository {
     }
   }
 
-  Future<void> logoutUser(String authToken) async {
+  Future<void> logoutUser() async {
     try {
-      await _dataProvider.logoutUser(authToken);
+      await _dataProvider.logoutUser();
       return;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> deleteAccount(String authToken) async {
+  Future<void> deleteAccount() async {
     try {
-      await _dataProvider.deleteAccount(authToken);
+      await _dataProvider.deleteAccount();
       return;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> logoutDifferentDevice(String authToken, String sessionID) async {
+  Future<bool> logoutDifferentDevice(String sessionID) async {
     try {
       final isLogoutSuccessful = await _dataProvider.logoutDifferentDevice(
-        authToken,
         sessionID,
       );
       return isLogoutSuccessful;
@@ -134,10 +120,10 @@ class AuthRepository {
     }
   }
 
-  Future<List<LoginActivityModel>> fetchLoginActivity(String authToken) async {
+  Future<List<LoginActivityModel>> fetchLoginActivity() async {
     try {
-      final List<LoginActivityModel> loginActivityData = await _dataProvider
-          .fetchLoginActivity(authToken);
+      final List<LoginActivityModel> loginActivityData =
+          await _dataProvider.fetchLoginActivity();
       loginActivityData.sort(
         (a, b) => b.lastLoggedIn.compareTo(a.lastLoggedIn),
       );
@@ -155,18 +141,18 @@ class AuthRepository {
     }
   }
 
-  Future<List<UserModel>> fetchFriend(String authToken) async {
+  Future<List<UserModel>> fetchFriend() async {
     try {
-      final List<UserModel> data = await _dataProvider.fetchFriend(authToken);
+      final List<UserModel> data = await _dataProvider.fetchFriend();
       return data;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> savePreference(PreferenceModel data, String authToken) async {
+  Future<void> savePreference(PreferenceModel data) async {
     try {
-      await _dataProvider.savePreference(data, authToken);
+      await _dataProvider.savePreference(data);
     } catch (e) {
       rethrow;
     }

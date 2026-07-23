@@ -7,9 +7,9 @@ class QuicksplitRepository {
 
   QuicksplitRepository(this._dataProvider);
 
-  Future<List<TransactionModel>> fetchData(String authToken) async {
+  Future<List<TransactionModel>> fetchData() async {
     try {
-      List<TransactionModel> data = await _dataProvider.fetchData(authToken);
+      List<TransactionModel> data = await _dataProvider.fetchData();
       data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
     } catch (e) {
@@ -17,55 +17,49 @@ class QuicksplitRepository {
     }
   }
 
-  Future<TransactionModel> create(
-    NewTransactionModel data,
-    String authToken,
-  ) async {
+  Future<TransactionModel> create(NewTransactionModel data) async {
     try {
-      return _dataProvider.create(data, authToken);
+      return _dataProvider.create(data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<TransactionModel> update(
-    NewTransactionModel data,
-    String authToken,
-  ) async {
+  Future<TransactionModel> update(NewTransactionModel data) async {
     try {
-      return _dataProvider.update(data, authToken);
+      return _dataProvider.update(data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> delete(String expenseID, String authToken) async {
+  Future<bool> delete(String expenseID) async {
     try {
-      return _dataProvider.delete(expenseID, authToken);
+      return _dataProvider.delete(expenseID);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<bool> addToPersonalExpense(String expenseID, String authToken) async {
+  Future<bool> addToPersonalExpense(String expenseID) async {
     try {
-      return _dataProvider.addToPersonalExpense(expenseID, authToken);
+      return _dataProvider.addToPersonalExpense(expenseID);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> settleExpense(String expenseID, String authToken) async {
+  Future<void> settleExpense(String expenseID) async {
     try {
-      return _dataProvider.settleExpense(expenseID, authToken);
+      return _dataProvider.settleExpense(expenseID);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> optout(String expenseID, String authToken) async {
+  Future<void> optout(String expenseID) async {
     try {
-      return _dataProvider.optout(expenseID, authToken);
+      return _dataProvider.optout(expenseID);
     } catch (e) {
       rethrow;
     }

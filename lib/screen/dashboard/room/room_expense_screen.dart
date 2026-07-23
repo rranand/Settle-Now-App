@@ -249,7 +249,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
     await roomInfoCubit.fetchData(
       widget.id,
-      _loggedInUser.authToken,
       forceRefresh: true,
     );
   }
@@ -336,7 +335,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           context.read<RoomInfoCubit>().fetchData(
             widget.id,
-            _loggedInUser.authToken,
           );
         });
       }
@@ -507,7 +505,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                 context.read<RoomCloseCubit>().closeRoom(
                   widget.id,
                   _loggedInUser.id,
-                  _loggedInUser.authToken,
                 );
               },
               child: Text("Yes"),
@@ -542,19 +539,16 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         } else if (state is RoomInfoSuccess && !state.isInternalUpdate) {
           context.read<RoomSettleCubit>().fetchData(
             widget.id,
-            _loggedInUser.authToken,
             state.data.users,
           );
           context.read<RoomBloc>().add(
             RoomFetch(
               id: widget.id,
-              authToken: _loggedInUser.authToken,
               users: state.data.users,
             ),
           );
           context.read<RoomActivityCubit>().fetchData(
             widget.id,
-            _loggedInUser.authToken,
           );
         }
       },
@@ -773,7 +767,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                             createJoinRoomCubit.inviteMember(
                               widget.id,
                               userDataFromScreen,
-                              _loggedInUser.authToken,
                               scaffoldMessengerState,
                             );
                           }
@@ -813,7 +806,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                               .read<RoomCloseRequestCubit>()
                               .closeRoomRequest(
                                 widget.id,
-                                _loggedInUser.authToken,
                               );
                         },
                       ),

@@ -58,7 +58,7 @@ class _InviteMemberState extends State<InviteMember> {
     final friendCubitState = context.read<FriendCubit>().state;
     if (!(friendCubitState is FriendSuccess ||
         friendCubitState is FriendLoading)) {
-      context.read<FriendCubit>().fetchLoginData(_loggedInUser);
+      context.read<FriendCubit>().fetchLoginData();
     }
   }
 

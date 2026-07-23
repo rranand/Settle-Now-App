@@ -4,14 +4,9 @@ import 'package:settlenow/model/notification_model.dart';
 import 'package:settlenow/util/handler/network_call.dart';
 
 class NotificationDataProvider {
-  Future<List<NotificationModel>> fetchData(String authToken) async {
+  Future<List<NotificationModel>> fetchData() async {
     try {
-      final response = await createAPICall(
-        'notification',
-        "get",
-        authToken,
-        {},
-      );
+      final response = await createAPICall('notification', "get", {});
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         List<NotificationModel> arr = [];
@@ -27,11 +22,9 @@ class NotificationDataProvider {
     }
   }
 
-  Future<bool> acceptInvite(String id, String authToken) async {
+  Future<bool> acceptInvite(String id) async {
     try {
-      final response = await createAPICall('notification', "put", authToken, {
-        "id": id,
-      });
+      final response = await createAPICall('notification', "put", {"id": id});
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;
@@ -43,14 +36,11 @@ class NotificationDataProvider {
     }
   }
 
-  Future<bool> declineInvite(String id, String authToken) async {
+  Future<bool> declineInvite(String id) async {
     try {
-      final response = await createAPICall(
-        'notification',
-        "delete",
-        authToken,
-        {"id": id},
-      );
+      final response = await createAPICall('notification', "delete", {
+        "id": id,
+      });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         return true;

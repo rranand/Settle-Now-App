@@ -4,13 +4,19 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
+import 'package:settlenow/constant/api_constant.dart';
 import 'package:settlenow/model/api_response_model.dart';
-import 'package:settlenow/util/handler/crypto.dart';
+import 'package:settlenow/util/token_manager/session_manager.dart';
 
-final ApiResponseModel newRes = ApiResponseModel(
-  body: "{\"message\": \"Something went wrong!\"}",
-  statusCode: 422,
-);
+final Set<String> publicURL = {
+  "get server",
+  "post auth/signup/google",
+  "post auth/signup",
+  "post auth/otp",
+  "patch auth/otp",
+  "post auth/googleLogin",
+  "post auth/refresh",
+};
 
 Function getHttpMethod(String methodName) {
   switch (methodName.toLowerCase()) {
@@ -27,22 +33,41 @@ Function getHttpMethod(String methodName) {
   }
 }
 
+bool isPublicURL(String url) {
+  return publicURL.contains(url);
+}
+
 Future<ApiResponseModel> createAPICall(
   String url,
   String methodName,
-  String token,
   dynamic jsonData,
 ) async {
+  if (kDebugMode) {
+    debugPrint("${"-" * 30}\nRequested URL: $url\nMethod: $methodName");
+  }
   Function httpType = getHttpMethod(methodName);
   try {
     String host = "https://prod-api.settlenow.in/";
     if (kDebugMode) {
       host = "http://192.168.1.4:9008/";
     }
-    String tokenization = Crypto.createJSONDataTOJWT(jsonData);
+
+    String? accessToken;
+
+    if (!isPublicURL("${methodName.toLowerCase()} $url")) {
+      accessToken = await SessionManager.instance.getValidAccessToken();
+
+      if (accessToken == null) {
+        throw ApiConstant.sessionExpired;
+      }
+    }
+
     Map<String, String> headersMap = <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': token,
+      ...SessionManager.instance.authHeaders,
+      ...(accessToken != null && accessToken.isNotEmpty
+          ? {'Authorization': 'Bearer $accessToken'}
+          : {}),
     };
 
     Response res = await (methodName.contains("get")
@@ -50,20 +75,17 @@ Future<ApiResponseModel> createAPICall(
             : httpType(
               Uri.parse(host + url),
               headers: headersMap,
-              body: jsonEncode({"data": tokenization}),
+              body: jsonEncode(jsonData),
             ))
         .timeout(Duration(seconds: 20));
 
-    var resData = jsonDecode(res.body);
-
-    if (resData['data'] != null) {
-      String jsonJWTData = resData['data'];
-      String responseBody = Crypto.extractJSONfromJWT(jsonJWTData);
-
-      return ApiResponseModel(body: responseBody, statusCode: res.statusCode);
+    if (kDebugMode) {
+      debugPrint(
+        "${"-" * 30}\nURL: $url\nMethod: $methodName\nHeader: $headersMap\nBody: $jsonData\nStatusCode: ${res.statusCode}\nResponseBody: ${res.body}",
+      );
     }
 
-    return newRes;
+    return ApiResponseModel(body: res.body, statusCode: res.statusCode);
   } on TimeoutException catch (_) {
     throw "The request timed out. Please check your internet connection and try again.";
   } on SocketException catch (_) {
@@ -72,7 +94,11 @@ Future<ApiResponseModel> createAPICall(
     throw "Unable to connect to the server. Please try again.";
   } on FormatException catch (_) {
     throw "Received an invalid response from the server.";
-  } catch (_) {
+  } catch (e) {
+    if (e.toString() == ApiConstant.sessionExpired) {
+      rethrow;
+    }
+
     throw "Something went wrong. Please try again.";
   }
 }

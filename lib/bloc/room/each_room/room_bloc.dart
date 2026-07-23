@@ -29,7 +29,6 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     try {
       List<TransactionModel> data = await repo.fetchData(
         event.id,
-        event.authToken,
         event.users,
       );
       return emit(RoomFetchSuccess(event.id, data));

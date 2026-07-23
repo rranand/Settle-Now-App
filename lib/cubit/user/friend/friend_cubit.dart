@@ -10,11 +10,11 @@ class FriendCubit extends Cubit<FriendState> {
 
   FriendCubit(this.repo) : super(FriendInitial());
 
-  void fetchLoginData(UserModel userdata) async {
+  void fetchLoginData() async {
     emit(FriendLoading());
 
     try {
-      final List<UserModel> data = await repo.fetchFriend(userdata.authToken);
+      final List<UserModel> data = await repo.fetchFriend();
 
       return emit(FriendSuccess(data));
     } catch (e) {

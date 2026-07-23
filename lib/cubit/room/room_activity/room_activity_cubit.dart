@@ -12,7 +12,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
 
   void fetchData(
     String id,
-    String authToken, {
+     {
     bool forceRefresh = false,
   }) async {
     if (!forceRefresh &&
@@ -22,7 +22,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
     }
     emit(RoomActivityLoading(id));
     try {
-      List<ActivityModel> data = await repo.fetchActivity(id, authToken);
+      List<ActivityModel> data = await repo.fetchActivity(id, );
       Map<String, List<ActivityModel>> transactionWiseActivity = {};
 
       for (int i = data.length - 1; i >= 0; i--) {

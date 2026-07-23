@@ -3,10 +3,7 @@ part of 'notification_bloc.dart';
 @immutable
 sealed class NotificationEvent {}
 
-final class NotificationFetch extends NotificationEvent {
-  final String authToken;
-  NotificationFetch({required this.authToken});
-}
+final class NotificationFetch extends NotificationEvent {}
 
 final class NotificationOnAdd extends NotificationEvent {
   final List<NotificationModel> data;

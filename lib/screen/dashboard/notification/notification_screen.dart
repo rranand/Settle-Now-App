@@ -50,9 +50,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       final state = context.read<NotificationBloc>().state;
 
       if (state is! NotificationFetchSuccess) {
-        context.read<NotificationBloc>().add(
-          NotificationFetch(authToken: _loggedInUser.authToken),
-        );
+        context.read<NotificationBloc>().add(NotificationFetch());
       }
     }
     widget.isSearchEnabled.addListener(() {
@@ -65,9 +63,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
       showNormalSnackBar(context, "Please re-login...Session expired!");
       return;
     }
-    context.read<NotificationBloc>().add(
-      NotificationFetch(authToken: _loggedInUser.authToken),
-    );
+    context.read<NotificationBloc>().add(NotificationFetch());
   }
 
   @override
@@ -183,7 +179,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                   child: NotificationCard(
                                     data: eachNotificationData,
                                     loggedInUserID: _loggedInUser.id,
-                                    authToken: _loggedInUser.authToken,
                                   ),
                                 ),
                                 Expanded(
@@ -194,7 +189,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                                           : NotificationCard(
                                             data: filterData[2 * index + 1],
                                             loggedInUserID: _loggedInUser.id,
-                                            authToken: _loggedInUser.authToken,
                                           ),
                                 ),
                               ],
@@ -203,7 +197,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             return NotificationCard(
                               data: filterData[index],
                               loggedInUserID: _loggedInUser.id,
-                              authToken: _loggedInUser.authToken,
                             );
                           }
                         },

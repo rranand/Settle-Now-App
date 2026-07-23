@@ -41,7 +41,7 @@ Future<Map<String, String>> platformState() async {
 }
 
 Future<String> fetchIP({int attempt = 0}) async {
-  if (attempt == 5) {
+  if (attempt == 3) {
     return "Unknown";
   }
   try {

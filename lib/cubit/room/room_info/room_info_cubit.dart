@@ -19,7 +19,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
 
   Future<void> fetchData(
     String id,
-    String authToken, {
+     {
     bool forceRefresh = false,
   }) async {
     if (state is RoomInfoLoading) return;
@@ -42,7 +42,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       if (oldData.hasData && !forceRefresh) {
         return emit(RoomInfoSuccess(oldData, false));
       } else {
-        RoomInfoModel data = await repo.fetchRoomInfo(id, authToken);
+        RoomInfoModel data = await repo.fetchRoomInfo(id, );
         return emit(RoomInfoSuccess(data, false));
       }
     } catch (e) {
@@ -110,7 +110,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
   }
 
   void updateRoomName(
-    String authToken,
+    
     String roomName,
     ScaffoldMessengerState scaffoldMessengerState,
   ) async {
@@ -125,7 +125,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {
-      await repo.updateRoom(oldData.data.id, authToken, roomName);
+      await repo.updateRoom(oldData.data.id,  roomName);
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
@@ -147,7 +147,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
 
   void deleteRoom(
     String id,
-    String authToken,
+    
     bool isRemoving,
     ScaffoldMessengerState scaffoldMessengerState,
   ) async {
@@ -167,7 +167,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {
-      await repo.deleteRoom(id, authToken);
+      await repo.deleteRoom(id, );
       _roomDashboardBloc.add(RoomDashboardOnDeleteRoom(id: id));
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(

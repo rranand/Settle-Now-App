@@ -7,7 +7,6 @@ class UserModel {
   String email = "";
   String profileImage = "";
   DateTime createdOn = DateTime.now();
-  String authToken = "";
   String phoneNo = "";
   bool isGoogle = false;
 
@@ -18,7 +17,6 @@ class UserModel {
     required this.email,
     required this.profileImage,
     required this.createdOn,
-    required this.authToken,
     required this.phoneNo,
   });
 
@@ -36,7 +34,6 @@ class UserModel {
     String? email,
     String? profileImage,
     DateTime? createdOn,
-    String? authToken,
     String? phoneNo,
   }) {
     return UserModel(
@@ -45,7 +42,6 @@ class UserModel {
       email: email ?? this.email,
       profileImage: profileImage ?? this.profileImage,
       createdOn: createdOn ?? this.createdOn,
-      authToken: authToken ?? this.authToken,
       phoneNo: phoneNo ?? this.phoneNo,
     );
   }
@@ -57,7 +53,6 @@ class UserModel {
       email: data.email,
       profileImage: data.profileImage,
       createdOn: data.createdOn,
-      authToken: data.authToken,
       phoneNo: data.phoneNo,
     );
   }
@@ -83,19 +78,18 @@ class UserModel {
     );
   }
 
-  factory UserModel.forOwnerInfo(Map<String, dynamic> map, String authToken) {
+  factory UserModel.forOwnerInfo(Map<String, dynamic> map) {
     UserModel userData = UserModel.fromBasicInfo(
       id: map['id'],
       name: map['name'],
-      profileImage: map['profileImage'],
+      profileImage: map['profilePic'],
     );
 
-    userData.phoneNo = map['phoneNo'];
+    userData.phoneNo = map['phoneNo'] ?? "";
     userData.createdOn = DateTime.parse(map['createdOn']).toLocal();
 
     userData.email = map['email'];
     userData.isGoogle = map['isGoogle'];
-    userData.authToken = authToken;
     return userData;
   }
 
@@ -106,7 +100,6 @@ class UserModel {
       email: map['email'] ?? "",
       profileImage: map['profileImage'] ?? "",
       createdOn: DateTime.parse(map['createdOn']).toLocal(),
-      authToken: map['authToken'] ?? "",
       phoneNo: map['phoneNo'] ?? "",
     );
   }
@@ -129,7 +122,6 @@ class UserModel {
         other.name == name &&
         other.email == email &&
         other.profileImage == profileImage &&
-        other.authToken == authToken &&
         other.createdOn == createdOn &&
         other.phoneNo == phoneNo &&
         other.isGoogle == isGoogle;
@@ -141,7 +133,6 @@ class UserModel {
         name.hashCode ^
         email.hashCode ^
         profileImage.hashCode ^
-        authToken.hashCode ^
         createdOn.hashCode ^
         phoneNo.hashCode ^
         isGoogle.hashCode;

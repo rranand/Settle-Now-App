@@ -4,9 +4,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
-const String jwtToken =
-    "BY#uu4qQiLb^SYcOCsxS@lQxu7TZKRozctbbCwGtN93LccoKVU3f6F0IjiDH#J2GH2N!2t^*UTwQtZmD4S#Fy8w#Y3b6d1gN#SHVYgcKX%s4pxQ@vq4vS%Emd#KRKqkF31EQjuB34x!3IMn@TfSTt7";
-
 class Crypto {
   static Future<String> createJWT(String email, String input) async {
     final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
@@ -38,24 +35,6 @@ class Crypto {
       return jwtData.payload;
     } on Exception catch (_) {
       return null;
-    }
-  }
-
-  static String createJSONDataTOJWT(dynamic data) {
-    final jwt = JWT(data);
-
-    return jwt.sign(
-      SecretKey(jwtToken),
-      expiresIn: foundation.kDebugMode ? null : Duration(seconds: 100),
-    );
-  }
-
-  static String extractJSONfromJWT(String data) {
-    try {
-      final reqData = JWT.verify(data, SecretKey(jwtToken));
-      return jsonEncode(reqData.payload);
-    } on Exception catch (_) {
-      rethrow;
     }
   }
 }

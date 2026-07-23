@@ -114,10 +114,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
               onPressed: () {
                 context.pop();
                 context.read<LendenRoomBloc>().add(
-                  LendenCloseRoom(
-                    authToken: _loggedInUser.authToken,
-                    uid: _loggedInUser.id,
-                  ),
+                  LendenCloseRoom(uid: _loggedInUser.id),
                 );
               },
               child: Text("Yes"),
@@ -204,7 +201,6 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                               createRoomCubit.inviteMember(
                                 widget.id,
                                 userDataFromScreen.first,
-                                _loggedInUser.authToken,
                                 scaffoldMessengerState,
                               );
                             }
@@ -303,9 +299,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       final state = context.read<LendenRoomBloc>().state;
 
       if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
-        context.read<LendenRoomBloc>().add(
-          LendenRoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
-        );
+        context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
       }
     }
 
@@ -351,9 +345,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       showNormalSnackBar(context, "Please re-login...Session expired!");
       return;
     }
-    context.read<LendenRoomBloc>().add(
-      LendenRoomFetch(id: widget.id, authToken: _loggedInUser.authToken),
-    );
+    context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
   }
 
   PreferredSizeWidget _buildAppBar(

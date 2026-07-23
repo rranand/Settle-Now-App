@@ -184,7 +184,6 @@ class _SettleExpenseState extends State<SettleExpense> {
         context.read<RoomSettleUpsertCubit>().addNewSettleExpense(
           widget.roomID,
           newData,
-          _loggedInUser.authToken,
         );
       } else {
         RoomSettleModel updatedData = RoomSettleModel(
@@ -201,7 +200,6 @@ class _SettleExpenseState extends State<SettleExpense> {
           context.read<RoomSettleUpsertCubit>().updateSettleExpense(
             widget.roomID,
             updatedData,
-            _loggedInUser.authToken,
           );
         } else {
           showNormalSnackBar(context, "No Change Detected");
@@ -354,7 +352,6 @@ class _SettleExpenseState extends State<SettleExpense> {
                                   widget.transactionData!.id,
                                   widget.transactionData!.sender.id,
                                   widget.transactionData!.receiver.id,
-                                  _loggedInUser.authToken,
                                 );
                               }
                             },

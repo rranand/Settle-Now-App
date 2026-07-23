@@ -5,12 +5,10 @@ sealed class RoomDashboardEvent {}
 
 final class RoomDashboardFetch extends RoomDashboardEvent {
   final bool isActiveRoom;
-  final String authToken;
   final bool isFreshFetch;
 
   RoomDashboardFetch({
     required this.isActiveRoom,
-    required this.authToken,
     required this.isFreshFetch,
   });
 }

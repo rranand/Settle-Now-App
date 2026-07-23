@@ -22,7 +22,7 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     if (state is NotificationLoading) return;
     emit(NotificationLoading());
     try {
-      List<NotificationModel> data = await repo.fetchData(event.authToken);
+      List<NotificationModel> data = await repo.fetchData();
       return emit(NotificationFetchSuccess(data));
     } catch (e) {
       return emit(NotificationFailure(e.toString()));

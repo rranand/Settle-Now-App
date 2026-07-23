@@ -13,13 +13,13 @@ class RoomDashboardRepository {
   Future<Pair<List<RoomInfoModel>, bool>> fetchData(
     bool isActiveRoom,
     int alreadyHave,
-    String authToken,
+    
   ) async {
     try {
       Pair<List<RoomInfoModel>, bool> data = await _dataProvider.fetchData(
         isActiveRoom,
         alreadyHave,
-        authToken,
+        
       );
       return data;
     } catch (e) {
@@ -27,11 +27,15 @@ class RoomDashboardRepository {
     }
   }
 
-  Future<RoomInfoModel> createRoom(String roomName, UserModel user) async {
+  Future<RoomInfoModel> createRoom(
+    String roomName,
+    UserModel user,
+    
+  ) async {
     try {
       Pair<RoomInfoModel, String> roomData = await _dataProvider.createRoom(
         roomName,
-        user.authToken,
+        
       );
       RoomInfoModel data = roomData.first;
       data.createdBy = user;
@@ -48,11 +52,11 @@ class RoomDashboardRepository {
     }
   }
 
-  Future<NotificationModel> joinRoom(String roomKey, String authToken) async {
+  Future<NotificationModel> joinRoom(String roomKey, ) async {
     try {
       NotificationModel notificationData = await _dataProvider.joinRoom(
         roomKey,
-        authToken,
+        
       );
       return notificationData;
     } catch (e) {

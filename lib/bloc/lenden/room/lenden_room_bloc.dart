@@ -37,7 +37,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     emit(LendenRoomLoading());
     try {
       Pair<LendenDashboardModel, List<LendenTransactionModel>> data = await repo
-          .fetchData(event.id, event.authToken);
+          .fetchData(event.id);
 
       lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
       return emit(LendenRoomFetchSuccess(event.id, data.first, data.second));
@@ -125,7 +125,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     emit(LendenRoomLoading());
     List<LendenUserModel> users = [...oldData.roomData.users];
     try {
-      await repo.closeRoom(oldData.id, event.authToken);
+      await repo.closeRoom(oldData.id);
       bool isClosed = true;
       for (int i = 0; i < users.length; i++) {
         if (users[i].id == event.uid) {
@@ -168,7 +168,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       scaffoldMessenger: event.scaffoldMessengerState,
     );
     try {
-      await repo.updateRoom(oldData.id, event.authToken, event.roomName);
+      await repo.updateRoom(oldData.id, event.roomName);
       LendenDashboardModel updatedData = oldData.roomData.copyWith(
         roomName: event.roomName,
       );
@@ -211,7 +211,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       scaffoldMessenger: event.scaffoldMessengerState,
     );
     try {
-      await repo.deleteRoom(oldData.id, event.authToken);
+      await repo.deleteRoom(oldData.id);
       lendenDashboardBloc.add(LendenDashboardOnDeleteRoom(id: event.id));
       event.scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(

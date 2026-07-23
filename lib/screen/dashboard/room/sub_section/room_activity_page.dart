@@ -56,7 +56,6 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
     }
     context.read<RoomActivityCubit>().fetchData(
       widget.id,
-      _loggedInUser.authToken,
       forceRefresh: true,
     );
   }
