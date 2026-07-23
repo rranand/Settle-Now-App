@@ -1,1 +1,68 @@
-{"hosting":{"public":"build/web","ignore":["firebase.json","**/.*","**/node_modules/**"],"headers":[{"source":"/flutter_service_worker.js","headers":[{"key":"Cache-Control","value":"no-cache"}]},{"source":"/index.html","headers":[{"key":"Cache-Control","value":"no-cache, no-store, must-revalidate"}]},{"source":"/main.dart.js","headers":[{"key":"Cache-Control","value":"no-cache"}]},{"source":"/assets/**","headers":[{"key":"Cache-Control","value":"public, max-age=31536000, immutable"}]},{"source":"/icons/**","headers":[{"key":"Cache-Control","value":"public, max-age=31536000, immutable"}]}],"appAssociation":"AUTO","rewrites":[{"source":"/privacy-policy","destination":"/privacy-policy.html"},{"source":"**","destination":"/index.html"}]},"flutter":{"platforms":{"android":{"default":{"projectId":"settlenow-dev","appId":"1:373327328514:android:8e696e79bc7d1249577e1b","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"settlenow-dev","appId":"1:373327328514:ios:d58df5e439fbcb65577e1b","uploadDebugSymbols":true,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"macos":{"default":{"projectId":"settlenow-dev","appId":"1:373327328514:ios:8fe77f54e6c0a5f1577e1b","uploadDebugSymbols":true,"fileOutput":"macos/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase/firebase_options_dev.dart":{"projectId":"settlenow-dev","configurations":{"android":"1:373327328514:android:8e696e79bc7d1249577e1b","web":"1:373327328514:web:7329624402a47fed577e1b"}},"lib/firebase/firebase_options.dart":{"projectId":"settle-now-340017","configurations":{"android":"1:950526449356:android:1fdb7eebae5c7c9e305469","web":"1:950526449356:web:2a9dea981f6d688f305469"}}}}}}
+{
+    "hosting": {
+        "public": "build/web",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "headers": [
+            {
+                "source": "/flutter_service_worker.js",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "no-cache"
+                    }
+                ]
+            },
+            {
+                "source": "/index.html",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "no-cache, no-store, must-revalidate"
+                    }
+                ]
+            },
+            {
+                "source": "/main.dart.js",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "no-cache"
+                    }
+                ]
+            },
+            {
+                "source": "/assets/**",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "public, max-age=31536000, immutable"
+                    }
+                ]
+            },
+            {
+                "source": "/icons/**",
+                "headers": [
+                    {
+                        "key": "Cache-Control",
+                        "value": "public, max-age=31536000, immutable"
+                    }
+                ]
+            }
+        ],
+        "appAssociation": "AUTO",
+        "rewrites": [
+            {
+                "source": "/privacy-policy",
+                "destination": "/privacy-policy.html"
+            },
+            {
+                "source": "**",
+                "destination": "/index.html"
+            }
+        ]
+    }
+}
