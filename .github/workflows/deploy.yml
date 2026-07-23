@@ -13,6 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Reconstruct Firebase options
+        run: |
+          echo "${{ secrets.FIREBASE_OPTIONS_PROD }}" > lib/firebase/firebase_options.dart
+          echo "${{ secrets.FIREBASE_OPTIONS_DEV }}" > lib/firebase/firebase_options_dev.dart
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
