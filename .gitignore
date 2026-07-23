@@ -54,3 +54,12 @@ app.*.map.json
 /android/app/release
 .vercel
 .env*
+
+
+# Firebase Options
+lib/firebase/firebase_options_dev.dart
+lib/firebase/firebase_options.dart
+macos/Runner/GoogleService-Info.plist
+ios/Runner/GoogleService-Info.plist
+android/app/src/dev/google-services.json
+android/app/src/prod/google-services.json
