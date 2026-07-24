@@ -43,7 +43,7 @@ class ActivityModel {
       id: map['id'],
       user: map['user'],
       type: activityTypeFromApi(map['type']),
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
       entityId: map['entityId'],
       details:
           map['details'] != null

@@ -74,7 +74,7 @@ class UserModel {
     return UserModel.fromBasicInfo(
       id: map['id'],
       name: map['name'] ?? "",
-      profileImage: map['profileImage'] ?? "",
+      profileImage: map['profile_pic'] ?? "",
     );
   }
 
@@ -82,11 +82,11 @@ class UserModel {
     UserModel userData = UserModel.fromBasicInfo(
       id: map['id'],
       name: map['name'],
-      profileImage: map['profilePic'],
+      profileImage: map['profile_pic'],
     );
 
     userData.phoneNo = map['phoneNo'] ?? "";
-    userData.createdOn = DateTime.parse(map['createdOn']).toLocal();
+    userData.createdOn = DateTime.parse(map['created_on']).toLocal();
 
     userData.email = map['email'];
     userData.isGoogle = map['isGoogle'];
@@ -98,8 +98,8 @@ class UserModel {
       id: map['id'],
       name: map['name'],
       email: map['email'] ?? "",
-      profileImage: map['profileImage'] ?? "",
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      profileImage: map['profile_pic'] ?? "",
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
       phoneNo: map['phoneNo'] ?? "",
     );
   }
@@ -111,7 +111,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(name: $name, email: $email, profileImage: $profileImage, id: $id, createdOn: $createdOn, phoneNo: $phoneNo, isGoogle: $isGoogle)';
+    return 'UserModel(id: $id, name: $name, email: $email, profileImage: $profileImage, createdOn: $createdOn, phoneNo: $phoneNo, isGoogle: $isGoogle)';
   }
 
   @override

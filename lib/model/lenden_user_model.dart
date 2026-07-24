@@ -1,13 +1,14 @@
 import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/resolver/user_resolver.dart';
 
 class LendenUserModel extends UserModel {
-  bool isClosed = false;
+  bool active = false;
 
   LendenUserModel({
     required super.id,
     required super.name,
     required super.profileImage,
-    required this.isClosed,
+    required this.active,
   }) : super(hasData: true, createdOn: DateTime.now(), email: "", phoneNo: "");
 
   LendenUserModel.empty()
@@ -26,21 +27,32 @@ class LendenUserModel extends UserModel {
       id: user.id,
       name: user.name,
       profileImage: user.profileImage,
-      isClosed: false,
+      active: false,
     );
   }
 
   factory LendenUserModel.fromBasicInfoMap(Map<String, dynamic> map) {
     return LendenUserModel(
       id: map['id'],
-      name: map['name'],
-      profileImage: map['profileImage'],
-      isClosed: map['isClosed'],
+      name: map['name'] ?? "",
+      profileImage: map['profile_pic'] ?? "",
+      active: map['active'],
+    );
+  }
+
+  factory LendenUserModel.fromUserResolver(Map<String, dynamic> map) {
+    UserModel userData = UserResolver.instance.resolve(map['id'] ?? "");
+
+    return LendenUserModel(
+      id: map['id'],
+      name: map['name'] ?? userData.name,
+      profileImage: map['profile_pic'] ?? userData.profileImage,
+      active: map['active'],
     );
   }
 
   @override
   String toString() {
-    return 'LendenUserModel(name: $name, id: $id, isClosed: $isClosed)';
+    return 'LendenUserModel(id: $id, name: $name, active: $active)';
   }
 }

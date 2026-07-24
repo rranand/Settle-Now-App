@@ -59,8 +59,8 @@ class RoomSettleModel {
       ),
       sender: UserModel.fromBasicInfoMap(map['sender'] as Map<String, dynamic>),
       amount: double.parse(map['amount'].toString()),
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
-      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
+      modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
     );
   }
 

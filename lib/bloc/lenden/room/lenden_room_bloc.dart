@@ -126,15 +126,16 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     List<LendenUserModel> users = [...oldData.roomData.users];
     try {
       await repo.closeRoom(oldData.id);
-      bool isClosed = true;
+      bool active = false;
       for (int i = 0; i < users.length; i++) {
         if (users[i].id == event.uid) {
-          users[i].isClosed = true;
+          users[i].active = false;
+        } else {
+          active = users[i].active;
         }
-        isClosed = isClosed && users[i].isClosed;
       }
       LendenDashboardModel roomData = oldData.roomData.copyWith(
-        status: isClosed ? "Closed" : "Partially Closed",
+        status: active ? "Partially Closed" : "Closed",
         users: users,
         modifiedOn: DateTime.now(),
       );

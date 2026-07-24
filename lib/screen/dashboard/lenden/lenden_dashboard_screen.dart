@@ -176,12 +176,12 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
 
     for (int i = 0; i < oldData.length; i++) {
       bool isSettledByYou =
-          oldData[i].users
+          !oldData[i].users
               .firstWhere(
                 (ele) => ele.id == _loggedInUser.id,
                 orElse: () => LendenUserModel.empty(),
               )
-              .isClosed;
+              .active;
       if (pref.isSettled != isSettledByYou) {
         continue;
       }

@@ -46,7 +46,7 @@ class UserAmountModel extends UserModel {
     UserAmountModel newData = UserAmountModel(
       id: map['id'],
       name: map['name'] ?? "",
-      profileImage: map['profileImage'] ?? "",
+      profileImage: map['profile_pic'] ?? "",
       amount: double.parse(map['amount'].toString()),
     );
     if (map.containsKey('isSettled')) {
@@ -59,7 +59,7 @@ class UserAmountModel extends UserModel {
     UserAmountModel newData = UserAmountModel(
       id: map['id'],
       name: map['name'],
-      profileImage: map['profileImage'],
+      profileImage: map['profile_pic'],
       amount: double.parse(map['amount'].toString()),
     );
     if (map.containsKey('isSettled')) {

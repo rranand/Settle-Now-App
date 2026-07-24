@@ -64,9 +64,9 @@ class LendenTransactionModel implements CommonTransactionField {
       id: map['id'],
       amount: double.parse(map['amount'].toString()),
       description: map['description'],
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
-      createdBy: users.firstWhere((user) => user.id == map['createdBy']),
-      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
+      modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
+      createdBy: users.firstWhere((user) => user.id == map['created_by']),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:settlenow/model/login_activity_model.dart';
 import 'package:settlenow/model/preference_model.dart';
 import 'package:settlenow/model/user_model.dart';
 import 'package:settlenow/util/custom/pair.dart';
+import 'package:settlenow/util/resolver/user_resolver.dart';
 
 class AuthRepository {
   final AuthDataProvider _dataProvider;
@@ -12,6 +13,8 @@ class AuthRepository {
     try {
       final Pair<UserModel, PreferenceModel> data =
           await _dataProvider.getOwnUserInfo();
+      UserResolver.instance.loadFriends([data.first]);
+
       return data;
     } catch (e) {
       rethrow;
@@ -124,6 +127,8 @@ class AuthRepository {
   Future<List<UserModel>> fetchFriend() async {
     try {
       final List<UserModel> data = await _dataProvider.fetchFriend();
+      UserResolver.instance.loadFriends(data);
+
       return data;
     } catch (e) {
       rethrow;

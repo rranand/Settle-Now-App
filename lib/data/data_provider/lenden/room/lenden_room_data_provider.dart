@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:settlenow/core.dart';
 import 'package:settlenow/model/new_transaction_model.dart';
 import 'package:settlenow/model/notification_model.dart';
@@ -10,7 +11,7 @@ class LendenRoomDataProvider {
     String id,
   ) async {
     try {
-      final response = await createAPICall('lenden/$id', "get",  {});
+      final response = await createAPICall('lenden/$id', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -18,19 +19,25 @@ class LendenRoomDataProvider {
           data['data'],
         );
         List<LendenTransactionModel> arr = [];
-        for (int i = 0; i < data['data']['transaction'].length; i++) {
-          arr.add(
-            LendenTransactionModel.fromMap(
-              data['data']['transaction'][i],
-              roomData.users,
-            ),
-          );
+        final allTransactions = data['data']['transactions'];
+
+        if (allTransactions != null) {
+          for (int i = 0; i < allTransactions.length; i++) {
+            arr.add(
+              LendenTransactionModel.fromMap(
+                allTransactions[i],
+                roomData.users,
+              ),
+            );
+          }
         }
+
         return Pair(roomData, arr);
       } else {
         throw data['message'];
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrintStack(stackTrace: st, label: e.toString());
       rethrow;
     }
   }
@@ -85,16 +92,11 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<void> updateRoom(
-    String id,
-    String newRoomName,
-  ) async {
+  Future<void> updateRoom(String id, String newRoomName) async {
     try {
-      final response = await createAPICall(
-        'lenden/$id/update',
-        "put",
-        {"name": newRoomName},
-      );
+      final response = await createAPICall('lenden/$id/update', "put", {
+        "name": newRoomName,
+      });
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -107,13 +109,9 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<void> deleteRoom(String id, ) async {
+  Future<void> deleteRoom(String id) async {
     try {
-      final response = await createAPICall(
-        'lenden/$id/room',
-        "delete",
-        {},
-      );
+      final response = await createAPICall('lenden/$id/room', "delete", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -128,7 +126,7 @@ class LendenRoomDataProvider {
 
   Future<bool> delete(String id, String expenseID) async {
     try {
-      final response = await createAPICall('lenden/$id', "delete",  {
+      final response = await createAPICall('lenden/$id', "delete", {
         "id": expenseID,
       });
       final data = jsonDecode(response.body);
@@ -142,13 +140,9 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<bool> closeRoom(String roomID, ) async {
+  Future<bool> closeRoom(String roomID) async {
     try {
-      final response = await createAPICall(
-        'lenden/$roomID',
-        "put",
-        {},
-      );
+      final response = await createAPICall('lenden/$roomID', "put", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -161,15 +155,11 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<NotificationModel> inviteUser(
-    String roomID,
-    String uid,
-  ) async {
+  Future<NotificationModel> inviteUser(String roomID, String uid) async {
     try {
       final response = await createAPICall(
         'lenden/$roomID/addPerson',
         'patch',
-        
         {"id": uid},
       );
 

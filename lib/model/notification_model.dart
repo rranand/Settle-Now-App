@@ -48,7 +48,7 @@ class NotificationModel {
       roomID: map['roomID'],
       by: UserModel.fromBasicInfoMap(map['by']),
       user: UserModel.fromBasicInfoMap(map['user']),
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
     );
   }
 

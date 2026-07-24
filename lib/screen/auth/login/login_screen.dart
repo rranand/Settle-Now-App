@@ -291,8 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           child: Padding(
                                             padding: EdgeInsets.only(top: 8.0),
                                             child:
-                                                (state is AuthOTPSendSuccess &&
-                                                        state.isSuccess)
+                                                (state is AuthOTPSendSuccess) // FIXME: Timer getting reset and starting on refresh of page
                                                     ? TimerButton(
                                                       onPressed: _resendOTP,
                                                       timerDuration:

@@ -53,7 +53,7 @@ class LoginActivityModel {
       deviceName: map['deviceName'],
       deviceType: capatilizeFirstLetter(map['deviceType'] ?? ""),
       lastLoggedIn: DateTime.parse(map['lastLoggedIn']).toLocal(),
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
     );
   }
 

@@ -223,7 +223,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                           ),
                           title: Text(users[index].name),
                           subtitle: Text(
-                            users[index].isClosed ? "Closed" : "Open",
+                            users[index].active ? "Open" : "Closed",
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
@@ -231,7 +231,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                           ),
                           trailing:
                               _loggedInUser.id == users[index].id &&
-                                      !users[index].isClosed
+                                      users[index].active
                                   ? IconButton(
                                     icon: Icon(Iconsax.unlock_copy),
                                     onPressed: () => _closeRoomPopupDialog(),
@@ -451,7 +451,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
           roomName = state.roomData.roomName;
           users = state.roomData.users;
 
-          isEditable = !loggedInUserData.isClosed;
+          isEditable = loggedInUserData.active;
 
           context.read<FilterCubit>().updateState(
             FilterState(id: state.id, data: state.data),
@@ -602,7 +602,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
               if (state is LendenRoomFetchSuccess) {
                 LendenUserModel loggedInUserData = state.roomData.users
                     .firstWhere((ele) => ele.id == _loggedInUser.id);
-                if (loggedInUserData.isClosed) {
+                if (!loggedInUserData.active) {
                   return SizedBox.shrink();
                 } else {
                   return CustomButton.customFloatingButton(Iconsax.add_copy, () {

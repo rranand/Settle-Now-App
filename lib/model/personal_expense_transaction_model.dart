@@ -124,8 +124,8 @@ class PersonalExpenseTransactionModel implements CommonTransactionField {
         amount: double.parse(map['amount'].toString()),
         description: map['description'],
         category: map['category'],
-        createdOn: DateTime.parse(map['createdOn']).toLocal(),
-        modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+        createdOn: DateTime.parse(map['created_on']).toLocal(),
+        modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
         roomData: RoomLinkedModel.fromMap(map['roomData']),
       );
     } else {
@@ -134,8 +134,8 @@ class PersonalExpenseTransactionModel implements CommonTransactionField {
         amount: double.parse(map['amount'].toString()),
         description: map['description'],
         category: map['category'],
-        createdOn: DateTime.parse(map['createdOn']).toLocal(),
-        modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+        createdOn: DateTime.parse(map['created_on']).toLocal(),
+        modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
         roomData: RoomLinkedModel.empty(),
       );
     }

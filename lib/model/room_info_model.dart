@@ -82,8 +82,8 @@ class RoomInfoModel {
       roomKey: map['roomKey'],
       roomLink: map['roomLink'],
       createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
-      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
+      modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
       users: List<RoomUserModel>.from(
         (map['users']).map((x) => RoomUserModel.fromBasicInfoMap(x)),
       ),

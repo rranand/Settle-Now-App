@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/model/lenden_user_model.dart';
 import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/util/resolver/user_resolver.dart';
 
 class LendenDashboardModel {
   bool hasData = true;
@@ -67,14 +68,14 @@ class LendenDashboardModel {
   factory LendenDashboardModel.fromMap(Map<String, dynamic> map) {
     return LendenDashboardModel(
       id: map['id'],
-      roomName: map['roomName'],
+      roomName: map['room_name'],
       status: map['status'],
-      createdBy: UserModel.fromBasicInfoMap(map['createdBy']),
-      createdOn: DateTime.parse(map['createdOn']).toLocal(),
-      modifiedOn: DateTime.parse(map['modifiedOn']).toLocal(),
+      createdBy: UserResolver.instance.resolve(map['created_by']),
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
+      modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
       amount: double.parse(map['amount'].toString()),
       users: List<LendenUserModel>.from(
-        (map['users']).map((x) => LendenUserModel.fromBasicInfoMap(x)),
+        (map['users']).map((x) => LendenUserModel.fromUserResolver(x)),
       ),
     );
   }

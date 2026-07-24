@@ -10,7 +10,7 @@ class FriendCubit extends Cubit<FriendState> {
 
   FriendCubit(this.repo) : super(FriendInitial());
 
-  void fetchLoginData() async {
+  void fetchData() async {
     emit(FriendLoading());
 
     try {

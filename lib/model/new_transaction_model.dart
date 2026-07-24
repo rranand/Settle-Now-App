@@ -113,7 +113,7 @@ class NewTransactionModel {
     return NewTransactionModel(
       amount: map['amount'] as double,
       description: map['description'] as String,
-      createdOn: DateTime.parse(map['createdOn'] as String),
+      createdOn: DateTime.parse(map['created_on'] as String),
       members: List<UserAmountModel>.from(
         (map['members'] as List<int>).map<UserAmountModel>(
           (x) => UserAmountModel.fromMap(x as Map<String, dynamic>),
