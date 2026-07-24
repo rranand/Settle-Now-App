@@ -63,29 +63,9 @@ class AuthRepository {
     }
   }
 
-  Future<bool> sendOTP(String email) async {
+  Future<void> sendOTP(String email) async {
     try {
-      final isOTPSend = await _dataProvider.sendOTP(email);
-      return isOTPSend;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<bool> sendSignupOTP() async {
-    try {
-      final isOTPSend = await _dataProvider.sendSignupOTP();
-      return isOTPSend;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(String otp) async {
-    try {
-      final userData = await _dataProvider.validateSignupOTP(otp);
-
-      return userData;
+      await _dataProvider.sendOTP(email);
     } catch (e) {
       rethrow;
     }

@@ -60,7 +60,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (_isOTPSent.value) {
       if (_signupFormKey.currentState!.validate()) {
         context.read<AuthBloc>().add(
-          AuthSignupOTPValidationRequested(otp: _otpController.text.trim()),
+          AuthSignupOTPValidationRequested(
+            _emailController.text.trim(),
+            _otpController.text.trim(),
+          ),
         );
       }
     } else {
@@ -76,7 +79,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _resendOTP() {
-    context.read<AuthBloc>().add(AuthSignupOTPRequested());
+    context.read<AuthBloc>().add(
+      AuthSignupOTPRequested(_emailController.text.trim()),
+    );
   }
 
   bool _isScreenLoading(AuthState state) {

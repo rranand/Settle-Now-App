@@ -244,7 +244,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      await repo.sendSignupOTP();
+      await repo.sendOTP(event.email);
       emit(AuthOTPSendSuccess(true));
       return emit(AuthSignUpSuccess(isSuccess: true));
     } catch (e) {
@@ -259,7 +259,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      Pair<UserModel, PreferenceModel> pairData = await repo.validateSignupOTP(
+      Pair<UserModel, PreferenceModel> pairData = await repo.loginUser(
+        event.email,
         event.otp,
       );
       return emit(AuthLoginSuccess(pairData.first, pairData.second));

@@ -223,49 +223,14 @@ class AuthDataProvider {
     }
   }
 
-  Future<bool> sendOTP(String email) async {
+  Future<void> sendOTP(String email) async {
     try {
       Map<String, String> jsonInputData = {'email': email};
       final response = await createAPICall('auth/otp', "post", jsonInputData);
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
-      } else {
-        throw data['message'];
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // TODO: Check is this required
-  Future<bool> sendSignupOTP() async {
-    try {
-      final response = await createAPICall('auth/signup/otp', "get", {});
-
-      final data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        throw data['message'];
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  // TODO: Check is this required
-  Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(String otp) async {
-    try {
-      final response = await createAPICall('auth/signup/otp', "patch", {
-        "otp": otp,
-      });
-
-      final data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
-        final userInfoData = await getOwnUserInfo();
-        return userInfoData;
+        return;
       } else {
         throw data['message'];
       }
