@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
 import 'package:settlenow/constant/api_constant.dart';
 import 'package:settlenow/model/api_response_model.dart';
+import 'package:settlenow/util/functions/additional_function.dart';
 import 'package:settlenow/util/token_manager/session_manager.dart';
 
 final Set<String> publicURL = {
@@ -43,8 +44,9 @@ Future<ApiResponseModel> createAPICall(
   dynamic jsonData,
 ) async {
   if (kDebugMode) {
-    debugPrint("${"-" * 30}\nRequested URL: $url\nMethod: $methodName");
+    logDebug("${"-" * 30}\nRequested URL: $url\nMethod: $methodName");
   }
+
   Function httpType = getHttpMethod(methodName);
   try {
     String host = "https://prod-api.settlenow.in/";
@@ -80,7 +82,7 @@ Future<ApiResponseModel> createAPICall(
         .timeout(Duration(seconds: 20));
 
     if (kDebugMode) {
-      debugPrint(
+      logDebug(
         "${"-" * 30}\nURL: $url\nMethod: $methodName\nHeader: $headersMap\nBody: $jsonData\nStatusCode: ${res.statusCode}\nResponseBody: ${res.body}",
       );
     }

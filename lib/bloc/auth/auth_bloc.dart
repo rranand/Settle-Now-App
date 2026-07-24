@@ -89,9 +89,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           idToken,
         );
         return emit(AuthLoginSuccess(pairData.first, pairData.second));
+      } on GoogleSignInException catch (e) {
+        String errMsg = "Google SignIn Failed";
+        if (e.code == GoogleSignInExceptionCode.canceled) {
+          errMsg = "Google SignIn : Cancelled By User";
+        }
+        await additionalLogoutAction();
+        return emit(AuthSignUpFailure(errMsg));
       } catch (e) {
         await additionalLogoutAction();
-        return emit(AuthLoginFailure("Google SignIn Failed"));
+        return emit(AuthLoginFailure(e.toString()));
       }
     }
   }
@@ -119,9 +126,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         idToken,
       );
       return emit(AuthLoginSuccess(pairData.first, pairData.second));
+    } on GoogleSignInException catch (e) {
+      String errMsg = "Google SignIn Failed";
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        errMsg = "Google SignIn : Cancelled By User";
+      }
+      await additionalLogoutAction();
+      return emit(AuthSignUpFailure(errMsg));
     } catch (e) {
       await additionalLogoutAction();
-      return emit(AuthLoginFailure("Google SignIn Failed"));
+      return emit(AuthLoginFailure(e.toString()));
     }
   }
 
@@ -153,16 +167,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       if (idToken.isEmpty) {
         await additionalLogoutAction();
-        return emit(AuthSignUpFailure("Google Signup Failed"));
+        return emit(AuthSignUpFailure("Google SignUp Failed"));
       }
       Pair<UserModel, PreferenceModel> pairData = await repo.signupUsingGoogle(
         email,
         idToken,
       );
       return emit(AuthLoginSuccess(pairData.first, pairData.second));
-    } on GoogleSignInException catch (_) {
+    } on GoogleSignInException catch (e) {
+      String errMsg = "Google SignUp Failed";
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        errMsg = "Google SignUp : Cancelled By User";
+      }
       await additionalLogoutAction();
-      return emit(AuthSignUpFailure("Google Signup Failed"));
+      return emit(AuthSignUpFailure(errMsg));
     } catch (e) {
       await additionalLogoutAction();
       return emit(AuthSignUpFailure(e.toString()));
@@ -192,9 +210,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         Pair<UserModel, PreferenceModel> pairData = await repo
             .signupUsingGoogle(email, idToken);
         return emit(AuthLoginSuccess(pairData.first, pairData.second));
-      } on GoogleSignInException catch (_) {
+      } on GoogleSignInException catch (e) {
+        String errMsg = "Google SignUp Failed";
+        if (e.code == GoogleSignInExceptionCode.canceled) {
+          errMsg = "Google SignUp : Cancelled By User";
+        }
         await additionalLogoutAction();
-        return emit(AuthSignUpFailure("Google Signup Failed"));
+        return emit(AuthSignUpFailure(errMsg));
       } catch (e) {
         await additionalLogoutAction();
         return emit(AuthSignUpFailure(e.toString()));

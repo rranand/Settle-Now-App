@@ -1,5 +1,7 @@
 import 'dart:math';
+import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -165,4 +167,10 @@ void updateHandler() {
 
 double getPrecisedAmount(double amount) {
   return (amount * 100).round() / 100;
+}
+
+void logDebug(String text) {
+  if (kDebugMode) {
+    developer.log(text);
+  }
 }

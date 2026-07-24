@@ -38,7 +38,7 @@ class AuthDataProvider {
       final response = await createAPICall('auth/otp', "patch", jsonInputData);
 
       final data = jsonDecode(response.body);
-      if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.statusCode == 201) {
         AuthModel authData = SessionManager.instance.getAuth().fromMap(data);
         await SessionManager.instance.setAuth(authData);
 
@@ -83,7 +83,10 @@ class AuthDataProvider {
       );
 
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
+        AuthModel authData = SessionManager.instance.getAuth().fromMap(data);
+        await SessionManager.instance.setAuth(authData);
+
         final userInfoData = await getOwnUserInfo();
         return userInfoData;
       } else {
@@ -125,7 +128,10 @@ class AuthDataProvider {
       );
 
       final data = jsonDecode(response.body);
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
+        AuthModel authData = SessionManager.instance.getAuth().fromMap(data);
+        await SessionManager.instance.setAuth(authData);
+
         final userInfoData = await getOwnUserInfo();
         return userInfoData;
       } else {
@@ -207,7 +213,7 @@ class AuthDataProvider {
 
       final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         return;
       } else {
         throw data['message'];
@@ -233,6 +239,7 @@ class AuthDataProvider {
     }
   }
 
+  // TODO: Check is this required
   Future<bool> sendSignupOTP() async {
     try {
       final response = await createAPICall('auth/signup/otp', "get", {});
@@ -248,6 +255,7 @@ class AuthDataProvider {
     }
   }
 
+  // TODO: Check is this required
   Future<Pair<UserModel, PreferenceModel>> validateSignupOTP(String otp) async {
     try {
       final response = await createAPICall('auth/signup/otp', "patch", {
