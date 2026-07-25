@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/room/room_settle/room_settle_cubit.dart';
-import 'package:settlenow/model/room_settle_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/card/settle_card.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomSettleScreen extends StatefulWidget {
   final String roomID;
@@ -34,7 +31,7 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
     return SliverLayoutBuilder(
       builder: (context, constraint) {
         final cardSizeInfo = calculateCrossAspectRatio(
-      context,
+          context,
           constraint.crossAxisExtent,
           EdgeInsets.zero,
         );

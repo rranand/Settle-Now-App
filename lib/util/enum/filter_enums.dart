@@ -13,30 +13,3 @@ extension SortByExtension on SortBy {
   }
 }
 
-enum SortRules { ascending, descending }
-
-extension SortRulesExtension on SortRules {
-  String get label {
-    switch (this) {
-      case SortRules.ascending:
-        return 'Ascending';
-      case SortRules.descending:
-        return 'Descending';
-    }
-  }
-}
-
-enum LendenType { gave, owe, none }
-
-extension LendenTypeExtension on LendenType {
-  String get label {
-    switch (this) {
-      case LendenType.gave:
-        return 'Gave';
-      case LendenType.owe:
-        return 'Owe';
-      case LendenType.none:
-        return 'None';
-    }
-  }
-}

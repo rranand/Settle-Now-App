@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:settlenow/model/common_transaction_field.dart';
-import 'package:settlenow/model/lenden_user_model.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class LendenTransactionModel implements CommonTransactionField {
   bool hasData = true;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow/model/activity_model.dart';
-import 'package:settlenow/util/enum/activity_type.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'room_activity_state.dart';
 
@@ -10,11 +10,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
   final RoomRepository repo;
   RoomActivityCubit(this.repo) : super(RoomActivityInitial());
 
-  void fetchData(
-    String id,
-     {
-    bool forceRefresh = false,
-  }) async {
+  void fetchData(String id, {bool forceRefresh = false}) async {
     if (!forceRefresh &&
         state is RoomActivityLoading &&
         (state as RoomActivityLoading).id == id) {
@@ -22,7 +18,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
     }
     emit(RoomActivityLoading(id));
     try {
-      List<ActivityModel> data = await repo.fetchActivity(id, );
+      List<ActivityModel> data = await repo.fetchActivity(id);
       Map<String, List<ActivityModel>> transactionWiseActivity = {};
 
       for (int i = data.length - 1; i >= 0; i--) {

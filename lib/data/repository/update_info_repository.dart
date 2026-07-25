@@ -1,5 +1,5 @@
-import 'package:settlenow/data/data_provider/update_info_data_provider.dart';
-import 'package:settlenow/model/update_info_model.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class UpdateInfoRepository {
   final UpdateInfoDataProvider _dataProvider;

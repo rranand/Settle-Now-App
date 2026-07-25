@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
 
 class LinearGraphCard extends StatelessWidget {

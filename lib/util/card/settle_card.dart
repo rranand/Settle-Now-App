@@ -2,17 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/room/room_activity/room_activity_cubit.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
-import 'package:settlenow/model/activity_model.dart';
-import 'package:settlenow/model/room_settle_model.dart';
-import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/util/functions/text_function.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/stacked_image.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class SettleCard extends StatelessWidget {
   final String roomID;

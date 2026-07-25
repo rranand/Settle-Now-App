@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
-import 'package:settlenow/model/activity_model.dart';
-import 'package:settlenow/util/enum/activity_type.dart';
-import 'package:settlenow/util/functions/text_function.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class ActivityCard extends StatefulWidget {
   final ActivityModel data;

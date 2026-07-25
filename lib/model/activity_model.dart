@@ -1,4 +1,4 @@
-import 'package:settlenow/util/enum/activity_type.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class ActivityModel {
   bool hasData = true;
@@ -142,7 +142,8 @@ class ActivityDetailValue {
   factory ActivityDetailValue.fromMap(Map<String, dynamic> map) {
     return ActivityDetailValue(
       description: map['description'],
-      amount: map['amount'] != null ? double.parse(map['amount'].toString()) : null,
+      amount:
+          map['amount'] != null ? double.parse(map['amount'].toString()) : null,
       user: map['user'],
     );
   }

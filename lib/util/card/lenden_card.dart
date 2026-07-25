@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
-import 'package:settlenow/model/lenden_dashboard_model.dart';
+import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/functions/text_function.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/stacked_image.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/util/util_core.dart';
 import 'package:shimmer/shimmer.dart';
 
 class LendenCard extends StatelessWidget {

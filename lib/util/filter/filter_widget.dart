@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:omni_datetime_picker/omni_datetime_picker.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/widgets/gradient_widget.dart';
-import 'package:settlenow/util/widgets/image_widget.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class FilterWidget {
   static Widget buildEnumRadioGroup<T extends Enum>(

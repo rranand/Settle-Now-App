@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/constant/constant_core.dart';
 
 class CustomTheme {
   static ThemeData lightTheme(BuildContext context) {

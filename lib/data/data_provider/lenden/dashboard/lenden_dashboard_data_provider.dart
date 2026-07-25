@@ -1,18 +1,25 @@
 import 'dart:convert';
 
-import 'package:settlenow/model/lenden_dashboard_model.dart';
-import 'package:settlenow/util/handler/network_call.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenDashboardDataProvider {
-  Future<List<LendenDashboardModel>> fetchData() async {
+  Future<List<LendenDashboardModel>> fetchData(int alreadyHave) async {
     try {
-      final response = await createAPICall('lenden/all', "get", {});
+      final response = await createAPICall(
+        'lenden/all?alreadyHave=$alreadyHave',
+        "get",
+        {},
+      );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         List<LendenDashboardModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(LendenDashboardModel.fromMap(data['data'][i]));
+        final allRoomData = data['data'];
+        if (allRoomData != null) {
+          for (int i = 0; i < allRoomData.length; i++) {
+            arr.add(LendenDashboardModel.fromMap(allRoomData[i]));
+          }
         }
         return arr;
       } else {

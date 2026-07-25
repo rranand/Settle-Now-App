@@ -4,23 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_sticky_header/flutter_sticky_header.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/personal_expense/dashboard/personal_expense_dashboard_bloc.dart';
-import 'package:settlenow/constant/calender_constant.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/model/personal_expense_info_model.dart';
-import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/preference_provider.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
-import 'package:settlenow/util/card/personal_expense_card.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/gradient_widget.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class PersonalExpenseDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -117,7 +106,10 @@ class _PersonalExpenseDashboardScreenState
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
     context.read<PersonalExpenseDashboardBloc>().add(

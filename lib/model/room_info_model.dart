@@ -2,8 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:settlenow/model/room_user_model.dart';
-import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class RoomInfoModel {
   bool hasData = true;

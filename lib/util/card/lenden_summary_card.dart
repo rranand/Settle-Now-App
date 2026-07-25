@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
-import 'package:settlenow/model/lenden_room_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/custom/pair.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenSummaryCard extends StatelessWidget {
   final List<LendenTransactionModel> data;

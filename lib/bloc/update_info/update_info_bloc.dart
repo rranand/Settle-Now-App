@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/constant/remote_config_constant.dart';
-import 'package:settlenow/data/repository/update_info_repository.dart';
-import 'package:settlenow/firebase/firebase_remote.dart';
-import 'package:settlenow/model/update_info_model.dart';
-import 'package:settlenow/util/handler/platform_service.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/firebase/firebase_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'update_info_event.dart';
 part 'update_info_state.dart';

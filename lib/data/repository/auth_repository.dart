@@ -1,9 +1,6 @@
-import 'package:settlenow/data/data_provider/auth_data_provider.dart';
-import 'package:settlenow/model/login_activity_model.dart';
-import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/custom/pair.dart';
-import 'package:settlenow/util/resolver/user_resolver.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class AuthRepository {
   final AuthDataProvider _dataProvider;

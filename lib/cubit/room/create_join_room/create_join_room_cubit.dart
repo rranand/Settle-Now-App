@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/notification/notification_bloc.dart';
-import 'package:settlenow/bloc/room/dashboard/room_dashboard_bloc.dart';
-import 'package:settlenow/data/repository/room/dashboard/room_dashboard_repository.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/model/room_info_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'create_join_room_state.dart';
 
@@ -56,7 +49,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
 
   void joinNewRoom(
     String roomKey,
-    
+
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     showSnackbarWithChildWidget(
@@ -67,10 +60,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
     );
     CreateJoinRoomLoading();
     try {
-      NotificationModel notificationData = await repo.joinRoom(
-        roomKey,
-        
-      );
+      NotificationModel notificationData = await repo.joinRoom(roomKey);
       notificationBloc.add(NotificationOnAdd(data: [notificationData]));
       scaffoldMessenger.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
@@ -88,7 +78,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
   void inviteMember(
     String roomID,
     List<UserModel> users,
-    
+
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     String message = "";
@@ -110,7 +100,6 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
       List<NotificationModel> notificationData = await roomRepo.inviteNewMember(
         roomID,
         users,
-        
       );
       notificationBloc.add(NotificationOnAdd(data: notificationData));
       scaffoldMessenger.hideCurrentSnackBar();

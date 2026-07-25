@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/cubit/room/create_join_room/create_join_room_cubit.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/util/enum/transaction_type.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class DeepLinkJoin extends StatefulWidget {
   final TransactionType transactionType;
@@ -40,7 +39,6 @@ class _DeepLinkJoinState extends State<DeepLinkJoin> {
     super.initState();
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
-
       switch (widget.transactionType) {
         case TransactionType.room:
           {

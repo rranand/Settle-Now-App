@@ -2,12 +2,11 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
-Widget imageWidgetForCachedNetworkimage(
+Widget imageWidgetWithShimmerEffect(
   ImageProvider? imgProvider,
   bool isLast,
   BuildContext context,
@@ -100,13 +99,13 @@ Widget eachUserImageBuilder(
       height: imageRadius,
       progressIndicatorBuilder:
           (context, url, downloadProgress) =>
-              imageWidgetForCachedNetworkimage(null, isLast, context),
+              imageWidgetWithShimmerEffect(null, isLast, context),
       errorWidget:
           (context, url, error) =>
               errorImageWidget(eachUser, imageRadius, isLast),
       imageBuilder:
           (context, imageProvider) =>
-              imageWidgetForCachedNetworkimage(imageProvider, isLast, context),
+              imageWidgetWithShimmerEffect(imageProvider, isLast, context),
     );
   }
 

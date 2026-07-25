@@ -12,7 +12,7 @@ final class LendenRoomFetch extends LendenRoomEvent {
 final class LendenAddNewTransaction extends LendenRoomEvent {
   final LendenTransactionModel data;
 
-  LendenAddNewTransaction(this.data);
+  LendenAddNewTransaction({required this.data});
 }
 
 final class LendenCloseRoom extends LendenRoomEvent {
@@ -21,16 +21,22 @@ final class LendenCloseRoom extends LendenRoomEvent {
   LendenCloseRoom({required this.uid});
 }
 
+final class LendenFetchTransaction extends LendenRoomEvent {
+  final LendenTransactionModel data;
+
+  LendenFetchTransaction({required this.data});
+}
+
 final class LendenUpdateTransaction extends LendenRoomEvent {
   final LendenTransactionModel data;
 
-  LendenUpdateTransaction(this.data);
+  LendenUpdateTransaction({required this.data});
 }
 
 final class LendenDeleteTransaction extends LendenRoomEvent {
   final String expenseID;
 
-  LendenDeleteTransaction(this.expenseID);
+  LendenDeleteTransaction({required this.expenseID});
 }
 
 final class LendenRoomReset extends LendenRoomEvent {}

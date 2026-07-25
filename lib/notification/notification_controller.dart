@@ -2,8 +2,8 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow/notification/notification_interface_handler.dart';
-import 'package:settlenow/data/repository/notification_repository.dart';
+import 'package:settlenow/notification/notification_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/router/router_constant.dart';
 
 class NotificationController {

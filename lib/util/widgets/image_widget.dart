@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/util/util_core.dart';
 
 Widget imageWidgetForCachedNetworkimage(
   BuildContext context,

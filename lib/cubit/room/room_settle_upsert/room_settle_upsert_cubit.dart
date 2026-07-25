@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/cubit/room/room_settle/room_settle_cubit.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow/model/room_settle_model.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
 
 part 'room_settle_upsert_state.dart';
 

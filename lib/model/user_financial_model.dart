@@ -1,5 +1,4 @@
-import 'package:settlenow/core.dart';
-import 'package:settlenow/model/room_user_model.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class UserFinancialData {
   final UserModel user;

@@ -1,13 +1,5 @@
-import 'package:settlenow/data/data_provider/room/each_room/room_data_provider.dart';
-import 'package:settlenow/model/activity_model.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/model/room_info_model.dart';
-import 'package:settlenow/model/room_settle_model.dart';
-import 'package:settlenow/model/room_user_model.dart';
-import 'package:settlenow/model/transaction_model.dart';
-import 'package:settlenow/model/user_amount_model.dart';
-import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class RoomRepository {
   final RoomDataProvider _dataProvider;

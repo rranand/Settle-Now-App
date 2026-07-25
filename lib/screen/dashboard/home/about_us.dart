@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
-import 'package:settlenow/util/widgets/gradient_widget.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
+import 'package:settlenow/util/util_core.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutUsPage extends StatefulWidget {

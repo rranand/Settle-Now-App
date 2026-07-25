@@ -5,39 +5,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/room/each_room/room_bloc.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/filter/filter_cubit.dart';
-import 'package:settlenow/cubit/room/create_join_room/create_join_room_cubit.dart';
-import 'package:settlenow/cubit/room/room_activity/room_activity_cubit.dart';
-import 'package:settlenow/cubit/room/room_close/room_close_cubit.dart';
-import 'package:settlenow/cubit/room/room_close_request/room_close_request_cubit.dart';
-import 'package:settlenow/cubit/room/room_info/room_info_cubit.dart';
-import 'package:settlenow/cubit/room/room_settle/room_settle_cubit.dart';
-import 'package:settlenow/cubit/room/room_user/room_user_cubit.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+
+import 'package:settlenow/cubit/cubit_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
-import 'package:settlenow/model/room_user_model.dart';
-import 'package:settlenow/model/transaction_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/screen/dashboard/room/sub_section/room_analysis_screen.dart';
-import 'package:settlenow/screen/dashboard/room/sub_section/room_settle_screen.dart';
-import 'package:settlenow/screen/dashboard/room/sub_section/room_transaction_screen.dart';
-import 'package:settlenow/screen/dashboard/room/sub_section/room_user_screen.dart';
-import 'package:settlenow/util/custom/custom_gesture_detector.dart';
-import 'package:settlenow/util/custom/multi_value_listenable_builder.dart';
-import 'package:settlenow/util/enum/transaction_type.dart';
-import 'package:settlenow/util/filter/filter_sheet.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/functions/room_function.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/navbar_widget.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/screen/screen_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomExpenseScreen extends StatefulWidget {
   final String id;
@@ -242,15 +219,15 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
     final roomInfoCubit = context.read<RoomInfoCubit>();
 
-    await roomInfoCubit.fetchData(
-      widget.id,
-      forceRefresh: true,
-    );
+    await roomInfoCubit.fetchData(widget.id, forceRefresh: true);
   }
 
   bool notificationPredicateHandler(ScrollNotification notification) {
@@ -333,9 +310,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       final state = context.read<RoomBloc>().state;
       if (!(state is RoomFetchSuccess && state.id == widget.id)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.read<RoomInfoCubit>().fetchData(
-            widget.id,
-          );
+          context.read<RoomInfoCubit>().fetchData(widget.id);
         });
       }
     }
@@ -542,14 +517,9 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             state.data.users,
           );
           context.read<RoomBloc>().add(
-            RoomFetch(
-              id: widget.id,
-              users: state.data.users,
-            ),
+            RoomFetch(id: widget.id, users: state.data.users),
           );
-          context.read<RoomActivityCubit>().fetchData(
-            widget.id,
-          );
+          context.read<RoomActivityCubit>().fetchData(widget.id);
         }
       },
       builder: (context, state) {
@@ -804,9 +774,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                         onTap: () {
                           context
                               .read<RoomCloseRequestCubit>()
-                              .closeRoomRequest(
-                                widget.id,
-                              );
+                              .closeRoomRequest(widget.id);
                         },
                       ),
                     ],

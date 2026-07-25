@@ -4,29 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/lenden/room/lenden_room_bloc.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/filter/filter_cubit.dart';
-import 'package:settlenow/cubit/lenden/create_room/create_room_cubit.dart';
-import 'package:settlenow/model/lenden_room_model.dart';
-import 'package:settlenow/model/lenden_user_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/util/card/lenden_expense_card.dart';
-import 'package:settlenow/util/card/lenden_summary_card.dart';
-import 'package:settlenow/util/enum/transaction_type.dart';
-import 'package:settlenow/util/filter/filter_sheet.dart';
-import 'package:settlenow/util/handler/filter_sort.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/gradient_widget.dart';
-import 'package:settlenow/util/widgets/image_widget.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenExpenseScreen extends StatefulWidget {
   final String id;
@@ -342,7 +326,10 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
     context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));

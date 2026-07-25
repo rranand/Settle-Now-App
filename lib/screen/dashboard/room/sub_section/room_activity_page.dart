@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/room/room_activity/room_activity_cubit.dart';
-import 'package:settlenow/cubit/room/room_info/room_info_cubit.dart';
-import 'package:settlenow/model/activity_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
-import 'package:settlenow/util/card/activity_card.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomActivityPage extends StatefulWidget {
   final String id;
@@ -51,13 +48,13 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
-    context.read<RoomActivityCubit>().fetchData(
-      widget.id,
-      forceRefresh: true,
-    );
+    context.read<RoomActivityCubit>().fetchData(widget.id, forceRefresh: true);
   }
 
   @override

@@ -1,6 +1,5 @@
 import 'dart:convert';
-
-import 'package:settlenow/core.dart';
+import 'package:settlenow/model/user_model.dart';
 
 class RoomSettleModel {
   bool hasData = true;

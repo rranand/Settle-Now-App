@@ -6,30 +6,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/room/dashboard/room_dashboard_bloc.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/room/create_join_room/create_join_room_cubit.dart';
-import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/model/room_info_model.dart';
-import 'package:settlenow/model/room_user_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/preference_provider.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
-import 'package:settlenow/util/card/room_card.dart';
-import 'package:settlenow/util/custom/custom_gesture_detector.dart';
-import 'package:settlenow/util/enum/enums.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/functions/validator.dart';
-import 'package:settlenow/util/handler/filter_sort.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/gradient_widget.dart';
-import 'package:settlenow/util/widgets/navbar_widget.dart';
-import 'package:settlenow/util/widgets/rounded_navbar_widget.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -101,10 +84,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
 
       if (state is! RoomDashboardFetchSuccess) {
         context.read<RoomDashboardBloc>().add(
-          RoomDashboardFetch(
-            isActiveRoom: true,
-            isFreshFetch: false,
-          ),
+          RoomDashboardFetch(isActiveRoom: true, isFreshFetch: false),
         );
       }
 
@@ -112,10 +92,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
         if (!_isInActiveDataFetched.value) {
           _isInActiveDataFetched.value = true;
           context.read<RoomDashboardBloc>().add(
-            RoomDashboardFetch(
-              isActiveRoom: false,
-              isFreshFetch: false,
-            ),
+            RoomDashboardFetch(isActiveRoom: false, isFreshFetch: false),
           );
         }
       });
@@ -251,7 +228,10 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
     context.read<RoomDashboardBloc>().add(

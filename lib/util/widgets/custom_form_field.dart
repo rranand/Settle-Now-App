@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/util/enum/enums.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class CustomFormField {
   static InputBorder _inputBorder(

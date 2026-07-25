@@ -1,14 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
-import 'package:settlenow/data/repository/lenden/room/lenden_room_repository.dart';
-import 'package:settlenow/model/lenden_dashboard_model.dart';
-import 'package:settlenow/model/lenden_room_model.dart';
-import 'package:settlenow/model/lenden_user_model.dart';
-import 'package:settlenow/util/custom/pair.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'lenden_room_event.dart';
 part 'lenden_room_state.dart';
@@ -21,6 +16,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     : super(LendenRoomInitial()) {
     on<LendenRoomFetch>(_lendenRoomFetch);
     on<LendenCloseRoom>(_lendenCloseRoom);
+    // on<LendenFetchTransaction>(_lendenFetchTransaction);
     on<LendenAddNewTransaction>(_lendenAddNewTransaction);
     on<LendenUpdateTransaction>(_lendenUpdateTransaction);
     on<LendenDeleteTransaction>(_lendenDeleteTransaction);
@@ -36,15 +32,40 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     if (state is LendenRoomLoading) return;
     emit(LendenRoomLoading());
     try {
-      Pair<LendenDashboardModel, List<LendenTransactionModel>> data = await repo
-          .fetchData(event.id);
+      Tuple<LendenDashboardModel, List<LendenTransactionModel>, bool> data =
+          await repo.fetchData(event.id);
 
       lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
-      return emit(LendenRoomFetchSuccess(event.id, data.first, data.second));
+      return emit(
+        LendenRoomFetchSuccess(
+          id: event.id,
+          roomData: data.first,
+          data: data.second,
+          fetchStatus: FetchStatus.done,
+          hasMoreData: data.third,
+        ),
+      );
     } catch (e) {
-      return emit(LendenRoomFailure(e.toString()));
+      return emit(LendenRoomFailure(error: e.toString()));
     }
   }
+
+  // void _lendenFetchTransaction(
+  //   LendenFetchTransaction event,
+  //   Emitter<LendenRoomState> emit,
+  // ) async {
+  //   if (state is LendenRoomLoading) return;
+  //   emit(LendenRoomLoading());
+  //   try {
+  //     Pair<LendenDashboardModel, List<LendenTransactionModel>> data = await repo
+  //         .fetchData(event.id);
+
+  //     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
+  //     return emit(LendenRoomFetchSuccess(event.id, data.first, data.second));
+  //   } catch (e) {
+  //     return emit(LendenRoomFailure(error: e.toString()));
+  //   }
+  // }
 
   void _lendenAddNewTransaction(
     LendenAddNewTransaction event,
@@ -60,7 +81,15 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
-    return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
+    return emit(
+      LendenRoomFetchSuccess(
+        id: oldData.id,
+        roomData: roomData,
+        data: data,
+        hasMoreData: oldData.hasMoreData,
+        fetchStatus: oldData.fetchStatus,
+      ),
+    );
   }
 
   void _lendenUpdateTransaction(
@@ -85,7 +114,15 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
-    return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
+    return emit(
+      LendenRoomFetchSuccess(
+        id: oldData.id,
+        roomData: roomData,
+        data: data,
+        hasMoreData: oldData.hasMoreData,
+        fetchStatus: oldData.fetchStatus,
+      ),
+    );
   }
 
   void _lendenDeleteTransaction(
@@ -111,7 +148,15 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
-    return emit(LendenRoomFetchSuccess(oldData.id, roomData, data));
+    return emit(
+      LendenRoomFetchSuccess(
+        id: oldData.id,
+        roomData: roomData,
+        data: data,
+        hasMoreData: oldData.hasMoreData,
+        fetchStatus: oldData.fetchStatus,
+      ),
+    );
   }
 
   void _lendenCloseRoom(
@@ -140,11 +185,25 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         modifiedOn: DateTime.now(),
       );
       lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
-      return emit(LendenRoomFetchSuccess(oldData.id, roomData, oldData.data));
-    } catch (e) {
-      emit(LendenRoomFailure(e.toString()));
       return emit(
-        LendenRoomFetchSuccess(oldData.id, oldData.roomData, oldData.data),
+        LendenRoomFetchSuccess(
+          id: oldData.id,
+          roomData: roomData,
+          data: oldData.data,
+          hasMoreData: oldData.hasMoreData,
+          fetchStatus: oldData.fetchStatus,
+        ),
+      );
+    } catch (e) {
+      emit(LendenRoomFailure(error: e.toString()));
+      return emit(
+        LendenRoomFetchSuccess(
+          id: oldData.id,
+          roomData: oldData.roomData,
+          data: oldData.data,
+          hasMoreData: oldData.hasMoreData,
+          fetchStatus: oldData.fetchStatus,
+        ),
       );
     }
   }
@@ -181,13 +240,25 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         scaffoldMessenger: event.scaffoldMessengerState,
       );
       return emit(
-        LendenRoomFetchSuccess(oldData.id, updatedData, oldData.data),
+        LendenRoomFetchSuccess(
+          id: oldData.id,
+          roomData: updatedData,
+          data: oldData.data,
+          hasMoreData: oldData.hasMoreData,
+          fetchStatus: oldData.fetchStatus,
+        ),
       );
     } catch (e) {
       event.scaffoldMessengerState.hideCurrentSnackBar();
-      emit(LendenRoomFailure(e.toString()));
+      emit(LendenRoomFailure(error: e.toString()));
       return emit(
-        LendenRoomFetchSuccess(oldData.id, oldData.roomData, oldData.data),
+        LendenRoomFetchSuccess(
+          id: oldData.id,
+          roomData: oldData.roomData,
+          data: oldData.data,
+          hasMoreData: oldData.hasMoreData,
+          fetchStatus: oldData.fetchStatus,
+        ),
       );
     }
   }
@@ -223,9 +294,15 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       return emit(LendenRoomInitial());
     } catch (e) {
       event.scaffoldMessengerState.hideCurrentSnackBar();
-      emit(LendenRoomFailure(e.toString()));
+      emit(LendenRoomFailure(error: e.toString()));
       return emit(
-        LendenRoomFetchSuccess(oldData.id, oldData.roomData, oldData.data),
+        LendenRoomFetchSuccess(
+          id: oldData.id,
+          roomData: oldData.roomData,
+          data: oldData.data,
+          hasMoreData: oldData.hasMoreData,
+          fetchStatus: oldData.fetchStatus,
+        ),
       );
     }
   }

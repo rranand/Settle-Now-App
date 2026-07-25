@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/bloc/quicksplit/quicksplit_bloc.dart';
-import 'package:settlenow/data/repository/quicksplit_repository.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'settle_state.dart';
 
@@ -14,7 +14,7 @@ class SettleCubit extends Cubit<SettleState> {
   void settleExpense(
     String transactionID,
     String uid,
-    
+
     BuildContext context,
   ) async {
     if (state.settlingExpense.contains(transactionID)) {
@@ -26,7 +26,7 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.settleExpense(transactionID, );
+      await repo.settleExpense(transactionID);
       oldProcessingIDs.remove(transactionID);
       bloc.add(QuicksplitSettleRequest(transactionID, uid));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
@@ -39,12 +39,7 @@ class SettleCubit extends Cubit<SettleState> {
     }
   }
 
-  void optout(
-    String transactionID,
-    String uid,
-    
-    BuildContext context,
-  ) async {
+  void optout(String transactionID, String uid, BuildContext context) async {
     if (state.settlingExpense.contains(transactionID)) {
       return;
     }
@@ -54,7 +49,7 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.optout(transactionID, );
+      await repo.optout(transactionID);
       oldProcessingIDs.remove(transactionID);
       bloc.add(QuicksplitDeleteTransaction(transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
@@ -67,12 +62,7 @@ class SettleCubit extends Cubit<SettleState> {
     }
   }
 
-  void delete(
-    String transactionID,
-    String uid,
-    
-    BuildContext context,
-  ) async {
+  void delete(String transactionID, String uid, BuildContext context) async {
     if (state.settlingExpense.contains(transactionID)) {
       return;
     }
@@ -82,7 +72,7 @@ class SettleCubit extends Cubit<SettleState> {
     emit(state.copyWith(settlingExpense: oldProcessingIDs));
 
     try {
-      await repo.delete(transactionID, );
+      await repo.delete(transactionID);
       oldProcessingIDs.remove(transactionID);
       bloc.add(QuicksplitDeleteTransaction(transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));

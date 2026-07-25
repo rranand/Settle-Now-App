@@ -1,13 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:settlenow/bloc/room/dashboard/room_dashboard_bloc.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow/model/room_info_model.dart';
-import 'package:settlenow/model/room_user_model.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'room_info_state.dart';
 
@@ -17,11 +14,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
 
   RoomInfoCubit(this._roomDashboardBloc, this.repo) : super(RoomInfoInitial());
 
-  Future<void> fetchData(
-    String id,
-     {
-    bool forceRefresh = false,
-  }) async {
+  Future<void> fetchData(String id, {bool forceRefresh = false}) async {
     if (state is RoomInfoLoading) return;
     emit(RoomInfoLoading());
     try {
@@ -42,7 +35,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       if (oldData.hasData && !forceRefresh) {
         return emit(RoomInfoSuccess(oldData, false));
       } else {
-        RoomInfoModel data = await repo.fetchRoomInfo(id, );
+        RoomInfoModel data = await repo.fetchRoomInfo(id);
         return emit(RoomInfoSuccess(data, false));
       }
     } catch (e) {
@@ -110,7 +103,6 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
   }
 
   void updateRoomName(
-    
     String roomName,
     ScaffoldMessengerState scaffoldMessengerState,
   ) async {
@@ -125,7 +117,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {
-      await repo.updateRoom(oldData.data.id,  roomName);
+      await repo.updateRoom(oldData.data.id, roomName);
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(
         "Room Name Updated",
@@ -147,7 +139,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
 
   void deleteRoom(
     String id,
-    
+
     bool isRemoving,
     ScaffoldMessengerState scaffoldMessengerState,
   ) async {
@@ -167,7 +159,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       scaffoldMessenger: scaffoldMessengerState,
     );
     try {
-      await repo.deleteRoom(id, );
+      await repo.deleteRoom(id);
       _roomDashboardBloc.add(RoomDashboardOnDeleteRoom(id: id));
       scaffoldMessengerState.hideCurrentSnackBar();
       showSnackbarWithChildWidget(

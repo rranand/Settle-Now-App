@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:settlenow/util/token_manager/token_storage.dart';
+import 'package:settlenow/util/util_core.dart';
 import 'package:uuid/uuid.dart';
 
 class AuthModel {

@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
-import 'package:settlenow/bloc/notification/notification_bloc.dart';
-import 'package:settlenow/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
-import 'package:settlenow/data/repository/lenden/room/lenden_room_repository.dart';
-import 'package:settlenow/model/lenden_dashboard_model.dart';
-import 'package:settlenow/model/lenden_user_model.dart';
-import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'create_room_state.dart';
 

@@ -3,22 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/quicksplit/quicksplit_bloc.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/model/transaction_model.dart';
-import 'package:settlenow/model/user_amount_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/preference_provider.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/util/card/quick_split_card.dart';
-import 'package:settlenow/util/handler/filter_sort.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class QuickSplitDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -70,7 +61,10 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
     context.read<QuicksplitBloc>().add(QuicksplitFetch());

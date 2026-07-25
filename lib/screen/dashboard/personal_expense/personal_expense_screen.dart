@@ -2,28 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
-import 'package:settlenow/constant/calender_constant.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/core.dart';
-import 'package:settlenow/cubit/filter/filter_cubit.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
 import 'package:settlenow/router/router_constant.dart';
-import 'package:settlenow/screen/dashboard/personal_expense/sub_section/personal_expense_categories_section_screen.dart';
-import 'package:settlenow/screen/dashboard/personal_expense/sub_section/personal_expense_transaction_screen.dart';
-import 'package:settlenow/util/custom/custom_gesture_detector.dart';
-import 'package:settlenow/util/enum/transaction_type.dart';
-import 'package:settlenow/util/filter/filter_sheet.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/functions/text_function.dart';
-import 'package:settlenow/util/graph/linear_graph_card.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/navbar_widget.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/screen/screen_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class PersonalExpenseScreen extends StatefulWidget {
   final String month;
@@ -120,10 +107,7 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
       if (!(state is PersonalMonthlyExpenseFetchSuccess &&
           state.id == (widget.year + widget.month).toLowerCase())) {
         context.read<PersonalMonthlyExpenseBloc>().add(
-          PersonalMonthlyExpenseFetch(
-            year: widget.year,
-            month: widget.month,
-          ),
+          PersonalMonthlyExpenseFetch(year: widget.year, month: widget.month),
         );
       }
     }
@@ -131,14 +115,14 @@ class _PersonalExpenseScreenState extends State<PersonalExpenseScreen> {
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
     context.read<PersonalMonthlyExpenseBloc>().add(
-      PersonalMonthlyExpenseFetch(
-        year: widget.year,
-        month: widget.month,
-      ),
+      PersonalMonthlyExpenseFetch(year: widget.year, month: widget.month),
     );
   }
 

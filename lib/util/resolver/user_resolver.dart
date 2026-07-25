@@ -1,4 +1,4 @@
-import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class UserResolver {
   UserResolver._();

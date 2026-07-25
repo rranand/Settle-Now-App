@@ -1,9 +1,6 @@
-import 'package:settlenow/data/data_provider/room/dashboard/room_dashboard_data_provider.dart';
-import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/model/room_info_model.dart';
-import 'package:settlenow/model/room_user_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/util/custom/pair.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomDashboardRepository {
   final RoomDashboardDataProvider _dataProvider;
@@ -13,13 +10,11 @@ class RoomDashboardRepository {
   Future<Pair<List<RoomInfoModel>, bool>> fetchData(
     bool isActiveRoom,
     int alreadyHave,
-    
   ) async {
     try {
       Pair<List<RoomInfoModel>, bool> data = await _dataProvider.fetchData(
         isActiveRoom,
         alreadyHave,
-        
       );
       return data;
     } catch (e) {
@@ -27,15 +22,10 @@ class RoomDashboardRepository {
     }
   }
 
-  Future<RoomInfoModel> createRoom(
-    String roomName,
-    UserModel user,
-    
-  ) async {
+  Future<RoomInfoModel> createRoom(String roomName, UserModel user) async {
     try {
       Pair<RoomInfoModel, String> roomData = await _dataProvider.createRoom(
         roomName,
-        
       );
       RoomInfoModel data = roomData.first;
       data.createdBy = user;
@@ -52,11 +42,10 @@ class RoomDashboardRepository {
     }
   }
 
-  Future<NotificationModel> joinRoom(String roomKey, ) async {
+  Future<NotificationModel> joinRoom(String roomKey) async {
     try {
       NotificationModel notificationData = await _dataProvider.joinRoom(
         roomKey,
-        
       );
       return notificationData;
     } catch (e) {

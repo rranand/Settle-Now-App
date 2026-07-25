@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/lenden/room/lenden_room_bloc.dart';
-import 'package:settlenow/bloc/personal_expense/monthly_expense/personal_expense_bloc.dart';
-import 'package:settlenow/bloc/quicksplit/quicksplit_bloc.dart';
-import 'package:settlenow/bloc/room/each_room/room_bloc.dart';
-import 'package:settlenow/core.dart';
-import 'package:settlenow/data/repository/lenden/room/lenden_room_repository.dart';
-import 'package:settlenow/data/repository/personal_expense/monthly_expense/personal_expense_repository.dart';
-import 'package:settlenow/data/repository/quicksplit_repository.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/util/enum/transaction_type.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'new_transaction_state.dart';
 
@@ -69,7 +61,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
 
               data,
             );
-            bloc.add(LendenAddNewTransaction(newData));
+            bloc.add(LendenAddNewTransaction(data: newData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
             );
@@ -168,7 +160,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
 
               data,
             );
-            bloc.add(LendenUpdateTransaction(updatedData));
+            bloc.add(LendenUpdateTransaction(data: updatedData));
             return emit(
               NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
             );
@@ -246,7 +238,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final bool isDeleted = await repoLD.delete(roomID, expenseID);
 
             if (isDeleted) {
-              bloc.add(LendenDeleteTransaction(expenseID));
+              bloc.add(LendenDeleteTransaction(expenseID: expenseID));
               return emit(NewTransactionSuccess(TransactionModel.empty()));
             } else {
               return emit(NewTransactionFailure("Something went wrong!"));

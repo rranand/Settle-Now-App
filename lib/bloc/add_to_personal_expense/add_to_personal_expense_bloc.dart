@@ -1,10 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/bloc/quicksplit/quicksplit_bloc.dart';
-import 'package:settlenow/bloc/room/each_room/room_bloc.dart';
-import 'package:settlenow/data/repository/quicksplit_repository.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow/util/enum/transaction_type.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'add_to_personal_expense_event.dart';
 part 'add_to_personal_expense_state.dart';

@@ -1,13 +1,8 @@
 import 'dart:convert';
 
-import 'package:settlenow/core.dart';
-import 'package:settlenow/firebase/firebase_messaging.dart';
-import 'package:settlenow/model/auth_model.dart';
-import 'package:settlenow/model/login_activity_model.dart';
-import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/util/handler/network_call.dart';
-import 'package:settlenow/util/handler/platform_service.dart';
-import 'package:settlenow/util/token_manager/session_manager.dart';
+import 'package:settlenow/firebase/firebase_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class AuthDataProvider {
   Future<Pair<UserModel, PreferenceModel>> loginUser(

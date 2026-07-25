@@ -1,21 +1,17 @@
-import 'package:settlenow/data/data_provider/lenden/room/lenden_room_data_provider.dart';
-import 'package:settlenow/model/lenden_dashboard_model.dart';
-import 'package:settlenow/model/lenden_room_model.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/util/custom/pair.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenRoomRepository {
   final LendenRoomDataProvider _dataProvider;
 
   LendenRoomRepository(this._dataProvider);
 
-  Future<Pair<LendenDashboardModel, List<LendenTransactionModel>>> fetchData(
-    String id,
-  ) async {
+  Future<Tuple<LendenDashboardModel, List<LendenTransactionModel>, bool>>
+  fetchData(String id) async {
     try {
-      Pair<LendenDashboardModel, List<LendenTransactionModel>> lendenData =
-          await _dataProvider.fetchData(id);
+      Tuple<LendenDashboardModel, List<LendenTransactionModel>, bool>
+      lendenData = await _dataProvider.fetchData(id);
       return lendenData;
     } catch (e) {
       rethrow;

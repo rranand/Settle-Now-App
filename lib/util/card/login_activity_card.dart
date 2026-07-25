@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/user/user_login_activity/user_login_activity_cubit.dart';
-import 'package:settlenow/model/login_activity_model.dart';
-import 'package:settlenow/util/enum/device_type.dart';
-import 'package:settlenow/util/enum/enums.dart';
-import 'package:settlenow/util/functions/text_function.dart';
-import 'package:settlenow/util/widgets/button_with_shimmer_effect.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LoginActivityCard extends StatelessWidget {
   final LoginActivityModel data;

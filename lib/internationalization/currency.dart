@@ -2,7 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
+import 'package:settlenow/util/util_core.dart';
 
 String formatCurrency(
   double amount,

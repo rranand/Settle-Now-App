@@ -1,15 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:settlenow/core.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/util/handler/network_call.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenRoomDataProvider {
-  Future<Pair<LendenDashboardModel, List<LendenTransactionModel>>> fetchData(
-    String id,
-  ) async {
+  Future<Tuple<LendenDashboardModel, List<LendenTransactionModel>, bool>>
+  fetchData(String id) async {
     try {
       final response = await createAPICall('lenden/$id', "get", {});
 
@@ -18,6 +15,7 @@ class LendenRoomDataProvider {
         LendenDashboardModel roomData = LendenDashboardModel.fromMap(
           data['data'],
         );
+        bool hasMore = data['data']['has_more'];
         List<LendenTransactionModel> arr = [];
         final allTransactions = data['data']['transactions'];
 
@@ -32,7 +30,7 @@ class LendenRoomDataProvider {
           }
         }
 
-        return Pair(roomData, arr);
+        return Tuple(roomData, arr, hasMore);
       } else {
         throw data['message'];
       }

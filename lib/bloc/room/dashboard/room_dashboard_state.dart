@@ -8,14 +8,14 @@ final class RoomDashboardInitial extends RoomDashboardState {}
 final class RoomDashboardLoading extends RoomDashboardState {}
 
 final class RoomDashboardFetchSuccess extends RoomDashboardState {
-  final FetchStatus activeStatus;
-  final FetchStatus inactiveStatus;
+  final bool activeHasMoreData;
+  final bool inactiveHasMoreData;
   final List<RoomInfoModel> activeData;
   final List<RoomInfoModel> inactiveData;
 
   RoomDashboardFetchSuccess({
-    required this.activeStatus,
-    required this.inactiveStatus,
+    required this.activeHasMoreData,
+    required this.inactiveHasMoreData,
     required this.activeData,
     required this.inactiveData,
   });

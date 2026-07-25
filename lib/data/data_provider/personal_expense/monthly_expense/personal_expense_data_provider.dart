@@ -1,8 +1,7 @@
 import 'dart:convert';
 
-import 'package:settlenow/core.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/util/handler/network_call.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class PersonalMonthlyExpenseDataProvider {
   Future<List<PersonalExpenseTransactionModel>> fetchData(
@@ -10,12 +9,7 @@ class PersonalMonthlyExpenseDataProvider {
     String month,
   ) async {
     try {
-      final response = await createAPICall(
-        'personal/$year/$month',
-        "get",
-        
-        {},
-      );
+      final response = await createAPICall('personal/$year/$month', "get", {});
 
       final data = jsonDecode(response.body);
 
@@ -43,7 +37,7 @@ class PersonalMonthlyExpenseDataProvider {
       final response = await createAPICall(
         'personal',
         "post",
-        
+
         newExpense.toCreateNewExpenseJson(),
       );
 
@@ -69,7 +63,7 @@ class PersonalMonthlyExpenseDataProvider {
       final response = await createAPICall(
         'personal',
         'put',
-        
+
         updatedExpense.toCreateNewExpenseJson(),
       );
 
@@ -86,12 +80,9 @@ class PersonalMonthlyExpenseDataProvider {
     }
   }
 
-  Future<bool> delete(
-    String expenseID,
-    String transactionType,
-  ) async {
+  Future<bool> delete(String expenseID, String transactionType) async {
     try {
-      final response = await createAPICall('personal', 'delete',  {
+      final response = await createAPICall('personal', 'delete', {
         "id": expenseID,
         "transactionType": transactionType,
       });

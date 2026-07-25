@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow/data/repository/lenden/dashboard/lenden_dashboard_repository.dart';
-import 'package:settlenow/model/lenden_dashboard_model.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
 
 part 'lenden_dashboard_event.dart';
 part 'lenden_dashboard_state.dart';
@@ -22,13 +22,28 @@ class LendenDashboardBloc
     LendenDashboardFetch event,
     Emitter<LendenDashboardState> emit,
   ) async {
+    List<LendenDashboardModel> oldData = [];
+
+    if (!event.isFreshFetch && state is LendenDashboardFetchSuccess) {
+      final allLendenRoomState = state as LendenDashboardFetchSuccess;
+      if (!allLendenRoomState.hasMoreData) {
+        return;
+      }
+      oldData = allLendenRoomState.data;
+    }
+
     if (state is LendenDashboardLoading) return;
     emit(LendenDashboardLoading());
     try {
-      List<LendenDashboardModel> data = await repo.fetchData();
-      return emit(LendenDashboardFetchSuccess(data));
+      List<LendenDashboardModel> data = await repo.fetchData(oldData.length);
+      bool hasMoreData = data.isNotEmpty;
+
+      data = [...oldData, ...data];
+      return emit(
+        LendenDashboardFetchSuccess(data: data, hasMoreData: hasMoreData),
+      );
     } catch (e) {
-      return emit(LendenDashboardFailure(e.toString()));
+      return emit(LendenDashboardFailure(error: e.toString()));
     }
   }
 
@@ -53,7 +68,12 @@ class LendenDashboardBloc
         }
       }
     }
-    return emit(LendenDashboardFetchSuccess(data));
+    return emit(
+      LendenDashboardFetchSuccess(
+        data: data,
+        hasMoreData: allLendenRoomState.hasMoreData,
+      ),
+    );
   }
 
   void _lendenDashboardOnUpdateRoom(
@@ -76,7 +96,12 @@ class LendenDashboardBloc
       if (index == -1) {
         data = [event.data, ...data];
       }
-      return emit(LendenDashboardFetchSuccess(data));
+      return emit(
+        LendenDashboardFetchSuccess(
+          data: data,
+          hasMoreData: allLendenRoomState.hasMoreData,
+        ),
+      );
     }
   }
 
@@ -88,7 +113,12 @@ class LendenDashboardBloc
       final allLendenRoomState = (state as LendenDashboardFetchSuccess);
       List<LendenDashboardModel> data = [...allLendenRoomState.data];
       data.removeWhere((ele) => ele.id == event.id);
-      return emit(LendenDashboardFetchSuccess(data));
+      return emit(
+        LendenDashboardFetchSuccess(
+          data: data,
+          hasMoreData: allLendenRoomState.hasMoreData,
+        ),
+      );
     }
   }
 

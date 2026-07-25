@@ -1,12 +1,10 @@
 import 'dart:convert';
 
-import 'package:settlenow/model/personal_expense_info_model.dart';
-import 'package:settlenow/util/handler/network_call.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class PersonalExpenseDashboardDataProvider {
-  Future<List<PersonalExpenseInfoModel>> fetchData(
-    int alreadyHave,
-  ) async {
+  Future<List<PersonalExpenseInfoModel>> fetchData(int alreadyHave) async {
     try {
       final response = await createAPICall(
         'personal/all?alreadyHave=${Uri.encodeQueryComponent(alreadyHave.toString())}',

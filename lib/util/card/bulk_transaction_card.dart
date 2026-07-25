@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/internationalization/currency.dart';
-import 'package:settlenow/model/bulk_transaction_model.dart';
-import 'package:settlenow/util/custom/category_parser.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class BulkTransactionCard extends StatefulWidget {
   final ValueNotifier<List<BulkTransactionModel>> data;

@@ -1,9 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow/cubit/room/room_user/room_user_cubit.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
-import 'package:settlenow/model/room_settle_model.dart';
-import 'package:settlenow/model/room_user_model.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
 
 part 'room_settle_state.dart';
 
@@ -12,17 +11,13 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   final RoomUserCubit roomUserCubit;
   RoomSettleCubit(this.repo, this.roomUserCubit) : super(RoomSettleInitial());
 
-  void fetchData(String id,  List<RoomUserModel> users) async {
+  void fetchData(String id, List<RoomUserModel> users) async {
     if (state is RoomSettleLoading && (state as RoomSettleLoading).id == id) {
       return;
     }
     emit(RoomSettleLoading(id));
     try {
-      List<RoomSettleModel> data = await repo.fetchSettleData(
-        id,
-        
-        users,
-      );
+      List<RoomSettleModel> data = await repo.fetchSettleData(id, users);
       return emit(RoomSettleSuccess(id, data));
     } catch (e) {
       return emit(RoomSettleFailure(e.toString()));

@@ -4,10 +4,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart';
-import 'package:settlenow/constant/api_constant.dart';
-import 'package:settlenow/model/api_response_model.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/token_manager/session_manager.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 final Set<String> publicURL = {
   "get server",
@@ -81,11 +80,11 @@ Future<ApiResponseModel> createAPICall(
             ))
         .timeout(Duration(seconds: 20));
 
-    if (kDebugMode) {
-      logDebug(
-        "${"-" * 30}\nURL: $url\nMethod: $methodName\nHeader: $headersMap\nBody: $jsonData\nStatusCode: ${res.statusCode}\nResponseBody: ${res.body}",
-      );
-    }
+    // if (kDebugMode) {
+    //   logDebug(
+    //     "${"-" * 30}\nURL: $url\nMethod: $methodName\nHeader: $headersMap\nBody: $jsonData\nStatusCode: ${res.statusCode}\nResponseBody: ${res.body}",
+    //   );
+    // }
 
     return ApiResponseModel(body: res.body, statusCode: res.statusCode);
   } on TimeoutException catch (_) {

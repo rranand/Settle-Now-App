@@ -1,5 +1,5 @@
-import 'package:settlenow/data/data_provider/notification_data_provider.dart';
-import 'package:settlenow/model/notification_model.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class NotificationRepository {
   final NotificationDataProvider _dataProvider;

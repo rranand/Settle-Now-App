@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow/data/repository/room/each_room/room_repository.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
 part 'room_close_request_state.dart';
 
 class RoomCloseRequestCubit extends Cubit<RoomCloseRequestState> {
   final RoomRepository repo;
   RoomCloseRequestCubit(this.repo) : super(RoomCloseRequestInitial());
 
-  void closeRoomRequest(String id, ) async {
+  void closeRoomRequest(String id) async {
     if (state is RoomCloseRequestSuccess &&
         (state as RoomCloseRequestSuccess).roomID == id) {
       return emit(
@@ -19,7 +19,7 @@ class RoomCloseRequestCubit extends Cubit<RoomCloseRequestState> {
     }
     emit(RoomCloseRequestLoading());
     try {
-      await repo.closeRoomRequest(id, );
+      await repo.closeRoomRequest(id);
       return emit(RoomCloseRequestSuccess(id, 1));
     } catch (e) {
       return emit(RoomCloseRequestFailure(id, e.toString()));

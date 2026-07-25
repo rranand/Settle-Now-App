@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:settlenow/model/auth_model.dart';
+import 'package:settlenow/model/model_core.dart';
 
 import 'token_storage_web.dart'
     if (dart.library.io) 'token_storage_stub.dart'

@@ -1,9 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:settlenow/data/repository/room/dashboard/room_dashboard_repository.dart';
-import 'package:settlenow/model/room_info_model.dart';
-import 'package:settlenow/util/custom/pair.dart';
-import 'package:settlenow/util/enum/enums.dart';
+import 'package:settlenow/data/repository/repository_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'room_dashboard_event.dart';
 part 'room_dashboard_state.dart';
@@ -28,24 +27,23 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
 
     List<RoomInfoModel> oldRoomActiveData = [];
     List<RoomInfoModel> oldRoomInActiveData = [];
-    FetchStatus oldRoomActiveStatus = FetchStatus.success;
-    FetchStatus oldRoomInActiveStatus = FetchStatus.success;
+    bool activeHasMoreData = false;
+    bool inactiveHasMoreData = false;
 
     if (state is RoomDashboardFetchSuccess) {
       final oldState = state as RoomDashboardFetchSuccess;
       oldRoomActiveData = oldState.activeData;
       oldRoomInActiveData = oldState.inactiveData;
-      oldRoomActiveStatus = oldState.activeStatus;
-      oldRoomInActiveStatus = oldState.inactiveStatus;
+      activeHasMoreData = oldState.activeHasMoreData;
+      inactiveHasMoreData = oldState.inactiveHasMoreData;
 
       if (!event.isFreshFetch &&
-          ((event.isActiveRoom && oldRoomActiveStatus == FetchStatus.done) ||
-              (!event.isActiveRoom &&
-                  oldRoomInActiveStatus == FetchStatus.done))) {
+          ((event.isActiveRoom && !activeHasMoreData) ||
+              (!event.isActiveRoom && !inactiveHasMoreData))) {
         return emit(
           RoomDashboardFetchSuccess(
-            activeStatus: oldRoomActiveStatus,
-            inactiveStatus: oldRoomInActiveStatus,
+            activeHasMoreData: activeHasMoreData,
+            inactiveHasMoreData: inactiveHasMoreData,
             activeData: oldRoomActiveData,
             inactiveData: oldRoomInActiveData,
           ),
@@ -67,9 +65,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         if (event.isFreshFetch) {
           emit(
             RoomDashboardFetchSuccess(
-              activeStatus:
-                  data.second ? FetchStatus.success : FetchStatus.done,
-              inactiveStatus: oldRoomInActiveStatus,
+              activeHasMoreData: data.second,
+              inactiveHasMoreData: inactiveHasMoreData,
               activeData: data.first,
               inactiveData: oldRoomInActiveData,
             ),
@@ -77,9 +74,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         } else {
           return emit(
             RoomDashboardFetchSuccess(
-              activeStatus:
-                  data.second ? FetchStatus.success : FetchStatus.done,
-              inactiveStatus: oldRoomInActiveStatus,
+              activeHasMoreData: data.second,
+              inactiveHasMoreData: inactiveHasMoreData,
               activeData: [...oldRoomActiveData, ...data.first],
               inactiveData: oldRoomInActiveData,
             ),
@@ -89,9 +85,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         if (event.isFreshFetch) {
           return emit(
             RoomDashboardFetchSuccess(
-              activeStatus: oldRoomActiveStatus,
-              inactiveStatus:
-                  data.second ? FetchStatus.success : FetchStatus.done,
+              activeHasMoreData: activeHasMoreData,
+              inactiveHasMoreData: data.second,
               activeData: oldRoomActiveData,
               inactiveData: data.first,
             ),
@@ -99,9 +94,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
         } else {
           return emit(
             RoomDashboardFetchSuccess(
-              activeStatus: oldRoomActiveStatus,
-              inactiveStatus:
-                  data.second ? FetchStatus.success : FetchStatus.done,
+              activeHasMoreData: activeHasMoreData,
+              inactiveHasMoreData: data.second,
               activeData: oldRoomActiveData,
               inactiveData: [...oldRoomInActiveData, ...data.first],
             ),
@@ -112,8 +106,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
       emit(RoomDashboardFailure(e.toString()));
       return emit(
         RoomDashboardFetchSuccess(
-          activeStatus: oldRoomActiveStatus,
-          inactiveStatus: oldRoomInActiveStatus,
+          activeHasMoreData: activeHasMoreData,
+          inactiveHasMoreData: inactiveHasMoreData,
           activeData: oldRoomActiveData,
           inactiveData: oldRoomInActiveData,
         ),
@@ -144,8 +138,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     }
     return emit(
       RoomDashboardFetchSuccess(
-        activeStatus: allRoomState.activeStatus,
-        inactiveStatus: allRoomState.inactiveStatus,
+        activeHasMoreData: allRoomState.activeHasMoreData,
+        inactiveHasMoreData: allRoomState.inactiveHasMoreData,
         activeData: data,
         inactiveData: allRoomState.inactiveData,
       ),
@@ -172,8 +166,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
       inactiveRoomData.addAll(allRoomState.inactiveData);
       return emit(
         RoomDashboardFetchSuccess(
-          activeStatus: allRoomState.activeStatus,
-          inactiveStatus: allRoomState.inactiveStatus,
+          activeHasMoreData: allRoomState.activeHasMoreData,
+          inactiveHasMoreData: allRoomState.inactiveHasMoreData,
           activeData: activeRoomData,
           inactiveData: inactiveRoomData,
         ),
@@ -199,8 +193,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
       }
       return emit(
         RoomDashboardFetchSuccess(
-          activeStatus: allRoomState.activeStatus,
-          inactiveStatus: allRoomState.inactiveStatus,
+          activeHasMoreData: allRoomState.activeHasMoreData,
+          inactiveHasMoreData: allRoomState.inactiveHasMoreData,
           activeData: activeRoomData,
           inactiveData: allRoomState.inactiveData,
         ),
@@ -231,8 +225,8 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
 
     return emit(
       RoomDashboardFetchSuccess(
-        activeStatus: allRoomState.activeStatus,
-        inactiveStatus: allRoomState.inactiveStatus,
+        activeHasMoreData: allRoomState.activeHasMoreData,
+        inactiveHasMoreData: allRoomState.inactiveHasMoreData,
         activeData: data,
         inactiveData: allRoomState.inactiveData,
       ),

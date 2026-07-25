@@ -1,8 +1,7 @@
 import 'dart:convert';
 
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/model/transaction_model.dart';
-import 'package:settlenow/util/handler/network_call.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class QuicksplitDataProvider {
   Future<List<TransactionModel>> fetchData() async {

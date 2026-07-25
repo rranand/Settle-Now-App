@@ -2,11 +2,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:settlenow/model/common_transaction_field.dart';
-import 'package:settlenow/model/lenden_room_model.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/model/personal_expense_transaction_model.dart';
-import 'package:settlenow/model/user_amount_model.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class TransactionModel implements CommonTransactionField {
   bool hasData = true;

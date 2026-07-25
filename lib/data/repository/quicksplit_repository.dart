@@ -1,6 +1,5 @@
-import 'package:settlenow/data/data_provider/quicksplit_data_provider.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/model/transaction_model.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
 
 class QuicksplitRepository {
   final QuicksplitDataProvider _dataProvider;

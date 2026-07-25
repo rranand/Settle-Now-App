@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'package:settlenow/constant/api_constant.dart';
-import 'package:settlenow/data/data_provider/auth_data_provider.dart';
-import 'package:settlenow/model/auth_model.dart';
-import 'package:settlenow/util/token_manager/auth_event_bus.dart';
-import 'package:settlenow/util/token_manager/token_storage.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/data/data_provider/data_provider_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class SessionManager {
   SessionManager._();

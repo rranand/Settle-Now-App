@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/util/widgets/custom_shimmer.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LoadingPage extends StatefulWidget {
   const LoadingPage({super.key});

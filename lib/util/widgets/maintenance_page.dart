@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
-import 'package:settlenow/util/widgets/shimmer_effect.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class MaintenancePage extends StatelessWidget {
   const MaintenancePage({super.key});

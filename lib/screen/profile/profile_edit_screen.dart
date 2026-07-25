@@ -2,20 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/user/user_update_profile/user_update_profile_cubit.dart';
-import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
-import 'package:settlenow/util/card/loading_card.dart';
-import 'package:settlenow/util/enum/enums.dart';
-import 'package:settlenow/util/functions/validator.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/stacked_image.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({super.key});

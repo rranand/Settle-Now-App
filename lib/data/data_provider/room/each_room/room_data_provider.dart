@@ -1,20 +1,12 @@
 import 'dart:convert';
 
-import 'package:settlenow/core.dart';
-import 'package:settlenow/model/activity_model.dart';
-import 'package:settlenow/model/new_transaction_model.dart';
-import 'package:settlenow/model/notification_model.dart';
-import 'package:settlenow/model/room_settle_model.dart';
-import 'package:settlenow/util/handler/network_call.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomDataProvider {
   Future<RoomInfoModel> fetchRoomInfo(String id) async {
     try {
-      final response = await createAPICall(
-        'room/info/$id',
-        "get",
-        {},
-      );
+      final response = await createAPICall('room/info/$id', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -30,11 +22,7 @@ class RoomDataProvider {
 
   Future<List<TransactionModel>> fetchData(String id) async {
     try {
-      final response = await createAPICall(
-        'room/$id/transaction',
-        "get",
-        {},
-      );
+      final response = await createAPICall('room/$id/transaction', "get", {});
 
       final data = jsonDecode(response.body);
 
@@ -52,15 +40,9 @@ class RoomDataProvider {
     }
   }
 
-  Future<List<RoomSettleModel>> fetchSettleData(
-    String id,
-  ) async {
+  Future<List<RoomSettleModel>> fetchSettleData(String id) async {
     try {
-      final response = await createAPICall(
-        'room/$id/settle',
-        "get",
-        {},
-      );
+      final response = await createAPICall('room/$id/settle', "get", {});
 
       final data = jsonDecode(response.body);
 
@@ -80,11 +62,7 @@ class RoomDataProvider {
 
   Future<void> closeRoomRequest(String id) async {
     try {
-      final response = await createAPICall(
-        'room/close/$id/request',
-        "get",
-        {},
-      );
+      final response = await createAPICall('room/close/$id/request', "get", {});
 
       final data = jsonDecode(response.body);
 
@@ -98,11 +76,7 @@ class RoomDataProvider {
 
   Future<void> closeRoom(String id) async {
     try {
-      final response = await createAPICall(
-        'room/close/$id',
-        "get",
-        {},
-      );
+      final response = await createAPICall('room/close/$id', "get", {});
 
       final data = jsonDecode(response.body);
 
@@ -114,16 +88,11 @@ class RoomDataProvider {
     }
   }
 
-  Future<void> updateRoom(
-    String id,
-    String newRoomName,
-  ) async {
+  Future<void> updateRoom(String id, String newRoomName) async {
     try {
-      final response = await createAPICall(
-        'room/$id/update',
-        "patch",
-        {"name": newRoomName},
-      );
+      final response = await createAPICall('room/$id/update', "patch", {
+        "name": newRoomName,
+      });
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -236,11 +205,10 @@ class RoomDataProvider {
     String expenseID,
     String expenseType,
   ) async {
-    final response = await createAPICall(
-      'room/$id/transaction',
-      "delete",
-      {"id": expenseID, "splitType": expenseType},
-    );
+    final response = await createAPICall('room/$id/transaction', "delete", {
+      "id": expenseID,
+      "splitType": expenseType,
+    });
 
     final respData = jsonDecode(response.body);
     if (response.statusCode == 200) {
@@ -298,11 +266,11 @@ class RoomDataProvider {
     String sender,
     String receiver,
   ) async {
-    final response = await createAPICall(
-      'room/$id/settle',
-      "delete",
-      {"id": expenseID, "sender": sender, "receiver": receiver},
-    );
+    final response = await createAPICall('room/$id/settle', "delete", {
+      "id": expenseID,
+      "sender": sender,
+      "receiver": receiver,
+    });
 
     final respData = jsonDecode(response.body);
     if (response.statusCode == 200) {
@@ -312,10 +280,7 @@ class RoomDataProvider {
     }
   }
 
-  Future<bool> addToPersonalExpense(
-    String id,
-    String expenseID,
-  ) async {
+  Future<bool> addToPersonalExpense(String id, String expenseID) async {
     try {
       final response = await createAPICall(
         'room/$id/transaction/personalExpense',
@@ -340,11 +305,9 @@ class RoomDataProvider {
   ) async {
     try {
       List<String> uid = users.map((e) => e.id).toList();
-      final response = await createAPICall(
-        'room/invite/$id',
-        "put",
-        {"users": uid},
-      );
+      final response = await createAPICall('room/invite/$id', "put", {
+        "users": uid,
+      });
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
@@ -363,11 +326,7 @@ class RoomDataProvider {
 
   Future<List<ActivityModel>> fetchActivity(String id) async {
     try {
-      final response = await createAPICall(
-        'room/$id/activity',
-        "get",
-        {},
-      );
+      final response = await createAPICall('room/$id/activity', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {

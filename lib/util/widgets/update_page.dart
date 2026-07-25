@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/model/update_info_model.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class UpdatePage extends StatelessWidget {
   final UpdateInfoModel data;

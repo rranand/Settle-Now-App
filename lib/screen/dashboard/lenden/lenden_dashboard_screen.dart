@@ -1,29 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:settlenow/bloc/auth/auth_bloc.dart';
-import 'package:settlenow/bloc/lenden/dashboard/lenden_dashboard_bloc.dart';
-import 'package:settlenow/constant/gradient_color_constant.dart';
-import 'package:settlenow/constant/ui_constant.dart';
-import 'package:settlenow/cubit/lenden/create_room/create_room_cubit.dart';
-import 'package:settlenow/model/lenden_dashboard_model.dart';
-import 'package:settlenow/model/lenden_user_model.dart';
-import 'package:settlenow/model/preference_model.dart';
-import 'package:settlenow/model/user_model.dart';
-import 'package:settlenow/provider/preference_provider.dart';
-import 'package:settlenow/provider/screen_size_provider.dart';
-import 'package:settlenow/util/card/lenden_card.dart';
-import 'package:settlenow/util/enum/enums.dart';
-import 'package:settlenow/util/functions/additional_function.dart';
-import 'package:settlenow/util/functions/validator.dart';
-import 'package:settlenow/util/handler/filter_sort.dart';
-import 'package:settlenow/util/widgets/custom_button.dart';
-import 'package:settlenow/util/widgets/custom_form_field.dart';
-import 'package:settlenow/util/widgets/gradient_widget.dart';
-import 'package:settlenow/util/widgets/snackbar.dart';
-import 'package:settlenow/util/widgets/widgets.dart';
+import 'package:settlenow/bloc/bloc_core.dart';
+import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/provider/provider_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenDashboardScreen extends StatefulWidget {
   final ValueNotifier<bool> isSearchEnabled;
@@ -39,6 +25,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
   final GlobalKey<FormState> _createRoomKey = GlobalKey<FormState>();
   final TextEditingController _createRoomController = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
+  final ScrollController _gridViewScrollController = ScrollController();
 
   void _blocListenerHandler(BuildContext context, LendenDashboardState state) {
     if (state is LendenDashboardFailure) {
@@ -65,12 +52,31 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
       final state = context.read<LendenDashboardBloc>().state;
 
       if (state is! LendenDashboardFetchSuccess) {
-        context.read<LendenDashboardBloc>().add(LendenDashboardFetch());
+        context.read<LendenDashboardBloc>().add(
+          LendenDashboardFetch(isFreshFetch: true),
+        );
       }
+
+      _gridViewScrollController.addListener(() {
+        if (_gridViewScrollController.position.pixels ==
+            _gridViewScrollController.position.maxScrollExtent) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            context.read<LendenDashboardBloc>().add(
+              LendenDashboardFetch(isFreshFetch: false),
+            );
+          });
+        }
+      });
     }
     widget.isSearchEnabled.addListener(() {
       _searchController.text = "";
     });
+  }
+
+  @override
+  void dispose() {
+    _gridViewScrollController.dispose();
+    super.dispose();
   }
 
   void _createRoomHandler() {
@@ -158,10 +164,15 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
 
   Future<void> onRefresh() async {
     if (!_loggedInUser.hasData) {
-      showNormalSnackBar(context, "Please re-login...Session expired!");
+      showNormalSnackBar(
+        context,
+        SnackbarMessageConstant.sessionExpiredMessage,
+      );
       return;
     }
-    context.read<LendenDashboardBloc>().add(LendenDashboardFetch());
+    context.read<LendenDashboardBloc>().add(
+      LendenDashboardFetch(isFreshFetch: true),
+    );
   }
 
   List<LendenDashboardModel> filterDataByPreference(
@@ -214,6 +225,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
               }
             },
             child: CustomScrollView(
+              controller: _gridViewScrollController,
               slivers: [
                 ValueListenableBuilder(
                   valueListenable: widget.isSearchEnabled,

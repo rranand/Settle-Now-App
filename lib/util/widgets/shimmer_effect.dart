@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:settlenow/constant/ui_constant.dart';
+import 'package:settlenow/constant/constant_core.dart';
 import 'package:shimmer/shimmer.dart';
 
 class CustomShimmerEffect {
