@@ -24,7 +24,7 @@ class UiConstant {
 
   static const Widget indianRupeeSymbol = Icon(Icons.currency_rupee);
 
-  static List<Color> colorsWithShade50 = [
+  static final List<Color> colorsWithShade50 = [
     Colors.green.shade50,
     Colors.blue.shade50,
     Colors.orange.shade50,
@@ -45,7 +45,7 @@ class UiConstant {
     Colors.indigo.shade50,
   ];
 
-  static List<Color> colorsWithShade100 = [
+  static final List<Color> colorsWithShade100 = [
     Colors.green.shade100,
     Colors.blue.shade100,
     Colors.orange.shade100,
@@ -66,7 +66,7 @@ class UiConstant {
     Colors.indigo.shade100,
   ];
 
-  static List<Color> colors = [
+  static final List<Color> colors = [
     Colors.green,
     Colors.blue,
     Colors.orange,

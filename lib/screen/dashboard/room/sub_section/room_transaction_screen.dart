@@ -115,7 +115,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
                   if (searchedData.isEmpty) {
                     return SliverToBoxAdapter(
                       child: noRecordFoundWidget(
-                        "No Matching Records",
+                        ApiConstant.noMatchingRecords,
                         context,
                       ),
                     );

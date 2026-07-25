@@ -21,11 +21,7 @@ final class LendenCloseRoom extends LendenRoomEvent {
   LendenCloseRoom({required this.uid});
 }
 
-final class LendenFetchTransaction extends LendenRoomEvent {
-  final LendenTransactionModel data;
-
-  LendenFetchTransaction({required this.data});
-}
+final class LendenFetchTransaction extends LendenRoomEvent {}
 
 final class LendenUpdateTransaction extends LendenRoomEvent {
   final LendenTransactionModel data;

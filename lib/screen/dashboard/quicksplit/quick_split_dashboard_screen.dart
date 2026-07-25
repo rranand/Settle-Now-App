@@ -174,7 +174,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                             if (filterData.isEmpty) {
                               return SliverToBoxAdapter(
                                 child: noRecordFoundWidget(
-                                  "No Matching Records",
+                                  ApiConstant.noMatchingRecords,
                                   context,
                                 ),
                               );

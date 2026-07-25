@@ -1,18 +1,17 @@
 import 'package:settlenow/data/data_provider/data_provider_core.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class LendenDashboardRepository {
   final LendenDashboardDataProvider _dataProvider;
 
   LendenDashboardRepository(this._dataProvider);
 
-  Future<List<LendenDashboardModel>> fetchData(int alreadyHave) async {
+  Future<Pair<List<LendenDashboardModel>, bool>> fetchData(
+    int alreadyHave,
+  ) async {
     try {
-      List<LendenDashboardModel> data = await _dataProvider.fetchData(
-        alreadyHave,
-      );
-      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
-      return data;
+      return await _dataProvider.fetchData(alreadyHave);
     } catch (e) {
       rethrow;
     }

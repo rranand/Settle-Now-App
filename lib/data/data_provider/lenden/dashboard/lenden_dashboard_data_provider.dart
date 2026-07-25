@@ -4,7 +4,9 @@ import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class LendenDashboardDataProvider {
-  Future<List<LendenDashboardModel>> fetchData(int alreadyHave) async {
+  Future<Pair<List<LendenDashboardModel>, bool>> fetchData(
+    int alreadyHave,
+  ) async {
     try {
       final response = await createAPICall(
         'lenden/all?alreadyHave=$alreadyHave',
@@ -14,6 +16,7 @@ class LendenDashboardDataProvider {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        bool hasMore = data['has_more'];
         List<LendenDashboardModel> arr = [];
         final allRoomData = data['data'];
         if (allRoomData != null) {
@@ -21,7 +24,7 @@ class LendenDashboardDataProvider {
             arr.add(LendenDashboardModel.fromMap(allRoomData[i]));
           }
         }
-        return arr;
+        return Pair(arr, hasMore);
       } else {
         throw data['message'];
       }

@@ -35,12 +35,13 @@ class LendenDashboardBloc
     if (state is LendenDashboardLoading) return;
     emit(LendenDashboardLoading());
     try {
-      List<LendenDashboardModel> data = await repo.fetchData(oldData.length);
-      bool hasMoreData = data.isNotEmpty;
+      final data = await repo.fetchData(oldData.length);
 
-      data = [...oldData, ...data];
       return emit(
-        LendenDashboardFetchSuccess(data: data, hasMoreData: hasMoreData),
+        LendenDashboardFetchSuccess(
+          data: [...oldData, ...data.first],
+          hasMoreData: data.second,
+        ),
       );
     } catch (e) {
       return emit(LendenDashboardFailure(error: e.toString()));

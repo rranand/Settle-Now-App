@@ -16,7 +16,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     : super(LendenRoomInitial()) {
     on<LendenRoomFetch>(_lendenRoomFetch);
     on<LendenCloseRoom>(_lendenCloseRoom);
-    // on<LendenFetchTransaction>(_lendenFetchTransaction);
+    on<LendenFetchTransaction>(_lendenFetchTransaction);
     on<LendenAddNewTransaction>(_lendenAddNewTransaction);
     on<LendenUpdateTransaction>(_lendenUpdateTransaction);
     on<LendenDeleteTransaction>(_lendenDeleteTransaction);
@@ -50,22 +50,55 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     }
   }
 
-  // void _lendenFetchTransaction(
-  //   LendenFetchTransaction event,
-  //   Emitter<LendenRoomState> emit,
-  // ) async {
-  //   if (state is LendenRoomLoading) return;
-  //   emit(LendenRoomLoading());
-  //   try {
-  //     Pair<LendenDashboardModel, List<LendenTransactionModel>> data = await repo
-  //         .fetchData(event.id);
+  void _lendenFetchTransaction(
+    LendenFetchTransaction event,
+    Emitter<LendenRoomState> emit,
+  ) async {
+    if (state is! LendenRoomFetchSuccess) return;
+    if (!(state as LendenRoomFetchSuccess).hasMoreData) return;
 
-  //     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: data.first));
-  //     return emit(LendenRoomFetchSuccess(event.id, data.first, data.second));
-  //   } catch (e) {
-  //     return emit(LendenRoomFailure(error: e.toString()));
-  //   }
-  // }
+    final oldState = (state as LendenRoomFetchSuccess);
+
+    emit(
+      LendenRoomFetchSuccess(
+        id: oldState.id,
+        roomData: oldState.roomData,
+        data: oldState.data,
+        fetchStatus: FetchStatus.progress,
+        hasMoreData: oldState.hasMoreData,
+      ),
+    );
+
+    try {
+      Pair<List<LendenTransactionModel>, bool> data = await repo
+          .fetchTransaction(
+            oldState.id,
+            oldState.data.length,
+            oldState.roomData.users,
+          );
+
+      return emit(
+        LendenRoomFetchSuccess(
+          id: oldState.id,
+          roomData: oldState.roomData,
+          data: [...oldState.data, ...data.first],
+          fetchStatus: FetchStatus.done,
+          hasMoreData: data.second,
+        ),
+      );
+    } catch (e) {
+      emit(LendenRoomFailure(error: e.toString()));
+      return emit(
+        LendenRoomFetchSuccess(
+          id: oldState.id,
+          roomData: oldState.roomData,
+          data: oldState.data,
+          fetchStatus: FetchStatus.done,
+          hasMoreData: oldState.hasMoreData,
+        ),
+      );
+    }
+  }
 
   void _lendenAddNewTransaction(
     LendenAddNewTransaction event,

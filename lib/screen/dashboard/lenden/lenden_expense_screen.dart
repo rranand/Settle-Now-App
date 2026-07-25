@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -29,6 +30,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
   UserModel _loggedInUser = UserModel.empty();
   String currentRoute = "";
   late final StreamSubscription _createRoomListener;
+  final ScrollController _gridViewScrollController = ScrollController();
 
   void _blocListenerHandler(BuildContext context, LendenRoomState state) {
     if (state is LendenRoomFailure) {
@@ -285,6 +287,15 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
       if (!(state is LendenRoomFetchSuccess && state.id == widget.id)) {
         context.read<LendenRoomBloc>().add(LendenRoomFetch(id: widget.id));
       }
+
+      _gridViewScrollController.addListener(() {
+        if (_gridViewScrollController.position.pixels ==
+            _gridViewScrollController.position.maxScrollExtent) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            context.read<LendenRoomBloc>().add(LendenFetchTransaction());
+          });
+        }
+      });
     }
 
     _createRoomListener = context.read<CreateRoomCubit>().stream.listen((
@@ -466,6 +477,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
               }
             },
             child: CustomScrollView(
+              controller: _gridViewScrollController,
               slivers:
                   isLoaded
                       ? (lendenTransactionData.isEmpty
@@ -520,7 +532,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                       ),
                                       sliver: SliverToBoxAdapter(
                                         child: LendenSummaryCard(
-                                          data: lendenTransactionData,
+                                          users: users,
                                           loggedInUser: _loggedInUser,
                                         ),
                                       ),
@@ -561,7 +573,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                       if (searchedData.isEmpty) {
                                         return SliverToBoxAdapter(
                                           child: noRecordFoundWidget(
-                                            "No Matching Records",
+                                            ApiConstant.noMatchingRecords,
                                             context,
                                           ),
                                         );

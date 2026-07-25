@@ -119,7 +119,10 @@ class _PersonalExpenseCategoriesSectionScreenState
               }
               if (filterState.data.isEmpty) {
                 return SliverToBoxAdapter(
-                  child: noRecordFoundWidget("No Matching Records", context),
+                  child: noRecordFoundWidget(
+                    ApiConstant.noMatchingRecords,
+                    context,
+                  ),
                 );
               }
               return categoryCardDisplay(true, categoryWiseExpense);

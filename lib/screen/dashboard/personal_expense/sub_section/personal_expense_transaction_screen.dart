@@ -77,7 +77,7 @@ class _PersonalExpenseTransactionScreenState
                   if (searchedData.isEmpty) {
                     return SliverToBoxAdapter(
                       child: noRecordFoundWidget(
-                        "No Matching Records",
+                        ApiConstant.noMatchingRecords,
                         context,
                       ),
                     );

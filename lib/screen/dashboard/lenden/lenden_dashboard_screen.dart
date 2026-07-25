@@ -275,7 +275,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                         if (lendenData.isEmpty) {
                           return SliverToBoxAdapter(
                             child: noRecordFoundWidget(
-                              "No Room Found",
+                              ApiConstant.noRoomFound,
                               context,
                             ),
                           );
@@ -317,7 +317,7 @@ class _LendenDashboardScreenState extends State<LendenDashboardScreen> {
                                 if (filterData.isEmpty) {
                                   return SliverToBoxAdapter(
                                     child: noRecordFoundWidget(
-                                      "No Matching Records",
+                                      ApiConstant.noMatchingRecords,
                                       context,
                                     ),
                                   );

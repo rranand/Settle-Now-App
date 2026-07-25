@@ -152,7 +152,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
                       if (filterData.isEmpty) {
                         return noRecordFoundWidget(
-                          "No Matching Records",
+                          ApiConstant.noMatchingRecords,
                           context,
                         );
                       }

@@ -20,7 +20,6 @@ class LendenRoomRepository {
 
   Future<LendenTransactionModel> create(
     String id,
-
     NewTransactionModel expenseData,
   ) async {
     try {
@@ -30,9 +29,20 @@ class LendenRoomRepository {
     }
   }
 
+  Future<Pair<List<LendenTransactionModel>, bool>> fetchTransaction(
+    String id,
+    int alreadyHave,
+    List<LendenUserModel> users,
+  ) async {
+    try {
+      return _dataProvider.fetchTransaction(id, alreadyHave, users);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<LendenTransactionModel> update(
     String id,
-
     NewTransactionModel expenseData,
   ) async {
     try {

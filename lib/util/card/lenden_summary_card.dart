@@ -4,13 +4,14 @@ import 'package:settlenow/internationalization/currency.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
+// FIXME: Fix gave and owe amount in dashboard
 class LendenSummaryCard extends StatelessWidget {
-  final List<LendenTransactionModel> data;
+  final List<LendenUserModel> users;
   final UserModel loggedInUser;
 
   const LendenSummaryCard({
     super.key,
-    required this.data,
+    required this.users,
     required this.loggedInUser,
   });
 
@@ -18,20 +19,20 @@ class LendenSummaryCard extends StatelessWidget {
     double gaveAmount = 0;
     double oweAmount = 0;
 
-    for (int i = 0; i < data.length; i++) {
-      bool isMe = data[i].createdBy.id == loggedInUser.id;
+    for (int i = 0; i < users.length; i++) {
+      bool isMe = users[i].id == loggedInUser.id;
 
       if (isMe) {
-        if (data[i].amount < 0) {
-          oweAmount += data[i].amount.abs();
+        if (users[i].amount < 0) {
+          oweAmount = users[i].amount.abs();
         } else {
-          gaveAmount += data[i].amount;
+          gaveAmount = users[i].amount;
         }
       } else {
-        if (data[i].amount < 0) {
-          gaveAmount += data[i].amount.abs();
+        if (users[i].amount < 0) {
+          gaveAmount = users[i].amount.abs();
         } else {
-          oweAmount += data[i].amount;
+          oweAmount += users[i].amount;
         }
       }
     }

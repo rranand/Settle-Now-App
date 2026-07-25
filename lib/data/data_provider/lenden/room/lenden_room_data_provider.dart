@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
@@ -15,7 +14,7 @@ class LendenRoomDataProvider {
         LendenDashboardModel roomData = LendenDashboardModel.fromMap(
           data['data'],
         );
-        bool hasMore = data['data']['has_more'];
+        bool hasMore = data['has_more'];
         List<LendenTransactionModel> arr = [];
         final allTransactions = data['data']['transactions'];
 
@@ -34,8 +33,7 @@ class LendenRoomDataProvider {
       } else {
         throw data['message'];
       }
-    } catch (e, st) {
-      debugPrintStack(stackTrace: st, label: e.toString());
+    } catch (e) {
       rethrow;
     }
   }
@@ -57,6 +55,39 @@ class LendenRoomDataProvider {
       if (response.statusCode == 200) {
         newExpense.id = data['data']['id'];
         return newExpense;
+      } else {
+        throw data['message'];
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Pair<List<LendenTransactionModel>, bool>> fetchTransaction(
+    String id,
+    int alreadyHave,
+    List<LendenUserModel> users,
+  ) async {
+    try {
+      final response = await createAPICall(
+        'lenden/$id/transactions?alreadyHave=$alreadyHave',
+        "get",
+        {},
+      );
+
+      final data = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        bool hasMore = data['has_more'];
+        List<LendenTransactionModel> arr = [];
+        final allTransactions = data['data'];
+
+        if (allTransactions != null) {
+          for (int i = 0; i < allTransactions.length; i++) {
+            arr.add(LendenTransactionModel.fromMap(allTransactions[i], users));
+          }
+        }
+
+        return Pair(arr, hasMore);
       } else {
         throw data['message'];
       }

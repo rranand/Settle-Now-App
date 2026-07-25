@@ -1,5 +1,5 @@
 class CalenderConstant {
-  static List<String> monthName = [
+  static final List<String> monthName = [
     "January",
     "February",
     "March",
@@ -14,7 +14,7 @@ class CalenderConstant {
     "December",
   ];
 
-  static List<String> monthNameInLowerCase = [
+  static final List<String> monthNameInLowerCase = [
     "january",
     "february",
     "march",

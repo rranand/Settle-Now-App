@@ -365,7 +365,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                           if (roomInfoData.isEmpty) {
                             return SliverToBoxAdapter(
                               child: noRecordFoundWidget(
-                                "No Room Found",
+                                ApiConstant.noRoomFound,
                                 context,
                               ),
                             );
@@ -397,7 +397,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                                   if (filterData.isEmpty) {
                                     return SliverToBoxAdapter(
                                       child: noRecordFoundWidget(
-                                        "No Matching Records",
+                                        ApiConstant.noMatchingRecords,
                                         context,
                                       ),
                                     );
