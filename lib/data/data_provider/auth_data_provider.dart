@@ -179,12 +179,14 @@ class AuthDataProvider {
             allFriendsArr.add(UserModel.fromBasicInfoMap(allFriends[i]));
           }
         }
-
-        return (
+        UserPreferenceBundle userPreferenceBundle = (
           user: userData,
           preference: preferenceData,
           friends: allFriendsArr,
         );
+
+        UserResolver.instance.initializer(userPreferenceBundle);
+        return userPreferenceBundle;
       } else {
         throw data['message'];
       }

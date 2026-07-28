@@ -9,8 +9,6 @@ class AuthRepository {
   Future<UserPreferenceBundle> getLoggedInUser() async {
     try {
       final UserPreferenceBundle data = await _dataProvider.getOwnUserInfo();
-      UserResolver.instance.loadFriends(data.friends);
-      UserResolver.instance.setLoggedInUser(data.user);
       return data;
     } catch (e) {
       rethrow;
@@ -122,7 +120,6 @@ class AuthRepository {
   Future<List<UserModel>> fetchFriend() async {
     try {
       final List<UserModel> data = await _dataProvider.fetchFriend();
-      UserResolver.instance.loadFriends(data);
       return data;
     } catch (e) {
       rethrow;

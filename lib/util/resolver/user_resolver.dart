@@ -1,5 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/custom/typedefs.dart';
 
 class UserResolver {
   UserResolver._();
@@ -8,16 +8,13 @@ class UserResolver {
   final Map<String, UserModel> _cache = {};
   static String _loggedInUserId = "";
 
-  void loadFriends(List<UserModel> friends) {
-    for (final f in friends) {
+  void initializer(UserPreferenceBundle userPreferenceBundle) {
+    _loggedInUserId = userPreferenceBundle.user.id;
+    _cache[_loggedInUserId] = userPreferenceBundle.user;
+
+    for (final f in userPreferenceBundle.friends) {
       _cache[f.id] = f;
     }
-  }
-
-  void setLoggedInUser(UserModel user) {
-    debugPrint("setLoggedInUser -> UserModel : ${user.id} : ${user.name}");
-    _loggedInUserId = user.id;
-    _cache[_loggedInUserId] = user;
   }
 
   UserModel resolve(String userId) {
