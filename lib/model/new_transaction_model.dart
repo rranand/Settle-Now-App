@@ -53,7 +53,7 @@ class NewTransactionModel {
     return <String, dynamic>{
       'amount': amount,
       'description': description,
-      'createdOn': createdOn.toString(),
+      'created_on': createdOn.toString(),
       'members': members.map((x) => x.toMap()).toList(),
       'createdBy': createdBy.toMap(),
       'category': category,

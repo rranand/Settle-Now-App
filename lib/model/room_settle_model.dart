@@ -45,8 +45,8 @@ class RoomSettleModel {
       'receiver': receiver.toMap(),
       'sender': sender.toMap(),
       'amount': amount,
-      'createdOn': createdOn.toString(),
-      'modifiedOn': modifiedOn.toString(),
+      'created_on': createdOn.toString(),
+      'modified_on': modifiedOn.toString(),
     };
   }
 

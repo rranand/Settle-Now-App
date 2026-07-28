@@ -279,10 +279,7 @@ class MyApp extends StatelessWidget {
                     UserLoginActivityCubit(context.read<AuthRepository>()),
           ),
           BlocProvider<FriendCubit>(
-            lazy: false,
-            create:
-                (context) =>
-                    FriendCubit(context.read<AuthRepository>())..fetchData(),
+            create: (context) => FriendCubit(context.read<AuthRepository>()),
           ),
           BlocProvider<NewTransactionCubit>(
             create:

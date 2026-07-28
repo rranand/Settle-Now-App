@@ -43,7 +43,7 @@ class LoginActivityModel {
       'deviceName': deviceName,
       'deviceType': deviceType,
       'lastLoggedIn': lastLoggedIn.toString(),
-      'createdOn': createdOn.toString(),
+      'created_on': createdOn.toString(),
     };
   }
 

@@ -6,42 +6,18 @@ import 'package:settlenow/util/util_core.dart';
 
 // FIXME: Fix gave and owe amount in dashboard
 class LendenSummaryCard extends StatelessWidget {
-  final List<LendenUserModel> users;
+  final LendenDashboardModel data;
   final UserModel loggedInUser;
 
   const LendenSummaryCard({
     super.key,
-    required this.users,
+    required this.data,
     required this.loggedInUser,
   });
 
-  Pair<double, double> calculateBalance() {
-    double gaveAmount = 0;
-    double oweAmount = 0;
-
-    for (int i = 0; i < users.length; i++) {
-      bool isMe = users[i].id == loggedInUser.id;
-
-      if (isMe) {
-        if (users[i].amount < 0) {
-          oweAmount = users[i].amount.abs();
-        } else {
-          gaveAmount = users[i].amount;
-        }
-      } else {
-        if (users[i].amount < 0) {
-          gaveAmount = users[i].amount.abs();
-        } else {
-          oweAmount += users[i].amount;
-        }
-      }
-    }
-    return Pair(gaveAmount, oweAmount);
-  }
-
   @override
   Widget build(BuildContext context) {
-    Pair<double, double> balance = calculateBalance();
+    Pair<double, double> balance = data.getAmount();
     final netBalance = balance.first - balance.second;
 
     return Container(

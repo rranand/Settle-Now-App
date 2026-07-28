@@ -76,7 +76,7 @@ Future<ApiResponseModel> createAPICall(
             : httpType(
               Uri.parse(host + url),
               headers: headersMap,
-              body: jsonEncode(jsonData),
+              body: jsonData is String ? jsonData : jsonEncode(jsonData),
             ))
         .timeout(Duration(seconds: 20));
 

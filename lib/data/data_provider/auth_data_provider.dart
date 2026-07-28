@@ -5,10 +5,7 @@ import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class AuthDataProvider {
-  Future<Pair<UserModel, PreferenceModel>> loginUser(
-    String email,
-    String otp,
-  ) async {
+  Future<UserPreferenceBundle> loginUser(String email, String otp) async {
     try {
       final deviceData = await Future.wait([
         generateFCMToken(),
@@ -47,7 +44,7 @@ class AuthDataProvider {
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> signupUsingGoogle(
+  Future<UserPreferenceBundle> signupUsingGoogle(
     String email,
     String idToken,
   ) async {
@@ -92,7 +89,7 @@ class AuthDataProvider {
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> loginUsingGoogle(
+  Future<UserPreferenceBundle> loginUsingGoogle(
     String email,
     String idToken,
   ) async {
@@ -161,7 +158,7 @@ class AuthDataProvider {
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> getOwnUserInfo() async {
+  Future<UserPreferenceBundle> getOwnUserInfo() async {
     try {
       String version = await getAppVersion();
       final response = await createAPICall(
@@ -175,8 +172,19 @@ class AuthDataProvider {
         PreferenceModel preferenceData = PreferenceModel.fromJson(
           data['preference'],
         );
+        final allFriends = data['friends'];
+        List<UserModel> allFriendsArr = [];
+        if (allFriends != null) {
+          for (int i = 0; i < allFriends.length; i++) {
+            allFriendsArr.add(UserModel.fromBasicInfoMap(allFriends[i]));
+          }
+        }
 
-        return Pair(userData, preferenceData);
+        return (
+          user: userData,
+          preference: preferenceData,
+          friends: allFriendsArr,
+        );
       } else {
         throw data['message'];
       }

@@ -170,7 +170,7 @@ class _InviteMemberState extends State<InviteMember> {
             }
             for (int i = 0; i < notificationData.length; i++) {
               if (notificationData[i].roomID == roomID) {
-                alreadyInvited.add(notificationData[i].user.id);
+                alreadyInvited.add(notificationData[i].invitedUser.id);
               }
             }
             _alreadyInvited.value = Set.from(alreadyInvited);
@@ -236,7 +236,7 @@ class _InviteMemberState extends State<InviteMember> {
       Set<String> alreadyInvited = {};
       for (int i = 0; i < notificationData.length; i++) {
         if (notificationData[i].roomID == roomID) {
-          alreadyInvited.add(notificationData[i].user.id);
+          alreadyInvited.add(notificationData[i].invitedUser.id);
         }
       }
       _alreadyInvited.value = Set.from(alreadyInvited);

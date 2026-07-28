@@ -109,10 +109,25 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     }
     final oldData = state as LendenRoomFetchSuccess;
     List<LendenTransactionModel> data = [...oldData.data, event.data];
+    List<LendenUserModel> newUserArr = [...oldData.roomData.users];
+
+    for (int i = 0; i < newUserArr.length; i++) {
+      if (newUserArr[i].id == event.data.createdBy.id) {
+        if (event.data.amount < 0) {
+          newUserArr[i].owe += event.data.amount * -1;
+        } else {
+          newUserArr[i].gave += event.data.amount;
+        }
+
+        break;
+      }
+    }
+
     LendenDashboardModel roomData = oldData.roomData.copyWith(
-      amount: oldData.roomData.amount + event.data.amount,
+      users: newUserArr,
       modifiedOn: DateTime.now(),
     );
+
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
     return emit(
       LendenRoomFetchSuccess(
@@ -134,16 +149,34 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     }
     final oldData = state as LendenRoomFetchSuccess;
     List<LendenTransactionModel> data = [...oldData.data];
-    double updatedAmount = oldData.roomData.amount + event.data.amount;
+    List<LendenUserModel> newUserArr = [...oldData.roomData.users];
+
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
-        updatedAmount -= data[i].amount;
+        for (int j = 0; j < newUserArr.length; j++) {
+          if (newUserArr[j].id == event.data.createdBy.id) {
+            if (event.data.amount < 0) {
+              newUserArr[j].owe += event.data.amount * -1;
+            } else {
+              newUserArr[j].gave += event.data.amount;
+            }
+
+            if (data[i].amount < 0) {
+              newUserArr[j].owe -= data[i].amount * -1;
+            } else {
+              newUserArr[j].gave -= data[i].amount;
+            }
+
+            break;
+          }
+        }
+
         data[i] = event.data;
         break;
       }
     }
     LendenDashboardModel roomData = oldData.roomData.copyWith(
-      amount: updatedAmount,
+      users: newUserArr,
       modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
@@ -167,17 +200,28 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     }
     final oldData = state as LendenRoomFetchSuccess;
     List<LendenTransactionModel> data = [...oldData.data];
-    double updatedAmount = oldData.roomData.amount;
+    List<LendenUserModel> newUserArr = [...oldData.roomData.users];
+
     data.removeWhere((element) {
       if (element.id == event.expenseID) {
-        updatedAmount -= element.amount;
+        for (int j = 0; j < newUserArr.length; j++) {
+          if (newUserArr[j].id == element.createdBy.id) {
+            if (element.amount < 0) {
+              newUserArr[j].owe -= element.amount * -1;
+            } else {
+              newUserArr[j].gave -= element.amount;
+            }
+
+            break;
+          }
+        }
         return true;
       } else {
         return false;
       }
     });
     LendenDashboardModel roomData = oldData.roomData.copyWith(
-      amount: updatedAmount,
+      users: newUserArr,
       modifiedOn: DateTime.now(),
     );
     lendenDashboardBloc.add(LendenDashboardOnUpdateRoom(data: roomData));
@@ -213,7 +257,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
         }
       }
       LendenDashboardModel roomData = oldData.roomData.copyWith(
-        status: active ? "Partially Closed" : "Closed",
+        status: active ? RoomStatus.partiallyClosed : RoomStatus.closed,
         users: users,
         modifiedOn: DateTime.now(),
       );

@@ -66,8 +66,8 @@ class RoomInfoModel {
       'roomKey': roomKey,
       'roomLink': roomLink,
       'createdBy': createdBy.toMap(),
-      'createdOn': createdOn.toString(),
-      'modifiedOn': modifiedOn.toString(),
+      'created_on': createdOn.toString(),
+      'modified_on': modifiedOn.toString(),
       'users': users.map((x) => x.toMap()).toList(),
       'active': active,
     };

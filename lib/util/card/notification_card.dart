@@ -27,16 +27,16 @@ class _NotificationCardState extends State<NotificationCard> {
         radius: 50,
       );
     }
-    if (widget.data.by.id == widget.data.user.id) {
-      if (widget.data.by.id != widget.loggedInUserID) {
+    if (widget.data.invitedBy.id == widget.data.invitedUser.id) {
+      if (widget.data.invitedBy.id != widget.loggedInUserID) {
         return imageWidgetForCachedNetworkImage(
-          widget.data.by.profileImage,
+          widget.data.invitedBy.profileImage,
           context,
           boxShape: BoxShape.circle,
           width: 50,
           height: 50,
         );
-      } else if (widget.data.type == "Room") {
+      } else if (widget.data.type == RoomType.room) {
         return colouredIcon(
           Icons.groups_outlined,
           iconSize: 30,
@@ -49,9 +49,9 @@ class _NotificationCardState extends State<NotificationCard> {
           Colors.blueAccent.shade100,
         );
       }
-    } else if (widget.data.by.id == widget.loggedInUserID) {
+    } else if (widget.data.invitedBy.id == widget.loggedInUserID) {
       return imageWidgetForCachedNetworkImage(
-        widget.data.user.profileImage,
+        widget.data.invitedUser.profileImage,
         context,
         boxShape: BoxShape.circle,
         width: 50,
@@ -59,7 +59,7 @@ class _NotificationCardState extends State<NotificationCard> {
       );
     } else {
       return imageWidgetForCachedNetworkImage(
-        widget.data.by.profileImage,
+        widget.data.invitedBy.profileImage,
         context,
         boxShape: BoxShape.circle,
         width: 50,
@@ -69,8 +69,8 @@ class _NotificationCardState extends State<NotificationCard> {
   }
 
   Widget title() {
-    if (widget.data.by.id == widget.data.user.id) {
-      if (widget.data.by.id == widget.loggedInUserID) {
+    if (widget.data.invitedBy.id == widget.data.invitedUser.id) {
+      if (widget.data.invitedBy.id == widget.loggedInUserID) {
         return Text.rich(
           TextSpan(
             text: "You requested to join",
@@ -86,7 +86,7 @@ class _NotificationCardState extends State<NotificationCard> {
       } else {
         return Text.rich(
           TextSpan(
-            text: widget.data.by.name,
+            text: widget.data.invitedBy.name,
             style: TextStyle(fontWeight: FontWeight.bold),
             children: [
               TextSpan(
@@ -98,13 +98,13 @@ class _NotificationCardState extends State<NotificationCard> {
           ),
         );
       }
-    } else if (widget.data.by.id == widget.loggedInUserID) {
+    } else if (widget.data.invitedBy.id == widget.loggedInUserID) {
       return Text.rich(
         TextSpan(
           text: "You invited ",
           children: [
             TextSpan(
-              text: widget.data.user.name,
+              text: widget.data.invitedUser.name,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             TextSpan(
@@ -121,7 +121,7 @@ class _NotificationCardState extends State<NotificationCard> {
     } else {
       return Text.rich(
         TextSpan(
-          text: widget.data.by.name,
+          text: widget.data.invitedBy.name,
           style: TextStyle(fontWeight: FontWeight.bold),
           children: [
             TextSpan(
@@ -129,7 +129,7 @@ class _NotificationCardState extends State<NotificationCard> {
               style: TextStyle(fontWeight: FontWeight.normal),
             ),
             TextSpan(
-              text: widget.data.user.name,
+              text: widget.data.invitedUser.name,
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             TextSpan(
@@ -163,10 +163,10 @@ class _NotificationCardState extends State<NotificationCard> {
             children: [
               Visibility(
                 visible:
-                    (widget.data.user.id != widget.data.by.id &&
-                        widget.data.user.id == widget.loggedInUserID) ||
-                    (widget.data.user.id == widget.data.by.id &&
-                        widget.data.user.id != widget.loggedInUserID),
+                    (widget.data.invitedUser.id != widget.data.invitedBy.id &&
+                        widget.data.invitedUser.id == widget.loggedInUserID) ||
+                    (widget.data.invitedUser.id == widget.data.invitedBy.id &&
+                        widget.data.invitedUser.id != widget.loggedInUserID),
                 child: Padding(
                   padding: const EdgeInsets.only(right: 24.0),
                   child: InkWell(
@@ -216,7 +216,7 @@ class _NotificationCardState extends State<NotificationCard> {
               subtitle:
                   widget.data.hasData
                       ? Text(
-                        widget.data.type,
+                        widget.data.type.label,
                         style: TextStyle(color: Colors.grey[600]),
                       )
                       : CustomShimmerEffect.textWidget(

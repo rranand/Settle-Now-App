@@ -1,14 +1,16 @@
 import 'dart:convert';
+import 'package:settlenow/util/util_core.dart';
+
 import 'model_core.dart';
 
 class NotificationModel {
   bool hasData = true;
   String id = "";
   String roomName = "";
-  String type = "";
+  RoomType type = RoomType.none;
   String roomID = "";
-  UserModel by = UserModel.empty();
-  UserModel user = UserModel.empty();
+  UserModel invitedBy = UserModel.empty();
+  UserModel invitedUser = UserModel.empty();
   DateTime createdOn = DateTime.now();
 
   NotificationModel.empty({this.hasData = false});
@@ -18,36 +20,56 @@ class NotificationModel {
     required this.roomName,
     required this.type,
     required this.roomID,
-    required this.by,
-    required this.user,
+    required this.invitedBy,
+    required this.invitedUser,
     required this.createdOn,
   });
 
   @override
   String toString() =>
-      'NotificationModel(id: $id, roomName: $roomName, roomID: $roomID, type: $type, user: $user, by: $by)';
+      'NotificationModel(id: $id, roomName: $roomName, roomID: $roomID, type: $type, invitedUser: $invitedUser, invitedBy: $invitedBy)';
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'roomName': roomName,
+      'room_name': roomName,
       'type': type,
-      'roomID': roomID,
-      'createdOn': createdOn,
-      'by': by.toMap(),
-      'user': user.toMap(),
+      'room_id': roomID,
+      'created_on': createdOn,
+      'invited_by': invitedBy.toMap(),
+      'invited_user': invitedUser.toMap(),
     };
   }
 
   factory NotificationModel.fromMap(Map<String, dynamic> map) {
     return NotificationModel(
       id: map['id'],
-      roomName: map['roomName'],
-      type: map['type'],
-      roomID: map['roomID'],
-      by: UserModel.fromBasicInfoMap(map['by']),
-      user: UserModel.fromBasicInfoMap(map['user']),
+      roomName: map['room_name'],
+      type: RoomTypeExtension.fromString(map['type']),
+      roomID: map['room_id'],
+      invitedBy: UserResolver.instance.resolve(map['invited_by']),
+      invitedUser: UserResolver.instance.resolve(map['invited_user']),
       createdOn: DateTime.parse(map['created_on']).toLocal(),
+    );
+  }
+
+  factory NotificationModel.fromLendenMap(
+    Map<String, dynamic> map,
+    String roomId,
+    String roomName,
+    String invitedUserId,
+  ) {
+    UserModel invitedBy = UserResolver.instance.getLoggedInUser();
+    UserModel invitedUser = UserResolver.instance.resolve(invitedUserId);
+
+    return NotificationModel(
+      id: map['id'],
+      roomName: roomName,
+      type: RoomType.lenden,
+      roomID: roomId,
+      invitedBy: invitedBy,
+      invitedUser: invitedUser,
+      createdOn: DateTime.now(),
     );
   }
 
@@ -64,8 +86,8 @@ class NotificationModel {
         other.roomName == roomName &&
         other.type == type &&
         other.roomID == roomID &&
-        other.by == by &&
-        other.user == user;
+        other.invitedBy == invitedBy &&
+        other.invitedUser == invitedUser;
   }
 
   @override
@@ -74,6 +96,6 @@ class NotificationModel {
       roomName.hashCode ^
       type.hashCode ^
       roomID.hashCode ^
-      by.hashCode ^
-      user.hashCode;
+      invitedBy.hashCode ^
+      invitedUser.hashCode;
 }

@@ -139,11 +139,15 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           (notificationData) {
                             String searchStr =
                                 "${notificationData.roomName} ${notificationData.type}";
-                            if (notificationData.by.id != _loggedInUser.id) {
-                              searchStr += " ${notificationData.by.name}";
+                            if (notificationData.invitedBy.id !=
+                                _loggedInUser.id) {
+                              searchStr +=
+                                  " ${notificationData.invitedBy.name}";
                             }
-                            if (notificationData.user.id != _loggedInUser.id) {
-                              searchStr += " ${notificationData.user.name}";
+                            if (notificationData.invitedUser.id !=
+                                _loggedInUser.id) {
+                              searchStr +=
+                                  " ${notificationData.invitedUser.name}";
                             }
                             return searchStr;
                           },

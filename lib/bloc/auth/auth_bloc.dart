@@ -45,11 +45,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoginLoading());
 
     try {
-      Pair<UserModel, PreferenceModel> pairData = await repo.loginUser(
+      UserPreferenceBundle userPreferenceBundle = await repo.loginUser(
         event.email,
         event.otp,
       );
-      return emit(AuthLoginSuccess(pairData.first, pairData.second));
+      return emit(
+        AuthLoginSuccess(
+          userPreferenceBundle.user,
+          userPreferenceBundle.preference,
+        ),
+      );
     } catch (e) {
       return emit(AuthLoginFailure(e.toString()));
     }
@@ -76,11 +81,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           return emit(AuthLoginFailure("Google SignIn Failed"));
         }
 
-        Pair<UserModel, PreferenceModel> pairData = await repo.loginUsingGoogle(
+        UserPreferenceBundle userPreferenceBundle = await repo.loginUsingGoogle(
           email,
           idToken,
         );
-        return emit(AuthLoginSuccess(pairData.first, pairData.second));
+        return emit(
+          AuthLoginSuccess(
+            userPreferenceBundle.user,
+            userPreferenceBundle.preference,
+          ),
+        );
       } on GoogleSignInException catch (e) {
         String errMsg = "Google SignIn Failed";
         if (e.code == GoogleSignInExceptionCode.canceled) {
@@ -113,11 +123,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return emit(AuthLoginFailure("Google SignIn Failed"));
       }
 
-      Pair<UserModel, PreferenceModel> pairData = await repo.loginUsingGoogle(
+      UserPreferenceBundle userPreferenceBundle = await repo.loginUsingGoogle(
         email,
         idToken,
       );
-      return emit(AuthLoginSuccess(pairData.first, pairData.second));
+      return emit(
+        AuthLoginSuccess(
+          userPreferenceBundle.user,
+          userPreferenceBundle.preference,
+        ),
+      );
     } on GoogleSignInException catch (e) {
       String errMsg = "Google SignIn Failed";
       if (e.code == GoogleSignInExceptionCode.canceled) {
@@ -161,11 +176,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await additionalLogoutAction();
         return emit(AuthSignUpFailure("Google SignUp Failed"));
       }
-      Pair<UserModel, PreferenceModel> pairData = await repo.signupUsingGoogle(
+      UserPreferenceBundle userPreferenceBundle = await repo.signupUsingGoogle(
         email,
         idToken,
       );
-      return emit(AuthLoginSuccess(pairData.first, pairData.second));
+      return emit(
+        AuthLoginSuccess(
+          userPreferenceBundle.user,
+          userPreferenceBundle.preference,
+        ),
+      );
     } on GoogleSignInException catch (e) {
       String errMsg = "Google SignUp Failed";
       if (e.code == GoogleSignInExceptionCode.canceled) {
@@ -199,9 +219,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           await additionalLogoutAction();
           return emit(AuthSignUpFailure("Google Signup Failed"));
         }
-        Pair<UserModel, PreferenceModel> pairData = await repo
+        UserPreferenceBundle userPreferenceBundle = await repo
             .signupUsingGoogle(email, idToken);
-        return emit(AuthLoginSuccess(pairData.first, pairData.second));
+        return emit(
+          AuthLoginSuccess(
+            userPreferenceBundle.user,
+            userPreferenceBundle.preference,
+          ),
+        );
       } on GoogleSignInException catch (e) {
         String errMsg = "Google SignUp Failed";
         if (e.code == GoogleSignInExceptionCode.canceled) {
@@ -251,11 +276,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthOTPSendLoading());
     try {
-      Pair<UserModel, PreferenceModel> pairData = await repo.loginUser(
+      UserPreferenceBundle userPreferenceBundle = await repo.loginUser(
         event.email,
         event.otp,
       );
-      return emit(AuthLoginSuccess(pairData.first, pairData.second));
+      return emit(
+        AuthLoginSuccess(
+          userPreferenceBundle.user,
+          userPreferenceBundle.preference,
+        ),
+      );
     } catch (e) {
       emit(AuthOTPSendFailure(e.toString()));
       return emit(AuthSignUpSuccess(isSuccess: false));
@@ -341,12 +371,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(AuthLoginLoading());
     try {
-      Pair<UserModel, PreferenceModel> data = await repo.getLoggedInUser();
-      UserModel userData = data.first;
-      PreferenceModel preferenceData = data.second;
+      UserPreferenceBundle userPreferenceBundle = await repo.getLoggedInUser();
 
-      if (userData.hasData) {
-        return emit(AuthLoginSuccess(userData, preferenceData));
+      if (userPreferenceBundle.user.hasData) {
+        return emit(
+          AuthLoginSuccess(
+            userPreferenceBundle.user,
+            userPreferenceBundle.preference,
+          ),
+        );
       } else {
         return emit(AuthInitial());
       }
@@ -374,6 +407,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> additionalLogoutAction() async {
     try {
+      UserResolver.instance.clear();
+
       List<Future<void>> futures = [
         SessionManager.instance.revoke(),
         GoogleOauth.logout(),

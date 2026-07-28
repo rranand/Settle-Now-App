@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'friend_state.dart';
 
@@ -16,10 +17,15 @@ class FriendCubit extends Cubit<FriendState> {
     try {
       final List<UserModel> data = await repo.fetchFriend();
 
-      return emit(FriendSuccess(data));
+      return emit(FriendSuccess(data: data));
     } catch (e) {
-      return emit(FriendFailure(e.toString()));
+      return emit(FriendFailure(error: e.toString()));
     }
+  }
+
+  void addFriendFromCache() {
+    List<UserModel> friends = UserResolver.instance.getFriends();
+    emit(FriendSuccess(data: friends));
   }
 
   void reset() {

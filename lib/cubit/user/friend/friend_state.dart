@@ -10,11 +10,11 @@ final class FriendLoading extends FriendState {}
 final class FriendSuccess extends FriendState {
   final List<UserModel> data;
 
-  FriendSuccess(this.data);
+  FriendSuccess({required this.data});
 }
 
 final class FriendFailure extends FriendState {
   final String error;
 
-  FriendFailure(this.error);
+  FriendFailure({required this.error});
 }

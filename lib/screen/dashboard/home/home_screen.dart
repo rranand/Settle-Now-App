@@ -7,6 +7,7 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:provider/provider.dart';
 import 'package:settlenow/bloc/bloc_core.dart';
 import 'package:settlenow/constant/constant_core.dart';
+import 'package:settlenow/cubit/cubit_core.dart';
 import 'package:settlenow/firebase/firebase_core.dart';
 import 'package:settlenow/notification/notification_core.dart';
 import 'package:settlenow/model/model_core.dart';
@@ -74,7 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     populateData();
     InAppUpdateService.checkForUpdate(context);
-
     NotificationInterfaceHandler.initateListeners(context);
 
     if (widget.initalScreenIndex != null &&
@@ -87,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
 
+      context.read<FriendCubit>().addFriendFromCache();
       final state = context.read<NotificationBloc>().state;
 
       if (state is! NotificationFetchSuccess) {

@@ -10,9 +10,14 @@ class NotificationDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         List<NotificationModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(NotificationModel.fromMap(data['data'][i]));
+        final allNotification = data['data'];
+
+        if (allNotification != null) {
+          for (int i = 0; i < allNotification.length; i++) {
+            arr.add(NotificationModel.fromMap(allNotification[i]));
+          }
         }
+
         return arr;
       } else {
         throw data['message'];

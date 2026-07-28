@@ -31,11 +31,10 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
       LendenDashboardModel newData = LendenDashboardModel(
         id: "",
         roomName: roomName,
-        status: "Open",
+        status: RoomStatus.open,
         createdBy: authLoginState.userData,
         createdOn: DateTime.now(),
         modifiedOn: DateTime.now(),
-        amount: 0,
         users: [LendenUserModel.fromUserModel(authLoginState.userData)],
       );
 
@@ -57,9 +56,9 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
   }
 
   void inviteMember(
-    String roomID,
+    String roomId,
     UserModel user,
-
+    String roomName,
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     showSnackbarWithChildWidget(
@@ -71,7 +70,8 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
 
     try {
       NotificationModel notificationData = await roomRepo.inviteUser(
-        roomID,
+        roomId,
+        roomName,
         user.id,
       );
       notificationBloc.add(NotificationOnAdd(data: [notificationData]));

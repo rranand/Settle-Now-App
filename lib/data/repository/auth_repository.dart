@@ -6,32 +6,30 @@ class AuthRepository {
   final AuthDataProvider _dataProvider;
   AuthRepository(this._dataProvider);
 
-  Future<Pair<UserModel, PreferenceModel>> getLoggedInUser() async {
+  Future<UserPreferenceBundle> getLoggedInUser() async {
     try {
-      final Pair<UserModel, PreferenceModel> data =
-          await _dataProvider.getOwnUserInfo();
-      UserResolver.instance.loadFriends([data.first]);
-
+      final UserPreferenceBundle data = await _dataProvider.getOwnUserInfo();
+      UserResolver.instance.loadFriends(data.friends);
+      UserResolver.instance.setLoggedInUser(data.user);
       return data;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> loginUser(
-    String email,
-    String otp,
-  ) async {
+  Future<UserPreferenceBundle> loginUser(String email, String otp) async {
     try {
-      final Pair<UserModel, PreferenceModel> pairData = await _dataProvider
-          .loginUser(email, otp);
+      final UserPreferenceBundle pairData = await _dataProvider.loginUser(
+        email,
+        otp,
+      );
       return pairData;
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> loginUsingGoogle(
+  Future<UserPreferenceBundle> loginUsingGoogle(
     String email,
     String idToken,
   ) async {
@@ -43,7 +41,7 @@ class AuthRepository {
     }
   }
 
-  Future<Pair<UserModel, PreferenceModel>> signupUsingGoogle(
+  Future<UserPreferenceBundle> signupUsingGoogle(
     String email,
     String idToken,
   ) async {
@@ -125,7 +123,6 @@ class AuthRepository {
     try {
       final List<UserModel> data = await _dataProvider.fetchFriend();
       UserResolver.instance.loadFriends(data);
-
       return data;
     } catch (e) {
       rethrow;

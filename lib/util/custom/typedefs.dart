@@ -6,3 +6,6 @@ typedef UserWithEditControlTD = Map<UserModel, TextEditingController>;
 
 typedef PersonalMonthlyExpensePairTD =
     Pair<List<Pair<double, int>>, List<PersonalExpenseTransactionModel>>;
+
+typedef UserPreferenceBundle =
+    ({UserModel user, PreferenceModel preference, List<UserModel> friends});

@@ -9,11 +9,10 @@ class LendenDashboardModel {
   bool hasData = true;
   String id = "";
   String roomName = "";
-  String status = "";
+  RoomStatus status = RoomStatus.none;
   UserModel createdBy = UserModel.empty();
   DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
-  double amount = 0;
   List<LendenUserModel> users = [];
 
   LendenDashboardModel({
@@ -23,7 +22,6 @@ class LendenDashboardModel {
     required this.createdBy,
     required this.createdOn,
     required this.modifiedOn,
-    required this.amount,
     required this.users,
   });
 
@@ -32,11 +30,10 @@ class LendenDashboardModel {
   LendenDashboardModel copyWith({
     String? id,
     String? roomName,
-    String? status,
+    RoomStatus? status,
     UserModel? createdBy,
     DateTime? createdOn,
     DateTime? modifiedOn,
-    double? amount,
     List<LendenUserModel>? users,
   }) {
     return LendenDashboardModel(
@@ -46,20 +43,41 @@ class LendenDashboardModel {
       createdOn: createdOn ?? this.createdOn,
       createdBy: createdBy ?? this.createdBy,
       modifiedOn: modifiedOn ?? this.modifiedOn,
-      amount: amount ?? this.amount,
       users: users ?? this.users,
     );
+  }
+
+  Pair<double, double> getAmount() {
+    UserModel loggedInUser = UserResolver.instance.getLoggedInUser();
+    if (users.isEmpty) {
+      return Pair(0, 0);
+    }
+
+    final me = users.firstWhere(
+      (each) => each.id == loggedInUser.id,
+      orElse: () => LendenUserModel.empty(),
+    );
+
+    if (!me.hasData) return Pair(0, 0);
+
+    if (users.length == 1) return Pair(me.gave, me.owe);
+
+    final other = users.firstWhere((u) => u.id != loggedInUser.id);
+
+    final gave = me.gave + other.owe;
+    final owe = me.owe + other.gave;
+
+    return Pair(gave, owe);
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'roomName': roomName,
+      'room_name': roomName,
       'status': status,
-      'createdBy': createdBy.toMap(),
-      'createdOn': createdOn.toString(),
-      'modifiedOn': modifiedOn.toString(),
-      'amount': amount.toString(),
+      'created_by': createdBy.toMap(),
+      'created_on': createdOn.toString(),
+      'modified_on': modifiedOn.toString(),
       'users': users.map((x) => x.toMap()).toList(),
     };
   }
@@ -68,11 +86,10 @@ class LendenDashboardModel {
     return LendenDashboardModel(
       id: map['id'],
       roomName: map['room_name'],
-      status: map['status'],
+      status: RoomStatusExtension.fromString(map['status']),
       createdBy: UserResolver.instance.resolve(map['created_by']),
       createdOn: DateTime.parse(map['created_on']).toLocal(),
       modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
-      amount: double.parse(map['amount'].toString()),
       users: List<LendenUserModel>.from(
         (map['users']).map((x) => LendenUserModel.fromUserResolver(x)),
       ),
@@ -86,7 +103,7 @@ class LendenDashboardModel {
 
   @override
   String toString() {
-    return 'LendenDashboardModel(id: $id, roomName: $roomName, amount $amount,status $status, createdOn: $createdOn)';
+    return 'LendenDashboardModel(id: $id, roomName: $roomName, status $status, createdOn: $createdOn)';
   }
 
   @override
@@ -99,7 +116,6 @@ class LendenDashboardModel {
         other.createdBy == createdBy &&
         other.createdOn == createdOn &&
         other.modifiedOn == modifiedOn &&
-        other.amount == amount &&
         listEquals(other.users, users);
   }
 
@@ -111,7 +127,6 @@ class LendenDashboardModel {
         createdBy.hashCode ^
         createdOn.hashCode ^
         modifiedOn.hashCode ^
-        amount.hashCode ^
         users.hashCode;
   }
 }

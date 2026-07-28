@@ -48,9 +48,9 @@ class LendenTransactionModel implements CommonTransactionField {
       'id': id,
       'amount': amount,
       'description': description,
-      'createdOn': createdOn.toString(),
+      'created_on': createdOn.toString(),
       'createdBy': createdBy,
-      'modifiedOn': modifiedOn.toString(),
+      'modified_on': modifiedOn.toString(),
     };
   }
 
@@ -80,19 +80,19 @@ class LendenTransactionModel implements CommonTransactionField {
   }
 
   String toCreateExpenseJson() {
-    Map<String, String> data = {
-      "amount": amount.toString(),
+    Map<String, dynamic> data = {
+      "amount": amount,
       "description": description,
-      "createdOn": createdOn.toIso8601String(),
+      "created_on": createdOn.toUtc().toIso8601String(),
     };
 
     return json.encode(data);
   }
 
   String toUpdateExpenseJson() {
-    Map<String, String> data = {
+    Map<String, dynamic> data = {
       "id": id,
-      "amount": amount.toString(),
+      "amount": amount,
       "description": description,
     };
 

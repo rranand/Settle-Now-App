@@ -84,10 +84,15 @@ class LendenRoomRepository {
     }
   }
 
-  Future<NotificationModel> inviteUser(String roomID, String uid) async {
+  Future<NotificationModel> inviteUser(
+    String roomId,
+    String roomName,
+    String uid,
+  ) async {
     try {
       NotificationModel notificationData = await _dataProvider.inviteUser(
-        roomID,
+        roomId,
+        roomName,
         uid,
       );
       return notificationData;

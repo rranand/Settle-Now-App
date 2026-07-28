@@ -27,6 +27,7 @@ export './card/login_activity_card.dart';
 export './card/settle_card.dart';
 export './oAuth/google_oauth.dart';
 export './enum/lenden_type.dart';
+export './enum/room_type.dart';
 export './enum/activity_type.dart';
 export './enum/format_selection.dart';
 export './enum/enums.dart';

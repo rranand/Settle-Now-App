@@ -184,10 +184,14 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<NotificationModel> inviteUser(String roomID, String uid) async {
+  Future<NotificationModel> inviteUser(
+    String roomId,
+    String roomName,
+    String uid,
+  ) async {
     try {
       final response = await createAPICall(
-        'lenden/$roomID/addPerson',
+        'lenden/$roomId/addPerson',
         'patch',
         {"id": uid},
       );
@@ -195,8 +199,11 @@ class LendenRoomDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        NotificationModel notificationData = NotificationModel.fromMap(
+        NotificationModel notificationData = NotificationModel.fromLendenMap(
           data['data'],
+          roomId,
+          roomName,
+          uid,
         );
         return notificationData;
       } else {

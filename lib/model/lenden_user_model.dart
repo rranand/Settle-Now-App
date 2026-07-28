@@ -3,14 +3,16 @@ import 'package:settlenow/util/util_core.dart';
 
 class LendenUserModel extends UserModel {
   bool active = false;
-  double amount = 0;
+  double gave = 0;
+  double owe = 0;
 
   LendenUserModel({
     required super.id,
     required super.name,
     required super.profileImage,
     required this.active,
-    required this.amount,
+    required this.gave,
+    required this.owe,
   }) : super(hasData: true, createdOn: DateTime.now(), email: "", phoneNo: "");
 
   LendenUserModel.empty()
@@ -30,7 +32,8 @@ class LendenUserModel extends UserModel {
       name: user.name,
       profileImage: user.profileImage,
       active: false,
-      amount: 0,
+      gave: 0,
+      owe: 0,
     );
   }
 
@@ -40,7 +43,8 @@ class LendenUserModel extends UserModel {
       name: map['name'] ?? "",
       profileImage: map['profile_pic'] ?? "",
       active: map['active'],
-      amount: double.parse(map['amount'].toString()),
+      gave: double.parse(map['gave'].toString()),
+      owe: double.parse(map['owe'].toString()),
     );
   }
 
@@ -52,12 +56,13 @@ class LendenUserModel extends UserModel {
       name: map['name'] ?? userData.name,
       profileImage: map['profile_pic'] ?? userData.profileImage,
       active: map['active'],
-      amount: double.parse(map['amount'].toString()),
+      gave: double.parse(map['gave'].toString()),
+      owe: double.parse(map['owe'].toString()),
     );
   }
 
   @override
   String toString() {
-    return 'LendenUserModel(id: $id, name: $name, amount: $amount, active: $active)';
+    return 'LendenUserModel(id: $id, name: $name, gave: $gave, owe: $owe, active: $active)';
   }
 }

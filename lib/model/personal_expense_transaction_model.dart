@@ -96,8 +96,8 @@ class PersonalExpenseTransactionModel implements CommonTransactionField {
       'amount': amount,
       'description': description,
       'category': category,
-      'createdOn': createdOn.toString(),
-      'modifiedOn': modifiedOn.toString(),
+      'created_on': createdOn.toString(),
+      'modified_on': modifiedOn.toString(),
       'roomData': roomData.toMap(),
     };
   }
@@ -148,7 +148,7 @@ class PersonalExpenseTransactionModel implements CommonTransactionField {
       "description": description,
       "amount": amount.toString(),
       "category": category,
-      "createdOn": createdOn.toIso8601String(),
+      "created_on": createdOn.toIso8601String(),
     };
     return json.encode(data);
   }

@@ -111,7 +111,11 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     );
   }
 
-  void _showBottomSheet(BuildContext context, List<LendenUserModel> oldUsers) {
+  void _showBottomSheet(
+    BuildContext context,
+    List<LendenUserModel> oldUsers,
+    String roomName,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -127,7 +131,8 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
             List<LendenUserModel> users = [];
             if (state is LendenRoomFetchSuccess) {
               users = state.roomData.users;
-              if (state.roomData.status == "Open" && users.length == 1) {
+              if (state.roomData.status == RoomStatus.open &&
+                  users.length == 1) {
                 showAddPerson = true;
               }
             } else {
@@ -187,6 +192,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                               createRoomCubit.inviteMember(
                                 widget.id,
                                 userDataFromScreen.first,
+                                roomName,
                                 scaffoldMessengerState,
                               );
                             }
@@ -209,7 +215,9 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                           ),
                           title: Text(users[index].name),
                           subtitle: Text(
-                            users[index].active ? "Open" : "Closed",
+                            users[index].active
+                                ? RoomStatus.open.label
+                                : RoomStatus.closed.label,
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
@@ -387,7 +395,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
             ),
           ),
           InkWell(
-            onTap: () => _showBottomSheet(context, users),
+            onTap: () => _showBottomSheet(context, users, roomName),
             borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
             child: const Icon(Iconsax.profile_2user_copy),
           ),
@@ -433,6 +441,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     return BlocConsumer<LendenRoomBloc, LendenRoomState>(
       listener: _blocListenerHandler,
       builder: (context, state) {
+        LendenDashboardModel lendenRoomData = LendenDashboardModel.empty();
         List<LendenTransactionModel> lendenTransactionData = [];
         LendenUserModel loggedInUserData = LendenUserModel.empty();
         bool isEditable = false;
@@ -442,6 +451,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
 
         if (state is LendenRoomFetchSuccess) {
           isLoaded = true;
+          lendenRoomData = state.roomData;
           lendenTransactionData = state.data;
           loggedInUserData = state.roomData.users.firstWhere(
             (ele) => ele.id == _loggedInUser.id,
@@ -532,7 +542,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                       ),
                                       sliver: SliverToBoxAdapter(
                                         child: LendenSummaryCard(
-                                          users: users,
+                                          data: lendenRoomData,
                                           loggedInUser: _loggedInUser,
                                         ),
                                       ),
