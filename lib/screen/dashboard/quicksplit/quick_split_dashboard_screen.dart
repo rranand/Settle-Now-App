@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -24,6 +25,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final TextEditingController _searchController = TextEditingController();
   UserModel _loggedInUser = UserModel.empty();
+  final ScrollController _gridViewScrollController = ScrollController();
 
   void _blocListenerHandler(BuildContext context, QuicksplitState state) {
     if (state is QuicksplitFailure) {
@@ -50,8 +52,19 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       final state = context.read<QuicksplitBloc>().state;
 
       if (state is! QuicksplitFetchSuccess) {
-        context.read<QuicksplitBloc>().add(QuicksplitFetch());
+        context.read<QuicksplitBloc>().add(QuicksplitFetch(isFreshFetch: true));
       }
+
+      _gridViewScrollController.addListener(() {
+        if (_gridViewScrollController.position.pixels ==
+            _gridViewScrollController.position.maxScrollExtent) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            context.read<QuicksplitBloc>().add(
+              QuicksplitFetch(isFreshFetch: false),
+            );
+          });
+        }
+      });
     }
 
     widget.isSearchEnabled.addListener(() {
@@ -67,7 +80,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       );
       return;
     }
-    context.read<QuicksplitBloc>().add(QuicksplitFetch());
+    context.read<QuicksplitBloc>().add(QuicksplitFetch(isFreshFetch: true));
   }
 
   List<TransactionModel> filterDataByPreference(
@@ -131,6 +144,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                   return noRecordFoundWidget("No Transaction Found", context);
                 } else {
                   return CustomScrollView(
+                    controller: _gridViewScrollController,
                     slivers: [
                       ValueListenableBuilder(
                         valueListenable: widget.isSearchEnabled,

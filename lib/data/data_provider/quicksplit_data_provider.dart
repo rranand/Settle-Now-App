@@ -4,17 +4,26 @@ import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class QuicksplitDataProvider {
-  Future<List<TransactionModel>> fetchData() async {
+  Future<Pair<List<TransactionModel>, bool>> fetchData(int alreadyHave) async {
     try {
-      final response = await createAPICall('quicksplit', "get", {});
+      final response = await createAPICall(
+        'quicksplit?alreadyHave=$alreadyHave',
+        "get",
+        {},
+      );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
+        bool hasMore = data['has_more'];
         List<TransactionModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(TransactionModel.fromMap(data['data'][i]));
+        final allTransactions = data['data'];
+        if (allTransactions != null) {
+          for (int i = 0; i < allTransactions.length; i++) {
+            arr.add(TransactionModel.fromMap(allTransactions[i]));
+          }
         }
-        return arr;
+
+        return Pair(arr, hasMore);
       } else {
         throw data['message'];
       }

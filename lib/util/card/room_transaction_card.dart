@@ -90,7 +90,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
   }
 
   Widget addToPersonalExpenseWidget() {
-    if (widget.data.hasData && !widget.data.isAddedToPersonalExpense) {
+    if (widget.data.hasData && widget.data.personalExpenseId.isEmpty) {
       return BlocBuilder<AddToPersonalExpenseBloc, AddToPersonalExpenseState>(
         builder: (context, state) {
           if (state.addingExpenseToPersonalExpense.contains(widget.data.id)) {

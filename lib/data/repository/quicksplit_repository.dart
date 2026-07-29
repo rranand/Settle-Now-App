@@ -1,16 +1,15 @@
 import 'package:settlenow/data/data_provider/data_provider_core.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class QuicksplitRepository {
   final QuicksplitDataProvider _dataProvider;
 
   QuicksplitRepository(this._dataProvider);
 
-  Future<List<TransactionModel>> fetchData() async {
+  Future<Pair<List<TransactionModel>, bool>> fetchData(int alreadyHave) async {
     try {
-      List<TransactionModel> data = await _dataProvider.fetchData();
-      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
-      return data;
+      return await _dataProvider.fetchData(alreadyHave);
     } catch (e) {
       rethrow;
     }

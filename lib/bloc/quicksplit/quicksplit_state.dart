@@ -9,12 +9,13 @@ final class QuicksplitLoading extends QuicksplitState {}
 
 final class QuicksplitFetchSuccess extends QuicksplitState {
   final List<TransactionModel> data;
+  final bool hasMoreData;
 
-  QuicksplitFetchSuccess(this.data);
+  QuicksplitFetchSuccess({required this.data, required this.hasMoreData});
 }
 
 final class QuicksplitFailure extends QuicksplitState {
   final String error;
 
-  QuicksplitFailure(this.error);
+  QuicksplitFailure({required this.error});
 }

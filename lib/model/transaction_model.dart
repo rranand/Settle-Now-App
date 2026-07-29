@@ -12,7 +12,7 @@ class TransactionModel implements CommonTransactionField {
   UserAmountModel createdBy = UserAmountModel.empty();
   List<UserAmountModel> users = [];
   DateTime modifiedOn = DateTime.now();
-  bool isAddedToPersonalExpense = false;
+  String personalExpenseId = "";
   bool active = true;
   bool isClosedAny = false;
   @override
@@ -32,7 +32,7 @@ class TransactionModel implements CommonTransactionField {
     required this.createdBy,
     required this.createdOn,
     required this.modifiedOn,
-    required this.isAddedToPersonalExpense,
+    required this.personalExpenseId,
     this.active = true,
     this.isClosedAny = false,
   });
@@ -48,7 +48,7 @@ class TransactionModel implements CommonTransactionField {
     UserAmountModel? createdBy,
     DateTime? createdOn,
     DateTime? modifiedOn,
-    bool? isAddedToPersonalExpense,
+    String? personalExpenseId,
     bool? active,
     bool? isClosedAny,
     String? splitType,
@@ -62,8 +62,7 @@ class TransactionModel implements CommonTransactionField {
       createdBy: createdBy ?? this.createdBy,
       createdOn: createdOn ?? this.createdOn,
       modifiedOn: modifiedOn ?? this.modifiedOn,
-      isAddedToPersonalExpense:
-          isAddedToPersonalExpense ?? this.isAddedToPersonalExpense,
+      personalExpenseId: personalExpenseId ?? this.personalExpenseId,
       active: active ?? this.active,
       isClosedAny: isClosedAny ?? this.isClosedAny,
       splitType: splitType ?? this.splitType,
@@ -80,7 +79,7 @@ class TransactionModel implements CommonTransactionField {
       'created_on': createdOn.toString(),
       'modified_on': modifiedOn.toString(),
       'splitType': splitType.toString(),
-      'isAddedToPersonalExpense': isAddedToPersonalExpense,
+      'personalExpenseId': personalExpenseId,
     };
   }
 
@@ -95,7 +94,7 @@ class TransactionModel implements CommonTransactionField {
       createdOn: data.createdOn,
       modifiedOn: data.createdOn,
       splitType: data.splitType,
-      isAddedToPersonalExpense: false,
+      personalExpenseId: "",
     );
   }
 
@@ -112,7 +111,7 @@ class TransactionModel implements CommonTransactionField {
       createdOn: data.createdOn,
       modifiedOn: data.modifiedOn,
       splitType: "",
-      isAddedToPersonalExpense: false,
+      personalExpenseId: "",
     );
   }
 
@@ -129,24 +128,33 @@ class TransactionModel implements CommonTransactionField {
       createdOn: data.createdOn,
       modifiedOn: data.modifiedOn,
       splitType: "",
-      isAddedToPersonalExpense: false,
+      personalExpenseId: "",
     );
   }
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
+    List<UserAmountModel> allUsers = List<UserAmountModel>.from(
+      (map['users']).map((x) => UserAmountModel.fromMap(x)),
+    );
+
     return TransactionModel(
       id: map['id'],
       description: map['description'],
       amount: double.parse(map['amount'].toString()),
       category: map['category'],
-      users: List<UserAmountModel>.from(
-        (map['users']).map((x) => UserAmountModel.fromBasicInfoMap(x)),
-      ),
-      createdBy: UserAmountModel.fromBasicInfoMap(map['createdBy']),
+      users:
+          allUsers
+              .where((element) => element.id != (map['created_by'] ?? ""))
+              .toList(),
+      createdBy:
+          allUsers
+              .where((element) => element.id == (map['created_by'] ?? ""))
+              .first,
       createdOn: DateTime.parse(map['created_on']).toLocal(),
       modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
-      isAddedToPersonalExpense: map['isAddedToPersonalExpense'],
-      isClosedAny: map.containsKey('isClosedAny') ? map['isClosedAny'] : false,
+      personalExpenseId: map['personal_expense_id'] ?? "",
+      isClosedAny:
+          map.containsKey('is_closed_any') ? map['is_closed_any'] : false,
       active: map.containsKey('active') ? map['active'] : true,
       splitType: map.containsKey('splitType') ? map['splitType'] : "",
     );
@@ -208,7 +216,8 @@ class TransactionModel implements CommonTransactionField {
 
   @override
   int get hashCode {
-    return id.hashCode ^
+    return super.hashCode ^
+        id.hashCode ^
         description.hashCode ^
         amount.hashCode ^
         category.hashCode ^

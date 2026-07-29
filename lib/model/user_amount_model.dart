@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/resolver/user_resolver.dart';
 
 class UserAmountModel extends UserModel {
   double amount = 0;
@@ -29,7 +30,7 @@ class UserAmountModel extends UserModel {
   Map<String, dynamic> toMap() {
     final map = super.toMap();
     map['amount'] = amount;
-    map['isSettled'] = isSettled;
+    map['is_settled'] = isSettled;
     return map;
   }
 
@@ -42,28 +43,24 @@ class UserAmountModel extends UserModel {
     );
   }
 
-  factory UserAmountModel.fromBasicInfoMap(Map<String, dynamic> map) {
-    UserAmountModel newData = UserAmountModel(
-      id: map['id'],
-      name: map['name'] ?? "",
-      profileImage: map['profile_pic'] ?? "",
-      amount: double.parse(map['amount'].toString()),
-    );
-    if (map.containsKey('isSettled')) {
-      newData.isSettled = map['isSettled'];
-    }
-    return newData;
-  }
-
   factory UserAmountModel.fromMap(Map<String, dynamic> map) {
-    UserAmountModel newData = UserAmountModel(
-      id: map['id'],
-      name: map['name'],
-      profileImage: map['profile_pic'],
-      amount: double.parse(map['amount'].toString()),
+    UserModel userData = UserResolver.instance.resolve(map['id'] ?? "");
+
+    if (!userData.hasData) {
+      userData = UserModel.fromBasicInfo(
+        id: map['name'] ?? "",
+        name: map['name'] ?? "",
+        profileImage: "",
+      );
+    }
+
+    UserAmountModel newData = UserAmountModel.copyFromUser(
+      userData,
+      double.parse(map['amount'].toString()),
     );
-    if (map.containsKey('isSettled')) {
-      newData.isSettled = map['isSettled'];
+
+    if (map.containsKey('is_settled')) {
+      newData.isSettled = map['is_settled'];
     }
     return newData;
   }
@@ -77,7 +74,7 @@ class UserAmountModel extends UserModel {
     Map<String, dynamic> data = {
       'id': id,
       'amount': amount.toString(),
-      'isSettled': isSettled,
+      'is_settled': isSettled,
     };
     return json.encode(data);
   }
@@ -87,7 +84,7 @@ class UserAmountModel extends UserModel {
 
   @override
   String toString() {
-    return 'UserAmountModel(id: $id, name: $name, amount: $amount , isSettled: $isSettled)';
+    return 'UserAmountModel(id: $id, name: $name, amount: $amount, is_settled: $isSettled)';
   }
 
   @override
@@ -103,5 +100,6 @@ class UserAmountModel extends UserModel {
   }
 
   @override
-  int get hashCode => amount.hashCode ^ isSettled.hashCode ^ id.hashCode;
+  int get hashCode =>
+      super.hashCode ^ amount.hashCode ^ isSettled.hashCode ^ id.hashCode;
 }

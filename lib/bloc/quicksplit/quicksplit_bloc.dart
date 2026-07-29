@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 part 'quicksplit_event.dart';
 part 'quicksplit_state.dart';
@@ -23,14 +24,32 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     QuicksplitFetch event,
     Emitter<QuicksplitState> emit,
   ) async {
+    List<TransactionModel> oldData = [];
+
+    if (!event.isFreshFetch && state is QuicksplitFetchSuccess) {
+      final oldState = state as QuicksplitFetchSuccess;
+      if (!oldState.hasMoreData) {
+        return;
+      }
+
+      oldData = [...(oldState.data)];
+    }
+
     if (state is QuicksplitLoading) return;
     emit(QuicksplitLoading());
 
     try {
-      List<TransactionModel> data = await repo.fetchData();
-      return emit(QuicksplitFetchSuccess(data));
+      Pair<List<TransactionModel>, bool> data = await repo.fetchData(
+        oldData.length,
+      );
+      return emit(
+        QuicksplitFetchSuccess(
+          data: [...oldData, ...data.first],
+          hasMoreData: data.second,
+        ),
+      );
     } catch (e) {
-      return emit(QuicksplitFailure(e.toString()));
+      return emit(QuicksplitFailure(error: e.toString()));
     }
   }
 
@@ -41,9 +60,11 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     if (state is! QuicksplitFetchSuccess) {
       return;
     }
-    final oldData = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [event.data, ...oldData.data];
-    return emit(QuicksplitFetchSuccess(data));
+    final oldState = state as QuicksplitFetchSuccess;
+    List<TransactionModel> data = [event.data, ...oldState.data];
+    return emit(
+      QuicksplitFetchSuccess(data: data, hasMoreData: oldState.hasMoreData),
+    );
   }
 
   void _quicksplitUpdateTransaction(
@@ -53,17 +74,19 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     if (state is! QuicksplitFetchSuccess) {
       return;
     }
-    final oldData = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [...oldData.data];
+    final oldState = state as QuicksplitFetchSuccess;
+    List<TransactionModel> data = [...oldState.data];
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
         data[i] = event.data.copyWith(
-          isAddedToPersonalExpense: data[i].isAddedToPersonalExpense,
+          personalExpenseId: data[i].personalExpenseId,
         );
         break;
       }
     }
-    return emit(QuicksplitFetchSuccess(data));
+    return emit(
+      QuicksplitFetchSuccess(data: data, hasMoreData: oldState.hasMoreData),
+    );
   }
 
   void _quicksplitDeleteTransaction(
@@ -73,10 +96,12 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     if (state is! QuicksplitFetchSuccess) {
       return;
     }
-    final oldData = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [...oldData.data];
+    final oldState = state as QuicksplitFetchSuccess;
+    List<TransactionModel> data = [...oldState.data];
     data.removeWhere((element) => element.id == event.transactionID);
-    return emit(QuicksplitFetchSuccess(data));
+    return emit(
+      QuicksplitFetchSuccess(data: data, hasMoreData: oldState.hasMoreData),
+    );
   }
 
   void _quicksplitAddToPersonalExpense(
@@ -91,11 +116,13 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
 
     for (int i = 0; i < oldData.length; i++) {
       if (oldData[i].id == event.transactionID) {
-        oldData[i].isAddedToPersonalExpense = true;
+        oldData[i].personalExpenseId = " "; //FIXME: Add Personal Expense ID
       }
     }
 
-    return emit(QuicksplitFetchSuccess(oldData));
+    return emit(
+      QuicksplitFetchSuccess(data: oldData, hasMoreData: oldState.hasMoreData),
+    );
   }
 
   void _quicksplitSettleRequest(
@@ -129,7 +156,9 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
       }
     }
 
-    return emit(QuicksplitFetchSuccess(oldData));
+    return emit(
+      QuicksplitFetchSuccess(data: oldData, hasMoreData: oldState.hasMoreData),
+    );
   }
 
   void _quicksplitReset(QuicksplitReset event, Emitter<QuicksplitState> emit) {
