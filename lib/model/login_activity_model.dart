@@ -40,9 +40,9 @@ class LoginActivityModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'deviceName': deviceName,
+      'device_name': deviceName,
       'deviceType': deviceType,
-      'lastLoggedIn': lastLoggedIn.toString(),
+      'last_logged_in': lastLoggedIn.toString(),
       'created_on': createdOn.toString(),
     };
   }
@@ -50,9 +50,9 @@ class LoginActivityModel {
   factory LoginActivityModel.fromMap(Map<String, dynamic> map) {
     return LoginActivityModel(
       id: map['id'],
-      deviceName: map['deviceName'],
-      deviceType: capatilizeFirstLetter(map['deviceType'] ?? ""),
-      lastLoggedIn: DateTime.parse(map['lastLoggedIn']).toLocal(),
+      deviceName: map['device_name'],
+      deviceType: capatilizeFirstLetter(map['device_type'] ?? ""),
+      lastLoggedIn: DateTime.parse(map['last_logged_in']).toLocal(),
       createdOn: DateTime.parse(map['created_on']).toLocal(),
     );
   }

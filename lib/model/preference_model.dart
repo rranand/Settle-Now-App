@@ -22,7 +22,9 @@ class PreferenceModel {
       room: PreferenceSection.fromJson(json['room']),
       quicksplit: PreferenceSection.fromJson(json['quicksplit']),
       lenden: PreferenceSection.fromJson(json['lenden']),
-      personalExpense: EmptyPreferenceSection.fromJson(json['personalExpense']),
+      personalExpense: EmptyPreferenceSection.fromJson(
+        json['personal_expense'],
+      ),
       theme: json['theme'] ?? 'system',
     );
   }
@@ -32,7 +34,7 @@ class PreferenceModel {
       'room': room.toJson(),
       'quicksplit': quicksplit.toJson(),
       'lenden': lenden.toJson(),
-      'personalExpense': personalExpense.toJson(),
+      'personal_expense': personalExpense.toJson(),
       'theme': theme,
     };
   }
@@ -83,11 +85,11 @@ class PreferenceSection {
   PreferenceSection.empty({this.hasData = false});
 
   factory PreferenceSection.fromJson(Map<String, dynamic> json) {
-    return PreferenceSection(isSettled: json['isSettled'] ?? false);
+    return PreferenceSection(isSettled: json['is_settled'] ?? false);
   }
 
   Map<String, dynamic> toJson() {
-    return {'isSettled': isSettled};
+    return {'is_settled': isSettled};
   }
 
   @override
@@ -114,11 +116,11 @@ class EmptyPreferenceSection {
   EmptyPreferenceSection.empty({this.hasData = false});
 
   factory EmptyPreferenceSection.fromJson(Map<String, dynamic> json) {
-    return EmptyPreferenceSection(showEmpty: json['showEmpty'] ?? false);
+    return EmptyPreferenceSection(showEmpty: json['show_empty'] ?? false);
   }
 
   Map<String, dynamic> toJson() {
-    return {'showEmpty': showEmpty};
+    return {'show_empty': showEmpty};
   }
 
   @override

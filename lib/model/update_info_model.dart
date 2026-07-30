@@ -45,7 +45,7 @@ class UpdateInfoModel {
       'description': description,
       'important': important,
       'maintenance': maintenance,
-      'currentVersion': currentVersion,
+      'current_version': currentVersion,
     };
   }
 

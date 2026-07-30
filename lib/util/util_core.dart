@@ -36,6 +36,7 @@ export './enum/device_type.dart';
 export './enum/sort_rules.dart';
 export './enum/room_status.dart';
 export './enum/transaction_type.dart';
+export './enum/split_type.dart';
 export './token_manager/auth_event_bus.dart';
 export './token_manager/session_manager.dart';
 export './token_manager/token_storage.dart';

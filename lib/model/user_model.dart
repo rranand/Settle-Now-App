@@ -66,7 +66,7 @@ class UserModel {
       'id': id,
       'name': name,
       'email': email,
-      'profileImage': profileImage,
+      'profile_pic': profileImage,
     };
   }
 
@@ -85,11 +85,11 @@ class UserModel {
       profileImage: map['profile_pic'],
     );
 
-    userData.phoneNo = map['phoneNo'] ?? "";
+    userData.phoneNo = map['phone_no'] ?? "";
     userData.createdOn = DateTime.parse(map['created_on']).toLocal();
 
     userData.email = map['email'];
-    userData.isGoogle = map['isGoogle'];
+    userData.isGoogle = map['is_google'];
     return userData;
   }
 
@@ -100,7 +100,7 @@ class UserModel {
       email: map['email'] ?? "",
       profileImage: map['profile_pic'] ?? "",
       createdOn: DateTime.parse(map['created_on']).toLocal(),
-      phoneNo: map['phoneNo'] ?? "",
+      phoneNo: map['phone_no'] ?? "",
     );
   }
 
