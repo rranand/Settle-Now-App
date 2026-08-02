@@ -1,3 +1,4 @@
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +24,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
   final ValueNotifier<bool> isSettledByYou = ValueNotifier(false);
   final ValueNotifier<bool> isEditable = ValueNotifier(false);
+  final ValueNotifier<bool> isValidState = ValueNotifier(false);
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
@@ -44,6 +46,24 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           orElse: () => QuicksplitUserModel.empty(),
         )
         .name;
+  }
+
+  bool _isValid() {
+    int totalSum = 0;
+
+    for (final eachUser in widget.data.users) {
+      totalSum +=
+          (Decimal.parse(eachUser.amount.toString()) * Decimal.fromInt(100))
+              .toBigInt()
+              .toInt();
+    }
+
+    int ogAmount =
+        (Decimal.parse(widget.data.amount.toString()) * Decimal.fromInt(100))
+            .toBigInt()
+            .toInt();
+
+    return totalSum == ogAmount;
   }
 
   Widget transactionInfoWidget(bool value) {
@@ -153,22 +173,38 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          ButtonWithShimmerEffect(
-                            isLoaded: isLoading,
-                            buttonText: "Settle",
-                            buttonType: CustomButtonType.customElevatedButton,
-                            buttonHeight: 40,
-                            buttonWidth: 110,
-                            borderRadius: 100,
-                            buttonTextColor: Colors.green.shade400,
-                            backgroundColor:
-                                Theme.of(context).scaffoldBackgroundColor,
-                            borderColor: Colors.green.shade400,
-                            onPressed: () {
-                              context.read<SettleCubit>().settleExpense(
-                                widget.data.id,
-                                _loggedInUser.id,
-                                context,
+                          ValueListenableBuilder(
+                            valueListenable: isValidState,
+                            builder: (context, _, child) {
+                              return ButtonWithShimmerEffect(
+                                isLoaded: isLoading,
+                                buttonText: "Settle",
+                                buttonType:
+                                    CustomButtonType.customElevatedButton,
+                                buttonHeight: 40,
+                                buttonWidth: 110,
+                                borderRadius: 100,
+                                buttonTextColor: Colors.green.shade400,
+                                backgroundColor:
+                                    Theme.of(context).scaffoldBackgroundColor,
+                                borderColor: Colors.green.shade400,
+                                onPressed: () {
+                                  if (isValidState.value) {
+                                    context.read<SettleCubit>().settleExpense(
+                                      widget.data.id,
+                                      _loggedInUser.id,
+                                      context,
+                                    );
+                                  } else {
+                                    showSnackbarWithChildWidget(
+                                      "Transaction is in invalid state",
+                                      child: snackbarErrorIcon(),
+                                      scaffoldMessenger: ScaffoldMessenger.of(
+                                        context,
+                                      ),
+                                    );
+                                  }
+                                },
                               );
                             },
                           ),
@@ -216,7 +252,9 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   }
 
   Widget addToPersonalExpenseWidget() {
-    if (widget.data.hasData && widget.data.personalExpenseId.isEmpty) {
+    if (widget.data.hasData &&
+        widget.data.personalExpenseId.isEmpty &&
+        isValidState.value) {
       return BlocBuilder<AddToPersonalExpenseBloc, AddToPersonalExpenseState>(
         builder: (context, state) {
           if (state.addingExpenseToPersonalExpense.contains(widget.data.id)) {
@@ -274,6 +312,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   Widget build(BuildContext context) {
     List<String> tags = createTags();
     isSettledByYou.value = calculateSettledFlag();
+    isValidState.value = _isValid();
     isEditable.value = !widget.data.isClosedAny;
 
     return Container(
@@ -311,6 +350,18 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  ValueListenableBuilder(
+                    valueListenable: isValidState,
+                    builder: (context, _, _) {
+                      return Visibility(
+                        visible: !isValidState.value,
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 6.0),
+                          child: snackbarErrorIcon(),
+                        ),
+                      );
+                    },
+                  ),
                   ValueListenableBuilder(
                     valueListenable: isSettledByYou,
                     builder: (context, _, _) {

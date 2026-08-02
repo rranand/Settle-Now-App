@@ -178,7 +178,13 @@ class _AddTransactionState extends State<AddTransaction> {
                   textInputType: TextInputType.numberWithOptions(decimal: true),
                   labelText: "",
                   validator: (value) {
-                    return CustomValidator.validateAmount(value, null);
+                    return CustomValidator.validateAmount(
+                      value,
+                      RangeValues(
+                        user.id == _loggedInUser.id ? 0 : 1,
+                        double.maxFinite,
+                      ),
+                    );
                   },
                   inputDecoration: TextFormFieldInputBorder.underLine,
                   borderColor:

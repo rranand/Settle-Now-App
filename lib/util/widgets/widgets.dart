@@ -146,6 +146,10 @@ Widget tagOnCard(
       : CustomShimmerEffect.textWidget(context, width: 100);
 }
 
+Widget snackbarErrorIcon() {
+  return Icon(Iconsax.warning_2_copy, color: Colors.redAccent);
+}
+
 Widget snackbarSuccessIcon() {
   return Icon(Iconsax.tick_circle_copy, color: Colors.green);
 }
