@@ -30,7 +30,6 @@ class _AddTransactionState extends State<AddTransaction> {
   EdgeInsets _mainScreenPadding = EdgeInsets.zero;
   final double _headerTextSize = 20;
   List<String> expenseCategories = [];
-  int oldTransHashcode = 0;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _expressionKey = GlobalKey<FormState>();
@@ -390,11 +389,9 @@ class _AddTransactionState extends State<AddTransaction> {
     switch (transactionType) {
       case TransactionType.lenden:
         {
-          final transTemp = transactionData as LendenTransactionModel;
           if (transactionData.amount < 0) {
             _lendenTransactionType.value = LendenType.owe;
           }
-          oldTransHashcode = transTemp.hashCode;
         }
       case TransactionType.room:
         {
@@ -404,7 +401,6 @@ class _AddTransactionState extends State<AddTransaction> {
           _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
             transTemp.category,
           );
-          oldTransHashcode = transTemp.hashCode;
         }
       case TransactionType.personal:
         {
@@ -413,7 +409,6 @@ class _AddTransactionState extends State<AddTransaction> {
           _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
             transTemp.category,
           );
-          oldTransHashcode = transTemp.hashCode;
         }
       case TransactionType.quicksplit:
         {
@@ -422,7 +417,6 @@ class _AddTransactionState extends State<AddTransaction> {
           _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
             transTemp.category,
           );
-          oldTransHashcode = transTemp.hashCode;
         }
     }
 
@@ -562,6 +556,11 @@ class _AddTransactionState extends State<AddTransaction> {
       }
 
       BaseTransactionModel? data;
+      String oldTransID = "";
+
+      if (widget.transactionData != null) {
+        oldTransID = widget.transactionData!.id;
+      }
 
       bool flag = false;
 
@@ -569,11 +568,11 @@ class _AddTransactionState extends State<AddTransaction> {
         case TransactionType.lenden:
           {
             data = LendenTransactionModel(
-              id: "",
+              id: oldTransID,
               amount: totalAmount,
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
-              modifiedOn: _createdOn,
+              modifiedOn: DateTime.now(),
               createdBy: createdBy.id,
             );
             if (_lendenTransactionType.value == LendenType.owe) {
@@ -584,63 +583,66 @@ class _AddTransactionState extends State<AddTransaction> {
         case TransactionType.personal:
           {
             data = PersonalExpenseTransactionModel(
-              id: "",
+              id: oldTransID,
               amount: totalAmount,
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
-              modifiedOn: _createdOn,
+              modifiedOn: DateTime.now(),
               createdBy: createdBy.id,
               category: expenseCategories[max(0, _categoryIndex.value)],
               roomData: RoomLinkedModel.empty(),
             );
-            if (_lendenTransactionType.value == LendenType.owe) {
-              data.amount = -1 * data.amount;
-            }
             break;
           }
         case TransactionType.quicksplit:
           {
+            Map<String, bool> isSettledMap = {};
+
+            if (widget.transactionData != null) {
+              final tempTransData =
+                  widget.transactionData as QuicksplitTransactionModel;
+              for (final qsUser in tempTransData.users) {
+                isSettledMap[qsUser.id] = qsUser.isSettled;
+              }
+            }
+
             data = QuicksplitTransactionModel(
-              id: "",
+              id: oldTransID,
               amount: totalAmount,
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
-              modifiedOn: _createdOn,
+              modifiedOn: DateTime.now(),
               createdBy: createdBy.id,
               category: expenseCategories[max(0, _categoryIndex.value)],
               users:
                   userWithAmount
                       .map(
-                        (element) =>
-                            QuicksplitUserModel.fromUserAmountObject(element),
+                        (element) => QuicksplitUserModel.fromUserAmountObject(
+                          element,
+                          isSettled: isSettledMap[element.id] ?? false,
+                        ),
                       )
                       .toList(),
               personalExpenseId: '',
               active: true,
               isClosedAny: false,
             );
-            if (_lendenTransactionType.value == LendenType.owe) {
-              data.amount = -1 * data.amount;
-            }
             break;
           }
         case TransactionType.room:
           {
             data = RoomTransactionModel(
-              id: "",
+              id: oldTransID,
               amount: totalAmount,
               description: _descriptionController.text.trim(),
               createdOn: _createdOn,
-              modifiedOn: _createdOn,
+              modifiedOn: DateTime.now(),
               createdBy: createdBy.id,
               category: expenseCategories[max(0, _categoryIndex.value)],
               users: userWithAmount,
               splitType: expenseSplitType,
               personalExpenseId: '',
             );
-            if (_lendenTransactionType.value == LendenType.owe) {
-              data.amount = -1 * data.amount;
-            }
             break;
           }
       }
@@ -672,8 +674,7 @@ class _AddTransactionState extends State<AddTransaction> {
             transactionType,
           );
         } else {
-          if (oldTransHashcode != data.hashCode) {
-            data.id = widget.transactionData!.id;
+          if (widget.transactionData.hashCode != data.hashCode) {
             context.read<NewTransactionCubit>().updateExpense(
               context,
               data,

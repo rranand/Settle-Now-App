@@ -15,7 +15,7 @@ class UserAmountModel extends BaseUserModel {
 
   @override
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{...super.toMap(), 'amount': amount};
+    return <String, dynamic>{'id': id, 'amount': amount};
   }
 
   @override

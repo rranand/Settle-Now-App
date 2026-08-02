@@ -122,6 +122,6 @@ class RoomInfoModel {
         status.hashCode ^
         createdOn.hashCode ^
         modifiedOn.hashCode ^
-        users.hashCode;
+        Object.hashAll(users);
   }
 }

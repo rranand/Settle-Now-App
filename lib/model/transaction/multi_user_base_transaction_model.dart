@@ -102,7 +102,7 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
       ...super.toUpdateExpenseJson(),
       "category": category,
       "users": allUsers,
-      "split_type": splitType,
+      "split_type": splitType.label,
     };
   }
 
@@ -132,6 +132,6 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
     return super.hashCode ^
         category.hashCode ^
         splitType.hashCode ^
-        users.hashCode;
+        Object.hashAll(users);
   }
 }

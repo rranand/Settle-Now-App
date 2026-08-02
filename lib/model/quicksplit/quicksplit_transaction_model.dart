@@ -93,7 +93,7 @@ class QuicksplitTransactionModel
 
   @override
   String toString() {
-    return 'QuicksplitTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category, splitType: $splitType)';
+    return 'QuicksplitTransactionModel(id: $id, description: $description, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn, createdBy: $createdBy, category: $category, splitType: $splitType, active:$active, personalExpenseId:$personalExpenseId, isClosedAny:$isClosedAny)';
   }
 
   @override

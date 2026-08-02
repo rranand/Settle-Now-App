@@ -100,8 +100,6 @@ class BaseTransactionModel {
         id.hashCode ^
         description.hashCode ^
         amount.hashCode ^
-        createdOn.hashCode ^
-        modifiedOn.hashCode ^
         createdBy.hashCode;
   }
 }
