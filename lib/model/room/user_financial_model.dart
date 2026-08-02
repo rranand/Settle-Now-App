@@ -1,19 +1,22 @@
 import 'package:settlenow/model/model_core.dart';
 
-class UserFinancialData {
-  final UserModel user;
+class UserFinancialData extends BaseUserModel {
   final double contribution;
   final double spent;
 
   UserFinancialData({
-    required this.user,
+    required super.id,
+    required super.name,
+    required super.profilePic,
     required this.contribution,
     required this.spent,
   });
 
   factory UserFinancialData.fromRoomUserModel(RoomUserModel data) {
     return UserFinancialData(
-      user: data.user,
+      id: data.id,
+      name: data.name,
+      profilePic: data.profilePic,
       contribution: data.contribution,
       spent: data.spent,
     );
@@ -23,13 +26,13 @@ class UserFinancialData {
   bool operator ==(covariant UserFinancialData other) {
     if (identical(this, other)) return true;
 
-    return other.user == user &&
+    return super.id == id &&
         other.contribution == contribution &&
         other.spent == spent;
   }
 
   @override
   int get hashCode {
-    return user.hashCode ^ contribution.hashCode ^ spent.hashCode;
+    return super.hashCode ^ contribution.hashCode ^ spent.hashCode;
   }
 }

@@ -24,7 +24,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     QuicksplitFetch event,
     Emitter<QuicksplitState> emit,
   ) async {
-    List<TransactionModel> oldData = [];
+    List<QuicksplitTransactionModel> oldData = [];
 
     if (!event.isFreshFetch && state is QuicksplitFetchSuccess) {
       final oldState = state as QuicksplitFetchSuccess;
@@ -39,7 +39,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
     emit(QuicksplitLoading());
 
     try {
-      Pair<List<TransactionModel>, bool> data = await repo.fetchData(
+      Pair<List<QuicksplitTransactionModel>, bool> data = await repo.fetchData(
         oldData.length,
       );
       return emit(
@@ -61,7 +61,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
       return;
     }
     final oldState = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [event.data, ...oldState.data];
+    List<QuicksplitTransactionModel> data = [event.data, ...oldState.data];
     return emit(
       QuicksplitFetchSuccess(data: data, hasMoreData: oldState.hasMoreData),
     );
@@ -75,7 +75,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
       return;
     }
     final oldState = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [...oldState.data];
+    List<QuicksplitTransactionModel> data = [...oldState.data];
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
         data[i] = event.data.copyWith(
@@ -97,7 +97,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
       return;
     }
     final oldState = state as QuicksplitFetchSuccess;
-    List<TransactionModel> data = [...oldState.data];
+    List<QuicksplitTransactionModel> data = [...oldState.data];
     data.removeWhere((element) => element.id == event.transactionID);
     return emit(
       QuicksplitFetchSuccess(data: data, hasMoreData: oldState.hasMoreData),
@@ -112,7 +112,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
       return;
     }
     final oldState = state as QuicksplitFetchSuccess;
-    List<TransactionModel> oldData = List.from(oldState.data);
+    List<QuicksplitTransactionModel> oldData = List.from(oldState.data);
 
     for (int i = 0; i < oldData.length; i++) {
       if (oldData[i].id == event.transactionID) {
@@ -133,15 +133,11 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
       return;
     }
     final oldState = state as QuicksplitFetchSuccess;
-    List<TransactionModel> oldData = List.from(oldState.data);
+    List<QuicksplitTransactionModel> oldData = List.from(oldState.data);
 
     for (int i = 0; i < oldData.length; i++) {
       if (oldData[i].id == event.transactionID) {
         int settledUserCount = 0;
-        if (oldData[i].createdBy.id == event.uid) {
-          oldData[i].createdBy.isSettled = true;
-          settledUserCount++;
-        }
 
         for (int j = 0; j < oldData[i].users.length; j++) {
           if (oldData[i].users[j].id == event.uid) {

@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: Theme.of(context).drawerTheme.backgroundColor,
             ),
             currentAccountPicture: imageWidgetForCachedNetworkImage(
-              _loggedInUser.profileImage,
+              _loggedInUser.profilePic,
               context,
               boxShape: BoxShape.circle,
             ),

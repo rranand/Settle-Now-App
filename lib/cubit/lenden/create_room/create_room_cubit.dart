@@ -32,7 +32,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
         id: "",
         roomName: roomName,
         status: RoomStatus.open,
-        createdBy: authLoginState.userData,
+        createdBy: authLoginState.userData.id,
         createdOn: DateTime.now(),
         modifiedOn: DateTime.now(),
         users: [LendenUserModel.fromUserModel(authLoginState.userData)],
@@ -57,7 +57,7 @@ class CreateRoomCubit extends Cubit<CreateRoomState> {
 
   void inviteMember(
     String roomId,
-    UserModel user,
+    BaseUserModel user,
     String roomName,
     ScaffoldMessengerState scaffoldMessenger,
   ) async {

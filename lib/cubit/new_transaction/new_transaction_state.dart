@@ -8,13 +8,13 @@ final class NewTransactionInitial extends NewTransactionState {}
 final class NewTransactionLoading extends NewTransactionState {}
 
 final class NewTransactionSuccess extends NewTransactionState {
-  final TransactionModel data;
+  final BaseTransactionModel data;
 
-  NewTransactionSuccess(this.data);
+  NewTransactionSuccess({required this.data});
 }
 
 final class NewTransactionFailure extends NewTransactionState {
   final String error;
 
-  NewTransactionFailure(this.error);
+  NewTransactionFailure({required this.error});
 }

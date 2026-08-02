@@ -117,10 +117,9 @@ class AuthRepository {
     }
   }
 
-  Future<List<UserModel>> fetchFriend() async {
+  Future<List<FriendUserModel>> fetchFriend() async {
     try {
-      final List<UserModel> data = await _dataProvider.fetchFriend();
-      return data;
+      return await _dataProvider.fetchFriend();
     } catch (e) {
       rethrow;
     }

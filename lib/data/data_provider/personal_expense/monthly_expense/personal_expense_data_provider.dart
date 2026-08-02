@@ -14,9 +14,12 @@ class PersonalMonthlyExpenseDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        final allData = data['data'];
         List<PersonalExpenseTransactionModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(PersonalExpenseTransactionModel.fromMap(data['data'][i]));
+        if (allData != null) {
+          for (int i = 0; i < data['data'].length; i++) {
+            arr.add(PersonalExpenseTransactionModel.fromMap(data['data'][i]));
+          }
         }
         return arr;
       } else {
@@ -28,24 +31,19 @@ class PersonalMonthlyExpenseDataProvider {
   }
 
   Future<PersonalExpenseTransactionModel> add(
-    NewTransactionModel expenseData,
+    PersonalExpenseTransactionModel expenseData,
   ) async {
     try {
-      PersonalExpenseTransactionModel newExpense =
-          PersonalExpenseTransactionModel.fromNewTransaction(expenseData);
-
       final response = await createAPICall(
         'personal',
         "post",
-
-        newExpense.toCreateNewExpenseJson(),
+        expenseData.toCreateExpenseJson(),
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        newExpense.id = data['data']['id'];
-        return newExpense;
+        return expenseData.copyWith(id: data['data']['id']);
       } else {
         throw data['message'];
       }
@@ -54,24 +52,18 @@ class PersonalMonthlyExpenseDataProvider {
     }
   }
 
-  Future<PersonalExpenseTransactionModel> update(
-    NewTransactionModel expenseData,
-  ) async {
+  Future<void> update(PersonalExpenseTransactionModel expenseData) async {
     try {
-      PersonalExpenseTransactionModel updatedExpense =
-          PersonalExpenseTransactionModel.fromNewTransaction(expenseData);
       final response = await createAPICall(
         'personal',
         'put',
-
-        updatedExpense.toCreateNewExpenseJson(),
+        expenseData.toCreateExpenseJson(),
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        updatedExpense.modifiedOn = DateTime.now();
-        return updatedExpense;
+        return;
       } else {
         throw data['message'];
       }
@@ -84,7 +76,7 @@ class PersonalMonthlyExpenseDataProvider {
     try {
       final response = await createAPICall('personal', 'delete', {
         "id": expenseID,
-        "transactionType": transactionType,
+        "transaction_type": transactionType,
       });
 
       final data = jsonDecode(response.body);

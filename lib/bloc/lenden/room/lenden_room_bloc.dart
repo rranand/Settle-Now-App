@@ -112,7 +112,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     List<LendenUserModel> newUserArr = [...oldData.roomData.users];
 
     for (int i = 0; i < newUserArr.length; i++) {
-      if (newUserArr[i].id == event.data.createdBy.id) {
+      if (newUserArr[i].id == event.data.createdBy) {
         if (event.data.amount < 0) {
           newUserArr[i].owe += event.data.amount * -1;
         } else {
@@ -154,7 +154,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
         for (int j = 0; j < newUserArr.length; j++) {
-          if (newUserArr[j].id == event.data.createdBy.id) {
+          if (newUserArr[j].id == event.data.createdBy) {
             if (event.data.amount < 0) {
               newUserArr[j].owe += event.data.amount * -1;
             } else {
@@ -205,7 +205,7 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
     data.removeWhere((element) {
       if (element.id == event.expenseID) {
         for (int j = 0; j < newUserArr.length; j++) {
-          if (newUserArr[j].id == element.createdBy.id) {
+          if (newUserArr[j].id == element.createdBy) {
             if (element.amount < 0) {
               newUserArr[j].owe -= element.amount * -1;
             } else {

@@ -26,7 +26,10 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     }
     emit(RoomLoading(event.id));
     try {
-      List<TransactionModel> data = await repo.fetchData(event.id, event.users);
+      List<RoomTransactionModel> data = await repo.fetchData(
+        event.id,
+        event.users,
+      );
       return emit(RoomFetchSuccess(event.id, data));
     } catch (e) {
       emit(RoomFailure(e.toString()));
@@ -41,7 +44,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       return;
     }
     final oldData = state as RoomFetchSuccess;
-    List<TransactionModel> data = [...event.data, ...oldData.data];
+    List<RoomTransactionModel> data = [...event.data, ...oldData.data];
     for (int i = 0; i < event.data.length; i++) {
       roomUserCubit.onAddNewTransaction(event.data[i]);
     }
@@ -57,8 +60,8 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       return;
     }
     final oldData = state as RoomFetchSuccess;
-    List<TransactionModel> data = [...oldData.data];
-    TransactionModel oldExpense = TransactionModel.empty();
+    List<RoomTransactionModel> data = [...oldData.data];
+    RoomTransactionModel oldExpense = RoomTransactionModel.empty();
 
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.data.id) {
@@ -79,7 +82,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       return;
     }
     final oldData = state as RoomFetchSuccess;
-    List<TransactionModel> data = [...oldData.data];
+    List<RoomTransactionModel> data = [...oldData.data];
     int index = -1;
     for (int i = 0; i < data.length; i++) {
       if (data[i].id == event.expenseID) {
@@ -108,7 +111,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     if (oldState.id != event.id) {
       return;
     }
-    List<TransactionModel> oldData = List.from(oldState.data);
+    List<RoomTransactionModel> oldData = List.from(oldState.data);
 
     for (int i = 0; i < oldData.length; i++) {
       if (oldData[i].id == event.expenseID) {

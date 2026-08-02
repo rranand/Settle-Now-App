@@ -39,7 +39,7 @@ class _ExpenseByUserDataScreenState extends State<ExpenseByUserDataScreen> {
           children:
               widget.userFinancialData.map((data) {
                 return BarGroup(
-                  user: data.user.name,
+                  user: data.name,
                   contribution: data.contribution,
                   spent: data.spent,
                   maxOverallValue: maxOverallValue,

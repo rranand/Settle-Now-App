@@ -44,7 +44,7 @@ class FilterCubit extends Cubit<FilterState> {
             filterRoomTransaction(
               filterState.id!,
               uid,
-              filterState.data.cast<TransactionModel>(),
+              filterState.data.cast<RoomTransactionModel>(),
             );
           }
         default:
@@ -53,7 +53,7 @@ class FilterCubit extends Cubit<FilterState> {
     }
   }
 
-  List<T> sortTransactions<T extends CommonTransactionField>(List<T> data) {
+  List<T> sortTransactions<T extends BaseTransactionModel>(List<T> data) {
     bool isMostRecent =
         state.sortRule == null || state.sortRule == SortRules.descending;
 
@@ -86,7 +86,7 @@ class FilterCubit extends Cubit<FilterState> {
     List<LendenTransactionModel> filteredData = [];
     for (int i = 0; i < data.length; i++) {
       if (state.lendenType != null && state.lendenType != LendenType.none) {
-        final isCreatedByUser = data[i].createdBy.id == uid;
+        final isCreatedByUser = data[i].createdBy == uid;
         final isOwe = state.lendenType == LendenType.owe;
         final isGave = state.lendenType == LendenType.gave;
         final amount = data[i].amount;
@@ -100,7 +100,7 @@ class FilterCubit extends Cubit<FilterState> {
       }
 
       if (state.selectedUsers.isNotEmpty &&
-          !state.selectedUsers.contains(data[i].createdBy.id)) {
+          !state.selectedUsers.contains(data[i].createdBy)) {
         continue;
       }
       if (state.amountRange != null &&
@@ -164,9 +164,9 @@ class FilterCubit extends Cubit<FilterState> {
   void filterRoomTransaction(
     String id,
     String uid,
-    List<TransactionModel> data,
+    List<RoomTransactionModel> data,
   ) {
-    List<TransactionModel> filteredData = [];
+    List<RoomTransactionModel> filteredData = [];
 
     for (int i = 0; i < data.length; i++) {
       if (state.selectedCategories.isNotEmpty &&
@@ -177,7 +177,7 @@ class FilterCubit extends Cubit<FilterState> {
       }
 
       if (state.selectedUsers.isNotEmpty &&
-          !state.selectedUsers.contains(data[i].createdBy.id)) {
+          !state.selectedUsers.contains(data[i].createdBy)) {
         continue;
       }
 
@@ -197,7 +197,7 @@ class FilterCubit extends Cubit<FilterState> {
       if (state.splitWith.isNotEmpty) {
         bool isUserFound = false;
 
-        isUserFound = state.splitWith.contains(data[i].createdBy.id);
+        isUserFound = state.splitWith.contains(data[i].createdBy);
 
         for (int j = 0; !isUserFound && j < data[i].users.length; j++) {
           isUserFound = state.splitWith.contains(data[i].users[j].id);

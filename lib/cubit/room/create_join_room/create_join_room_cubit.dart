@@ -77,8 +77,7 @@ class CreateJoinRoomCubit extends Cubit<CreateJoinRoomState> {
 
   void inviteMember(
     String roomID,
-    List<UserModel> users,
-
+    List<BaseUserModel> users,
     ScaffoldMessengerState scaffoldMessenger,
   ) async {
     String message = "";

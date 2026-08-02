@@ -109,9 +109,7 @@ class _TransactionCardState extends State<TransactionCard> {
                         } else {
                           context.push(
                             "${RouterConstants.personalExpenseRouteName}/${widget.data.createdOn.year}/${CalenderConstant.monthName[widget.data.createdOn.month]}${RouterConstants.personalExpenseEditExpenseRouteName}",
-                            extra: TransactionModel.fromPersonalExpense(
-                              widget.data,
-                            ),
+                            extra: widget.data,
                           );
                         }
                       },

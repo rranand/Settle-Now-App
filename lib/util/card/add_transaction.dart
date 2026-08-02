@@ -16,7 +16,7 @@ import 'package:settlenow/router/router_constant.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class AddTransaction extends StatefulWidget {
-  final TransactionModel? transactionData;
+  final BaseTransactionModel? transactionData;
   const AddTransaction({super.key, this.transactionData});
 
   @override
@@ -46,7 +46,7 @@ class _AddTransactionState extends State<AddTransaction> {
   bool _isNewExpense = true;
   String expenseType = "";
 
-  final List<String> _splitType = ["Equal", "Partial", "Self"];
+  final List<SplitType> _splitType = SplitType.values;
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
   final ValueNotifier<int> _splitTypeIndex = ValueNotifier(0);
   final ValueNotifier<LendenType> _lendenTransactionType = ValueNotifier(
@@ -81,7 +81,7 @@ class _AddTransactionState extends State<AddTransaction> {
           int equalSplit = (amountInPaisa / userCount).toInt();
           UserWithEditControlTD newUserTDMap = {};
 
-          for (MapEntry<UserModel, TextEditingController> eachEntry
+          for (MapEntry<BaseUserModel, TextEditingController> eachEntry
               in _selectedUserIDs.value.entries) {
             newUserTDMap.putIfAbsent(
               eachEntry.key,
@@ -104,7 +104,7 @@ class _AddTransactionState extends State<AddTransaction> {
             int equalSplit = (amountInPaisa / (userCount - 1)).toInt();
             UserWithEditControlTD newUserTDMap = {};
 
-            for (MapEntry<UserModel, TextEditingController> eachEntry
+            for (MapEntry<BaseUserModel, TextEditingController> eachEntry
                 in _selectedUserIDs.value.entries) {
               newUserTDMap.putIfAbsent(
                 eachEntry.key,
@@ -129,7 +129,7 @@ class _AddTransactionState extends State<AddTransaction> {
     }
   }
 
-  void _removeUserFromSplitTransaction(UserModel user, bool skipRemoval) {
+  void _removeUserFromSplitTransaction(BaseUserModel user, bool skipRemoval) {
     {
       final current = UserWithEditControlTD.from(_selectedUserIDs.value);
       final oldUserIDs = Set<String>.from(_selectedUserIDSet.value);
@@ -153,7 +153,7 @@ class _AddTransactionState extends State<AddTransaction> {
     }
   }
 
-  Widget _userCardWithAmountWidget(UserModel user) {
+  Widget _userCardWithAmountWidget(BaseUserModel user) {
     return Padding(
       padding: const EdgeInsets.only(
         bottom: 8.0,
@@ -302,7 +302,7 @@ class _AddTransactionState extends State<AddTransaction> {
                   borderRadius: BorderRadius.circular(100),
                   onTap: () {
                     if (_splitTypeIndex.value != index) {
-                      if (_splitType[index] == 'Partial') {
+                      if (_splitType[index] == SplitType.partial) {
                         _selectedUserIDs.value.clear();
                         _selectedUserIDSet.value.clear();
                         _selectedUserIDs.value.putIfAbsent(
@@ -331,7 +331,7 @@ class _AddTransactionState extends State<AddTransaction> {
                         border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: Text(
-                        _splitType[index],
+                        _splitType[index].label,
                         style: TextStyle(
                           color: Theme.of(context).textTheme.bodyLarge!.color,
                         ),
@@ -366,10 +366,10 @@ class _AddTransactionState extends State<AddTransaction> {
     _selectedUserIDs.value = {};
     _selectedUserIDs.value = {};
     _categoryIndex.value = 0;
-    _splitTypeIndex.value = _splitType.indexOf("Equal");
+    _splitTypeIndex.value = _splitType.indexOf(SplitType.equal);
 
     if (transactionType == TransactionType.quicksplit) {
-      _splitTypeIndex.value = _splitType.indexOf("Partial");
+      _splitTypeIndex.value = _splitType.indexOf(SplitType.partial);
       _selectedUserIDs.value.putIfAbsent(
         _loggedInUser,
         () => TextEditingController(),
@@ -377,36 +377,54 @@ class _AddTransactionState extends State<AddTransaction> {
     }
   }
 
-  void _populateEditForm(TransactionModel transactionData) {
+  void _populateEditForm(BaseTransactionModel transactionData) {
     _isNewExpense = false;
-    switch (transactionType) {
-      case TransactionType.lenden:
-        {
-          if (transactionData.amount < 0) {
-            _lendenTransactionType.value = LendenType.owe;
-          }
-        }
-      case TransactionType.room:
-        {
-          _splitTypeIndex.value = _splitType.indexOf(
-            capatilizeFirstLetter(transactionData.splitType),
-          );
-        }
-      case TransactionType.personal:
-        {
-          expenseType = "Personal";
-        }
-      default:
-        {}
-    }
 
     _amountController.text = transactionData.amount.abs().toStringAsFixed(2);
     _descriptionController.text = transactionData.description;
     _createdOn = transactionData.createdOn;
     _creationDateController.text = convertDateTimeFormat(_createdOn);
-    _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
-      transactionData.category,
-    );
+
+    List<UserAmountModel> users = [];
+
+    switch (transactionType) {
+      case TransactionType.lenden:
+        {
+          final transTemp = transactionData as LendenTransactionModel;
+          if (transactionData.amount < 0) {
+            _lendenTransactionType.value = LendenType.owe;
+          }
+          oldTransHashcode = transTemp.hashCode;
+        }
+      case TransactionType.room:
+        {
+          final transTemp = transactionData as RoomTransactionModel;
+          users = [...transTemp.users];
+          _splitTypeIndex.value = _splitType.indexOf(transTemp.splitType);
+          _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
+            transTemp.category,
+          );
+          oldTransHashcode = transTemp.hashCode;
+        }
+      case TransactionType.personal:
+        {
+          final transTemp = transactionData as RoomTransactionModel;
+          expenseType = "Personal";
+          _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
+            transTemp.category,
+          );
+          oldTransHashcode = transTemp.hashCode;
+        }
+      case TransactionType.quicksplit:
+        {
+          final transTemp = transactionData as QuicksplitTransactionModel;
+          users = [...transTemp.users];
+          _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
+            transTemp.category,
+          );
+          oldTransHashcode = transTemp.hashCode;
+        }
+    }
 
     _selectedUserIDs.value = {};
     _selectedUserIDSet.value = {};
@@ -414,35 +432,18 @@ class _AddTransactionState extends State<AddTransaction> {
     UserWithEditControlTD tempMap = {};
     Set<String> tempUserIDs = {};
 
-    tempMap[transactionData.createdBy] = TextEditingController(
-      text: transactionData.createdBy.amount.toStringAsFixed(2),
-    );
-    tempUserIDs.add(transactionData.createdBy.id);
-
-    for (int i = 0; i < transactionData.users.length; i++) {
-      final userWithAmountData = <UserModel, TextEditingController>{
-        transactionData.users[i]: TextEditingController(
-          text: transactionData.users[i].amount.toStringAsFixed(2),
+    for (int i = 0; i < users.length; i++) {
+      final userWithAmountData = <BaseUserModel, TextEditingController>{
+        users[i]: TextEditingController(
+          text: users[i].amount.toStringAsFixed(2),
         ),
       };
       tempMap.addAll(userWithAmountData);
-      tempUserIDs.add(transactionData.users[i].id);
+      tempUserIDs.add(users[i].id);
     }
 
     _selectedUserIDs.value = tempMap;
     _selectedUserIDSet.value = tempUserIDs;
-
-    NewTransactionModel oldTrans = NewTransactionModel(
-      amount: transactionData.amount,
-      description: transactionData.description,
-      createdOn: transactionData.createdOn,
-      members: transactionData.users,
-      createdBy: transactionData.createdBy,
-      splitType: transactionData.splitType,
-      category: transactionData.category,
-    );
-
-    oldTransHashcode = oldTrans.hashCode;
   }
 
   @override
@@ -459,7 +460,7 @@ class _AddTransactionState extends State<AddTransaction> {
       switch (transactionType) {
         case TransactionType.quicksplit:
           {
-            _splitTypeIndex.value = _splitType.indexOf("Partial");
+            _splitTypeIndex.value = _splitType.indexOf(SplitType.partial);
             if (widget.transactionData == null) {
               _selectedUserIDs.value.putIfAbsent(
                 _loggedInUser,
@@ -492,7 +493,7 @@ class _AddTransactionState extends State<AddTransaction> {
   }
 
   void _submitTransactionHandler() {
-    if (_splitType[_splitTypeIndex.value] == "Partial" &&
+    if (_splitType[_splitTypeIndex.value] == SplitType.partial &&
         !_partialFormKey.currentState!.validate()) {
       return;
     }
@@ -504,14 +505,17 @@ class _AddTransactionState extends State<AddTransaction> {
               .toInt();
       double totalAmount = double.parse(_amountController.text);
       List<UserAmountModel> userWithAmount = [];
-      UserAmountModel createdBy = UserAmountModel.copyFromUser(
+      UserAmountModel createdBy = UserAmountModel.fromBaseObject(
         _loggedInUser,
-        _splitTypeIndex.value == _splitType.indexOf("Self") ? totalAmount : 0,
+        amount:
+            _splitTypeIndex.value == _splitType.indexOf(SplitType.self)
+                ? totalAmount
+                : 0,
       );
 
-      String expenseSplitType = _splitType[_splitTypeIndex.value].toLowerCase();
+      SplitType expenseSplitType = _splitType[_splitTypeIndex.value];
 
-      if (_splitType[_splitTypeIndex.value] == "Partial") {
+      if (_splitType[_splitTypeIndex.value] == SplitType.partial) {
         _selectedUserIDs.value.forEach((userData, amountTxt) {
           double tempAmount = double.parse(amountTxt.text);
           sumAmount +=
@@ -519,19 +523,15 @@ class _AddTransactionState extends State<AddTransaction> {
                   .toBigInt()
                   .toInt();
 
-          if (userData.id == _loggedInUser.id) {
-            createdBy = UserAmountModel.copyFromUser(_loggedInUser, tempAmount);
-          } else {
-            userWithAmount.add(
-              UserAmountModel.copyFromUser(userData, tempAmount),
-            );
-          }
+          userWithAmount.add(
+            UserAmountModel.fromBaseObject(userData, amount: tempAmount),
+          );
         });
       } else if (transactionType == TransactionType.room &&
-          (_splitType[_splitTypeIndex.value] == "Equal" ||
+          (_splitType[_splitTypeIndex.value] == SplitType.equal ||
               !_futureJoinerBool.value)) {
         if (!_futureJoinerBool.value) {
-          expenseSplitType = "partial";
+          expenseSplitType = SplitType.partial;
         }
         final roomInfoState = context.read<RoomInfoCubit>().state;
 
@@ -549,49 +549,104 @@ class _AddTransactionState extends State<AddTransaction> {
 
           for (int i = 0; i < roomInfoState.data.users.length; i++) {
             if (roomInfoState.data.users[i].active) {
-              if (roomInfoState.data.users[i].user.id == _loggedInUser.id) {
-                createdBy = UserAmountModel.copyFromUser(
-                  _loggedInUser,
-                  ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
-                );
-              } else {
-                userWithAmount.add(
-                  UserAmountModel.copyFromUser(
-                    roomInfoState.data.users[i].user,
-                    ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
-                  ),
-                );
-              }
+              userWithAmount.add(
+                UserAmountModel.fromBaseObject(
+                  roomInfoState.data.users[i],
+                  amount: ((eachAmount + (remaining > 0 ? 1 : 0)) / 100),
+                ),
+              );
               remaining--;
             }
           }
         }
       }
 
-      NewTransactionModel data = NewTransactionModel(
-        amount: totalAmount,
-        description: _descriptionController.text.trim(),
-        createdOn: _createdOn,
-        members: userWithAmount,
-        createdBy: createdBy,
-        splitType: expenseSplitType,
-        category: expenseCategories[max(0, _categoryIndex.value)],
-      );
+      BaseTransactionModel? data;
+
       bool flag = false;
 
       switch (transactionType) {
         case TransactionType.lenden:
           {
+            data = LendenTransactionModel(
+              id: "",
+              amount: totalAmount,
+              description: _descriptionController.text.trim(),
+              createdOn: _createdOn,
+              modifiedOn: _createdOn,
+              createdBy: createdBy.id,
+            );
             if (_lendenTransactionType.value == LendenType.owe) {
               data.amount = -1 * data.amount;
             }
+            break;
           }
-        default:
-          {}
+        case TransactionType.personal:
+          {
+            data = PersonalExpenseTransactionModel(
+              id: "",
+              amount: totalAmount,
+              description: _descriptionController.text.trim(),
+              createdOn: _createdOn,
+              modifiedOn: _createdOn,
+              createdBy: createdBy.id,
+              category: expenseCategories[max(0, _categoryIndex.value)],
+              roomData: RoomLinkedModel.empty(),
+            );
+            if (_lendenTransactionType.value == LendenType.owe) {
+              data.amount = -1 * data.amount;
+            }
+            break;
+          }
+        case TransactionType.quicksplit:
+          {
+            data = QuicksplitTransactionModel(
+              id: "",
+              amount: totalAmount,
+              description: _descriptionController.text.trim(),
+              createdOn: _createdOn,
+              modifiedOn: _createdOn,
+              createdBy: createdBy.id,
+              category: expenseCategories[max(0, _categoryIndex.value)],
+              users:
+                  userWithAmount
+                      .map(
+                        (element) =>
+                            QuicksplitUserModel.fromUserAmountObject(element),
+                      )
+                      .toList(),
+              personalExpenseId: '',
+              active: true,
+              isClosedAny: false,
+            );
+            if (_lendenTransactionType.value == LendenType.owe) {
+              data.amount = -1 * data.amount;
+            }
+            break;
+          }
+        case TransactionType.room:
+          {
+            data = RoomTransactionModel(
+              id: "",
+              amount: totalAmount,
+              description: _descriptionController.text.trim(),
+              createdOn: _createdOn,
+              modifiedOn: _createdOn,
+              createdBy: createdBy.id,
+              category: expenseCategories[max(0, _categoryIndex.value)],
+              users: userWithAmount,
+              splitType: expenseSplitType,
+              personalExpenseId: '',
+            );
+            if (_lendenTransactionType.value == LendenType.owe) {
+              data.amount = -1 * data.amount;
+            }
+            break;
+          }
       }
 
       switch (_splitType[_splitTypeIndex.value]) {
-        case "Partial":
+        case SplitType.partial:
           {
             if (userWithAmount.isEmpty) {
               showNormalSnackBar(context, "Add Atleast One Member");
@@ -887,7 +942,7 @@ class _AddTransactionState extends State<AddTransaction> {
                         ValueListenableBuilder(
                           valueListenable: _splitTypeIndex,
                           builder: (context, value, child) {
-                            if (_splitType[value].contains("Equal")) {
+                            if (_splitType[value] == SplitType.equal) {
                               return child!;
                             } else {
                               return SizedBox(
@@ -926,7 +981,7 @@ class _AddTransactionState extends State<AddTransaction> {
                   ValueListenableBuilder(
                     valueListenable: _splitTypeIndex,
                     builder: (context, value, child) {
-                      if (_splitType[value].contains("Partial")) {
+                      if (_splitType[value] == SplitType.partial) {
                         return child!;
                       } else {
                         return SizedBox.shrink();
@@ -956,7 +1011,7 @@ class _AddTransactionState extends State<AddTransaction> {
                                             "transactionType": transactionType,
                                           },
                                         )
-                                        as List<UserModel>?;
+                                        as List<BaseUserModel>?;
                                 if (userDataFromScreen != null) {
                                   for (
                                     int i = 0;
@@ -1027,7 +1082,7 @@ class _AddTransactionState extends State<AddTransaction> {
                               UserWithEditControlTD userWithEditControlTD,
                               Widget? _,
                             ) {
-                              List<UserModel> selectedUsers =
+                              List<BaseUserModel> selectedUsers =
                                   userWithEditControlTD.keys.toList();
                               if (userWithEditControlTD.isEmpty) {
                                 return SizedBox.shrink();

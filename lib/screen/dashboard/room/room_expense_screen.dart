@@ -111,7 +111,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           double ogTotalSpent = 0;
 
           for (int i = 0; i < state.data.length; i++) {
-            if (_loggedInUser.id == state.data[i].user.id) {
+            if (_loggedInUser.id == state.data[i].id) {
               data = state.data[i];
             }
             totalSpent += state.data[i].contribution;
@@ -131,12 +131,12 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                 List<RoomUserModel> filteredExpenseInfo =
                     calculateUserExpenseInfo(
                       state.data,
-                      filterState.data.cast<TransactionModel>(),
+                      filterState.data.cast<RoomTransactionModel>(),
                       [],
                     );
                 totalSpent = 0;
                 for (int i = 0; i < filteredExpenseInfo.length; i++) {
-                  if (_loggedInUser.id == filteredExpenseInfo[i].user.id) {
+                  if (_loggedInUser.id == filteredExpenseInfo[i].id) {
                     data = filteredExpenseInfo[i];
                   }
                   totalSpent += filteredExpenseInfo[i].contribution;
@@ -538,7 +538,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
           for (int i = 0; i < state.data.users.length; i++) {
             hasTransactionData =
                 hasTransactionData || (state.data.users[i].contribution > 0);
-            if (_loggedInUser.id == state.data.users[i].user.id) {
+            if (_loggedInUser.id == state.data.users[i].id) {
               roomUserModel = state.data.users[i];
             } else if (state.data.users[i].active) {
               showCloseRoomRequest = true;
@@ -731,7 +731,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                                       "transactionType": TransactionType.room,
                                     },
                                   )
-                                  as List<UserModel>?;
+                                  as List<BaseUserModel>?;
                           if (userDataFromScreen != null &&
                               userDataFromScreen.isNotEmpty) {
                             createJoinRoomCubit.inviteMember(

@@ -21,7 +21,7 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
   List<CategoryAmountModel> categoryAmountModel = [];
   List<UserFinancialData> userFinancialData = [];
 
-  Widget expenseByCategoryGraph(List<TransactionModel> data) {
+  Widget expenseByCategoryGraph(List<RoomTransactionModel> data) {
     if (_categoryHashCode != data.hashCode) {
       _categoryHashCode = data.hashCode;
       final Map<String, double> categoryData = {};
@@ -63,7 +63,7 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
     return ExpenseByUserDataScreen(userFinancialData: userFinancialData);
   }
 
-  Widget _graphController(int index, List<TransactionModel> data) {
+  Widget _graphController(int index, List<RoomTransactionModel> data) {
     switch (index) {
       case 0:
         return expenseByCategoryGraph(data);
@@ -79,7 +79,7 @@ class _RoomAnalysisScreenState extends State<RoomAnalysisScreen> {
     return BlocBuilder<RoomBloc, RoomState>(
       builder: (context, state) {
         if (state is RoomFetchSuccess) {
-          List<TransactionModel> data = state.data;
+          List<RoomTransactionModel> data = state.data;
 
           if (data.isEmpty) {
             return SliverToBoxAdapter(

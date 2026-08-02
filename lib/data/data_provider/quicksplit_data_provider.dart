@@ -4,7 +4,9 @@ import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class QuicksplitDataProvider {
-  Future<Pair<List<TransactionModel>, bool>> fetchData(int alreadyHave) async {
+  Future<Pair<List<QuicksplitTransactionModel>, bool>> fetchData(
+    int alreadyHave,
+  ) async {
     try {
       final response = await createAPICall(
         'quicksplit?alreadyHave=$alreadyHave',
@@ -15,11 +17,11 @@ class QuicksplitDataProvider {
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
         bool hasMore = data['has_more'];
-        List<TransactionModel> arr = [];
+        List<QuicksplitTransactionModel> arr = [];
         final allTransactions = data['data'];
         if (allTransactions != null) {
           for (int i = 0; i < allTransactions.length; i++) {
-            arr.add(TransactionModel.fromMap(allTransactions[i]));
+            arr.add(QuicksplitTransactionModel.fromMap(allTransactions[i]));
           }
         }
 
@@ -32,20 +34,19 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<TransactionModel> create(NewTransactionModel data) async {
+  Future<QuicksplitTransactionModel> create(
+    QuicksplitTransactionModel data,
+  ) async {
     try {
-      TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
-
       final response = await createAPICall(
         'quicksplit',
         "post",
-        newExpense.toQuickSplitJson(),
+        data.toCreateExpenseJson(),
       );
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.id = respData['data']['id'];
-        return newExpense;
+        return data.copyWith(id: respData['data']['id']);
       } else {
         throw respData['message'];
       }
@@ -54,22 +55,17 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<TransactionModel> update(NewTransactionModel data) async {
+  Future<void> update(QuicksplitTransactionModel data) async {
     try {
-      TransactionModel updatedExpense = TransactionModel.fromNewTransaction(
-        data,
-      );
-      updatedExpense.modifiedOn = DateTime.now();
-
       final response = await createAPICall(
         'quicksplit',
         "put",
-        updatedExpense.toQuickSplitJson(),
+        data.toUpdateExpenseJson(),
       );
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return updatedExpense;
+        return;
       } else {
         throw respData['message'];
       }

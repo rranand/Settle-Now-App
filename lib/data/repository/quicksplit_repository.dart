@@ -7,7 +7,9 @@ class QuicksplitRepository {
 
   QuicksplitRepository(this._dataProvider);
 
-  Future<Pair<List<TransactionModel>, bool>> fetchData(int alreadyHave) async {
+  Future<Pair<List<QuicksplitTransactionModel>, bool>> fetchData(
+    int alreadyHave,
+  ) async {
     try {
       return await _dataProvider.fetchData(alreadyHave);
     } catch (e) {
@@ -15,7 +17,9 @@ class QuicksplitRepository {
     }
   }
 
-  Future<TransactionModel> create(NewTransactionModel data) async {
+  Future<QuicksplitTransactionModel> create(
+    QuicksplitTransactionModel data,
+  ) async {
     try {
       return _dataProvider.create(data);
     } catch (e) {
@@ -23,7 +27,7 @@ class QuicksplitRepository {
     }
   }
 
-  Future<TransactionModel> update(NewTransactionModel data) async {
+  Future<void> update(QuicksplitTransactionModel data) async {
     try {
       return _dataProvider.update(data);
     } catch (e) {

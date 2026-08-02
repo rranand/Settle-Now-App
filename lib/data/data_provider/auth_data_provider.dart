@@ -168,15 +168,15 @@ class AuthDataProvider {
       );
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        UserModel userData = UserModel.forOwnerInfo(data);
+        UserModel userData = UserModel.fromMap(data);
         PreferenceModel preferenceData = PreferenceModel.fromJson(
           data['preference'],
         );
         final allFriends = data['friends'];
-        List<UserModel> allFriendsArr = [];
+        List<FriendUserModel> allFriendsArr = [];
         if (allFriends != null) {
           for (int i = 0; i < allFriends.length; i++) {
-            allFriendsArr.add(UserModel.fromBasicInfoMap(allFriends[i]));
+            allFriendsArr.add(FriendUserModel.fromMap(allFriends[i]));
           }
         }
         UserPreferenceBundle userPreferenceBundle = (
@@ -316,7 +316,7 @@ class AuthDataProvider {
       final response = await createAPICall(
         'user',
         "patch",
-        userData.updateProfileJSON(),
+        userData.toUpdateJSON(),
       );
 
       final data = jsonDecode(response.body);
@@ -330,16 +330,21 @@ class AuthDataProvider {
     }
   }
 
-  Future<List<UserModel>> fetchFriend() async {
+  Future<List<FriendUserModel>> fetchFriend() async {
     try {
       final response = await createAPICall('friend', "get", {});
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        List<UserModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(UserModel.fromBasicInfoMap(data['data'][i]));
+        List<FriendUserModel> arr = [];
+        final allFriends = data['data'];
+
+        if (allFriends != null) {
+          for (int i = 0; i < allFriends.length; i++) {
+            arr.add(FriendUserModel.fromMap(allFriends[i]));
+          }
         }
+
         return arr;
       } else {
         throw data['message'];

@@ -23,7 +23,7 @@ class SettleCard extends StatelessWidget {
     required this.loggedInUser,
   });
 
-  Widget _userCard(BuildContext context, UserModel user, bool isLast) {
+  Widget _userCard(BuildContext context, BaseUserModel user, bool isLast) {
     final userCardWidth = (screenWidth - 2 * UiConstant.cardPadding - 36) * .5;
     return SizedBox(
       width: userCardWidth,

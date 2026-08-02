@@ -33,7 +33,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
     }
   }
 
-  Widget transactionCardDisplay(List<TransactionModel> data) {
+  Widget transactionCardDisplay(List<RoomTransactionModel> data) {
     bool isWide = MediaQuery.of(context).size.width > UiConstant.maxWidth;
     int noOfCardsToBeShown = (data.length / 2).toInt() + data.length % 2;
 
@@ -74,11 +74,15 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
     );
   }
 
+  String getName(String createdBy) {
+    return UserResolver.instance.resolve(createdBy).name;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<RoomBloc, RoomState>(
       builder: (context, state) {
-        List<TransactionModel> data = [];
+        List<RoomTransactionModel> data = [];
         if (state is RoomFetchSuccess) {
           data = state.data;
 
@@ -102,14 +106,14 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
               return ValueListenableBuilder<TextEditingValue>(
                 valueListenable: widget.searchController,
                 builder: (context, _, _) {
-                  List<TransactionModel> searchedData =
-                      filterState.data.cast<TransactionModel>();
+                  List<RoomTransactionModel> searchedData =
+                      filterState.data.cast<RoomTransactionModel>();
 
                   searchedData = FilterSort.filteredSearchText(
                     widget.searchController.text,
                     searchedData,
                     (transData) =>
-                        "${transData.description} ${transData.amount} ${transData.category} ${transData.createdBy.name}",
+                        "${transData.description} ${transData.amount} ${transData.category} ${getName(transData.createdBy)}",
                   );
 
                   if (searchedData.isEmpty) {
@@ -127,7 +131,7 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
           );
         } else {
           return transactionCardDisplay(
-            List.filled(11, TransactionModel.empty()),
+            List.filled(11, RoomTransactionModel.empty()),
           );
         }
       },

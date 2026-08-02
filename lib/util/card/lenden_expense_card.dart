@@ -39,7 +39,7 @@ class LendenExpenseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isMe = data.createdBy.id == loggedInUser.id;
+    final isMe = data.createdBy == loggedInUser.id;
     final direction = calculateDirection(isMe);
     final bgColor =
         data.hasData
@@ -53,15 +53,15 @@ class LendenExpenseCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
         onTap: () {
-          if (data.createdBy.id == loggedInUser.id && isEditable) {
+          if (data.createdBy == loggedInUser.id && isEditable) {
             context.push(
               "${RouterConstants.lendenRouteName}/$lendenID${RouterConstants.lendenEditExpenseRouteName}",
-              extra: TransactionModel.fromLendenTransactionModel(data),
+              extra: data,
             );
           }
         },
         hoverColor:
-            data.createdBy.id == loggedInUser.id ? null : Colors.transparent,
+            data.createdBy == loggedInUser.id ? null : Colors.transparent,
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 8),
           padding: const EdgeInsets.all(12),

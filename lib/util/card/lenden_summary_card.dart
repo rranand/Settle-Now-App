@@ -4,7 +4,6 @@ import 'package:settlenow/internationalization/currency.dart';
 import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
-// FIXME: Fix gave and owe amount in dashboard
 class LendenSummaryCard extends StatelessWidget {
   final LendenDashboardModel data;
   final UserModel loggedInUser;

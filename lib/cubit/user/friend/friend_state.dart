@@ -8,7 +8,7 @@ final class FriendInitial extends FriendState {}
 final class FriendLoading extends FriendState {}
 
 final class FriendSuccess extends FriendState {
-  final List<UserModel> data;
+  final List<FriendUserModel> data;
 
   FriendSuccess({required this.data});
 }

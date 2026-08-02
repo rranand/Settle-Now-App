@@ -19,7 +19,9 @@ class PersonalMonthlyExpenseRepository {
     }
   }
 
-  Future<PersonalExpenseTransactionModel> add(NewTransactionModel data) async {
+  Future<PersonalExpenseTransactionModel> add(
+    PersonalExpenseTransactionModel data,
+  ) async {
     try {
       return _dataProvider.add(data);
     } catch (e) {
@@ -27,9 +29,7 @@ class PersonalMonthlyExpenseRepository {
     }
   }
 
-  Future<PersonalExpenseTransactionModel> update(
-    NewTransactionModel data,
-  ) async {
+  Future<void> update(PersonalExpenseTransactionModel data) async {
     try {
       return _dataProvider.update(data);
     } catch (e) {

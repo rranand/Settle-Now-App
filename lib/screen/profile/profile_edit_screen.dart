@@ -41,8 +41,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   void _onSubmitEditForm() {
     if (_profileEditFormKey.currentState!.validate()) {
       if (_name.text != _loggedInUser.name) {
-        UserModel newData = UserModel.copyFromUser(_loggedInUser);
-        newData.name = _name.text;
+        UserModel newData = _loggedInUser.copyWith(name: _name.text);
         context.read<UserUpdateProfileCubit>().updateProfile(
           newData,
           _preferenceData,

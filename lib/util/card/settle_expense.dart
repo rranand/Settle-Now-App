@@ -42,7 +42,7 @@ class _SettleExpenseState extends State<SettleExpense> {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        _selectedUser.value = userData.user.id;
+        _selectedUser.value = userData.id;
         if (_amountController.text.isEmpty) {
           _amountController.text = formatCurrency(
             payableAmount,
@@ -56,15 +56,10 @@ class _SettleExpenseState extends State<SettleExpense> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                overlapUserImageWidget(
-                  context,
-                  [userData.user],
-                  1,
-                  imageRadius: 50,
-                ),
+                overlapUserImageWidget(context, [userData], 1, imageRadius: 50),
                 SizedBox(height: 8),
                 Text(
-                  userData.user.name,
+                  userData.name,
                   maxLines: 1,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.clip,
@@ -91,7 +86,7 @@ class _SettleExpenseState extends State<SettleExpense> {
               bottom: 0,
               right: 0,
               child:
-                  _selectedUser.value == userData.user.id
+                  _selectedUser.value == userData.id
                       ? Icon(Icons.check_circle, color: Colors.green, size: 24)
                       : SizedBox.shrink(),
             ),
@@ -123,7 +118,7 @@ class _SettleExpenseState extends State<SettleExpense> {
           (widget.transactionData != null ? widget.transactionData!.amount : 0);
       double amountToBeSettled = double.parse(_amountController.text);
       double userCanReceive = oldAmount;
-      UserModel receiverData = UserModel.empty();
+      RoomUserModel receiverData = RoomUserModel.empty();
 
       if (_selectedUser.value.isEmpty) {
         showNormalSnackBar(context, "Select User!");
@@ -134,11 +129,11 @@ class _SettleExpenseState extends State<SettleExpense> {
       }
 
       for (int i = 0; i < userData.length; i++) {
-        if (_selectedUser.value == userData[i].user.id) {
+        if (_selectedUser.value == userData[i].id) {
           userCanReceive = getPrecisedAmount(
             userData[i].contribution - userData[i].spent + userData[i].settle,
           );
-          receiverData = userData[i].user;
+          receiverData = userData[i];
           break;
         }
       }
@@ -200,7 +195,7 @@ class _SettleExpenseState extends State<SettleExpense> {
     for (int i = 0; i < data.length; i++) {
       double bal = data[i].contribution - data[i].spent + data[i].settle;
 
-      if (data[i].user.id == _loggedInUser.id) {
+      if (data[i].id == _loggedInUser.id) {
         userCanPay = bal;
         break;
       }
@@ -211,7 +206,7 @@ class _SettleExpenseState extends State<SettleExpense> {
     }
     for (int i = 0; i < data.length; i++) {
       if (widget.transactionData != null) {
-        if (widget.transactionData!.receiver.id == data[i].user.id) {
+        if (widget.transactionData!.receiver.id == data[i].id) {
           users.add(data[i]);
           break;
         }
@@ -226,7 +221,7 @@ class _SettleExpenseState extends State<SettleExpense> {
         }
         if (bal == 0) {
           continue;
-        } else if (data[i].user.id != _loggedInUser.id && isNega2 != isNega) {
+        } else if (data[i].id != _loggedInUser.id && isNega2 != isNega) {
           users.add(data[i]);
         }
       }
@@ -293,10 +288,10 @@ class _SettleExpenseState extends State<SettleExpense> {
             widget.transactionData != null && i < state.data.length;
             i++
           ) {
-            if (state.data[i].user.id == widget.transactionData!.sender.id) {
+            if (state.data[i].id == widget.transactionData!.sender.id) {
               isEditable = isEditable && state.data[i].active;
             }
-            if (state.data[i].user.id == widget.transactionData!.receiver.id) {
+            if (state.data[i].id == widget.transactionData!.receiver.id) {
               isEditable = isEditable && state.data[i].active;
             }
           }
@@ -382,7 +377,7 @@ class _SettleExpenseState extends State<SettleExpense> {
                           if (_selectedUser.value.isNotEmpty &&
                               userCanPay > 0) {
                             RoomUserModel userToBePaid = users.firstWhere(
-                              (ele) => ele.user.id == _selectedUser.value,
+                              (ele) => ele.id == _selectedUser.value,
                               orElse: () => RoomUserModel.empty(),
                             );
                             if (userToBePaid.hasData) {
@@ -391,7 +386,7 @@ class _SettleExpenseState extends State<SettleExpense> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 2.0),
                                   child: Text(
-                                    "Settling on ${userToBePaid.user.name}'s behalf",
+                                    "Settling on ${userToBePaid.name}'s behalf",
                                     style: TextStyle(fontSize: 12),
                                   ),
                                 ),

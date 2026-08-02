@@ -83,29 +83,24 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
     context.read<QuicksplitBloc>().add(QuicksplitFetch(isFreshFetch: true));
   }
 
-  List<TransactionModel> filterDataByPreference(
-    List<TransactionModel> oldData,
+  List<QuicksplitTransactionModel> filterDataByPreference(
+    List<QuicksplitTransactionModel> oldData,
     PreferenceSection pref,
   ) {
     if (pref.isSettled) {
       return oldData;
     }
 
-    List<TransactionModel> data = [];
+    List<QuicksplitTransactionModel> data = [];
 
     for (int i = 0; i < oldData.length; i++) {
-      bool isSettledByYou = false;
-      if (oldData[i].createdBy.id == _loggedInUser.id) {
-        isSettledByYou = oldData[i].createdBy.isSettled;
-      } else {
-        isSettledByYou =
-            oldData[i].users
-                .firstWhere(
-                  (ele) => ele.id == _loggedInUser.id,
-                  orElse: () => UserAmountModel.empty(),
-                )
-                .isSettled;
-      }
+      bool isSettledByYou =
+          oldData[i].users
+              .firstWhere(
+                (ele) => ele.id == _loggedInUser.id,
+                orElse: () => QuicksplitUserModel.empty(),
+              )
+              .isSettled;
 
       if (pref.isSettled != isSettledByYou) {
         continue;
@@ -127,7 +122,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
             child: BlocConsumer<QuicksplitBloc, QuicksplitState>(
               listener: _blocListenerHandler,
               builder: (context, state) {
-                List<TransactionModel> splitData = [];
+                List<QuicksplitTransactionModel> splitData = [];
                 if (state is QuicksplitFetchSuccess) {
                   splitData = filterDataByPreference(
                     state.data,
@@ -136,7 +131,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                 } else if (state is QuicksplitLoading) {
                   splitData = List.generate(
                     11,
-                    (i) => TransactionModel.empty(),
+                    (i) => QuicksplitTransactionModel.empty(),
                   );
                 }
 
@@ -176,7 +171,8 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                         sliver: ValueListenableBuilder<TextEditingValue>(
                           valueListenable: _searchController,
                           builder: (context, _, _) {
-                            List<TransactionModel> filterData = splitData;
+                            List<QuicksplitTransactionModel> filterData =
+                                splitData;
                             if (state is QuicksplitFetchSuccess) {
                               filterData = FilterSort.filteredSearchText(
                                 _searchController.text,
@@ -203,7 +199,7 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                               itemCount: noOfCardsToBeShown,
                               itemBuilder: (BuildContext context, int index) {
                                 if (isWide) {
-                                  TransactionModel eachSplitData =
+                                  QuicksplitTransactionModel eachSplitData =
                                       filterData[2 * index];
                                   return Row(
                                     crossAxisAlignment:

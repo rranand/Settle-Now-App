@@ -20,7 +20,7 @@ class LendenRoomRepository {
 
   Future<LendenTransactionModel> create(
     String id,
-    NewTransactionModel expenseData,
+    LendenTransactionModel expenseData,
   ) async {
     try {
       return _dataProvider.create(id, expenseData);
@@ -41,10 +41,7 @@ class LendenRoomRepository {
     }
   }
 
-  Future<LendenTransactionModel> update(
-    String id,
-    NewTransactionModel expenseData,
-  ) async {
+  Future<void> update(String id, LendenTransactionModel expenseData) async {
     try {
       return _dataProvider.update(id, expenseData);
     } catch (e) {

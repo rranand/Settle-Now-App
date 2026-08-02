@@ -28,7 +28,7 @@ class _FilterSheetState extends State<FilterSheet> {
   String loggedInUserID = "";
   List<String> filterSections = [];
   List<RoomLinkedModel> roomData = [];
-  List<UserModel> userData = [];
+  List<BaseUserModel> userData = [];
   final ValueNotifier<int> _filterSelectedIndex = ValueNotifier(0);
   final ValueNotifier<SortBy> _selectedSortBy = ValueNotifier(
     SortBy.dateCreated,
@@ -248,7 +248,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 maxDate = data[i].createdOn;
               }
             }
-            userData = state.roomData.users.map((e) => e as UserModel).toList();
+            userData = state.roomData.users;
             maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
             if (maxAmount == 0) {
               maxAmount = 1;
@@ -270,7 +270,7 @@ class _FilterSheetState extends State<FilterSheet> {
         {
           final state = context.read<RoomBloc>().state;
           final roomInfoState = context.read<RoomInfoCubit>().state;
-          List<TransactionModel> data = [];
+          List<RoomTransactionModel> data = [];
 
           if (state is RoomFetchSuccess) {
             data = state.data;
@@ -290,7 +290,7 @@ class _FilterSheetState extends State<FilterSheet> {
               }
             }
             if (roomInfoState is RoomInfoSuccess) {
-              userData = roomInfoState.data.users.map((e) => e.user).toList();
+              userData = roomInfoState.data.users;
             }
             maxAmount = roundUpToPowerOfTen(maxAmount.toInt()).toDouble();
             if (maxAmount == 0) {
@@ -469,7 +469,7 @@ class _FilterSheetState extends State<FilterSheet> {
         {
           final state = context.read<FilterCubit>().state;
           final expenseState = context.read<RoomBloc>().state;
-          List<TransactionModel> data = [];
+          List<RoomTransactionModel> data = [];
           if (expenseState is RoomFetchSuccess) {
             data = expenseState.data;
           }

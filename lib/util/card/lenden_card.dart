@@ -25,6 +25,15 @@ class LendenCard extends StatelessWidget {
     );
   }
 
+  String getName(String createdBy) {
+    return data.users
+        .firstWhere(
+          (element) => element.id == createdBy,
+          orElse: () => LendenUserModel.empty(),
+        )
+        .name;
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -42,7 +51,7 @@ class LendenCard extends StatelessWidget {
               data.hasData
                   ? Border(
                     left: BorderSide(
-                      color: getStatusColor(data.status.label),
+                      color: getStatusColor(data.status),
                       width: UiConstant.cardBorderLeftSideStripWidth,
                     ),
                   )
@@ -95,7 +104,7 @@ class LendenCard extends StatelessWidget {
                   ),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
-                    "Created By ${data.createdBy.name.split(' ').first}",
+                    "Created By ${getName(data.createdBy).split(' ').first}",
                     context,
                     isLoaded: data.hasData,
                   ),

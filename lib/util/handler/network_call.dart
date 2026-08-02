@@ -43,7 +43,9 @@ Future<ApiResponseModel> createAPICall(
   dynamic jsonData,
 ) async {
   if (kDebugMode) {
-    logDebug("${"-" * 30}\nRequested URL: $url\nMethod: $methodName");
+    logDebug(
+      "${"-" * 30}\nRequested URL: $url\nMethod: $methodName\nBody: ${jsonData is String ? jsonData : jsonEncode(jsonData)}",
+    );
   }
 
   Function httpType = getHttpMethod(methodName);

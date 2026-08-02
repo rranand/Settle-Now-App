@@ -8,7 +8,7 @@ final class QuicksplitInitial extends QuicksplitState {}
 final class QuicksplitLoading extends QuicksplitState {}
 
 final class QuicksplitFetchSuccess extends QuicksplitState {
-  final List<TransactionModel> data;
+  final List<QuicksplitTransactionModel> data;
   final bool hasMoreData;
 
   QuicksplitFetchSuccess({required this.data, required this.hasMoreData});

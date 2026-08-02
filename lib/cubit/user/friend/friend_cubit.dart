@@ -15,8 +15,7 @@ class FriendCubit extends Cubit<FriendState> {
     emit(FriendLoading());
 
     try {
-      final List<UserModel> data = await repo.fetchFriend();
-
+      final data = await repo.fetchFriend();
       return emit(FriendSuccess(data: data));
     } catch (e) {
       return emit(FriendFailure(error: e.toString()));
@@ -24,7 +23,7 @@ class FriendCubit extends Cubit<FriendState> {
   }
 
   void addFriendFromCache() {
-    List<UserModel> friends = UserResolver.instance.getFriends();
+    final friends = UserResolver.instance.getFriends();
     emit(FriendSuccess(data: friends));
   }
 

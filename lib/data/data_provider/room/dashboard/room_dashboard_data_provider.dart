@@ -20,9 +20,14 @@ class RoomDashboardDataProvider {
       if (response.statusCode == 200) {
         List<RoomInfoModel> arr = [];
         bool hasMoreData = data['hasMore'];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(RoomInfoModel.fromMap(data['data'][i]));
+        final allRooms = data['data'];
+
+        if (allRooms != null) {
+          for (int i = 0; i < allRooms.length; i++) {
+            arr.add(RoomInfoModel.fromMap(allRooms[i]));
+          }
         }
+
         return Pair(arr, hasMoreData);
       } else {
         throw data['message'];
@@ -32,28 +37,30 @@ class RoomDashboardDataProvider {
     }
   }
 
-  Future<Pair<RoomInfoModel, String>> createRoom(String roomName) async {
+  Future<RoomInfoModel> createRoom(String roomName) async {
     try {
       final response = await createAPICall('room', 'post', {
-        "roomName": roomName,
+        "room_name": roomName,
       });
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        final roomInfo = data['data'];
+
         RoomInfoModel newRoomData = RoomInfoModel(
-          id: data["data"]["id"],
+          id: roomInfo["id"],
           roomName: roomName,
-          status: "Open",
-          createdBy: UserModel.empty(),
+          status: RoomStatus.open,
+          createdBy: "",
           createdOn: DateTime.now(),
           modifiedOn: DateTime.now(),
           users: [],
-          roomKey: data["data"]["roomKey"],
-          roomLink: data["data"]["roomLink"],
+          roomKey: roomInfo["room_key"],
+          roomLink: roomInfo["room_link"],
           active: true,
         );
-        return Pair(newRoomData, data["data"]["roomMemberID"]);
+        return newRoomData;
       } else {
         throw data['message'];
       }

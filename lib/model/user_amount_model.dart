@@ -1,105 +1,79 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
 import 'package:settlenow/model/model_core.dart';
-import 'package:settlenow/util/resolver/user_resolver.dart';
+import 'package:settlenow/util/util_core.dart';
 
-class UserAmountModel extends UserModel {
-  double amount = 0;
-  bool isSettled = false;
+class UserAmountModel extends BaseUserModel {
+  double amount;
 
   UserAmountModel({
     required super.id,
     required super.name,
-    required super.profileImage,
+    required super.profilePic,
     required this.amount,
-  }) : super(hasData: true, createdOn: DateTime.now(), phoneNo: "", email: "");
+  }) : super();
 
-  UserAmountModel.empty()
-    : super(
-        id: "",
-        name: "",
-        email: "",
-        profileImage: "",
-        hasData: false,
-        createdOn: DateTime.now(),
-        phoneNo: "",
-      );
+  UserAmountModel.empty() : amount = 0, super.empty();
 
   @override
   Map<String, dynamic> toMap() {
-    final map = super.toMap();
-    map['amount'] = amount;
-    map['is_settled'] = isSettled;
-    return map;
+    return <String, dynamic>{...super.toMap(), 'amount': amount};
   }
 
-  factory UserAmountModel.copyFromUser(UserModel user, double amount) {
+  @override
+  UserAmountModel copyWith({
+    String? id,
+    String? name,
+    String? profilePic,
+    String? phoneNo,
+    double? amount,
+  }) {
     return UserAmountModel(
-      id: user.id,
-      name: user.name,
-      profileImage: user.profileImage,
-      amount: amount,
+      id: id ?? this.id,
+      name: name ?? this.name,
+      profilePic: profilePic ?? this.profilePic,
+      amount: amount ?? this.amount,
+    );
+  }
+
+  factory UserAmountModel.fromBaseObject(BaseUserModel data, {double? amount}) {
+    return UserAmountModel(
+      id: data.id,
+      name: data.name,
+      profilePic: data.profilePic,
+      amount: amount ?? 0,
     );
   }
 
   factory UserAmountModel.fromMap(Map<String, dynamic> map) {
-    UserModel userData = UserResolver.instance.resolve(map['id'] ?? "");
+    BaseUserModel baseData = UserResolver.instance.resolve(map['id'] ?? "");
 
-    if (!userData.hasData) {
-      userData = UserModel.fromBasicInfo(
+    if (!baseData.hasData) {
+      baseData = baseData.copyWith(
         id: map['name'] ?? "",
         name: map['name'] ?? "",
-        profileImage: "",
       );
     }
 
-    UserAmountModel newData = UserAmountModel.copyFromUser(
-      userData,
-      double.parse(map['amount'].toString()),
-    );
+    final newData = baseData as UserAmountModel;
 
-    if (map.containsKey('is_settled')) {
-      newData.isSettled = map['is_settled'];
-    }
-    return newData;
+    return newData.copyWith(amount: double.parse(map['amount'].toString()));
   }
-
-  @override
-  String toJson() {
-    return json.encode(toMap());
-  }
-
-  String toQuickSplitJson() {
-    Map<String, dynamic> data = {
-      'id': id,
-      'amount': amount.toString(),
-      'is_settled': isSettled,
-    };
-    return json.encode(data);
-  }
-
-  factory UserAmountModel.fromJson(String source) =>
-      UserAmountModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
-    return 'UserAmountModel(id: $id, name: $name, amount: $amount, is_settled: $isSettled)';
+    return 'UserAmountModel(id: $id, name: $name, amount: $amount)';
   }
 
   @override
   bool operator ==(covariant UserAmountModel other) {
     if (identical(this, other)) return true;
 
-    return other.amount == amount &&
+    return other.hasData == hasData &&
         other.id == id &&
         other.name == name &&
-        other.email == email &&
-        other.profileImage == profileImage &&
-        other.isSettled == isSettled;
+        other.profilePic == profilePic &&
+        other.amount == amount;
   }
 
   @override
-  int get hashCode =>
-      super.hashCode ^ amount.hashCode ^ isSettled.hashCode ^ id.hashCode;
+  int get hashCode => super.hashCode ^ amount.hashCode;
 }

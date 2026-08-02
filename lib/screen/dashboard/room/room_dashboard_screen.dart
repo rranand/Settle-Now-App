@@ -256,7 +256,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
       bool isSettledByYou =
           !oldData[i].users
               .firstWhere(
-                (ele) => ele.user.id == _loggedInUser.id,
+                (ele) => ele.id == _loggedInUser.id,
                 orElse: () => RoomUserModel.empty(),
               )
               .active;

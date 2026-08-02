@@ -18,7 +18,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
 
   void createNewExpense(
     BuildContext context,
-    NewTransactionModel data,
+    BaseTransactionModel baseTransData,
     TransactionType transactionType,
   ) async {
     final authLoginState = context.read<AuthBloc>().state;
@@ -32,21 +32,21 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.quicksplit:
           {
             final bloc = context.read<QuicksplitBloc>();
-            final TransactionModel newData = await repo.create(data);
+            final data = baseTransData as QuicksplitTransactionModel;
+            final newData = await repo.create(data);
             bloc.add(QuicksplitAddNewTransaction(newData));
-            return emit(NewTransactionSuccess(newData));
+            return emit(NewTransactionSuccess(data: newData));
           }
         case TransactionType.personal:
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
+            final data = baseTransData as PersonalExpenseTransactionModel;
             final PersonalExpenseTransactionModel newData = await repoPS.add(
               data,
             );
 
             bloc.add(PersonalMonthlyExpenseAdd(newData));
-            return emit(
-              NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
-            );
+            return emit(NewTransactionSuccess(data: newData));
           }
         case TransactionType.lenden:
           {
@@ -56,15 +56,14 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
+            final data = baseTransData as LendenTransactionModel;
+
             final LendenTransactionModel newData = await repoLD.create(
               roomID,
-
               data,
             );
             bloc.add(LendenAddNewTransaction(data: newData));
-            return emit(
-              NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
-            );
+            return emit(NewTransactionSuccess(data: newData));
           }
         case TransactionType.room:
           {
@@ -74,22 +73,23 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            final TransactionModel newData = await repoRD.createExpense(
+            final data = baseTransData as RoomTransactionModel;
+            final RoomTransactionModel newData = await repoRD.createExpense(
               roomID,
               data,
             );
             bloc.add(RoomAddNewTransaction([newData]));
-            return emit(NewTransactionSuccess(newData));
+            return emit(NewTransactionSuccess(data: newData));
           }
       }
     } catch (e) {
-      return emit(NewTransactionFailure(e.toString()));
+      return emit(NewTransactionFailure(error: e.toString()));
     }
   }
 
   void createBulkExpense(
     BuildContext context,
-    List<NewTransactionModel> data,
+    List<RoomTransactionModel> data,
   ) async {
     final authLoginState = context.read<AuthBloc>().state;
     if (authLoginState is! AuthLoginSuccess) {
@@ -104,20 +104,20 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         return;
       }
       final roomID = blocState.id;
-      final List<TransactionModel> newData = await repoRD.createBulkExpense(
+      final List<RoomTransactionModel> newData = await repoRD.createBulkExpense(
         roomID,
         data,
       );
       bloc.add(RoomAddNewTransaction(newData));
-      return emit(NewTransactionSuccess(newData.first));
+      return emit(NewTransactionSuccess(data: newData.first));
     } catch (e) {
-      return emit(NewTransactionFailure(e.toString()));
+      return emit(NewTransactionFailure(error: e.toString()));
     }
   }
 
   void updateExpense(
     BuildContext context,
-    NewTransactionModel data,
+    BaseTransactionModel baseTransData,
     TransactionType transactionType, {
     String expenseType = "Personal",
   }) async {
@@ -133,19 +133,18 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.quicksplit:
           {
             final bloc = context.read<QuicksplitBloc>();
-            final TransactionModel updatedData = await repo.update(data);
-            bloc.add(QuicksplitUpdateTransaction(updatedData));
-            return emit(NewTransactionSuccess(updatedData));
+            final data = baseTransData as QuicksplitTransactionModel;
+            await repo.update(data);
+            bloc.add(QuicksplitUpdateTransaction(data));
+            return emit(NewTransactionSuccess(data: data));
           }
         case TransactionType.personal:
           {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
-            final PersonalExpenseTransactionModel updatedData = await repoPS
-                .update(data);
-            bloc.add(PersonalMonthlyExpenseUpdate(updatedData));
-            return emit(
-              NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
-            );
+            final data = baseTransData as PersonalExpenseTransactionModel;
+            await repoPS.update(data);
+            bloc.add(PersonalMonthlyExpenseUpdate(data));
+            return emit(NewTransactionSuccess(data: data));
           }
         case TransactionType.lenden:
           {
@@ -155,15 +154,10 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            final LendenTransactionModel updatedData = await repoLD.update(
-              roomID,
-
-              data,
-            );
-            bloc.add(LendenUpdateTransaction(data: updatedData));
-            return emit(
-              NewTransactionSuccess(TransactionModel.fromNewTransaction(data)),
-            );
+            final data = baseTransData as LendenTransactionModel;
+            await repoLD.update(roomID, data);
+            bloc.add(LendenUpdateTransaction(data: data));
+            return emit(NewTransactionSuccess(data: data));
           }
         case TransactionType.room:
           {
@@ -173,16 +167,14 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            final TransactionModel newData = await repoRD.updateExpense(
-              roomID,
-              data,
-            );
-            bloc.add(RoomUpdateTransaction(newData));
-            return emit(NewTransactionSuccess(newData));
+            final data = baseTransData as RoomTransactionModel;
+            await repoRD.updateExpense(roomID, data);
+            bloc.add(RoomUpdateTransaction(data));
+            return emit(NewTransactionSuccess(data: data));
           }
       }
     } catch (e) {
-      return emit(NewTransactionFailure(e.toString()));
+      return emit(NewTransactionFailure(error: e.toString()));
     }
   }
 
@@ -208,9 +200,13 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final bool isDeleted = await repo.delete(expenseID);
             if (isDeleted) {
               bloc.add(QuicksplitDeleteTransaction(expenseID));
-              return emit(NewTransactionSuccess(TransactionModel.empty()));
+              return emit(
+                NewTransactionSuccess(data: QuicksplitTransactionModel.empty()),
+              );
             } else {
-              return emit(NewTransactionFailure("Something went wrong!"));
+              return emit(
+                NewTransactionFailure(error: "Something went wrong!"),
+              );
             }
           }
         case TransactionType.personal:
@@ -221,10 +217,16 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
 
             if (isDeleted) {
               bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
-              return emit(NewTransactionSuccess(TransactionModel.empty()));
+              return emit(
+                NewTransactionSuccess(
+                  data: PersonalExpenseTransactionModel.empty(),
+                ),
+              );
             } else {
               bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
-              return emit(NewTransactionFailure("Something went wrong!"));
+              return emit(
+                NewTransactionFailure(error: "Something went wrong!"),
+              );
             }
           }
         case TransactionType.lenden:
@@ -239,9 +241,13 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
 
             if (isDeleted) {
               bloc.add(LendenDeleteTransaction(expenseID: expenseID));
-              return emit(NewTransactionSuccess(TransactionModel.empty()));
+              return emit(
+                NewTransactionSuccess(data: LendenTransactionModel.empty()),
+              );
             } else {
-              return emit(NewTransactionFailure("Something went wrong!"));
+              return emit(
+                NewTransactionFailure(error: "Something went wrong!"),
+              );
             }
           }
         case TransactionType.room:
@@ -260,9 +266,13 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
 
             if (isDeleted) {
               bloc.add(RoomDeleteTransaction(expenseID));
-              return emit(NewTransactionSuccess(TransactionModel.empty()));
+              return emit(
+                NewTransactionSuccess(data: RoomTransactionModel.empty()),
+              );
             } else {
-              return emit(NewTransactionFailure("Something went wrong!"));
+              return emit(
+                NewTransactionFailure(error: "Something went wrong!"),
+              );
             }
           }
       }
@@ -270,7 +280,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
       if (transactionType == TransactionType.personal) {
         bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
       }
-      return emit(NewTransactionFailure(e.toString()));
+      return emit(NewTransactionFailure(error: e.toString()));
     }
   }
 

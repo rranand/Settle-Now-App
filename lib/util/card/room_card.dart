@@ -10,9 +10,19 @@ class RoomCard extends StatelessWidget {
   final RoomInfoModel data;
   const RoomCard({super.key, required this.data});
 
+  String getName(String createdBy) {
+    return data.users
+        .firstWhere(
+          (element) => element.id == createdBy,
+          orElse: () => RoomUserModel.empty(),
+        )
+        .name;
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<UserModel> users = data.users.map((obj) => obj.user).toList();
+    final users = data.users;
+
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
@@ -83,7 +93,7 @@ class RoomCard extends StatelessWidget {
                   ),
                   const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
                   dateOnCard(
-                    "Created By ${data.createdBy.name.split(' ').first}",
+                    "Created By ${getName(data.createdBy).split(' ').first}",
                     context,
                     isLoaded: data.hasData,
                   ),

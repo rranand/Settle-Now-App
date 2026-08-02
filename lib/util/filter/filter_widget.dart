@@ -64,7 +64,7 @@ class FilterWidget {
     T selected,
     BuildContext context,
     String text, {
-    UserModel? user,
+    BaseUserModel? user,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -103,7 +103,7 @@ class FilterWidget {
                     Padding(
                       padding: const EdgeInsets.all(4.0),
                       child: imageWidgetForCachedNetworkImage(
-                        user.profileImage,
+                        user.profilePic,
                         context,
                         boxShape: BoxShape.circle,
                         width: 35,

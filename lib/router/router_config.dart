@@ -245,7 +245,8 @@ class AppRouterConfig {
               GoRoute(
                 path: RouterConstants.roomEditExpenseRouteName,
                 builder: (context, state) {
-                  TransactionModel data = state.extra as TransactionModel;
+                  BaseTransactionModel data =
+                      state.extra as BaseTransactionModel;
                   return AuthGate(child: AddTransaction(transactionData: data));
                 },
                 redirect: (context, state) {
@@ -352,7 +353,8 @@ class AppRouterConfig {
               GoRoute(
                 path: RouterConstants.personalExpenseEditExpenseRouteName,
                 builder: (context, state) {
-                  TransactionModel data = state.extra as TransactionModel;
+                  BaseTransactionModel data =
+                      state.extra as BaseTransactionModel;
                   return AuthGate(child: AddTransaction(transactionData: data));
                 },
                 redirect: (context, state) {
@@ -431,7 +433,8 @@ class AppRouterConfig {
               GoRoute(
                 path: RouterConstants.lendenEditExpenseRouteName,
                 builder: (context, state) {
-                  TransactionModel data = state.extra as TransactionModel;
+                  BaseTransactionModel data =
+                      state.extra as BaseTransactionModel;
                   return AuthGate(child: AddTransaction(transactionData: data));
                 },
                 redirect: (context, state) {
@@ -482,7 +485,7 @@ class AppRouterConfig {
           GoRoute(
             path: RouterConstants.quickSplitEditExpenseRouteName,
             builder: (context, state) {
-              TransactionModel data = state.extra as TransactionModel;
+              BaseTransactionModel data = state.extra as BaseTransactionModel;
               return AuthGate(child: AddTransaction(transactionData: data));
             },
             redirect: (context, state) {

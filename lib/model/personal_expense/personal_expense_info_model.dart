@@ -1,6 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/constant/constant_core.dart';
 
@@ -61,13 +58,6 @@ class PersonalExpenseInfoModel {
       transaction: transaction,
     );
   }
-
-  String toJson() => json.encode(toMap());
-
-  factory PersonalExpenseInfoModel.fromJson(String source) =>
-      PersonalExpenseInfoModel.fromMap(
-        json.decode(source) as Map<String, dynamic>,
-      );
 
   @override
   String toString() {

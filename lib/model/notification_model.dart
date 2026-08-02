@@ -9,8 +9,8 @@ class NotificationModel {
   String roomName = "";
   RoomType type = RoomType.none;
   String roomID = "";
-  UserModel invitedBy = UserModel.empty();
-  UserModel invitedUser = UserModel.empty();
+  BaseUserModel invitedBy = BaseUserModel.empty();
+  BaseUserModel invitedUser = BaseUserModel.empty();
   DateTime createdOn = DateTime.now();
 
   NotificationModel.empty({this.hasData = false});
@@ -59,8 +59,8 @@ class NotificationModel {
     String roomName,
     String invitedUserId,
   ) {
-    UserModel invitedBy = UserResolver.instance.getLoggedInUser();
-    UserModel invitedUser = UserResolver.instance.resolve(invitedUserId);
+    final invitedBy = UserResolver.instance.getLoggedInUser();
+    final invitedUser = UserResolver.instance.resolve(invitedUserId);
 
     return NotificationModel(
       id: map['id'],

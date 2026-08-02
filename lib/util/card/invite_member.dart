@@ -51,7 +51,7 @@ class _InviteMemberState extends State<InviteMember> {
     }
   }
 
-  void _toggleSelectedUser(UserModel user) {
+  void _toggleSelectedUser(BaseUserModel user) {
     if (widget.transactionType == TransactionType.lenden) {
       if (_alreadyInvited.value.isNotEmpty) {
         return;
@@ -70,7 +70,7 @@ class _InviteMemberState extends State<InviteMember> {
     }
   }
 
-  Widget _userCardWidget(UserModel user) {
+  Widget _userCardWidget(BaseUserModel user) {
     if (!user.hasData) {
       return Center(
         child: Stack(
@@ -144,8 +144,8 @@ class _InviteMemberState extends State<InviteMember> {
     );
   }
 
-  List<UserModel> _memberFetchController() {
-    List<UserModel> users = [];
+  List<BaseUserModel> _memberFetchController() {
+    List<BaseUserModel> users = [];
     _isLoaded.value = false;
 
     if (widget.transactionType == TransactionType.room) {
@@ -165,7 +165,7 @@ class _InviteMemberState extends State<InviteMember> {
             if (roomUserState is RoomUserSuccess) {
               roomID = roomUserState.id;
               for (int i = 0; i < roomUserState.data.length; i++) {
-                alreadyMember.add(roomUserState.data[i].user.id);
+                alreadyMember.add(roomUserState.data[i].id);
               }
             }
             for (int i = 0; i < notificationData.length; i++) {
@@ -198,9 +198,9 @@ class _InviteMemberState extends State<InviteMember> {
             final roomUserState = context.watch<RoomUserCubit>().state;
             if (roomUserState is RoomUserSuccess) {
               for (int i = 0; i < roomUserState.data.length; i++) {
-                if (roomUserState.data[i].user.id != _loggedInUser.id &&
+                if (roomUserState.data[i].id != _loggedInUser.id &&
                     roomUserState.data[i].active) {
-                  users.add(roomUserState.data[i].user);
+                  users.add(roomUserState.data[i]);
                 }
               }
               _isLoaded.value = true;
@@ -277,7 +277,8 @@ class _InviteMemberState extends State<InviteMember> {
 
   @override
   Widget build(BuildContext context) {
-    List<UserModel> users = _memberFetchController();
+    List<BaseUserModel> users = _memberFetchController();
+
     return ValueListenableBuilder(
       valueListenable: _isLoaded,
       builder: (context, isLoaded, _) {
@@ -299,7 +300,7 @@ class _InviteMemberState extends State<InviteMember> {
                       ),
                       IconButton(
                         onPressed: () {
-                          List<UserModel> toBePassed = [];
+                          List<BaseUserModel> toBePassed = [];
                           for (int i = 0; i < users.length; i++) {
                             if (_selectedUserIDs.value.contains(users[i].id)) {
                               toBePassed.add(users[i]);
@@ -331,7 +332,10 @@ class _InviteMemberState extends State<InviteMember> {
                         );
 
                         if (!isLoaded) {
-                          users = List.filled(columns * 4, UserModel.empty());
+                          users = List.filled(
+                            columns * 4,
+                            BaseUserModel.empty(),
+                          );
                         }
                         return ValueListenableBuilder(
                           valueListenable: isSearchEnabled,
@@ -348,7 +352,7 @@ class _InviteMemberState extends State<InviteMember> {
                                 ValueListenableBuilder<TextEditingValue>(
                                   valueListenable: _searchController,
                                   builder: (context, _, _) {
-                                    List<UserModel> filterData =
+                                    List<BaseUserModel> filterData =
                                         FilterSort.filteredSearchText(
                                           _searchController.text,
                                           users,
@@ -381,7 +385,7 @@ class _InviteMemberState extends State<InviteMember> {
                                                 _userCardWidth / cardHeight,
                                           ),
                                       itemBuilder: (context, index) {
-                                        UserModel user = filterData[index];
+                                        BaseUserModel user = filterData[index];
                                         return ValueListenableBuilder(
                                           valueListenable: _selectedUserIDs,
                                           builder: (

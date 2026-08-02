@@ -67,9 +67,9 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
           status:
               activeUserCount > 0
                   ? (activeUserCount != userData.length
-                      ? "Partially Closed"
-                      : "Open")
-                  : "Closed",
+                      ? RoomStatus.partiallyClosed
+                      : RoomStatus.open)
+                  : RoomStatus.closed,
           modifiedOn: DateTime.now(),
         );
         _roomDashboardBloc.add(RoomDashboardOnCloseRoom(data: updatedRoomInfo));

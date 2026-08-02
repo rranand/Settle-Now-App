@@ -29,8 +29,6 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
   }
 
   Widget _userExpenseWidget(RoomUserModel data, double amount) {
-    UserModel user = data.user;
-
     return Card(
       child: Container(
         padding: const EdgeInsets.all(UiConstant.cardPadding + 2),
@@ -49,7 +47,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
                 data.hasData
                     ? overlapUserImageWidget(
                       context,
-                      [user],
+                      [data],
                       1,
                       imageRadius: 55,
                     )
@@ -64,7 +62,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
                   children: [
                     data.hasData
                         ? Text(
-                          user.name,
+                          data.name,
                           style: TextStyle(
                             fontSize: UiConstant.cardTitleTextSize,
                             fontWeight: FontWeight.w500,
@@ -151,7 +149,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
         childAspectRatio: cardSizeInfo[1],
       ),
       itemBuilder: (BuildContext context, int index) {
-        double amount = balanceMap[data[index].user.id] ?? 0;
+        double amount = balanceMap[data[index].id] ?? 0;
         return _userExpenseWidget(data[index], amount);
       },
     );
@@ -168,7 +166,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
           data = state.data;
 
           for (int i = 0; i < data.length; i++) {
-            balanceMap[data[i].user.id] =
+            balanceMap[data[i].id] =
                 data[i].contribution - data[i].spent + data[i].settle;
           }
 
@@ -187,7 +185,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
               if (haveFilter) {
                 data = calculateUserExpenseInfo(
                   state.data,
-                  filterState.data.cast<TransactionModel>(),
+                  filterState.data.cast<RoomTransactionModel>(),
                   [],
                 );
               } else {

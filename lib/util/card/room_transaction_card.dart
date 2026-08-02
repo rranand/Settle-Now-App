@@ -12,7 +12,7 @@ import 'package:settlenow/util/util_core.dart';
 
 class RoomTransactionCard extends StatefulWidget {
   final String roomID;
-  final TransactionModel data;
+  final RoomTransactionModel data;
   final UserModel loggedInUser;
 
   const RoomTransactionCard({
@@ -32,13 +32,22 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
 
   List<String> createTags() {
     List<String> tags = [widget.data.category];
-    if (widget.data.splitType != "equal") {
-      tags.add(widget.data.splitType);
+    if (widget.data.splitType != SplitType.equal) {
+      tags.add(widget.data.splitType.label);
     }
     if (!isDateTimeSame(widget.data.createdOn, widget.data.modifiedOn)) {
       tags.add("Edited");
     }
     return tags;
+  }
+
+  String getName(String createdBy) {
+    return widget.data.users
+        .firstWhere(
+          (element) => element.id == createdBy,
+          orElse: () => UserAmountModel.empty(),
+        )
+        .name;
   }
 
   Widget extendedTransactionWidget() {
@@ -48,14 +57,10 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
         ListView.separated(
           shrinkWrap: true,
           padding: EdgeInsets.zero,
-          itemCount: widget.data.users.length + 1,
+          itemCount: widget.data.users.length,
           itemBuilder: (BuildContext context, int index) {
-            UserAmountModel user = UserAmountModel.empty();
-            if (index == 0) {
-              user = widget.data.createdBy;
-            } else {
-              user = widget.data.users[index - 1];
-            }
+            UserAmountModel user = widget.data.users[index];
+
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Row(
@@ -174,7 +179,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
   void initState() {
     super.initState();
     if (widget.data.hasData) {
-      if (widget.data.createdBy.id == widget.loggedInUser.id) {
+      if (widget.data.createdBy == widget.loggedInUser.id) {
         userPartOfTransaction.value = true;
       } else {
         for (int i = 0; i < widget.data.users.length; i++) {
@@ -197,7 +202,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
     return InkWell(
       borderRadius: BorderRadius.circular(UiConstant.cardBorderRadius),
       onTap: () {
-        if (widget.loggedInUser.id == widget.data.createdBy.id) {
+        if (widget.loggedInUser.id == widget.data.createdBy) {
           context.push(
             "${RouterConstants.roomRouteName}/${widget.roomID}${RouterConstants.roomEditExpenseRouteName}",
             extra: widget.data,
@@ -291,7 +296,7 @@ class _RoomTransactionCardState extends State<RoomTransactionCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   subTextOnCard(
-                    "Created By ${widget.loggedInUser.id == widget.data.createdBy.id ? "You" : widget.data.createdBy.name}",
+                    "Created By ${widget.loggedInUser.id == widget.data.createdBy ? "You" : getName(widget.data.createdBy)}",
                     context,
                     isLoaded: widget.data.hasData,
                   ),

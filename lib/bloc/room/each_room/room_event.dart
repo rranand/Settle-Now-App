@@ -11,13 +11,13 @@ class RoomFetch extends RoomEvent {
 }
 
 final class RoomAddNewTransaction extends RoomEvent {
-  final List<TransactionModel> data;
+  final List<RoomTransactionModel> data;
 
   RoomAddNewTransaction(this.data);
 }
 
 final class RoomUpdateTransaction extends RoomEvent {
-  final TransactionModel data;
+  final RoomTransactionModel data;
 
   RoomUpdateTransaction(this.data);
 }

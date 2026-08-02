@@ -1,5 +1,6 @@
 import 'package:settlenow/data/data_provider/data_provider_core.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class RoomRepository {
   final RoomDataProvider _dataProvider;
@@ -16,30 +17,12 @@ class RoomRepository {
     }
   }
 
-  Future<List<TransactionModel>> fetchData(
+  Future<List<RoomTransactionModel>> fetchData(
     String id,
-
     List<RoomUserModel> users,
   ) async {
     try {
-      List<TransactionModel> data = await _dataProvider.fetchData(id);
-      Map<String, UserModel> userMap = {};
-      for (int i = 0; i < users.length; i++) {
-        userMap[users[i].user.id] = users[i].user;
-      }
-
-      for (int i = 0; i < data.length; i++) {
-        data[i].createdBy = UserAmountModel.copyFromUser(
-          userMap[data[i].createdBy.id]!,
-          data[i].createdBy.amount,
-        );
-        for (int j = 0; j < data[i].users.length; j++) {
-          data[i].users[j] = UserAmountModel.copyFromUser(
-            userMap[data[i].users[j].id]!,
-            data[i].users[j].amount,
-          );
-        }
-      }
+      List<RoomTransactionModel> data = await _dataProvider.fetchData(id);
 
       return data;
     } catch (e) {
@@ -65,20 +48,14 @@ class RoomRepository {
 
   Future<List<RoomSettleModel>> fetchSettleData(
     String id,
-
     List<RoomUserModel> users,
   ) async {
     try {
       List<RoomSettleModel> data = await _dataProvider.fetchSettleData(id);
 
-      Map<String, UserModel> userMap = {};
-      for (int i = 0; i < users.length; i++) {
-        userMap[users[i].user.id] = users[i].user;
-      }
-
       for (int i = 0; i < data.length; i++) {
-        data[i].sender = userMap[data[i].sender.id]!;
-        data[i].receiver = userMap[data[i].receiver.id]!;
+        data[i].sender = UserResolver.instance.resolve(data[i].sender.id);
+        data[i].receiver = UserResolver.instance.resolve(data[i].receiver.id);
       }
       data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
@@ -103,24 +80,12 @@ class RoomRepository {
     }
   }
 
-  Future<TransactionModel> createExpense(
+  Future<RoomTransactionModel> createExpense(
     String id,
-    NewTransactionModel data,
+    RoomTransactionModel data,
   ) async {
     try {
-      TransactionModel newExpense = await _dataProvider.createExpense(id, data);
-      return newExpense;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<List<TransactionModel>> createBulkExpense(
-    String id,
-    List<NewTransactionModel> data,
-  ) async {
-    try {
-      List<TransactionModel> newExpense = await _dataProvider.createBulkExpense(
+      RoomTransactionModel newExpense = await _dataProvider.createExpense(
         id,
         data,
       );
@@ -130,16 +95,23 @@ class RoomRepository {
     }
   }
 
-  Future<TransactionModel> updateExpense(
+  Future<List<RoomTransactionModel>> createBulkExpense(
     String id,
-    NewTransactionModel data,
+    List<RoomTransactionModel> data,
   ) async {
     try {
-      TransactionModel updatedExpense = await _dataProvider.updateExpense(
-        id,
-        data,
-      );
-      return updatedExpense;
+      List<RoomTransactionModel> newExpense = await _dataProvider
+          .createBulkExpense(id, data);
+      return newExpense;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> updateExpense(String id, RoomTransactionModel data) async {
+    try {
+      await _dataProvider.updateExpense(id, data);
+      return;
     } catch (e) {
       rethrow;
     }
@@ -210,7 +182,7 @@ class RoomRepository {
 
   Future<List<NotificationModel>> inviteNewMember(
     String id,
-    List<UserModel> users,
+    List<BaseUserModel> users,
   ) async {
     try {
       List<NotificationModel> notificationData = await _dataProvider

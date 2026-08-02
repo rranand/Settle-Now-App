@@ -5,7 +5,7 @@ class UserResolver {
   UserResolver._();
   static final UserResolver instance = UserResolver._();
 
-  final Map<String, UserModel> _cache = {};
+  final Map<String, FriendUserModel> _cache = {};
   static String _loggedInUserId = "";
 
   void initializer(UserPreferenceBundle userPreferenceBundle) {
@@ -17,16 +17,16 @@ class UserResolver {
     }
   }
 
-  UserModel resolve(String userId) {
-    return _cache[userId] ?? UserModel.empty();
+  FriendUserModel resolve(String userId) {
+    return _cache[userId] ?? FriendUserModel.empty();
   }
 
-  UserModel getLoggedInUser() {
-    return _cache[_loggedInUserId] ?? UserModel.empty();
+  FriendUserModel getLoggedInUser() {
+    return _cache[_loggedInUserId] ?? FriendUserModel.empty();
   }
 
-  List<UserModel> getFriends() {
-    List<UserModel> arr = [];
+  List<FriendUserModel> getFriends() {
+    List<FriendUserModel> arr = [];
 
     for (var ele in _cache.entries) {
       if (ele.key == _loggedInUserId) {

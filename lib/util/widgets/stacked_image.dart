@@ -42,7 +42,7 @@ int convertInitialToNumber(String input) {
   return (c1 << 16) | c2;
 }
 
-Widget errorImageWidget(UserModel user, double radius, bool isLast) {
+Widget errorImageWidget(BaseUserModel user, double radius, bool isLast) {
   String nameInitial = "";
   final List<String> nameArr = user.name.trim().split(" ");
   switch (nameArr.length) {
@@ -84,7 +84,7 @@ Widget errorImageWidget(UserModel user, double radius, bool isLast) {
 }
 
 Widget eachUserImageBuilder(
-  UserModel eachUser,
+  BaseUserModel eachUser,
   int index,
   bool isLast, {
   double nextImageOffset = 22,
@@ -92,9 +92,9 @@ Widget eachUserImageBuilder(
 }) {
   Widget profileImage = errorImageWidget(eachUser, imageRadius, isLast);
 
-  if (eachUser.profileImage.isNotEmpty) {
+  if (eachUser.profilePic.isNotEmpty) {
     profileImage = CachedNetworkImage(
-      imageUrl: eachUser.profileImage,
+      imageUrl: eachUser.profilePic,
       width: imageRadius,
       height: imageRadius,
       progressIndicatorBuilder:
@@ -120,7 +120,7 @@ Widget eachUserImageBuilder(
 
 Widget overlapUserImageWidget(
   BuildContext context,
-  List<UserModel> users,
+  List<BaseUserModel> users,
   int maxProfileImageToShow, {
   int? totalUsers,
   double nextImageOffset = 22,

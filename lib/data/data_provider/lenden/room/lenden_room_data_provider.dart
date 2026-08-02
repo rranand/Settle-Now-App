@@ -20,12 +20,7 @@ class LendenRoomDataProvider {
 
         if (allTransactions != null) {
           for (int i = 0; i < allTransactions.length; i++) {
-            arr.add(
-              LendenTransactionModel.fromMap(
-                allTransactions[i],
-                roomData.users,
-              ),
-            );
+            arr.add(LendenTransactionModel.fromMap(allTransactions[i]));
           }
         }
 
@@ -40,21 +35,18 @@ class LendenRoomDataProvider {
 
   Future<LendenTransactionModel> create(
     String id,
-    NewTransactionModel expenseData,
+    LendenTransactionModel expenseData,
   ) async {
     try {
-      LendenTransactionModel newExpense =
-          LendenTransactionModel.fromNewTransaction(expenseData);
       final response = await createAPICall(
         'lenden/$id',
         "post",
-        newExpense.toCreateExpenseJson(),
+        expenseData.toCreateExpenseJson(),
       );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.id = data['data']['id'];
-        return newExpense;
+        return expenseData.copyWith(id: data['data']['id']);
       } else {
         throw data['message'];
       }
@@ -83,7 +75,7 @@ class LendenRoomDataProvider {
 
         if (allTransactions != null) {
           for (int i = 0; i < allTransactions.length; i++) {
-            arr.add(LendenTransactionModel.fromMap(allTransactions[i], users));
+            arr.add(LendenTransactionModel.fromMap(allTransactions[i]));
           }
         }
 
@@ -96,23 +88,17 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<LendenTransactionModel> update(
-    String id,
-    NewTransactionModel expenseData,
-  ) async {
+  Future<void> update(String id, LendenTransactionModel expenseData) async {
     try {
-      LendenTransactionModel newExpense =
-          LendenTransactionModel.fromNewTransaction(expenseData);
       final response = await createAPICall(
         'lenden/$id',
         "patch",
-        newExpense.toUpdateExpenseJson(),
+        expenseData.toUpdateExpenseJson(),
       );
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.modifiedOn = DateTime.now();
-        return newExpense;
+        return;
       } else {
         throw data['message'];
       }

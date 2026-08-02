@@ -30,7 +30,7 @@ class _NotificationCardState extends State<NotificationCard> {
     if (widget.data.invitedBy.id == widget.data.invitedUser.id) {
       if (widget.data.invitedBy.id != widget.loggedInUserID) {
         return imageWidgetForCachedNetworkImage(
-          widget.data.invitedBy.profileImage,
+          widget.data.invitedBy.profilePic,
           context,
           boxShape: BoxShape.circle,
           width: 50,
@@ -51,7 +51,7 @@ class _NotificationCardState extends State<NotificationCard> {
       }
     } else if (widget.data.invitedBy.id == widget.loggedInUserID) {
       return imageWidgetForCachedNetworkImage(
-        widget.data.invitedUser.profileImage,
+        widget.data.invitedUser.profilePic,
         context,
         boxShape: BoxShape.circle,
         width: 50,
@@ -59,7 +59,7 @@ class _NotificationCardState extends State<NotificationCard> {
       );
     } else {
       return imageWidgetForCachedNetworkImage(
-        widget.data.invitedBy.profileImage,
+        widget.data.invitedBy.profilePic,
         context,
         boxShape: BoxShape.circle,
         width: 50,

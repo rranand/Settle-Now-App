@@ -11,7 +11,7 @@ import 'package:settlenow/router/router_constant.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class QuickSplitCard extends StatefulWidget {
-  final TransactionModel data;
+  final QuicksplitTransactionModel data;
   const QuickSplitCard({super.key, required this.data});
 
   @override
@@ -37,6 +37,15 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
     return tags;
   }
 
+  String getName(String createdBy) {
+    return widget.data.users
+        .firstWhere(
+          (element) => element.id == createdBy,
+          orElse: () => QuicksplitUserModel.empty(),
+        )
+        .name;
+  }
+
   Widget transactionInfoWidget(bool value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,7 +59,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               visible: !value,
               child: overlapUserImageWidget(
                 context,
-                [widget.data.createdBy, ...widget.data.users],
+                widget.data.users,
                 4,
                 imageRadius: 30,
                 nextImageOffset: 24,
@@ -62,7 +71,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
           child: const SizedBox(height: UiConstant.cardSpaceAfterSubText),
         ),
         subTextOnCard(
-          "Created By ${widget.data.createdBy.id == _loggedInUser.id ? "You" : widget.data.createdBy.name.split(' ').first}",
+          "Created By ${widget.data.createdBy == _loggedInUser.id ? "You" : getName(widget.data.createdBy).split(' ').first}",
           context,
           isLoaded: widget.data.hasData,
         ),
@@ -91,14 +100,10 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
         ListView.separated(
           shrinkWrap: true,
           padding: EdgeInsets.zero,
-          itemCount: widget.data.users.length + 1,
+          itemCount: widget.data.users.length,
           itemBuilder: (BuildContext context, int index) {
-            UserAmountModel user = UserAmountModel.empty();
-            if (index == 0) {
-              user = widget.data.createdBy;
-            } else {
-              user = widget.data.users[index - 1];
-            }
+            final user = widget.data.users[index];
+
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -170,7 +175,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                           ButtonWithShimmerEffect(
                             isLoaded: isLoading,
                             buttonText:
-                                _loggedInUser.id == widget.data.createdBy.id
+                                _loggedInUser.id == widget.data.createdBy
                                     ? "Delete"
                                     : "Opt Out",
                             buttonType: CustomButtonType.customElevatedButton,
@@ -182,8 +187,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                                 Theme.of(context).scaffoldBackgroundColor,
                             borderColor: Colors.red.shade400,
                             onPressed: () {
-                              if (_loggedInUser.id ==
-                                  widget.data.createdBy.id) {
+                              if (_loggedInUser.id == widget.data.createdBy) {
                                 context.read<SettleCubit>().delete(
                                   widget.data.id,
                                   _loggedInUser.id,
@@ -249,28 +253,12 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   }
 
   bool calculateSettledFlag() {
-    if (_loggedInUser.id == widget.data.createdBy.id) {
-      return widget.data.createdBy.isSettled;
-    } else {
-      for (int i = 0; i < widget.data.users.length; i++) {
-        if (widget.data.users[i].id == _loggedInUser.id) {
-          return widget.data.users[i].isSettled;
-        }
+    for (int i = 0; i < widget.data.users.length; i++) {
+      if (widget.data.users[i].id == _loggedInUser.id) {
+        return widget.data.users[i].isSettled;
       }
     }
     return false;
-  }
-
-  bool isEditableFlag() {
-    if (widget.data.createdBy.isSettled) {
-      return false;
-    }
-    for (int i = 0; i < widget.data.users.length; i++) {
-      if (widget.data.users[i].isSettled) {
-        return false;
-      }
-    }
-    return true;
   }
 
   @override
@@ -286,7 +274,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
   Widget build(BuildContext context) {
     List<String> tags = createTags();
     isSettledByYou.value = calculateSettledFlag();
-    isEditable.value = isEditableFlag();
+    isEditable.value = !widget.data.isClosedAny;
 
     return Container(
       padding: EdgeInsets.all(UiConstant.cardPadding),
@@ -339,7 +327,7 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
                   Visibility(
                     visible:
                         widget.data.hasData &&
-                        widget.data.createdBy.id == _loggedInUser.id &&
+                        widget.data.createdBy == _loggedInUser.id &&
                         !isSettledByYou.value &&
                         isEditable.value,
                     child: Padding(
@@ -423,10 +411,11 @@ class _QuickSplitCardState extends State<QuickSplitCard> {
               Builder(
                 builder: (context) {
                   if (widget.data.hasData) {
-                    UserAmountModel userData = widget.data.users.firstWhere(
+                    QuicksplitUserModel userData = widget.data.users.firstWhere(
                       (user) => user.id == _loggedInUser.id,
-                      orElse: () => widget.data.createdBy,
+                      orElse: () => QuicksplitUserModel.empty(),
                     );
+
                     return Text(
                       formatCurrency(userData.amount, context),
                       style: TextStyle(

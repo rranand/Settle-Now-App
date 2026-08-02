@@ -1,11 +1,11 @@
-import 'dart:convert';
-import 'package:settlenow/model/user_model.dart';
+import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/resolver/user_resolver.dart';
 
 class RoomSettleModel {
   bool hasData = true;
   String id = "";
-  UserModel receiver = UserModel.empty();
-  UserModel sender = UserModel.empty();
+  BaseUserModel receiver = BaseUserModel.empty();
+  BaseUserModel sender = BaseUserModel.empty();
   double amount = 0;
   DateTime createdOn = DateTime.now();
   DateTime modifiedOn = DateTime.now();
@@ -51,33 +51,27 @@ class RoomSettleModel {
   }
 
   factory RoomSettleModel.fromMap(Map<String, dynamic> map) {
+    final receiver = UserResolver.instance.resolve(map['receiver'] ?? "");
+    final sender = UserResolver.instance.resolve(map['sender'] ?? "");
+
     return RoomSettleModel(
       id: map['id'],
-      receiver: UserModel.fromBasicInfoMap(
-        map['receiver'] as Map<String, dynamic>,
-      ),
-      sender: UserModel.fromBasicInfoMap(map['sender'] as Map<String, dynamic>),
+      receiver: receiver,
+      sender: sender,
       amount: double.parse(map['amount'].toString()),
       createdOn: DateTime.parse(map['created_on']).toLocal(),
       modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
     );
   }
 
-  String toSettleTransactionJSON() {
-    Map<String, String> data = {
+  Map<String, dynamic> toSettleTransactionJSON() {
+    return <String, dynamic>{
       'id': id,
-      'amount': amount.toString(),
-      'sender': sender.id,
-      'receiver': receiver.id,
+      'amount': amount,
+      'sender': sender,
+      'receiver': receiver,
     };
-
-    return json.encode(data);
   }
-
-  String toJson() => json.encode(toMap());
-
-  factory RoomSettleModel.fromJson(String source) =>
-      RoomSettleModel.fromMap(json.decode(source) as Map<String, dynamic>);
 
   @override
   String toString() {
@@ -88,7 +82,8 @@ class RoomSettleModel {
   bool operator ==(covariant RoomSettleModel other) {
     if (identical(this, other)) return true;
 
-    return other.id == id &&
+    return other.hasData == hasData &&
+        other.id == id &&
         other.receiver.id == receiver.id &&
         other.sender.id == sender.id &&
         other.amount == amount &&
@@ -98,7 +93,8 @@ class RoomSettleModel {
 
   @override
   int get hashCode {
-    return id.hashCode ^
+    return hasData.hashCode ^
+        id.hashCode ^
         receiver.id.hashCode ^
         sender.id.hashCode ^
         amount.hashCode ^

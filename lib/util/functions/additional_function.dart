@@ -54,13 +54,13 @@ List<double> calculateCrossAspectRatio(
   }
 }
 
-Color getStatusColor(String status) {
-  switch (status.toLowerCase()) {
-    case 'open':
+Color getStatusColor(RoomStatus status) {
+  switch (status) {
+    case RoomStatus.open:
       return Colors.green;
-    case 'closed':
+    case RoomStatus.closed:
       return Colors.red;
-    case 'partially closed':
+    case RoomStatus.partiallyClosed:
       return Colors.amber;
     default:
       return Colors.grey.shade200;

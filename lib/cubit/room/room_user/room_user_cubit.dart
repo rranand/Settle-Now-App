@@ -15,7 +15,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   void fetchData(
     String id,
     List<RoomUserModel> userArr,
-    List<TransactionModel> transArr,
+    List<RoomTransactionModel> transArr,
     List<RoomSettleModel> settleArr,
   ) async {
     if (state is RoomUserLoading) return;
@@ -40,7 +40,7 @@ class RoomUserCubit extends Cubit<RoomUserState> {
       if (oldState.id == id) {
         List<RoomUserModel> userData = [...oldState.data];
         for (int i = 0; i < userData.length; i++) {
-          if (userData[i].user.id == uid) {
+          if (userData[i].id == uid) {
             userData[i].active = active;
             break;
           }
@@ -53,41 +53,40 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     return;
   }
 
-  void onAddNewTransaction(TransactionModel data) {
+  void onAddNewTransaction(RoomTransactionModel data) {
     if (state is! RoomUserSuccess) {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 
-    if (data.createdBy.amount == data.amount) {
+    if (data.splitType == SplitType.self) {
       for (int i = 0; i < usersData.length; i++) {
-        if (usersData[i].user.id == data.createdBy.id) {
+        if (usersData[i].id == data.createdBy) {
           usersData[i].contribution += data.amount;
           usersData[i].spent += data.amount;
           break;
         }
       }
-    } else if (data.users.isEmpty) {
+    } else if (data.splitType == SplitType.equal) {
       int n = usersData.length;
       double splitAmount = data.amount / n;
 
       for (int i = 0; i < usersData.length; i++) {
         usersData[i].spent += splitAmount;
-        if (usersData[i].user.id == data.createdBy.id) {
+        if (usersData[i].id == data.createdBy) {
           usersData[i].contribution += data.amount;
         }
       }
     } else {
       Map<String, double> userWithAmount = {};
-      userWithAmount[data.createdBy.id] = data.createdBy.amount;
       for (int i = 0; i < data.users.length; i++) {
         userWithAmount[data.users[i].id] = data.users[i].amount;
       }
       for (int i = 0; i < usersData.length; i++) {
-        if (userWithAmount.containsKey(usersData[i].user.id)) {
-          double splitAmount = userWithAmount[usersData[i].user.id]!;
-          if (usersData[i].user.id == data.createdBy.id) {
+        if (userWithAmount.containsKey(usersData[i].id)) {
+          double splitAmount = userWithAmount[usersData[i].id]!;
+          if (usersData[i].id == data.createdBy) {
             usersData[i].contribution += data.amount;
           }
           usersData[i].spent += splitAmount;
@@ -98,7 +97,10 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
-  void onUpdateTransaction(TransactionModel oldExpense, TransactionModel data) {
+  void onUpdateTransaction(
+    RoomTransactionModel oldExpense,
+    RoomTransactionModel data,
+  ) {
     if (state is! RoomUserSuccess) {
       return;
     }
@@ -106,34 +108,33 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     List<RoomUserModel> usersData = roomUserState.data;
 
     // Removing amount of old transaction. May be nature of Split can be changed so, logics are different from removing old amount and adding new amount
-    if (oldExpense.createdBy.amount == oldExpense.amount) {
+    if (oldExpense.splitType == SplitType.self) {
       for (int i = 0; i < usersData.length; i++) {
-        if (usersData[i].user.id == oldExpense.createdBy.id) {
+        if (usersData[i].id == oldExpense.createdBy) {
           usersData[i].contribution -= oldExpense.amount;
           usersData[i].spent -= oldExpense.amount;
           break;
         }
       }
-    } else if (oldExpense.users.isEmpty) {
+    } else if (oldExpense.splitType == SplitType.equal) {
       int n = usersData.length;
       double splitAmount = oldExpense.amount / n;
 
       for (int i = 0; i < usersData.length; i++) {
         usersData[i].spent -= splitAmount;
-        if (usersData[i].user.id == oldExpense.createdBy.id) {
+        if (usersData[i].id == oldExpense.createdBy) {
           usersData[i].contribution -= oldExpense.amount;
         }
       }
     } else {
       Map<String, double> userWithAmount = {};
-      userWithAmount[oldExpense.createdBy.id] = oldExpense.createdBy.amount;
       for (int i = 0; i < oldExpense.users.length; i++) {
         userWithAmount[oldExpense.users[i].id] = oldExpense.users[i].amount;
       }
       for (int i = 0; i < usersData.length; i++) {
-        if (userWithAmount.containsKey(usersData[i].user.id)) {
-          double splitAmount = userWithAmount[usersData[i].user.id]!;
-          if (usersData[i].user.id == oldExpense.createdBy.id) {
+        if (userWithAmount.containsKey(usersData[i].id)) {
+          double splitAmount = userWithAmount[usersData[i].id]!;
+          if (usersData[i].id == oldExpense.createdBy) {
             usersData[i].contribution -= oldExpense.amount;
           }
           usersData[i].spent -= splitAmount;
@@ -142,34 +143,33 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     }
 
     // Adding amount of updated transaction
-    if (data.createdBy.amount == data.amount) {
+    if (data.splitType == SplitType.self) {
       for (int i = 0; i < usersData.length; i++) {
-        if (usersData[i].user.id == data.createdBy.id) {
+        if (usersData[i].id == data.createdBy) {
           usersData[i].contribution += data.amount;
           usersData[i].spent += data.amount;
           break;
         }
       }
-    } else if (data.users.isEmpty) {
+    } else if (oldExpense.splitType == SplitType.equal) {
       int n = usersData.length;
       double splitAmount = data.amount / n;
 
       for (int i = 0; i < usersData.length; i++) {
         usersData[i].spent += splitAmount;
-        if (usersData[i].user.id == data.createdBy.id) {
+        if (usersData[i].id == data.createdBy) {
           usersData[i].contribution += data.amount;
         }
       }
     } else {
       Map<String, double> userWithAmount = {};
-      userWithAmount[data.createdBy.id] = data.createdBy.amount;
       for (int i = 0; i < data.users.length; i++) {
         userWithAmount[data.users[i].id] = data.users[i].amount;
       }
       for (int i = 0; i < usersData.length; i++) {
-        if (userWithAmount.containsKey(usersData[i].user.id)) {
-          double splitAmount = userWithAmount[usersData[i].user.id]!;
-          if (usersData[i].user.id == data.createdBy.id) {
+        if (userWithAmount.containsKey(usersData[i].id)) {
+          double splitAmount = userWithAmount[usersData[i].id]!;
+          if (usersData[i].id == data.createdBy) {
             usersData[i].contribution += data.amount;
           }
           usersData[i].spent += splitAmount;
@@ -180,41 +180,40 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     return emit(RoomUserSuccess(roomUserState.id, [...usersData].toList()));
   }
 
-  void onDeleteTransaction(TransactionModel data) {
+  void onDeleteTransaction(RoomTransactionModel data) {
     if (state is! RoomUserSuccess) {
       return;
     }
     final roomUserState = state as RoomUserSuccess;
     List<RoomUserModel> usersData = roomUserState.data;
 
-    if (data.createdBy.amount == data.amount) {
+    if (data.splitType == SplitType.self) {
       for (int i = 0; i < usersData.length; i++) {
-        if (usersData[i].user.id == data.createdBy.id) {
+        if (usersData[i].id == data.createdBy) {
           usersData[i].contribution -= data.amount;
           usersData[i].spent -= data.amount;
           break;
         }
       }
-    } else if (data.users.isEmpty) {
+    } else if (data.splitType == SplitType.equal) {
       int n = usersData.length;
       double splitAmount = data.amount / n;
 
       for (int i = 0; i < usersData.length; i++) {
         usersData[i].spent -= splitAmount;
-        if (usersData[i].user.id == data.createdBy.id) {
+        if (usersData[i].id == data.createdBy) {
           usersData[i].contribution -= data.amount;
         }
       }
     } else {
       Map<String, double> userWithAmount = {};
-      userWithAmount[data.createdBy.id] = data.createdBy.amount;
       for (int i = 0; i < data.users.length; i++) {
         userWithAmount[data.users[i].id] = data.users[i].amount;
       }
       for (int i = 0; i < usersData.length; i++) {
-        if (userWithAmount.containsKey(usersData[i].user.id)) {
-          double splitAmount = userWithAmount[usersData[i].user.id]!;
-          if (usersData[i].user.id == data.createdBy.id) {
+        if (userWithAmount.containsKey(usersData[i].id)) {
+          double splitAmount = userWithAmount[usersData[i].id]!;
+          if (usersData[i].id == data.createdBy) {
             usersData[i].contribution -= data.amount;
           }
           usersData[i].spent -= splitAmount;
@@ -233,9 +232,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     List<RoomUserModel> usersData = roomUserState.data;
 
     for (int i = 0; i < usersData.length; i++) {
-      if (data.sender.id == usersData[i].user.id) {
+      if (data.sender.id == usersData[i].id) {
         usersData[i].settle += data.amount;
-      } else if (data.receiver.id == usersData[i].user.id) {
+      } else if (data.receiver.id == usersData[i].id) {
         usersData[i].settle -= data.amount;
       }
     }
@@ -251,15 +250,15 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     List<RoomUserModel> usersData = roomUserState.data;
 
     for (int i = 0; i < usersData.length; i++) {
-      if (oldData.sender.id == usersData[i].user.id) {
+      if (oldData.sender.id == usersData[i].id) {
         usersData[i].settle -= oldData.amount;
-      } else if (oldData.receiver.id == usersData[i].user.id) {
+      } else if (oldData.receiver.id == usersData[i].id) {
         usersData[i].settle += oldData.amount;
       }
 
-      if (data.sender.id == usersData[i].user.id) {
+      if (data.sender.id == usersData[i].id) {
         usersData[i].settle += data.amount;
-      } else if (data.receiver.id == usersData[i].user.id) {
+      } else if (data.receiver.id == usersData[i].id) {
         usersData[i].settle -= data.amount;
       }
     }
@@ -275,9 +274,9 @@ class RoomUserCubit extends Cubit<RoomUserState> {
     List<RoomUserModel> usersData = roomUserState.data;
 
     for (int i = 0; i < usersData.length; i++) {
-      if (data.sender.id == usersData[i].user.id) {
+      if (data.sender.id == usersData[i].id) {
         usersData[i].settle -= data.amount;
-      } else if (data.receiver.id == usersData[i].user.id) {
+      } else if (data.receiver.id == usersData[i].id) {
         usersData[i].settle += data.amount;
       }
     }

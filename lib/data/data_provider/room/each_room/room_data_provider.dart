@@ -20,17 +20,21 @@ class RoomDataProvider {
     }
   }
 
-  Future<List<TransactionModel>> fetchData(String id) async {
+  Future<List<RoomTransactionModel>> fetchData(String id) async {
     try {
       final response = await createAPICall('room/$id/transaction', "get", {});
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        List<TransactionModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(TransactionModel.fromMap(data['data'][i]));
+        final allTrans = data['data'];
+        List<RoomTransactionModel> arr = [];
+        if (allTrans != null) {
+          for (int i = 0; i < allTrans.length; i++) {
+            arr.add(RoomTransactionModel.fromMap(allTrans[i]));
+          }
         }
+
         return arr;
       } else {
         throw data['message'];
@@ -47,9 +51,12 @@ class RoomDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        final allTrans = data['data'];
         List<RoomSettleModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(RoomSettleModel.fromMap(data['data'][i]));
+        if (allTrans != null) {
+          for (int i = 0; i < allTrans.length; i++) {
+            arr.add(RoomSettleModel.fromMap(allTrans[i]));
+          }
         }
         return arr;
       } else {
@@ -120,23 +127,20 @@ class RoomDataProvider {
     }
   }
 
-  Future<TransactionModel> createExpense(
+  Future<RoomTransactionModel> createExpense(
     String id,
-    NewTransactionModel data,
+    RoomTransactionModel data,
   ) async {
     try {
-      TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
-
       final response = await createAPICall(
         'room/$id/transaction',
         "post",
-        newExpense.toQuickSplitJson(),
+        data.toCreateExpenseJson(),
       );
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.id = respData['data']['id'];
-        return newExpense;
+        return data.copyWith(id: respData['data']['id']);
       } else {
         throw respData['message'];
       }
@@ -145,24 +149,21 @@ class RoomDataProvider {
     }
   }
 
-  Future<List<TransactionModel>> createBulkExpense(
+  Future<List<RoomTransactionModel>> createBulkExpense(
     String id,
-    List<NewTransactionModel> data,
+    List<RoomTransactionModel> data,
   ) async {
     try {
-      List<TransactionModel> newExpense = [];
-      for (int i = 0; i < data.length; i++) {
-        newExpense.add(TransactionModel.fromNewTransaction(data[i]));
-      }
       final response = await createAPICall(
         'room/$id/bulk-transaction',
         "post",
-        {"data": newExpense.toQuickSplitJson()},
+        {"data": data.map((e) => e.toCreateExpenseJson()).toList()},
       );
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
         final transactionMapping = respData['data'];
+        List<RoomTransactionModel> newExpense = [...data];
         for (int i = 0; i < data.length; i++) {
           newExpense[i].id = transactionMapping[i.toString()];
         }
@@ -175,23 +176,17 @@ class RoomDataProvider {
     }
   }
 
-  Future<TransactionModel> updateExpense(
-    String id,
-    NewTransactionModel data,
-  ) async {
+  Future<void> updateExpense(String id, RoomTransactionModel data) async {
     try {
-      TransactionModel newExpense = TransactionModel.fromNewTransaction(data);
-
       final response = await createAPICall(
         'room/$id/transaction',
         "patch",
-        newExpense.toQuickSplitUpdateJson(),
+        data.toUpdateExpenseJson(),
       );
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        newExpense.modifiedOn = DateTime.now();
-        return newExpense;
+        return;
       } else {
         throw respData['message'];
       }
@@ -301,7 +296,7 @@ class RoomDataProvider {
 
   Future<List<NotificationModel>> inviteNewMember(
     String id,
-    List<UserModel> users,
+    List<BaseUserModel> users,
   ) async {
     try {
       List<String> uid = users.map((e) => e.id).toList();

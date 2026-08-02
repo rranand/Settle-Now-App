@@ -3,7 +3,7 @@ import 'package:settlenow/model/model_core.dart';
 
 List<RoomUserModel> calculateUserExpenseInfo(
   List<RoomUserModel> userArr,
-  List<TransactionModel> transArr,
+  List<RoomTransactionModel> transArr,
   List<RoomSettleModel> settleArr,
 ) {
   Map<String, Decimal> contributionMap = {};
@@ -27,21 +27,17 @@ List<RoomUserModel> calculateUserExpenseInfo(
     }
   } else {
     for (int i = 0; i < userArr.length; i++) {
-      settleMap[userArr[i].user.id] = Decimal.zero;
+      settleMap[userArr[i].id] = Decimal.zero;
     }
   }
 
   for (int i = 0; i < transArr.length; i++) {
-    TransactionModel eachObj = transArr[i];
-    String createdBy = eachObj.createdBy.id;
+    RoomTransactionModel eachObj = transArr[i];
+    String createdBy = eachObj.createdBy;
 
     contributionMap[createdBy] =
         (contributionMap[createdBy] ?? Decimal.zero) +
         Decimal.parse(eachObj.amount.toString());
-
-    spentMap[createdBy] =
-        (spentMap[createdBy] ?? Decimal.zero) +
-        Decimal.parse(eachObj.createdBy.amount.toString());
 
     for (int j = 0; j < eachObj.users.length; j++) {
       String userID = eachObj.users[j].id;
@@ -54,12 +50,9 @@ List<RoomUserModel> calculateUserExpenseInfo(
   List<RoomUserModel> data = [];
 
   for (int i = 0; i < n; i++) {
-    String userID = userArr[i].user.id;
+    String userID = userArr[i].id;
 
-    RoomUserModel eachObj = RoomUserModel(
-      id: userArr[i].id,
-      active: userArr[i].active,
-      user: userArr[i].user,
+    RoomUserModel eachObj = userArr[i].copyWith(
       contribution: (contributionMap[userID] ?? Decimal.zero).toDouble(),
       spent: (spentMap[userID] ?? Decimal.zero).toDouble(),
       settle: (settleMap[userID] ?? Decimal.zero).toDouble(),

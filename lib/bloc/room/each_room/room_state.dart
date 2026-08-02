@@ -13,7 +13,7 @@ final class RoomLoading extends RoomState {
 
 final class RoomFetchSuccess extends RoomState {
   final String id;
-  final List<TransactionModel> data;
+  final List<RoomTransactionModel> data;
 
   RoomFetchSuccess(this.id, this.data);
 }

@@ -52,7 +52,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     return List.generate(11, (i) {
       LendenTransactionModel tempData = LendenTransactionModel.empty();
       if (i % 2 == 0) {
-        tempData.createdBy.id = _loggedInUser.id;
+        tempData.createdBy = _loggedInUser.id;
       }
       return tempData;
     });
@@ -184,7 +184,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                             TransactionType.lenden,
                                       },
                                     )
-                                    as List<UserModel>?;
+                                    as List<BaseUserModel>?;
                             if (userDataFromScreen != null &&
                                 userDataFromScreen.isNotEmpty &&
                                 userDataFromScreen.first.hasData) {
@@ -207,7 +207,7 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                       children: List.generate(users.length, (index) {
                         return ListTile(
                           leading: imageWidgetForCachedNetworkImage(
-                            users[index].profileImage,
+                            users[index].profilePic,
                             context,
                             width: 45,
                             height: 45,
@@ -431,6 +431,15 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
     }
   }
 
+  String getName(String createdBy, List<LendenUserModel> users) {
+    return users
+        .firstWhere(
+          (element) => element.id == createdBy,
+          orElse: () => LendenUserModel.empty(),
+        )
+        .name;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isWide = MediaQuery.of(context).size.width >= UiConstant.maxWidth;
@@ -565,20 +574,18 @@ class _LendenExpenseScreenState extends State<LendenExpenseScreen> {
                                           filterState.data
                                               .cast<LendenTransactionModel>();
 
-                                      searchedData =
-                                          FilterSort.filteredSearchText(
-                                            _searchController.text,
-                                            searchedData,
-                                            (transData) {
-                                              String searchStr =
-                                                  transData.description;
-                                              searchStr +=
-                                                  " ${transData.createdBy.name}";
-                                              searchStr +=
-                                                  " ${transData.amount}";
-                                              return searchStr;
-                                            },
-                                          );
+                                      searchedData = FilterSort.filteredSearchText(
+                                        _searchController.text,
+                                        searchedData,
+                                        (transData) {
+                                          String searchStr =
+                                              transData.description;
+                                          searchStr +=
+                                              " ${getName(transData.createdBy, users)}";
+                                          searchStr += " ${transData.amount}";
+                                          return searchStr;
+                                        },
+                                      );
 
                                       if (searchedData.isEmpty) {
                                         return SliverToBoxAdapter(

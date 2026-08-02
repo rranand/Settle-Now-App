@@ -91,11 +91,11 @@ class _BulkTransactionState extends State<BulkTransaction> {
         }
       }
 
-      List<NewTransactionModel> transData = [];
+      List<RoomTransactionModel> transData = [];
 
       for (int i = 0; i < _transactionArr.value.length; i++) {
         transData.add(
-          NewTransactionModel.fromBulkTransaction(
+          RoomTransactionModel.fromBulkTransaction(
             _transactionArr.value[i],
             i.toString(),
             _loggedInUser.id,

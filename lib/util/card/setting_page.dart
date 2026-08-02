@@ -42,7 +42,7 @@ class _SettingPageState extends State<SettingPage> {
   late final StreamSubscription _sub;
 
   int totalMemberCount = 0;
-  UserModel createdBy = UserModel.empty();
+  BaseUserModel createdBy = BaseUserModel.empty();
   DateTime createdOn = DateTime.now();
   String roomKey = "";
   String roomName = "";
@@ -87,7 +87,7 @@ class _SettingPageState extends State<SettingPage> {
 
   bool calculateIsLeavableForRoom(
     List<RoomSettleModel> roomSettleData,
-    List<TransactionModel> transData,
+    List<RoomTransactionModel> transData,
   ) {
     for (int i = 0; i < roomSettleData.length; i++) {
       if (roomSettleData[i].sender.id == _loggedInUser.id ||
@@ -97,7 +97,7 @@ class _SettingPageState extends State<SettingPage> {
     }
 
     for (int i = 0; i < transData.length; i++) {
-      if (transData[i].createdBy.id == _loggedInUser.id) {
+      if (transData[i].createdBy == _loggedInUser.id) {
         return false;
       }
 
@@ -115,7 +115,7 @@ class _SettingPageState extends State<SettingPage> {
     List<LendenTransactionModel> transData,
   ) {
     for (int i = 0; i < transData.length; i++) {
-      if (transData[i].createdBy.id == _loggedInUser.id) {
+      if (transData[i].createdBy == _loggedInUser.id) {
         return false;
       }
     }
@@ -133,7 +133,14 @@ class _SettingPageState extends State<SettingPage> {
             _roomNameController.text = state.data.roomName;
             roomName = state.data.roomName;
             totalMemberCount = state.data.users.length;
-            createdBy = state.data.createdBy;
+
+            for (int i = 0; i < totalMemberCount; i++) {
+              if (state.data.users[i].id == state.data.createdBy) {
+                createdBy = state.data.users[i] as BaseUserModel;
+                break;
+              }
+            }
+
             createdOn = state.data.createdOn;
             roomKey = state.data.roomKey;
             roomLink = state.data.roomLink;
@@ -148,7 +155,7 @@ class _SettingPageState extends State<SettingPage> {
               isDeletable =
                   roomSettleState.data.isEmpty && roomBlocState.data.isEmpty;
 
-              if (state.data.createdBy.id != _loggedInUser.id) {
+              if (state.data.createdBy != _loggedInUser.id) {
                 isLeavable = calculateIsLeavableForRoom(
                   roomSettleState.data,
                   roomBlocState.data,
@@ -166,11 +173,18 @@ class _SettingPageState extends State<SettingPage> {
             dataPopulated = true;
             _roomNameController.text = state.roomData.roomName;
             totalMemberCount = state.roomData.users.length;
-            createdBy = state.roomData.createdBy;
+
+            for (int i = 0; i < totalMemberCount; i++) {
+              if (state.roomData.users[i].id == state.roomData.createdBy) {
+                createdBy = state.roomData.users[i] as BaseUserModel;
+                break;
+              }
+            }
+
             createdOn = state.roomData.createdOn;
             isDeletable = state.data.isEmpty;
 
-            if (state.roomData.createdBy.id != _loggedInUser.id) {
+            if (state.roomData.createdBy != _loggedInUser.id) {
               isLeavable = calculateIsLeavableForLendenRoom(state.data);
             } else {
               isLeavable = false;
