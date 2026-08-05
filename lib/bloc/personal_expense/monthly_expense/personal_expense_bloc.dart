@@ -29,14 +29,11 @@ class PersonalMonthlyExpenseBloc
     emit(PersonalMonthlyExpenseLoading());
     try {
       String id = (event.year + event.month).toLowerCase();
-      List<PersonalExpenseTransactionModel> data = await repo.fetchData(
-        event.year,
-        event.month,
-      );
+      final data = await repo.fetchData(event.year, event.month);
       dashboardBloc.add(PersonalExpenseDashboardUpdate(id: id, data: data));
-      return emit(PersonalMonthlyExpenseFetchSuccess(id, data));
+      return emit(PersonalMonthlyExpenseFetchSuccess(id: id, data: data));
     } catch (e) {
-      return emit(PersonalMonthlyExpenseFailure(e.toString()));
+      return emit(PersonalMonthlyExpenseFailure(error: e.toString()));
     }
   }
 
@@ -52,7 +49,7 @@ class PersonalMonthlyExpenseBloc
     dashboardBloc.add(
       PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
     );
-    return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
+    return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
   }
 
   void _personalMonthlyExpenseUpdate(
@@ -73,7 +70,7 @@ class PersonalMonthlyExpenseBloc
     dashboardBloc.add(
       PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
     );
-    return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
+    return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
   }
 
   void _personalMonthlyExpenseDelete(
@@ -98,7 +95,7 @@ class PersonalMonthlyExpenseBloc
     dashboardBloc.add(
       PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
     );
-    return emit(PersonalMonthlyExpenseFetchSuccess(oldData.id, data));
+    return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
   }
 
   void _personalMonthlyExpenseReset(

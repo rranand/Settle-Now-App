@@ -45,7 +45,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               data,
             );
 
-            bloc.add(PersonalMonthlyExpenseAdd(newData));
+            bloc.add(PersonalMonthlyExpenseAdd(data: newData));
             return emit(NewTransactionSuccess(data: newData));
           }
         case TransactionType.lenden:
@@ -119,7 +119,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     BuildContext context,
     BaseTransactionModel baseTransData,
     TransactionType transactionType, {
-    String expenseType = "Personal",
+    TransactionType expenseType = TransactionType.personal,
   }) async {
     final authLoginState = context.read<AuthBloc>().state;
     if (authLoginState is! AuthLoginSuccess) {
@@ -143,7 +143,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final bloc = context.read<PersonalMonthlyExpenseBloc>();
             final data = baseTransData as PersonalExpenseTransactionModel;
             await repoPS.update(data);
-            bloc.add(PersonalMonthlyExpenseUpdate(data));
+            bloc.add(PersonalMonthlyExpenseUpdate(data: data));
             return emit(NewTransactionSuccess(data: data));
           }
         case TransactionType.lenden:
@@ -182,7 +182,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
     BuildContext context,
     String expenseID,
     TransactionType transactionType, {
-    String expenseType = "Personal",
+    TransactionType expenseType = TransactionType.personal,
   }) async {
     final authLoginState = context.read<AuthBloc>().state;
     if (authLoginState is! AuthLoginSuccess) {
@@ -212,18 +212,33 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.personal:
           {
             bloc = context.read<PersonalMonthlyExpenseBloc>();
-            bloc.add(PersonalMonthlyExpenseDelete(true, expenseID));
+            bloc.add(
+              PersonalMonthlyExpenseDelete(
+                isLoading: true,
+                expenseID: expenseID,
+              ),
+            );
             final bool isDeleted = await repoPS.delete(expenseID, expenseType);
 
             if (isDeleted) {
-              bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
+              bloc.add(
+                PersonalMonthlyExpenseDelete(
+                  isLoading: false,
+                  expenseID: expenseID,
+                ),
+              );
               return emit(
                 NewTransactionSuccess(
                   data: PersonalExpenseTransactionModel.empty(),
                 ),
               );
             } else {
-              bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
+              bloc.add(
+                PersonalMonthlyExpenseDelete(
+                  isLoading: false,
+                  expenseID: expenseID,
+                ),
+              );
               return emit(
                 NewTransactionFailure(error: "Something went wrong!"),
               );
@@ -278,7 +293,9 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
       }
     } catch (e) {
       if (transactionType == TransactionType.personal) {
-        bloc.add(PersonalMonthlyExpenseDelete(false, expenseID));
+        bloc.add(
+          PersonalMonthlyExpenseDelete(isLoading: false, expenseID: expenseID),
+        );
       }
       return emit(NewTransactionFailure(error: e.toString()));
     }

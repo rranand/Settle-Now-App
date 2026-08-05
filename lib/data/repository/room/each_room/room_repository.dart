@@ -120,7 +120,7 @@ class RoomRepository {
   Future<bool> deleteExpense(
     String id,
     String expenseID,
-    String expenseType,
+    TransactionType expenseType,
   ) async {
     try {
       return _dataProvider.deleteExpense(id, expenseID, expenseType);

@@ -15,10 +15,14 @@ class PersonalExpenseDashboardDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        final allTransactions = data['data'];
         List<PersonalExpenseInfoModel> arr = [];
-        for (int i = 0; i < data['data'].length; i++) {
-          arr.add(PersonalExpenseInfoModel.fromMap(data['data'][i]));
+        if (allTransactions != null) {
+          for (int i = 0; i < allTransactions.length; i++) {
+            arr.add(PersonalExpenseInfoModel.fromMap(allTransactions[i]));
+          }
         }
+
         return arr;
       } else {
         throw data['message'];

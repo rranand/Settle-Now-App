@@ -1,5 +1,6 @@
 import 'package:settlenow/data/data_provider/data_provider_core.dart';
 import 'package:settlenow/model/model_core.dart';
+import 'package:settlenow/util/util_core.dart';
 
 class PersonalMonthlyExpenseRepository {
   final PersonalMonthlyExpenseDataProvider _dataProvider;
@@ -13,6 +14,8 @@ class PersonalMonthlyExpenseRepository {
     try {
       List<PersonalExpenseTransactionModel> data = await _dataProvider
           .fetchData(year, month);
+
+      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
       return data;
     } catch (e) {
       rethrow;
@@ -37,7 +40,7 @@ class PersonalMonthlyExpenseRepository {
     }
   }
 
-  Future<bool> delete(String expenseID, String transactionType) async {
+  Future<bool> delete(String expenseID, TransactionType transactionType) async {
     try {
       return _dataProvider.delete(expenseID, transactionType);
     } catch (e) {

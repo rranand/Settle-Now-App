@@ -17,8 +17,8 @@ class PersonalMonthlyExpenseDataProvider {
         final allData = data['data'];
         List<PersonalExpenseTransactionModel> arr = [];
         if (allData != null) {
-          for (int i = 0; i < data['data'].length; i++) {
-            arr.add(PersonalExpenseTransactionModel.fromMap(data['data'][i]));
+          for (int i = 0; i < allData.length; i++) {
+            arr.add(PersonalExpenseTransactionModel.fromMap(allData[i]));
           }
         }
         return arr;
@@ -57,7 +57,7 @@ class PersonalMonthlyExpenseDataProvider {
       final response = await createAPICall(
         'personal',
         'put',
-        expenseData.toCreateExpenseJson(),
+        expenseData.toUpdateExpenseJson(),
       );
 
       final data = jsonDecode(response.body);
@@ -72,11 +72,11 @@ class PersonalMonthlyExpenseDataProvider {
     }
   }
 
-  Future<bool> delete(String expenseID, String transactionType) async {
+  Future<bool> delete(String expenseID, TransactionType transactionType) async {
     try {
       final response = await createAPICall('personal', 'delete', {
         "id": expenseID,
-        "transaction_type": transactionType,
+        "transaction_type": transactionType.label,
       });
 
       final data = jsonDecode(response.body);

@@ -198,11 +198,11 @@ class RoomDataProvider {
   Future<bool> deleteExpense(
     String id,
     String expenseID,
-    String expenseType,
+    TransactionType expenseType,
   ) async {
     final response = await createAPICall('room/$id/transaction', "delete", {
       "id": expenseID,
-      "splitType": expenseType,
+      "split_type": expenseType.label,
     });
 
     final respData = jsonDecode(response.body);

@@ -43,7 +43,7 @@ class _AddTransactionState extends State<AddTransaction> {
     text: convertDateTimeFormat(DateTime.now()),
   );
   bool _isNewExpense = true;
-  String expenseType = "";
+  TransactionType expenseType = TransactionType.personal;
 
   final List<SplitType> _splitType = SplitType.values;
   final ValueNotifier<int> _categoryIndex = ValueNotifier(0);
@@ -410,8 +410,8 @@ class _AddTransactionState extends State<AddTransaction> {
         }
       case TransactionType.personal:
         {
-          final transTemp = transactionData as RoomTransactionModel;
-          expenseType = "Personal";
+          final transTemp = transactionData as PersonalExpenseTransactionModel;
+          expenseType = TransactionType.personal;
           _categoryIndex.value = CategoryParser.expenseCategories.indexOf(
             transTemp.category,
           );

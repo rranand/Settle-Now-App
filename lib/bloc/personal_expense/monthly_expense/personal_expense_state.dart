@@ -12,11 +12,11 @@ final class PersonalMonthlyExpenseFetchSuccess
   final String id;
   final List<PersonalExpenseTransactionModel> data;
 
-  PersonalMonthlyExpenseFetchSuccess(this.id, this.data);
+  PersonalMonthlyExpenseFetchSuccess({required this.id, required this.data});
 }
 
 final class PersonalMonthlyExpenseFailure extends PersonalMonthlyExpenseState {
   final String error;
 
-  PersonalMonthlyExpenseFailure(this.error);
+  PersonalMonthlyExpenseFailure({required this.error});
 }

@@ -7,30 +7,29 @@ final class PersonalMonthlyExpenseFetch extends PersonalMonthlyExpenseEvent {
   final String year;
   final String month;
 
-  PersonalMonthlyExpenseFetch({
-    required this.year,
-    required this.month,
-  });
+  PersonalMonthlyExpenseFetch({required this.year, required this.month});
 }
 
 final class PersonalMonthlyExpenseAdd extends PersonalMonthlyExpenseEvent {
   final PersonalExpenseTransactionModel data;
 
-  PersonalMonthlyExpenseAdd(this.data);
+  PersonalMonthlyExpenseAdd({required this.data});
 }
 
 final class PersonalMonthlyExpenseUpdate extends PersonalMonthlyExpenseEvent {
   final PersonalExpenseTransactionModel data;
 
-  PersonalMonthlyExpenseUpdate(this.data);
+  PersonalMonthlyExpenseUpdate({required this.data});
 }
 
 final class PersonalMonthlyExpenseDelete extends PersonalMonthlyExpenseEvent {
   final bool isLoading;
   final String expenseID;
 
-  PersonalMonthlyExpenseDelete(this.isLoading, this.expenseID);
+  PersonalMonthlyExpenseDelete({
+    required this.isLoading,
+    required this.expenseID,
+  });
 }
 
-final class PersonalMonthlyExpenseReset extends PersonalMonthlyExpenseEvent {
-}
+final class PersonalMonthlyExpenseReset extends PersonalMonthlyExpenseEvent {}

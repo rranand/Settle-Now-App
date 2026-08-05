@@ -1,4 +1,3 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:settlenow/constant/constant_core.dart';
@@ -16,73 +15,22 @@ class PersonalExpenseCard extends StatelessWidget {
     BuildContext context, {
     bool isCurrency = false,
     bool isLoaded = true,
+    double fontSize = 20,
   }) {
     return isLoaded
         ? Text(
           text,
           style: TextStyle(
-            fontSize: 18,
+            fontSize: fontSize,
             fontWeight: FontWeight.bold,
             color: isCurrency ? Colors.green : null,
           ),
         )
         : CustomShimmerEffect.textWidget(
           context,
-          fontSize: 18,
+          fontSize: fontSize,
           width: isCurrency ? 60 : 100,
         );
-  }
-
-  Widget linerChartForPersonalExpenseDashBoard(BuildContext context) {
-    return LineChart(
-      LineChartData(
-        titlesData: FlTitlesData(
-          bottomTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        ),
-        lineTouchData: LineTouchData(
-          touchTooltipData: LineTouchTooltipData(
-            maxContentWidth: 100,
-            getTooltipColor: (touchedSpot) => Colors.black,
-            getTooltipItems: (touchedSpots) {
-              return touchedSpots.map((LineBarSpot touchedSpot) {
-                final textStyle = TextStyle(
-                  color:
-                      touchedSpot.bar.gradient?.colors[0] ??
-                      touchedSpot.bar.color,
-                  fontSize: 14,
-                );
-                return LineTooltipItem(
-                  formatCurrency(touchedSpot.y, context),
-                  textStyle,
-                );
-              }).toList();
-            },
-          ),
-          handleBuiltInTouches: true,
-          getTouchLineStart: (data, index) => 0,
-        ),
-        borderData: FlBorderData(show: false),
-        gridData: FlGridData(show: false),
-        lineBarsData: [
-          LineChartBarData(
-            spots: List.generate(
-              data.transaction.length,
-              (i) => FlSpot(i.toDouble(), data.transaction[i]),
-            ),
-            isCurved: true,
-            color: Colors.green.shade50,
-            gradient: const LinearGradient(
-              colors: [Color(0xFF14b8a6), Color(0xFF0f766e)],
-            ),
-            dotData: FlDotData(show: true),
-            barWidth: 2,
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -110,46 +58,24 @@ class PersonalExpenseCard extends StatelessWidget {
             children: [
               textWidget(data.monthName, context, isLoaded: data.hasData),
               const SizedBox(height: UiConstant.cardSpaceBetweenSubText),
+              textWidget(data.year, context, isLoaded: data.hasData),
+              const SizedBox(height: 2 * UiConstant.cardSpaceBetweenSubText),
               textWidget(
                 formatCurrency(data.amount, context),
                 context,
                 isCurrency: true,
                 isLoaded: data.hasData,
+                fontSize: 22,
+              ),
+              const SizedBox(height: 2 * UiConstant.cardSpaceBetweenSubText),
+              tagOnCard(
+                "${data.transactionCount} transaction${data.transactionCount > 1 ? "s" : ""}",
+                context,
+                textColor: UiConstant.colors[0],
+                backgroundColor: UiConstant.colorsWithShade50[0],
+                isLoaded: data.hasData,
               ),
               const SizedBox(height: UiConstant.cardSpaceAfterSubText),
-              Expanded(
-                child:
-                    data.hasData
-                        ? Container(
-                          margin: EdgeInsets.symmetric(
-                            vertical: 4,
-                            horizontal: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(
-                              UiConstant.cardBorderRadius,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: linerChartForPersonalExpenseDashBoard(
-                              context,
-                            ),
-                          ),
-                        )
-                        : CustomShimmerEffect.placeHolderShimmerEffect(
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                UiConstant.cardBorderRadius,
-                              ),
-                            ),
-                          ),
-                          context,
-                        ),
-              ),
             ],
           ),
         ),

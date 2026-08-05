@@ -52,13 +52,30 @@ class PersonalExpenseTransactionModel extends BaseTransactionModel {
     };
   }
 
-  factory PersonalExpenseTransactionModel.fromMap(Map<String, dynamic> map) {
-    final data =
-        BaseTransactionModel.fromMap(map) as PersonalExpenseTransactionModel;
+  factory PersonalExpenseTransactionModel.fromBaseObject(
+    BaseTransactionModel baseData, {
+    String? category,
+    RoomLinkedModel? roomLinkedData,
+  }) {
+    return PersonalExpenseTransactionModel(
+      id: baseData.id,
+      amount: baseData.amount,
+      description: baseData.description,
+      createdBy: baseData.createdBy,
+      createdOn: baseData.createdOn,
+      modifiedOn: baseData.modifiedOn,
+      category: category ?? "",
+      roomData: roomLinkedData ?? RoomLinkedModel.empty(),
+    );
+  }
 
-    return data.copyWith(
+  factory PersonalExpenseTransactionModel.fromMap(Map<String, dynamic> map) {
+    final data = BaseTransactionModel.fromMap(map);
+
+    return PersonalExpenseTransactionModel.fromBaseObject(
+      data,
       category: map['category'],
-      roomData:
+      roomLinkedData:
           map['room_data'] != null
               ? RoomLinkedModel.fromMap(map['room_data'])
               : RoomLinkedModel.empty(),
@@ -69,6 +86,14 @@ class PersonalExpenseTransactionModel extends BaseTransactionModel {
   Map<String, dynamic> toCreateExpenseJson() {
     return <String, dynamic>{
       ...super.toCreateExpenseJson(),
+      "category": category,
+    };
+  }
+
+  @override
+  Map<String, dynamic> toUpdateExpenseJson() {
+    return <String, dynamic>{
+      ...super.toUpdateExpenseJson(),
       "category": category,
     };
   }

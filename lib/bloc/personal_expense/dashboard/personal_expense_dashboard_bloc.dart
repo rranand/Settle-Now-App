@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settlenow/constant/constant_core.dart';
@@ -70,8 +68,7 @@ class PersonalExpenseDashboardBloc
       amount: totalAmount,
       monthName: capatilizeFirstLetter(event.id.substring(4)),
       year: year.toString(),
-      transaction:
-          data.sublist(0, min(10, data.length)).map((e) => e.amount).toList(),
+      transactionCount: data.length,
     );
 
     Map<int, List<PersonalExpenseInfoModel>> newData = Map.from(oldData);
@@ -97,7 +94,7 @@ class PersonalExpenseDashboardBloc
           id: "",
           amount: 0,
           monthName: CalenderConstant.monthName[now.month - 1],
-          transaction: [],
+          transactionCount: 0,
           year: year.toString(),
         );
 

@@ -1,8 +1,10 @@
+import 'package:settlenow/util/util_core.dart';
+
 class RoomLinkedModel {
   bool hasData = true;
   String id = "";
   String roomName = "";
-  String transactionType = "";
+  TransactionType transactionType = TransactionType.room;
 
   RoomLinkedModel({
     required this.id,
@@ -16,15 +18,23 @@ class RoomLinkedModel {
     return <String, dynamic>{
       'id': id,
       'room_name': roomName,
-      'transaction_type': transactionType,
+      'transaction_type': transactionType.toString(),
     };
   }
 
   factory RoomLinkedModel.fromMap(Map<String, dynamic> map) {
+    String id = map['id'] ?? "";
+
+    if (id.isEmpty) {
+      return RoomLinkedModel.empty();
+    }
+
     return RoomLinkedModel(
-      id: map['id'],
+      id: id,
       roomName: map['room_name'],
-      transactionType: map['transaction_type'],
+      transactionType: TransactionTypeExtension.fromString(
+        map['transaction_type'] ?? "",
+      ),
     );
   }
 

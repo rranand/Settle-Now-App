@@ -40,7 +40,7 @@ class BaseTransactionModel {
       id: map['id'],
       description: map['description'],
       amount: double.parse(map['amount'].toString()),
-      createdBy: map['created_by'],
+      createdBy: map['created_by'] ?? "",
       createdOn: DateTime.parse(map['created_on']).toLocal(),
       modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
     );

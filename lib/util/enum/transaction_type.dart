@@ -29,4 +29,30 @@ extension TransactionTypeExtension on TransactionType {
         return TransactionType.room;
     }
   }
+
+  String get label {
+    switch (this) {
+      case TransactionType.quicksplit:
+        return 'quicksplit';
+      case TransactionType.lenden:
+        return 'lenden';
+      case TransactionType.room:
+        return 'room';
+      default:
+        return 'personal';
+    }
+  }
+
+  static TransactionType fromString(String transactionType) {
+    switch (transactionType.toLowerCase()) {
+      case 'quicksplit':
+        return TransactionType.quicksplit;
+      case 'lenden':
+        return TransactionType.lenden;
+      case 'personal':
+        return TransactionType.personal;
+      default:
+        return TransactionType.room;
+    }
+  }
 }

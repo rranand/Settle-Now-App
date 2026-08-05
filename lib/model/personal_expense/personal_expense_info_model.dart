@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:settlenow/constant/constant_core.dart';
 
 class PersonalExpenseInfoModel {
@@ -7,14 +6,14 @@ class PersonalExpenseInfoModel {
   double amount = 0;
   String monthName = "";
   String year = "";
-  List<double> transaction = [];
+  int transactionCount = 0;
 
   PersonalExpenseInfoModel({
     required this.id,
     required this.amount,
     required this.monthName,
     required this.year,
-    required this.transaction,
+    required this.transactionCount,
   });
 
   PersonalExpenseInfoModel.empty({this.hasData = false});
@@ -24,14 +23,14 @@ class PersonalExpenseInfoModel {
     double? amount,
     String? monthName,
     String? year,
-    List<double>? transaction,
+    int? transactionCount,
   }) {
     return PersonalExpenseInfoModel(
       id: id ?? this.id,
       amount: amount ?? this.amount,
       monthName: monthName ?? this.monthName,
       year: year ?? this.year,
-      transaction: transaction ?? this.transaction,
+      transactionCount: transactionCount ?? this.transactionCount,
     );
   }
 
@@ -41,21 +40,22 @@ class PersonalExpenseInfoModel {
       'amount': amount,
       'monthName': monthName,
       'year': year,
-      'transaction': transaction,
+      'transaction_count': transactionCount,
     };
   }
 
   factory PersonalExpenseInfoModel.fromMap(Map<String, dynamic> map) {
-    List<double> transaction = [];
-    for (int i = 0; i < map["transaction"].length; i++) {
-      transaction.add(double.parse(map["transaction"][i].toString()));
-    }
+    String date = map['date'] ?? "";
+
+    String year = date.substring(date.length - 4);
+    int monthIndex = int.parse(date.substring(0, date.length - 4));
+
     return PersonalExpenseInfoModel(
       id: map['id'],
       amount: double.parse(map['amount'].toString()),
-      monthName: CalenderConstant.monthName[int.parse(map['monthName'])],
-      year: map['year'],
-      transaction: transaction,
+      monthName: CalenderConstant.monthName[monthIndex],
+      year: year,
+      transactionCount: map['transaction_count'],
     );
   }
 
@@ -72,7 +72,7 @@ class PersonalExpenseInfoModel {
         other.amount == amount &&
         other.monthName == monthName &&
         other.year == year &&
-        listEquals(other.transaction, transaction);
+        other.transactionCount == transactionCount;
   }
 
   @override
@@ -81,6 +81,6 @@ class PersonalExpenseInfoModel {
         amount.hashCode ^
         monthName.hashCode ^
         year.hashCode ^
-        transaction.hashCode;
+        transactionCount.hashCode;
   }
 }
