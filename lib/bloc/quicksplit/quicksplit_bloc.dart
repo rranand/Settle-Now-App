@@ -116,7 +116,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
 
     for (int i = 0; i < oldData.length; i++) {
       if (oldData[i].id == event.transactionID) {
-        oldData[i].personalExpenseId = " "; //FIXME: Add Personal Expense ID
+        oldData[i].personalExpenseId = event.personalExpenseID;
       }
     }
 

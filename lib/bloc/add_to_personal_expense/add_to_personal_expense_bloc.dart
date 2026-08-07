@@ -43,10 +43,14 @@ class AddToPersonalExpenseBloc
             emit(
               state.copyWith(addingExpenseToPersonalExpense: oldProcessingIDs),
             );
-            await quickSplitRepo.addToPersonalExpense(event.transactionID);
+            String personalExpenseID = await quickSplitRepo
+                .addToPersonalExpense(event.transactionID);
             oldProcessingIDs.remove(event.transactionID);
             quicksplitBloc.add(
-              QuicksplitAddToPersonalExpense(event.transactionID),
+              QuicksplitAddToPersonalExpense(
+                transactionID: event.transactionID,
+                personalExpenseID: personalExpenseID,
+              ),
             );
             return emit(
               state.copyWith(addingExpenseToPersonalExpense: oldProcessingIDs),

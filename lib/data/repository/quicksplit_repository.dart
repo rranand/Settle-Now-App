@@ -43,9 +43,9 @@ class QuicksplitRepository {
     }
   }
 
-  Future<bool> addToPersonalExpense(String expenseID) async {
+  Future<String> addToPersonalExpense(String expenseID) async {
     try {
-      return _dataProvider.addToPersonalExpense(expenseID);
+      return await _dataProvider.addToPersonalExpense(expenseID);
     } catch (e) {
       rethrow;
     }

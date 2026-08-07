@@ -202,7 +202,7 @@ class _FilterSheetState extends State<FilterSheet> {
 
               if (data[i].roomData.hasData) {
                 String id =
-                    "${data[i].roomData.roomName}###${data[i].roomData.transactionType == "Quicksplit" ? "" : "Room"}";
+                    "${data[i].roomData.roomName}###${data[i].roomData.transactionType == TransactionType.quicksplit ? "" : "Room"}";
                 if (!roomIDs.contains(id)) {
                   roomIDs.add(id);
                   roomData.add(data[i].roomData);
@@ -576,10 +576,10 @@ class _FilterSheetState extends State<FilterSheet> {
                     itemCount: roomData.length,
                     itemBuilder: (context, i) {
                       return FilterWidget.buildCheckBox<String>(
-                        "${roomData[i].roomName} ${roomData[i].transactionType == "Quicksplit" ? "" : "(Room)"}",
+                        "${roomData[i].roomName} ${roomData[i].transactionType == TransactionType.quicksplit ? "" : "(Room)"}",
                         _selectedRoom,
                         context,
-                        "${roomData[i].roomName}###${roomData[i].transactionType == "Quicksplit" ? "" : "Room"}",
+                        "${roomData[i].roomName}###${roomData[i].transactionType == TransactionType.quicksplit ? "" : "Room"}",
                         roomData.length,
                       );
                     },

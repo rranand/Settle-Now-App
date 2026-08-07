@@ -137,7 +137,7 @@ class FilterCubit extends Cubit<FilterState> {
       }
       if (data[i].roomData.hasData && state.selectedRoom.isNotEmpty) {
         String id =
-            "${data[i].roomData.roomName}###${data[i].roomData.transactionType == "Quicksplit" ? "" : "Room"}";
+            "${data[i].roomData.roomName}###${data[i].roomData.transactionType == TransactionType.quicksplit ? "" : "Room"}";
         if (!state.selectedRoom.contains(id)) {
           continue;
         }

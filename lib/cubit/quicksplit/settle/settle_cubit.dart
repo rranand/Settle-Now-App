@@ -28,7 +28,7 @@ class SettleCubit extends Cubit<SettleState> {
     try {
       await repo.settleExpense(transactionID);
       oldProcessingIDs.remove(transactionID);
-      bloc.add(QuicksplitSettleRequest(transactionID, uid));
+      bloc.add(QuicksplitSettleRequest(transactionID: transactionID, uid: uid));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
     } catch (e) {
       if (context.mounted) {
@@ -51,7 +51,7 @@ class SettleCubit extends Cubit<SettleState> {
     try {
       await repo.optout(transactionID);
       oldProcessingIDs.remove(transactionID);
-      bloc.add(QuicksplitDeleteTransaction(transactionID));
+      bloc.add(QuicksplitDeleteTransaction(transactionID: transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
     } catch (e) {
       if (context.mounted) {
@@ -74,7 +74,7 @@ class SettleCubit extends Cubit<SettleState> {
     try {
       await repo.delete(transactionID);
       oldProcessingIDs.remove(transactionID);
-      bloc.add(QuicksplitDeleteTransaction(transactionID));
+      bloc.add(QuicksplitDeleteTransaction(transactionID: transactionID));
       return emit(state.copyWith(settlingExpense: oldProcessingIDs));
     } catch (e) {
       if (context.mounted) {

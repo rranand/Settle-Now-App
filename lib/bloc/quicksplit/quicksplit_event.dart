@@ -12,32 +12,36 @@ final class QuicksplitFetch extends QuicksplitEvent {
 final class QuicksplitAddNewTransaction extends QuicksplitEvent {
   final QuicksplitTransactionModel data;
 
-  QuicksplitAddNewTransaction(this.data);
+  QuicksplitAddNewTransaction({required this.data});
 }
 
 final class QuicksplitUpdateTransaction extends QuicksplitEvent {
   final QuicksplitTransactionModel data;
 
-  QuicksplitUpdateTransaction(this.data);
+  QuicksplitUpdateTransaction({required this.data});
 }
 
 final class QuicksplitDeleteTransaction extends QuicksplitEvent {
   final String transactionID;
 
-  QuicksplitDeleteTransaction(this.transactionID);
+  QuicksplitDeleteTransaction({required this.transactionID});
 }
 
 final class QuicksplitAddToPersonalExpense extends QuicksplitEvent {
   final String transactionID;
+  final String personalExpenseID;
 
-  QuicksplitAddToPersonalExpense(this.transactionID);
+  QuicksplitAddToPersonalExpense({
+    required this.transactionID,
+    required this.personalExpenseID,
+  });
 }
 
 final class QuicksplitSettleRequest extends QuicksplitEvent {
   final String transactionID;
   final String uid;
 
-  QuicksplitSettleRequest(this.transactionID, this.uid);
+  QuicksplitSettleRequest({required this.transactionID, required this.uid});
 }
 
 final class QuicksplitReset extends QuicksplitEvent {}

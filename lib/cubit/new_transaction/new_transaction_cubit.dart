@@ -34,7 +34,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final bloc = context.read<QuicksplitBloc>();
             final data = baseTransData as QuicksplitTransactionModel;
             final newData = await repo.create(data);
-            bloc.add(QuicksplitAddNewTransaction(newData));
+            bloc.add(QuicksplitAddNewTransaction(data: newData));
             return emit(NewTransactionSuccess(data: newData));
           }
         case TransactionType.personal:
@@ -135,7 +135,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final bloc = context.read<QuicksplitBloc>();
             final data = baseTransData as QuicksplitTransactionModel;
             await repo.update(data);
-            bloc.add(QuicksplitUpdateTransaction(data));
+            bloc.add(QuicksplitUpdateTransaction(data: data));
             return emit(NewTransactionSuccess(data: data));
           }
         case TransactionType.personal:
@@ -199,7 +199,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             bloc = context.read<QuicksplitBloc>();
             final bool isDeleted = await repo.delete(expenseID);
             if (isDeleted) {
-              bloc.add(QuicksplitDeleteTransaction(expenseID));
+              bloc.add(QuicksplitDeleteTransaction(transactionID: expenseID));
               return emit(
                 NewTransactionSuccess(data: QuicksplitTransactionModel.empty()),
               );

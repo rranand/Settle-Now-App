@@ -91,7 +91,7 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<bool> addToPersonalExpense(String expenseID) async {
+  Future<String> addToPersonalExpense(String expenseID) async {
     try {
       final response = await createAPICall(
         'quicksplit/personalExpense',
@@ -101,7 +101,7 @@ class QuicksplitDataProvider {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
+        return data['data']['id'];
       } else {
         throw data['message'];
       }
