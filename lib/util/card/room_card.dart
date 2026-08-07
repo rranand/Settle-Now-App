@@ -77,7 +77,7 @@ class RoomCard extends StatelessWidget {
                 children: [
                   data.hasData
                       ? Text(
-                        data.roomName,
+                        data.name,
                         style: const TextStyle(
                           fontSize: UiConstant.cardTitleTextSize,
                           fontWeight: FontWeight.bold,

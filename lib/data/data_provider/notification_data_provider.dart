@@ -27,12 +27,12 @@ class NotificationDataProvider {
     }
   }
 
-  Future<bool> acceptInvite(String id) async {
+  Future<void> acceptInvite(String id) async {
     try {
       final response = await createAPICall('notification', "put", {"id": id});
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
+        return;
       } else {
         throw data['message'];
       }
@@ -41,14 +41,14 @@ class NotificationDataProvider {
     }
   }
 
-  Future<bool> declineInvite(String id) async {
+  Future<void> declineInvite(String id) async {
     try {
       final response = await createAPICall('notification', "delete", {
         "id": id,
       });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
+        return;
       } else {
         throw data['message'];
       }

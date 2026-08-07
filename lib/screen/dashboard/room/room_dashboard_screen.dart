@@ -390,7 +390,7 @@ class _RoomDashboardScreenState extends State<RoomDashboardScreen> {
                                     filterData = FilterSort.filteredSearchText(
                                       _searchController.text,
                                       roomInfoData,
-                                      (roomData) => roomData.roomName,
+                                      (roomData) => roomData.name,
                                     );
                                   }
 

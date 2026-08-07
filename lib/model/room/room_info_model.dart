@@ -5,9 +5,9 @@ import 'package:settlenow/util/util_core.dart';
 class RoomInfoModel {
   bool hasData = true;
   String id = "";
-  String roomName = "";
-  String roomKey = "";
-  String roomLink = "";
+  String name = "";
+  String key = "";
+  String link = "";
   RoomStatus status = RoomStatus.none;
   String createdBy = "";
   DateTime createdOn = DateTime.now();
@@ -17,9 +17,9 @@ class RoomInfoModel {
 
   RoomInfoModel({
     required this.id,
-    required this.roomName,
-    required this.roomKey,
-    required this.roomLink,
+    required this.name,
+    required this.key,
+    required this.link,
     required this.status,
     required this.createdBy,
     required this.createdOn,
@@ -32,10 +32,10 @@ class RoomInfoModel {
 
   RoomInfoModel copyWith({
     String? id,
-    String? roomName,
+    String? name,
     RoomStatus? status,
-    String? roomKey,
-    String? roomLink,
+    String? key,
+    String? link,
     String? createdBy,
     DateTime? createdOn,
     DateTime? modifiedOn,
@@ -44,14 +44,14 @@ class RoomInfoModel {
   }) {
     return RoomInfoModel(
       id: id ?? this.id,
-      roomName: roomName ?? this.roomName,
+      name: name ?? this.name,
       status: status ?? this.status,
       createdOn: createdOn ?? this.createdOn,
       createdBy: createdBy ?? this.createdBy,
       modifiedOn: modifiedOn ?? this.modifiedOn,
       users: users ?? this.users,
-      roomKey: roomKey ?? this.roomKey,
-      roomLink: roomLink ?? this.roomLink,
+      key: key ?? this.key,
+      link: link ?? this.link,
       active: active ?? this.active,
     );
   }
@@ -59,10 +59,10 @@ class RoomInfoModel {
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'id': id,
-      'room_name': roomName,
+      'name': name,
       'status': status,
-      'room_key': roomKey,
-      'room_link': roomLink,
+      'key': key,
+      'link': link,
       'created_by': createdBy,
       'created_on': createdOn,
       'modified_on': modifiedOn,
@@ -78,10 +78,10 @@ class RoomInfoModel {
 
     return RoomInfoModel(
       id: map['id'],
-      roomName: map['room_name'],
-      status: map['status'],
-      roomKey: map['room_key'],
-      roomLink: map['room_link'],
+      name: map['name'],
+      status: RoomStatusExtension.fromString(map['status']),
+      key: map['key'],
+      link: map['link'],
       createdBy: map['created_by'],
       createdOn: DateTime.parse(map['created_on']).toLocal(),
       modifiedOn: DateTime.parse(map['modified_on']).toLocal(),
@@ -92,7 +92,7 @@ class RoomInfoModel {
 
   @override
   String toString() {
-    return 'RoomInfoModel(id: $id, active: $active roomName: $roomName, roomKey: $roomKey, status $status, createdOn: $createdOn)';
+    return 'RoomInfoModel(id: $id, active: $active name: $name, key: $key, status $status, createdOn: $createdOn)';
   }
 
   @override
@@ -101,9 +101,9 @@ class RoomInfoModel {
 
     return other.id == id &&
         other.active == active &&
-        other.roomName == roomName &&
-        other.roomKey == roomKey &&
-        other.roomLink == roomLink &&
+        other.name == name &&
+        other.key == key &&
+        other.link == link &&
         other.status == status &&
         other.createdBy == createdBy &&
         other.createdOn == createdOn &&
@@ -115,9 +115,9 @@ class RoomInfoModel {
   int get hashCode {
     return id.hashCode ^
         active.hashCode ^
-        roomName.hashCode ^
-        roomKey.hashCode ^
-        roomLink.hashCode ^
+        name.hashCode ^
+        key.hashCode ^
+        link.hashCode ^
         createdBy.hashCode ^
         status.hashCode ^
         createdOn.hashCode ^

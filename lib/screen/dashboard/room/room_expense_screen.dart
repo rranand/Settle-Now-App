@@ -533,7 +533,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
 
         if (state is RoomInfoSuccess) {
           isRoomActive = state.data.active;
-          roomName = state.data.roomName;
+          roomName = state.data.name;
           isLoaded = true;
           for (int i = 0; i < state.data.users.length; i++) {
             hasTransactionData =

@@ -10,7 +10,7 @@ class RoomDashboardDataProvider {
   ) async {
     try {
       final response = await createAPICall(
-        'room${isActiveRoom ? "/open" : "/close"}?alreadyHave=$alreadyHave',
+        'room/${isActiveRoom ? "open" : "close"}?alreadyHave=$alreadyHave',
         "get",
         {},
       );
@@ -19,7 +19,7 @@ class RoomDashboardDataProvider {
 
       if (response.statusCode == 200) {
         List<RoomInfoModel> arr = [];
-        bool hasMoreData = data['hasMore'];
+        bool hasMoreData = data['has_more'];
         final allRooms = data['data'];
 
         if (allRooms != null) {
@@ -39,9 +39,7 @@ class RoomDashboardDataProvider {
 
   Future<RoomInfoModel> createRoom(String roomName) async {
     try {
-      final response = await createAPICall('room', 'post', {
-        "room_name": roomName,
-      });
+      final response = await createAPICall('room', 'post', {"name": roomName});
 
       final data = jsonDecode(response.body);
 
@@ -50,16 +48,17 @@ class RoomDashboardDataProvider {
 
         RoomInfoModel newRoomData = RoomInfoModel(
           id: roomInfo["id"],
-          roomName: roomName,
+          name: roomName,
           status: RoomStatus.open,
           createdBy: "",
           createdOn: DateTime.now(),
           modifiedOn: DateTime.now(),
           users: [],
-          roomKey: roomInfo["room_key"],
-          roomLink: roomInfo["room_link"],
+          key: roomInfo["key"],
+          link: roomInfo["link"],
           active: true,
         );
+
         return newRoomData;
       } else {
         throw data['message'];

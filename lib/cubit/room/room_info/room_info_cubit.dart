@@ -125,7 +125,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
         scaffoldMessenger: scaffoldMessengerState,
       );
       RoomInfoModel updatedRoomInfo = oldData.data.copyWith(
-        roomName: roomName,
+        name: roomName,
         modifiedOn: DateTime.now(),
       );
       _roomDashboardBloc.add(RoomDashboardOnUpdateRoom(data: updatedRoomInfo));

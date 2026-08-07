@@ -130,8 +130,8 @@ class _SettingPageState extends State<SettingPage> {
           final state = context.read<RoomInfoCubit>().state;
           if (state is RoomInfoSuccess) {
             dataPopulated = true;
-            _roomNameController.text = state.data.roomName;
-            roomName = state.data.roomName;
+            _roomNameController.text = state.data.name;
+            roomName = state.data.name;
             totalMemberCount = state.data.users.length;
 
             for (int i = 0; i < totalMemberCount; i++) {
@@ -142,8 +142,8 @@ class _SettingPageState extends State<SettingPage> {
             }
 
             createdOn = state.data.createdOn;
-            roomKey = state.data.roomKey;
-            roomLink = state.data.roomLink;
+            roomKey = state.data.key;
+            roomLink = state.data.link;
 
             final roomSettleState = context.read<RoomSettleCubit>().state;
             final roomBlocState = context.read<RoomBloc>().state;
@@ -353,7 +353,7 @@ class _SettingPageState extends State<SettingPage> {
         {
           final state = context.watch<RoomInfoCubit>().state;
           if (state is RoomInfoSuccess && state.data.id == widget.id) {
-            ogRoomName = state.data.roomName;
+            ogRoomName = state.data.name;
             roomName = ogRoomName;
           }
         }
