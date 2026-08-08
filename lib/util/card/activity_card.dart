@@ -6,12 +6,7 @@ import 'package:settlenow/util/util_core.dart';
 
 class ActivityCard extends StatefulWidget {
   final ActivityModel data;
-  final Map<String, String> userMapping;
-  const ActivityCard({
-    super.key,
-    required this.data,
-    required this.userMapping,
-  });
+  const ActivityCard({super.key, required this.data});
 
   @override
   State<ActivityCard> createState() => _ActivityCardState();
@@ -21,59 +16,80 @@ class _ActivityCardState extends State<ActivityCard> {
   final ValueNotifier<bool> isExpanded = ValueNotifier(false);
   final TextStyle _textStyle = TextStyle(fontSize: 15, color: Colors.grey);
 
+  String getName(
+    BaseUserModel? userData, {
+    bool isCapatilizeFirstLetter = false,
+  }) {
+    if (userData == null || !userData.hasData) {
+      return "Unknown";
+    }
+
+    String name = userData.name.split(' ').first;
+
+    if (userData.id == UserResolver.instance.getLoggedInUser().id) {
+      name = "you";
+    }
+
+    return isCapatilizeFirstLetter ? capatilizeFirstLetter(name) : name;
+  }
+
   String getText(BuildContext context) {
-    switch (widget.data.type) {
+    String userFullName = getName(
+      widget.data.user,
+      isCapatilizeFirstLetter: true,
+    );
+
+    switch (widget.data.entityType) {
       case ActivityType.transactionAdded:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} added a transaction of ${formatCurrency(widget.data.details!.newValue!.amount ?? 0, context)}";
+          return "$userFullName added a transaction of ${formatCurrency(widget.data.newValue!.amount ?? 0, context)}";
         }
       case ActivityType.transactionUpdated:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} updated a transaction";
+          return "$userFullName updated a transaction";
         }
       case ActivityType.transactionDeleted:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} deleted a transaction of ${formatCurrency(widget.data.details!.newValue!.amount ?? 0, context)}";
+          return "$userFullName deleted a transaction of ${formatCurrency(widget.data.newValue!.amount ?? 0, context)}";
         }
       case ActivityType.settlementAdded:
         {
-          double amount = widget.data.details!.newValue!.amount ?? 0;
-          if (amount < 0) {
-            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} settled ${formatCurrency(amount * -1, context)} for ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
-          } else {
-            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} settled ${formatCurrency(amount, context)} with ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
-          }
+          double amount = widget.data.newValue!.amount ?? 0;
+          String newValueFullName = getName(widget.data.newValue!.user);
+
+          return "${getName(widget.data.user)} settled ${formatCurrency(amount.abs(), context)} with $newValueFullName";
         }
       case ActivityType.settlementUpdated:
         {
-          double amount = widget.data.details!.newValue!.amount ?? 0;
-          if (amount < 0) {
-            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} updated settlement for ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
-          } else {
-            return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} updated settlement with ${widget.userMapping[widget.data.details!.newValue!.user] ?? "Unknown"}";
-          }
+          double amount = widget.data.newValue!.amount ?? 0;
+          String newValueFullName = getName(widget.data.newValue!.user);
+
+          return "$userFullName updated settlement ${amount < 0 ? "for" : "with"} $newValueFullName";
         }
       case ActivityType.settlementDeleted:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} deleted settlement of ${formatCurrency(widget.data.details!.newValue!.amount!.abs(), context)}";
+          return "$userFullName deleted settlement of ${formatCurrency(widget.data.newValue!.amount!.abs(), context)}";
         }
       case ActivityType.roomRenamed:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} renamed room";
+          return "$userFullName renamed room";
         }
       case ActivityType.memberAdded:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} joined room (approved by ${widget.userMapping[widget.data.entityId] ?? "Unknown"})";
+          final baseUserData = UserResolver.instance.resolve(
+            widget.data.entityId,
+          );
+          return "$userFullName joined room (approved by ${getName(baseUserData)})";
         }
       case ActivityType.memberRemoved:
-        return widget.data.details!.newValue!.description ?? '';
+        return widget.data.newValue!.description ?? '';
       case ActivityType.roomClosed:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} closed room";
+          return "$userFullName closed room";
         }
       case ActivityType.roomCreated:
         {
-          return "${capatilizeFirstLetter(widget.userMapping[widget.data.user] ?? "Unknown")} created room";
+          return "$userFullName created room";
         }
     }
   }
@@ -81,14 +97,13 @@ class _ActivityCardState extends State<ActivityCard> {
   Widget activityInfoWidget() {
     List<Widget> updateAttributes = [Divider()];
 
-    switch (widget.data.type) {
+    switch (widget.data.entityType) {
       case ActivityType.transactionUpdated:
         {
-          double oldAmount = widget.data.details!.oldValue!.amount!.abs();
-          double amount = widget.data.details!.newValue!.amount!.abs();
-          String oldDescription =
-              widget.data.details!.oldValue!.description ?? "";
-          String description = widget.data.details!.newValue!.description ?? "";
+          double oldAmount = widget.data.oldValue!.amount!.abs();
+          double amount = widget.data.newValue!.amount!.abs();
+          String oldDescription = widget.data.oldValue!.description ?? "";
+          String description = widget.data.newValue!.description ?? "";
 
           if (oldAmount != amount) {
             updateAttributes.add(
@@ -109,9 +124,8 @@ class _ActivityCardState extends State<ActivityCard> {
         }
       case ActivityType.roomRenamed:
         {
-          String oldDescription =
-              widget.data.details!.oldValue!.description ?? "";
-          String description = widget.data.details!.newValue!.description ?? "";
+          String oldDescription = widget.data.oldValue!.description ?? "";
+          String description = widget.data.newValue!.description ?? "";
 
           if (oldDescription != description) {
             updateAttributes.add(
@@ -124,8 +138,8 @@ class _ActivityCardState extends State<ActivityCard> {
         }
       case ActivityType.settlementUpdated:
         {
-          double oldAmount = widget.data.details!.oldValue!.amount ?? 0;
-          double amount = widget.data.details!.newValue!.amount ?? 0;
+          double oldAmount = widget.data.oldValue!.amount ?? 0;
+          double amount = widget.data.newValue!.amount ?? 0;
           if (oldAmount != amount) {
             updateAttributes.add(
               Text(
@@ -183,8 +197,8 @@ class _ActivityCardState extends State<ActivityCard> {
                     children: [
                       widget.data.hasData
                           ? colouredIcon(
-                            widget.data.type.icon,
-                            UiConstant.colors[widget.data.type.iconCode],
+                            widget.data.entityType.icon,
+                            UiConstant.colors[widget.data.entityType.iconCode],
                           )
                           : CustomShimmerEffect.imageWidget(
                             context,

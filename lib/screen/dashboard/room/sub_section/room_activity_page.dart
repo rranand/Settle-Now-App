@@ -67,19 +67,6 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
       ),
       body: BlocBuilder<RoomInfoCubit, RoomInfoState>(
         builder: (context, infoState) {
-          Map<String, String> userMapping = {};
-
-          if (infoState is RoomInfoSuccess) {
-            for (int i = 0; i < infoState.data.users.length; i++) {
-              if (infoState.data.users[i].id == _loggedInUser.id) {
-                userMapping[infoState.data.users[i].id] = "you";
-              } else {
-                userMapping[infoState.data.users[i].id] =
-                    infoState.data.users[i].name.split(' ').first;
-              }
-            }
-          }
-
           return RefreshIndicator(
             onRefresh: onRefresh,
             child: BlocConsumer<RoomActivityCubit, RoomActivityState>(
@@ -109,22 +96,16 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
                     ),
                   ),
                   itemBuilder: (context, index) {
-                    ActivityModel activityData = data[data.length - index - 1];
+                    ActivityModel activityData = data[index];
 
                     if (widget.transactionID != null) {
                       if (widget.transactionID == activityData.entityId) {
-                        return ActivityCard(
-                          data: activityData,
-                          userMapping: userMapping,
-                        );
+                        return ActivityCard(data: activityData);
                       } else {
                         return SizedBox.shrink();
                       }
                     } else {
-                      return ActivityCard(
-                        data: activityData,
-                        userMapping: userMapping,
-                      );
+                      return ActivityCard(data: activityData);
                     }
                   },
                   itemCount: data.length,

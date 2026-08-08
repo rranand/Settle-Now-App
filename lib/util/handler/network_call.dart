@@ -82,11 +82,11 @@ Future<ApiResponseModel> createAPICall(
             ))
         .timeout(Duration(seconds: 20));
 
-    // if (kDebugMode) {
-    //   logDebug(
-    //     "${"-" * 30}\nURL: $url\nMethod: $methodName\nHeader: $headersMap\nBody: $jsonData\nStatusCode: ${res.statusCode}\nResponseBody: ${res.body}",
-    //   );
-    // }
+    if (kDebugMode) {
+      logDebug(
+        "${"-" * 30}\nURL: $url\nMethod: $methodName\nHeader: $headersMap\nBody: $jsonData\nStatusCode: ${res.statusCode}\nResponseBody: ${res.body}",
+      );
+    }
 
     return ApiResponseModel(body: res.body, statusCode: res.statusCode);
   } on TimeoutException catch (_) {

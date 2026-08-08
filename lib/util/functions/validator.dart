@@ -1,6 +1,7 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'package:uuid/uuid.dart';
 
 class CustomValidator {
   static String? validateEmail(String? value) {
@@ -86,8 +87,7 @@ class CustomValidator {
   }
 
   static bool isValidObjectId(String id) {
-    final objectIdRegex = RegExp(r'^[0-9a-fA-F]{24}$');
-    return objectIdRegex.hasMatch(id);
+    return Uuid.isValidUUID(fromString: id);
   }
 
   static String? validateExpression(String? expression) {

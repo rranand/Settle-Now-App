@@ -15,7 +15,7 @@ enum ActivityType {
   roomCreated,
 }
 
-ActivityType activityTypeFromApi(String type) {
+ActivityType activityTypeFromString(String type) {
   switch (type) {
     case 'TRANSACTION_ADDED':
       return ActivityType.transactionAdded;

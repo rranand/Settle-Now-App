@@ -73,6 +73,10 @@ class RoomSettleModel {
     };
   }
 
+  Map<String, dynamic> toUpdateTransactionJSON() {
+    return <String, dynamic>{'id': id, 'amount': amount};
+  }
+
   @override
   String toString() {
     return 'RoomSettleModel(id: $id, receiver: $receiver, sender: $sender, amount: $amount, createdOn: $createdOn, modifiedOn: $modifiedOn)';

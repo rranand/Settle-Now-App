@@ -22,7 +22,7 @@ class RoomActivityCubit extends Cubit<RoomActivityState> {
       Map<String, List<ActivityModel>> transactionWiseActivity = {};
 
       for (int i = data.length - 1; i >= 0; i--) {
-        switch (data[i].type) {
+        switch (data[i].entityType) {
           case ActivityType.transactionAdded:
           case ActivityType.transactionUpdated:
           case ActivityType.settlementAdded:

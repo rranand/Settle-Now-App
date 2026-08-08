@@ -40,20 +40,10 @@ class RoomSettleUpsertCubit extends Cubit<RoomSettleUpsertState> {
     }
   }
 
-  void deleteSettleExpense(
-    String id,
-    String settleExpenseID,
-    String sender,
-    String receiver,
-  ) async {
+  void deleteSettleExpense(String id, String settleExpenseID) async {
     emit(RoomSettleUpsertLoading());
     try {
-      bool isDeleted = await repo.deleteSettleExpense(
-        id,
-        settleExpenseID,
-        sender,
-        receiver,
-      );
+      bool isDeleted = await repo.deleteSettleExpense(id, settleExpenseID);
       if (isDeleted) {
         roomSettleCubit.deleteSettleExpense(settleExpenseID);
         return emit(RoomSettleUpsertSuccess(RoomSettleModel.empty()));

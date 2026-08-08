@@ -1,136 +1,106 @@
+import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class ActivityModel {
   bool hasData = true;
-  String id = "";
-  String user = "";
-  ActivityType type = ActivityType.roomCreated;
+  BaseUserModel user = BaseUserModel.empty();
+  ActivityType entityType = ActivityType.roomCreated;
   String entityId = "";
   DateTime createdOn = DateTime.now();
-  ActivityDetails? details;
+  ActivityDetailValue? oldValue;
+  ActivityDetailValue? newValue;
 
   ActivityModel({
-    required this.id,
     required this.user,
-    required this.type,
+    required this.entityType,
     required this.createdOn,
     required this.entityId,
-    this.details,
+    this.oldValue,
+    this.newValue,
   });
 
   ActivityModel.empty({this.hasData = false});
 
   ActivityModel copyWith({
-    String? id,
-    String? user,
-    DateTime? createdOn,
-    ActivityType? type,
+    BaseUserModel? user,
     String? entityId,
-    ActivityDetails? details,
+    ActivityType? entityType,
+    DateTime? createdOn,
+    ActivityDetailValue? oldValue,
+    ActivityDetailValue? newValue,
   }) {
     return ActivityModel(
-      id: id ?? this.id,
       user: user ?? this.user,
-      type: type ?? this.type,
+      entityType: entityType ?? this.entityType,
       createdOn: createdOn ?? this.createdOn,
       entityId: entityId ?? this.entityId,
-      details: details ?? this.details,
+      oldValue: oldValue ?? this.oldValue,
+      newValue: newValue ?? this.newValue,
     );
   }
 
   factory ActivityModel.fromMap(Map<String, dynamic> map) {
+    final baseUser = UserResolver.instance.resolve(map['user_id']);
+
     return ActivityModel(
-      id: map['id'],
-      user: map['user'],
-      type: activityTypeFromApi(map['type']),
+      user: baseUser,
+      entityId: map['entity_id'],
+      entityType: activityTypeFromString(map['entity_type']),
       createdOn: DateTime.parse(map['created_on']).toLocal(),
-      entityId: map['entityId'],
-      details:
-          map['details'] != null
-              ? ActivityDetails.fromMap(map['details'] as Map<String, dynamic>)
+      oldValue:
+          map['old_value'] != null
+              ? ActivityDetailValue.fromMap(
+                map['old_value'] as Map<String, dynamic>,
+              )
+              : null,
+      newValue:
+          map['new_value'] != null
+              ? ActivityDetailValue.fromMap(
+                map['new_value'] as Map<String, dynamic>,
+              )
               : null,
     );
   }
 
   @override
   String toString() {
-    return 'ActivityModel(id: $id, user: $user, type: $type, entityId: $entityId, details: $details)';
+    return 'ActivityModel(user: $user, entityType: $entityType, entityId: $entityId, createdOn: $createdOn)';
   }
 
   @override
   bool operator ==(covariant ActivityModel other) {
     if (identical(this, other)) return true;
 
-    return other.id == id &&
-        other.user == user &&
-        other.type == type &&
-        other.createdOn == createdOn &&
+    return other.user == user &&
         other.entityId == entityId &&
-        other.details == details;
+        other.entityType == entityType &&
+        other.createdOn == createdOn &&
+        other.oldValue == oldValue &&
+        other.newValue == newValue;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^
-        user.hashCode ^
-        type.hashCode ^
-        createdOn.hashCode ^
+    return user.hashCode ^
         entityId.hashCode ^
-        details.hashCode;
+        entityType.hashCode ^
+        createdOn.hashCode ^
+        oldValue.hashCode ^
+        newValue.hashCode;
   }
-}
-
-class ActivityDetails {
-  ActivityDetailValue? oldValue;
-  ActivityDetailValue? newValue;
-
-  ActivityDetails({this.oldValue, this.newValue});
-
-  ActivityDetails copyWith({
-    ActivityDetailValue? oldValue,
-    ActivityDetailValue? newValue,
-  }) {
-    return ActivityDetails(
-      oldValue: oldValue ?? this.oldValue,
-      newValue: newValue ?? this.newValue,
-    );
-  }
-
-  factory ActivityDetails.fromMap(Map<String, dynamic> map) {
-    return ActivityDetails(
-      oldValue:
-          map['oldValue'] != null
-              ? ActivityDetailValue.fromMap(map['oldValue'])
-              : null,
-      newValue:
-          map['newValue'] != null
-              ? ActivityDetailValue.fromMap(map['newValue'])
-              : null,
-    );
-  }
-
-  @override
-  bool operator ==(covariant ActivityDetails other) {
-    if (identical(this, other)) return true;
-
-    return other.oldValue == oldValue && other.newValue == newValue;
-  }
-
-  @override
-  int get hashCode => oldValue.hashCode ^ newValue.hashCode;
 }
 
 class ActivityDetailValue {
   String? description;
   double? amount;
-  String? user;
+  BaseUserModel? user;
 
   ActivityDetailValue({this.description, this.amount, this.user});
 
   ActivityDetailValue copyWith({
     String? description,
     double? amount,
-    String? user,
+    BaseUserModel? user,
   }) {
     return ActivityDetailValue(
       description: description ?? this.description,
@@ -144,7 +114,10 @@ class ActivityDetailValue {
       description: map['description'],
       amount:
           map['amount'] != null ? double.parse(map['amount'].toString()) : null,
-      user: map['user'],
+      user:
+          map['user_id'] != null
+              ? UserResolver.instance.resolve(map['user_id'])
+              : null,
     );
   }
 

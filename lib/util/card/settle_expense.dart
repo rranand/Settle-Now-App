@@ -332,8 +332,6 @@ class _SettleExpenseState extends State<SettleExpense> {
                                 roomSettleUpsertCubit.deleteSettleExpense(
                                   widget.roomID,
                                   widget.transactionData!.id,
-                                  widget.transactionData!.sender.id,
-                                  widget.transactionData!.receiver.id,
                                 );
                               }
                             },

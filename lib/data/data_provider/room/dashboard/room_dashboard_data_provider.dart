@@ -10,7 +10,7 @@ class RoomDashboardDataProvider {
   ) async {
     try {
       final response = await createAPICall(
-        'room/${isActiveRoom ? "open" : "close"}?alreadyHave=$alreadyHave',
+        'room/dashboard/${isActiveRoom ? "open" : "close"}?alreadyHave=$alreadyHave',
         "get",
         {},
       );
@@ -39,7 +39,9 @@ class RoomDashboardDataProvider {
 
   Future<RoomInfoModel> createRoom(String roomName) async {
     try {
-      final response = await createAPICall('room', 'post', {"name": roomName});
+      final response = await createAPICall('room/dashboard', 'post', {
+        "name": roomName,
+      });
 
       final data = jsonDecode(response.body);
 
@@ -70,7 +72,11 @@ class RoomDashboardDataProvider {
 
   Future<NotificationModel> joinRoom(String roomKey) async {
     try {
-      final response = await createAPICall('room/join/$roomKey', 'get', {});
+      final response = await createAPICall(
+        'room/dashboard/join/$roomKey',
+        'get',
+        {},
+      );
 
       final data = jsonDecode(response.body);
 
