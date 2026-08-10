@@ -49,7 +49,7 @@ class LendenRoomRepository {
     }
   }
 
-  Future<bool> delete(String id, String expenseID) async {
+  Future<void> delete(String id, String expenseID) async {
     try {
       return _dataProvider.delete(id, expenseID);
     } catch (e) {

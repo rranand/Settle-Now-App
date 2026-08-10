@@ -72,7 +72,7 @@ class PersonalMonthlyExpenseDataProvider {
     }
   }
 
-  Future<bool> delete(String expenseID, TransactionType transactionType) async {
+  Future<void> delete(String expenseID, TransactionType transactionType) async {
     try {
       final response = await createAPICall('personal', 'delete', {
         "id": expenseID,
@@ -82,7 +82,7 @@ class PersonalMonthlyExpenseDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return true;
+        return;
       } else {
         throw data['message'];
       }

@@ -139,14 +139,14 @@ class LendenRoomDataProvider {
     }
   }
 
-  Future<bool> delete(String id, String expenseID) async {
+  Future<void> delete(String id, String expenseID) async {
     try {
       final response = await createAPICall('lenden/$id', "delete", {
         "id": expenseID,
       });
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
+        return;
       } else {
         throw data['message'];
       }

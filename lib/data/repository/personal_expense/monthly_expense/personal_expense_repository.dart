@@ -40,7 +40,7 @@ class PersonalMonthlyExpenseRepository {
     }
   }
 
-  Future<bool> delete(String expenseID, TransactionType transactionType) async {
+  Future<void> delete(String expenseID, TransactionType transactionType) async {
     try {
       return _dataProvider.delete(expenseID, transactionType);
     } catch (e) {

@@ -55,15 +55,15 @@ extension RoomTransactionDataProvider on RoomDataProvider {
       final response = await createAPICall(
         'room/$id/bulk-transaction',
         "post",
-        {"data": data.map((e) => e.toCreateExpenseJson()).toList()},
+        {"transactions": data.map((e) => e.toBulkExpenseJson()).toList()},
       );
 
       final respData = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        final transactionMapping = respData['data'];
+        final transactionIDs = respData['data'];
         List<RoomTransactionModel> newExpense = [...data];
         for (int i = 0; i < data.length; i++) {
-          newExpense[i].id = transactionMapping[i.toString()];
+          newExpense[i].id = transactionIDs[i];
         }
         return newExpense;
       } else {
@@ -93,7 +93,7 @@ extension RoomTransactionDataProvider on RoomDataProvider {
     }
   }
 
-  Future<bool> deleteExpense(
+  Future<void> deleteExpense(
     String id,
     String expenseID,
     TransactionType expenseType,
@@ -105,13 +105,13 @@ extension RoomTransactionDataProvider on RoomDataProvider {
 
     final respData = jsonDecode(response.body);
     if (response.statusCode == 200) {
-      return true;
+      return;
     } else {
       throw respData['message'];
     }
   }
 
-  Future<bool> addToPersonalExpense(String id, String expenseID) async {
+  Future<String> addToPersonalExpense(String id, String expenseID) async {
     try {
       final response = await createAPICall(
         'room/$id/transaction/personalExpense',
@@ -121,7 +121,7 @@ extension RoomTransactionDataProvider on RoomDataProvider {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
+        return data['data']['id'];
       } else {
         throw data['message'];
       }

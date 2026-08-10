@@ -74,7 +74,7 @@ class QuicksplitDataProvider {
     }
   }
 
-  Future<bool> delete(String expenseID) async {
+  Future<void> delete(String expenseID) async {
     try {
       final response = await createAPICall('quicksplit', "delete", {
         "id": expenseID,
@@ -82,7 +82,7 @@ class QuicksplitDataProvider {
 
       final data = jsonDecode(response.body);
       if (response.statusCode == 200) {
-        return true;
+        return;
       } else {
         throw data['message'];
       }

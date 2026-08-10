@@ -117,7 +117,7 @@ class RoomRepository {
     }
   }
 
-  Future<bool> deleteExpense(
+  Future<void> deleteExpense(
     String id,
     String expenseID,
     TransactionType expenseType,
@@ -167,7 +167,7 @@ class RoomRepository {
     }
   }
 
-  Future<bool> addToPersonalExpense(String id, String expenseID) async {
+  Future<String> addToPersonalExpense(String id, String expenseID) async {
     try {
       return _dataProvider.addToPersonalExpense(id, expenseID);
     } catch (e) {

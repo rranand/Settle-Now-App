@@ -115,7 +115,7 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
 
     for (int i = 0; i < oldData.length; i++) {
       if (oldData[i].id == event.expenseID) {
-        oldData[i].personalExpenseId = " "; //FIXME: Add Personal Expense ID
+        oldData[i].personalExpenseId = event.personalExpenseID;
       }
     }
 

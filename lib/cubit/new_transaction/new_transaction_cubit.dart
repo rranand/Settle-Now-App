@@ -78,7 +78,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               roomID,
               data,
             );
-            bloc.add(RoomAddNewTransaction([newData]));
+            bloc.add(RoomAddNewTransaction(data: [newData]));
             return emit(NewTransactionSuccess(data: newData));
           }
       }
@@ -108,7 +108,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         roomID,
         data,
       );
-      bloc.add(RoomAddNewTransaction(newData));
+      bloc.add(RoomAddNewTransaction(data: newData));
       return emit(NewTransactionSuccess(data: newData.first));
     } catch (e) {
       return emit(NewTransactionFailure(error: e.toString()));
@@ -169,7 +169,7 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
             final roomID = blocState.id;
             final data = baseTransData as RoomTransactionModel;
             await repoRD.updateExpense(roomID, data);
-            bloc.add(RoomUpdateTransaction(data));
+            bloc.add(RoomUpdateTransaction(data: data));
             return emit(NewTransactionSuccess(data: data));
           }
       }
@@ -197,17 +197,11 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
         case TransactionType.quicksplit:
           {
             bloc = context.read<QuicksplitBloc>();
-            final bool isDeleted = await repo.delete(expenseID);
-            if (isDeleted) {
-              bloc.add(QuicksplitDeleteTransaction(transactionID: expenseID));
-              return emit(
-                NewTransactionSuccess(data: QuicksplitTransactionModel.empty()),
-              );
-            } else {
-              return emit(
-                NewTransactionFailure(error: "Something went wrong!"),
-              );
-            }
+            await repo.delete(expenseID);
+            bloc.add(QuicksplitDeleteTransaction(transactionID: expenseID));
+            return emit(
+              NewTransactionSuccess(data: QuicksplitTransactionModel.empty()),
+            );
           }
         case TransactionType.personal:
           {
@@ -218,31 +212,19 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
                 expenseID: expenseID,
               ),
             );
-            final bool isDeleted = await repoPS.delete(expenseID, expenseType);
+            await repoPS.delete(expenseID, expenseType);
 
-            if (isDeleted) {
-              bloc.add(
-                PersonalMonthlyExpenseDelete(
-                  isLoading: false,
-                  expenseID: expenseID,
-                ),
-              );
-              return emit(
-                NewTransactionSuccess(
-                  data: PersonalExpenseTransactionModel.empty(),
-                ),
-              );
-            } else {
-              bloc.add(
-                PersonalMonthlyExpenseDelete(
-                  isLoading: false,
-                  expenseID: expenseID,
-                ),
-              );
-              return emit(
-                NewTransactionFailure(error: "Something went wrong!"),
-              );
-            }
+            bloc.add(
+              PersonalMonthlyExpenseDelete(
+                isLoading: false,
+                expenseID: expenseID,
+              ),
+            );
+            return emit(
+              NewTransactionSuccess(
+                data: PersonalExpenseTransactionModel.empty(),
+              ),
+            );
           }
         case TransactionType.lenden:
           {
@@ -252,18 +234,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            final bool isDeleted = await repoLD.delete(roomID, expenseID);
+            await repoLD.delete(roomID, expenseID);
 
-            if (isDeleted) {
-              bloc.add(LendenDeleteTransaction(expenseID: expenseID));
-              return emit(
-                NewTransactionSuccess(data: LendenTransactionModel.empty()),
-              );
-            } else {
-              return emit(
-                NewTransactionFailure(error: "Something went wrong!"),
-              );
-            }
+            bloc.add(LendenDeleteTransaction(expenseID: expenseID));
+            return emit(
+              NewTransactionSuccess(data: LendenTransactionModel.empty()),
+            );
           }
         case TransactionType.room:
           {
@@ -273,22 +249,12 @@ class NewTransactionCubit extends Cubit<NewTransactionState> {
               return;
             }
             final roomID = blocState.id;
-            final bool isDeleted = await repoRD.deleteExpense(
-              roomID,
-              expenseID,
-              expenseType,
-            );
+            await repoRD.deleteExpense(roomID, expenseID, expenseType);
 
-            if (isDeleted) {
-              bloc.add(RoomDeleteTransaction(expenseID));
-              return emit(
-                NewTransactionSuccess(data: RoomTransactionModel.empty()),
-              );
-            } else {
-              return emit(
-                NewTransactionFailure(error: "Something went wrong!"),
-              );
-            }
+            bloc.add(RoomDeleteTransaction(expenseID: expenseID));
+            return emit(
+              NewTransactionSuccess(data: RoomTransactionModel.empty()),
+            );
           }
       }
     } catch (e) {

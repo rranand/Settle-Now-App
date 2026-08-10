@@ -35,7 +35,7 @@ class QuicksplitRepository {
     }
   }
 
-  Future<bool> delete(String expenseID) async {
+  Future<void> delete(String expenseID) async {
     try {
       return _dataProvider.delete(expenseID);
     } catch (e) {

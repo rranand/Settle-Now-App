@@ -94,6 +94,14 @@ class MultiUserBaseTransactionModel<T extends UserAmountModel>
     };
   }
 
+  Map<String, dynamic> toBulkExpenseJson() {
+    return <String, dynamic>{
+      "amount": super.amount,
+      "description": super.description,
+      "category": category,
+    };
+  }
+
   @override
   Map<String, dynamic> toUpdateExpenseJson() {
     final allUsers = users.map((e) => e.toMap()).toList();

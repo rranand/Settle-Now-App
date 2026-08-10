@@ -69,13 +69,15 @@ class AddToPersonalExpenseBloc
             emit(
               state.copyWith(addingExpenseToPersonalExpense: oldProcessingIDs),
             );
-            await roomRepository.addToPersonalExpense(
-              event.roomID,
-              event.transactionID,
-            );
+            String personalExpenseID = await roomRepository
+                .addToPersonalExpense(event.roomID, event.transactionID);
             oldProcessingIDs.remove(event.transactionID);
             roomBloc.add(
-              RoomAddToPersonalExpense(event.roomID, event.transactionID),
+              RoomAddToPersonalExpense(
+                id: event.roomID,
+                expenseID: event.transactionID,
+                personalExpenseID: personalExpenseID,
+              ),
             );
             return emit(
               state.copyWith(addingExpenseToPersonalExpense: oldProcessingIDs),
