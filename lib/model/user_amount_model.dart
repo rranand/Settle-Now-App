@@ -53,9 +53,10 @@ class UserAmountModel extends BaseUserModel {
       );
     }
 
-    final newData = baseData as UserAmountModel;
-
-    return newData.copyWith(amount: double.parse(map['amount'].toString()));
+    return UserAmountModel.fromBaseObject(
+      baseData,
+      amount: double.parse(map['amount'].toString()),
+    );
   }
 
   @override
