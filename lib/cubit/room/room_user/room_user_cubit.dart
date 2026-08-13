@@ -12,22 +12,11 @@ class RoomUserCubit extends Cubit<RoomUserState> {
   final RoomInfoCubit _roomInfoCubit;
   RoomUserCubit(this.repo, this._roomInfoCubit) : super(RoomUserInitial());
 
-  void fetchData(
-    String id,
-    List<RoomUserModel> userArr,
-    List<RoomTransactionModel> transArr,
-    List<RoomSettleModel> settleArr,
-  ) async {
+  void fetchData(String id, List<RoomUserModel> userArr) async {
     if (state is RoomUserLoading) return;
     emit(RoomUserLoading());
     try {
-      List<RoomUserModel> data = calculateUserExpenseInfo(
-        userArr,
-        transArr,
-        settleArr,
-      );
-      _roomInfoCubit.updateUserData(id, data);
-      return emit(RoomUserSuccess(id, data));
+      return emit(RoomUserSuccess(id, userArr));
     } catch (e) {
       return emit(RoomUserFailure(e.toString()));
     }

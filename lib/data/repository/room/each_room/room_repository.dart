@@ -17,14 +17,12 @@ class RoomRepository {
     }
   }
 
-  Future<List<RoomTransactionModel>> fetchData(
+  Future<Pair<List<RoomTransactionModel>, bool>> fetchData(
     String id,
-    List<RoomUserModel> users,
+    DateTime cursor,
   ) async {
     try {
-      List<RoomTransactionModel> data = await _dataProvider.fetchData(id);
-
-      return data;
+      return await _dataProvider.fetchData(id, cursor);
     } catch (e) {
       rethrow;
     }
@@ -46,18 +44,23 @@ class RoomRepository {
     }
   }
 
-  Future<List<RoomSettleModel>> fetchSettleData(
+  Future<Pair<List<RoomSettleModel>, bool>> fetchSettleData(
     String id,
-    List<RoomUserModel> users,
+    DateTime cursor,
   ) async {
     try {
-      List<RoomSettleModel> data = await _dataProvider.fetchSettleData(id);
+      Pair<List<RoomSettleModel>, bool> data = await _dataProvider
+          .fetchSettleData(id, cursor);
 
-      for (int i = 0; i < data.length; i++) {
-        data[i].sender = UserResolver.instance.resolve(data[i].sender.id);
-        data[i].receiver = UserResolver.instance.resolve(data[i].receiver.id);
+      for (int i = 0; i < data.first.length; i++) {
+        data.first[i].sender = UserResolver.instance.resolve(
+          data.first[i].sender.id,
+        );
+        data.first[i].receiver = UserResolver.instance.resolve(
+          data.first[i].receiver.id,
+        );
       }
-      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
+
       return data;
     } catch (e) {
       rethrow;
@@ -189,11 +192,12 @@ class RoomRepository {
     }
   }
 
-  Future<List<ActivityModel>> fetchActivity(String id) async {
+  Future<Pair<List<ActivityModel>, bool>> fetchActivity(
+    String id,
+    DateTime cursor,
+  ) async {
     try {
-      List<ActivityModel> activityData = await _dataProvider.fetchActivity(id);
-
-      return activityData;
+      return await _dataProvider.fetchActivity(id, cursor);
     } catch (e) {
       rethrow;
     }

@@ -8,18 +8,23 @@ final class RoomInitial extends RoomState {}
 final class RoomLoading extends RoomState {
   final String id;
 
-  RoomLoading(this.id);
+  RoomLoading({required this.id});
 }
 
 final class RoomFetchSuccess extends RoomState {
   final String id;
   final List<RoomTransactionModel> data;
+  final bool hasMoreData;
 
-  RoomFetchSuccess(this.id, this.data);
+  RoomFetchSuccess({
+    required this.id,
+    required this.data,
+    required this.hasMoreData,
+  });
 }
 
 final class RoomFailure extends RoomState {
   final String error;
 
-  RoomFailure(this.error);
+  RoomFailure({required this.error});
 }

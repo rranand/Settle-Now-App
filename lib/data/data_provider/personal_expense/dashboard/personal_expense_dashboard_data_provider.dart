@@ -4,10 +4,12 @@ import 'package:settlenow/model/model_core.dart';
 import 'package:settlenow/util/util_core.dart';
 
 class PersonalExpenseDashboardDataProvider {
-  Future<List<PersonalExpenseInfoModel>> fetchData(int alreadyHave) async {
+  Future<Pair<List<PersonalExpenseInfoModel>, bool>> fetchData(
+    DateTime cursor,
+  ) async {
     try {
       final response = await createAPICall(
-        'personal/all?alreadyHave=${Uri.encodeQueryComponent(alreadyHave.toString())}',
+        'personal/all?${addCursorInURL(cursor)}',
         "get",
         {},
       );
@@ -15,6 +17,7 @@ class PersonalExpenseDashboardDataProvider {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        bool hasMoreData = data['has_more'];
         final allTransactions = data['data'];
         List<PersonalExpenseInfoModel> arr = [];
         if (allTransactions != null) {
@@ -23,7 +26,7 @@ class PersonalExpenseDashboardDataProvider {
           }
         }
 
-        return arr;
+        return Pair(arr, hasMoreData);
       } else {
         throw data['message'];
       }

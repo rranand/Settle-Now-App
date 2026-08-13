@@ -37,6 +37,11 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+
+      final oldState = context.read<RoomActivityCubit>().state;
+      if (!(oldState is RoomActivitySuccess && oldState.id == widget.id)) {
+        context.read<RoomActivityCubit>().fetchData(widget.id, false);
+      }
     }
   }
 
@@ -54,7 +59,7 @@ class _RoomActivityPageState extends State<RoomActivityPage> {
       );
       return;
     }
-    context.read<RoomActivityCubit>().fetchData(widget.id, forceRefresh: true);
+    context.read<RoomActivityCubit>().fetchData(widget.id, true);
   }
 
   @override

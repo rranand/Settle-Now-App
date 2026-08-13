@@ -33,10 +33,10 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
       }
 
       if (oldData.hasData && !forceRefresh) {
-        return emit(RoomInfoSuccess(oldData, false));
+        return emit(RoomInfoSuccess(data: oldData, isInternalUpdate: false));
       } else {
         RoomInfoModel data = await repo.fetchRoomInfo(id);
-        return emit(RoomInfoSuccess(data, false));
+        return emit(RoomInfoSuccess(data: data, isInternalUpdate: false));
       }
     } catch (e) {
       return emit(RoomInfoFailure(e.toString()));
@@ -73,7 +73,9 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
           modifiedOn: DateTime.now(),
         );
         _roomDashboardBloc.add(RoomDashboardOnCloseRoom(data: updatedRoomInfo));
-        return emit(RoomInfoSuccess(updatedRoomInfo, true));
+        return emit(
+          RoomInfoSuccess(data: updatedRoomInfo, isInternalUpdate: true),
+        );
       }
     }
 
@@ -91,7 +93,9 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
         _roomDashboardBloc.add(
           RoomDashboardOnUpdateRoom(data: updatedRoomInfo),
         );
-        return emit(RoomInfoSuccess(updatedRoomInfo, true));
+        return emit(
+          RoomInfoSuccess(data: updatedRoomInfo, isInternalUpdate: true),
+        );
       }
     }
 
@@ -129,17 +133,18 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
         modifiedOn: DateTime.now(),
       );
       _roomDashboardBloc.add(RoomDashboardOnUpdateRoom(data: updatedRoomInfo));
-      return emit(RoomInfoSuccess(updatedRoomInfo, true));
+      return emit(
+        RoomInfoSuccess(data: updatedRoomInfo, isInternalUpdate: true),
+      );
     } catch (e) {
       scaffoldMessengerState.hideCurrentSnackBar();
       emit(RoomInfoFailure(e.toString()));
-      return emit(RoomInfoSuccess(oldData.data, true));
+      return emit(RoomInfoSuccess(data: oldData.data, isInternalUpdate: true));
     }
   }
 
   void deleteRoom(
     String id,
-
     bool isRemoving,
     ScaffoldMessengerState scaffoldMessengerState,
   ) async {
@@ -171,7 +176,7 @@ class RoomInfoCubit extends Cubit<RoomInfoState> {
     } catch (e) {
       scaffoldMessengerState.hideCurrentSnackBar();
       emit(RoomInfoFailure(e.toString()));
-      return emit(RoomInfoSuccess(oldData.data, true));
+      return emit(RoomInfoSuccess(data: oldData.data, isInternalUpdate: true));
     }
   }
 }

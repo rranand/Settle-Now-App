@@ -21,6 +21,21 @@ class PersonalMonthlyExpenseBloc
     on<PersonalMonthlyExpenseReset>(_personalMonthlyExpenseReset);
   }
 
+  void _updateDashboardPersonalExpense(
+    String id,
+    List<PersonalExpenseTransactionModel> data,
+  ) {
+    dashboardBloc.add(
+      PersonalExpenseDashboardUpdate(
+        id: id,
+        totalAmount: data
+            .map((element) => element.amount)
+            .fold(0.0, (previousValue, element) => previousValue + element),
+        transactionCount: data.length,
+      ),
+    );
+  }
+
   void _personalExpenseFetch(
     PersonalMonthlyExpenseFetch event,
     Emitter<PersonalMonthlyExpenseState> emit,
@@ -30,7 +45,7 @@ class PersonalMonthlyExpenseBloc
     try {
       String id = (event.year + event.month).toLowerCase();
       final data = await repo.fetchData(event.year, event.month);
-      dashboardBloc.add(PersonalExpenseDashboardUpdate(id: id, data: data));
+      _updateDashboardPersonalExpense(id, data);
       return emit(PersonalMonthlyExpenseFetchSuccess(id: id, data: data));
     } catch (e) {
       return emit(PersonalMonthlyExpenseFailure(error: e.toString()));
@@ -46,9 +61,7 @@ class PersonalMonthlyExpenseBloc
     }
     final oldData = state as PersonalMonthlyExpenseFetchSuccess;
     List<PersonalExpenseTransactionModel> data = [event.data, ...oldData.data];
-    dashboardBloc.add(
-      PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
-    );
+    _updateDashboardPersonalExpense(oldData.id, data);
     return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
   }
 
@@ -67,9 +80,7 @@ class PersonalMonthlyExpenseBloc
         break;
       }
     }
-    dashboardBloc.add(
-      PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
-    );
+    _updateDashboardPersonalExpense(oldData.id, data);
     return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
   }
 
@@ -92,9 +103,7 @@ class PersonalMonthlyExpenseBloc
     } else {
       data.removeWhere((element) => element.id == event.expenseID);
     }
-    dashboardBloc.add(
-      PersonalExpenseDashboardUpdate(id: oldData.id, data: data),
-    );
+    _updateDashboardPersonalExpense(oldData.id, data);
     return emit(PersonalMonthlyExpenseFetchSuccess(id: oldData.id, data: data));
   }
 

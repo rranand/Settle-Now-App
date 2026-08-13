@@ -5,11 +5,11 @@ import 'package:settlenow/util/util_core.dart';
 
 class LendenDashboardDataProvider {
   Future<Pair<List<LendenDashboardModel>, bool>> fetchData(
-    int alreadyHave,
+    DateTime cursor,
   ) async {
     try {
       final response = await createAPICall(
-        'lenden/all?alreadyHave=$alreadyHave',
+        'lenden/all?${addCursorInURL(cursor)}',
         "get",
         {},
       );

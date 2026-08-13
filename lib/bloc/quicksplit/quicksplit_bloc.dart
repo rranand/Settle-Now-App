@@ -40,7 +40,7 @@ class QuicksplitBloc extends Bloc<QuicksplitEvent, QuicksplitState> {
 
     try {
       Pair<List<QuicksplitTransactionModel>, bool> data = await repo.fetchData(
-        oldData.length,
+        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
       );
       return emit(
         QuicksplitFetchSuccess(

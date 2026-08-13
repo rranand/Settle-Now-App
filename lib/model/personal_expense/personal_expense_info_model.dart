@@ -6,6 +6,7 @@ class PersonalExpenseInfoModel {
   double amount = 0;
   String monthName = "";
   String year = "";
+  DateTime createdOn = DateTime.now();
   int transactionCount = 0;
 
   PersonalExpenseInfoModel({
@@ -14,6 +15,7 @@ class PersonalExpenseInfoModel {
     required this.monthName,
     required this.year,
     required this.transactionCount,
+    required this.createdOn,
   });
 
   PersonalExpenseInfoModel.empty({this.hasData = false});
@@ -24,6 +26,7 @@ class PersonalExpenseInfoModel {
     String? monthName,
     String? year,
     int? transactionCount,
+    DateTime? createdOn,
   }) {
     return PersonalExpenseInfoModel(
       id: id ?? this.id,
@@ -31,6 +34,7 @@ class PersonalExpenseInfoModel {
       monthName: monthName ?? this.monthName,
       year: year ?? this.year,
       transactionCount: transactionCount ?? this.transactionCount,
+      createdOn: createdOn ?? this.createdOn,
     );
   }
 
@@ -38,9 +42,10 @@ class PersonalExpenseInfoModel {
     return <String, dynamic>{
       'id': id,
       'amount': amount,
-      'monthName': monthName,
+      'month_name': monthName,
       'year': year,
       'transaction_count': transactionCount,
+      'created_on': createdOn,
     };
   }
 
@@ -56,6 +61,7 @@ class PersonalExpenseInfoModel {
       monthName: CalenderConstant.monthName[monthIndex],
       year: year,
       transactionCount: map['transaction_count'],
+      createdOn: DateTime.parse(map['created_on']).toLocal(),
     );
   }
 

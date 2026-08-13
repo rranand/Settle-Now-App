@@ -9,12 +9,12 @@ class RoomDashboardRepository {
 
   Future<Pair<List<RoomInfoModel>, bool>> fetchData(
     bool isActiveRoom,
-    int alreadyHave,
+    DateTime cursor,
   ) async {
     try {
       Pair<List<RoomInfoModel>, bool> data = await _dataProvider.fetchData(
         isActiveRoom,
-        alreadyHave,
+        cursor,
       );
       return data;
     } catch (e) {

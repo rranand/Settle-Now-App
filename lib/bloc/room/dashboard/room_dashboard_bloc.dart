@@ -19,6 +19,14 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     on<RoomDashboardOnDeleteRoom>(_roomDashboardOnDeleteRoom);
   }
 
+  DateTime getCursor(bool isFreshFetch, List<RoomInfoModel> data) {
+    if (isFreshFetch || data.isEmpty) {
+      return DateTime.now();
+    }
+
+    return data.last.createdOn;
+  }
+
   void _roomFetch(
     RoomDashboardFetch event,
     Emitter<RoomDashboardState> emit,
@@ -55,11 +63,10 @@ class RoomDashboardBloc extends Bloc<RoomDashboardEvent, RoomDashboardState> {
     try {
       Pair<List<RoomInfoModel>, bool> data = await repo.fetchData(
         event.isActiveRoom,
-        event.isFreshFetch
-            ? 0
-            : (event.isActiveRoom
-                ? oldRoomActiveData.length
-                : oldRoomInActiveData.length),
+        getCursor(
+          event.isFreshFetch,
+          event.isActiveRoom ? oldRoomActiveData : oldRoomInActiveData,
+        ),
       );
       if (event.isActiveRoom) {
         if (event.isFreshFetch) {

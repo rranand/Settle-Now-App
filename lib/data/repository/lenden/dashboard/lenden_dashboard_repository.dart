@@ -8,10 +8,10 @@ class LendenDashboardRepository {
   LendenDashboardRepository(this._dataProvider);
 
   Future<Pair<List<LendenDashboardModel>, bool>> fetchData(
-    int alreadyHave,
+    DateTime cursor,
   ) async {
     try {
-      return await _dataProvider.fetchData(alreadyHave);
+      return await _dataProvider.fetchData(cursor);
     } catch (e) {
       rethrow;
     }

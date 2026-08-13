@@ -31,11 +31,10 @@ class LendenRoomRepository {
 
   Future<Pair<List<LendenTransactionModel>, bool>> fetchTransaction(
     String id,
-    int alreadyHave,
-    List<LendenUserModel> users,
+    DateTime cursor,
   ) async {
     try {
-      return _dataProvider.fetchTransaction(id, alreadyHave, users);
+      return _dataProvider.fetchTransaction(id, cursor);
     } catch (e) {
       rethrow;
     }

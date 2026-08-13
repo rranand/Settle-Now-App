@@ -57,12 +57,11 @@ class LendenRoomDataProvider {
 
   Future<Pair<List<LendenTransactionModel>, bool>> fetchTransaction(
     String id,
-    int alreadyHave,
-    List<LendenUserModel> users,
+    DateTime cursor,
   ) async {
     try {
       final response = await createAPICall(
-        'lenden/$id/transactions?alreadyHave=$alreadyHave',
+        'lenden/$id/transactions?${addCursorInURL(cursor)}',
         "get",
         {},
       );

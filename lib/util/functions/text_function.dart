@@ -54,3 +54,9 @@ String convertInDateFormat(DateTime date) {
 DateTime? convertFromDateFormat(String date) {
   return DateFormat.yMMMd().tryParse(date);
 }
+
+String addCursorInURL(DateTime cursor) {
+  return Uri(
+    queryParameters: {'cursor': cursor.toUtc().toIso8601String()},
+  ).query;
+}

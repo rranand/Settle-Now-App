@@ -11,16 +11,35 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
   final RoomUserCubit roomUserCubit;
   RoomSettleCubit(this.repo, this.roomUserCubit) : super(RoomSettleInitial());
 
-  void fetchData(String id, List<RoomUserModel> users) async {
+  void fetchData(String id, bool forceRefresh) async {
     if (state is RoomSettleLoading && (state as RoomSettleLoading).id == id) {
       return;
     }
-    emit(RoomSettleLoading(id));
+
+    List<RoomSettleModel> oldData = [];
+
+    if (!forceRefresh && state is RoomSettleSuccess) {
+      final oldState = state as RoomSettleSuccess;
+      if (oldState.id == id) {
+        if (!oldState.hasMoreData) {
+          return;
+        }
+
+        oldData = [...(oldState.data)];
+      }
+    }
+
+    emit(RoomSettleLoading(id: id));
     try {
-      List<RoomSettleModel> data = await repo.fetchSettleData(id, users);
-      return emit(RoomSettleSuccess(id, data));
+      final data = await repo.fetchSettleData(
+        id,
+        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
+      );
+      return emit(
+        RoomSettleSuccess(id: id, data: data.first, hasMoreData: data.second),
+      );
     } catch (e) {
-      return emit(RoomSettleFailure(e.toString()));
+      return emit(RoomSettleFailure(error: e.toString()));
     }
   }
 
@@ -31,7 +50,13 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     final roomSettleSuccessState = state as RoomSettleSuccess;
     List<RoomSettleModel> newArr = [data, ...roomSettleSuccessState.data];
     roomUserCubit.onAddNewSettleExpense(data);
-    return emit(RoomSettleSuccess(roomSettleSuccessState.id, newArr));
+    return emit(
+      RoomSettleSuccess(
+        id: roomSettleSuccessState.id,
+        data: newArr,
+        hasMoreData: roomSettleSuccessState.hasMoreData,
+      ),
+    );
   }
 
   void updateSettleExpense(RoomSettleModel data) {
@@ -50,7 +75,13 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
       }
     }
     roomUserCubit.updateSettleExpense(oldData, data);
-    return emit(RoomSettleSuccess(roomSettleSuccessState.id, oldArr));
+    return emit(
+      RoomSettleSuccess(
+        id: roomSettleSuccessState.id,
+        data: oldArr,
+        hasMoreData: roomSettleSuccessState.hasMoreData,
+      ),
+    );
   }
 
   void deleteSettleExpense(String settleExpenseID) {
@@ -70,7 +101,13 @@ class RoomSettleCubit extends Cubit<RoomSettleState> {
     if (index != -1) {
       roomUserCubit.deleteSettleExpense(oldArr.removeAt(index));
     }
-    return emit(RoomSettleSuccess(roomSettleSuccessState.id, oldArr));
+    return emit(
+      RoomSettleSuccess(
+        id: roomSettleSuccessState.id,
+        data: oldArr,
+        hasMoreData: roomSettleSuccessState.hasMoreData,
+      ),
+    );
   }
 
   void reset() {

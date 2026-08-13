@@ -5,11 +5,11 @@ import 'package:settlenow/util/util_core.dart';
 
 class QuicksplitDataProvider {
   Future<Pair<List<QuicksplitTransactionModel>, bool>> fetchData(
-    int alreadyHave,
+    DateTime cursor,
   ) async {
     try {
       final response = await createAPICall(
-        'quicksplit?alreadyHave=$alreadyHave',
+        'quicksplit?${addCursorInURL(cursor)}',
         "get",
         {},
       );

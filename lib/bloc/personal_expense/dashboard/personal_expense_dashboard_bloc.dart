@@ -3,8 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:settlenow/constant/constant_core.dart';
 import 'package:settlenow/data/repository/repository_core.dart';
 import 'package:settlenow/model/model_core.dart';
-import 'package:settlenow/util/util_core.dart';
-
 part 'personal_expense_dashboard_event.dart';
 part 'personal_expense_dashboard_state.dart';
 
@@ -24,17 +22,33 @@ class PersonalExpenseDashboardBloc
     PersonalExpenseDashboardFetch event,
     Emitter<PersonalExpenseDashboardState> emit,
   ) async {
+    List<PersonalExpenseInfoModel> oldData = [];
+
+    if (!event.isFreshFetch && state is PersonalExpenseDashboardFetchSuccess) {
+      final allRoomState = state as PersonalExpenseDashboardFetchSuccess;
+      if (!allRoomState.hasMoreData) {
+        return;
+      }
+      oldData = allRoomState.data;
+    }
+
     if (state is PersonalExpenseDashboardLoading) {
       return;
     }
     emit(PersonalExpenseDashboardLoading());
     try {
-      Map<int, List<PersonalExpenseInfoModel>> data = await repo.fetchData(
-        event.alreadyHave,
+      final data = await repo.fetchData(
+        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
       );
-      return emit(PersonalExpenseDashboardFetchSuccess(data));
+
+      return emit(
+        PersonalExpenseDashboardFetchSuccess(
+          data: [...oldData, ...data.first],
+          hasMoreData: data.second,
+        ),
+      );
     } catch (e) {
-      return emit(PersonalExpenseDashboardFailure(e.toString()));
+      return emit(PersonalExpenseDashboardFailure(error: e.toString()));
     }
   }
 
@@ -46,40 +60,24 @@ class PersonalExpenseDashboardBloc
       return emit(PersonalExpenseDashboardInitial());
     }
     final oldState = state as PersonalExpenseDashboardFetchSuccess;
-    final oldData = oldState.data;
 
-    int year = int.parse(event.id.substring(0, 4));
-    String month = capatilizeFirstLetter(event.id.substring(4));
+    final updatedData = [...oldState.data];
 
-    int index = (oldData[year] ?? []).indexWhere(
-      (element) =>
-          element.year == year.toString() && element.monthName == month,
-    );
-
-    List<PersonalExpenseTransactionModel> data = event.data;
-    double totalAmount = 0;
-
-    for (int i = 0; i < data.length; i++) {
-      totalAmount += data[i].amount;
+    for (int i = 0; i < updatedData.length; i++) {
+      if (updatedData[i].id == event.id) {
+        updatedData[i] = updatedData[i].copyWith(
+          amount: event.totalAmount,
+          transactionCount: event.transactionCount,
+        );
+      }
     }
 
-    PersonalExpenseInfoModel newExpenseInfo = PersonalExpenseInfoModel(
-      id: event.id,
-      amount: totalAmount,
-      monthName: capatilizeFirstLetter(event.id.substring(4)),
-      year: year.toString(),
-      transactionCount: data.length,
+    return emit(
+      PersonalExpenseDashboardFetchSuccess(
+        data: updatedData,
+        hasMoreData: oldState.hasMoreData,
+      ),
     );
-
-    Map<int, List<PersonalExpenseInfoModel>> newData = Map.from(oldData);
-
-    if (index != -1) {
-      newData[year]![index] = newExpenseInfo;
-    } else {
-      newData[year] = [...?newData[year], newExpenseInfo];
-    }
-
-    return emit(PersonalExpenseDashboardFetchSuccess(newData));
   }
 
   void _personalExpenseDashboardOnAdd(
@@ -96,19 +94,25 @@ class PersonalExpenseDashboardBloc
           monthName: CalenderConstant.monthName[now.month - 1],
           transactionCount: 0,
           year: year.toString(),
+          createdOn: now,
         );
 
-    Map<int, List<PersonalExpenseInfoModel>> data = {};
+    List<PersonalExpenseInfoModel> oldData = [];
+    bool hasMoreDataOld = true;
+
     if (state is PersonalExpenseDashboardFetchSuccess) {
-      data = Map.from((state as PersonalExpenseDashboardFetchSuccess).data);
+      final oldState = state as PersonalExpenseDashboardFetchSuccess;
+
+      oldData = oldState.data;
+      hasMoreDataOld = oldState.hasMoreData;
     }
 
-    if (data.containsKey(year)) {
-      data[year]!.add(currentMonthPersonalExpense);
-    } else {
-      data[year] = [currentMonthPersonalExpense];
-    }
-    return emit(PersonalExpenseDashboardFetchSuccess(data));
+    return emit(
+      PersonalExpenseDashboardFetchSuccess(
+        data: [currentMonthPersonalExpense, ...oldData],
+        hasMoreData: hasMoreDataOld,
+      ),
+    );
   }
 
   void _personalExpenseDashboardReset(

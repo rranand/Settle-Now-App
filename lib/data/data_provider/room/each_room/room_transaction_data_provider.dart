@@ -1,13 +1,21 @@
 part of 'room_data_provider.dart';
 
 extension RoomTransactionDataProvider on RoomDataProvider {
-  Future<List<RoomTransactionModel>> fetchData(String id) async {
+  Future<Pair<List<RoomTransactionModel>, bool>> fetchData(
+    String id,
+    DateTime cursor,
+  ) async {
     try {
-      final response = await createAPICall('room/$id/transaction', "get", {});
+      final response = await createAPICall(
+        'room/$id/transaction?${addCursorInURL(cursor)}',
+        "get",
+        {},
+      );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        bool hasMore = data['has_more'];
         final allTrans = data['data'];
         List<RoomTransactionModel> arr = [];
         if (allTrans != null) {
@@ -16,7 +24,7 @@ extension RoomTransactionDataProvider on RoomDataProvider {
           }
         }
 
-        return arr;
+        return Pair(arr, hasMore);
       } else {
         throw data['message'];
       }

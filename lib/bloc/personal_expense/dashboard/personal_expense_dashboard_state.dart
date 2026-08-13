@@ -11,14 +11,18 @@ final class PersonalExpenseDashboardLoading
 
 final class PersonalExpenseDashboardFetchSuccess
     extends PersonalExpenseDashboardState {
-  final Map<int, List<PersonalExpenseInfoModel>> data;
+  final List<PersonalExpenseInfoModel> data;
+  final bool hasMoreData;
 
-  PersonalExpenseDashboardFetchSuccess(this.data);
+  PersonalExpenseDashboardFetchSuccess({
+    required this.data,
+    required this.hasMoreData,
+  });
 }
 
 final class PersonalExpenseDashboardFailure
     extends PersonalExpenseDashboardState {
   final String error;
 
-  PersonalExpenseDashboardFailure(this.error);
+  PersonalExpenseDashboardFailure({required this.error});
 }

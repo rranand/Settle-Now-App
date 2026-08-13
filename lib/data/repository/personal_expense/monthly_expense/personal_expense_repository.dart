@@ -12,11 +12,7 @@ class PersonalMonthlyExpenseRepository {
     String month,
   ) async {
     try {
-      List<PersonalExpenseTransactionModel> data = await _dataProvider
-          .fetchData(year, month);
-
-      data.sort((a, b) => b.createdOn.compareTo(a.createdOn));
-      return data;
+      return await _dataProvider.fetchData(year, month);
     } catch (e) {
       rethrow;
     }

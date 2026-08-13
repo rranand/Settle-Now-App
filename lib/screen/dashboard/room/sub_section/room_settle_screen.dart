@@ -23,6 +23,11 @@ class _RoomSettleScreenState extends State<RoomSettleScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+
+      final oldState = context.read<RoomSettleCubit>().state;
+      if (!(oldState is RoomSettleSuccess && oldState.id == widget.roomID)) {
+        context.read<RoomSettleCubit>().fetchData(widget.roomID, false);
+      }
     }
   }
 

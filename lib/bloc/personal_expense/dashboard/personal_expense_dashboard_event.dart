@@ -5,17 +5,22 @@ sealed class PersonalExpenseDashboardEvent {}
 
 final class PersonalExpenseDashboardFetch
     extends PersonalExpenseDashboardEvent {
-  final int alreadyHave;
+  final bool isFreshFetch;
 
-  PersonalExpenseDashboardFetch({required this.alreadyHave});
+  PersonalExpenseDashboardFetch({required this.isFreshFetch});
 }
 
 final class PersonalExpenseDashboardUpdate
     extends PersonalExpenseDashboardEvent {
   final String id;
-  final List<PersonalExpenseTransactionModel> data;
+  final double totalAmount;
+  final int transactionCount;
 
-  PersonalExpenseDashboardUpdate({required this.id, required this.data});
+  PersonalExpenseDashboardUpdate({
+    required this.id,
+    required this.totalAmount,
+    required this.transactionCount,
+  });
 }
 
 final class PersonalExpenseDashboardOnAdd

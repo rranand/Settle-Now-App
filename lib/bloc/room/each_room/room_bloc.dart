@@ -24,15 +24,35 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     if (state is RoomLoading && (state as RoomLoading).id == event.id) {
       return;
     }
-    emit(RoomLoading(event.id));
+
+    List<RoomTransactionModel> oldData = [];
+
+    if (!event.isFreshFetch && state is RoomFetchSuccess) {
+      final oldState = state as RoomFetchSuccess;
+      if (oldState.id == event.id) {
+        if (!oldState.hasMoreData) {
+          return;
+        }
+
+        oldData = [...(oldState.data)];
+      }
+    }
+
+    emit(RoomLoading(id: event.id));
     try {
-      List<RoomTransactionModel> data = await repo.fetchData(
+      final data = await repo.fetchData(
         event.id,
-        event.users,
+        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
       );
-      return emit(RoomFetchSuccess(event.id, data));
+      return emit(
+        RoomFetchSuccess(
+          id: event.id,
+          data: data.first,
+          hasMoreData: data.second,
+        ),
+      );
     } catch (e) {
-      emit(RoomFailure(e.toString()));
+      emit(RoomFailure(error: e.toString()));
     }
   }
 
@@ -49,7 +69,13 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       roomUserCubit.onAddNewTransaction(event.data[i]);
     }
 
-    return emit(RoomFetchSuccess(oldData.id, data));
+    return emit(
+      RoomFetchSuccess(
+        id: oldData.id,
+        data: data,
+        hasMoreData: oldData.hasMoreData,
+      ),
+    );
   }
 
   void _roomUpdateTransaction(
@@ -71,7 +97,13 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       }
     }
     roomUserCubit.onUpdateTransaction(oldExpense, event.data);
-    return emit(RoomFetchSuccess(oldData.id, data));
+    return emit(
+      RoomFetchSuccess(
+        id: oldData.id,
+        data: data,
+        hasMoreData: oldData.hasMoreData,
+      ),
+    );
   }
 
   void _roomDeleteTransaction(
@@ -93,7 +125,13 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
     if (index != -1) {
       roomUserCubit.onDeleteTransaction(data.removeAt(index));
     }
-    return emit(RoomFetchSuccess(oldData.id, data));
+    return emit(
+      RoomFetchSuccess(
+        id: oldData.id,
+        data: data,
+        hasMoreData: oldData.hasMoreData,
+      ),
+    );
   }
 
   void _roomBlocReset(RoomBlocReset event, Emitter<RoomState> emit) {
@@ -119,6 +157,12 @@ class RoomBloc extends Bloc<RoomEvent, RoomState> {
       }
     }
 
-    return emit(RoomFetchSuccess(oldState.id, oldData));
+    return emit(
+      RoomFetchSuccess(
+        id: oldState.id,
+        data: oldData,
+        hasMoreData: oldState.hasMoreData,
+      ),
+    );
   }
 }

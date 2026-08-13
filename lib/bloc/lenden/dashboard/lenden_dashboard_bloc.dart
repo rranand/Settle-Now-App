@@ -35,7 +35,9 @@ class LendenDashboardBloc
     if (state is LendenDashboardLoading) return;
     emit(LendenDashboardLoading());
     try {
-      final data = await repo.fetchData(oldData.length);
+      final data = await repo.fetchData(
+        oldData.isEmpty ? DateTime.now() : oldData.last.createdOn,
+      );
 
       return emit(
         LendenDashboardFetchSuccess(

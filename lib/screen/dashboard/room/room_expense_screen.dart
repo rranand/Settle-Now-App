@@ -24,6 +24,7 @@ class RoomExpenseScreen extends StatefulWidget {
   State<RoomExpenseScreen> createState() => _RoomExpenseScreenState();
 }
 
+//FIXME: Add pagination where it is pending
 class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
   final ValueNotifier<bool> isSearchEnabled = ValueNotifier(false);
   final TextEditingController _searchController = TextEditingController();
@@ -225,8 +226,24 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
       );
       return;
     }
-    final roomInfoCubit = context.read<RoomInfoCubit>();
+    final activityOldState = context.read<RoomActivityCubit>().state;
+    if (activityOldState is RoomActivitySuccess) {
+      context.read<RoomActivityCubit>().fetchData(widget.id, true);
+    }
 
+    final roomSettleOldState = context.read<RoomSettleCubit>().state;
+    if (roomSettleOldState is RoomSettleSuccess) {
+      context.read<RoomSettleCubit>().fetchData(widget.id, true);
+    }
+
+    final roomTransactionOldState = context.read<RoomBloc>().state;
+    if (roomTransactionOldState is RoomFetchSuccess) {
+      context.read<RoomBloc>().add(
+        RoomFetch(id: widget.id, isFreshFetch: true),
+      );
+    }
+
+    final roomInfoCubit = context.read<RoomInfoCubit>();
     await roomInfoCubit.fetchData(widget.id, forceRefresh: true);
   }
 
@@ -351,27 +368,6 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
         }
       }
     });
-  }
-
-  void callRoomUserBloc() {
-    final RoomInfoState roomInfoState = context.read<RoomInfoCubit>().state;
-    final RoomState roomState = context.read<RoomBloc>().state;
-    final RoomSettleState roomSettleState =
-        context.read<RoomSettleCubit>().state;
-
-    if (roomState is RoomFetchSuccess &&
-        roomState.id == widget.id &&
-        roomInfoState is RoomInfoSuccess &&
-        roomInfoState.data.id == widget.id &&
-        roomSettleState is RoomSettleSuccess &&
-        roomSettleState.id == widget.id) {
-      context.read<RoomUserCubit>().fetchData(
-        roomInfoState.data.id,
-        roomInfoState.data.users,
-        roomState.data,
-        roomSettleState.data,
-      );
-    }
   }
 
   List<Widget>? appBarActionButtonHandler(
@@ -512,14 +508,7 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
             context.pop();
           }
         } else if (state is RoomInfoSuccess && !state.isInternalUpdate) {
-          context.read<RoomSettleCubit>().fetchData(
-            widget.id,
-            state.data.users,
-          );
-          context.read<RoomBloc>().add(
-            RoomFetch(id: widget.id, users: state.data.users),
-          );
-          context.read<RoomActivityCubit>().fetchData(widget.id);
+          context.read<RoomUserCubit>().fetchData(widget.id, state.data.users);
         }
       },
       builder: (context, state) {
@@ -629,32 +618,14 @@ class _RoomExpenseScreenState extends State<RoomExpenseScreen> {
                       );
                     },
                   ),
-                  MultiBlocListener(
-                    listeners: [
-                      BlocListener<RoomBloc, RoomState>(
-                        listener: (context, state) {
-                          if (state is RoomFetchSuccess) {
-                            callRoomUserBloc();
-                          }
-                        },
-                      ),
-                      BlocListener<RoomSettleCubit, RoomSettleState>(
-                        listener: (context, state) {
-                          if (state is RoomSettleSuccess) {
-                            callRoomUserBloc();
-                          }
-                        },
-                      ),
-                    ],
-                    child: ValueListenableBuilder(
-                      valueListenable: _navbarSelectedIndex,
-                      builder: (context, value, _) {
-                        return SliverPadding(
-                          padding: _mainScreenPadding,
-                          sliver: _navBarHandler(value),
-                        );
-                      },
-                    ),
+                  ValueListenableBuilder(
+                    valueListenable: _navbarSelectedIndex,
+                    builder: (context, value, _) {
+                      return SliverPadding(
+                        padding: _mainScreenPadding,
+                        sliver: _navBarHandler(value),
+                      );
+                    },
                   ),
                   SliverPadding(
                     padding: EdgeInsets.only(top: UiConstant.spaceAtBottom),

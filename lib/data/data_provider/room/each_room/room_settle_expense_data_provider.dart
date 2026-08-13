@@ -1,21 +1,30 @@
 part of 'room_data_provider.dart';
 
 extension RoomSettleExpenseDataProvider on RoomDataProvider {
-  Future<List<RoomSettleModel>> fetchSettleData(String id) async {
+  Future<Pair<List<RoomSettleModel>, bool>> fetchSettleData(
+    String id,
+    DateTime cursor,
+  ) async {
     try {
-      final response = await createAPICall('room/$id/settle', "get", {});
+      final response = await createAPICall(
+        'room/$id/settle?${addCursorInURL(cursor)}',
+        "get",
+        {},
+      );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        bool hasMore = data['has_more'];
         final allTrans = data['data'];
         List<RoomSettleModel> arr = [];
+
         if (allTrans != null) {
           for (int i = 0; i < allTrans.length; i++) {
             arr.add(RoomSettleModel.fromMap(allTrans[i]));
           }
         }
-        return arr;
+        return Pair(arr, hasMore);
       } else {
         throw data['message'];
       }

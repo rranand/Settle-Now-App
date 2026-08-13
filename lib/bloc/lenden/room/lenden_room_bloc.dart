@@ -73,8 +73,9 @@ class LendenRoomBloc extends Bloc<LendenRoomEvent, LendenRoomState> {
       Pair<List<LendenTransactionModel>, bool> data = await repo
           .fetchTransaction(
             oldState.id,
-            oldState.data.length,
-            oldState.roomData.users,
+            oldState.data.isEmpty
+                ? DateTime.now()
+                : oldState.data.last.createdOn,
           );
 
       return emit(

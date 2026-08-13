@@ -30,6 +30,13 @@ class _RoomTransactionScreenState extends State<RoomTransactionScreen> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthLoginSuccess) {
       _loggedInUser = authState.userData;
+
+      final oldState = context.read<RoomBloc>().state;
+      if (!(oldState is RoomFetchSuccess && oldState.id == widget.roomID)) {
+        context.read<RoomBloc>().add(
+          RoomFetch(id: widget.roomID, isFreshFetch: false),
+        );
+      }
     }
   }
 

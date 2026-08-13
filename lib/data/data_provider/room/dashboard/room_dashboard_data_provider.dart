@@ -6,11 +6,11 @@ import 'package:settlenow/util/util_core.dart';
 class RoomDashboardDataProvider {
   Future<Pair<List<RoomInfoModel>, bool>> fetchData(
     bool isActiveRoom,
-    int alreadyHave,
+    DateTime cursor,
   ) async {
     try {
       final response = await createAPICall(
-        'room/dashboard/${isActiveRoom ? "open" : "close"}?alreadyHave=$alreadyHave',
+        'room/dashboard/${isActiveRoom ? "open" : "close"}?${addCursorInURL(cursor)}',
         "get",
         {},
       );

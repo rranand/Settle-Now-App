@@ -28,7 +28,9 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     return amount < 0 ? Colors.red : Colors.green;
   }
 
-  Widget _userExpenseWidget(RoomUserModel data, double amount) {
+  Widget _userExpenseWidget(RoomUserModel data) {
+    final netAmount = data.contribution - data.spent + data.settle;
+
     return Card(
       child: Container(
         padding: const EdgeInsets.all(UiConstant.cardPadding + 2),
@@ -86,10 +88,10 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
                       isLoaded: data.hasData,
                     ),
                     subTextOnCard(
-                      "Balance: ${formatCurrency(amount, context)}",
+                      "Balance: ${formatCurrency(netAmount, context)}",
                       context,
                       fontSize: subTextFontSize,
-                      textColor: getAmountColor(amount),
+                      textColor: getAmountColor(netAmount),
                       isLoaded: data.hasData,
                     ),
                   ],
@@ -130,10 +132,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     }
   }
 
-  Widget showUserExpenseInfo(
-    List<RoomUserModel> data,
-    Map<String, double> balanceMap,
-  ) {
+  Widget showUserExpenseInfo(List<RoomUserModel> data) {
     final cardSizeInfo = calculateCrossAspectRatio(
       context,
       MediaQuery.of(context).size.width,
@@ -149,8 +148,7 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
         childAspectRatio: cardSizeInfo[1],
       ),
       itemBuilder: (BuildContext context, int index) {
-        double amount = balanceMap[data[index].id] ?? 0;
-        return _userExpenseWidget(data[index], amount);
+        return _userExpenseWidget(data[index]);
       },
     );
   }
@@ -160,15 +158,9 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
     return BlocBuilder<RoomUserCubit, RoomUserState>(
       builder: (context, state) {
         List<RoomUserModel> data = [];
-        Map<String, double> balanceMap = {};
 
         if (state is RoomUserSuccess) {
           data = state.data;
-
-          for (int i = 0; i < data.length; i++) {
-            balanceMap[data[i].id] =
-                data[i].contribution - data[i].spent + data[i].settle;
-          }
 
           if (data.isEmpty) {
             return SliverToBoxAdapter(
@@ -191,14 +183,11 @@ class _RoomUserScreenState extends State<RoomUserScreen> {
               } else {
                 data = state.data;
               }
-              return showUserExpenseInfo(data, balanceMap);
+              return showUserExpenseInfo(data);
             },
           );
         } else {
-          return showUserExpenseInfo(
-            List.filled(11, RoomUserModel.empty()),
-            balanceMap,
-          );
+          return showUserExpenseInfo(List.filled(11, RoomUserModel.empty()));
         }
       },
     );
