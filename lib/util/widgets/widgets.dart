@@ -329,6 +329,30 @@ List<BoxShadow> getContainerBoxShadow(BuildContext context) {
   }
 }
 
+Widget genericFooterForDashboard<S>(
+  ValueNotifier<bool> isSearchEnabled,
+  Widget Function(BuildContext context, S state) builderFooterLogic,
+  BuildContext context,
+  S state,
+) {
+  return ValueListenableBuilder(
+    valueListenable: isSearchEnabled,
+    builder: (BuildContext context, bool value, Widget? child) {
+      if (value) {
+        return SliverToBoxAdapter(child: SizedBox.shrink());
+      }
+      return child!;
+    },
+    child: SliverPadding(
+      padding: EdgeInsets.only(
+        top: 2 * UiConstant.spaceBetweenSection,
+        bottom: UiConstant.spaceAtBottom,
+      ),
+      sliver: SliverToBoxAdapter(child: builderFooterLogic(context, state)),
+    ),
+  );
+}
+
 Widget buildFooter(BuildContext context, bool isLoading, bool hasMore) {
   if (isLoading) {
     return Center(child: CircularProgressIndicator());

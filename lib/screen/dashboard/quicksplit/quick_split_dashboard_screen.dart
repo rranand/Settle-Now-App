@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -30,6 +29,8 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
   void _blocListenerHandler(BuildContext context, QuicksplitState state) {
     if (state is QuicksplitFailure) {
       showNormalSnackBar(context, state.error);
+    } else if (state is QuicksplitFetchSuccess && state.error != null) {
+      showNormalSnackBar(context, state.error!);
     }
   }
 
@@ -40,6 +41,13 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _gridViewScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -55,16 +63,18 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
         context.read<QuicksplitBloc>().add(QuicksplitFetch(isFreshFetch: true));
       }
 
-      _gridViewScrollController.addListener(() {
-        if (_gridViewScrollController.position.pixels ==
-            _gridViewScrollController.position.maxScrollExtent) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            context.read<QuicksplitBloc>().add(
+      addPaginationListener<QuicksplitBloc, QuicksplitState>(
+        scrollController: _gridViewScrollController,
+        context: context,
+        hasMore:
+            (state) => state is QuicksplitFetchSuccess && state.hasMoreData,
+        isLoadingMore:
+            (state) => state is QuicksplitFetchSuccess && state.isLoadingMore,
+        onFetch:
+            () => context.read<QuicksplitBloc>().add(
               QuicksplitFetch(isFreshFetch: false),
-            );
-          });
-        }
-      });
+            ),
+      );
     }
 
     widget.isSearchEnabled.addListener(() {
@@ -81,6 +91,14 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
       return;
     }
     context.read<QuicksplitBloc>().add(QuicksplitFetch(isFreshFetch: true));
+  }
+
+  Widget _builderFooter(BuildContext context, QuicksplitState state) {
+    if (state is QuicksplitFetchSuccess) {
+      return buildFooter(context, state.isLoadingMore, state.hasMoreData);
+    }
+
+    return const SizedBox.shrink();
   }
 
   List<QuicksplitTransactionModel> filterDataByPreference(
@@ -116,6 +134,9 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
         return Scaffold(
           body: RefreshIndicator(
             onRefresh: onRefresh,
+            notificationPredicate: (ScrollNotification notification) {
+              return notification.depth == 0;
+            },
             child: BlocConsumer<QuicksplitBloc, QuicksplitState>(
               listener: _blocListenerHandler,
               builder: (context, state) {
@@ -132,106 +153,139 @@ class _QuickSplitDashboardScreenState extends State<QuickSplitDashboardScreen> {
                   );
                 }
 
-                if (splitData.isEmpty) {
-                  return noRecordFoundWidget("No Transaction Found", context);
-                } else {
-                  return CustomScrollView(
-                    controller: _gridViewScrollController,
-                    slivers: [
-                      ValueListenableBuilder(
-                        valueListenable: widget.isSearchEnabled,
-                        builder: (BuildContext context, bool value, Widget? _) {
-                          if (!value) {
-                            return SliverToBoxAdapter(child: SizedBox.shrink());
-                          }
-                          return SliverPadding(
-                            padding: _mainScreenPadding,
-                            sliver: SliverAppBar(
-                              automaticallyImplyLeading: false,
-                              pinned: value,
-                              title: CustomFormField.searchBar(
-                                "Search",
-                                widget.isSearchEnabled,
-                                _searchController,
+                return CustomScrollView(
+                  controller: _gridViewScrollController,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers:
+                      splitData.isEmpty
+                          ? [
+                            SliverFillRemaining(
+                              child: noRecordFoundWidget(
+                                "No Transaction Found",
+                                context,
                               ),
                             ),
-                          );
-                        },
-                      ),
-                      SliverPadding(
-                        padding: _mainScreenPadding.add(
-                          EdgeInsets.only(
-                            top: UiConstant.spaceBetweenSection,
-                            bottom: UiConstant.spaceAtBottom,
-                          ),
-                        ),
-                        sliver: ValueListenableBuilder<TextEditingValue>(
-                          valueListenable: _searchController,
-                          builder: (context, _, _) {
-                            List<QuicksplitTransactionModel> filterData =
-                                splitData;
-                            if (state is QuicksplitFetchSuccess) {
-                              filterData = FilterSort.filteredSearchText(
-                                _searchController.text,
-                                splitData,
-                                (roomData) => roomData.description,
-                              );
-                            }
-
-                            if (filterData.isEmpty) {
-                              return SliverFillRemaining(
-                                child: noRecordFoundWidget(
-                                  ApiConstant.noMatchingRecords,
-                                  context,
+                          ]
+                          : [
+                            ValueListenableBuilder(
+                              valueListenable: widget.isSearchEnabled,
+                              builder: (
+                                BuildContext context,
+                                bool value,
+                                Widget? _,
+                              ) {
+                                if (!value) {
+                                  return SliverToBoxAdapter(
+                                    child: SizedBox.shrink(),
+                                  );
+                                }
+                                return SliverPadding(
+                                  padding: _mainScreenPadding,
+                                  sliver: SliverAppBar(
+                                    automaticallyImplyLeading: false,
+                                    pinned: value,
+                                    title: CustomFormField.searchBar(
+                                      "Search",
+                                      widget.isSearchEnabled,
+                                      _searchController,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            SliverPadding(
+                              padding: _mainScreenPadding.add(
+                                EdgeInsets.only(
+                                  top: UiConstant.spaceBetweenSection,
+                                  bottom: UiConstant.spaceAtBottom,
                                 ),
-                              );
-                            }
-                            int noOfCardsToBeShown = filterData.length;
-                            if (isWide) {
-                              noOfCardsToBeShown =
-                                  (noOfCardsToBeShown / 2).toInt() +
-                                  noOfCardsToBeShown % 2;
-                            }
-                            return SliverList.builder(
-                              itemCount: noOfCardsToBeShown,
-                              itemBuilder: (BuildContext context, int index) {
-                                if (isWide) {
-                                  QuicksplitTransactionModel eachSplitData =
-                                      filterData[2 * index];
-                                  return Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Expanded(
-                                        child: QuickSplitCard(
-                                          data: eachSplitData,
-                                        ),
+                              ),
+                              sliver: ValueListenableBuilder<TextEditingValue>(
+                                valueListenable: _searchController,
+                                builder: (context, _, _) {
+                                  List<QuicksplitTransactionModel> filterData =
+                                      splitData;
+                                  if (state is QuicksplitFetchSuccess) {
+                                    filterData = FilterSort.filteredSearchText(
+                                      _searchController.text,
+                                      splitData,
+                                      (roomData) => roomData.description,
+                                    );
+                                  }
+
+                                  if (filterData.isEmpty) {
+                                    return SliverFillRemaining(
+                                      child: noRecordFoundWidget(
+                                        ApiConstant.noMatchingRecords,
+                                        context,
                                       ),
-                                      Expanded(
-                                        child:
-                                            (index == noOfCardsToBeShown - 1 &&
-                                                    filterData.length % 2 > 0)
-                                                ? SizedBox()
-                                                : QuickSplitCard(
-                                                  data:
-                                                      filterData[2 * index + 1],
+                                    );
+                                  }
+                                  int noOfCardsToBeShown = filterData.length;
+                                  if (isWide) {
+                                    noOfCardsToBeShown =
+                                        (noOfCardsToBeShown / 2).toInt() +
+                                        noOfCardsToBeShown % 2;
+                                  }
+                                  return SliverMainAxisGroup(
+                                    slivers: [
+                                      SliverList.builder(
+                                        itemCount: noOfCardsToBeShown,
+                                        itemBuilder: (
+                                          BuildContext context,
+                                          int index,
+                                        ) {
+                                          if (isWide) {
+                                            QuicksplitTransactionModel
+                                            eachSplitData =
+                                                filterData[2 * index];
+                                            return Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                  child: QuickSplitCard(
+                                                    data: eachSplitData,
+                                                  ),
                                                 ),
+                                                Expanded(
+                                                  child:
+                                                      (index ==
+                                                                  noOfCardsToBeShown -
+                                                                      1 &&
+                                                              filterData.length %
+                                                                      2 >
+                                                                  0)
+                                                          ? SizedBox()
+                                                          : QuickSplitCard(
+                                                            data:
+                                                                filterData[2 *
+                                                                        index +
+                                                                    1],
+                                                          ),
+                                                ),
+                                              ],
+                                            );
+                                          } else {
+                                            return QuickSplitCard(
+                                              data: filterData[index],
+                                            );
+                                          }
+                                        },
+                                      ),
+                                      genericFooterForDashboard(
+                                        widget.isSearchEnabled,
+                                        _builderFooter,
+                                        context,
+                                        state,
                                       ),
                                     ],
                                   );
-                                } else {
-                                  return QuickSplitCard(
-                                    data: filterData[index],
-                                  );
-                                }
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  );
-                }
+                                },
+                              ),
+                            ),
+                          ],
+                );
               },
             ),
           ),
